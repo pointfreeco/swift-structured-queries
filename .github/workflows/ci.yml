@@ -39,6 +39,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install SQLite
-        run: apt-get install -y libsqlite3-dev
+        run: apt-get --fix-missing update && apt-get install -y libsqlite3-dev
       - name: Build
         run: swift build
