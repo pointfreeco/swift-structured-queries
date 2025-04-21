@@ -982,8 +982,3 @@ extension Reminder.TableColumns {
     self.priority == Priority.high
   }
 }
-//extension Reminder?.TableColumns {
-//  var isHighPriority: some QueryExpression<Bool> {
-//    #sql("\(self.priority) = \(Priority.high)")
-//  }
-//}
