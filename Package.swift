@@ -117,14 +117,14 @@ for index in package.targets.indices {
 #if !os(Darwin)
   package.targets.append(
     .systemLibrary(
-      name: "SQLite3",
+      name: "StructuredQueriesSQLite3",
       providers: [.apt(["libsqlite3-dev"])]
     )
   )
 
   for index in package.targets.indices {
     if package.targets[index].name == "StructuredQueriesSQLite" {
-      package.targets[index].dependencies.append("SQLite3")
+      package.targets[index].dependencies.append("StructuredQueriesSQLite3")
     }
   }
 #endif

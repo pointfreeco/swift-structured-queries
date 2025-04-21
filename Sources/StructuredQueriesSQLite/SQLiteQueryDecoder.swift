@@ -1,5 +1,10 @@
-import SQLite3
 import StructuredQueries
+
+#if canImport(Darwin)
+  import SQLite3
+#else
+  import StructuredQueriesSQLite3
+#endif
 
 @usableFromInline
 struct SQLiteQueryDecoder: QueryDecoder {

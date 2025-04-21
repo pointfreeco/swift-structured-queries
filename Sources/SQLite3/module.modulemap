@@ -1,4 +1,0 @@
-module SQLite3 [system] {
-  link "sqlite3"
-  export *
-}

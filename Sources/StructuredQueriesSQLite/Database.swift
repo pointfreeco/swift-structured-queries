@@ -1,6 +1,11 @@
 import Foundation
-import SQLite3
 import StructuredQueries
+
+#if canImport(Darwin)
+  import SQLite3
+#else
+  import StructuredQueriesSQLite3
+#endif
 
 public struct Database {
   @usableFromInline
