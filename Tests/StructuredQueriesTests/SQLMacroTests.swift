@@ -173,18 +173,6 @@ extension SnapshotTests {
         """
       }
     }
-
-    func foo() {
-      let searchText = "get"
-      #sql(
-        """
-        SELECT \(Reminder.columns) 
-        FROM \(Reminder.self)
-        WHERE \(Reminder.title) COLLATE NOCASE LIKE \(searchText)
-        """,
-        as: Reminder.self
-      )
-    }
   }
 }
 

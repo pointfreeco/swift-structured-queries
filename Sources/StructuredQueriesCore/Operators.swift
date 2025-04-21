@@ -14,7 +14,8 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///   - rhs: Another expression to compare.
   /// - Returns: A predicate expression.
   public static func == (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     lhs.eq(rhs)
   }
@@ -34,25 +35,10 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///   - rhs: Another expression to compare.
   /// - Returns: A predicate expression.
   public static func != (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     lhs.neq(rhs)
-  }
-
-  @_disfavoredOverload
-  @_documentation(visibility: private)
-  public static func == (
-    lhs: Self, rhs: some QueryExpression<QueryValue?>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS" : "=", rhs: rhs)
-  }
-
-  @_disfavoredOverload
-  @_documentation(visibility: private)
-  public static func != (
-    lhs: Self, rhs: some QueryExpression<QueryValue?>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
   }
 
   /// Returns a predicate expression indicating whether two query expressions are equal.
@@ -120,34 +106,6 @@ private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
 
 extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
   @_documentation(visibility: private)
-  public static func == (
-    lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS" : "=", rhs: rhs)
-  }
-
-  @_documentation(visibility: private)
-  public static func != (
-    lhs: Self, rhs: some QueryExpression<QueryValue.Wrapped>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS NOT" : "<>", rhs: rhs)
-  }
-
-  @_documentation(visibility: private)
-  public static func == (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS" : "=", rhs: rhs)
-  }
-
-  @_documentation(visibility: private)
-  public static func != (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
-  }
-
-  @_documentation(visibility: private)
   public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "=", rhs: other)
   }
@@ -184,16 +142,6 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
 
 extension QueryExpression where QueryValue: QueryBindable {
   @_documentation(visibility: private)
-  public static func == (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
-    lhs.is(rhs)
-  }
-
-  @_documentation(visibility: private)
-  public static func != (lhs: Self, rhs: _Null<QueryValue>) -> some QueryExpression<Bool> {
-    lhs.isNot(rhs)
-  }
-
-  @_documentation(visibility: private)
   public func `is`(
     _ other: _Null<QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -217,6 +165,80 @@ extension _Null: ExpressibleByNilLiteral {
   public init(nilLiteral: ()) {}
 }
 
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
+@_disfavoredOverload
+@_documentation(visibility: private)
+public func == <QueryValue>(
+  lhs: any QueryExpression<QueryValue>,
+  rhs: some QueryExpression<QueryValue?>
+) -> some QueryExpression<Bool> {
+  BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS" : "=", rhs: rhs)
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
+@_disfavoredOverload
+@_documentation(visibility: private)
+public func != <QueryValue>(
+  lhs: any QueryExpression<QueryValue>,
+  rhs: some QueryExpression<QueryValue?>
+) -> some QueryExpression<Bool> {
+  BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
+@_documentation(visibility: private)
+public func == <QueryValue: _OptionalProtocol>(
+  lhs: any QueryExpression<QueryValue>,
+  rhs: some QueryExpression<QueryValue.Wrapped>
+) -> some QueryExpression<Bool> {
+  BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS" : "=", rhs: rhs)
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
+@_documentation(visibility: private)
+public func != <QueryValue: _OptionalProtocol>(
+  lhs: any QueryExpression<QueryValue>,
+  rhs: some QueryExpression<QueryValue.Wrapped>
+) -> some QueryExpression<Bool> {
+  BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS NOT" : "<>", rhs: rhs)
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
+@_documentation(visibility: private)
+public func == <QueryValue: _OptionalProtocol>(
+  lhs: any QueryExpression<QueryValue>,
+  rhs: some QueryExpression<QueryValue>
+) -> some QueryExpression<Bool> {
+  BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS" : "=", rhs: rhs)
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
+@_documentation(visibility: private)
+public func != <QueryValue: _OptionalProtocol>(
+  lhs: any QueryExpression<QueryValue>,
+  rhs: some QueryExpression<QueryValue>
+) -> some QueryExpression<Bool> {
+  BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
+@_documentation(visibility: private)
+public func == <QueryValue: QueryBindable>(
+  lhs: any QueryExpression<QueryValue>,
+  rhs: _Null<QueryValue>
+) -> some QueryExpression<Bool> {
+  SQLQueryExpression(lhs).is(rhs)
+}
+
+// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
+@_documentation(visibility: private)
+public func != <QueryValue: QueryBindable>(
+  lhs: any QueryExpression<QueryValue>,
+  rhs: _Null<QueryValue>
+) -> some QueryExpression<Bool> {
+  SQLQueryExpression(lhs).isNot(rhs)
+}
+
 extension QueryExpression where QueryValue: QueryBindable {
   /// Returns a predicate expression indicating whether the value of the first expression is less
   /// than that of the second expression.
@@ -229,7 +251,8 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///   - rhs: Another expression to compare.
   /// - Returns: A predicate expression.
   public static func < (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     lhs.lt(rhs)
   }
@@ -245,7 +268,8 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///   - rhs: Another expression to compare.
   /// - Returns: A predicate expression.
   public static func > (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     lhs.gt(rhs)
   }
@@ -261,7 +285,8 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///   - rhs: Another expression to compare.
   /// - Returns: A predicate expression.
   public static func <= (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     lhs.lte(rhs)
   }
@@ -277,7 +302,8 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///   - rhs: Another expression to compare.
   /// - Returns: A predicate expression.
   public static func >= (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     lhs.gte(rhs)
   }
@@ -338,7 +364,8 @@ extension QueryExpression where QueryValue == Bool {
   ///   - rhs: The right-hand side of the operation.
   /// - Returns: A predicate expression.
   public static func && (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     lhs.and(rhs)
   }
@@ -353,7 +380,8 @@ extension QueryExpression where QueryValue == Bool {
   ///   - rhs: The right-hand side of the operation.
   /// - Returns: A predicate expression.
   public static func || (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     lhs.or(rhs)
   }
@@ -415,7 +443,8 @@ extension QueryExpression where QueryValue: Numeric {
   ///   - rhs: The second expression to add.
   /// - Returns: A sum expression.
   public static func + (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "+", rhs: rhs)
   }
@@ -427,7 +456,8 @@ extension QueryExpression where QueryValue: Numeric {
   ///   - rhs: The second expression to subtract.
   /// - Returns: A difference expression.
   public static func - (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "-", rhs: rhs)
   }
@@ -439,7 +469,8 @@ extension QueryExpression where QueryValue: Numeric {
   ///   - rhs: The second expression to multiply.
   /// - Returns: A product expression.
   public static func * (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "*", rhs: rhs)
   }
@@ -451,7 +482,8 @@ extension QueryExpression where QueryValue: Numeric {
   ///   - rhs: The second expression to divide.
   /// - Returns: A quotient expression.
   public static func / (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "/", rhs: rhs)
   }
@@ -546,7 +578,8 @@ extension QueryExpression where QueryValue: BinaryInteger {
   ///   - rhs: The value to divide `lhs` by.
   /// - Returns: An expression representing the remainder, or `NULL` if `rhs` is zero.
   public static func % (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue?> {
     BinaryOperator(lhs: lhs, operator: "%", rhs: rhs)
   }
@@ -558,7 +591,8 @@ extension QueryExpression where QueryValue: BinaryInteger {
   ///   - rhs: Another integer expression.
   /// - Returns: An expression representing a bitwise AND operation on the two given expressions.
   public static func & (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "&", rhs: rhs)
   }
@@ -570,7 +604,8 @@ extension QueryExpression where QueryValue: BinaryInteger {
   ///   - rhs: Another integer expression.
   /// - Returns: An expression representing a bitwise OR operation on the two given expressions.
   public static func | (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "|", rhs: rhs)
   }
@@ -583,7 +618,8 @@ extension QueryExpression where QueryValue: BinaryInteger {
   ///   - rhs: Another integer expression.
   /// - Returns: An expression representing a left bitshift operation on the two given expressions.
   public static func << (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "<<", rhs: rhs)
   }
@@ -596,7 +632,8 @@ extension QueryExpression where QueryValue: BinaryInteger {
   ///   - rhs: Another integer expression.
   /// - Returns: An expression representing a right bitshift operation on the two given expressions.
   public static func >> (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: ">>", rhs: rhs)
   }
@@ -647,7 +684,8 @@ extension QueryExpression where QueryValue == String {
   ///   - rhs: The second string expression.
   /// - Returns: An expression concatenating the first expression with the second.
   public static func + (
-    lhs: Self, rhs: some QueryExpression<QueryValue>
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue> {
     BinaryOperator(lhs: lhs, operator: "||", rhs: rhs)
   }
@@ -762,7 +800,8 @@ extension SQLQueryExpression<String> {
   ///   - lhs: The column to append.
   ///   - rhs: The appended text.
   public static func += (
-    lhs: inout Self, rhs: some QueryExpression<QueryValue>
+    lhs: inout Self,
+    rhs: some QueryExpression<QueryValue>
   ) {
     lhs = Self(lhs + rhs)
   }
