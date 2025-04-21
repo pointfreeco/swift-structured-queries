@@ -99,6 +99,12 @@ extension Optional: Table where Wrapped: Table {
         keyPath: \.[member: \Member.self, column: column._keyPath]
       )
     }
+
+    public subscript<Q: QueryExpression>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, Q>
+    ) -> Q? {
+      Wrapped.columns[keyPath: keyPath]
+    }
   }
 }
 
