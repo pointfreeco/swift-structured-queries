@@ -121,6 +121,12 @@ for index in package.targets.indices {
       providers: [.apt(["libsqlite3-dev"])]
     )
   )
+
+  for index in package.targets.indices {
+    if package.targets[index].name == "StructuredQueriesSQLite" {
+      package.targets[index].dependencies.append("SQLite3")
+    }
+  }
 #endif
 
 #if !os(Windows)
