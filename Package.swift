@@ -114,6 +114,15 @@ for index in package.targets.indices {
   package.targets[index].swiftSettings = swiftSettings
 }
 
+#if !os(Darwin)
+  package.targets.append(
+    .systemLibrary(
+      name: "SQLite3",
+      providers: [.apt(["libsqlite3-dev"])]
+    )
+  )
+#endif
+
 #if !os(Windows)
   // Add the documentation compiler plugin if possible
   package.dependencies.append(
