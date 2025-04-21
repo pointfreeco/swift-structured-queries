@@ -38,5 +38,7 @@ jobs:
     container: swift:${{ matrix.swift }}
     steps:
       - uses: actions/checkout@v4
+      - name: Install SQLite
+        run: sudo apt-get install -y libsqlite3-dev
       - name: Build
         run: swift build
