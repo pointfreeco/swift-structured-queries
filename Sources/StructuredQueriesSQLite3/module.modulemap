@@ -1,4 +1,5 @@
 module StructuredQueriesSQLite3 [system] {
   link "sqlite3"
+  header "StructuredQueriesSQLite3.h"
   export *
 }
