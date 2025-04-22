@@ -919,5 +919,66 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func reusableHelperOnLeftJoinedTable() {
+      assertQuery(
+        RemindersList
+          .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
+          .where { $1.isHighPriority.ifnull(false) }
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "remindersLists"
+        LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        WHERE ifnull(("reminders"."priority" = 3), 0)
+        """
+      } results: {
+        """
+        ┌────────────────────┬────────────────────────────────────────────┐
+        │ RemindersList(     │ Reminder(                                  │
+        │   id: 1,           │   id: 3,                                   │
+        │   color: 4889071,  │   assignedUserID: nil,                     │
+        │   name: "Personal" │   dueDate: Date(2001-01-01T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                      │
+        │                    │   isFlagged: false,                        │
+        │                    │   notes: "Ask about diet",                 │
+        │                    │   priority: .high,                         │
+        │                    │   remindersListID: 1,                      │
+        │                    │   title: "Doctor appointment"              │
+        │                    │ )                                          │
+        ├────────────────────┼────────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                                  │
+        │   id: 2,           │   id: 6,                                   │
+        │   color: 15567157, │   assignedUserID: nil,                     │
+        │   name: "Family"   │   dueDate: Date(2001-01-03T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                      │
+        │                    │   isFlagged: true,                         │
+        │                    │   notes: "",                               │
+        │                    │   priority: .high,                         │
+        │                    │   remindersListID: 2,                      │
+        │                    │   title: "Pick up kids from school"        │
+        │                    │ )                                          │
+        ├────────────────────┼────────────────────────────────────────────┤
+        │ RemindersList(     │ Reminder(                                  │
+        │   id: 2,           │   id: 8,                                   │
+        │   color: 15567157, │   assignedUserID: nil,                     │
+        │   name: "Family"   │   dueDate: Date(2001-01-05T00:00:00.000Z), │
+        │ )                  │   isCompleted: false,                      │
+        │                    │   isFlagged: false,                        │
+        │                    │   notes: "",                               │
+        │                    │   priority: .high,                         │
+        │                    │   remindersListID: 2,                      │
+        │                    │   title: "Take out trash"                  │
+        │                    │ )                                          │
+        └────────────────────┴────────────────────────────────────────────┘
+        """
+      }
+    }
+  }
+}
+
+extension Reminder.TableColumns {
+  var isHighPriority: some QueryExpression<Bool> {
+    self.priority == Priority.high
   }
 }

@@ -150,7 +150,7 @@ you can define your own conformances for your own custom data types.
 
 #### Dates
 
-SQLite does not have a native data type, and instead has 3 different ways to represent dates:
+SQLite does not have a native date type, and instead has 3 different ways to represent dates:
 
   * Text column interpreted as ISO-8601-formatted string.
   * Int column interpreted as number of seconds since Unix epoch.
@@ -256,7 +256,7 @@ enum Priority: Int, QueryBindable {
 }
 ```
 
-The library will automatically encode the priority to an integer when insert into the database,
+The library will automatically encode the priority to an integer when inserting into the database,
 and will decode data from the database using the `RawRepresentable` conformance of `Priority`.
 
 @Row {

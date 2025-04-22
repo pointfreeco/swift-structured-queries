@@ -352,8 +352,7 @@ extension SnapshotTests {
         .find(1)
         .update {
           $0.dueDate = Case()
-            .when($0.dueDate.is(nil), then: #sql("'2018-01-29 00:08:00.000'"))
-            .else(#sql("NULL"))
+            .when($0.dueDate == nil, then: #sql("'2018-01-29 00:08:00.000'"))
         }
 
       assertQuery(
@@ -362,11 +361,11 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "reminders"
-        SET "dueDate" = CASE WHEN ("reminders"."dueDate" IS NULL) THEN '2018-01-29 00:08:00.000' ELSE NULL END
+        SET "dueDate" = CASE WHEN ("reminders"."dueDate" IS NULL) THEN '2018-01-29 00:08:00.000' END
         WHERE ("reminders"."id" = 1)
         RETURNING "dueDate"
         """
-      } results: {
+      }results: {
         """
         ┌─────┐
         │ nil │
@@ -380,11 +379,11 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "reminders"
-        SET "dueDate" = CASE WHEN ("reminders"."dueDate" IS NULL) THEN '2018-01-29 00:08:00.000' ELSE NULL END
+        SET "dueDate" = CASE WHEN ("reminders"."dueDate" IS NULL) THEN '2018-01-29 00:08:00.000' END
         WHERE ("reminders"."id" = 1)
         RETURNING "dueDate"
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────────────┐
         │ Date(2018-01-29T00:08:00.000Z) │
