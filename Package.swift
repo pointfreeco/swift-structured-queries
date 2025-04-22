@@ -31,10 +31,10 @@ let package = Package(
   ],
   traits: [
     .trait(
-      name: "TaggedStructuredQueries",
+      name: "StructuredQueriesTagged",
       description: "Introduce StructuredQueries conformances to the swift-tagged package.",
       enabledTraits: []
-    ),
+    )
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
@@ -54,7 +54,7 @@ let package = Package(
         .product(
           name: "Tagged",
           package: "swift-tagged",
-          condition: .when(traits: ["TaggedStructuredQueries"])
+          condition: .when(traits: ["StructuredQueriesTagged"])
         ),
       ]
     ),

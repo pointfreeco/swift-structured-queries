@@ -335,7 +335,7 @@ With that you can insert reminders with notes like so:
 
 The [Tagged](https://github.com/pointfreeco/swift-tagged) library provides lightweight syntax for
 introducing type-safe identifiers (and more) to your models. StructuredQueries ships support for
-Tagged with a `TaggedStructuredQueries` package trait, which is available starting from Swift 6.1.
+Tagged with a `StructuredQueriesTagged` package trait, which is available starting from Swift 6.1.
 
 To enable the trait, specify it in the Package.swift file that depends on StructuredQueries:
 
@@ -343,7 +343,7 @@ To enable the trait, specify it in the Package.swift file that depends on Struct
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
    from: "0.2.0",
-+  traits: ["TaggedStructuredQueries"]
++  traits: ["StructuredQueriesTagged"]
  ),
 ```
 
