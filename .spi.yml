@@ -1,5 +1,9 @@
 version: 1
 builder:
   configs:
-    - documentation_targets: [StructuredQueries, StructuredQueriesCore]
-      custom_documentation_parameters: [--enable-experimental-overloaded-symbol-presentation]
+    - documentation_targets:
+        - StructuredQueriesCore
+        - StructuredQueries
+      custom_documentation_parameters:
+        - '--enable-experimental-overloaded-symbol-presentation'
+        - '--enable-experimental-combined-documentation'

@@ -132,6 +132,6 @@ for index in package.targets.indices {
 #if !os(Windows)
   // Add the documentation compiler plugin if possible
   package.dependencies.append(
-    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
+    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.4.0")
   )
 #endif
