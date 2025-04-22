@@ -230,7 +230,7 @@ limits, offsets, and more. For example, we can chain onto the above query using 
          $0.priority.desc(),
          $0.title)
       }
-    // => [Reminder]
+    // => [String]
     ```
   }
   @Column {
@@ -273,7 +273,7 @@ method:
          $0.title)
       }
       .limit(10, offset: 10)
-    // => [Reminder]
+    // => [String]
     ```
   }
   @Column {
