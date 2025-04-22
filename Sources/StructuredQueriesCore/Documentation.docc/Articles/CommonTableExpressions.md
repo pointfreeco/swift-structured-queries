@@ -171,7 +171,7 @@ As a simple example let's construct a query that selects the numbers from 1 to 1
 by defining a CTE data type that holds the data we want to compute:
 
 ```swift
-@Table @Seletion
+@Table @Selection
 struct Counts {
   let value: Int
 }
