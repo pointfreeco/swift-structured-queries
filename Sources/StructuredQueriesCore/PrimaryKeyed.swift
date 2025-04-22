@@ -25,7 +25,8 @@ where QueryValue: PrimaryKeyedTable {
   /// A type representing this table's primary key.
   ///
   /// For auto-incrementing tables, this is typically `Int`.
-  associatedtype PrimaryKey: QueryBindable where PrimaryKey.QueryValue == PrimaryKey
+  associatedtype PrimaryKey: QueryBindable
+  where PrimaryKey.QueryValue == PrimaryKey, PrimaryKey.QueryValue.QueryOutput: Sendable
 
   /// The column representing this table's primary key.
   var primaryKey: TableColumn<QueryValue, PrimaryKey> { get }

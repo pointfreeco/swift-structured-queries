@@ -9,6 +9,9 @@ public protocol TableColumnExpression<Root, Value>: QueryExpression where Value 
   /// The name of the table column.
   var name: String { get }
 
+  /// The default value of the table column.
+  var defaultValue: Value.QueryOutput? { get }
+
   /// The table model key path associated with this table column.
   var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 
@@ -24,10 +27,13 @@ public protocol TableColumnExpression<Root, Value>: QueryExpression where Value 
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
   TableColumnExpression,
   Sendable
-{
+where Value.QueryOutput: Sendable {
   public typealias QueryValue = Value
 
   public let name: String
+
+  public let defaultValue: Value.QueryOutput?
+
   let _keyPath: KeyPath<Root, Value.QueryOutput> & Sendable
 
   public var keyPath: KeyPath<Root, Value.QueryOutput> {
@@ -37,18 +43,20 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
   public init(
     _ name: String,
     keyPath: KeyPath<Root, Value.QueryOutput> & Sendable,
-    default: Value.QueryOutput? = nil
+    default defaultValue: Value.QueryOutput? = nil
   ) {
     self.name = name
+    self.defaultValue = defaultValue
     self._keyPath = keyPath
   }
 
   public init(
     _ name: String,
     keyPath: KeyPath<Root, Value.QueryOutput> & Sendable,
-    default: Value? = nil
+    default defaultValue: Value? = nil
   ) where Value == Value.QueryOutput {
     self.name = name
+    self.defaultValue = defaultValue
     self._keyPath = keyPath
   }
 
