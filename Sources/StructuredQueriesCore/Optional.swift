@@ -103,9 +103,8 @@ extension Optional: Table where Wrapped: Table {
     public subscript<QueryValue>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, some QueryExpression<QueryValue>>
     ) -> some QueryExpression<QueryValue?> {
-      let tmp = Wrapped.columns[keyPath: keyPath]
-      let tmp1: Optional<some QueryExpression<QueryValue>> = .some(tmp)
-      return tmp1
+      let result: (some QueryExpression<QueryValue>)? = .some(Wrapped.columns[keyPath: keyPath])
+      return result
     }
   }
 }
