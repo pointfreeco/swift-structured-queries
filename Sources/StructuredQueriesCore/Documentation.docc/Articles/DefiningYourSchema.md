@@ -150,7 +150,7 @@ you can define your own conformances for your own custom data types.
 
 #### Dates
 
-SQLite does not have a native data type, and instead has 3 different ways to represent dates:
+SQLite does not have a native date type, and instead has 3 different ways to represent dates:
 
   * Text column interpreted as ISO-8601-formatted string.
   * Int column interpreted as number of seconds since Unix epoch.
