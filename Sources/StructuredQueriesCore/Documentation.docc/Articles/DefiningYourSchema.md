@@ -256,7 +256,7 @@ enum Priority: Int, QueryBindable {
 }
 ```
 
-The library will automatically encode the priority to an integer when insert into the database,
+The library will automatically encode the priority to an integer when inserting into the database,
 and will decode data from the database using the `RawRepresentable` conformance of `Priority`.
 
 @Row {
