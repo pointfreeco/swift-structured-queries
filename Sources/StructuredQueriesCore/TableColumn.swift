@@ -20,12 +20,18 @@ public protocol TableColumnExpression<Root, Value>: QueryExpression where Value 
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
 }
 
+/// An expression that can be ordered (ORDER BY xyz ASC/DESC).
+public protocol OrderableExpression {
+    var queryFragment: QueryFragment { get }
+}
+
 /// A type representing a table column.
 ///
 /// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros to
 /// generate values of this type.
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
   TableColumnExpression,
+  OrderableExpression,
   Sendable
 where Value.QueryOutput: Sendable {
   public typealias QueryValue = Value

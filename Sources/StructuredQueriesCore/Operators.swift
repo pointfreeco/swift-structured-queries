@@ -694,7 +694,7 @@ extension QueryExpression where QueryValue == String {
   ///
   /// - Parameter collation: A collating sequence name.
   /// - Returns: An expression that is compared using the given collating sequence.
-  public func collate(_ collation: Collation) -> some QueryExpression<QueryValue> {
+  public func collate(_ collation: Collation) -> some QueryExpression<QueryValue> & OrderableExpression {
     BinaryOperator(lhs: self, operator: "COLLATE", rhs: collation)
   }
 
@@ -935,7 +935,7 @@ private struct UnaryOperator<QueryValue>: QueryExpression {
   }
 }
 
-struct BinaryOperator<QueryValue>: QueryExpression {
+struct BinaryOperator<QueryValue>: QueryExpression, OrderableExpression {
   let lhs: QueryFragment
   let `operator`: QueryFragment
   let rhs: QueryFragment

@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: QueryBindable {
+extension OrderableExpression {
   /// This expression with an ascending ordering term.
   ///
   /// - Parameter nullOrdering: `NULL`-specific ordering.
@@ -44,7 +44,7 @@ private struct OrderingTerm: QueryExpression {
   let direction: Direction
   let nullOrdering: NullOrdering?
 
-  init(base: some QueryExpression, direction: Direction, nullOrdering: NullOrdering?) {
+  init(base: some OrderableExpression, direction: Direction, nullOrdering: NullOrdering?) {
     self.base = base.queryFragment
     self.direction = direction
     self.nullOrdering = nullOrdering
