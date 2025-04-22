@@ -14,12 +14,14 @@
   }
 
   extension Tagged: QueryRepresentable where RawValue: QueryRepresentable {
-    public init(queryOutput: RawValue.QueryOutput) {
-      self.init(RawValue(queryOutput: queryOutput))
+    public typealias QueryOutput = Tagged<Tag, RawValue.QueryOutput>
+
+    public var queryOutput: QueryOutput {
+      QueryOutput(rawValue: self.rawValue.queryOutput)
     }
 
-    public var queryOutput: RawValue.QueryOutput {
-      rawValue.queryOutput
+    public init(queryOutput: QueryOutput) {
+      self.init(rawValue: RawValue(queryOutput: queryOutput.rawValue))
     }
   }
 

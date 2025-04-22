@@ -331,6 +331,51 @@ With that you can insert reminders with notes like so:
   }
 }
 
+#### Tagged identifiers
+
+The [Tagged](https://github.com/pointfreeco/swift-tagged) library provides lightweight syntax for
+introducing type-safe identifiers (and more) to your models. StructuredQueries ships support for
+Tagged with a `TaggedStructuredQueries` package trait, which is available starting from Swift 6.1.
+
+To enable the trait, specify it in the Package.swift file that depends on StructuredQueries:
+
+```diff
+ .package(
+   url: "https://github.com/pointfreeco/swift-structured-queries",
+   from: "0.2.0",
++  traits: ["TaggedStructuredQueries"]
+ ),
+```
+
+This will allow you to introduce distinct `Tagged` identifiers throughout your schema:
+
+```diff
+ @Table
+ struct RemindersList: Identifiable {
+-  let id: Int
++  typealias ID = Tagged<Self, Int>
++  let id: ID
+   // ...
+ }
+ @Table
+ struct Reminder: Identifiable {
+-  let id: Int
++  typealias ID = Tagged<Self, Int>
++  let id: ID
+   // ...
+   var remindersList: Reminder.ID
+ }
+```
+
+This adds a new layer of type-safety when constructing queries. Previously comparing a
+`RemindersList.ID` to a `Reminder.ID` would compile just fine, even though it is a nonsensical thing
+to do. But now, such a comparison is a compile time error:
+
+```
+RemindersList.leftJoin(Reminder.all) {
+  $0.id == $1.id  // 🛑 Requires the types 'Reminder.ID' and 'RemindersList.ID' be equivalent
+}
+
 ### Primary keyed tables
 
 It is possible to tell let the `@Table` macro know which property of your data type is the primary
