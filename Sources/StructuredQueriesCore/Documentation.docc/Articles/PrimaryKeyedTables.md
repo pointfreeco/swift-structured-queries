@@ -61,7 +61,8 @@ into the database by providing only a draft:
 @Row {
   @Column {
     ```swift
-    Reminder.insert(Reminder.Draft(title: "Get groceries"))
+    Reminder
+      .insert(Reminder.Draft(title: "Get groceries"))
     ```
   }
   @Column {
@@ -122,8 +123,6 @@ Or even get back the entire newly inserted row:
     ```
   }
 }
-```swift
-```
 
 At times your application may want to provide the same business logic for creating a new record and
 editing an existing one. Your primary keyed table's `Draft` type can be used for these kinds of
