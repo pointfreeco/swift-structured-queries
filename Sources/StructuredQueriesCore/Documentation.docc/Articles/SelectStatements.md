@@ -6,9 +6,8 @@ Learn how to build queries that read data from a database.
 
 ### Selecting columns
 
-The ``Table/select(_:)`` function is used to specify the result columns of a query. It uses a given
-closure to specify any number of result columns as a variadic tuple from the table columns passed to
-the closure:
+The ``Table/select(_:)`` function is used to specify the result columns of a query. Given a simple
+table definition:
 
 ```swift
 @Table
@@ -18,6 +17,9 @@ struct Reminder {
   var isCompleted = false
 }
 ```
+
+We can invoke `select` and specify any number of result columns as a variadic tuple from the table
+columns passed to a trailing closure:
 
 @Row {
   @Column {
@@ -42,7 +44,9 @@ struct Reminder {
   }
   @Column {
     ```sql
-    SELECT "reminders"."id", "reminders"."title"
+    SELECT
+      "reminders"."id",
+      "reminders"."title"
     FROM "reminders"
     ```
   }
@@ -52,14 +56,16 @@ struct Reminder {
   @Column {
     ```swift
     Reminder
-      .select { ($0.id, $0.title, $0.isCompleted) }
+      .select {
+        ($0.id, $0.title, $0.isCompleted)
+      }
     ```
   }
   @Column {
     ```sql
-    SELECT 
-      "reminders"."id", 
-      "reminders"."title", 
+    SELECT
+      "reminders"."id",
+      "reminders"."title",
       "reminders"."isCompleted"
     FROM "reminders"
     ```
@@ -94,8 +100,8 @@ To add (or remove) a `DISTINCT` clause from a selection, use ``Select/distinct(_
   }
   @Column {
     ```sql
-    SELECT DISTINCT 
-      "reminders"."title" 
+    SELECT DISTINCT
+      "reminders"."title"
     FROM "reminders"
     ```
   }
@@ -142,8 +148,8 @@ handed the currently-selected columns:
   }
   @Column {
     ```sql
-    SELECT 
-      "reminders"."title", 
+    SELECT
+      "reminders"."title",
       "reminders"."isCompleted"
     FROM "reminders"
     ```
@@ -160,16 +166,21 @@ is given the columns of each table so that it can describe the join constraint:
   @Column {
     ```swift
     RemindersList
-      .join(Reminder.all) { $0.id == $1.remindersListID }
+      .join(Reminder.all) {
+        $0.id == $1.remindersListID
+      }
     // => (RemindersList, Reminder)
     ```
   }
   @Column {
     ```sql
-    SELECT "remindersLists".…, "reminders".…
-      FROM "remindersLists"
+    SELECT
+      "remindersLists".…,
+      "reminders".…
+    FROM "remindersLists"
     JOIN "reminders"
-      ON "remindersLists"."id" = "reminders"."remindersListID"
+      ON "remindersLists"."id"
+        = "reminders"."remindersListID"
     ```
   }
 }
@@ -184,17 +195,22 @@ The joined query has access to both tables' columns in subsequent chained builde
   @Column {
     ```swift
     RemindersList
-      .join(Reminder.all) { $0.id == $1.remindersListID }
+      .join(Reminder.all) {
+        $0.id == $1.remindersListID
+      }
       .select { ($0.title, $1.title) }
     // => (String, String)
     ```
   }
   @Column {
     ```sql
-    SELECT "remindersLists"."title", "reminders"."title"
-      FROM "remindersLists"
+    SELECT
+      "remindersLists"."title",
+      "reminders"."title"
+    FROM "remindersLists"
     JOIN "reminders"
-      ON "remindersLists"."id" = "reminders"."remindersListID"
+      ON "remindersLists"."id"
+        = "reminders"."remindersListID"
     ```
   }
 }
@@ -206,19 +222,28 @@ joins:
   @Column {
     ```swift
     RemindersList
-      .join(Reminder.all) { $0.id == $1.remindersListID }
-      .join(User.all) { $1.assignedUserID == $2.id }
+      .join(Reminder.all) {
+        $0.id == $1.remindersListID
+      }
+      .join(User.all) {
+        $1.assignedUserID == $2.id
+      }
     // => (RemindersList, Reminder, User)
     ```
   }
   @Column {
     ```sql
-    SELECT "remindersLists".…, "reminders".…, "users".…
-      FROM "remindersLists"
+    SELECT
+      "remindersLists".…,
+      "reminders".…,
+      "users".…
+    FROM "remindersLists"
     JOIN "reminders"
-      ON "remindersLists"."id" = "reminders"."remindersListID"
+      ON "remindersLists"."id"
+        = "reminders"."remindersListID"
     JOIN "users"
-      ON "reminders"."assignedUserID" = "users"."id"
+      ON "reminders"."assignedUserID"
+        = "users"."id"
     ```
   }
 }
@@ -231,16 +256,21 @@ selected columns, joins, filters, and more.
     ```swift
     RemindersList
       .select(\.title)
-      .join(Reminder.select(\.title) { /* ... */ }
+      .join(Reminder.select(\.title) {
+        // ...
+      }
     // => (String, String)
     ```
   }
   @Column {
     ```sql
-    SELECT "remindersLists"."title", "reminders"."title"
-      FROM "remindersLists"
+    SELECT
+      "remindersLists"."title",
+      "reminders"."title"
+    FROM "remindersLists"
     JOIN "reminders"
-      ON "remindersLists"."id" = "reminders"."remindersListID"
+      ON "remindersLists"."id"
+        = "reminders"."remindersListID"
     ```
   }
 }
@@ -250,17 +280,23 @@ selected columns, joins, filters, and more.
     ```swift
     RemindersList
       .where { $0.id == 1 }
-      .join(Reminder.where(\.isFlagged) { /* ... */ }
+      .join(Reminder.where(\.isFlagged) {
+        // ...
+      }
     // => (RemindersList, Reminder)
     ```
   }
   @Column {
     ```sql
-    SELECT "remindersLists".…, "reminders".…
-      FROM "remindersLists"
+    SELECT
+      "remindersLists".…,
+      "reminders".…
+    FROM "remindersLists"
     JOIN "reminders"
-      ON "remindersLists"."id" = "reminders"."remindersListID"
-    WHERE ("remindersLists"."id" = 1) AND "reminders"."isFlagged"
+      ON "remindersLists"."id"
+        = "reminders"."remindersListID"
+    WHERE ("remindersLists"."id" = 1)
+      AND "reminders"."isFlagged"
     ```
   }
 }
@@ -291,17 +327,22 @@ enum Referrer: AliasName {}
   @Column {
     ```swift
     let usersWithReferrers = User
-      .leftJoin(User.as(Referrer.self).all) { $0.referrerID == $1.id }
+      .leftJoin(User.as(Referrer.self).all) {
+        $0.referrerID == $1.id
+      }
       .select { ($0.name, $1.name) }
     // => (String, String?)
     ```
   }
   @Column {
     ```sql
-    SELECT "users"."name", "referrers"."name"
-      FROM "users"
+    SELECT
+      "users"."name",
+      "referrers"."name"
+    FROM "users"
     JOIN "users" AS "referrers"
-      ON "users"."referrerID" = "referrers"."id"
+      ON "users"."referrerID"
+        = "referrers"."id"
     ```
   }
 }
@@ -330,14 +371,19 @@ closure that specifies a predicate expression:
   @Column {
     ```swift
     Reminder
-      .where { !$0.isCompleted && $0.title.like("%groceries%") }
+      .where {
+        !$0.isCompleted
+          && $0.title.like("%groceries%")
+      }
     ```
   }
   @Column {
     ```sql
     SELECT … FROM "reminders"
     WHERE "reminders"."isCompleted"
-    AND ("reminders"."title" LIKE '%groceries%')
+    AND (
+      "reminders"."title" LIKE '%groceries%'
+    )
     ```
   }
 }
@@ -360,7 +406,9 @@ returns an `AND` of the combined predicates:
     ```sql
     SELECT … FROM "reminders"
     WHERE "reminders"."isCompleted"
-    AND ("reminders"."title" LIKE '%groceries%')
+    AND (
+      "reminders"."title" LIKE '%groceries%'
+    )
     ```
   }
 }
@@ -381,7 +429,9 @@ The closure is a result builder that can conditionally generate parts of the pre
   @Column {
     ```sql
     SELECT … FROM "reminders"
-    WHERE (NOT "reminders"."isCompleted")
+    WHERE (
+      NOT "reminders"."isCompleted"
+    )
     ```
   }
 }
@@ -424,8 +474,7 @@ extension Reminder {
   @Column {
     ```sql
     SELECT … FROM "reminders"
-    WHERE 
-      ("reminders"."isCompleted") 
+    WHERE ("reminders"."isCompleted")
       AND ("reminders"."isFlagged")
     ```
   }
@@ -441,8 +490,7 @@ extension Reminder {
   @Column {
     ```sql
     SELECT … FROM "reminders"
-    WHERE 
-      ("reminders"."isCompleted") 
+    WHERE ("reminders"."isCompleted")
       OR ("reminders"."isFlagged")
     ```
   }
@@ -471,13 +519,17 @@ The `group(by:)` function is used to add a grouping to a query.
   @Column {
     ```swift
     Reminder
-      .group { ($0.isCompleted, $0.priority) }
+      .group {
+        ($0.isCompleted, $0.priority)
+      }
     ```
   }
   @Column {
     ```sql
     SELECT … FROM "reminders"
-    GROUP BY "reminders"."isCompleted", "reminders"."priority"
+    GROUP BY
+      "reminders"."isCompleted",
+      "reminders"."priority"
     ```
   }
 }
@@ -496,7 +548,9 @@ combines them:
   @Column {
     ```sql
     SELECT … FROM "reminders"
-    GROUP BY "reminders"."isCompleted", "reminders"."priority"
+    GROUP BY
+      "reminders"."isCompleted",
+      "reminders"."priority"
     ```
   }
 }
@@ -511,13 +565,17 @@ The `having` function is used to add a predicate to a query's `HAVING` clause.
     Reminder
       .group(by: \.priority)
       .having { $0.id.count() > 1 }
-      .select { ($0.priority, $0.id.count()) }
+      .select {
+        ($0.priority, $0.id.count())
+      }
     // => (Int?, Int)
     ```
   }
   @Column {
     ```sql
-    SELECT "reminders"."priority", count("reminders"."id")
+    SELECT
+      "reminders"."priority",
+      count("reminders"."id")
     GROUP BY "reminders"."priority"
     HAVING count("reminders"."id") > 1
     ```
@@ -554,14 +612,18 @@ direction.
   @Column {
     ```swift
     Reminder
-      .order { ($0.priority.desc(nulls: .first), $0.title.asc()) }
+      .order {
+        ($0.priority.desc(nulls: .first),
+         $0.title.asc())
+      }
     ```
   }
   @Column {
     ```sql
      SELECT … FROM "reminders"
     ORDER BY
-      "reminders"."priority" DESC NULLS FIRST,
+      "reminders"."priority" DESC
+        NULLS FIRST,
       "reminders"."title" ASC
     ```
   }
@@ -580,12 +642,12 @@ Multiple chained calls to `order` will accumulate each term:
   @Column {
     ```sql
     SELECT … FROM "reminders"
-    ORDER BY "reminders"."priority" DESC, "reminders"."title"
+    ORDER BY
+      "reminders"."priority" DESC,
+      "reminders"."title"
     ```
   }
 }
-```swift
-```
 
 The closure is a result builder that can conditionally generate ordering terms:
 
