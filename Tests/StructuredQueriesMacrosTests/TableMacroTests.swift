@@ -957,90 +957,108 @@ extension SnapshotTests {
         """#
       }
     }
-  }
 
-  @Test func noTypeWithAs() {
-    assertMacro {
-      """
-      @Table
-      struct RemindersList: Hashable, Identifiable {
-        var id: Int
-        @Column(as: Color.HexRepresentation.self)
-        var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
-        var name = ""
-      }
-      """
-    } expansion: {
-      #"""
-      struct RemindersList: Hashable, Identifiable {
-        var id: Int
-        var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
-        var name = ""
-      }
-
-      extension RemindersList: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
-        public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
-          public typealias QueryValue = RemindersList
-          public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-          public let color = StructuredQueries.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
-          public let name = StructuredQueries.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
-          public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
-            self.id
-          }
-          public static var allColumns: [any StructuredQueries.TableColumnExpression] {
-            [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
-          }
-        }
-        public struct Draft: StructuredQueries.TableDraft {
-          public typealias PrimaryTable = RemindersList
-          @Column(primaryKey: false)
-          var id: Int?
-          @Column(as: Color.HexRepresentation.self) var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+    @Test func noTypeWithAs() {
+      assertMacro {
+        """
+        @Table
+        struct RemindersList: Hashable, Identifiable {
+          var id: Int
+          @Column(as: Color.HexRepresentation.self)
+          var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
           var name = ""
-          public struct TableColumns: StructuredQueries.TableDefinition {
-            public typealias QueryValue = RemindersList.Draft
-            public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+        }
+        """
+      } expansion: {
+        #"""
+        struct RemindersList: Hashable, Identifiable {
+          var id: Int
+          var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+          var name = ""
+        }
+
+        extension RemindersList: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = RemindersList
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public let color = StructuredQueries.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
             public let name = StructuredQueries.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.id
+            }
             public static var allColumns: [any StructuredQueries.TableColumnExpression] {
               [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
             }
           }
+          public struct Draft: StructuredQueries.TableDraft {
+            public typealias PrimaryTable = RemindersList
+            @Column(primaryKey: false)
+            var id: Int?
+            @Column(as: Color.HexRepresentation.self) var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+            var name = ""
+            public struct TableColumns: StructuredQueries.TableDefinition {
+              public typealias QueryValue = RemindersList.Draft
+              public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let color = StructuredQueries.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
+              public let name = StructuredQueries.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
+              public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = RemindersList.tableName
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+              self.name = try decoder.decode(Swift.String.self) ?? ""
+            }
+            public init(_ other: RemindersList) {
+              self.id = other.id
+              self.color = other.color
+              self.name = other.name
+            }
+            public init(
+              id: Int? = nil,
+              color: Color.HexRepresentation.QueryOutput = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255),
+              name: Swift.String = ""
+            ) {
+              self.id = id
+              self.color = color
+              self.name = name
+            }
+          }
           public static let columns = TableColumns()
-          public static let tableName = RemindersList.tableName
+          public static let tableName = "remindersLists"
           public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
-            self.id = try decoder.decode(Int.self)
+            let id = try decoder.decode(Int.self)
             self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
             self.name = try decoder.decode(Swift.String.self) ?? ""
-          }
-          public init(_ other: RemindersList) {
-            self.id = other.id
-            self.color = other.color
-            self.name = other.name
-          }
-          public init(
-            id: Int? = nil,
-            color: Color.HexRepresentation.QueryOutput = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255),
-            name: Swift.String = ""
-          ) {
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
             self.id = id
-            self.color = color
-            self.name = name
           }
         }
-        public static let columns = TableColumns()
-        public static let tableName = "remindersLists"
-        public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
-          let id = try decoder.decode(Int.self)
-          self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
-          self.name = try decoder.decode(Swift.String.self) ?? ""
-          guard let id else {
-            throw QueryDecodingError.missingRequiredColumn
-          }
-          self.id = id
-        }
+        """#
       }
-      """#
+    }
+
+    @Test func emptyStruct() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        ┬─────
+        ╰─ 🛑 '@Table' requires at least one stored column property to be defined on 'Foo'
+        struct Foo {
+        }
+        """
+      }
     }
   }
 

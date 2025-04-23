@@ -365,7 +365,7 @@ extension SnapshotTests {
         WHERE ("reminders"."id" = 1)
         RETURNING "dueDate"
         """
-      }results: {
+      } results: {
         """
         ┌─────┐
         │ nil │
@@ -383,7 +383,7 @@ extension SnapshotTests {
         WHERE ("reminders"."id" = 1)
         RETURNING "dueDate"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────┐
         │ Date(2018-01-29T00:08:00.000Z) │

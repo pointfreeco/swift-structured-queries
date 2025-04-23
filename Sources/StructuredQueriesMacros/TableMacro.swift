@@ -526,6 +526,19 @@ extension TableMacro: ExtensionMacro {
       conformances = protocolNames.map { "\(moduleName).\($0)" }
     }
 
+    if columnsProperties.isEmpty {
+      diagnostics.append(
+        Diagnostic(
+          node: node,
+          message: MacroExpansionErrorMessage(
+            """
+            '@Table' requires at least one stored column property to be defined on '\(type)'
+            """
+          )
+        )
+      )
+    }
+
     guard diagnostics.isEmpty else {
       diagnostics.forEach(context.diagnose)
       return []
