@@ -54,11 +54,6 @@ extension QueryExpression where QueryValue: QueryBindable {
     BinaryOperator(lhs: self, operator: "=", rhs: other)
   }
 
-  public func eq(_ other: QueryValue) -> some QueryExpression<Bool>
-  where QueryValue: FixedWidthInteger {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
-  }
-
   /// Returns a predicate expression indicating whether two query expressions are not equal.
   ///
   /// ```swift
