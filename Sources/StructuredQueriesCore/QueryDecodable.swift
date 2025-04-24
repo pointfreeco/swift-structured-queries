@@ -13,7 +13,9 @@ extension [UInt8]: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode([UInt8].self)
-    else { throw QueryDecodingError.missingRequiredColumn }
+    else {
+      throw QueryDecodingError.missingRequiredColumn
+    }
     self = result
   }
 }
@@ -22,7 +24,9 @@ extension Double: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode(Double.self)
-    else { throw QueryDecodingError.missingRequiredColumn }
+    else {
+      throw QueryDecodingError.missingRequiredColumn
+    }
     self = result
   }
 }
@@ -31,7 +35,9 @@ extension Int64: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode(Int64.self)
-    else { throw QueryDecodingError.missingRequiredColumn }
+    else {
+      throw QueryDecodingError.missingRequiredColumn
+    }
     self = result
   }
 }
@@ -40,7 +46,9 @@ extension String: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
     guard let result = try decoder.decode(String.self)
-    else { throw QueryDecodingError.missingRequiredColumn }
+    else {
+      throw QueryDecodingError.missingRequiredColumn
+    }
     self = result
   }
 }

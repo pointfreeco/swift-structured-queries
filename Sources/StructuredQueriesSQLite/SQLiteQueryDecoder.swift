@@ -53,7 +53,9 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func decode(_ columnType: String.Type) throws -> String? {
     defer { currentIndex += 1 }
-    guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
+    guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else {
+      return nil
+    }
     return String(cString: sqlite3_column_text(statement, currentIndex))
   }
 

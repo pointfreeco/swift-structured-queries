@@ -37,7 +37,7 @@ struct Reminder: Equatable, Identifiable {
 }
 
 @Table
-struct User: Equatable, Identifiable {
+struct User: Codable, Equatable, Identifiable {
   let id: Int
   var name = ""
 }

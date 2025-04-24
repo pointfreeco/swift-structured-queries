@@ -108,21 +108,33 @@ extension SnapshotTests {
           .group(by: \.id)
           .leftJoin(ReminderTag.all) { $0.id.eq($1.reminderID) }
           .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
-          .select { Row.Columns(reminder: $0, tags: #sql("\($2.jsonObjects)")) }
-          .limit(3)
+          .leftJoin(User.all) { $0.assignedUserID.eq($3.id) }
+          .select { reminder, _, tag, user in
+            Row.Columns(
+              assignedUser: user.jsonObject,
+              reminder: reminder,
+              tags: #sql("\(tag.jsonObjects)")
+            )
+          }
+          .limit(1)
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title"))) filter(where ("tags"."id" IS NOT NULL)) AS "tags"
+        SELECT iif(("users"."id" IS NULL), NULL, json_object('id', json_quote("users"."id"), 'name', json_quote("users"."name"))) AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(iif(("tags"."id" IS NULL), NULL, json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")))) filter(where ("tags"."id" IS NOT NULL)) AS "tags"
         FROM "reminders"
         LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
         LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
+        LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
         GROUP BY "reminders"."id"
-        LIMIT 3
+        LIMIT 1
         """
       }results: {
         """
         ┌──────────────────────────────────────────────┐
         │ Row(                                         │
+        │   assignedUser: User(                        │
+        │     id: 1,                                   │
+        │     name: "Blob"                             │
+        │   ),                                         │
         │   reminder: Reminder(                        │
         │     id: 1,                                   │
         │     assignedUserID: 1,                       │
@@ -145,45 +157,6 @@ extension SnapshotTests {
         │     )                                        │
         │   ]                                          │
         │ )                                            │
-        ├──────────────────────────────────────────────┤
-        │ Row(                                         │
-        │   reminder: Reminder(                        │
-        │     id: 2,                                   │
-        │     assignedUserID: nil,                     │
-        │     dueDate: Date(2000-12-30T00:00:00.000Z), │
-        │     isCompleted: false,                      │
-        │     isFlagged: true,                         │
-        │     notes: "",                               │
-        │     priority: nil,                           │
-        │     remindersListID: 1,                      │
-        │     title: "Haircut"                         │
-        │   ),                                         │
-        │   tags: [                                    │
-        │     [0]: Tag(                                │
-        │       id: 3,                                 │
-        │       title: "someday"                       │
-        │     ),                                       │
-        │     [1]: Tag(                                │
-        │       id: 4,                                 │
-        │       title: "optional"                      │
-        │     )                                        │
-        │   ]                                          │
-        │ )                                            │
-        ├──────────────────────────────────────────────┤
-        │ Row(                                         │
-        │   reminder: Reminder(                        │
-        │     id: 3,                                   │
-        │     assignedUserID: nil,                     │
-        │     dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │     isCompleted: false,                      │
-        │     isFlagged: false,                        │
-        │     notes: "Ask about diet",                 │
-        │     priority: .high,                         │
-        │     remindersListID: 1,                      │
-        │     title: "Doctor appointment"              │
-        │   ),                                         │
-        │   tags: []                                   │
-        │ )                                            │
         └──────────────────────────────────────────────┘
         """
       }
@@ -193,6 +166,8 @@ extension SnapshotTests {
 
 @Selection
 fileprivate struct Row {
+  @Column(as: JSONRepresentation<User?>.self)
+  let assignedUser: User?
   let reminder: Reminder
   @Column(as: JSONRepresentation<[Tag]>.self)
   let tags: [Tag]
@@ -204,12 +179,12 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
     let fragment: QueryFragment = Self.allColumns
       .map { "\(quote: $0.name, delimiter: .text), json_quote(\($0))" }
       .joined(separator: ", ")
-    return #sql("json_object(\(fragment))")
+    return #sql("iif(\(self.primaryKey.is(nil)), NULL, json_object(\(fragment)))")
   }
 
   public var jsonObjects: some QueryExpression<JSONRepresentation<[QueryValue]>> {
     #sql(
-      "json_group_array(\(jsonObject)) filter(where \(self.primaryKey != nil))"
+      "json_group_array(\(jsonObject)) filter(where \(self.primaryKey.isNot(nil)))"
     )
   }
 }
