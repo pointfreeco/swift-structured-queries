@@ -1220,12 +1220,28 @@ extension Select {
   /// - Parameter predicate: A closure that produces a Boolean query expression from this select's
   ///   tables.
   /// - Returns: A new select statement that appends the given predicate to its `HAVING` clause.
+  @_disfavoredOverload
   public func having<each J: Table>(
     _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Bool>
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
     select.having.append(predicate(From.columns, repeat (each J).columns).queryFragment)
+    return select
+  }
+
+  /// Creates a new select statement from this one by appending a predicate to its `HAVING` clause.
+  ///
+  /// - Parameter predicate: A result builder closure that returns a Boolean expression to filter
+  ///   by.
+  /// - Returns: A new select statement that appends the given predicate to its `HAVING` clause.
+  public func having<each J: Table>(
+    @QueryFragmentBuilder<Bool>
+    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
+  ) -> Self
+  where Joins == (repeat each J) {
+    var select = self
+    select.having.append(contentsOf: predicate(From.columns, repeat (each J).columns))
     return select
   }
 

@@ -524,6 +524,66 @@ extension SnapshotTests {
       }
     }
 
+    @Test func whereConditionalTrue() {
+      let includeConditional = true
+      assertQuery(
+        Reminder.all
+          .select(\.id)
+          .where {
+            if includeConditional {
+              $0.isCompleted
+            }
+          }
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE "reminders"."isCompleted"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 4  │
+        │ 7  │
+        │ 10 │
+        └────┘
+        """
+      }
+    }
+
+    @Test func whereConditionalFalse() {
+      let includeConditional = false
+      assertQuery(
+        Reminder.all
+          .select(\.id)
+          .where {
+            if includeConditional {
+              $0.isCompleted
+            }
+          }
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 1  │
+        │ 2  │
+        │ 3  │
+        │ 4  │
+        │ 5  │
+        │ 6  │
+        │ 7  │
+        │ 8  │
+        │ 9  │
+        │ 10 │
+        └────┘
+        """
+      }
+    }
+
     @Test func whereAnd() {
       assertQuery(
         Reminder.where(\.isCompleted).and(.where(\.isFlagged))
@@ -598,6 +658,60 @@ extension SnapshotTests {
         """
         ┌───────┬───┐
         │ false │ 7 │
+        └───────┴───┘
+        """
+      }
+    }
+
+    @Test func havingConditionalTrue() {
+      let includeConditional: Bool = true
+      assertQuery(
+        Reminder
+          .select { ($0.isCompleted, $0.id.count()) }
+          .group(by: \.isCompleted)
+          .having {
+            if includeConditional {
+              $0.id.count() > 3
+            }
+          }
+      ) {
+        """
+        SELECT "reminders"."isCompleted", count("reminders"."id")
+        FROM "reminders"
+        GROUP BY "reminders"."isCompleted"
+        HAVING (count("reminders"."id") > 3)
+        """
+      } results: {
+        """
+        ┌───────┬───┐
+        │ false │ 7 │
+        └───────┴───┘
+        """
+      }
+    }
+
+    @Test func havingConditionalFalse() {
+      let includeConditional: Bool = false
+      assertQuery(
+        Reminder
+          .select { ($0.isCompleted, $0.id.count()) }
+          .group(by: \.isCompleted)
+          .having {
+            if includeConditional {
+              $0.id.count() > 3
+            }
+          }
+      ) {
+        """
+        SELECT "reminders"."isCompleted", count("reminders"."id")
+        FROM "reminders"
+        GROUP BY "reminders"."isCompleted"
+        """
+      }results: {
+        """
+        ┌───────┬───┐
+        │ false │ 7 │
+        │ true  │ 3 │
         └───────┴───┘
         """
       }
