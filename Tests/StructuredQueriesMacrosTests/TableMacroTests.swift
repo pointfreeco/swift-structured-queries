@@ -61,8 +61,8 @@ extension SnapshotTests {
           let id: /* TODO: UUID */Int
           /// The user's email.
           var email: String?  // TODO: Should this be non-optional?
-          var age: Int
           /// The user's age.
+          var age: Int
         }
 
         extension User: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
