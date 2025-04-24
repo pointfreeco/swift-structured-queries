@@ -8,8 +8,8 @@ extension SnapshotTests {
     @Test func basics() {
       assertQuery(
         Reminder.select { ("reminder", $0.title) }
-          .union(RemindersList.select { ("list", $0.name) })
-          .union(Tag.select { ("tag", $0.name) })
+          .union(RemindersList.select { ("list", $0.title) })
+          .union(Tag.select { ("tag", $0.title) })
       ) {
         """
         SELECT 'reminder', "reminders"."title"
@@ -50,8 +50,8 @@ extension SnapshotTests {
       assertQuery(
         With {
           Reminder.select { Name.Columns(type: "reminder", value: $0.title) }
-            .union(RemindersList.select { Name.Columns(type: "list", value: $0.name) })
-            .union(Tag.select { Name.Columns(type: "tag", value: $0.name) })
+            .union(RemindersList.select { Name.Columns(type: "list", value: $0.title) })
+            .union(Tag.select { Name.Columns(type: "tag", value: $0.title) })
         } query: {
           Name.order { ($0.type.desc(), $0.value.asc()) }
         }

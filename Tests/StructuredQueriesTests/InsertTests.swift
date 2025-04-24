@@ -194,9 +194,9 @@ extension SnapshotTests {
     @Test func select() {
       assertQuery(
         Tag.insert {
-          $0.name
+          $0.title
         } select: {
-          RemindersList.select { $0.name.lower() }
+          RemindersList.select { $0.title.lower() }
         }
         .returning(\.self)
       ) {
@@ -430,7 +430,7 @@ extension SnapshotTests {
       enum R: AliasName {}
       assertQuery(
         RemindersList.as(R.self).insert {
-          $0.name
+          $0.title
         } values: {
           "cruise"
         }

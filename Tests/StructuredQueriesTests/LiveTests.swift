@@ -220,7 +220,7 @@ extension SnapshotTests {
           .group(by: \.id)
           .join(ReminderTag.all) { $0.id.eq($1.reminderID) }
           .join(Tag.all) { $1.tagID.eq($2.id) }
-          .select { ($0, $2.name.groupConcat()) }
+          .select { ($0, $2.title.groupConcat()) }
       ) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", group_concat("tags"."name")

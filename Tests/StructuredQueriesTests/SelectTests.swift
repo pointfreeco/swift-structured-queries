@@ -94,7 +94,7 @@ extension SnapshotTests {
     }
 
     @Test func selectSingleColumn() {
-      assertQuery(Tag.select(\.name)) {
+      assertQuery(Tag.select(\.title)) {
         """
         SELECT "tags"."name"
         FROM "tags"
@@ -112,7 +112,7 @@ extension SnapshotTests {
     }
 
     @Test func selectChaining() {
-      assertQuery(Tag.select(\.id).select(\.name)) {
+      assertQuery(Tag.select(\.id).select(\.title)) {
         """
         SELECT "tags"."id", "tags"."name"
         FROM "tags"
@@ -301,7 +301,7 @@ extension SnapshotTests {
       assertQuery(
         RemindersList
           .join(Reminder.all) { $0.id.eq($1.remindersListID) }
-          .select { ($0.name, $1.title) }
+          .select { ($0.title, $1.title) }
       ) {
         """
         SELECT "remindersLists"."name", "reminders"."title"
@@ -909,7 +909,7 @@ extension SnapshotTests {
         assertQuery(
           RemindersList
             .limit(1)
-            .select(\.name)
+            .select(\.title)
             .withReminderCount
         ) {
           """
