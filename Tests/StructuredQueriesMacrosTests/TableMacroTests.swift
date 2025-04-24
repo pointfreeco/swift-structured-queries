@@ -41,6 +41,104 @@ extension SnapshotTests {
       }
     }
 
+    @Test func comment() {
+      assertMacro {
+        """
+        @Table
+        struct User {
+          /// The user's identifier.
+          let id: /* TODO: UUID */Int
+          /// The user's email.
+          var email: String?  // TODO: Should this be non-optional?
+          /// The user's age.
+          var age: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct User {
+          /// The user's identifier.
+          let id: /* TODO: UUID */Int
+          /// The user's email.
+          var email: String?  // TODO: Should this be non-optional?
+          var age: Int
+          /// The user's age.
+        }
+
+        extension User: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = User
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public let email = StructuredQueries.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
+            public let age = StructuredQueries.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
+            }
+          }
+          public struct Draft: StructuredQueries.TableDraft {
+            public typealias PrimaryTable = User
+            @Column(primaryKey: false)
+            let id: /* TODO: UUID */ Int?
+            var email: String?
+            var age: Int
+            public struct TableColumns: StructuredQueries.TableDefinition {
+              public typealias QueryValue = User.Draft
+              public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let email = StructuredQueries.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
+              public let age = StructuredQueries.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
+              public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = User.tableName
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              self.email = try decoder.decode(String.self)
+              let age = try decoder.decode(Int.self)
+              guard let age else {
+                throw QueryDecodingError.missingRequiredColumn
+              }
+              self.age = age
+            }
+            public init(_ other: User) {
+              self.id = other.id
+              self.email = other.email
+              self.age = other.age
+            }
+            public init(
+              id: /* TODO: UUID */ Int? = nil,
+              email: String? = nil,
+              age: Int
+            ) {
+              self.id = id
+              self.email = email
+              self.age = age
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "users"
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            self.email = try decoder.decode(String.self)
+            let age = try decoder.decode(Int.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let age else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.age = age
+          }
+        }
+        """#
+      }
+    }
+
     @Test func tableName() {
       assertMacro {
         """

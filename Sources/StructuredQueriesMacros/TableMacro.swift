@@ -436,7 +436,7 @@ extension TableMacro: ExtensionMacro {
       var memberwiseArguments: [PatternBindingSyntax] = []
       var memberwiseAssignments: [TokenSyntax] = []
       for (binding, queryOutputType) in draftBindings {
-        let argument = binding.annotated(queryOutputType).rewritten(selfRewriter)
+        let argument = binding.trimmed.annotated(queryOutputType).rewritten(selfRewriter)
         if argument.typeAnnotation == nil {
           let identifier =
             (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)
