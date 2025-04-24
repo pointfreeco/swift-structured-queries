@@ -13,12 +13,12 @@ extension SnapshotTests {
           .select { ($0.title, $1.title) }
       ) {
         """
-        SELECT "reminders"."title", "remindersLists"."name"
+        SELECT "reminders"."title", "remindersLists"."title"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         ORDER BY "reminders"."dueDate" DESC
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────────┬────────────┐
         │ "Take out trash"           │ "Family"   │

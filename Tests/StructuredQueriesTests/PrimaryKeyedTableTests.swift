@@ -136,12 +136,12 @@ extension SnapshotTests {
           .find(2)
       ) {
         """
-        SELECT "reminders"."title", "remindersLists"."name"
+        SELECT "reminders"."title", "remindersLists"."title"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         WHERE ("reminders"."id" = 2)
         """
-      } results: {
+      }results: {
         """
         ┌───────────┬────────────┐
         │ "Haircut" │ "Personal" │

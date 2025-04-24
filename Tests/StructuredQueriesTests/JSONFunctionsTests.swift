@@ -3,6 +3,7 @@ import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
 import StructuredQueriesSQLite
+import StructuredQueriesSupport
 import Testing
 
 extension SnapshotTests {
@@ -201,7 +202,7 @@ fileprivate struct Row {
 extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
     let fragment: QueryFragment = Self.allColumns
-      .map { "'\(raw: $0.name)', json_quote(\($0))" }
+      .map { "\(quote: $0.name, delimiter: .text), json_quote(\($0))" }
       .joined(separator: ", ")
     return #sql("json_object(\(fragment))")
   }

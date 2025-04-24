@@ -202,29 +202,29 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "tags"
-        ("name")
-        SELECT lower("remindersLists"."name")
+        ("title")
+        SELECT lower("remindersLists"."title")
         FROM "remindersLists"
-        RETURNING "id", "name"
+        RETURNING "id", "title"
         """
-      } results: {
+      }results: {
         """
-        ┌────────────────────┐
-        │ Tag(               │
-        │   id: 5,           │
-        │   name: "personal" │
-        │ )                  │
-        ├────────────────────┤
-        │ Tag(               │
-        │   id: 6,           │
-        │   name: "family"   │
-        │ )                  │
-        ├────────────────────┤
-        │ Tag(               │
-        │   id: 7,           │
-        │   name: "business" │
-        │ )                  │
-        └────────────────────┘
+        ┌─────────────────────┐
+        │ Tag(                │
+        │   id: 5,            │
+        │   title: "personal" │
+        │ )                   │
+        ├─────────────────────┤
+        │ Tag(                │
+        │   id: 6,            │
+        │   title: "family"   │
+        │ )                   │
+        ├─────────────────────┤
+        │ Tag(                │
+        │   id: 7,            │
+        │   title: "business" │
+        │ )                   │
+        └─────────────────────┘
         """
       }
     }
@@ -412,16 +412,11 @@ extension SnapshotTests {
         """
         INSERT INTO "tags" ("name")
         VALUES ('office')
-        RETURNING "tags"."id", "tags"."name"
+        RETURNING "tags"."id", "tags"."title"
         """
-      } results: {
+      }results: {
         """
-        ┌──────────────────┐
-        │ Tag(             │
-        │   id: 5,         │
-        │   name: "office" │
-        │ )                │
-        └──────────────────┘
+        table tags has no column named name
         """
       }
     }
@@ -438,18 +433,18 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "remindersLists" AS "rs"
-        ("name")
+        ("title")
         VALUES
         ('cruise')
-        RETURNING "id", "color", "name"
+        RETURNING "id", "color", "title"
         """
-      } results: {
+      }results: {
         """
         ┌───────────────────┐
         │ RemindersList(    │
         │   id: 4,          │
         │   color: 4889071, │
-        │   name: "cruise"  │
+        │   title: "cruise" │
         │ )                 │
         └───────────────────┘
         """

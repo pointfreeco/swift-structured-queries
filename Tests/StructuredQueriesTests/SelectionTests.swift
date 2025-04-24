@@ -19,20 +19,20 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         LIMIT 2
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────────┐
         │ RemindersListAndReminderCount(  │
         │   remindersList: RemindersList( │
         │     id: 1,                      │
         │     color: 4889071,             │
-        │     name: "Personal"            │
+        │     title: "Personal"           │
         │   ),                            │
         │   remindersCount: 5             │
         │ )                               │
@@ -41,7 +41,7 @@ extension SnapshotTests {
         │   remindersList: RemindersList( │
         │     id: 2,                      │
         │     color: 15567157,            │
-        │     name: "Family"              │
+        │     title: "Family"             │
         │   ),                            │
         │   remindersCount: 3             │
         │ )                               │
@@ -54,20 +54,20 @@ extension SnapshotTests {
           .map { RemindersListAndReminderCount.Columns(remindersList: $1, remindersCount: $0) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         LIMIT 2
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────────┐
         │ RemindersListAndReminderCount(  │
         │   remindersList: RemindersList( │
         │     id: 1,                      │
         │     color: 4889071,             │
-        │     name: "Personal"            │
+        │     title: "Personal"           │
         │   ),                            │
         │   remindersCount: 5             │
         │ )                               │
@@ -76,7 +76,7 @@ extension SnapshotTests {
         │   remindersList: RemindersList( │
         │     id: 2,                      │
         │     color: 15567157,            │
-        │     name: "Family"              │
+        │     title: "Family"             │
         │   ),                            │
         │   remindersCount: 3             │
         │ )                               │

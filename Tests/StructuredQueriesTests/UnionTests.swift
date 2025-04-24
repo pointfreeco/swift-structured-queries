@@ -15,13 +15,13 @@ extension SnapshotTests {
         SELECT 'reminder', "reminders"."title"
         FROM "reminders"
           UNION
-        SELECT 'list', "remindersLists"."name"
+        SELECT 'list', "remindersLists"."title"
         FROM "remindersLists"
           UNION
-        SELECT 'tag', "tags"."name"
+        SELECT 'tag', "tags"."title"
         FROM "tags"
         """
-      } results: {
+      }results: {
         """
         ┌────────────┬────────────────────────────┐
         │ "list"     │ "Business"                 │
@@ -61,17 +61,17 @@ extension SnapshotTests {
           SELECT 'reminder' AS "type", "reminders"."title" AS "value"
           FROM "reminders"
             UNION
-          SELECT 'list' AS "type", "remindersLists"."name" AS "value"
+          SELECT 'list' AS "type", "remindersLists"."title" AS "value"
           FROM "remindersLists"
             UNION
-          SELECT 'tag' AS "type", "tags"."name" AS "value"
+          SELECT 'tag' AS "type", "tags"."title" AS "value"
           FROM "tags"
         )
         SELECT "names"."type", "names"."value"
         FROM "names"
         ORDER BY "names"."type" DESC, "names"."value" ASC
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────────────┐
         │ Name(                               │
