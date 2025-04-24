@@ -651,37 +651,39 @@ Multiple chained calls to `order` will accumulate each term:
 
 The closure is a result builder that can conditionally generate ordering terms:
 
-@Row {
-  @Column {
-    ```swift
-    ```
-  }
-  @Column {
-    ```sql
-    ```
-  }
-}
 ```swift
 enum Ordering {
   case dueDate
   case priority
   case title
 }
+```
 
-var ordering: Ordering = .dueDate
-Reminder.order {
-  switch ordering {
-  case .dueDate:
-    ($0.isCompleted, $0.date)
-  case .priority:
-    ($0.isCompleted, $0.priority.desc(), $0.isFlagged.desc())
-  case .title:
-    ($0.isCompleted, $0.title)
+@Row {
+  @Column {
+    ```swift
+    var ordering: Ordering = .dueDate
+    Reminder.order {
+      switch ordering {
+      case .dueDate:
+        ($0.isCompleted, $0.date)
+      case .priority:
+        ($0.isCompleted, $0.priority.desc(), $0.isFlagged.desc())
+      case .title:
+        ($0.isCompleted, $0.title)
+      }
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT … FROM "reminders"
+    ORDER BY 
+      "reminders"."isCompleted", 
+      "reminders"."date"
+    ```
   }
 }
-// SELECT … FROM "reminders"
-// ORDER BY "reminders"."isCompleted", "reminders"."date"
-```
 
 ### Paginating results
 
@@ -690,68 +692,64 @@ The `limit(_:offset:)` function is used to change a query's `LIMIT` and `OFFSET`
 @Row {
   @Column {
     ```swift
+    Reminder.limit(10)
     ```
   }
   @Column {
     ```sql
+    SELECT … FROM "reminders"
+    LIMIT 10
     ```
   }
 }
-```swift
-Reminder.limit(10)
-// SELECT … FROM "reminders"
-// LIMIT 10
 
 @Row {
   @Column {
     ```swift
+    Reminder.limit(10, offset: 10)
     ```
   }
   @Column {
     ```sql
+    SELECT … FROM "reminders"
+    LIMIT 10 OFFSET 10
     ```
   }
 }
-Reminder.limit(10, offset: 10)
-// SELECT … FROM "reminders"
-// LIMIT 10 OFFSET 10
-```
 
 Multiple chained calls to `limit` will override the limit and offset to the last call:
 
 @Row {
   @Column {
     ```swift
+    Reminder
+      .limit(10, offset: 10)
+      .limit(20)
     ```
   }
   @Column {
     ```sql
+    SELECT … FROM "reminders"
+    LIMIT 20
     ```
   }
 }
-```swift
-Reminder
-  .limit(10, offset: 10)
-  .limit(20)
-// SELECT … FROM "reminders"
-// LIMIT 20
 
 @Row {
   @Column {
     ```swift
+    Reminder
+      .limit(10)
+      .limit(20, offset: 20)
     ```
   }
   @Column {
     ```sql
+    SELECT … FROM "reminders"
+    LIMIT 20 OFFSET 20
     ```
   }
 }
-Reminder
-  .limit(10)
-  .limit(20, offset: 20)
-// SELECT … FROM "reminders"
-// LIMIT 20 OFFSET 20
-```
 
 ### Compound selects
 
@@ -761,51 +759,50 @@ functions, which apply the appropriate SQL operator between each statement.
 @Row {
   @Column {
     ```swift
+    RemindersList.select(\.title)
+      .union(Reminder.select(\.title))
     ```
   }
   @Column {
     ```sql
+    SELECT "remindersLists"."title" FROM "remindersLists"
+      UNION
+    SELECT "reminders"."title" FROM "reminders"
     ```
   }
 }
-```swift
-RemindersList.select(\.title)
-  .union(Reminder.select(\.title))
-// SELECT "remindersLists"."title" FROM "remindersLists"
-//   UNION
-// SELECT "reminders"."title" FROM "reminders"
 
 @Row {
   @Column {
     ```swift
+    RemindersList.select(\.title)
+      .intersect(Reminder.select(\.title))
     ```
   }
   @Column {
     ```sql
+    SELECT "remindersLists"."title" FROM "remindersLists"
+      INTERSECT
+    SELECT "reminders"."title" FROM "reminders"
     ```
   }
 }
-RemindersList.select(\.title)
-  .intersect(Reminder.select(\.title))
-// SELECT "remindersLists"."title" FROM "remindersLists"
-//   INTERSECT
-// SELECT "reminders"."title" FROM "reminders"
 
 @Row {
   @Column {
     ```swift
+    RemindersList.select(\.title)
+      .intersect(Reminder.select(\.title))
     ```
   }
   @Column {
     ```sql
+    SELECT "remindersLists"."title" FROM "remindersLists"
+      EXCEPT
+    SELECT "reminders"."title" FROM "reminders"
     ```
   }
 }
-RemindersList.select(\.title)
-  .intersect(Reminder.select(\.title))
-// SELECT "remindersLists"."title" FROM "remindersLists"
-//   EXCEPT
-// SELECT "reminders"."title" FROM "reminders"
 ```
 
 ## Topics
