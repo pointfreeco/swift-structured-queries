@@ -111,14 +111,14 @@ extension SnapshotTests {
           .limit(3)
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(json_object('id',json_quote("tags"."id"),'title',json_quote("tags"."title"))) filter(where ("tags"."id" IS NOT NULL)) AS "tags"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title"))) filter(where ("tags"."id" IS NOT NULL)) AS "tags"
         FROM "reminders"
         LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
         LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
         GROUP BY "reminders"."id"
         LIMIT 3
         """
-      } results: {
+      }results: {
         """
         ┌──────────────────────────────────────────────┐
         │ Row(                                         │
@@ -200,17 +200,9 @@ fileprivate struct Row {
 // TODO: Library code?
 extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
-    var fragment: QueryFragment = ""
-    var isFirst = true
-    for column in Self.allColumns {
-      defer { isFirst = false }
-      if !isFirst {
-        fragment.append(",")
-      }
-      fragment.append("'\(raw: column.name)'")
-      fragment.append(",")
-      fragment.append("json_quote(\(column))")
-    }
+    let fragment: QueryFragment = Self.allColumns
+      .map { "'\(raw: $0.name)', json_quote(\($0))" }
+      .joined(separator: ", ")
     return #sql("json_object(\(fragment))")
   }
 
