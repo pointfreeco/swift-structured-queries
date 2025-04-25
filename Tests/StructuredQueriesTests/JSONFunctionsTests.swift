@@ -102,7 +102,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func jsonAssociation() {
+    @Test func jsonAssociation_Reminder() {
       assertQuery(
         Reminder
           .group(by: \.id)
@@ -110,7 +110,7 @@ extension SnapshotTests {
           .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
           .leftJoin(User.all) { $0.assignedUserID.eq($3.id) }
           .select { reminder, _, tag, user in
-            Row.Columns(
+            ReminderRow.Columns(
               assignedUser: user.jsonObject,
               reminder: reminder,
               tags: #sql("\(tag.jsonObjects)")
@@ -130,7 +130,7 @@ extension SnapshotTests {
       }results: {
         """
         ┌──────────────────────────────────────────────┐
-        │ Row(                                         │
+        │ ReminderRow(                                 │
         │   assignedUser: User(                        │
         │     id: 1,                                   │
         │     name: "Blob"                             │
@@ -161,11 +161,93 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func jsonAssociation_RemindersList() throws {
+      assertQuery(
+        RemindersList
+          .group(by: \.id)
+          .leftJoin(Reminder.incomplete) { $0.id.eq($1.remindersListID) }
+          .select {
+            RemindersListRow.Columns(
+              remindersList: $0,
+              reminders: #sql("\($1.jsonObjects)")
+            )
+          }
+          .limit(1)
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", json_group_array(iif(("reminders"."id" IS NULL), NULL, json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json_quote(iif("reminders"."isCompleted" = 0, json('false'), json('true'))), 'isFlagged', json_quote(iif("reminders"."isFlagged" = 0, json('false'), json('true'))), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")))) filter(where ("reminders"."id" IS NOT NULL)) AS "reminders"
+        FROM "remindersLists"
+        LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        WHERE NOT ("reminders"."isCompleted")
+        GROUP BY "remindersLists"."id"
+        LIMIT 1
+        """
+      }results: {
+        """
+        ┌────────────────────────────────────────────────┐
+        │ RemindersListRow(                              │
+        │   remindersList: RemindersList(                │
+        │     id: 1,                                     │
+        │     color: 4889071,                            │
+        │     title: "Personal"                          │
+        │   ),                                           │
+        │   reminders: [                                 │
+        │     [0]: Reminder(                             │
+        │       id: 1,                                   │
+        │       assignedUserID: 1,                       │
+        │       dueDate: Date(2001-01-01T08:00:00.000Z), │
+        │       isCompleted: false,                      │
+        │       isFlagged: false,                        │
+        │       notes: "Milk, Eggs, Apples",             │
+        │       priority: nil,                           │
+        │       remindersListID: 1,                      │
+        │       title: "Groceries"                       │
+        │     ),                                         │
+        │     [1]: Reminder(                             │
+        │       id: 2,                                   │
+        │       assignedUserID: nil,                     │
+        │       dueDate: Date(2000-12-30T08:00:00.000Z), │
+        │       isCompleted: false,                      │
+        │       isFlagged: true,                         │
+        │       notes: "",                               │
+        │       priority: nil,                           │
+        │       remindersListID: 1,                      │
+        │       title: "Haircut"                         │
+        │     ),                                         │
+        │     [2]: Reminder(                             │
+        │       id: 3,                                   │
+        │       assignedUserID: nil,                     │
+        │       dueDate: Date(2001-01-01T08:00:00.000Z), │
+        │       isCompleted: false,                      │
+        │       isFlagged: false,                        │
+        │       notes: "Ask about diet",                 │
+        │       priority: .high,                         │
+        │       remindersListID: 1,                      │
+        │       title: "Doctor appointment"              │
+        │     ),                                         │
+        │     [3]: Reminder(                             │
+        │       id: 5,                                   │
+        │       assignedUserID: nil,                     │
+        │       dueDate: nil,                            │
+        │       isCompleted: false,                      │
+        │       isFlagged: false,                        │
+        │       notes: "",                               │
+        │       priority: nil,                           │
+        │       remindersListID: 1,                      │
+        │       title: "Buy concert tickets"             │
+        │     )                                          │
+        │   ]                                            │
+        │ )                                              │
+        └────────────────────────────────────────────────┘
+        """
+      }
+    }
   }
 }
 
 @Selection
-fileprivate struct Row {
+fileprivate struct ReminderRow {
   @Column(as: JSONRepresentation<User?>.self)
   let assignedUser: User?
   let reminder: Reminder
@@ -173,11 +255,25 @@ fileprivate struct Row {
   let tags: [Tag]
 }
 
+@Selection
+fileprivate struct RemindersListRow {
+  let remindersList: RemindersList
+  @Column(as: JSONRepresentation<[Reminder]>.self)
+  let reminders: [Reminder]
+}
+
 // TODO: Library code?
 extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
+    func open<T: TableColumnExpression>(_ column: T) -> QueryFragment {
+      if T.Value.self == Bool.self {
+        return "\(quote: column.name, delimiter: .text), json_quote(iif(\(column) = 0, json('false'), json('true')))"
+      } else {
+        return "\(quote: column.name, delimiter: .text), json_quote(\(column))"
+      }
+    }
     let fragment: QueryFragment = Self.allColumns
-      .map { "\(quote: $0.name, delimiter: .text), json_quote(\($0))" }
+      .map { open($0) }
       .joined(separator: ", ")
     return #sql("iif(\(self.primaryKey.is(nil)), NULL, json_object(\(fragment)))")
   }

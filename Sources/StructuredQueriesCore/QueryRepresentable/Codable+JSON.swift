@@ -21,13 +21,21 @@ public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresen
 
   public init(decoder: inout some QueryDecoder) throws {
     self.init(
-      queryOutput: try JSONDecoder().decode(
+      queryOutput: try jsonDecoder.decode(
         QueryOutput.self,
         from: Data(String(decoder: &decoder).utf8)
       )
     )
   }
 }
+
+private let jsonDecoder: JSONDecoder = {
+  var decoder = JSONDecoder()
+  var formatter = DateFormatter.init()
+  formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+  decoder.dateDecodingStrategy = .formatted(formatter)
+  return decoder
+}()
 
 extension JSONRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
