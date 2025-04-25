@@ -116,6 +116,7 @@ extension SnapshotTests {
               tags: #sql("\(tag.jsonObjects)")
             )
           }
+          // NB: Change to number >1 to see a decoding error
           .limit(1)
       ) {
         """
