@@ -212,7 +212,7 @@ extension SnapshotTests {
         ┌────────────────────┐
         │ Tag(               │
         │   id: 5,           │
-        │   name: "personal" │
+        │   name: "business" │
         │ )                  │
         ├────────────────────┤
         │ Tag(               │
@@ -222,7 +222,7 @@ extension SnapshotTests {
         ├────────────────────┤
         │ Tag(               │
         │   id: 7,           │
-        │   name: "business" │
+        │   name: "personal" │
         │ )                  │
         └────────────────────┘
         """
@@ -332,7 +332,7 @@ extension SnapshotTests {
         ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (1, NULL, NULL, 0, 0, '', NULL, 1, 'Cash check')
-        ON CONFLICT ("id")DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
+        ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       }results: {
@@ -379,7 +379,7 @@ extension SnapshotTests {
         ON CONFLICT DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │
@@ -394,6 +394,32 @@ extension SnapshotTests {
         │   title: ""            │
         │ )                      │
         └────────────────────────┘
+        """
+      }
+    }
+
+    @Test func upsertWithoutID_OtherConflict() {
+      assertQuery(
+        RemindersList.upsert(RemindersList.Draft(name: "Personal"))
+          .returning(\.self)
+      ) {
+        """
+        INSERT INTO "remindersLists"
+        ("id", "color", "name")
+        VALUES
+        (NULL, 4889071, 'Personal')
+        ON CONFLICT DO UPDATE SET "color" = "excluded"."color", "name" = "excluded"."name"
+        RETURNING "id", "color", "name"
+        """
+      }results: {
+        """
+        ┌────────────────────┐
+        │ RemindersList(     │
+        │   id: 1,           │
+        │   color: 4889071,  │
+        │   name: "Personal" │
+        │ )                  │
+        └────────────────────┘
         """
       }
     }

@@ -432,7 +432,7 @@ extension Insert: Statement {
     }
 
     if let updates {
-      query.append("\(.newlineOrSpace)ON CONFLICT ")// DO ")
+      query.append("\(.newlineOrSpace)ON CONFLICT ")
       if !conflictTargetColumnNames.isEmpty {
         query.append("(")
         query.append(conflictTargetColumnNames.map { "\(quote: $0)" }.joined(separator: ", "))
