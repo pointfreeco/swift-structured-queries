@@ -167,10 +167,10 @@ extension SnapshotTests {
         RemindersList
           .group(by: \.id)
           .leftJoin(Reminder.incomplete) { $0.id.eq($1.remindersListID) }
-          .select {
+          .select { remindersList, reminder in
             RemindersListRow.Columns(
-              remindersList: $0,
-              reminders: #sql("\($1.jsonObjects)")
+              remindersList: remindersList,
+              reminders: #sql("\(reminder.jsonObjects)")
             )
           }
           .limit(1)
