@@ -1,3 +1,15 @@
+public protocol QueryEncodable {
+  static func encode<Root>(_ column: any TableColumnExpression<Root, Self>) -> QueryFragment
+}
+
+extension Bool: QueryEncodable {
+  public static func encode<Root>(_ column: any TableColumnExpression<Root, Bool>) -> QueryFragment {
+    "iif(\(column) = 0, json('false'), json('true'))"
+  }
+}
+
+
+
 /// A type that can decode itself from a query.
 public protocol QueryDecodable: _OptionalPromotable {
   /// Creates a new instance by decoding from the given decoder.

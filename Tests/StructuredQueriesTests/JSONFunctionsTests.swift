@@ -265,9 +265,12 @@ fileprivate struct RemindersListRow {
 // TODO: Library code?
 extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
-    func open<T: TableColumnExpression>(_ column: T) -> QueryFragment {
-      if T.Value.self == Bool.self {
-        return "\(quote: column.name, delimiter: .text), json_quote(iif(\(column) = 0, json('false'), json('true')))"
+    func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
+      func open<EncodableValue: QueryEncodable>(_: EncodableValue.Type) -> QueryFragment {
+        EncodableValue.encode(column as! any TableColumnExpression<TableColumn.Root, EncodableValue>)
+      }
+      if let encodableValuetype = TableColumn.Value.self as? any QueryEncodable.Type {
+        return "\(quote: column.name, delimiter: .text), json_quote(\(open(encodableValuetype)))"
       } else {
         return "\(quote: column.name, delimiter: .text), json_quote(\(column))"
       }
