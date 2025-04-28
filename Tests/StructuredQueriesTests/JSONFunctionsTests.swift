@@ -292,9 +292,14 @@ fileprivate struct RemindersListRow {
 extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
-      if TableColumn.QueryValue.self == Bool.self {
+      switch TableColumn.QueryValue.self {
+      case is Bool.Type:
         return "\(quote: column.name, delimiter: .text), iif(\(column) = 0, json('false'), json('true'))"
-      } else {
+      case is Date.UnixTimeRepresentation.Type:
+        return "\(quote: column.name, delimiter: .text), datetime(\(column), 'unixepoch')"
+      case is Date.JulianDayRepresentation.Type:
+        return "\(quote: column.name, delimiter: .text), datetime(\(column), 'julianday')"
+      default:
         return "\(quote: column.name, delimiter: .text), json_quote(\(column))"
       }
     }

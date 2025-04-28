@@ -29,14 +29,6 @@ public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresen
   }
 }
 
-private let jsonDecoder: JSONDecoder = {
-  var decoder = JSONDecoder()
-  var formatter = DateFormatter.init()
-  formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
-  decoder.dateDecodingStrategy = .formatted(formatter)
-  return decoder
-}()
-
 extension JSONRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     do {
@@ -52,3 +44,11 @@ extension JSONRepresentation: SQLiteType {
     String.typeAffinity
   }
 }
+
+private let jsonDecoder: JSONDecoder = {
+  var decoder = JSONDecoder()
+  decoder.dateDecodingStrategy = .custom {
+    try $0.singleValueContainer().decode(String.self).iso8601
+  }
+  return decoder
+}()

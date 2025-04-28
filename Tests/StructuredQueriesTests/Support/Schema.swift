@@ -3,41 +3,6 @@ import Foundation
 import StructuredQueries
 import StructuredQueriesSQLite
 
-
-extension Bool {
-  public struct IntegerRepresentation: QueryRepresentable {
-    public var queryOutput: Bool
-    public init(queryOutput: Bool) {
-      self.queryOutput = queryOutput
-    }
-  }
-}
-
-extension Bool.IntegerRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
-    .int(queryOutput ? 1 : 0)
-  }
-}
-
-extension Bool.IntegerRepresentation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
-    self.init(
-      queryOutput: try Int(decoder: &decoder) != 0
-    )
-  }
-
-  private struct InvalidBytes: Error {}
-}
-
-extension Bool.IntegerRepresentation: SQLiteType {
-  public static var typeAffinity: SQLiteTypeAffinity {
-    Int.typeAffinity
-  }
-}
-
-
-
-
 @Table
 struct RemindersList: Equatable, Identifiable {
   static let withReminderCount = group(by: \.id)
