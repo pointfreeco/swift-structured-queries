@@ -390,11 +390,12 @@ let rows = remindersLists.map { remindersList in
 ```
 
 This can work, but it's incredibly inefficient, a lot of boilerplate, and prone to mistakes. And
-this is doing work that SQL actually excels out. In fact, the condition inside the `filter` looks
+this is doing work that SQL actually excels at. In fact, the condition inside the `filter` looks
 suspiciously like a join constraint, which should give us a hint that what we are doing is not 
 quite right.
 
-A better way to do this is to use the `@Selection` macro described above (<doc:QueryCookbook#Custom-selections>), along with a ``JSONRepresentation`` of the collection
+A better way to do this is to use the `@Selection` macro described above
+(<doc:QueryCookbook#Custom-selections>), along with a ``JSONRepresentation`` of the collection
 of reminders you want to load for each list:
 
 ```struct
@@ -408,8 +409,8 @@ struct Row {
 
 > Note: `Reminder` must conform to `Codable` to be able to use ``JSONRepresentation``.
 
-This allows the query to serialize the associated rows into JSON which are then deserialized into
-the `Row` type. To construct such a query you can use the 
+This allows the query to serialize the associated rows into JSON, which are then deserialized into
+a `Row` type. To construct such a query you can use the 
 ``PrimaryKeyedTableDefinition/jsonObjects`` property that is defined on the columns of 
  [primary keyed tables](<doc:PrimaryKeyedTables>):
 
@@ -427,4 +428,5 @@ RemindersList
 This allows you to fetch all of the data in a single SQLite query and decode the data into a 
 collection of `Row` values. There is an extra cost associated with decoding the JSON object, 
 but that cost may be smaller than executing multiple SQLite requests and transforming the data
-into `Row` manually, not to mention how much more code it is to do it manually.
+into `Row` manually, not to mention the additional code you need to write and maintain to process
+the data.
