@@ -382,7 +382,8 @@ closure that specifies a predicate expression:
     SELECT … FROM "reminders"
     WHERE "reminders"."isCompleted"
     AND (
-      "reminders"."title" LIKE '%groceries%'
+      "reminders"."title"
+        LIKE '%groceries%'
     )
     ```
   }
@@ -399,7 +400,9 @@ returns an `AND` of the combined predicates:
     ```swift
     Reminder
       .where(\.isCompleted)
-      .where { $0.title.like("%groceries%") }
+      .where {
+        $0.title.like("%groceries%")
+      }
     ```
   }
   @Column {
@@ -407,7 +410,8 @@ returns an `AND` of the combined predicates:
     SELECT … FROM "reminders"
     WHERE "reminders"."isCompleted"
     AND (
-      "reminders"."title" LIKE '%groceries%'
+      "reminders"."title"
+        LIKE '%groceries%'
     )
     ```
   }
@@ -765,9 +769,11 @@ functions, which apply the appropriate SQL operator between each statement.
   }
   @Column {
     ```sql
-    SELECT "remindersLists"."title" FROM "remindersLists"
+    SELECT "remindersLists"."title"
+    FROM "remindersLists"
       UNION
-    SELECT "reminders"."title" FROM "reminders"
+    SELECT "reminders"."title"
+    FROM "reminders"
     ```
   }
 }
@@ -781,9 +787,11 @@ functions, which apply the appropriate SQL operator between each statement.
   }
   @Column {
     ```sql
-    SELECT "remindersLists"."title" FROM "remindersLists"
+    SELECT "remindersLists"."title"
+    FROM "remindersLists"
       INTERSECT
-    SELECT "reminders"."title" FROM "reminders"
+    SELECT "reminders"."title"
+    FROM "reminders"
     ```
   }
 }
@@ -797,13 +805,14 @@ functions, which apply the appropriate SQL operator between each statement.
   }
   @Column {
     ```sql
-    SELECT "remindersLists"."title" FROM "remindersLists"
+    SELECT "remindersLists"."title"
+    FROM "remindersLists"
       EXCEPT
-    SELECT "reminders"."title" FROM "reminders"
+    SELECT "reminders"."title"
+    FROM "reminders"
     ```
   }
 }
-```
 
 ## Topics
 
