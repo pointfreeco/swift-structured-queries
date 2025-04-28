@@ -35,5 +35,60 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func outerJoinOptional() {
+      assertQuery(
+        RemindersList
+          .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
+          .select {
+            PriorityRow.Columns(value: $1.priority)
+          }
+      ) {
+        """
+        SELECT "reminders"."priority" AS "value"
+        FROM "remindersLists"
+        LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        """
+      } results: {
+        """
+        ┌─────────────────────────┐
+        │ PriorityRow(value: nil) │
+        ├─────────────────────────┤
+        │ PriorityRow(            │
+        │   value: .medium        │
+        │ )                       │
+        ├─────────────────────────┤
+        │ PriorityRow(            │
+        │   value: .high          │
+        │ )                       │
+        ├─────────────────────────┤
+        │ PriorityRow(            │
+        │   value: .low           │
+        │ )                       │
+        ├─────────────────────────┤
+        │ PriorityRow(            │
+        │   value: .high          │
+        │ )                       │
+        ├─────────────────────────┤
+        │ PriorityRow(value: nil) │
+        ├─────────────────────────┤
+        │ PriorityRow(value: nil) │
+        ├─────────────────────────┤
+        │ PriorityRow(            │
+        │   value: .high          │
+        │ )                       │
+        ├─────────────────────────┤
+        │ PriorityRow(value: nil) │
+        ├─────────────────────────┤
+        │ PriorityRow(value: nil) │
+        └─────────────────────────┘
+        """
+      }
+    }
   }
+}
+
+@Selection
+private struct PriorityRow {
+  let value: Priority?
 }
