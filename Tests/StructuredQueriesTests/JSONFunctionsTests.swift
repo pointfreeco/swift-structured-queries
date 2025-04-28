@@ -110,7 +110,7 @@ extension SnapshotTests {
           .leftJoin(User.all) { $0.assignedUserID.eq($3.id) }
           .select { reminder, _, tag, user in
             ReminderRow.Columns(
-              assignedUser: user.jsonObject,
+              assignedUser: user,
               reminder: reminder,
               tags: #sql("\(tag.jsonObjects)")
             )
@@ -272,7 +272,6 @@ extension SnapshotTests {
 
 @Selection
 private struct ReminderRow {
-  @Column(as: JSONRepresentation<User>?.self)
   let assignedUser: User?
   let reminder: Reminder
   @Column(as: JSONRepresentation<[Tag]>.self)

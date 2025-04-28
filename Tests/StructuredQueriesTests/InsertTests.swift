@@ -400,7 +400,7 @@ extension SnapshotTests {
 
     @Test func upsertWithoutID_OtherConflict() {
       assertQuery(
-        RemindersList.upsert(RemindersList.Draft(name: "Personal"))
+        RemindersList.upsert(RemindersList.Draft(title: "Personal"))
           .returning(\.self)
       ) {
         """
