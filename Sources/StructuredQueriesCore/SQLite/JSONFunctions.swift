@@ -39,6 +39,24 @@ extension QueryExpression where QueryValue: Codable & Sendable {
 }
 
 extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
+  /// A JSON object repsentation of the table's columns
+  ///
+  /// Constructs a `json_object` with a field for each column of the table.
+  ///
+  /// @Row {
+  ///   @Column {
+  ///     ```swift
+  ///     @Table struct Tag: Codable {
+  ///     Tag.select { $0.json }
+  ///     ```
+  ///   }
+  ///   @Column {
+  ///     ```sql
+  ///      let x = 1
+  ///      ```
+  ///   }
+  /// }
+  ///
   public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       switch TableColumn.QueryValue.self {

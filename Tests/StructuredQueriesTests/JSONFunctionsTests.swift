@@ -221,7 +221,7 @@ extension SnapshotTests {
         │     [0]: Reminder(                             │
         │       id: 1,                                   │
         │       assignedUserID: 1,                       │
-        │       dueDate: Date(2001-01-01T06:00:00.000Z), │
+        │       dueDate: Date(2001-01-01T00:00:00.000Z), │
         │       isCompleted: false,                      │
         │       isFlagged: false,                        │
         │       notes: "Milk, Eggs, Apples",             │
@@ -232,7 +232,7 @@ extension SnapshotTests {
         │     [1]: Reminder(                             │
         │       id: 2,                                   │
         │       assignedUserID: nil,                     │
-        │       dueDate: Date(2000-12-30T06:00:00.000Z), │
+        │       dueDate: Date(2000-12-30T00:00:00.000Z), │
         │       isCompleted: false,                      │
         │       isFlagged: true,                         │
         │       notes: "",                               │
@@ -243,7 +243,7 @@ extension SnapshotTests {
         │     [2]: Reminder(                             │
         │       id: 3,                                   │
         │       assignedUserID: nil,                     │
-        │       dueDate: Date(2001-01-01T06:00:00.000Z), │
+        │       dueDate: Date(2001-01-01T00:00:00.000Z), │
         │       isCompleted: false,                      │
         │       isFlagged: false,                        │
         │       notes: "Ask about diet",                 │

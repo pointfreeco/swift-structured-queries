@@ -45,7 +45,7 @@ extension Date {
 }
 
 extension DateFormatter {
-  static func iso8601(includingFractionalSeconds: Bool) -> DateFormatter {
+  fileprivate static func iso8601(includingFractionalSeconds: Bool) -> DateFormatter {
     includingFractionalSeconds ? iso8601Fractional : iso8601Whole
   }
 
