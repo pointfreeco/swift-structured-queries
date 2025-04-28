@@ -111,13 +111,13 @@ extension SnapshotTests {
           .leftJoin(User.all) { $0.assignedUserID.eq($3.id) }
           .select { reminder, _, tag, user in
             ReminderRow.Columns(
+              // user.jsonRepresentation
               assignedUser: user.jsonObject,
               reminder: reminder,
               tags: #sql("\(tag.jsonObjects)")
             )
           }
-          // NB: Change to number >1 to see a decoding error
-          .limit(1)
+          .limit(2)
       ) {
         """
         SELECT iif(("users"."id" IS NULL), NULL, json_object('id', json_quote("users"."id"), 'name', json_quote("users"."name"))) AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(iif(("tags"."id" IS NULL), NULL, json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")))) filter(where ("tags"."id" IS NOT NULL)) AS "tags"
@@ -126,7 +126,7 @@ extension SnapshotTests {
         LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
         LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
         GROUP BY "reminders"."id"
-        LIMIT 1
+        LIMIT 2
         """
       }results: {
         """
@@ -158,6 +158,31 @@ extension SnapshotTests {
         │     )                                        │
         │   ]                                          │
         │ )                                            │
+        ├──────────────────────────────────────────────┤
+        │ ReminderRow(                                 │
+        │   assignedUser: nil,                         │
+        │   reminder: Reminder(                        │
+        │     id: 2,                                   │
+        │     assignedUserID: nil,                     │
+        │     dueDate: Date(2000-12-30T00:00:00.000Z), │
+        │     isCompleted: false,                      │
+        │     isFlagged: true,                         │
+        │     notes: "",                               │
+        │     priority: nil,                           │
+        │     remindersListID: 1,                      │
+        │     title: "Haircut"                         │
+        │   ),                                         │
+        │   tags: [                                    │
+        │     [0]: Tag(                                │
+        │       id: 3,                                 │
+        │       title: "someday"                       │
+        │     ),                                       │
+        │     [1]: Tag(                                │
+        │       id: 4,                                 │
+        │       title: "optional"                      │
+        │     )                                        │
+        │   ]                                          │
+        │ )                                            │
         └──────────────────────────────────────────────┘
         """
       }
@@ -177,7 +202,7 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", json_group_array(iif(("reminders"."id" IS NULL), NULL, json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json_quote(iif("reminders"."isCompleted" = 0, json('false'), json('true'))), 'isFlagged', json_quote(iif("reminders"."isFlagged" = 0, json('false'), json('true'))), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")))) filter(where ("reminders"."id" IS NOT NULL)) AS "reminders"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", json_group_array(iif(("reminders"."id" IS NULL), NULL, json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', iif("reminders"."isCompleted" = 0, json('false'), json('true')), 'isFlagged', iif("reminders"."isFlagged" = 0, json('false'), json('true')), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")))) filter(where ("reminders"."id" IS NOT NULL)) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE NOT ("reminders"."isCompleted")
@@ -197,7 +222,7 @@ extension SnapshotTests {
         │     [0]: Reminder(                             │
         │       id: 1,                                   │
         │       assignedUserID: 1,                       │
-        │       dueDate: Date(2001-01-01T08:00:00.000Z), │
+        │       dueDate: Date(2001-01-01T06:00:00.000Z), │
         │       isCompleted: false,                      │
         │       isFlagged: false,                        │
         │       notes: "Milk, Eggs, Apples",             │
@@ -208,7 +233,7 @@ extension SnapshotTests {
         │     [1]: Reminder(                             │
         │       id: 2,                                   │
         │       assignedUserID: nil,                     │
-        │       dueDate: Date(2000-12-30T08:00:00.000Z), │
+        │       dueDate: Date(2000-12-30T06:00:00.000Z), │
         │       isCompleted: false,                      │
         │       isFlagged: true,                         │
         │       notes: "",                               │
@@ -219,7 +244,7 @@ extension SnapshotTests {
         │     [2]: Reminder(                             │
         │       id: 3,                                   │
         │       assignedUserID: nil,                     │
-        │       dueDate: Date(2001-01-01T08:00:00.000Z), │
+        │       dueDate: Date(2001-01-01T06:00:00.000Z), │
         │       isCompleted: false,                      │
         │       isFlagged: false,                        │
         │       notes: "Ask about diet",                 │
@@ -249,7 +274,7 @@ extension SnapshotTests {
 
 @Selection
 fileprivate struct ReminderRow {
-  @Column(as: JSONRepresentation<User?>.self)
+  @Column(as: JSONRepresentation<User>?.self)
   let assignedUser: User?
   let reminder: Reminder
   @Column(as: JSONRepresentation<[Tag]>.self)
@@ -267,11 +292,11 @@ fileprivate struct RemindersListRow {
 extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
-      func open<EncodableValue: QueryEncodable>(_: EncodableValue.Type) -> QueryFragment {
-        EncodableValue.encode(column as! any TableColumnExpression<TableColumn.Root, EncodableValue>)
-      }
-      if let encodableValuetype = TableColumn.Value.self as? any QueryEncodable.Type {
-        return "\(quote: column.name, delimiter: .text), json_quote(\(open(encodableValuetype)))"
+//      func open<EncodableValue: QueryEncodable>(_: EncodableValue.Type) -> QueryFragment {
+//        EncodableValue.encode(column as! any TableColumnExpression<TableColumn.Root, EncodableValue>)
+//      }
+      if TableColumn.QueryValue.self == Bool.self {
+        return "\(quote: column.name, delimiter: .text), iif(\(column) = 0, json('false'), json('true'))"
       } else {
         return "\(quote: column.name, delimiter: .text), json_quote(\(column))"
       }
