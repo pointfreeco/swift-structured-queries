@@ -335,7 +335,7 @@ extension SnapshotTests {
         ON CONFLICT ("id") DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │
@@ -379,7 +379,7 @@ extension SnapshotTests {
         ON CONFLICT ("id") DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────┐
         │ Reminder(              │
@@ -411,7 +411,7 @@ extension SnapshotTests {
         ON CONFLICT ("id") DO UPDATE SET "color" = "excluded"."color", "name" = "excluded"."name"
         RETURNING "id", "color", "name"
         """
-      }results: {
+      } results: {
         """
         UNIQUE constraint failed: remindersLists.name
         """

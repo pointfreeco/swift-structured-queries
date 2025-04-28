@@ -707,7 +707,7 @@ extension SnapshotTests {
         FROM "reminders"
         GROUP BY "reminders"."isCompleted"
         """
-      }results: {
+      } results: {
         """
         ┌───────┬───┐
         │ false │ 7 │
