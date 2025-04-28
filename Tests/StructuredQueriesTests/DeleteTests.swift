@@ -135,17 +135,17 @@ extension SnapshotTests {
         """
         DELETE FROM "remindersLists" AS "rs"
         WHERE ("rs"."id" = 1)
-        RETURNING "id", "color", "name"
+        RETURNING "id", "color", "title"
         """
-      } results: {
+      }results: {
         """
-        ┌────────────────────┐
-        │ RemindersList(     │
-        │   id: 1,           │
-        │   color: 4889071,  │
-        │   name: "Personal" │
-        │ )                  │
-        └────────────────────┘
+        ┌─────────────────────┐
+        │ RemindersList(      │
+        │   id: 1,            │
+        │   color: 4889071,   │
+        │   title: "Personal" │
+        │ )                   │
+        └─────────────────────┘
         """
       }
     }

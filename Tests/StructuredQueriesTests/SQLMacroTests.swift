@@ -60,27 +60,27 @@ extension SnapshotTests {
         """
         SELECT
           "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title",
-          "remindersLists"."id", "remindersLists"."color", "remindersLists"."name"
+          "remindersLists"."id", "remindersLists"."color", "remindersLists"."title"
         FROM "reminders"
         JOIN "remindersLists"
           ON "reminders"."remindersListID" = "remindersLists"."id"
         LIMIT 1
         """
-      } results: {
+      }results: {
         """
-        ┌────────────────────────────────────────────┬────────────────────┐
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 1,                                   │   id: 1,           │
-        │   assignedUserID: 1,                       │   color: 4889071,  │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │   name: "Personal" │
-        │   isCompleted: false,                      │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: "Milk, Eggs, Apples",             │                    │
-        │   priority: nil,                           │                    │
-        │   remindersListID: 1,                      │                    │
-        │   title: "Groceries"                       │                    │
-        │ )                                          │                    │
-        └────────────────────────────────────────────┴────────────────────┘
+        ┌────────────────────────────────────────────┬─────────────────────┐
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 1,                                   │   id: 1,            │
+        │   assignedUserID: 1,                       │   color: 4889071,   │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │   title: "Personal" │
+        │   isCompleted: false,                      │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: "Milk, Eggs, Apples",             │                     │
+        │   priority: nil,                           │                     │
+        │   remindersListID: 1,                      │                     │
+        │   title: "Groceries"                       │                     │
+        │ )                                          │                     │
+        └────────────────────────────────────────────┴─────────────────────┘
         """
       }
     }
@@ -99,10 +99,10 @@ extension SnapshotTests {
         )
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" 
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" 
         FROM "reminders" JOIN "remindersLists" ON "reminders"."remindersListID" = "remindersLists"."id" LIMIT 1
         """
-      } results: {
+      }results: {
         """
         ┌──────────────────────────────────────────────┐
         │ ReminderWithList(                            │
@@ -120,7 +120,7 @@ extension SnapshotTests {
         │   list: RemindersList(                       │
         │     id: 1,                                   │
         │     color: 4889071,                          │
-        │     name: "Personal"                         │
+        │     title: "Personal"                        │
         │   )                                          │
         │ )                                            │
         └──────────────────────────────────────────────┘

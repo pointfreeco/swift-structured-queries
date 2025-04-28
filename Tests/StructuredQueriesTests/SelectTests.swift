@@ -21,32 +21,32 @@ extension SnapshotTests {
     @Test func selectAll() {
       assertQuery(Tag.all) {
         """
-        SELECT "tags"."id", "tags"."name"
+        SELECT "tags"."id", "tags"."title"
         FROM "tags"
         """
-      } results: {
+      }results: {
         """
-        ┌────────────────────┐
-        │ Tag(               │
-        │   id: 1,           │
-        │   name: "car"      │
-        │ )                  │
-        ├────────────────────┤
-        │ Tag(               │
-        │   id: 2,           │
-        │   name: "kids"     │
-        │ )                  │
-        ├────────────────────┤
-        │ Tag(               │
-        │   id: 3,           │
-        │   name: "someday"  │
-        │ )                  │
-        ├────────────────────┤
-        │ Tag(               │
-        │   id: 4,           │
-        │   name: "optional" │
-        │ )                  │
-        └────────────────────┘
+        ┌─────────────────────┐
+        │ Tag(                │
+        │   id: 1,            │
+        │   title: "car"      │
+        │ )                   │
+        ├─────────────────────┤
+        │ Tag(                │
+        │   id: 2,            │
+        │   title: "kids"     │
+        │ )                   │
+        ├─────────────────────┤
+        │ Tag(                │
+        │   id: 3,            │
+        │   title: "someday"  │
+        │ )                   │
+        ├─────────────────────┤
+        │ Tag(                │
+        │   id: 4,            │
+        │   title: "optional" │
+        │ )                   │
+        └─────────────────────┘
         """
       }
     }
@@ -94,12 +94,12 @@ extension SnapshotTests {
     }
 
     @Test func selectSingleColumn() {
-      assertQuery(Tag.select(\.name)) {
+      assertQuery(Tag.select(\.title)) {
         """
-        SELECT "tags"."name"
+        SELECT "tags"."title"
         FROM "tags"
         """
-      } results: {
+      }results: {
         """
         ┌────────────┐
         │ "car"      │
@@ -112,12 +112,12 @@ extension SnapshotTests {
     }
 
     @Test func selectChaining() {
-      assertQuery(Tag.select(\.id).select(\.name)) {
+      assertQuery(Tag.select(\.id).select(\.title)) {
         """
-        SELECT "tags"."id", "tags"."name"
+        SELECT "tags"."id", "tags"."title"
         FROM "tags"
         """
-      } results: {
+      }results: {
         """
         ┌───┬────────────┐
         │ 1 │ "car"      │
@@ -164,151 +164,151 @@ extension SnapshotTests {
           .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."name"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."title"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
-      } results: {
+      }results: {
         #"""
-        ┌────────────────────────────────────────────┬────────────────────┐
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 1,                                   │   id: 1,           │
-        │   assignedUserID: 1,                       │   color: 4889071,  │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │   name: "Personal" │
-        │   isCompleted: false,                      │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: "Milk, Eggs, Apples",             │                    │
-        │   priority: nil,                           │                    │
-        │   remindersListID: 1,                      │                    │
-        │   title: "Groceries"                       │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 2,                                   │   id: 1,           │
-        │   assignedUserID: nil,                     │   color: 4889071,  │
-        │   dueDate: Date(2000-12-30T00:00:00.000Z), │   name: "Personal" │
-        │   isCompleted: false,                      │ )                  │
-        │   isFlagged: true,                         │                    │
-        │   notes: "",                               │                    │
-        │   priority: nil,                           │                    │
-        │   remindersListID: 1,                      │                    │
-        │   title: "Haircut"                         │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 3,                                   │   id: 1,           │
-        │   assignedUserID: nil,                     │   color: 4889071,  │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │   name: "Personal" │
-        │   isCompleted: false,                      │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: "Ask about diet",                 │                    │
-        │   priority: .high,                         │                    │
-        │   remindersListID: 1,                      │                    │
-        │   title: "Doctor appointment"              │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 4,                                   │   id: 1,           │
-        │   assignedUserID: nil,                     │   color: 4889071,  │
-        │   dueDate: Date(2000-06-25T00:00:00.000Z), │   name: "Personal" │
-        │   isCompleted: true,                       │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: "",                               │                    │
-        │   priority: nil,                           │                    │
-        │   remindersListID: 1,                      │                    │
-        │   title: "Take a walk"                     │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 5,                                   │   id: 1,           │
-        │   assignedUserID: nil,                     │   color: 4889071,  │
-        │   dueDate: nil,                            │   name: "Personal" │
-        │   isCompleted: false,                      │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: "",                               │                    │
-        │   priority: nil,                           │                    │
-        │   remindersListID: 1,                      │                    │
-        │   title: "Buy concert tickets"             │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 6,                                   │   id: 2,           │
-        │   assignedUserID: nil,                     │   color: 15567157, │
-        │   dueDate: Date(2001-01-03T00:00:00.000Z), │   name: "Family"   │
-        │   isCompleted: false,                      │ )                  │
-        │   isFlagged: true,                         │                    │
-        │   notes: "",                               │                    │
-        │   priority: .high,                         │                    │
-        │   remindersListID: 2,                      │                    │
-        │   title: "Pick up kids from school"        │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 7,                                   │   id: 2,           │
-        │   assignedUserID: nil,                     │   color: 15567157, │
-        │   dueDate: Date(2000-12-30T00:00:00.000Z), │   name: "Family"   │
-        │   isCompleted: true,                       │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: "",                               │                    │
-        │   priority: .low,                          │                    │
-        │   remindersListID: 2,                      │                    │
-        │   title: "Get laundry"                     │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 8,                                   │   id: 2,           │
-        │   assignedUserID: nil,                     │   color: 15567157, │
-        │   dueDate: Date(2001-01-05T00:00:00.000Z), │   name: "Family"   │
-        │   isCompleted: false,                      │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: "",                               │                    │
-        │   priority: .high,                         │                    │
-        │   remindersListID: 2,                      │                    │
-        │   title: "Take out trash"                  │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 9,                                   │   id: 3,           │
-        │   assignedUserID: nil,                     │   color: 11689427, │
-        │   dueDate: Date(2001-01-03T00:00:00.000Z), │   name: "Business" │
-        │   isCompleted: false,                      │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: """                               │                    │
-        │     Status of tax return                   │                    │
-        │     Expenses for next year                 │                    │
-        │     Changing payroll company               │                    │
-        │     """,                                   │                    │
-        │   priority: nil,                           │                    │
-        │   remindersListID: 3,                      │                    │
-        │   title: "Call accountant"                 │                    │
-        │ )                                          │                    │
-        ├────────────────────────────────────────────┼────────────────────┤
-        │ Reminder(                                  │ RemindersList(     │
-        │   id: 10,                                  │   id: 3,           │
-        │   assignedUserID: nil,                     │   color: 11689427, │
-        │   dueDate: Date(2000-12-30T00:00:00.000Z), │   name: "Business" │
-        │   isCompleted: true,                       │ )                  │
-        │   isFlagged: false,                        │                    │
-        │   notes: "",                               │                    │
-        │   priority: .medium,                       │                    │
-        │   remindersListID: 3,                      │                    │
-        │   title: "Send weekly emails"              │                    │
-        │ )                                          │                    │
-        └────────────────────────────────────────────┴────────────────────┘
+        ┌────────────────────────────────────────────┬─────────────────────┐
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 1,                                   │   id: 1,            │
+        │   assignedUserID: 1,                       │   color: 4889071,   │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │   title: "Personal" │
+        │   isCompleted: false,                      │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: "Milk, Eggs, Apples",             │                     │
+        │   priority: nil,                           │                     │
+        │   remindersListID: 1,                      │                     │
+        │   title: "Groceries"                       │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 2,                                   │   id: 1,            │
+        │   assignedUserID: nil,                     │   color: 4889071,   │
+        │   dueDate: Date(2000-12-30T00:00:00.000Z), │   title: "Personal" │
+        │   isCompleted: false,                      │ )                   │
+        │   isFlagged: true,                         │                     │
+        │   notes: "",                               │                     │
+        │   priority: nil,                           │                     │
+        │   remindersListID: 1,                      │                     │
+        │   title: "Haircut"                         │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 3,                                   │   id: 1,            │
+        │   assignedUserID: nil,                     │   color: 4889071,   │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │   title: "Personal" │
+        │   isCompleted: false,                      │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: "Ask about diet",                 │                     │
+        │   priority: .high,                         │                     │
+        │   remindersListID: 1,                      │                     │
+        │   title: "Doctor appointment"              │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 4,                                   │   id: 1,            │
+        │   assignedUserID: nil,                     │   color: 4889071,   │
+        │   dueDate: Date(2000-06-25T00:00:00.000Z), │   title: "Personal" │
+        │   isCompleted: true,                       │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: "",                               │                     │
+        │   priority: nil,                           │                     │
+        │   remindersListID: 1,                      │                     │
+        │   title: "Take a walk"                     │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 5,                                   │   id: 1,            │
+        │   assignedUserID: nil,                     │   color: 4889071,   │
+        │   dueDate: nil,                            │   title: "Personal" │
+        │   isCompleted: false,                      │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: "",                               │                     │
+        │   priority: nil,                           │                     │
+        │   remindersListID: 1,                      │                     │
+        │   title: "Buy concert tickets"             │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 6,                                   │   id: 2,            │
+        │   assignedUserID: nil,                     │   color: 15567157,  │
+        │   dueDate: Date(2001-01-03T00:00:00.000Z), │   title: "Family"   │
+        │   isCompleted: false,                      │ )                   │
+        │   isFlagged: true,                         │                     │
+        │   notes: "",                               │                     │
+        │   priority: .high,                         │                     │
+        │   remindersListID: 2,                      │                     │
+        │   title: "Pick up kids from school"        │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 7,                                   │   id: 2,            │
+        │   assignedUserID: nil,                     │   color: 15567157,  │
+        │   dueDate: Date(2000-12-30T00:00:00.000Z), │   title: "Family"   │
+        │   isCompleted: true,                       │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: "",                               │                     │
+        │   priority: .low,                          │                     │
+        │   remindersListID: 2,                      │                     │
+        │   title: "Get laundry"                     │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 8,                                   │   id: 2,            │
+        │   assignedUserID: nil,                     │   color: 15567157,  │
+        │   dueDate: Date(2001-01-05T00:00:00.000Z), │   title: "Family"   │
+        │   isCompleted: false,                      │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: "",                               │                     │
+        │   priority: .high,                         │                     │
+        │   remindersListID: 2,                      │                     │
+        │   title: "Take out trash"                  │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 9,                                   │   id: 3,            │
+        │   assignedUserID: nil,                     │   color: 11689427,  │
+        │   dueDate: Date(2001-01-03T00:00:00.000Z), │   title: "Business" │
+        │   isCompleted: false,                      │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: """                               │                     │
+        │     Status of tax return                   │                     │
+        │     Expenses for next year                 │                     │
+        │     Changing payroll company               │                     │
+        │     """,                                   │                     │
+        │   priority: nil,                           │                     │
+        │   remindersListID: 3,                      │                     │
+        │   title: "Call accountant"                 │                     │
+        │ )                                          │                     │
+        ├────────────────────────────────────────────┼─────────────────────┤
+        │ Reminder(                                  │ RemindersList(      │
+        │   id: 10,                                  │   id: 3,            │
+        │   assignedUserID: nil,                     │   color: 11689427,  │
+        │   dueDate: Date(2000-12-30T00:00:00.000Z), │   title: "Business" │
+        │   isCompleted: true,                       │ )                   │
+        │   isFlagged: false,                        │                     │
+        │   notes: "",                               │                     │
+        │   priority: .medium,                       │                     │
+        │   remindersListID: 3,                      │                     │
+        │   title: "Send weekly emails"              │                     │
+        │ )                                          │                     │
+        └────────────────────────────────────────────┴─────────────────────┘
         """#
       }
 
       assertQuery(
         RemindersList
           .join(Reminder.all) { $0.id.eq($1.remindersListID) }
-          .select { ($0.name, $1.title) }
+          .select { ($0.title, $1.title) }
       ) {
         """
-        SELECT "remindersLists"."name", "reminders"."title"
+        SELECT "remindersLists"."title", "reminders"."title"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         """
-      } results: {
+      }results: {
         """
         ┌────────────┬────────────────────────────┐
         │ "Personal" │ "Groceries"                │
@@ -909,17 +909,17 @@ extension SnapshotTests {
         assertQuery(
           RemindersList
             .limit(1)
-            .select(\.name)
+            .select(\.title)
             .withReminderCount
         ) {
           """
-          SELECT "remindersLists"."name", count("reminders"."id")
+          SELECT "remindersLists"."title", count("reminders"."id")
           FROM "remindersLists"
           JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
           GROUP BY "remindersLists"."id"
           LIMIT 1
           """
-        } results: {
+        }results: {
           """
           ┌────────────┬───┐
           │ "Personal" │ 5 │
@@ -1041,50 +1041,50 @@ extension SnapshotTests {
           .where { $1.isHighPriority.ifnull(false) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE ifnull(("reminders"."priority" = 3), 0)
         """
-      } results: {
+      }results: {
         """
-        ┌────────────────────┬────────────────────────────────────────────┐
-        │ RemindersList(     │ Reminder(                                  │
-        │   id: 1,           │   id: 3,                                   │
-        │   color: 4889071,  │   assignedUserID: nil,                     │
-        │   name: "Personal" │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │ )                  │   isCompleted: false,                      │
-        │                    │   isFlagged: false,                        │
-        │                    │   notes: "Ask about diet",                 │
-        │                    │   priority: .high,                         │
-        │                    │   remindersListID: 1,                      │
-        │                    │   title: "Doctor appointment"              │
-        │                    │ )                                          │
-        ├────────────────────┼────────────────────────────────────────────┤
-        │ RemindersList(     │ Reminder(                                  │
-        │   id: 2,           │   id: 6,                                   │
-        │   color: 15567157, │   assignedUserID: nil,                     │
-        │   name: "Family"   │   dueDate: Date(2001-01-03T00:00:00.000Z), │
-        │ )                  │   isCompleted: false,                      │
-        │                    │   isFlagged: true,                         │
-        │                    │   notes: "",                               │
-        │                    │   priority: .high,                         │
-        │                    │   remindersListID: 2,                      │
-        │                    │   title: "Pick up kids from school"        │
-        │                    │ )                                          │
-        ├────────────────────┼────────────────────────────────────────────┤
-        │ RemindersList(     │ Reminder(                                  │
-        │   id: 2,           │   id: 8,                                   │
-        │   color: 15567157, │   assignedUserID: nil,                     │
-        │   name: "Family"   │   dueDate: Date(2001-01-05T00:00:00.000Z), │
-        │ )                  │   isCompleted: false,                      │
-        │                    │   isFlagged: false,                        │
-        │                    │   notes: "",                               │
-        │                    │   priority: .high,                         │
-        │                    │   remindersListID: 2,                      │
-        │                    │   title: "Take out trash"                  │
-        │                    │ )                                          │
-        └────────────────────┴────────────────────────────────────────────┘
+        ┌─────────────────────┬────────────────────────────────────────────┐
+        │ RemindersList(      │ Reminder(                                  │
+        │   id: 1,            │   id: 3,                                   │
+        │   color: 4889071,   │   assignedUserID: nil,                     │
+        │   title: "Personal" │   dueDate: Date(2001-01-01T00:00:00.000Z), │
+        │ )                   │   isCompleted: false,                      │
+        │                     │   isFlagged: false,                        │
+        │                     │   notes: "Ask about diet",                 │
+        │                     │   priority: .high,                         │
+        │                     │   remindersListID: 1,                      │
+        │                     │   title: "Doctor appointment"              │
+        │                     │ )                                          │
+        ├─────────────────────┼────────────────────────────────────────────┤
+        │ RemindersList(      │ Reminder(                                  │
+        │   id: 2,            │   id: 6,                                   │
+        │   color: 15567157,  │   assignedUserID: nil,                     │
+        │   title: "Family"   │   dueDate: Date(2001-01-03T00:00:00.000Z), │
+        │ )                   │   isCompleted: false,                      │
+        │                     │   isFlagged: true,                         │
+        │                     │   notes: "",                               │
+        │                     │   priority: .high,                         │
+        │                     │   remindersListID: 2,                      │
+        │                     │   title: "Pick up kids from school"        │
+        │                     │ )                                          │
+        ├─────────────────────┼────────────────────────────────────────────┤
+        │ RemindersList(      │ Reminder(                                  │
+        │   id: 2,            │   id: 8,                                   │
+        │   color: 15567157,  │   assignedUserID: nil,                     │
+        │   title: "Family"   │   dueDate: Date(2001-01-05T00:00:00.000Z), │
+        │ )                   │   isCompleted: false,                      │
+        │                     │   isFlagged: false,                        │
+        │                     │   notes: "",                               │
+        │                     │   priority: .high,                         │
+        │                     │   remindersListID: 2,                      │
+        │                     │   title: "Take out trash"                  │
+        │                     │ )                                          │
+        └─────────────────────┴────────────────────────────────────────────┘
         """
       }
     }

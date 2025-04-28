@@ -184,32 +184,32 @@ extension SnapshotTests {
           .select { ($0, $1.id.count()) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name", count("reminders"."id")
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", count("reminders"."id")
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         """
-      } results: {
+      }results: {
         """
-        ┌────────────────────┬───┐
-        │ RemindersList(     │ 5 │
-        │   id: 1,           │   │
-        │   color: 4889071,  │   │
-        │   name: "Personal" │   │
-        │ )                  │   │
-        ├────────────────────┼───┤
-        │ RemindersList(     │ 3 │
-        │   id: 2,           │   │
-        │   color: 15567157, │   │
-        │   name: "Family"   │   │
-        │ )                  │   │
-        ├────────────────────┼───┤
-        │ RemindersList(     │ 2 │
-        │   id: 3,           │   │
-        │   color: 11689427, │   │
-        │   name: "Business" │   │
-        │ )                  │   │
-        └────────────────────┴───┘
+        ┌─────────────────────┬───┐
+        │ RemindersList(      │ 5 │
+        │   id: 1,            │   │
+        │   color: 4889071,   │   │
+        │   title: "Personal" │   │
+        │ )                   │   │
+        ├─────────────────────┼───┤
+        │ RemindersList(      │ 3 │
+        │   id: 2,            │   │
+        │   color: 15567157,  │   │
+        │   title: "Family"   │   │
+        │ )                   │   │
+        ├─────────────────────┼───┤
+        │ RemindersList(      │ 2 │
+        │   id: 3,            │   │
+        │   color: 11689427,  │   │
+        │   title: "Business" │   │
+        │ )                   │   │
+        └─────────────────────┴───┘
         """
       }
     }
@@ -220,16 +220,16 @@ extension SnapshotTests {
           .group(by: \.id)
           .join(ReminderTag.all) { $0.id.eq($1.reminderID) }
           .join(Tag.all) { $1.tagID.eq($2.id) }
-          .select { ($0, $2.name.groupConcat()) }
+          .select { ($0, $2.title.groupConcat()) }
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", group_concat("tags"."name")
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", group_concat("tags"."title")
         FROM "reminders"
-        JOIN "reminderTags" ON ("reminders"."id" = "reminderTags"."reminderID")
-        JOIN "tags" ON ("reminderTags"."tagID" = "tags"."id")
+        JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
+        JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
         GROUP BY "reminders"."id"
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────────────────────────┬────────────────────┐
         │ Reminder(                                  │ "someday,optional" │

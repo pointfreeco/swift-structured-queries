@@ -132,16 +132,16 @@ extension SnapshotTests {
       assertQuery(
         Reminder
           .join(RemindersList.all) { $0.remindersListID == $1.id }
-          .select { ($0.title, $1.name) }
+          .select { ($0.title, $1.title) }
           .find(2)
       ) {
         """
-        SELECT "reminders"."title", "remindersLists"."name"
+        SELECT "reminders"."title", "remindersLists"."title"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         WHERE ("reminders"."id" = 2)
         """
-      } results: {
+      }results: {
         """
         ┌───────────┬────────────┐
         │ "Haircut" │ "Personal" │

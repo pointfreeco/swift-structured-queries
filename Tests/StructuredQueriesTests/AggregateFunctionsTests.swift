@@ -247,13 +247,13 @@ extension SnapshotTests {
         """
       }
 
-      assertQuery(Tag.select { $0.name.groupConcat() }.order(by: \.name)) {
+      assertQuery(Tag.select { $0.title.groupConcat() }.order(by: \.title)) {
         """
-        SELECT group_concat("tags"."name")
+        SELECT group_concat("tags"."title")
         FROM "tags"
-        ORDER BY "tags"."name"
+        ORDER BY "tags"."title"
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────┐
         │ "car,kids,someday,optional" │
@@ -263,16 +263,16 @@ extension SnapshotTests {
       assertQuery(
         Tag
           .select {
-            #sql("iif(\($0.name.length() > 5), \($0.name), NULL)", as: String?.self).groupConcat()
+            #sql("iif(\($0.title.length() > 5), \($0.title), NULL)", as: String?.self).groupConcat()
           }
-          .order(by: \.name)
+          .order(by: \.title)
       ) {
         """
-        SELECT group_concat(iif((length("tags"."name") > 5), "tags"."name", NULL))
+        SELECT group_concat(iif((length("tags"."title") > 5), "tags"."title", NULL))
         FROM "tags"
-        ORDER BY "tags"."name"
+        ORDER BY "tags"."title"
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────┐
         │ "someday,optional" │
@@ -283,17 +283,17 @@ extension SnapshotTests {
         Tag
           .select {
             Case()
-              .when($0.name.length() > 5, then: $0.name)
+              .when($0.title.length() > 5, then: $0.title)
               .groupConcat()
           }
-          .order(by: \.name)
+          .order(by: \.title)
       ) {
         """
-        SELECT group_concat(CASE WHEN (length("tags"."name") > 5) THEN "tags"."name" END)
+        SELECT group_concat(CASE WHEN (length("tags"."title") > 5) THEN "tags"."title" END)
         FROM "tags"
-        ORDER BY "tags"."name"
+        ORDER BY "tags"."title"
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────┐
         │ "someday,optional" │
@@ -304,18 +304,18 @@ extension SnapshotTests {
       assertQuery(
         Tag
           .select {
-            Case($0.name.length())
-              .when(7, then: $0.name)
+            Case($0.title.length())
+              .when(7, then: $0.title)
               .groupConcat()
           }
-          .order(by: \.name)
+          .order(by: \.title)
       ) {
         """
-        SELECT group_concat(CASE length("tags"."name") WHEN 7 THEN "tags"."name" END)
+        SELECT group_concat(CASE length("tags"."title") WHEN 7 THEN "tags"."title" END)
         FROM "tags"
-        ORDER BY "tags"."name"
+        ORDER BY "tags"."title"
         """
-      } results: {
+      }results: {
         """
         ┌───────────┐
         │ "someday" │
@@ -349,12 +349,12 @@ extension SnapshotTests {
         └───┘
         """
       }
-      assertQuery(Tag.select { ($0.name + "!").groupConcat(", ") }) {
+      assertQuery(Tag.select { ($0.title + "!").groupConcat(", ") }) {
         """
-        SELECT group_concat(("tags"."name" || '!'), ', ')
+        SELECT group_concat(("tags"."title" || '!'), ', ')
         FROM "tags"
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────────────────┐
         │ "car!, kids!, someday!, optional!" │

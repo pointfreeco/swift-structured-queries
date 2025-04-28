@@ -10,15 +10,15 @@ extension SnapshotTests {
         Reminder
           .order { $0.dueDate.desc() }
           .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
-          .select { ($0.title, $1.name) }
+          .select { ($0.title, $1.title) }
       ) {
         """
-        SELECT "reminders"."title", "remindersLists"."name"
+        SELECT "reminders"."title", "remindersLists"."title"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         ORDER BY "reminders"."dueDate" DESC
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────────┬────────────┐
         │ "Take out trash"           │ "Family"   │
