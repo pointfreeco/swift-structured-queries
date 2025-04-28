@@ -32,7 +32,7 @@ public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresen
 extension JSONRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     do {
-      return try .text(String(decoding: JSONEncoder().encode(queryOutput), as: UTF8.self))
+      return try .text(String(decoding: jsonEncoder.encode(queryOutput), as: UTF8.self))
     } catch {
       return .invalid(error)
     }
@@ -51,4 +51,12 @@ private let jsonDecoder: JSONDecoder = {
     try $0.singleValueContainer().decode(String.self).iso8601
   }
   return decoder
+}()
+
+private let jsonEncoder: JSONEncoder = {
+  var encoder = JSONEncoder()
+  #if DEBUG
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+  #endif
+  return encoder
 }()
