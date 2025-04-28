@@ -86,7 +86,7 @@ extension Database {
     )
     try execute(
       """
-      CREATE UNIQUE INDEX "remindersLists_name" ON "remindersLists"("name")
+      CREATE UNIQUE INDEX "remindersLists_title" ON "remindersLists"("title")
       """
     )
     try execute(

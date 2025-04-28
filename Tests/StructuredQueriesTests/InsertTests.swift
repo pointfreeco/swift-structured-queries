@@ -212,7 +212,7 @@ extension SnapshotTests {
         ┌─────────────────────┐
         │ Tag(                │
         │   id: 5,            │
-        │   title: "personal" │
+        │   title: "business" │
         │ )                   │
         ├─────────────────────┤
         │ Tag(                │
@@ -222,7 +222,7 @@ extension SnapshotTests {
         ├─────────────────────┤
         │ Tag(                │
         │   id: 7,            │
-        │   title: "business" │
+        │   title: "personal" │
         │ )                   │
         └─────────────────────┘
         """
@@ -405,15 +405,15 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "remindersLists"
-        ("id", "color", "name")
+        ("id", "color", "title")
         VALUES
         (NULL, 4889071, 'Personal')
-        ON CONFLICT ("id") DO UPDATE SET "color" = "excluded"."color", "name" = "excluded"."name"
-        RETURNING "id", "color", "name"
+        ON CONFLICT ("id") DO UPDATE SET "color" = "excluded"."color", "title" = "excluded"."title"
+        RETURNING "id", "color", "title"
         """
-      } results: {
+      }results: {
         """
-        UNIQUE constraint failed: remindersLists.name
+        UNIQUE constraint failed: remindersLists.title
         """
       }
     }
