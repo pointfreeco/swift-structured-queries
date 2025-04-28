@@ -127,7 +127,7 @@ extension SnapshotTests {
         GROUP BY "reminders"."id"
         LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌──────────────────────────────────────────────┐
         │ ReminderRow(                                 │
@@ -208,7 +208,7 @@ extension SnapshotTests {
         GROUP BY "remindersLists"."id"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────────┐
         │ RemindersListRow(                              │
@@ -268,11 +268,232 @@ extension SnapshotTests {
         """
       }
     }
+
+    struct Foo {
+      @Selection struct Row {
+        let reminder: Reminder
+        @Column(as: JSONRepresentation<RemindersList>?.self)
+        let remindersList: RemindersList?
+      }
+      @Test func foo() {
+        assertQuery(
+          Reminder
+            .leftJoin(RemindersList.all) { $0.remindersListID.eq($1.id) }
+            .select {
+              Row.Columns(reminder: $0, remindersList: $1.jsonObject)
+            }
+        ) {
+          """
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", iif(("remindersLists"."id" IS NULL), NULL, json_object('id', json_quote("remindersLists"."id"), 'color', json_quote("remindersLists"."color"), 'title', json_quote("remindersLists"."title"))) AS "remindersList"
+          FROM "reminders"
+          LEFT JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+          """
+        } results: {
+          #"""
+          ┌──────────────────────────────────────────────┐
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 1,                                   │
+          │     assignedUserID: 1,                       │
+          │     dueDate: Date(2001-01-01T00:00:00.000Z), │
+          │     isCompleted: false,                      │
+          │     isFlagged: false,                        │
+          │     notes: "Milk, Eggs, Apples",             │
+          │     priority: nil,                           │
+          │     remindersListID: 1,                      │
+          │     title: "Groceries"                       │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 1,                                   │
+          │     color: 4889071,                          │
+          │     title: "Personal"                        │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 2,                                   │
+          │     assignedUserID: nil,                     │
+          │     dueDate: Date(2000-12-30T00:00:00.000Z), │
+          │     isCompleted: false,                      │
+          │     isFlagged: true,                         │
+          │     notes: "",                               │
+          │     priority: nil,                           │
+          │     remindersListID: 1,                      │
+          │     title: "Haircut"                         │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 1,                                   │
+          │     color: 4889071,                          │
+          │     title: "Personal"                        │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 3,                                   │
+          │     assignedUserID: nil,                     │
+          │     dueDate: Date(2001-01-01T00:00:00.000Z), │
+          │     isCompleted: false,                      │
+          │     isFlagged: false,                        │
+          │     notes: "Ask about diet",                 │
+          │     priority: .high,                         │
+          │     remindersListID: 1,                      │
+          │     title: "Doctor appointment"              │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 1,                                   │
+          │     color: 4889071,                          │
+          │     title: "Personal"                        │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 4,                                   │
+          │     assignedUserID: nil,                     │
+          │     dueDate: Date(2000-06-25T00:00:00.000Z), │
+          │     isCompleted: true,                       │
+          │     isFlagged: false,                        │
+          │     notes: "",                               │
+          │     priority: nil,                           │
+          │     remindersListID: 1,                      │
+          │     title: "Take a walk"                     │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 1,                                   │
+          │     color: 4889071,                          │
+          │     title: "Personal"                        │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 5,                                   │
+          │     assignedUserID: nil,                     │
+          │     dueDate: nil,                            │
+          │     isCompleted: false,                      │
+          │     isFlagged: false,                        │
+          │     notes: "",                               │
+          │     priority: nil,                           │
+          │     remindersListID: 1,                      │
+          │     title: "Buy concert tickets"             │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 1,                                   │
+          │     color: 4889071,                          │
+          │     title: "Personal"                        │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 6,                                   │
+          │     assignedUserID: nil,                     │
+          │     dueDate: Date(2001-01-03T00:00:00.000Z), │
+          │     isCompleted: false,                      │
+          │     isFlagged: true,                         │
+          │     notes: "",                               │
+          │     priority: .high,                         │
+          │     remindersListID: 2,                      │
+          │     title: "Pick up kids from school"        │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 2,                                   │
+          │     color: 15567157,                         │
+          │     title: "Family"                          │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 7,                                   │
+          │     assignedUserID: nil,                     │
+          │     dueDate: Date(2000-12-30T00:00:00.000Z), │
+          │     isCompleted: true,                       │
+          │     isFlagged: false,                        │
+          │     notes: "",                               │
+          │     priority: .low,                          │
+          │     remindersListID: 2,                      │
+          │     title: "Get laundry"                     │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 2,                                   │
+          │     color: 15567157,                         │
+          │     title: "Family"                          │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 8,                                   │
+          │     assignedUserID: nil,                     │
+          │     dueDate: Date(2001-01-05T00:00:00.000Z), │
+          │     isCompleted: false,                      │
+          │     isFlagged: false,                        │
+          │     notes: "",                               │
+          │     priority: .high,                         │
+          │     remindersListID: 2,                      │
+          │     title: "Take out trash"                  │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 2,                                   │
+          │     color: 15567157,                         │
+          │     title: "Family"                          │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 9,                                   │
+          │     assignedUserID: nil,                     │
+          │     dueDate: Date(2001-01-03T00:00:00.000Z), │
+          │     isCompleted: false,                      │
+          │     isFlagged: false,                        │
+          │     notes: """                               │
+          │       Status of tax return                   │
+          │       Expenses for next year                 │
+          │       Changing payroll company               │
+          │       """,                                   │
+          │     priority: nil,                           │
+          │     remindersListID: 3,                      │
+          │     title: "Call accountant"                 │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 3,                                   │
+          │     color: 11689427,                         │
+          │     title: "Business"                        │
+          │   )                                          │
+          │ )                                            │
+          ├──────────────────────────────────────────────┤
+          │ SnapshotTests.JSONFunctionsTests.Foo.Row(    │
+          │   reminder: Reminder(                        │
+          │     id: 10,                                  │
+          │     assignedUserID: nil,                     │
+          │     dueDate: Date(2000-12-30T00:00:00.000Z), │
+          │     isCompleted: true,                       │
+          │     isFlagged: false,                        │
+          │     notes: "",                               │
+          │     priority: .medium,                       │
+          │     remindersListID: 3,                      │
+          │     title: "Send weekly emails"              │
+          │   ),                                         │
+          │   remindersList: RemindersList(              │
+          │     id: 3,                                   │
+          │     color: 11689427,                         │
+          │     title: "Business"                        │
+          │   )                                          │
+          │ )                                            │
+          └──────────────────────────────────────────────┘
+          """#
+        }
+      }
+    }
   }
 }
 
 @Selection
-fileprivate struct ReminderRow {
+private struct ReminderRow {
   @Column(as: JSONRepresentation<User>?.self)
   let assignedUser: User?
   let reminder: Reminder
@@ -281,7 +502,7 @@ fileprivate struct ReminderRow {
 }
 
 @Selection
-fileprivate struct RemindersListRow {
+private struct RemindersListRow {
   let remindersList: RemindersList
   @Column(as: JSONRepresentation<[Reminder]>.self)
   let reminders: [Reminder]
