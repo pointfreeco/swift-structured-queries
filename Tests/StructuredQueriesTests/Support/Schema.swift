@@ -86,6 +86,11 @@ extension Database {
     )
     try execute(
       """
+      CREATE UNIQUE INDEX "remindersLists_name" ON "remindersLists"("name")
+      """
+    )
+    try execute(
+      """
       CREATE TABLE "reminders" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "assignedUserID" INTEGER,
