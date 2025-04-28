@@ -1,3 +1,6 @@
+import Foundation
+import StructuredQueriesSupport
+
 extension QueryExpression {
   /// Wraps this expression with the `json_array_length` function.
   ///
@@ -32,5 +35,32 @@ extension QueryExpression where QueryValue: Codable & Sendable {
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<JSONRepresentation<[QueryValue]>> {
     AggregateFunction("json_group_array", self, order: order, filter: filter)
+  }
+}
+
+extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
+  public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
+    func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
+      switch TableColumn.QueryValue.self {
+      case is Bool.Type:
+        return "\(quote: column.name, delimiter: .text), iif(\(column) = 0, json('false'), json('true'))"
+      case is Date.UnixTimeRepresentation.Type:
+        return "\(quote: column.name, delimiter: .text), datetime(\(column), 'unixepoch')"
+      case is Date.JulianDayRepresentation.Type:
+        return "\(quote: column.name, delimiter: .text), datetime(\(column), 'julianday')"
+      default:
+        return "\(quote: column.name, delimiter: .text), json_quote(\(column))"
+      }
+    }
+    let fragment: QueryFragment = Self.allColumns
+      .map { open($0) }
+      .joined(separator: ", ")
+    return SQLQueryExpression("iif(\(self.primaryKey.is(nil)), NULL, json_object(\(fragment)))")
+  }
+
+  public var jsonObjects: some QueryExpression<JSONRepresentation<[QueryValue]>> {
+    SQLQueryExpression(
+      "json_group_array(\(jsonObject)) filter(where \(self.primaryKey.isNot(nil)))"
+    )
   }
 }

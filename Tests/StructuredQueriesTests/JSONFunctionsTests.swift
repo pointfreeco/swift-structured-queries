@@ -3,7 +3,6 @@ import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
 import StructuredQueriesSQLite
-import StructuredQueriesSupport
 import Testing
 
 extension SnapshotTests {
@@ -286,32 +285,4 @@ fileprivate struct RemindersListRow {
   let remindersList: RemindersList
   @Column(as: JSONRepresentation<[Reminder]>.self)
   let reminders: [Reminder]
-}
-
-// TODO: Library code?
-extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
-  public var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
-    func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
-      switch TableColumn.QueryValue.self {
-      case is Bool.Type:
-        return "\(quote: column.name, delimiter: .text), iif(\(column) = 0, json('false'), json('true'))"
-      case is Date.UnixTimeRepresentation.Type:
-        return "\(quote: column.name, delimiter: .text), datetime(\(column), 'unixepoch')"
-      case is Date.JulianDayRepresentation.Type:
-        return "\(quote: column.name, delimiter: .text), datetime(\(column), 'julianday')"
-      default:
-        return "\(quote: column.name, delimiter: .text), json_quote(\(column))"
-      }
-    }
-    let fragment: QueryFragment = Self.allColumns
-      .map { open($0) }
-      .joined(separator: ", ")
-    return #sql("iif(\(self.primaryKey.is(nil)), NULL, json_object(\(fragment)))")
-  }
-
-  public var jsonObjects: some QueryExpression<JSONRepresentation<[QueryValue]>> {
-    #sql(
-      "json_group_array(\(jsonObject)) filter(where \(self.primaryKey.isNot(nil)))"
-    )
-  }
 }
