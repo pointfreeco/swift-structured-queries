@@ -97,6 +97,23 @@ public struct Cases<Base, QueryValue: _OptionalProtocol>: QueryExpression {
     return cases
   }
 
+  /// Adds a `WHEN` clause to a `CASE` expression.
+  ///
+  /// - Parameters:
+  ///   - condition: A condition to test.
+  ///   - expression: A return value should the condition pass.
+  /// - Returns: A `CASE` expression builder.
+  public func when(
+    _ condition: some QueryExpression<Base>,
+    then expression: some QueryExpression<QueryValue.Wrapped>
+  ) -> Cases {
+    var cases = self
+    cases.cases.append(
+      When(predicate: condition.queryFragment, expression: expression.queryFragment).queryFragment
+    )
+    return cases
+  }
+
   /// Terminates a `CASE` expression with an `ELSE` clause.
   ///
   /// - Parameter expression: A return value should every `WHEN` condition fail.

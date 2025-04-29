@@ -8,17 +8,17 @@ extension SnapshotTests {
     @Test func basics() {
       assertQuery(
         Reminder.select { ("reminder", $0.title) }
-          .union(RemindersList.select { ("list", $0.name) })
-          .union(Tag.select { ("tag", $0.name) })
+          .union(RemindersList.select { ("list", $0.title) })
+          .union(Tag.select { ("tag", $0.title) })
       ) {
         """
         SELECT 'reminder', "reminders"."title"
         FROM "reminders"
           UNION
-        SELECT 'list', "remindersLists"."name"
+        SELECT 'list', "remindersLists"."title"
         FROM "remindersLists"
           UNION
-        SELECT 'tag', "tags"."name"
+        SELECT 'tag', "tags"."title"
         FROM "tags"
         """
       } results: {
@@ -50,8 +50,8 @@ extension SnapshotTests {
       assertQuery(
         With {
           Reminder.select { Name.Columns(type: "reminder", value: $0.title) }
-            .union(RemindersList.select { Name.Columns(type: "list", value: $0.name) })
-            .union(Tag.select { Name.Columns(type: "tag", value: $0.name) })
+            .union(RemindersList.select { Name.Columns(type: "list", value: $0.title) })
+            .union(Tag.select { Name.Columns(type: "tag", value: $0.title) })
         } query: {
           Name.order { ($0.type.desc(), $0.value.asc()) }
         }
@@ -61,10 +61,10 @@ extension SnapshotTests {
           SELECT 'reminder' AS "type", "reminders"."title" AS "value"
           FROM "reminders"
             UNION
-          SELECT 'list' AS "type", "remindersLists"."name" AS "value"
+          SELECT 'list' AS "type", "remindersLists"."title" AS "value"
           FROM "remindersLists"
             UNION
-          SELECT 'tag' AS "type", "tags"."name" AS "value"
+          SELECT 'tag' AS "type", "tags"."title" AS "value"
           FROM "tags"
         )
         SELECT "names"."type", "names"."value"
