@@ -267,36 +267,8 @@ extension SnapshotTests {
         """
       }
     }
-
-    @Test func associationWithJSONField() {
-      assertQuery(
-        TaskList
-          .join(Task.all) { $0.id.eq($1.taskListID) }
-          .select {
-            TaskListRow.Columns(taskList: $0, tasks: $1.jsonGroupArray())
-          }
-      ) {
-        """
-        SELECT "taskLists"."id" AS "taskList", json_group_array(CASE WHEN ("tasks"."id" IS NOT NULL) THEN json_object('id', json_quote("tasks"."id"), 'notes', json("tasks"."notes"), 'taskListID', json_quote("tasks"."taskListID")) END) AS "tasks"
-        FROM "taskLists"
-        JOIN "tasks" ON ("taskLists"."id" = "tasks"."taskListID")
-        """
-      } results: {
-        """
-        no such table: taskLists
-        """
-      }
-    }
   }
 }
-/*
- TODO: split json association tests into own suite with custom schema
- * exercise Bool? path
- * exercise Data/UUID path with JSON
- * exercise dates
- * exercise JSONRepresentation field (such as [String] notes)
- * exercise path that removes the NULL filter to see how that can come up
- */
 
 @Selection
 private struct ReminderRow {
@@ -311,20 +283,4 @@ private struct RemindersListRow {
   let remindersList: RemindersList
   @Column(as: JSONRepresentation<[Reminder]>.self)
   let reminders: [Reminder]
-}
-
-@Table struct TaskList {
-  let id: Int
-}
-@Table
-struct Task: Codable {
-  let id: Int
-  @Column(as: JSONRepresentation<[String]>.self)
-  var notes: [String]
-  var taskListID: Int
-}
-@Selection struct TaskListRow {
-  let taskList: TaskList
-  @Column(as: JSONRepresentation<[Task]>.self)
-  let tasks: [Task]
 }

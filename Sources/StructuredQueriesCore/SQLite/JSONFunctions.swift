@@ -97,18 +97,34 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
 
   private var jsonObject: some QueryExpression<QueryValue> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
-      func isJSONRepresentation<T: Codable & Sendable>(_: T.Type) -> Bool {
-        TableColumn.QueryValue.self == JSONRepresentation<T>.self
+      typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
+
+      func isJSONRepresentation<T: Codable & Sendable>(_: T.Type, isOptional: Bool = false) -> Bool
+      {
+        func isOptionalJSONRepresentation<U: _OptionalProtocol>(_: U.Type) -> Bool {
+          if let codableType = U.Wrapped.self as? any (Codable & Sendable).Type {
+            return isJSONRepresentation(codableType, isOptional: true)
+          } else {
+            return false
+          }
+        }
+        if let optionalType = T.self as? any _OptionalProtocol.Type {
+          return isOptionalJSONRepresentation(optionalType)
+        } else if isOptional {
+          return TableColumn.QueryValue.self == JSONRepresentation<T>?.self
+        } else {
+          return Value.self == JSONRepresentation<T>.self
+        }
       }
 
-      if TableColumn.QueryValue.self == Bool.self {
+      if Value.self == Bool.self {
         return """
           \(quote: column.name, delimiter: .text), \
           json(CASE \(column) WHEN 0 THEN 'false' WHEN 1 THEN 'true' END)
           """
-      } else if TableColumn.QueryValue.self == Date.UnixTimeRepresentation.self {
+      } else if Value.self == Date.UnixTimeRepresentation.self {
         return "\(quote: column.name, delimiter: .text), datetime(\(column), 'unixepoch')"
-      } else if TableColumn.QueryValue.self == Date.JulianDayRepresentation.self {
+      } else if Value.self == Date.JulianDayRepresentation.self {
         return "\(quote: column.name, delimiter: .text), datetime(\(column), 'julianday')"
       } else if let codableType = TableColumn.QueryValue.QueryOutput.self
         as? any (Codable & Sendable).Type,
