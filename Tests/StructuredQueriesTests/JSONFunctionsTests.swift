@@ -118,7 +118,7 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(iif(("tags"."id" IS NULL), NULL, json_object('id', json_quote("tags"."id"), 'name', json_quote("tags"."name")))) AS "tags"
+        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(CASE WHEN ("tags"."id" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'name', json_quote("tags"."name")) END) AS "tags"
         FROM "reminders"
         LEFT JOIN "reminderTags" ON ("reminders"."id" = "reminderTags"."reminderID")
         LEFT JOIN "tags" ON ("reminderTags"."tagID" = "tags"."id")
@@ -126,7 +126,7 @@ extension SnapshotTests {
         GROUP BY "reminders"."id"
         LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌──────────────────────────────────────────────┐
         │ ReminderRow(                                 │
@@ -200,14 +200,14 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", json_group_array(iif(("reminders"."id" IS NULL), NULL, json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', iif("reminders"."isCompleted" = 0, json('false'), iif("reminders"."isCompleted" = 1, json('true'), NULL)), 'isFlagged', iif("reminders"."isFlagged" = 0, json('false'), iif("reminders"."isFlagged" = 1, json('true'), NULL)), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")))) AS "reminders"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", json_group_array(CASE WHEN ("reminders"."id" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")) END) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE NOT ("reminders"."isCompleted")
         GROUP BY "remindersLists"."id"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────────┐
         │ RemindersListRow(                              │
@@ -270,18 +270,18 @@ extension SnapshotTests {
 
     @Test func associationWithJSONField() {
       assertQuery(
-      TaskList
-        .join(Task.all) { $0.id.eq($1.taskListID) }
-        .select {
-          TaskListRow.Columns(taskList: $0, tasks: $1.jsonGroupArray())
-        }
+        TaskList
+          .join(Task.all) { $0.id.eq($1.taskListID) }
+          .select {
+            TaskListRow.Columns(taskList: $0, tasks: $1.jsonGroupArray())
+          }
       ) {
         """
-        SELECT "taskLists"."id" AS "taskList", json_group_array(iif(("tasks"."id" IS NULL), NULL, json_object('id', json_quote("tasks"."id"), 'notes', json("tasks"."notes"), 'taskListID', json_quote("tasks"."taskListID")))) AS "tasks"
+        SELECT "taskLists"."id" AS "taskList", json_group_array(CASE WHEN ("tasks"."id" IS NOT NULL) THEN json_object('id', json_quote("tasks"."id"), 'notes', json("tasks"."notes"), 'taskListID', json_quote("tasks"."taskListID")) END) AS "tasks"
         FROM "taskLists"
         JOIN "tasks" ON ("taskLists"."id" = "tasks"."taskListID")
         """
-      }results: {
+      } results: {
         """
         no such table: taskLists
         """

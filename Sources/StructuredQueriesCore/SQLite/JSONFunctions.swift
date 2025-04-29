@@ -39,7 +39,7 @@ extension QueryExpression where QueryValue: Codable & Sendable {
 }
 
 extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
-  /// A JSON array repsentation of the aggregation of a table's columns.
+  /// A JSON array representation of the aggregation of a table's columns.
   ///
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
   /// useful for loading many associated values in a single query. For example, to query for every
@@ -84,7 +84,10 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   ///   }
   /// }
   ///
-  /// > Note: If the primary key of the row is NULL, then the object is omitted from the array.
+  /// - Parameters:
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this table.
   public func jsonGroupArray(
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
@@ -119,6 +122,8 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
     let fragment: QueryFragment = Self.allColumns
       .map { open($0) }
       .joined(separator: ", ")
-    return SQLQueryExpression("iif(\(self.primaryKey.is(nil)), NULL, json_object(\(fragment)))")
+    return SQLQueryExpression(
+      "CASE WHEN \(primaryKey.isNot(nil)) THEN json_object(\(fragment)) END"
+    )
   }
 }
