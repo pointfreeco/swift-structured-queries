@@ -12,7 +12,7 @@ large and complex queries.
 * [Reusable column queries](#Reusable-column-queries)
 * [Default scopes](#Default-scopes)
 * [Custom selections](#Custom-selections)
-* [Pre-loading associations](#Pre-loading-associations)
+* [Pre-loading associations with JSON](#Pre-loading-associations-with-json)
 
 ### Reusable table queries
 
@@ -346,7 +346,7 @@ And a query that selects into this type can be defined like so:
   }
 }
 
-### Pre-loading associations
+### Pre-loading associations with JSON
 
 There are times you may want to load rows from a table along with the data from some associated
 table. For example, querying for all reminders lists along with an array of the reminders in each
@@ -395,7 +395,7 @@ this is doing work that SQL actually excels at. In fact, the condition inside th
 suspiciously like a join constraint, which should give us a hint that what we are doing is not
 quite right.
 
-A better way to do this is to use the `@Selection` macro described above
+Another way to do this is to use the `@Selection` macro described above
 (<doc:QueryCookbook#Custom-selections>), along with a ``JSONRepresentation`` of the collection
 of reminders you want to load for each list:
 
