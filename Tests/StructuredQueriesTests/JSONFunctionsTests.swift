@@ -118,7 +118,7 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(iif(("tags"."id" IS NULL), NULL, json_object('id', json_quote("tags"."id"), 'name', json_quote("tags"."name")))) FILTER (WHERE coalesce(NULL, ("tags"."id" IS NOT NULL))) AS "tags"
+        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(iif(("tags"."id" IS NULL), NULL, json_object('id', json_quote("tags"."id"), 'name', json_quote("tags"."name")))) AS "tags"
         FROM "reminders"
         LEFT JOIN "reminderTags" ON ("reminders"."id" = "reminderTags"."reminderID")
         LEFT JOIN "tags" ON ("reminderTags"."tagID" = "tags"."id")
@@ -126,7 +126,7 @@ extension SnapshotTests {
         GROUP BY "reminders"."id"
         LIMIT 2
         """
-      } results: {
+      }results: {
         """
         ┌──────────────────────────────────────────────┐
         │ ReminderRow(                                 │
@@ -200,14 +200,14 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", json_group_array(iif(("reminders"."id" IS NULL), NULL, json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', iif("reminders"."isCompleted" = 0, json('false'), json('true')), 'isFlagged', iif("reminders"."isFlagged" = 0, json('false'), json('true')), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")))) FILTER (WHERE coalesce(NULL, ("reminders"."id" IS NOT NULL))) AS "reminders"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", json_group_array(iif(("reminders"."id" IS NULL), NULL, json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', iif("reminders"."isCompleted" = 0, json('false'), iif("reminders"."isCompleted" = 1, json('true'), NULL)), 'isFlagged', iif("reminders"."isFlagged" = 0, json('false'), iif("reminders"."isFlagged" = 1, json('true'), NULL)), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")))) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE NOT ("reminders"."isCompleted")
         GROUP BY "remindersLists"."id"
         LIMIT 1
         """
-      } results: {
+      }results: {
         """
         ┌────────────────────────────────────────────────┐
         │ RemindersListRow(                              │
@@ -267,8 +267,36 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func associationWithJSONField() {
+      assertQuery(
+      TaskList
+        .join(Task.all) { $0.id.eq($1.taskListID) }
+        .select {
+          TaskListRow.Columns(taskList: $0, tasks: $1.jsonGroupArray())
+        }
+      ) {
+        """
+        SELECT "taskLists"."id" AS "taskList", json_group_array(iif(("tasks"."id" IS NULL), NULL, json_object('id', json_quote("tasks"."id"), 'notes', json("tasks"."notes"), 'taskListID', json_quote("tasks"."taskListID")))) AS "tasks"
+        FROM "taskLists"
+        JOIN "tasks" ON ("taskLists"."id" = "tasks"."taskListID")
+        """
+      }results: {
+        """
+        no such table: taskLists
+        """
+      }
+    }
   }
 }
+/*
+ TODO: split json association tests into own suite with custom schema
+ * exercise Bool? path
+ * exercise Data/UUID path with JSON
+ * exercise dates
+ * exercise JSONRepresentation field (such as [String] notes)
+ * exercise path that removes the NULL filter to see how that can come up
+ */
 
 @Selection
 private struct ReminderRow {
@@ -283,4 +311,20 @@ private struct RemindersListRow {
   let remindersList: RemindersList
   @Column(as: JSONRepresentation<[Reminder]>.self)
   let reminders: [Reminder]
+}
+
+@Table struct TaskList {
+  let id: Int
+}
+@Table
+struct Task: Codable {
+  let id: Int
+  @Column(as: JSONRepresentation<[String]>.self)
+  var notes: [String]
+  var taskListID: Int
+}
+@Selection struct TaskListRow {
+  let taskList: TaskList
+  @Column(as: JSONRepresentation<[Task]>.self)
+  let tasks: [Task]
 }

@@ -52,7 +52,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   ///     @Selection struct Row {
   ///       let remindersList: RemindersList
   ///       @Column(as: JSONRepresentation<[Reminder]>.self)
-  ///       let reminders: Reminder
+  ///       let reminders: [Reminder]
   ///     }
   ///     RemindersList
   ///       .join(Reminder.all) { $0.id.eq($1.remindersListID) }
@@ -89,16 +89,30 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<JSONRepresentation<[QueryValue]>> {
-    let filter = filter.map { primaryKey.isNot(nil) && $0 } ?? primaryKey.isNot(nil)
-    return jsonObject.jsonGroupArray(order: order, filter: filter)
+    jsonObject.jsonGroupArray(order: order, filter: filter)
   }
 
   private var jsonObject: some QueryExpression<QueryValue> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
+
+      func openCodable<C: Codable & Sendable>(_ codableType: C.Type) -> QueryFragment? {
+        if TableColumn.QueryValue.self == JSONRepresentation<C>.self {
+          return "\(quote: column.name, delimiter: .text), json(\(column))"
+        } else {
+          return nil
+        }
+      }
+      if
+        let codableType = TableColumn.QueryValue.QueryOutput.self as? any (Codable & Sendable).Type,
+        let jsonQueryFragment = openCodable(codableType)
+      {
+        return jsonQueryFragment
+      }
+
       switch TableColumn.QueryValue.self {
       case is Bool.Type:
         return
-          "\(quote: column.name, delimiter: .text), iif(\(column) = 0, json('false'), json('true'))"
+          "\(quote: column.name, delimiter: .text), iif(\(column) = 0, json('false'), iif(\(column) = 1, json('true'), NULL))"
       case is Date.UnixTimeRepresentation.Type:
         return "\(quote: column.name, delimiter: .text), datetime(\(column), 'unixepoch')"
       case is Date.JulianDayRepresentation.Type:
