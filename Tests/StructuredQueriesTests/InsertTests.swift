@@ -194,37 +194,37 @@ extension SnapshotTests {
     @Test func select() {
       assertQuery(
         Tag.insert {
-          $0.title
+          $0.name
         } select: {
-          RemindersList.select { $0.title.lower() }
+          RemindersList.select { $0.name.lower() }
         }
         .returning(\.self)
       ) {
         """
         INSERT INTO "tags"
-        ("title")
-        SELECT lower("remindersLists"."title")
+        ("name")
+        SELECT lower("remindersLists"."name")
         FROM "remindersLists"
-        RETURNING "id", "title"
+        RETURNING "id", "name"
         """
-      }results: {
+      } results: {
         """
-        ┌─────────────────────┐
-        │ Tag(                │
-        │   id: 5,            │
-        │   title: "business" │
-        │ )                   │
-        ├─────────────────────┤
-        │ Tag(                │
-        │   id: 6,            │
-        │   title: "family"   │
-        │ )                   │
-        ├─────────────────────┤
-        │ Tag(                │
-        │   id: 7,            │
-        │   title: "personal" │
-        │ )                   │
-        └─────────────────────┘
+        ┌────────────────────┐
+        │ Tag(               │
+        │   id: 5,           │
+        │   name: "business" │
+        │ )                  │
+        ├────────────────────┤
+        │ Tag(               │
+        │   id: 6,           │
+        │   name: "family"   │
+        │ )                  │
+        ├────────────────────┤
+        │ Tag(               │
+        │   id: 7,           │
+        │   name: "personal" │
+        │ )                  │
+        └────────────────────┘
         """
       }
     }
@@ -400,20 +400,20 @@ extension SnapshotTests {
 
     @Test func upsertWithoutID_OtherConflict() {
       assertQuery(
-        RemindersList.upsert(RemindersList.Draft(title: "Personal"))
+        RemindersList.upsert(RemindersList.Draft(name: "Personal"))
           .returning(\.self)
       ) {
         """
         INSERT INTO "remindersLists"
-        ("id", "color", "title")
+        ("id", "color", "name")
         VALUES
         (NULL, 4889071, 'Personal')
-        ON CONFLICT ("id") DO UPDATE SET "color" = "excluded"."color", "title" = "excluded"."title"
-        RETURNING "id", "color", "title"
+        ON CONFLICT ("id") DO UPDATE SET "color" = "excluded"."color", "name" = "excluded"."name"
+        RETURNING "id", "color", "name"
         """
-      }results: {
+      } results: {
         """
-        UNIQUE constraint failed: remindersLists.title
+        UNIQUE constraint failed: remindersLists.name
         """
       }
     }
@@ -432,11 +432,16 @@ extension SnapshotTests {
         """
         INSERT INTO "tags" ("name")
         VALUES ('office')
-        RETURNING "tags"."id", "tags"."title"
+        RETURNING "tags"."id", "tags"."name"
         """
-      }results: {
+      } results: {
         """
-        table tags has no column named name
+        ┌──────────────────┐
+        │ Tag(             │
+        │   id: 5,         │
+        │   name: "office" │
+        │ )                │
+        └──────────────────┘
         """
       }
     }
@@ -445,7 +450,7 @@ extension SnapshotTests {
       enum R: AliasName {}
       assertQuery(
         RemindersList.as(R.self).insert {
-          $0.title
+          $0.name
         } values: {
           "cruise"
         }
@@ -453,18 +458,18 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "remindersLists" AS "rs"
-        ("title")
+        ("name")
         VALUES
         ('cruise')
-        RETURNING "id", "color", "title"
+        RETURNING "id", "color", "name"
         """
-      }results: {
+      } results: {
         """
         ┌───────────────────┐
         │ RemindersList(    │
         │   id: 4,          │
         │   color: 4889071, │
-        │   title: "cruise" │
+        │   name: "cruise"  │
         │ )                 │
         └───────────────────┘
         """

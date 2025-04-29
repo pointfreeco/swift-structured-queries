@@ -11,7 +11,7 @@ struct RemindersList: Codable, Equatable, Identifiable {
 
   let id: Int
   var color = 0x4a99ef
-  var title = ""
+  var name = ""
 }
 
 @Table
@@ -57,10 +57,10 @@ extension Reminder.TableColumns {
 @Table
 struct Tag: Codable, Equatable, Identifiable {
   let id: Int
-  var title = ""
+  var name = ""
 }
 
-@Table("remindersTags")
+@Table
 struct ReminderTag: Equatable {
   let reminderID: Int
   let tagID: Int
@@ -80,13 +80,13 @@ extension Database {
       CREATE TABLE "remindersLists" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "color" INTEGER NOT NULL DEFAULT 4889071,
-        "title" TEXT NOT NULL DEFAULT ''
+        "name" TEXT NOT NULL DEFAULT ''
       )
       """
     )
     try execute(
       """
-      CREATE UNIQUE INDEX "remindersLists_title" ON "remindersLists"("title")
+      CREATE UNIQUE INDEX "remindersLists_name" ON "remindersLists"("name")
       """
     )
     try execute(
@@ -121,13 +121,13 @@ extension Database {
       """
       CREATE TABLE "tags" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-        "title" TEXT NOT NULL UNIQUE COLLATE NOCASE
+        "name" TEXT NOT NULL UNIQUE COLLATE NOCASE
       )
       """
     )
     try execute(
       """
-      CREATE TABLE "remindersTags" (
+      CREATE TABLE "reminderTags" (
         "reminderID" INTEGER NOT NULL REFERENCES "reminders"("id") ON DELETE CASCADE,
         "tagID" INTEGER NOT NULL REFERENCES "tags"("id") ON DELETE CASCADE
       )
@@ -135,12 +135,12 @@ extension Database {
     )
     try execute(
       """
-      CREATE INDEX "index_remindersTags_on_reminderID" ON "remindersTags"("reminderID")
+      CREATE INDEX "index_remindersTags_on_reminderID" ON "reminderTags"("reminderID")
       """
     )
     try execute(
       """
-      CREATE INDEX "index_remindersTags_on_tagID" ON "remindersTags"("tagID")
+      CREATE INDEX "index_remindersTags_on_tagID" ON "reminderTags"("tagID")
       """
     )
   }
@@ -167,7 +167,7 @@ extension Database {
   func createDebugRemindersLists() throws {
     try execute(
       RemindersList.insert {
-        ($0.color, $0.title)
+        ($0.color, $0.name)
       } values: {
         (0x4a99ef, "Personal")
         (0xed8935, "Family")
@@ -256,7 +256,7 @@ extension Database {
 
   func createDebugTags() throws {
     try execute(
-      Tag.insert(\.title) {
+      Tag.insert(\.name) {
         "car"
         "kids"
         "someday"
