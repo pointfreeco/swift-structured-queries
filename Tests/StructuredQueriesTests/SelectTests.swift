@@ -1027,7 +1027,16 @@ extension SnapshotTests {
         """
         SELECT "vecExamples"."rowid", "vecExamples"."distance"
         FROM "vecExamples"
-        WHERE sample_embedding match '[0.89,0.544,0.825,0.961,0.358,0.0196,0.521,0.175]'
+        WHERE sample_embedding match '[
+          0.89,
+          0.544,
+          0.825,
+          0.961,
+          0.358,
+          0.0196,
+          0.521,
+          0.175
+        ]'
         ORDER BY "vecExamples"."distance"
         LIMIT 2
         """
