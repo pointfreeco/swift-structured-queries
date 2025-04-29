@@ -392,7 +392,7 @@ let rows = remindersLists.map { remindersList in
 
 This can work, but it's incredibly inefficient, a lot of boilerplate, and prone to mistakes. And
 this is doing work that SQL actually excels at. In fact, the condition inside the `filter` looks
-suspiciously like a join constraint, which should give us a hint that what we are doing is not 
+suspiciously like a join constraint, which should give us a hint that what we are doing is not
 quite right.
 
 A better way to do this is to use the `@Selection` macro described above
@@ -411,23 +411,23 @@ struct Row {
 > Note: `Reminder` must conform to `Codable` to be able to use ``JSONRepresentation``.
 
 This allows the query to serialize the associated rows into JSON, which are then deserialized into
-a `Row` type. To construct such a query you can use the 
-``PrimaryKeyedTableDefinition/jsonGroupArray`` property that is defined on the columns of 
- [primary keyed tables](<doc:PrimaryKeyedTables>):
+a `Row` type. To construct such a query you can use the
+``PrimaryKeyedTableDefinition/jsonGroupArray(order:filter:)`` property that is defined on the
+columns of [primary keyed tables](<doc:PrimaryKeyedTables>):
 
 ```swift
 RemindersList
   .join(Reminder.all) { $0.id.eq($1.remindersListID) }
-  .select { 
+  .select {
     Row.Columns(
       remindersList: $0,
-      reminders: $1.jsonGroupArray
+      reminders: $1.jsonGroupArray()
     )
   }
 ```
 
-This allows you to fetch all of the data in a single SQLite query and decode the data into a 
-collection of `Row` values. There is an extra cost associated with decoding the JSON object, 
+This allows you to fetch all of the data in a single SQLite query and decode the data into a
+collection of `Row` values. There is an extra cost associated with decoding the JSON object,
 but that cost may be smaller than executing multiple SQLite requests and transforming the data
 into `Row` manually, not to mention the additional code you need to write and maintain to process
 the data.

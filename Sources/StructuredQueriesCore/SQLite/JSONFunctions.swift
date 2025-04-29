@@ -59,7 +59,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   ///       .select {
   ///         Row.Columns(
   ///           remindersList: $0,
-  ///           reminders: $1.jsonGroupArray
+  ///           reminders: $1.jsonGroupArray()
   ///         )
   ///       }
   ///     ```
@@ -85,13 +85,15 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   /// }
   ///
   /// > Note: If the primary key of the row is NULL, then the object is omitted from the array.
-  public var jsonGroupArray: some QueryExpression<JSONRepresentation<[QueryValue]>> {
-    SQLQueryExpression(
-      "json_group_array(\(jsonObject)) filter(where \(self.primaryKey.isNot(nil)))"
-    )
+  public func jsonGroupArray(
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<JSONRepresentation<[QueryValue]>> {
+    let filter = filter.map { primaryKey.isNot(nil) && $0 } ?? primaryKey.isNot(nil)
+    return jsonObject.jsonGroupArray(order: order, filter: filter)
   }
 
-  private var jsonObject: some QueryExpression<JSONRepresentation<QueryValue>> {
+  private var jsonObject: some QueryExpression<QueryValue> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       switch TableColumn.QueryValue.self {
       case is Bool.Type:

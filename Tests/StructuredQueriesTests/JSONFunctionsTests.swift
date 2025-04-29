@@ -112,13 +112,13 @@ extension SnapshotTests {
             ReminderRow.Columns(
               assignedUser: user,
               reminder: reminder,
-              tags: #sql("\(tag.jsonGroupArray)")
+              tags: #sql("\(tag.jsonGroupArray())")
             )
           }
           .limit(2)
       ) {
         """
-        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(iif(("tags"."id" IS NULL), NULL, json_object('id', json_quote("tags"."id"), 'name', json_quote("tags"."name")))) filter(where ("tags"."id" IS NOT NULL)) AS "tags"
+        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(iif(("tags"."id" IS NULL), NULL, json_object('id', json_quote("tags"."id"), 'name', json_quote("tags"."name")))) FILTER (WHERE coalesce(NULL, ("tags"."id" IS NOT NULL))) AS "tags"
         FROM "reminders"
         LEFT JOIN "reminderTags" ON ("reminders"."id" = "reminderTags"."reminderID")
         LEFT JOIN "tags" ON ("reminderTags"."tagID" = "tags"."id")
@@ -126,7 +126,7 @@ extension SnapshotTests {
         GROUP BY "reminders"."id"
         LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌──────────────────────────────────────────────┐
         │ ReminderRow(                                 │
@@ -194,20 +194,20 @@ extension SnapshotTests {
           .select { remindersList, reminder in
             RemindersListRow.Columns(
               remindersList: remindersList,
-              reminders: #sql("\(reminder.jsonGroupArray)")
+              reminders: #sql("\(reminder.jsonGroupArray())")
             )
           }
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", json_group_array(iif(("reminders"."id" IS NULL), NULL, json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', iif("reminders"."isCompleted" = 0, json('false'), json('true')), 'isFlagged', iif("reminders"."isFlagged" = 0, json('false'), json('true')), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")))) filter(where ("reminders"."id" IS NOT NULL)) AS "reminders"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", json_group_array(iif(("reminders"."id" IS NULL), NULL, json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', iif("reminders"."isCompleted" = 0, json('false'), json('true')), 'isFlagged', iif("reminders"."isFlagged" = 0, json('false'), json('true')), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")))) FILTER (WHERE coalesce(NULL, ("reminders"."id" IS NOT NULL))) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE NOT ("reminders"."isCompleted")
         GROUP BY "remindersLists"."id"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌────────────────────────────────────────────────┐
         │ RemindersListRow(                              │
