@@ -118,10 +118,10 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(CASE WHEN ("tags"."id" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'name', json_quote("tags"."name")) END) AS "tags"
+        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(CASE WHEN ("tags"."id" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) AS "tags"
         FROM "reminders"
-        LEFT JOIN "reminderTags" ON ("reminders"."id" = "reminderTags"."reminderID")
-        LEFT JOIN "tags" ON ("reminderTags"."tagID" = "tags"."id")
+        LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
+        LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
         LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
         GROUP BY "reminders"."id"
         LIMIT 2
@@ -148,11 +148,11 @@ extension SnapshotTests {
         │   tags: [                                    │
         │     [0]: Tag(                                │
         │       id: 3,                                 │
-        │       name: "someday"                        │
+        │       title: "someday"                       │
         │     ),                                       │
         │     [1]: Tag(                                │
         │       id: 4,                                 │
-        │       name: "optional"                       │
+        │       title: "optional"                      │
         │     )                                        │
         │   ]                                          │
         │ )                                            │
@@ -173,11 +173,11 @@ extension SnapshotTests {
         │   tags: [                                    │
         │     [0]: Tag(                                │
         │       id: 3,                                 │
-        │       name: "someday"                        │
+        │       title: "someday"                       │
         │     ),                                       │
         │     [1]: Tag(                                │
         │       id: 4,                                 │
-        │       name: "optional"                       │
+        │       title: "optional"                      │
         │     )                                        │
         │   ]                                          │
         │ )                                            │
@@ -200,7 +200,7 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."name" AS "remindersList", json_group_array(CASE WHEN ("reminders"."id" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")) END) AS "reminders"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", json_group_array(CASE WHEN ("reminders"."id" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")) END) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE NOT ("reminders"."isCompleted")
@@ -214,7 +214,7 @@ extension SnapshotTests {
         │   remindersList: RemindersList(                │
         │     id: 1,                                     │
         │     color: 4889071,                            │
-        │     name: "Personal"                           │
+        │     title: "Personal"                          │
         │   ),                                           │
         │   reminders: [                                 │
         │     [0]: Reminder(                             │
