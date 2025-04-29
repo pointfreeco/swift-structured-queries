@@ -94,30 +94,25 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
 
   private var jsonObject: some QueryExpression<QueryValue> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
-
-      func openCodable<C: Codable & Sendable>(_ codableType: C.Type) -> QueryFragment? {
-        if TableColumn.QueryValue.self == JSONRepresentation<C>.self {
-          return "\(quote: column.name, delimiter: .text), json(\(column))"
-        } else {
-          return nil
-        }
-      }
-      if
-        let codableType = TableColumn.QueryValue.QueryOutput.self as? any (Codable & Sendable).Type,
-        let jsonQueryFragment = openCodable(codableType)
-      {
-        return jsonQueryFragment
+      func isJSONRepresentation<T: Codable & Sendable>(_: T.Type) -> Bool {
+        TableColumn.QueryValue.self == JSONRepresentation<T>.self
       }
 
-      switch TableColumn.QueryValue.self {
-      case is Bool.Type:
-        return
-          "\(quote: column.name, delimiter: .text), iif(\(column) = 0, json('false'), iif(\(column) = 1, json('true'), NULL))"
-      case is Date.UnixTimeRepresentation.Type:
+      if TableColumn.QueryValue.self == Bool.self {
+        return """
+          \(quote: column.name, delimiter: .text), \
+          json(CASE \(column) WHEN 0 THEN 'false' WHEN 1 THEN 'true' END)
+          """
+      } else if TableColumn.QueryValue.self == Date.UnixTimeRepresentation.self {
         return "\(quote: column.name, delimiter: .text), datetime(\(column), 'unixepoch')"
-      case is Date.JulianDayRepresentation.Type:
+      } else if TableColumn.QueryValue.self == Date.JulianDayRepresentation.self {
         return "\(quote: column.name, delimiter: .text), datetime(\(column), 'julianday')"
-      default:
+      } else if let codableType = TableColumn.QueryValue.QueryOutput.self
+        as? any (Codable & Sendable).Type,
+        isJSONRepresentation(codableType)
+      {
+        return "\(quote: column.name, delimiter: .text), json(\(column))"
+      } else {
         return "\(quote: column.name, delimiter: .text), json_quote(\(column))"
       }
     }
