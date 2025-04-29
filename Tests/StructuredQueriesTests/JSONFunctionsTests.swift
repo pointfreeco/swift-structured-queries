@@ -274,13 +274,13 @@ extension SnapshotTests {
 private struct ReminderRow {
   let assignedUser: User?
   let reminder: Reminder
-  @Column(as: JSONRepresentation<[Tag]>.self)
+  @Column(as: [Tag].JSONRepresentation.self)
   let tags: [Tag]
 }
 
 @Selection
 private struct RemindersListRow {
   let remindersList: RemindersList
-  @Column(as: JSONRepresentation<[Reminder]>.self)
+  @Column(as: [Reminder].JSONRepresentation.self)
   let reminders: [Reminder]
 }

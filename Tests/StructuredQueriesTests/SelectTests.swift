@@ -1018,7 +1018,7 @@ extension SnapshotTests {
         of:
           VecExample
           .where { _ in
-            #sql("sample_embedding match \(#bind(xs, as: JSONRepresentation.self))")
+            #sql("sample_embedding match \(#bind(xs, as: [Double].JSONRepresentation.self))")
           }
           .order(by: \.distance)
           .limit(2),

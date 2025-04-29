@@ -11,7 +11,7 @@ extension QueryExpression {
   ///
   /// - Returns: An integer expression of the `json_array_length` function wrapping this expression.
   public func jsonArrayLength<Element: Codable & Sendable>() -> some QueryExpression<Int>
-  where QueryValue == JSONRepresentation<[Element]> {
+  where QueryValue == [Element].JSONRepresentation {
     QueryFunction("json_array_length", self)
   }
 }
@@ -33,7 +33,7 @@ extension QueryExpression where QueryValue: Codable & Sendable {
   public func jsonGroupArray(
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<JSONRepresentation<[QueryValue]>> {
+  ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
     AggregateFunction("json_group_array", self, order: order, filter: filter)
   }
 }
@@ -91,7 +91,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   public func jsonGroupArray(
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<JSONRepresentation<[QueryValue]>> {
+  ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
     jsonObject.jsonGroupArray(order: order, filter: filter)
   }
 
@@ -111,9 +111,9 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
         if let optionalType = T.self as? any _OptionalProtocol.Type {
           return isOptionalJSONRepresentation(optionalType)
         } else if isOptional {
-          return TableColumn.QueryValue.self == JSONRepresentation<T>?.self
+          return TableColumn.QueryValue.self == T.JSONRepresentation?.self
         } else {
-          return Value.self == JSONRepresentation<T>.self
+          return Value.self == T.JSONRepresentation.self
         }
       }
 

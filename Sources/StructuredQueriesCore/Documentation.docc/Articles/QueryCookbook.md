@@ -396,19 +396,20 @@ suspiciously like a join constraint, which should give us a hint that what we ar
 quite right.
 
 Another way to do this is to use the `@Selection` macro described above
-(<doc:QueryCookbook#Custom-selections>), along with a ``JSONRepresentation`` of the collection
-of reminders you want to load for each list:
+(<doc:QueryCookbook#Custom-selections>), along with a ``Swift/Decodable/JSONRepresentation`` of the
+collection of reminders you want to load for each list:
 
 ```struct
 @Selection
 struct Row {
   let remindersList: RemindersList
-  @Column(as: JSONRepresentation<[Reminder]>.self)
+  @Column(as: [Reminder].JSONRepresentation.self)
   let reminders: [Reminder]
 }
 ```
 
-> Note: `Reminder` must conform to `Codable` to be able to use ``JSONRepresentation``.
+> Note: `Reminder` must conform to `Codable` to be able to use
+> ``Swift/Decodable/JSONRepresentation``.
 
 This allows the query to serialize the associated rows into JSON, which are then deserialized into
 a `Row` type. To construct such a query you can use the

@@ -295,14 +295,15 @@ example, suppose the `Reminder` table had an array of notes:
 
 This does not work because the `@Table` macro does not know how to encode and decode an array
 of strings into a value that SQLite understands. If you annotate this field with
-``JSONRepresentation``, then the library can encode the array of strings to a JSON string when
-storing data in the table, and decode the JSON array into a Swift array when decoding a row:
+``Swift/Decodable/JSONRepresentation``, then the library can encode the array of strings to a JSON
+string when storing data in the table, and decode the JSON array into a Swift array when decoding a
+row:
 
 ```swift
 @Table struct Reminder {
   let id: Int
   var title = ""
-  @Column(as: JSONRepresentation<[String]>.self)
+  @Column(as: [String].JSONRepresentation.self)
   var notes: [String]
 }
 ```

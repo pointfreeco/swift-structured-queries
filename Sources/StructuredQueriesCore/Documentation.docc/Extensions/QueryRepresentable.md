@@ -16,4 +16,4 @@
 - ``Foundation/UUID/BytesRepresentation``
 - ``Foundation/UUID/LowercasedRepresentation``
 - ``Foundation/UUID/UppercasedRepresentation``
-- ``JSONRepresentation``
+- ``Swift/Decodable/JSONRepresentation``

@@ -22,6 +22,10 @@ extension UUID {
   }
 }
 
+extension UUID? {
+  public typealias BytesRepresentation = UUID.BytesRepresentation?
+}
+
 extension UUID.BytesRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .blob(withUnsafeBytes(of: queryOutput.uuid, [UInt8].init))

@@ -22,6 +22,10 @@ extension UUID {
   }
 }
 
+extension UUID? {
+  public typealias LowercasedRepresentation = UUID.LowercasedRepresentation?
+}
+
 extension UUID.LowercasedRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .text(queryOutput.uuidString.lowercased())

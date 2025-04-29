@@ -22,6 +22,10 @@ extension Date {
   }
 }
 
+extension Date? {
+  public typealias UnixTimeRepresentation = Date.UnixTimeRepresentation?
+}
+
 extension Date.UnixTimeRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .int(Int64(queryOutput.timeIntervalSince1970))

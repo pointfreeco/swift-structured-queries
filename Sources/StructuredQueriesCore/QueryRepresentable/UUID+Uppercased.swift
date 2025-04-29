@@ -22,6 +22,10 @@ extension UUID {
   }
 }
 
+extension UUID? {
+  public typealias UppercasedRepresentation = UUID.UppercasedRepresentation?
+}
+
 extension UUID.UppercasedRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .text(queryOutput.uuidString)

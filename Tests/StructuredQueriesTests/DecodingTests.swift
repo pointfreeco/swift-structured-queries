@@ -154,7 +154,7 @@ extension SnapshotTests {
             """
             '{"id":1,"name":"Blob"}'
             """,
-            as: JSONRepresentation<User>.self
+            as: User.JSONRepresentation.self
           )
         }
       ) {
@@ -189,7 +189,7 @@ extension SnapshotTests {
             """
             '{"user_id":1,"user_name":"Blob"}'
             """,
-            as: JSONRepresentation<User>.self
+            as: User.JSONRepresentation.self
           )
         }
       ) {

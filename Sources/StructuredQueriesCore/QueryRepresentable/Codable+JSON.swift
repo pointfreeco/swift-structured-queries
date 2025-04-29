@@ -1,18 +1,6 @@
 import Foundation
 
-/// A query expression representing codable JSON.
-///
-/// ```swift
-/// @Table
-/// struct Item {
-///   @Column(as: JSONRepresentation<[String]>.self)
-///   var notes: [String] = []
-/// }
-///
-/// Item.insert { $0.notes } values: { ["First post", "An update"] }
-/// // INSERT INTO "items" ("notes") VALUES ('["First post","An update"]')
-/// ```
-public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresentable {
+public struct _CodableJSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresentable {
   public var queryOutput: QueryOutput
 
   public init(queryOutput: QueryOutput) {
@@ -29,7 +17,28 @@ public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresen
   }
 }
 
-extension JSONRepresentation: QueryBindable {
+extension Decodable where Self: Encodable {
+  /// A query expression representing codable JSON.
+  ///
+  /// ```swift
+  /// @Table
+  /// struct Item {
+  ///   @Column(as: [String].JSONRepresentation.self)
+  ///   var notes: [String] = []
+  /// }
+  ///
+  /// Item.insert { $0.notes } values: { ["First post", "An update"] }
+  /// // INSERT INTO "items" ("notes") VALUES ('["First post","An update"]')
+  /// ```
+  public typealias JSONRepresentation = _CodableJSONRepresentation<Self>
+}
+
+extension Optional where Wrapped: Codable {
+  @_documentation(visibility: private)
+  public typealias JSONRepresentation = _CodableJSONRepresentation<Wrapped>?
+}
+
+extension _CodableJSONRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     do {
       return try .text(String(decoding: jsonEncoder.encode(queryOutput), as: UTF8.self))
@@ -39,7 +48,7 @@ extension JSONRepresentation: QueryBindable {
   }
 }
 
-extension JSONRepresentation: SQLiteType {
+extension _CodableJSONRepresentation: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity {
     String.typeAffinity
   }
