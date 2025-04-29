@@ -371,7 +371,7 @@ Then you execute another query to fetch all of the reminders
 
 ```swift
 let reminders = try Reminder
-  .where { $0.id.in(remindersLists.map(\.id) }
+  .where { $0.id.in(remindersLists.map(\.id)) }
   .execute(db))
 ```
 
