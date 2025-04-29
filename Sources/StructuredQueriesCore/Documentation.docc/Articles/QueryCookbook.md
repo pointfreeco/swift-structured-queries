@@ -367,7 +367,8 @@ of the reminders lists:
 let remindersLists = try RemindersLists.all.execute(db)
 ```
 
-Then you execute another query to fetch all of the reminders 
+Then you execute another query to fetch all of the reminders associated with the lists just
+fetched:
 
 ```swift
 let reminders = try Reminder
