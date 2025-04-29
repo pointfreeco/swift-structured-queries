@@ -59,7 +59,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   ///       .select {
   ///         Row.Columns(
   ///           remindersList: $0,
-  ///           reminders: $1.jsonObjects
+  ///           reminders: $1.jsonGroupArray
   ///         )
   ///       }
   ///     ```
@@ -85,7 +85,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   /// }
   ///
   /// > Note: If the primary key of the row is NULL, then the object is omitted from the array.
-  public var jsonObjects: some QueryExpression<JSONRepresentation<[QueryValue]>> {
+  public var jsonGroupArray: some QueryExpression<JSONRepresentation<[QueryValue]>> {
     SQLQueryExpression(
       "json_group_array(\(jsonObject)) filter(where \(self.primaryKey.isNot(nil)))"
     )

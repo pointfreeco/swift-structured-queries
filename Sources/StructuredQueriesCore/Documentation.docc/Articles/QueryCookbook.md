@@ -411,7 +411,7 @@ struct Row {
 
 This allows the query to serialize the associated rows into JSON, which are then deserialized into
 a `Row` type. To construct such a query you can use the 
-``PrimaryKeyedTableDefinition/jsonObjects`` property that is defined on the columns of 
+``PrimaryKeyedTableDefinition/jsonGroupArray`` property that is defined on the columns of 
  [primary keyed tables](<doc:PrimaryKeyedTables>):
 
 ```swift
@@ -420,7 +420,7 @@ RemindersList
   .select { 
     Row.Columns(
       remindersList: $0,
-      reminders: $1.jsonObjects
+      reminders: $1.jsonGroupArray
     )
   }
 ```

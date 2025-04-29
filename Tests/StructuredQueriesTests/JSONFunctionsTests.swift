@@ -112,7 +112,7 @@ extension SnapshotTests {
             ReminderRow.Columns(
               assignedUser: user,
               reminder: reminder,
-              tags: #sql("\(tag.jsonObjects)")
+              tags: #sql("\(tag.jsonGroupArray)")
             )
           }
           .limit(2)
@@ -194,7 +194,7 @@ extension SnapshotTests {
           .select { remindersList, reminder in
             RemindersListRow.Columns(
               remindersList: remindersList,
-              reminders: #sql("\(reminder.jsonObjects)")
+              reminders: #sql("\(reminder.jsonGroupArray)")
             )
           }
           .limit(1)
