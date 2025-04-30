@@ -138,6 +138,17 @@ extension UInt64: QueryDecodable {
   }
 }
 
+extension QueryDecodable where Self: LosslessStringConvertible {
+  @inlinable
+  public init(decoder: inout some QueryDecoder) throws {
+    guard let losslessStringConvertible = try Self(String(decoder: &decoder))
+    else {
+      throw DataCorruptedError()
+    }
+    self = losslessStringConvertible
+  }
+}
+
 extension QueryDecodable where Self: RawRepresentable, RawValue: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
