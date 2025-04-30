@@ -35,4 +35,11 @@ public struct SQLQueryExpression<QueryValue>: Statement {
   public init(_ expression: some QueryExpression<QueryValue>) {
     self.queryFragment = expression.queryFragment
   }
+
+  /// Creates a type erased query expression from a statement.
+  ///
+  /// - Parameter statement: A statement.
+  public init(_ statement: some Statement<QueryValue>) {
+    self.queryFragment = statement.query
+  }
 }

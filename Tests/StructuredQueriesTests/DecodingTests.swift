@@ -39,6 +39,22 @@ extension SnapshotTests {
       #expect(bytes == [0xDE, 0xAD, 0xBE, 0xEF])
     }
 
+    @Test func losslessStringConvertible() throws {
+      struct Email: Equatable, LosslessStringConvertible, QueryBindable {
+        var description: String
+
+        init?(_ description: String) {
+          self.description = description
+        }
+      }
+      #expect(
+        try db.execute(
+          SimpleSelect { #sql("'support@pointfree.co'", as: Email.self) }
+        )
+        .first == Email("support@pointfree.co")
+      )
+    }
+
     @Test func rawRepresentable() throws {
       enum Priority: Int, QueryBindable {
         case low = 1

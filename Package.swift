@@ -114,7 +114,7 @@ for index in package.targets.indices {
   package.targets[index].swiftSettings = swiftSettings
 }
 
-#if !os(Darwin)
+#if !canImport(Darwin)
   package.targets.append(
     .systemLibrary(
       name: "StructuredQueriesSQLite3",

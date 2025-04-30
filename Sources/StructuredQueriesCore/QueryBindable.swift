@@ -102,6 +102,10 @@ extension DefaultStringInterpolation {
   }
 }
 
+extension QueryBindable where Self: LosslessStringConvertible {
+  public var queryBinding: QueryBinding { description.queryBinding }
+}
+
 extension QueryBindable where Self: RawRepresentable, RawValue: QueryBindable {
   public var queryBinding: QueryBinding { rawValue.queryBinding }
 }
