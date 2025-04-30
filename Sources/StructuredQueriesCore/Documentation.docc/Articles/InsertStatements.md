@@ -447,3 +447,7 @@ clause:
 ### Statement types
 
 - ``Insert``
+
+### Seeding a database
+
+- ``Seeds``
