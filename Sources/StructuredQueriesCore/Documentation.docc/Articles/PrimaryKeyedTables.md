@@ -217,7 +217,7 @@ draft has an ID or inserting a new row if the ID is `nil`:
 @Row {
   @Column {
     ```swift
-    let reminder = Reminder(
+    let reminder = Reminder.Draft(
       id: 1,
       title: "Get groceries",
       isCompleted: false
@@ -231,7 +231,7 @@ draft has an ID or inserting a new row if the ID is `nil`:
     ("id", "isCompleted", "title")
     VALUES
     (1, 0, 'Get groceries')
-    ON CONFLICT DO UPDATE SET
+    ON CONFLICT ("id") DO UPDATE SET
       "isCompleted" =
         "excluded"."isCompleted",
       "title" = "excluded"."title"
