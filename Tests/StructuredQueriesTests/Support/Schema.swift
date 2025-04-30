@@ -70,7 +70,7 @@ extension Database {
   static func `default`() throws -> Database {
     let db = try Database()
     try db.migrate()
-    try db.createMockData()
+    try db.seedDatabase()
     return db
   }
 
@@ -145,136 +145,107 @@ extension Database {
     )
   }
 
-  func createMockData() throws {
-    try createDebugUsers()
-    try createDebugRemindersLists()
-    try createDebugReminders()
-    try createDebugTags()
-  }
-
-  func createDebugUsers() throws {
-    try execute(
-      User.insert {
-        $0.name
-      } values: {
-        "Blob"
-        "Blob Jr"
-        "Blob Sr"
-      }
-    )
-  }
-
-  func createDebugRemindersLists() throws {
-    try execute(
-      RemindersList.insert {
-        ($0.color, $0.title)
-      } values: {
-        (0x4a99ef, "Personal")
-        (0xed8935, "Family")
-        (0xb25dd3, "Business")
-      }
-    )
-  }
-
-  func createDebugReminders() throws {
-    let now = Date(timeIntervalSinceReferenceDate: 0)
-    try execute(
-      Reminder.insert([
-        Reminder.Draft(
-          assignedUserID: 1,
-          dueDate: now,
-          notes: """
-            Milk, Eggs, Apples
-            """,
-          remindersListID: 1,
-          title: "Groceries"
-        ),
-        Reminder.Draft(
-          dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
-          isFlagged: true,
-          remindersListID: 1,
-          title: "Haircut"
-        ),
-        Reminder.Draft(
-          dueDate: now,
-          notes: "Ask about diet",
-          priority: .high,
-          remindersListID: 1,
-          title: "Doctor appointment"
-        ),
-        Reminder.Draft(
-          dueDate: now.addingTimeInterval(-60 * 60 * 24 * 190),
-          isCompleted: true,
-          remindersListID: 1,
-          title: "Take a walk"
-        ),
-        Reminder.Draft(
-          remindersListID: 1,
-          title: "Buy concert tickets"
-        ),
-        Reminder.Draft(
-          dueDate: now.addingTimeInterval(60 * 60 * 24 * 2),
-          isFlagged: true,
-          priority: .high,
-          remindersListID: 2,
-          title: "Pick up kids from school"
-        ),
-        Reminder.Draft(
-          dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
-          isCompleted: true,
-          priority: .low,
-          remindersListID: 2,
-          title: "Get laundry"
-        ),
-        Reminder.Draft(
-          dueDate: now.addingTimeInterval(60 * 60 * 24 * 4),
-          isCompleted: false,
-          priority: .high,
-          remindersListID: 2,
-          title: "Take out trash"
-        ),
-        Reminder.Draft(
-          dueDate: now.addingTimeInterval(60 * 60 * 24 * 2),
-          notes: """
-            Status of tax return
-            Expenses for next year
-            Changing payroll company
-            """,
-          remindersListID: 3,
-          title: "Call accountant"
-        ),
-        Reminder.Draft(
-          dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
-          isCompleted: true,
-          priority: .medium,
-          remindersListID: 3,
-          title: "Send weekly emails"
-        ),
-      ])
-    )
-  }
-
-  func createDebugTags() throws {
-    try execute(
-      Tag.insert(\.title) {
-        "car"
-        "kids"
-        "someday"
-        "optional"
-      }
-    )
-    try execute(
-      ReminderTag.insert {
-        ($0.reminderID, $0.tagID)
-      } values: {
-        (1, 3)
-        (1, 4)
-        (2, 3)
-        (2, 4)
-        (4, 1)
-        (4, 2)
-      }
-    )
+  func seedDatabase() throws {
+    try Seeds {
+      User(id: 1, name: "Blob")
+      User(id: 2, name: "Blob Jr")
+      User(id: 3, name: "Blob Sr")
+      RemindersList(id: 1, color: 0x4a99ef, title: "Personal")
+      RemindersList(id: 2, color: 0xed8935, title: "Family")
+      RemindersList(id: 3, color: 0xb25dd3, title: "Business")
+      let now = Date(timeIntervalSinceReferenceDate: 0)
+      Reminder(
+        id: 1,
+        assignedUserID: 1,
+        dueDate: now,
+        notes: """
+          Milk, Eggs, Apples
+          """,
+        remindersListID: 1,
+        title: "Groceries"
+      )
+      Reminder(
+        id: 2,
+        dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
+        isFlagged: true,
+        remindersListID: 1,
+        title: "Haircut"
+      )
+      Reminder(
+        id: 3,
+        dueDate: now,
+        notes: "Ask about diet",
+        priority: .high,
+        remindersListID: 1,
+        title: "Doctor appointment"
+      )
+      Reminder(
+        id: 4,
+        dueDate: now.addingTimeInterval(-60 * 60 * 24 * 190),
+        isCompleted: true,
+        remindersListID: 1,
+        title: "Take a walk"
+      )
+      Reminder(
+        id: 5,
+        remindersListID: 1,
+        title: "Buy concert tickets"
+      )
+      Reminder(
+        id: 6,
+        dueDate: now.addingTimeInterval(60 * 60 * 24 * 2),
+        isFlagged: true,
+        priority: .high,
+        remindersListID: 2,
+        title: "Pick up kids from school"
+      )
+      Reminder(
+        id: 7,
+        dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
+        isCompleted: true,
+        priority: .low,
+        remindersListID: 2,
+        title: "Get laundry"
+      )
+      Reminder(
+        id: 8,
+        dueDate: now.addingTimeInterval(60 * 60 * 24 * 4),
+        isCompleted: false,
+        priority: .high,
+        remindersListID: 2,
+        title: "Take out trash"
+      )
+      Reminder(
+        id: 9,
+        dueDate: now.addingTimeInterval(60 * 60 * 24 * 2),
+        notes: """
+          Status of tax return
+          Expenses for next year
+          Changing payroll company
+          """,
+        remindersListID: 3,
+        title: "Call accountant"
+      )
+      Reminder(
+        id: 10,
+        dueDate: now.addingTimeInterval(-60 * 60 * 24 * 2),
+        isCompleted: true,
+        priority: .medium,
+        remindersListID: 3,
+        title: "Send weekly emails"
+      )
+      Tag(id: 1, title: "car")
+      Tag(id: 2, title: "kids")
+      Tag(id: 3, title: "someday")
+      Tag(id: 4, title: "optional")
+      ReminderTag(reminderID: 1, tagID: 3)
+      ReminderTag(reminderID: 1, tagID: 4)
+      ReminderTag(reminderID: 2, tagID: 3)
+      ReminderTag(reminderID: 2, tagID: 4)
+      ReminderTag(reminderID: 4, tagID: 1)
+      ReminderTag(reminderID: 4, tagID: 2)
+    }
+    .forEach(execute)
   }
 }
 
