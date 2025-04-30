@@ -30,7 +30,7 @@ extension Date.ISO8601Representation: QueryBindable {
 
 extension Date.ISO8601Representation: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
-    try self.init(queryOutput: String(decoder: &decoder).date)
+    try self.init(queryOutput: String(decoder: &decoder).iso8601)
   }
 }
 
@@ -69,7 +69,7 @@ extension DateFormatter {
 }
 
 extension String {
-  fileprivate var date: Date {
+  var iso8601: Date {
     get throws {
       if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
         do {

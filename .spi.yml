@@ -6,4 +6,4 @@ builder:
         - StructuredQueries
       custom_documentation_parameters:
         - '--enable-experimental-overloaded-symbol-presentation'
-        - '--enable-experimental-combined-documentation'
+        # - '--enable-experimental-combined-documentation'

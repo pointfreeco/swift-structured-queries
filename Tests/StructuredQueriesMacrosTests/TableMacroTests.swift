@@ -41,6 +41,104 @@ extension SnapshotTests {
       }
     }
 
+    @Test func comment() {
+      assertMacro {
+        """
+        @Table
+        struct User {
+          /// The user's identifier.
+          let id: /* TODO: UUID */Int
+          /// The user's email.
+          var email: String?  // TODO: Should this be non-optional?
+          /// The user's age.
+          var age: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct User {
+          /// The user's identifier.
+          let id: /* TODO: UUID */Int
+          /// The user's email.
+          var email: String?  // TODO: Should this be non-optional?
+          /// The user's age.
+          var age: Int
+        }
+
+        extension User: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = User
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public let email = StructuredQueries.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
+            public let age = StructuredQueries.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
+            }
+          }
+          public struct Draft: StructuredQueries.TableDraft {
+            public typealias PrimaryTable = User
+            @Column(primaryKey: false)
+            let id: /* TODO: UUID */ Int?
+            var email: String?
+            var age: Int
+            public struct TableColumns: StructuredQueries.TableDefinition {
+              public typealias QueryValue = User.Draft
+              public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let email = StructuredQueries.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
+              public let age = StructuredQueries.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
+              public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = User.tableName
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              self.email = try decoder.decode(String.self)
+              let age = try decoder.decode(Int.self)
+              guard let age else {
+                throw QueryDecodingError.missingRequiredColumn
+              }
+              self.age = age
+            }
+            public init(_ other: User) {
+              self.id = other.id
+              self.email = other.email
+              self.age = other.age
+            }
+            public init(
+              id: /* TODO: UUID */ Int? = nil,
+              email: String? = nil,
+              age: Int
+            ) {
+              self.id = id
+              self.email = email
+              self.age = age
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "users"
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            self.email = try decoder.decode(String.self)
+            let age = try decoder.decode(Int.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let age else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.age = age
+          }
+        }
+        """#
+      }
+    }
+
     @Test func tableName() {
       assertMacro {
         """
@@ -957,90 +1055,108 @@ extension SnapshotTests {
         """#
       }
     }
-  }
 
-  @Test func noTypeWithAs() {
-    assertMacro {
-      """
-      @Table
-      struct RemindersList: Hashable, Identifiable {
-        var id: Int
-        @Column(as: Color.HexRepresentation.self)
-        var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
-        var name = ""
-      }
-      """
-    } expansion: {
-      #"""
-      struct RemindersList: Hashable, Identifiable {
-        var id: Int
-        var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
-        var name = ""
-      }
-
-      extension RemindersList: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
-        public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
-          public typealias QueryValue = RemindersList
-          public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-          public let color = StructuredQueries.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
-          public let name = StructuredQueries.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
-          public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
-            self.id
-          }
-          public static var allColumns: [any StructuredQueries.TableColumnExpression] {
-            [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
-          }
-        }
-        public struct Draft: StructuredQueries.TableDraft {
-          public typealias PrimaryTable = RemindersList
-          @Column(primaryKey: false)
-          var id: Int?
-          @Column(as: Color.HexRepresentation.self) var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+    @Test func noTypeWithAs() {
+      assertMacro {
+        """
+        @Table
+        struct RemindersList: Hashable, Identifiable {
+          var id: Int
+          @Column(as: Color.HexRepresentation.self)
+          var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
           var name = ""
-          public struct TableColumns: StructuredQueries.TableDefinition {
-            public typealias QueryValue = RemindersList.Draft
-            public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+        }
+        """
+      } expansion: {
+        #"""
+        struct RemindersList: Hashable, Identifiable {
+          var id: Int
+          var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+          var name = ""
+        }
+
+        extension RemindersList: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = RemindersList
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public let color = StructuredQueries.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
             public let name = StructuredQueries.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.id
+            }
             public static var allColumns: [any StructuredQueries.TableColumnExpression] {
               [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
             }
           }
+          public struct Draft: StructuredQueries.TableDraft {
+            public typealias PrimaryTable = RemindersList
+            @Column(primaryKey: false)
+            var id: Int?
+            @Column(as: Color.HexRepresentation.self) var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+            var name = ""
+            public struct TableColumns: StructuredQueries.TableDefinition {
+              public typealias QueryValue = RemindersList.Draft
+              public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let color = StructuredQueries.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
+              public let name = StructuredQueries.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
+              public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = RemindersList.tableName
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+              self.name = try decoder.decode(Swift.String.self) ?? ""
+            }
+            public init(_ other: RemindersList) {
+              self.id = other.id
+              self.color = other.color
+              self.name = other.name
+            }
+            public init(
+              id: Int? = nil,
+              color: Color.HexRepresentation.QueryOutput = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255),
+              name: Swift.String = ""
+            ) {
+              self.id = id
+              self.color = color
+              self.name = name
+            }
+          }
           public static let columns = TableColumns()
-          public static let tableName = RemindersList.tableName
+          public static let tableName = "remindersLists"
           public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
-            self.id = try decoder.decode(Int.self)
+            let id = try decoder.decode(Int.self)
             self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
             self.name = try decoder.decode(Swift.String.self) ?? ""
-          }
-          public init(_ other: RemindersList) {
-            self.id = other.id
-            self.color = other.color
-            self.name = other.name
-          }
-          public init(
-            id: Int? = nil,
-            color: Color.HexRepresentation.QueryOutput = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255),
-            name: Swift.String = ""
-          ) {
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
             self.id = id
-            self.color = color
-            self.name = name
           }
         }
-        public static let columns = TableColumns()
-        public static let tableName = "remindersLists"
-        public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
-          let id = try decoder.decode(Int.self)
-          self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
-          self.name = try decoder.decode(Swift.String.self) ?? ""
-          guard let id else {
-            throw QueryDecodingError.missingRequiredColumn
-          }
-          self.id = id
-        }
+        """#
       }
-      """#
+    }
+
+    @Test func emptyStruct() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        ┬─────
+        ╰─ 🛑 '@Table' requires at least one stored column property to be defined on 'Foo'
+        struct Foo {
+        }
+        """
+      }
     }
   }
 

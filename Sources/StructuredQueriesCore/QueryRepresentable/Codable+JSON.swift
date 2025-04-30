@@ -21,7 +21,7 @@ public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresen
 
   public init(decoder: inout some QueryDecoder) throws {
     self.init(
-      queryOutput: try JSONDecoder().decode(
+      queryOutput: try jsonDecoder.decode(
         QueryOutput.self,
         from: Data(String(decoder: &decoder).utf8)
       )
@@ -32,7 +32,7 @@ public struct JSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresen
 extension JSONRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     do {
-      return try .text(String(decoding: JSONEncoder().encode(queryOutput), as: UTF8.self))
+      return try .text(String(decoding: jsonEncoder.encode(queryOutput), as: UTF8.self))
     } catch {
       return .invalid(error)
     }
@@ -44,3 +44,19 @@ extension JSONRepresentation: SQLiteType {
     String.typeAffinity
   }
 }
+
+private let jsonDecoder: JSONDecoder = {
+  var decoder = JSONDecoder()
+  decoder.dateDecodingStrategy = .custom {
+    try $0.singleValueContainer().decode(String.self).iso8601
+  }
+  return decoder
+}()
+
+private let jsonEncoder: JSONEncoder = {
+  var encoder = JSONEncoder()
+  #if DEBUG
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+  #endif
+  return encoder
+}()

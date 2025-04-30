@@ -8,6 +8,12 @@ scopes, and decoding into custom data types.
 The library comes with a variety of tools that allow you to define helpers for composing together
 large and complex queries.
 
+* [Reusable table queries](#Reusable-table-queries)
+* [Reusable column queries](#Reusable-column-queries)
+* [Default scopes](#Default-scopes)
+* [Custom selections](#Custom-selections)
+* [Pre-loading associations with JSON](#Pre-loading-associations-with-json)
+
 ### Reusable table queries
 
 One can define query helpers as statics on their tables in order to facilitate using those
@@ -339,3 +345,89 @@ And a query that selects into this type can be defined like so:
     ```
   }
 }
+
+### Pre-loading associations with JSON
+
+There are times you may want to load rows from a table along with the data from some associated
+table. For example, querying for all reminders lists along with an array of the reminders in each
+list. We'd like to be able to query for this data and decode it into a collection of values
+from the following data type:
+
+```struct
+struct Row {
+  let remindersList: RemindersList
+  let reminders: [Reminder]
+}
+```
+
+However, typically this requires one to make multiple SQL queries. First a query to selects all
+of the reminders lists:
+
+```swift
+let remindersLists = try RemindersLists.all.execute(db)
+```
+
+Then you execute another query to fetch all of the reminders associated with the lists just
+fetched:
+
+```swift
+let reminders = try Reminder
+  .where { $0.id.in(remindersLists.map(\.id)) }
+  .execute(db))
+```
+
+And then finally you need to transform the `remindersLists` and `reminders` into a single collection
+of `Row` values:
+
+```swift
+let rows = remindersLists.map { remindersList in
+  Row(
+    remindersList: remindersList,
+    reminders: reminders.filter { reminder in
+      reminder.remindersListID == remindersList.id
+    }
+  )
+}
+```
+
+This can work, but it's incredibly inefficient, a lot of boilerplate, and prone to mistakes. And
+this is doing work that SQL actually excels at. In fact, the condition inside the `filter` looks
+suspiciously like a join constraint, which should give us a hint that what we are doing is not
+quite right.
+
+Another way to do this is to use the `@Selection` macro described above
+(<doc:QueryCookbook#Custom-selections>), along with a ``JSONRepresentation`` of the collection
+of reminders you want to load for each list:
+
+```struct
+@Selection
+struct Row {
+  let remindersList: RemindersList
+  @Column(as: JSONRepresentation<[Reminder]>.self)
+  let reminders: [Reminder]
+}
+```
+
+> Note: `Reminder` must conform to `Codable` to be able to use ``JSONRepresentation``.
+
+This allows the query to serialize the associated rows into JSON, which are then deserialized into
+a `Row` type. To construct such a query you can use the
+``PrimaryKeyedTableDefinition/jsonGroupArray(order:filter:)`` property that is defined on the
+columns of [primary keyed tables](<doc:PrimaryKeyedTables>):
+
+```swift
+RemindersList
+  .join(Reminder.all) { $0.id.eq($1.remindersListID) }
+  .select {
+    Row.Columns(
+      remindersList: $0,
+      reminders: $1.jsonGroupArray()
+    )
+  }
+```
+
+This allows you to fetch all of the data in a single SQLite query and decode the data into a
+collection of `Row` values. There is an extra cost associated with decoding the JSON object,
+but that cost may be smaller than executing multiple SQLite requests and transforming the data
+into `Row` manually, not to mention the additional code you need to write and maintain to process
+the data.

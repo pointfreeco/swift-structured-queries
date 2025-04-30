@@ -436,7 +436,7 @@ extension TableMacro: ExtensionMacro {
       var memberwiseArguments: [PatternBindingSyntax] = []
       var memberwiseAssignments: [TokenSyntax] = []
       for (binding, queryOutputType) in draftBindings {
-        let argument = binding.annotated(queryOutputType).rewritten(selfRewriter)
+        let argument = binding.trimmed.annotated(queryOutputType).rewritten(selfRewriter)
         if argument.typeAnnotation == nil {
           let identifier =
             (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)
@@ -524,6 +524,19 @@ extension TableMacro: ExtensionMacro {
       }
     } else {
       conformances = protocolNames.map { "\(moduleName).\($0)" }
+    }
+
+    if columnsProperties.isEmpty {
+      diagnostics.append(
+        Diagnostic(
+          node: node,
+          message: MacroExpansionErrorMessage(
+            """
+            '@Table' requires at least one stored column property to be defined on '\(type)'
+            """
+          )
+        )
+      )
     }
 
     guard diagnostics.isEmpty else {

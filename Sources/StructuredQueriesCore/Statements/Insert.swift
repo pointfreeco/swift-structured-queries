@@ -89,6 +89,7 @@ extension Table {
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
+      conflictTargetColumnNames: [],
       values: .values(values),
       updates: doUpdate.map(Updates.init),
       returning: []
@@ -156,6 +157,7 @@ extension Table {
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
+      conflictTargetColumnNames: [],
       values: .values(values),
       updates: doUpdate.map(Updates.init),
       returning: []
@@ -215,6 +217,7 @@ extension Table {
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
+      conflictTargetColumnNames: [],
       values: .select(selection().query),
       updates: doUpdate.map(Updates.init),
       returning: []
@@ -242,6 +245,7 @@ extension Table {
     Insert(
       conflictResolution: conflictResolution,
       columnNames: [],
+      conflictTargetColumnNames: [],
       values: .default,
       updates: doUpdate.map(Updates.init),
       returning: []
@@ -317,6 +321,7 @@ extension PrimaryKeyedTable {
     return Insert(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
+      conflictTargetColumnNames: [Self.columns.primaryKey.name],
       values: .values(values),
       updates: doUpdate.map(Updates.init),
       returning: []
@@ -338,10 +343,11 @@ private enum InsertValues {
 /// To learn more, see <doc:InsertStatements>.
 public struct Insert<Into: Table, Returning> {
   var conflictResolution: ConflictResolution?
-  var columnNames: [String] = []
+  var columnNames: [String]
+  var conflictTargetColumnNames: [String]
   fileprivate var values: InsertValues
   var updates: Updates<Into>?
-  var returning: [QueryFragment] = []
+  var returning: [QueryFragment]
 
   /// Adds a returning clause to an insert statement.
   ///
@@ -357,6 +363,7 @@ public struct Insert<Into: Table, Returning> {
     return Insert<Into, (repeat each QueryValue)>(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
+      conflictTargetColumnNames: conflictTargetColumnNames,
       values: values,
       updates: updates,
       returning: returning
@@ -379,6 +386,7 @@ public struct Insert<Into: Table, Returning> {
     return Insert<Into, Into>(
       conflictResolution: conflictResolution,
       columnNames: columnNames,
+      conflictTargetColumnNames: conflictTargetColumnNames,
       values: values,
       updates: updates,
       returning: returning
@@ -424,7 +432,13 @@ extension Insert: Statement {
     }
 
     if let updates {
-      query.append("\(.newlineOrSpace)ON CONFLICT DO ")
+      query.append("\(.newlineOrSpace)ON CONFLICT ")
+      if !conflictTargetColumnNames.isEmpty {
+        query.append("(")
+        query.append(conflictTargetColumnNames.map { "\(quote: $0)" }.joined(separator: ", "))
+        query.append(") ")
+      }
+      query.append("DO ")
       query.append(updates.isEmpty ? "NOTHING" : "UPDATE \(bind: updates)")
     }
     if !returning.isEmpty {
