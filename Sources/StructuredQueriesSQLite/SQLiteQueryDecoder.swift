@@ -1,3 +1,4 @@
+import Foundation
 import StructuredQueries
 
 #if canImport(Darwin)
@@ -22,6 +23,11 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func next() {
     currentIndex = 0
+  }
+
+  @inlinable
+  func decode(_ columnType: Date.Type) throws -> Date? {
+    return nil
   }
 
   @inlinable

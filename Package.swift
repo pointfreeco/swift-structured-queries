@@ -28,6 +28,10 @@ let package = Package(
       name: "_StructuredQueriesSQLite",
       targets: ["StructuredQueriesSQLite"]
     ),
+    .library(
+      name: "StructuredQueriesPostgresNIO",
+      targets: ["StructuredQueriesPostgresNIO"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
@@ -36,6 +40,8 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.1"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.2"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"601.0.0"),
+
+      .package(url: "https://github.com/vapor/postgres-nio", from: "1.0.0"),
   ],
   targets: [
     .target(
@@ -64,6 +70,19 @@ let package = Package(
       name: "StructuredQueriesSQLite",
       dependencies: [
         "StructuredQueries"
+      ]
+    ),
+    .target(
+      name: "StructuredQueriesPostgresNIO",
+      dependencies: [
+        "StructuredQueries",
+        .product(name: "PostgresNIO", package: "postgres-nio")
+      ]
+    ),
+    .testTarget(
+      name: "StructuredQueriesPostgresNIOTests",
+      dependencies: [
+        "StructuredQueriesPostgresNIO",
       ]
     ),
     .target(

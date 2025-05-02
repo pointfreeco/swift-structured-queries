@@ -73,7 +73,7 @@ extension DateFormatter {
 }
 
 extension String {
-  var iso8601: Date {
+  package var iso8601: Date {
     get throws {
       if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
         do {
