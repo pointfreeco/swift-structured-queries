@@ -1,5 +1,5 @@
 {
-  "originHash" : "c6d1e6c49f622359647bcd073a92db28e1dad8d549034617c7f827b702813be4",
+  "originHash" : "587a4f16d6abcf8ce2a9823d3a1470bab537338281a888ef1c84c91c18be68a5",
   "pins" : [
     {
       "identity" : "combine-schedulers",
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-dependencies",
       "state" : {
-        "revision" : "ec2862d1364536fc22ec56a3094e7a034bbc7da8",
-        "version" : "1.8.1"
+        "revision" : "4c90d6b2b9bf0911af87b103bb40f41771891596",
+        "version" : "1.9.2"
       }
     },
     {
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-macro-testing",
       "state" : {
-        "revision" : "0b80a098d4805a21c412b65f01ffde7b01aab2fa",
-        "version" : "0.6.0"
+        "revision" : "cfe474c7e97d429ea31eefed2e9ab8c7c74260f9",
+        "version" : "0.6.2"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
-        "revision" : "b2d4cb30735f4fbc3a01963a9c658336dd21e9ba",
-        "version" : "1.18.1"
+        "revision" : "1be8144023c367c5de701a6313ed29a3a10bf59b",
+        "version" : "1.18.3"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax",
       "state" : {
-        "revision" : "0687f71944021d616d34d922343dcef086855920",
-        "version" : "600.0.1"
+        "revision" : "f99ae8aa18f0cf0d53481901f88a0991dc3bd4a2",
+        "version" : "601.0.1"
       }
     },
     {
