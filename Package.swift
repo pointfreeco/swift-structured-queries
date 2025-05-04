@@ -28,6 +28,10 @@ let package = Package(
       name: "_StructuredQueriesSQLite",
       targets: ["StructuredQueriesSQLite"]
     ),
+    .library(
+      name: "StructuredQueriesDuckDB",
+      targets: ["StructuredQueriesDuckDB"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
@@ -36,6 +40,8 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.1"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.2"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"601.0.0"),
+
+    .package(url: "https://github.com/duckdb/duckdb-swift", from: "1.0.0"),
   ],
   targets: [
     .target(
@@ -52,6 +58,21 @@ let package = Package(
         "StructuredQueriesMacros",
       ]
     ),
+
+    .target(
+      name: "StructuredQueriesDuckDB",
+      dependencies: [
+        "StructuredQueries",
+        .product(name: "DuckDB", package: "duckdb-swift"),
+      ]
+    ),
+    .testTarget(
+      name: "StructuredQueriesDuckDBTests",
+      dependencies: [
+        "StructuredQueriesDuckDB"
+      ]
+    ),
+
     .macro(
       name: "StructuredQueriesMacros",
       dependencies: [

@@ -63,6 +63,20 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "StructuredQueriesDuckDB"
+               BuildableName = "StructuredQueriesDuckDB"
+               BlueprintName = "StructuredQueriesDuckDB"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -99,6 +113,16 @@
                BlueprintIdentifier = "StructuredQueriesTests"
                BuildableName = "StructuredQueriesTests"
                BlueprintName = "StructuredQueriesTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "StructuredQueriesDuckDBTests"
+               BuildableName = "StructuredQueriesDuckDBTests"
+               BlueprintName = "StructuredQueriesDuckDBTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
