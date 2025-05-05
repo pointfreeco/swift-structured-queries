@@ -61,7 +61,7 @@ struct Tag: Codable, Equatable, Identifiable {
 }
 
 @Table("remindersTags")
-struct ReminderTag: Equatable {
+struct ReminderTag: Equatable, Codable {
   let reminderID: Int
   let tagID: Int
 }
