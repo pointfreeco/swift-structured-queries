@@ -16,7 +16,7 @@ extension QueryExpression {
   }
 }
 
-extension QueryExpression where QueryValue: Codable & Sendable {
+extension QueryExpression where QueryValue: Codable & QueryBindable & Sendable {
   /// A JSON array aggregate of this expression
   ///
   /// Concatenates all of the values in a group.
