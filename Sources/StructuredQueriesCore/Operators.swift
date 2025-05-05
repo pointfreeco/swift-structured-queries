@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression /*where QueryValue: QueryBindable*/ where QueryValue: _OptionalPromotable {
   /// A predicate expression indicating whether two query expressions are equal.
   ///
   /// ```swift

@@ -4,7 +4,7 @@
 /// a table's columns. You should not conform to this protocol directly.
 public protocol TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
   associatedtype Root: Table
-  associatedtype Value: QueryRepresentable & QueryBindable
+  associatedtype Value: QueryRepresentable & QueryExpression
 
   /// The name of the table column.
   var name: String { get }
@@ -24,7 +24,8 @@ public protocol TableColumnExpression<Root, Value>: QueryExpression where Value 
 ///
 /// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros to
 /// generate values of this type.
-public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
+@dynamicMemberLookup
+public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryExpression>:
   TableColumnExpression,
   Sendable
 where Value.QueryOutput: Sendable {
@@ -75,5 +76,22 @@ where Value.QueryOutput: Sendable {
       name,
       keyPath: \.[member: \Value.self, column: _keyPath]
     )
+  }
+}
+
+extension TableColumn where Value: Table {
+  public subscript<Member>(dynamicMember keyPath: KeyPath<Value, Member> & Sendable) -> TableColumn<Value, Member> where Member.QueryOutput == Member {
+    for column in Value.TableColumns.allColumns {
+      func open(_ column: some TableColumnExpression) -> Bool {
+        column.keyPath == keyPath
+      }
+      if open(column) {
+        return TableColumn<Value, Member>(
+          column.name,
+          keyPath: keyPath
+        )
+      }
+    }
+    fatalError()
   }
 }

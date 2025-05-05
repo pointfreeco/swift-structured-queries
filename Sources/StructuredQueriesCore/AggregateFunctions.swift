@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression /*where QueryValue: QueryBindable*/ {
   /// A count aggregate of this expression.
   ///
   /// Counts the number of non-`NULL` times the expression appears in a group.

@@ -16,7 +16,7 @@ extension QueryExpression {
   }
 }
 
-extension QueryExpression where QueryValue: Codable & Sendable {
+extension QueryExpression where QueryValue: Codable & Sendable & QueryBindable {
   /// A JSON array aggregate of this expression
   ///
   /// Concatenates all of the values in a group.
@@ -92,7 +92,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
-    jsonObject.jsonGroupArray(order: order, filter: filter)
+    AggregateFunction("json_group_array", jsonObject, order: order, filter: filter)
   }
 
   private var jsonObject: some QueryExpression<QueryValue> {
@@ -138,8 +138,9 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
     let fragment: QueryFragment = Self.allColumns
       .map { open($0) }
       .joined(separator: ", ")
+
     return SQLQueryExpression(
-      "CASE WHEN \(primaryKey.isNot(nil)) THEN json_object(\(fragment)) END"
+      "CASE WHEN (\(primaryKey) IS NOT NULL) THEN json_object(\(fragment)) END"
     )
   }
 }

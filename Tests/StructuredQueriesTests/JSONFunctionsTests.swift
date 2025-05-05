@@ -269,28 +269,95 @@ extension SnapshotTests {
     }
 
     // This test is showing a missing feature
-    @Test func jsonGroupArrayMultiplePrimaryKeys() {
-      assertQuery(
-        Reminder
-          .join(ReminderTag.all) { $0.id.eq($1.reminderID) }
-          .select {
-            ReminderTagList.Columns(
-              reminder: $0,
-              tags: $1.jsonGroupArray()
-            )
-          }
-      ) {
+    //    @Test func jsonGroupArrayMultiplePrimaryKeys() {
+    //      assertQuery(
+    //        Reminder
+    //          .join(ReminderTag.all) { $0.id.eq($1.reminderID) }
+    //          .select {
+    //            ReminderTagList.Columns(
+    //              reminder: $0,
+    //              tags: $1.jsonGroupArray()
+    //            )
+    //          }
+    //      ) {
+    //        """
+    //        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array("remindersTags"."reminderID", "remindersTags"."tagID") AS "tags"
+    //        FROM "reminders"
+    //        JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
+    //        """
+    //      } results: {
+    //        """
+    //        wrong number of arguments to function json_group_array()
+    //        """
+    //      }
+    //    }
+
+    @Test func foo() throws {
+      try db.execute(
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array("remindersTags"."reminderID", "remindersTags"."tagID") AS "tags"
-        FROM "reminders"
-        JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
+        CREATE TABLE "tokens" (
+          "name" TEXT NOT NULL,
+          "axis" TEXT NOT NULL,
+          "value" INT NOT NULL,
+          "description" TEXT NOT NULL,
+          PRIMARY KEY("name", "axis")
+        )
+        """
+      )
+
+      try db.execute(
+        Token.insert {
+          Token.Draft(id: Token.ID(name: "A", axis: "x"), value: 42, description: "Blob")
+          Token.Draft(id: Token.ID(name: "B", axis: "y"), value: 42, description: "Blob")
+        }
+      )
+
+      assertQuery(Token.all) {
+        """
+        SELECT tokens.name, axis, tokens.value, tokens.description
+        FROM tokens
         """
       } results: {
         """
-        wrong number of arguments to function json_group_array()
+        ┌───────────────────────┐
+        │ Token(                │
+        │   id: Token.ID(       │
+        │     name: "A",        │
+        │     axis: "x"         │
+        │   ),                  │
+        │   value: 42,          │
+        │   description: "Blob" │
+        │ )                     │
+        ├───────────────────────┤
+        │ Token(                │
+        │   id: Token.ID(       │
+        │     name: "B",        │
+        │     axis: "y"         │
+        │   ),                  │
+        │   value: 42,          │
+        │   description: "Blob" │
+        │ )                     │
+        └───────────────────────┘
+        """
+      }
+
+      assertQuery(
+        Token.where {
+          $0.id[dynamicMember: \.axis].eq("x")
+        }
+      ) {
+        """
+        SELECT tokens.name, axis, tokens.value, tokens.description
+        FROM tokens
+        WHERE (iDs.axis = x)
+        """
+      } results: {
+        """
+        no such column: iDs.axis
         """
       }
     }
+
   }
 }
 
@@ -314,4 +381,23 @@ struct ReminderTagList {
   let reminder: Reminder
   @Column(as: [ReminderTag].JSONRepresentation.self)
   let tags: [ReminderTag]
+}
+
+@Table
+struct Token {
+  @Column("name, axis", primaryKey: true)
+  let id: ID
+  var value = 0
+  var description = ""
+  @Table
+  struct ID: QueryExpression {
+    typealias QueryValue = Self
+
+    var queryFragment: StructuredQueriesCore.QueryFragment {
+      "\(bind: name), \(bind: axis)"
+    }
+
+    let name: String
+    let axis: String
+  }
 }

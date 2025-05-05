@@ -205,7 +205,7 @@ extension SnapshotTests {
         FROM "kitchens"
         FULL JOIN "kitchenSinks" ON ("kitchens"."id" IS "kitchenSinks"."kitchenID")
         """
-      } results: {
+      }results: {
         """
         ┌────────────────┬────────────────────────────────────────────────────────────┐
         │ Kitchen(id: 1) │ [                                                          │
