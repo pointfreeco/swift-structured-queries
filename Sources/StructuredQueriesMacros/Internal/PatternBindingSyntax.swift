@@ -37,4 +37,13 @@ extension PatternBindingSyntax {
     optionalized.typeAnnotation?.type = optionalType
     return optionalized
   }
+
+  func isOptional() -> Bool {
+    // x: Optional<T> or x: T?
+    if self.typeAnnotation?.type.isOptionalType == true { return true }
+    // Missing cases
+    // x = Optional<T>.some(_)
+    // x = fnReturningOptionalType()
+    return false
+  }
 }

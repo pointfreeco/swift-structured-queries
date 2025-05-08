@@ -96,6 +96,7 @@ extension TableMacro: ExtensionMacro {
       var columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
       var isEphemeral = false
+      var databaseInitialized: Bool? = nil
 
       for attribute in property.attributes {
         guard
@@ -182,6 +183,89 @@ extension TableMacro: ExtensionMacro {
               queryValueType: columnQueryValueType
             )
 
+          case let .some(label) where label.text == "databaseInitialized":
+            guard
+              let tokenKind = argument.expression.as(BooleanLiteralExprSyntax.self)?.literal
+                .tokenKind
+            else {
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage(
+                    "Argument 'databaseInitialized' must be a boolean literal")
+                )
+              )
+              break
+            }
+
+            databaseInitialized = tokenKind == .keyword(.true)
+
+            if databaseInitialized! && binding.isOptional() {
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage(
+                    "Can't use `databaseInitialized: true` on an optional property")
+                )
+              )
+              break
+            }
+
+            let hasPrimaryKeySemantics =
+              (isPrimaryKey || primaryKey?.identifier.text == identifier.text)
+
+            switch (hasPrimaryKeySemantics, databaseInitialized!) {
+            case (true, true):
+              var newArguments = arguments
+              newArguments.remove(at: argumentIndex)
+              if var lastArgument = newArguments.last {
+                lastArgument.trailingComma = nil
+                newArguments[newArguments.index(before: newArguments.endIndex)] = lastArgument
+              }
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionWarningMessage(
+                    isPrimaryKey
+                      ? "'databaseInitialized: true' is redundant for primary keys"
+                      : "'databaseInitialized: true' is redundant with 'primaryKey: true'"
+                  ),
+                  fixIt: .replace(
+                    message: MacroExpansionFixItMessage("Remove 'databaseInitialized: true'"),
+                    oldNode: Syntax(attribute),
+                    newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                  )
+                )
+              )
+              break
+
+            case (false, false):
+              var newArguments = arguments
+              newArguments.remove(at: argumentIndex)
+              if var lastArgument = newArguments.last {
+                lastArgument.trailingComma = nil
+                newArguments[newArguments.index(before: newArguments.endIndex)] = lastArgument
+              }
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionWarningMessage(
+                    isPrimaryKey
+                      ? "'databaseInitialized: false' is redundant with 'primaryKey: false'"
+                      : "'databaseInitialized: false' is redundant for non primary keys"
+                  ),
+                  fixIt: .replace(
+                    message: MacroExpansionFixItMessage("Remove 'databaseInitialized: false'"),
+                    oldNode: Syntax(attribute),
+                    newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                  )
+                )
+              )
+              break
+
+            default: break
+            }
+
           case let argument?:
             fatalError("Unexpected argument: \(argument)")
           }
@@ -200,7 +284,7 @@ extension TableMacro: ExtensionMacro {
       }
 
       // NB: A compiled bug prevents us from applying the '@_Draft' macro directly
-      if identifier == primaryKey?.identifier {
+      if databaseInitialized == true || identifier == primaryKey?.identifier {
         draftBindings.append((binding.optionalized(), columnQueryOutputType))
       } else {
         draftBindings.append((binding, columnQueryOutputType))
@@ -336,6 +420,7 @@ extension TableMacro: ExtensionMacro {
           else { continue }
           hasColumnAttribute = true
           var hasPrimaryKeyArgument = false
+          var databaseInitializedIndex: DefaultIndices<LabeledExprListSyntax>.Element? = nil
           for argumentIndex in arguments.indices {
             var argument = arguments[argumentIndex]
             defer { arguments[argumentIndex] = argument }
@@ -350,11 +435,17 @@ extension TableMacro: ExtensionMacro {
               hasPrimaryKeyArgument = true
               argument.expression = ExprSyntax(BooleanLiteralExprSyntax(false))
 
+            case "databaseInitialized":
+              databaseInitializedIndex = argumentIndex
+
             default:
               break
             }
           }
-          if !hasPrimaryKeyArgument {
+          if let databaseInitializedIndex {
+            arguments.remove(at: databaseInitializedIndex)
+          }
+          if !hasPrimaryKeyArgument, arguments.count > 0 {
             arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
               trailingTrivia: .space
             )
@@ -389,6 +480,30 @@ extension TableMacro: ExtensionMacro {
           )
         )
       } else {
+        var property = property
+        var binding = binding
+
+        if databaseInitialized == true, let type = binding.typeAnnotation?.type.asOptionalType() {
+          if let columnAttributeIdx = property.attributes.firstIndex(where: {
+            $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+              == "Column"
+          }),
+            var columnAttribute = property.attributes[columnAttributeIdx].as(AttributeSyntax.self),
+            case var .argumentList(arguments) = columnAttribute.arguments
+          {
+            if arguments.count <= 1 {
+              property.attributes.remove(at: columnAttributeIdx)
+            } else if let dabaseInitializeIdx = arguments.firstIndex(where: {
+              $0.label?.text == "databaseInitialized"
+            }) {
+              arguments.remove(at: dabaseInitializeIdx)
+              columnAttribute.arguments = .argumentList(arguments)
+              property.attributes[columnAttributeIdx] = .attribute(columnAttribute)
+            }
+          }
+          binding.typeAnnotation?.type = type
+        }
+        property.bindings = [binding]
         draftProperties.append(
           DeclSyntax(
             property.trimmed
@@ -539,8 +654,14 @@ extension TableMacro: ExtensionMacro {
       )
     }
 
-    guard diagnostics.isEmpty else {
-      diagnostics.forEach(context.diagnose)
+    var hasErrorDiagnostic = false
+    for diagnostic in diagnostics {
+      context.diagnose(diagnostic)
+      if diagnostic.diagMessage.severity == .error {
+        hasErrorDiagnostic = true
+      }
+    }
+    guard !hasErrorDiagnostic else {
       return []
     }
 

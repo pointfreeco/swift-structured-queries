@@ -1627,4 +1627,426 @@ extension SnapshotTests {
       }
     }
   }
+
+  @MainActor
+  @Suite struct DatabaseInitializedTests {
+    @Test func basic() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+          var id: Int
+          var foo: String
+          @Column(databaseInitialized: true)
+          var created: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo {
+          var id: Int
+          var foo: String
+          var created: Int
+        }
+
+        extension Foo: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Foo
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public let foo = StructuredQueries.TableColumn<QueryValue, String>("foo", keyPath: \QueryValue.foo)
+            public let created = StructuredQueries.TableColumn<QueryValue, Int>("created", keyPath: \QueryValue.created)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [QueryValue.columns.id, QueryValue.columns.foo, QueryValue.columns.created]
+            }
+          }
+          public struct Draft: StructuredQueries.TableDraft {
+            public typealias PrimaryTable = Foo
+            @Column(primaryKey: false)
+            var id: Int?
+            var foo: String
+            var created: Int?
+            public struct TableColumns: StructuredQueries.TableDefinition {
+              public typealias QueryValue = Foo.Draft
+              public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let foo = StructuredQueries.TableColumn<QueryValue, String>("foo", keyPath: \QueryValue.foo)
+              public let created = StructuredQueries.TableColumn<QueryValue, Int?>("created", keyPath: \QueryValue.created)
+              public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.foo, QueryValue.columns.created]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = Foo.tableName
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              let foo = try decoder.decode(String.self)
+              self.created = try decoder.decode(Int.self)
+              guard let foo else {
+                throw QueryDecodingError.missingRequiredColumn
+              }
+              self.foo = foo
+            }
+            public init(_ other: Foo) {
+              self.id = other.id
+              self.foo = other.foo
+              self.created = other.created
+            }
+            public init(
+              id: Int? = nil,
+              foo: String,
+              created: Int? = nil
+            ) {
+              self.id = id
+              self.foo = foo
+              self.created = created
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            let foo = try decoder.decode(String.self)
+            let created = try decoder.decode(Int.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let foo else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let created else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.foo = foo
+            self.created = created
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func nilArgument() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+          @Column(databaseInitialized: nil)
+          var bar: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        struct Foo {
+          @Column(databaseInitialized: nil)
+                                       ┬──
+                                       ╰─ 🛑 Argument 'databaseInitialized' must be a boolean literal
+          var bar: Int
+        }
+        """
+      }
+    }
+
+    @Test func optionalProperty() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+          @Column(databaseInitialized: true)
+          var bar: Int?
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        struct Foo {
+          @Column(databaseInitialized: true)
+                                       ┬───
+                                       ╰─ 🛑 Can't use `databaseInitialized: true` on an optional property
+          var bar: Int?
+        }
+        """
+      }
+    }
+
+    @Test func idProperty() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+          @Column(databaseInitialized: true)
+          var id: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        struct Foo {
+          @Column(databaseInitialized: true)
+                                       ┬───
+                                       ╰─ ⚠️ 'databaseInitialized: true' is redundant for primary keys
+                                          ✏️ Remove 'databaseInitialized: true'
+          var id: Int
+        }
+        """
+      } fixes: {
+        """
+        @Table
+        struct Foo {
+          @Column()
+          var id: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo {
+          var id: Int
+        }
+
+        extension Foo: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Foo
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [QueryValue.columns.id]
+            }
+          }
+          public struct Draft: StructuredQueries.TableDraft {
+            public typealias PrimaryTable = Foo
+            @Column() var id: Int?
+            public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
+              public typealias QueryValue = Foo.Draft
+              public let id = StructuredQueries.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [QueryValue.columns.id]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = Foo.tableName
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+            }
+            public init(_ other: Foo) {
+              self.id = other.id
+            }
+            public init(
+              id: Int? = nil
+            ) {
+              self.id = id
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func primaryKey() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+          @Column(primaryKey: true, databaseInitialized: true)
+          var bar: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        struct Foo {
+          @Column(primaryKey: true, databaseInitialized: true)
+                                                         ┬───
+                                                         ╰─ ⚠️ 'databaseInitialized: true' is redundant with 'primaryKey: true'
+                                                            ✏️ Remove 'databaseInitialized: true'
+          var bar: Int
+        }
+        """
+      } fixes: {
+        """
+        @Table
+        struct Foo {
+          @Column(primaryKey: true)
+          var bar: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo {
+          var bar: Int
+        }
+
+        extension Foo: StructuredQueries.Table, StructuredQueries.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueries.TableDefinition, StructuredQueries.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Foo
+            public let bar = StructuredQueries.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
+            public var primaryKey: StructuredQueries.TableColumn<QueryValue, Int> {
+              self.bar
+            }
+            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [QueryValue.columns.bar]
+            }
+          }
+          public struct Draft: StructuredQueries.TableDraft {
+            public typealias PrimaryTable = Foo
+            @Column(primaryKey: false) var bar: Int?
+            public struct TableColumns: StructuredQueries.TableDefinition {
+              public typealias QueryValue = Foo.Draft
+              public let bar = StructuredQueries.TableColumn<QueryValue, Int?>("bar", keyPath: \QueryValue.bar)
+              public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+                [QueryValue.columns.bar]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = Foo.tableName
+            public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+              self.bar = try decoder.decode(Int.self)
+            }
+            public init(_ other: Foo) {
+              self.bar = other.bar
+            }
+            public init(
+              bar: Int? = nil
+            ) {
+              self.bar = bar
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(Int.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func idNonPrimaryKeyAndFalse() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+          @Column(primaryKey: false, databaseInitialized: false)
+          var id: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        struct Foo {
+          @Column(primaryKey: false, databaseInitialized: false)
+                                                          ┬────
+                                                          ╰─ ⚠️ 'databaseInitialized: false' is redundant for non primary keys
+                                                             ✏️ Remove 'databaseInitialized: false'
+          var id: Int
+        }
+        """
+      } fixes: {
+        """
+        @Table
+        struct Foo {
+          @Column(primaryKey: false)
+          var id: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo {
+          var id: Int
+        }
+
+        extension Foo: StructuredQueries.Table {
+          public struct TableColumns: StructuredQueries.TableDefinition {
+            public typealias QueryValue = Foo
+            public let id = StructuredQueries.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [QueryValue.columns.id]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func regularPropertyFalse() {
+      assertMacro {
+        """
+        @Table
+        struct Foo {
+          @Column(databaseInitialized: false)
+          var bar: String
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        struct Foo {
+          @Column(databaseInitialized: false)
+                                       ┬────
+                                       ╰─ ⚠️ 'databaseInitialized: false' is redundant for non primary keys
+                                          ✏️ Remove 'databaseInitialized: false'
+          var bar: String
+        }
+        """
+      } fixes: {
+        """
+        @Table
+        struct Foo {
+          @Column()
+          var bar: String
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo {
+          var bar: String
+        }
+
+        extension Foo: StructuredQueries.Table {
+          public struct TableColumns: StructuredQueries.TableDefinition {
+            public typealias QueryValue = Foo
+            public let bar = StructuredQueries.TableColumn<QueryValue, String>("bar", keyPath: \QueryValue.bar)
+            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [QueryValue.columns.bar]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let bar = try decoder.decode(String.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
+          }
+        }
+        """#
+      }
+    }
+  }
 }
