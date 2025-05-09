@@ -1,3 +1,5 @@
+import Foundation
+
 /// A type representing a value that can be bound to a parameter of a SQL statement.
 public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryValue: QueryBindable {
   /// The Swift data type representation of the expression's SQL bindable data type.
@@ -13,12 +15,20 @@ extension QueryBindable {
   public var queryFragment: QueryFragment { "\(queryBinding)" }
 }
 
+extension [UInt8]: QueryBindable, QueryExpression {
+  public var queryBinding: QueryBinding { .blob(self) }
+}
+
 extension Bool: QueryBindable {
   public var queryBinding: QueryBinding { .int(self ? 1 : 0) }
 }
 
 extension Double: QueryBindable {
   public var queryBinding: QueryBinding { .double(self) }
+}
+
+extension Date: QueryBindable {
+  public var queryBinding: QueryBinding { .date(self) }
 }
 
 extension Float: QueryBindable {
@@ -71,8 +81,8 @@ extension UInt64: QueryBindable {
   }
 }
 
-extension [UInt8]: QueryBindable, QueryExpression {
-  public var queryBinding: QueryBinding { .blob(self) }
+extension UUID: QueryBindable {
+  public var queryBinding: QueryBinding { .uuid(self) }
 }
 
 extension DefaultStringInterpolation {

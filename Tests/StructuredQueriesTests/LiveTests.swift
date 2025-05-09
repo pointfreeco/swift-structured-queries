@@ -318,7 +318,6 @@ extension SnapshotTests {
       let id: Int
       var isActive: Bool
       var title: String
-      @Column(as: Date.ISO8601Representation.self)
       var createdAt: Date
     }
 
@@ -327,7 +326,6 @@ extension SnapshotTests {
       let id: Int
       var name: String
       var syncUpID: Int
-      @Column(as: Date.ISO8601Representation.self)
       var createdAt: Date
     }
   }

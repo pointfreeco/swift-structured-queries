@@ -34,12 +34,12 @@ extension Date.ISO8601Representation: QueryBindable {
 
 extension Date.ISO8601Representation: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
-    try self.init(queryOutput: String(decoder: &decoder).iso8601)
+    try self.init(queryOutput: Date(iso8601String: String(decoder: &decoder)))
   }
 }
 
 extension Date {
-  fileprivate var iso8601String: String {
+  package var iso8601String: String {
     if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
       return formatted(.iso8601.currentTimestamp(includingFractionalSeconds: true))
     } else {
@@ -72,31 +72,30 @@ extension DateFormatter {
   }()
 }
 
-extension String {
-  var iso8601: Date {
-    get throws {
-      if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
-        do {
-          return try Date(
-            queryOutput,
-            strategy: .iso8601.currentTimestamp(includingFractionalSeconds: true)
-          )
-        } catch {
-          return try Date(
-            queryOutput,
-            strategy: .iso8601.currentTimestamp(includingFractionalSeconds: false)
-          )
-        }
-      } else {
-        guard
-          let date = DateFormatter.iso8601(includingFractionalSeconds: true).date(from: self)
-            ?? DateFormatter.iso8601(includingFractionalSeconds: false).date(from: self)
-        else {
-          struct InvalidDate: Error { let string: String }
-          throw InvalidDate(string: self)
-        }
-        return date
+extension Date {
+  @usableFromInline
+  package init(iso8601String: String) throws {
+    if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
+      do {
+        try self.init(
+          iso8601String.queryOutput,
+          strategy: .iso8601.currentTimestamp(includingFractionalSeconds: true)
+        )
+      } catch {
+        try self.init(
+          iso8601String.queryOutput,
+          strategy: .iso8601.currentTimestamp(includingFractionalSeconds: false)
+        )
       }
+    } else {
+      guard
+        let date = DateFormatter.iso8601(includingFractionalSeconds: true).date(from: iso8601String)
+          ?? DateFormatter.iso8601(includingFractionalSeconds: false).date(from: iso8601String)
+      else {
+        struct InvalidDate: Error { let string: String }
+        throw InvalidDate(string: iso8601String)
+      }
+      self = date
     }
   }
 }

@@ -137,6 +137,8 @@ public struct Database {
         switch binding {
         case let .blob(blob):
           sqlite3_bind_blob(statement, index, Array(blob), Int32(blob.count), SQLITE_TRANSIENT)
+        case let .date(date):
+          sqlite3_bind_text(statement, index, date.iso8601String, -1, SQLITE_TRANSIENT)
         case let .double(double):
           sqlite3_bind_double(statement, index, double)
         case let .int(int):
@@ -145,6 +147,8 @@ public struct Database {
           sqlite3_bind_null(statement, index)
         case let .text(text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
+        case let .uuid(uuid):
+          sqlite3_bind_text(statement, index, uuid.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
         case let .invalid(error):
           throw error.underlyingError
         }

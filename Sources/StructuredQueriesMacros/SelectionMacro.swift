@@ -134,67 +134,6 @@ extension SelectionMacro: ExtensionMacro {
           .baseName
           .text
       }
-      if columnQueryValueType == columnQueryOutputType,
-        let typeIdentifier = columnQueryValueType?.identifier ?? assignedType,
-        ["Date", "UUID"].contains(typeIdentifier)
-      {
-        var fixIts: [FixIt] = []
-        let optional = columnQueryValueType?.isOptionalType == true ? "?" : ""
-        if typeIdentifier.hasPrefix("Date") {
-          for representation in ["ISO8601", "UnixTime", "JulianDay"] {
-            var newProperty = property.with(\.leadingTrivia, "")
-            let attribute = "@Column(as: Date.\(representation)Representation\(optional).self)"
-            newProperty.attributes.insert(
-              AttributeListSyntax.Element("\(raw: attribute)")
-                .with(
-                  \.trailingTrivia,
-                  .newline.merging(property.leadingTrivia.indentation(isOnNewline: true))
-                ),
-              at: newProperty.attributes.startIndex
-            )
-            fixIts.append(
-              FixIt(
-                message: MacroExpansionFixItMessage("Insert '\(attribute)'"),
-                changes: [
-                  .replace(
-                    oldNode: Syntax(property),
-                    newNode: Syntax(newProperty.with(\.leadingTrivia, property.leadingTrivia))
-                  )
-                ]
-              )
-            )
-          }
-        } else if typeIdentifier.hasPrefix("UUID") {
-          for representation in ["Lowercased", "Uppercased", "Bytes"] {
-            var newProperty = property.with(\.leadingTrivia, "")
-            let attribute = "@Column(as: UUID.\(representation)Representation\(optional).self)"
-            newProperty.attributes.insert(
-              AttributeListSyntax.Element("\(raw: attribute)"),
-              at: newProperty.attributes.startIndex
-            )
-            fixIts.append(
-              FixIt(
-                message: MacroExpansionFixItMessage("Insert '\(attribute)'"),
-                changes: [
-                  .replace(
-                    oldNode: Syntax(property),
-                    newNode: Syntax(newProperty.with(\.leadingTrivia, property.leadingTrivia))
-                  )
-                ]
-              )
-            )
-          }
-        }
-        diagnostics.append(
-          Diagnostic(
-            node: property,
-            message: MacroExpansionErrorMessage(
-              "'\(typeIdentifier)' column requires a query representation"
-            ),
-            fixIts: fixIts
-          )
-        )
-      }
 
       allColumns.append((identifier, columnQueryValueType))
       let decodedType = columnQueryValueType?.asNonOptionalType()

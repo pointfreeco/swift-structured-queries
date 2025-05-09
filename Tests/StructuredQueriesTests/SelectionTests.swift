@@ -179,7 +179,6 @@ extension SnapshotTests {
 
 @Selection
 struct ReminderDate {
-  @Column(as: Date.ISO8601Representation?.self)
   var date: Date?
 }
 
