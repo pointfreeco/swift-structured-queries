@@ -9,6 +9,9 @@ public enum QueryBinding: Hashable, Sendable {
   /// A value that should be bound to a statement as a double.
   case double(Double)
 
+  /// A value that should be bound to a statement as a date.
+  case date(Date)
+
   /// A value that should be bound to a statement as an integer.
   case int(Int64)
 
@@ -17,6 +20,9 @@ public enum QueryBinding: Hashable, Sendable {
 
   /// A value that should be bound to a statement as a string.
   case text(String)
+
+  /// A value that should be bound to a statement as a unique identifier.
+  case uuid(UUID)
 
   /// An error describing why a value cannot be bound to a statement.
   case invalid(QueryBindingError)
@@ -46,6 +52,8 @@ extension QueryBinding: CustomDebugStringConvertible {
         .dropLast()
         .dropFirst()
         .quoted(.text)
+    case let .date(date):
+      return date.iso8601String.quoted(.text)
     case let .double(value):
       return "\(value)"
     case let .int(value):
@@ -54,6 +62,8 @@ extension QueryBinding: CustomDebugStringConvertible {
       return "NULL"
     case let .text(string):
       return string.quoted(.text)
+    case let .uuid(uuid):
+      return uuid.uuidString.lowercased().quoted(.text)
     case let .invalid(error):
       return "<invalid: \(error.underlyingError.localizedDescription)>"
     }

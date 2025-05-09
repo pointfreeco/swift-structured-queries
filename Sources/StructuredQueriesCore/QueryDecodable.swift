@@ -1,3 +1,5 @@
+import Foundation
+
 /// A type that can decode itself from a query.
 public protocol QueryDecodable: _OptionalPromotable {
   /// Creates a new instance by decoding from the given decoder.
@@ -49,6 +51,15 @@ extension Bool: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
     self = try Int(decoder: &decoder) != 0
+  }
+}
+
+extension Date: QueryDecodable {
+  @inlinable
+  public init(decoder: inout some QueryDecoder) throws {
+    guard let result = try decoder.decode(Date.self)
+    else { throw QueryDecodingError.missingRequiredColumn }
+    self = result
   }
 }
 
@@ -135,6 +146,15 @@ extension UInt64: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
     try self.init(Int64(decoder: &decoder))
+  }
+}
+
+extension UUID: QueryDecodable {
+  @inlinable
+  public init(decoder: inout some QueryDecoder) throws {
+    guard let result = try decoder.decode(UUID.self)
+    else { throw QueryDecodingError.missingRequiredColumn }
+    self = result
   }
 }
 

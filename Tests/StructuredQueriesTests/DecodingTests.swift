@@ -84,6 +84,12 @@ extension SnapshotTests {
       )
       #expect(
         try db.execute(
+          SimpleSelect { #sql("'2001-01-01 00:00:00'", as: Date.self) }
+        )
+        .first == Date(timeIntervalSinceReferenceDate: 0)
+      )
+      #expect(
+        try db.execute(
           SimpleSelect { #sql("1234567890", as: Date.UnixTimeRepresentation.self) }
         )
         .first == Date(timeIntervalSince1970: 1_234_567_890)
@@ -93,6 +99,14 @@ extension SnapshotTests {
           SimpleSelect { #sql("2451910.5", as: Date.JulianDayRepresentation.self) }
         )
         .first == Date(timeIntervalSinceReferenceDate: 0)
+      )
+      #expect(
+        try db.execute(
+          SimpleSelect {
+            #sql("'deadbeef-dead-beef-dead-beefdeadbeef'", as: UUID.self)
+          }
+        )
+        .first == UUID(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef")
       )
       #expect(
         try db.execute(

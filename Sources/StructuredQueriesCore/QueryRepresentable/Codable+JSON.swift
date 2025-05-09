@@ -57,7 +57,7 @@ extension _CodableJSONRepresentation: SQLiteType {
 private let jsonDecoder: JSONDecoder = {
   var decoder = JSONDecoder()
   decoder.dateDecodingStrategy = .custom {
-    try $0.singleValueContainer().decode(String.self).iso8601
+    try Date(iso8601String: $0.singleValueContainer().decode(String.self))
   }
   return decoder
 }()

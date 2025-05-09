@@ -189,6 +189,5 @@ extension SnapshotTests {
 
 @Table
 private struct Row {
-  @Column(as: UUID.LowercasedRepresentation.self)
   let id: UUID
 }

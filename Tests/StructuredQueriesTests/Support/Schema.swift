@@ -20,7 +20,6 @@ struct Reminder: Codable, Equatable, Identifiable {
 
   let id: Int
   var assignedUserID: User.ID?
-  @Column(as: Date.ISO8601Representation?.self)
   var dueDate: Date?
   var isCompleted = false
   var isFlagged = false
