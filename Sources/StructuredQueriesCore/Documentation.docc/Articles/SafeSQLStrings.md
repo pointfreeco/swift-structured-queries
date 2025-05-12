@@ -150,11 +150,12 @@ Values can be interpolated into `#sql` strings to produce dynamic queries:
   @Column {
     ```swift
     let isCompleted = true
+
     #sql(
       """
       SELECT count(*)
-      FROM reminders
-      WHERE isCompleted = \(isCompleted)
+      FROM \(Reminder.self)
+      WHERE \(Reminder.isCompleted) = \(isCompleted)
       """,
       as: Reminder.self
     )
@@ -163,22 +164,22 @@ Values can be interpolated into `#sql` strings to produce dynamic queries:
   @Column {
     ```sql
     SELECT count(*)
-    FROM reminders
-    WHERE isCompleted = ?
+    FROM "reminders"
+    WHERE "reminders"."isCompleted" = ?
     -- [1]
     ```
   }
 }
 
-Note that although it seems the literal value is being interpolated directly into the string, that
+Note that although it seems that `isCompleted` is being interpolated directly into the string, that
 is not what is happening. The interpolated value is captured as a separate statement binding in
 order to protect against SQL injection.
 
-String bindings are handled in a special fashion to make it clear what the intended usage is. If
-you interpolate a string into a `#sql` string, you will get a deprecation warning:
+String bindings are handled in a special fashion to make it clear what the intended usage is. If you
+interpolate a string into a `#sql` string, you will get a deprecation warning:
 
 ```swift
-let searchText = "get"
+let searchText = "%get%"
 #sql(
   """
   SELECT \(Reminder.columns)
@@ -197,7 +198,7 @@ If you mean to bind the string as a value, you can update the interpolation to u
 @Row {
   @Column {
     ```swift
-    let searchText = "get"
+    let searchText = "%get%"
     #sql(
       """
       SELECT \(Reminder.columns)
@@ -224,12 +225,12 @@ If you mean to interpolate the string directly into the SQL you can use
 @Row {
   @Column {
     ```swift
-    let searchText = "get"
+    let searchText = "%get%"
     #sql(
       """
       SELECT \(Reminder.columns)
       FROM \(Reminder.self)
-      WHERE \(Reminder.title) COLLATE NOCASE LIKE '%\(raw: searchText)%'
+      WHERE \(Reminder.title) COLLATE NOCASE LIKE '\(raw: searchText)'
       """,
       as: Reminder.self
     )
