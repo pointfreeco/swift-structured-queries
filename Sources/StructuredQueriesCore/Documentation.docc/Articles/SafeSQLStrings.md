@@ -120,12 +120,14 @@ each table type, so you can freely interpolate this schema information into the 
 >
 >   * Selecting "`*`" requires that the column order in the database matches the field order in the
 >     Swift data type. Because StructuredQueries decodes columns in positional order, a query using
->     "`*`" will fail to decode. Instead, interpolate `Table.columns` to generate SQL in the same
->     order as the Swift data type.
+>     "`*`" will fail to decode unless the field order matches exactly. Instead of leaving this to
+>     chance, prefer interpolating `Table.columns`, which will generate an explicit SQL column
+>     selection that matches the order of fields in the Swift data type.
 >   * Spelling out table and column names directly inside the query (_e.g._ "`reminders`") can lead
 >     to runtime errors due to typos or stale queries that refer to schema columns that have been
->     renamed or removed. Instead, interpolate `Table.columnName` to refer to a particular column,
->     and `Table.self` to refer to a table.
+>     renamed or removed. Instead, prefer interpolating `Table.columnName` to refer to a particular
+>     column (_e.g._, `Reminder.isCompleted`), and `Table.self` to refer to a table (_e.g._,
+>     `Reminder.self`).
 
 Note that the query's represented type cannot be inferred here, and so the `as` parameter is used
 to let Swift know that we expect to decode the `Reminder` type when we execute the query.
