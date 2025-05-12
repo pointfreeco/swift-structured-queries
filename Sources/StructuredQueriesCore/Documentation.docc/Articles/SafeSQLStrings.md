@@ -108,6 +108,25 @@ could be written as a single invocation of the macro:
 All of the columns provided to trailing closures in the query builder are available statically on
 each table type, so you can freely interpolate this schema information into the SQL string.
 
+> Important: _Always_ interpolate as much static schema information as possible into the SQL string
+> to better ensure that queries are correct and will successfully decode.
+>
+> For example:
+>
+> ```diff
+> -SELECT * FROM reminders
+> +SELECT \(Reminder.columns) FROM \(Reminder.self)
+> ```
+>
+>   * Selecting "`*`" requires that the column order in the database matches the field order in the
+>     Swift data type. Because StructuredQueries decodes columns in positional order, a query using
+>     "`*`" will fail to decode. Instead, interpolate `Table.columns` to generate SQL in the same
+>     order as the Swift data type.
+>   * Spelling out table and column names directly inside the query (_e.g._ "`reminders`") can lead
+>     to runtime errors due to typos or stale queries that refer to schema columns that have been
+>     renamed or removed. Instead, interpolate `Table.columnName` to refer to a particular column,
+>     and `Table.self` to refer to a table.
+
 Note that the query's represented type cannot be inferred here, and so the `as` parameter is used
 to let Swift know that we expect to decode the `Reminder` type when we execute the query.
 
