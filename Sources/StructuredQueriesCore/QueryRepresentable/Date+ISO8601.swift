@@ -16,8 +16,16 @@ extension Date {
   public struct ISO8601Representation: QueryRepresentable {
     public var queryOutput: Date
 
+    public var iso8601String: String {
+      queryOutput.iso8601String
+    }
+
     public init(queryOutput: Date) {
       self.queryOutput = queryOutput
+    }
+
+    public init(iso8601String: String) throws {
+      try self.init(queryOutput: Date(iso8601String: iso8601String))
     }
   }
 }
