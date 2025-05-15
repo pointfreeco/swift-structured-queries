@@ -9,8 +9,7 @@ public protocol PrimaryKeyedTable: Table where TableColumns: PrimaryKeyedTableDe
 // A type representing a draft to be saved to a table with a primary key.
 public protocol TableDraft: Table {
   /// A type that represents the table with a primary key.
-  associatedtype PrimaryTable: StructuredQueriesCore.PrimaryKeyedTable
-  where PrimaryTable.Draft == Self
+  associatedtype PrimaryTable: PrimaryKeyedTable where PrimaryTable.Draft == Self
 
   /// Creates a draft from a primary keyed table.
   init(_ primaryTable: PrimaryTable)

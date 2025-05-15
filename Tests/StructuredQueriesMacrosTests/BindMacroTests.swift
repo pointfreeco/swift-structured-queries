@@ -12,7 +12,7 @@ extension SnapshotTests {
         """#
       } expansion: {
         #"""
-        \(date) < StructuredQueries.BindQueryExpression(Date())
+        \(date) < StructuredQueriesCore.BindQueryExpression(Date())
         """#
       }
     }
@@ -24,7 +24,7 @@ extension SnapshotTests {
         """#
       } expansion: {
         #"""
-        \(date) < StructuredQueries.BindQueryExpression(Date(), as: Date.ISO8601Representation.self)
+        \(date) < StructuredQueriesCore.BindQueryExpression(Date(), as: Date.ISO8601Representation.self)
         """#
       }
     }
