@@ -1410,7 +1410,11 @@ extension Select: SelectStatement {
       query.append(" DISTINCT")
     }
     query.append(" \(columns.joined(separator: ", "))")
-    query.append("\(.newlineOrSpace)FROM \(quote: From.tableName)")
+    query.append("\(.newlineOrSpace)FROM ")
+    if let schemaName = From.schemaName {
+      query.append("\(quote: schemaName).")
+    }
+    query.append("\(quote: From.tableName)")
     if let tableAlias = From.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }

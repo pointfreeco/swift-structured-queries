@@ -97,6 +97,22 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
         line: line,
         column: column
       )
+    } else {
+      assertInlineSnapshot(
+        of: table,
+        as: .lines,
+        message: "Results did not match",
+        syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+          trailingClosureLabel: "results",
+          trailingClosureOffset: snapshotTrailingClosureOffset + 1
+        ),
+        matches: nil,
+        fileID: fileID,
+        file: filePath,
+        function: function,
+        line: line,
+        column: column
+      )
     }
   } catch {
     assertInlineSnapshot(

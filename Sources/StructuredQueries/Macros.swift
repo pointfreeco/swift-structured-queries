@@ -16,12 +16,16 @@ import StructuredQueriesCore
   named(init(_:)),
   named(init(decoder:)),
   named(QueryValue),
+  named(schemaName),
   named(tableName)
 )
 @attached(
   memberAttribute
 )
-public macro Table(_ name: String? = nil) =
+public macro Table(
+  _ name: String? = nil,
+  schema schemaName: String? = nil
+) =
   #externalMacro(
     module: "StructuredQueriesMacros",
     type: "TableMacro"

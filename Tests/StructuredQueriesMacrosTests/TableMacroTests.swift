@@ -198,16 +198,93 @@ extension SnapshotTests {
     @Test func tableNameEmpty() {
       assertMacro {
         """
-        @Table(nil)
+        @Table("")
         struct Foo {
           var bar: Int
         }
         """
       } diagnostics: {
         """
-        @Table(nil)
-               ┬──
+        @Table("")
+               ┬─
                ╰─ 🛑 Argument must be a non-empty string literal
+        struct Foo {
+          var bar: Int
+        }
+        """
+      }
+    }
+
+    @Test func schemaName() {
+      assertMacro {
+        """
+        @Table("bar", schema: "foo")
+        struct Bar {
+          var baz: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct Bar {
+          var baz: Int
+        }
+
+        extension Bar: StructuredQueries.Table {
+          public struct TableColumns: StructuredQueries.TableDefinition {
+            public typealias QueryValue = Bar
+            public let baz = StructuredQueries.TableColumn<QueryValue, Int>("baz", keyPath: \QueryValue.baz)
+            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+              [QueryValue.columns.baz]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "bar"
+          public static let schemaName: Swift.String? = "foo"
+          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+            let baz = try decoder.decode(Int.self)
+            guard let baz else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.baz = baz
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func schemaNameNil() {
+      assertMacro {
+        """
+        @Table(schema: nil)
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table(schema: nil)
+                       ┬──
+                       ╰─ 🛑 Argument must be a non-empty string literal
+        struct Foo {
+          var bar: Int
+        }
+        """
+      }
+    }
+
+    @Test func schemaNameEmpty() {
+      assertMacro {
+        """
+        @Table(schema: "")
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table(schema: "")
+                       ┬─
+                       ╰─ 🛑 Argument must be a non-empty string literal
         struct Foo {
           var bar: Int
         }
