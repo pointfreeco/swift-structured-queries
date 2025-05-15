@@ -12,7 +12,7 @@ large and complex queries.
 * [Reusable column queries](#Reusable-column-queries)
 * [Default scopes](#Default-scopes)
 * [Custom selections](#Custom-selections)
-* [Pre-loading associations with JSON](#Pre-loading-associations-with-json)
+* [Pre-loading associations with JSON](#Pre-loading-associations-with-JSON)
 
 ### Reusable table queries
 

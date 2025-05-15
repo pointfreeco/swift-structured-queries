@@ -21,6 +21,9 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   /// This property should always return `nil` unless called on a ``TableAlias``.
   static var tableAlias: String? { get }
 
+  /// The table schema's name.
+  static var schemaName: String? { get }
+
   /// A select statement for this table.
   ///
   /// The default implementation of this property returns a fully unscoped query for the table
@@ -87,6 +90,10 @@ extension Table {
   }
 
   public static var tableAlias: String? {
+    nil
+  }
+
+  public static var schemaName: String? {
     nil
   }
 

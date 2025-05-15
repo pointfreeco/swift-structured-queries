@@ -39,10 +39,10 @@ public struct With<QueryValue>: Statement {
 
 public struct CommonTableExpressionClause: QueryExpression {
   public typealias QueryValue = ()
-  let tableName: String
+  let tableName: QueryFragment
   let select: QueryFragment
   public var queryFragment: QueryFragment {
-    "\(quote: tableName) AS (\(.newline)\(select.indented())\(.newline))"
+    "\(tableName) AS (\(.newline)\(select.indented())\(.newline))"
   }
 }
 
@@ -55,7 +55,7 @@ public enum CommonTableExpressionBuilder {
   public static func buildExpression<CTETable: Table>(
     _ expression: some PartialSelectStatement<CTETable>
   ) -> CommonTableExpressionClause {
-    CommonTableExpressionClause(tableName: CTETable.tableName, select: expression.query)
+    CommonTableExpressionClause(tableName: "\(CTETable.self)", select: expression.query)
   }
 
   public static func buildBlock(

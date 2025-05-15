@@ -108,6 +108,27 @@ could be written as a single invocation of the macro:
 All of the columns provided to trailing closures in the query builder are available statically on
 each table type, so you can freely interpolate this schema information into the SQL string.
 
+> Important: _Always_ interpolate as much static schema information as possible into the SQL string
+> to better ensure that queries are correct and will successfully decode.
+>
+> For example:
+>
+> ```diff
+> -SELECT * FROM reminders
+> +SELECT \(Reminder.columns) FROM \(Reminder.self)
+> ```
+>
+>   * Selecting "`*`" requires that the column order in the database matches the field order in the
+>     Swift data type. Because StructuredQueries decodes columns in positional order, a query using
+>     "`*`" will fail to decode unless the field order matches exactly. Instead of leaving this to
+>     chance, prefer interpolating `Table.columns`, which will generate an explicit SQL column
+>     selection that matches the order of fields in the Swift data type.
+>   * Spelling out table and column names directly inside the query (_e.g._ "`reminders`") can lead
+>     to runtime errors due to typos or stale queries that refer to schema columns that have been
+>     renamed or removed. Instead, prefer interpolating `Table.columnName` to refer to a particular
+>     column (_e.g._, `Reminder.isCompleted`), and `Table.self` to refer to a table (_e.g._,
+>     `Reminder.self`).
+
 Note that the query's represented type cannot be inferred here, and so the `as` parameter is used
 to let Swift know that we expect to decode the `Reminder` type when we execute the query.
 
@@ -131,11 +152,12 @@ Values can be interpolated into `#sql` strings to produce dynamic queries:
   @Column {
     ```swift
     let isCompleted = true
+
     #sql(
       """
       SELECT count(*)
-      FROM reminders
-      WHERE isCompleted = \(isCompleted)
+      FROM \(Reminder.self)
+      WHERE \(Reminder.isCompleted) = \(isCompleted)
       """,
       as: Reminder.self
     )
@@ -144,22 +166,22 @@ Values can be interpolated into `#sql` strings to produce dynamic queries:
   @Column {
     ```sql
     SELECT count(*)
-    FROM reminders
-    WHERE isCompleted = ?
+    FROM "reminders"
+    WHERE "reminders"."isCompleted" = ?
     -- [1]
     ```
   }
 }
 
-Note that although it seems the literal value is being interpolated directly into the string, that
+Note that although it seems that `isCompleted` is being interpolated directly into the string, that
 is not what is happening. The interpolated value is captured as a separate statement binding in
 order to protect against SQL injection.
 
-String bindings are handled in a special fashion to make it clear what the intended usage is. If
-you interpolate a string into a `#sql` string, you will get a deprecation warning:
+String bindings are handled in a special fashion to make it clear what the intended usage is. If you
+interpolate a string into a `#sql` string, you will get a deprecation warning:
 
 ```swift
-let searchText = "get"
+let searchText = "%get%"
 #sql(
   """
   SELECT \(Reminder.columns)
@@ -178,7 +200,7 @@ If you mean to bind the string as a value, you can update the interpolation to u
 @Row {
   @Column {
     ```swift
-    let searchText = "get"
+    let searchText = "%get%"
     #sql(
       """
       SELECT \(Reminder.columns)
@@ -205,12 +227,12 @@ If you mean to interpolate the string directly into the SQL you can use
 @Row {
   @Column {
     ```swift
-    let searchText = "get"
+    let searchText = "%get%"
     #sql(
       """
       SELECT \(Reminder.columns)
       FROM \(Reminder.self)
-      WHERE \(Reminder.title) COLLATE NOCASE LIKE '%\(raw: searchText)%'
+      WHERE \(Reminder.title) COLLATE NOCASE LIKE '\(raw: searchText)'
       """,
       as: Reminder.self
     )
