@@ -229,18 +229,18 @@ extension SnapshotTests {
           var baz: Int
         }
 
-        extension Bar: StructuredQueries.Table {
-          public struct TableColumns: StructuredQueries.TableDefinition {
+        extension Bar: StructuredQueriesCore.Table {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Bar
-            public let baz = StructuredQueries.TableColumn<QueryValue, Int>("baz", keyPath: \QueryValue.baz)
-            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+            public let baz = StructuredQueriesCore.TableColumn<QueryValue, Int>("baz", keyPath: \QueryValue.baz)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               [QueryValue.columns.baz]
             }
           }
           public static let columns = TableColumns()
           public static let tableName = "bar"
           public static let schemaName: Swift.String? = "foo"
-          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let baz = try decoder.decode(Int.self)
             guard let baz else {
               throw QueryDecodingError.missingRequiredColumn
@@ -540,25 +540,9 @@ extension SnapshotTests {
         """
       } diagnostics: {
         """
-        @Table
-        struct Foo {
-          var bar: Date
-          ┬────────────
-          ╰─ 🛑 'Date' column requires a query representation
-             ✏️ Insert '@Column(as: Date.ISO8601Representation.self)'
-             ✏️ Insert '@Column(as: Date.UnixTimeRepresentation.self)'
-             ✏️ Insert '@Column(as: Date.JulianDayRepresentation.self)'
-        }
+
         """
-      } fixes: {
-        """
-        @Table
-        struct Foo {
-          @Column(as: Date.ISO8601Representation.self)
-          var bar: Date
-        }
-        """
-      } expansion: {
+      }expansion: {
         #"""
         struct Foo {
           var bar: Date
@@ -583,6 +567,31 @@ extension SnapshotTests {
           }
         }
         """#
+      } expansion: {
+        #"""
+        struct Foo {
+          var bar: Date
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Foo
+            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date>("bar", keyPath: \QueryValue.bar)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.bar]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let bar = try decoder.decode(Date.self)
+            guard let bar else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
+          }
+        }
+        """#
       }
     }
 
@@ -596,25 +605,9 @@ extension SnapshotTests {
         """
       } diagnostics: {
         """
-        @Table
-        struct Foo {
-          var bar: Date?
-          ┬─────────────
-          ╰─ 🛑 'Date' column requires a query representation
-             ✏️ Insert '@Column(as: Date.ISO8601Representation?.self)'
-             ✏️ Insert '@Column(as: Date.UnixTimeRepresentation?.self)'
-             ✏️ Insert '@Column(as: Date.JulianDayRepresentation?.self)'
-        }
+
         """
-      } fixes: {
-        """
-        @Table
-        struct Foo {
-          @Column(as: Date.ISO8601Representation?.self)
-          var bar: Date?
-        }
-        """
-      } expansion: {
+      }expansion: {
         #"""
         struct Foo {
           var bar: Date?
@@ -632,6 +625,27 @@ extension SnapshotTests {
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.bar = try decoder.decode(Date.ISO8601Representation.self)
+          }
+        }
+        """#
+      } expansion: {
+        #"""
+        struct Foo {
+          var bar: Date?
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Foo
+            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date?>("bar", keyPath: \QueryValue.bar)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.bar]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.bar = try decoder.decode(Date.self)
           }
         }
         """#
@@ -648,25 +662,9 @@ extension SnapshotTests {
         """
       } diagnostics: {
         """
-        @Table
-        struct Foo {
-          var bar: Optional<Date>
-          ┬──────────────────────
-          ╰─ 🛑 'Date' column requires a query representation
-             ✏️ Insert '@Column(as: Date.ISO8601Representation?.self)'
-             ✏️ Insert '@Column(as: Date.UnixTimeRepresentation?.self)'
-             ✏️ Insert '@Column(as: Date.JulianDayRepresentation?.self)'
-        }
+
         """
-      } fixes: {
-        """
-        @Table
-        struct Foo {
-          @Column(as: Date.ISO8601Representation?.self)
-          var bar: Optional<Date>
-        }
-        """
-      } expansion: {
+      }expansion: {
         #"""
         struct Foo {
           var bar: Optional<Date>
@@ -687,6 +685,27 @@ extension SnapshotTests {
           }
         }
         """#
+      } expansion: {
+        #"""
+        struct Foo {
+          var bar: Optional<Date>
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Foo
+            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Optional<Date>>("bar", keyPath: \QueryValue.bar)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.bar]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.bar = try decoder.decode(Optional<Date>.self)
+          }
+        }
+        """#
       }
     }
 
@@ -700,25 +719,9 @@ extension SnapshotTests {
         """
       } diagnostics: {
         """
-        @Table
-        struct Foo {
-          var bar = Date()
-          ┬───────────────
-          ╰─ 🛑 'Date' column requires a query representation
-             ✏️ Insert '@Column(as: Date.ISO8601Representation.self)'
-             ✏️ Insert '@Column(as: Date.UnixTimeRepresentation.self)'
-             ✏️ Insert '@Column(as: Date.JulianDayRepresentation.self)'
-        }
+
         """
-      } fixes: {
-        """
-        @Table
-        struct Foo {
-          @Column(as: Date.ISO8601Representation.self)
-          var bar = Date()
-        }
-        """
-      } expansion: {
+      }expansion: {
         #"""
         struct Foo {
           var bar = Date()
@@ -736,6 +739,27 @@ extension SnapshotTests {
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.bar = try decoder.decode(Date.ISO8601Representation.self) ?? Date()
+          }
+        }
+        """#
+      } expansion: {
+        #"""
+        struct Foo {
+          var bar = Date()
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Foo
+            public let bar = StructuredQueriesCore.TableColumn<QueryValue, _>("bar", keyPath: \QueryValue.bar, default: Date())
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.bar]
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "foos"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.bar = try decoder.decode() ?? Date()
           }
         }
         """#
