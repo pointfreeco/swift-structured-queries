@@ -92,7 +92,7 @@ public struct Seeds: Sequence {
 
         return insertBatch(firstType)
       } else {
-        func insertBatch<T: StructuredQueriesCore.Table>(_: T.Type) -> SQLQueryExpression<Void> {
+        func insertBatch<T: Table>(_: T.Type) -> SQLQueryExpression<Void> {
           let batch = Array(seeds.lazy.prefix { $0 is T }.compactMap { $0 as? T })
           defer { seeds.removeFirst(batch.count) }
           return SQLQueryExpression(T.insert(batch))

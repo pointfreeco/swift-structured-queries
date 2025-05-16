@@ -207,6 +207,6 @@ public enum SQLMacro: ExpressionMacro {
         )
       )
     }
-    return "StructuredQueries.SQLQueryExpression(\(argument))"
+    return "\(moduleName).SQLQueryExpression(\(argument))"
   }
 }
