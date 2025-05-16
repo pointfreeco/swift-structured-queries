@@ -1,3 +1,5 @@
+import Foundation
+
 /// A type that can decode values from a database connection into in-memory representations.
 public protocol QueryDecoder {
   /// Decodes a single value of the given type from the current column.
@@ -35,6 +37,18 @@ public protocol QueryDecoder {
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
   mutating func decode(_ columnType: Int.Type) throws -> Int?
+
+  /// Decodes a single value of the given type from the current column.
+  ///
+  /// - Parameter columnType: The type to decode as.
+  /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
+  mutating func decode(_ columnType: Date.Type) throws -> Date?
+
+  /// Decodes a single value of the given type from the current column.
+  ///
+  /// - Parameter columnType: The type to decode as.
+  /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
+  mutating func decode(_ columnType: UUID.Type) throws -> UUID?
 
   /// Decodes a single value of the given type starting from the current column.
   ///
