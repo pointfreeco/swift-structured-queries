@@ -154,37 +154,6 @@ extension SnapshotTests {
           var date: Date
         }
         """
-      } diagnostics: {
-        """
-
-        """
-      }expansion: {
-        #"""
-        struct ReminderDate {
-          var date: Date
-        }
-
-        extension ReminderDate: StructuredQueriesCore.QueryRepresentable {
-          public struct Columns: StructuredQueriesCore.QueryExpression {
-            public typealias QueryValue = ReminderDate
-            public let queryFragment: StructuredQueriesCore.QueryFragment
-            public init(
-              date: some StructuredQueriesCore.QueryExpression<Date.ISO8601Representation>
-            ) {
-              self.queryFragment = """
-              \(date.queryFragment) AS "date"
-              """
-            }
-          }
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let date = try decoder.decode(Date.ISO8601Representation.self)
-            guard let date else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.date = date
-          }
-        }
-        """#
       } expansion: {
         #"""
         struct ReminderDate {
