@@ -229,18 +229,18 @@ extension SnapshotTests {
           var baz: Int
         }
 
-        extension Bar: StructuredQueries.Table {
-          public struct TableColumns: StructuredQueries.TableDefinition {
+        extension Bar: StructuredQueriesCore.Table {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Bar
-            public let baz = StructuredQueries.TableColumn<QueryValue, Int>("baz", keyPath: \QueryValue.baz)
-            public static var allColumns: [any StructuredQueries.TableColumnExpression] {
+            public let baz = StructuredQueriesCore.TableColumn<QueryValue, Int>("baz", keyPath: \QueryValue.baz)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               [QueryValue.columns.baz]
             }
           }
           public static let columns = TableColumns()
           public static let tableName = "bar"
           public static let schemaName: Swift.String? = "foo"
-          public init(decoder: inout some StructuredQueries.QueryDecoder) throws {
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let baz = try decoder.decode(Int.self)
             guard let baz else {
               throw QueryDecodingError.missingRequiredColumn
