@@ -1282,8 +1282,8 @@ extension Select {
   where Joins == (repeat each J) {
     var select = self
     select.limit = _LimitClause(
-      maxLength: maxLength(From.columns, repeat (each J).columns),
-      offset: offset?(From.columns, repeat (each J).columns)
+      maxLength: maxLength(From.columns, repeat (each J).columns).queryFragment,
+      offset: offset?(From.columns, repeat (each J).columns).queryFragment ?? select.limit?.offset
     )
     return select
   }
@@ -1297,7 +1297,10 @@ extension Select {
   public func limit<each J: Table>(_ maxLength: Int, offset: Int? = nil) -> Self
   where Joins == (repeat each J) {
     var select = self
-    select.limit = _LimitClause(maxLength: maxLength, offset: offset)
+    select.limit = _LimitClause(
+      maxLength: maxLength.queryFragment,
+      offset: offset?.queryFragment ?? select.limit?.offset
+    )
     return select
   }
 
@@ -1487,14 +1490,6 @@ public struct _LimitClause: QueryExpression {
 
   let maxLength: QueryFragment
   let offset: QueryFragment?
-
-  init(
-    maxLength: some QueryExpression,
-    offset: (some QueryExpression)? = Int?.none
-  ) {
-    self.maxLength = maxLength.queryFragment
-    self.offset = offset?.queryFragment
-  }
 
   public var queryFragment: QueryFragment {
     var query: QueryFragment = "LIMIT \(maxLength)"
