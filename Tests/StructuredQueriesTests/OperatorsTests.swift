@@ -405,7 +405,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" BETWEEN (0 AND 10))
+        ("rows"."c" BETWEEN 0 AND 10)
         """
       }
       assertInlineSnapshot(
@@ -413,7 +413,66 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" BETWEEN (0 AND 10))
+        ("rows"."c" BETWEEN 0 AND 10)
+        """
+      }
+      assertQuery(
+        Reminder.where {
+          $0.id.between(
+            Reminder.select { $0.id.min() } ?? 0,
+            and: (Reminder.select { $0.id.max() } ?? 0) / 3
+          )
+        }) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" BETWEEN coalesce((
+          SELECT min("reminders"."id")
+          FROM "reminders"
+        ), 0) AND (coalesce((
+          SELECT max("reminders"."id")
+          FROM "reminders"
+        ), 0) / 3))
+        """
+      }results: {
+        """
+        ┌────────────────────────────────────────────┐
+        │ Reminder(                                  │
+        │   id: 1,                                   │
+        │   assignedUserID: 1,                       │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                      │
+        │   isFlagged: false,                        │
+        │   notes: "Milk, Eggs, Apples",             │
+        │   priority: nil,                           │
+        │   remindersListID: 1,                      │
+        │   title: "Groceries"                       │
+        │ )                                          │
+        ├────────────────────────────────────────────┤
+        │ Reminder(                                  │
+        │   id: 2,                                   │
+        │   assignedUserID: nil,                     │
+        │   dueDate: Date(2000-12-30T00:00:00.000Z), │
+        │   isCompleted: false,                      │
+        │   isFlagged: true,                         │
+        │   notes: "",                               │
+        │   priority: nil,                           │
+        │   remindersListID: 1,                      │
+        │   title: "Haircut"                         │
+        │ )                                          │
+        ├────────────────────────────────────────────┤
+        │ Reminder(                                  │
+        │   id: 3,                                   │
+        │   assignedUserID: nil,                     │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
+        │   isCompleted: false,                      │
+        │   isFlagged: false,                        │
+        │   notes: "Ask about diet",                 │
+        │   priority: .high,                         │
+        │   remindersListID: 1,                      │
+        │   title: "Doctor appointment"              │
+        │ )                                          │
+        └────────────────────────────────────────────┘
         """
       }
     }
