@@ -38,11 +38,13 @@ public macro Table(
 ///   - representableType: A type that represents the property type in a query expression. For types
 ///     that don't have a single representation in SQL, like `Date` and `UUID`.
 ///   - primaryKey: The column is its table's auto-incrementing primary key.
+///   - databaseInitialized: The column has a default value and is not needed in an insert statement.
 @attached(accessor, names: named(willSet))
 public macro Column(
   _ name: String? = nil,
   as representableType: (any QueryRepresentable.Type)? = nil,
-  primaryKey: Bool = false
+  primaryKey: Bool? = nil,
+  databaseInitialized: Bool? = nil
 ) =
   #externalMacro(
     module: "StructuredQueriesMacros",
