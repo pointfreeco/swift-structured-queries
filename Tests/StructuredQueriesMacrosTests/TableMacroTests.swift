@@ -1703,5 +1703,75 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func commentAfterOptionalID() {
+      assertMacro {
+        """
+        @Table
+        struct Reminder {
+          let id: Int?  // TODO: Migrate to UUID
+          var title = ""
+        }
+        """
+      } expansion: {
+        #"""
+        struct Reminder {
+          let id: Int?  // TODO: Migrate to UUID
+          var title = ""
+        }
+
+        extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Reminder
+            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+            public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int?> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.id, QueryValue.columns.title]
+            }
+          }
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = Reminder
+            @Column(primaryKey: false)
+            let id: Int?
+            var title = ""
+            public struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Reminder.Draft
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.title]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = Reminder.tableName
+            public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              self.title = try decoder.decode(Swift.String.self) ?? ""
+            }
+            public init(_ other: Reminder) {
+              self.id = other.id
+              self.title = other.title
+            }
+            public init(
+              id: Int?  // TODO: Migrate to UUID = nil,
+        title:Swift.String = ""
+            ) {
+              self.id = id
+              self.title = title
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "reminders"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.id = try decoder.decode(Int.self)
+            self.title = try decoder.decode(Swift.String.self) ?? ""
+          }
+        }
+        """#
+      }
+    }
   }
 }
