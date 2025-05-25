@@ -100,11 +100,10 @@ extension Optional: Table where Wrapped: Table {
       )
     }
 
-    public subscript<QueryValue>(
-      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, some QueryExpression<QueryValue>>
-    ) -> some QueryExpression<QueryValue?> {
-      let result: (some QueryExpression<QueryValue>)? = .some(Wrapped.columns[keyPath: keyPath])
-      return result
+    public subscript<Member: QueryExpression>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, Member>
+    ) -> some QueryExpression<Member.QueryValue?> {
+      Member?.some(Wrapped.columns[keyPath: keyPath])
     }
 
     public subscript<QueryValue>(

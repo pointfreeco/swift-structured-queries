@@ -9,6 +9,6 @@ public enum BindMacro: ExpressionMacro {
   ) -> ExprSyntax {
     guard let argument = node.arguments.first?.expression else { fatalError() }
     let `as` = node.arguments.dropFirst().first
-    return "StructuredQueries.BindQueryExpression(\(argument)\(raw: `as`.map { ", \($0)" } ?? ""))"
+    return "\(moduleName).BindQueryExpression(\(argument)\(raw: `as`.map { ", \($0)" } ?? ""))"
   }
 }

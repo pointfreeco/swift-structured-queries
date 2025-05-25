@@ -196,11 +196,14 @@ extension Update: Statement {
     guard !updates.isEmpty
     else { return "" }
 
-    var query: QueryFragment = "UPDATE"
+    var query: QueryFragment = "UPDATE "
     if let conflictResolution {
-      query.append(" OR \(conflictResolution)")
+      query.append("OR \(conflictResolution) ")
     }
-    query.append(" \(quote: From.tableName)")
+    if let schemaName = From.schemaName {
+      query.append("\(quote: schemaName).")
+    }
+    query.append("\(quote: From.tableName)")
     if let tableAlias = From.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }

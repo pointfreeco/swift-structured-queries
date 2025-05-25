@@ -403,7 +403,11 @@ extension Insert: Statement {
     if let conflictResolution {
       query.append(" OR \(conflictResolution)")
     }
-    query.append(" INTO \(quote: Into.tableName)")
+    query.append(" INTO ")
+    if let schemaName = Into.schemaName {
+      query.append("\(quote: schemaName).")
+    }
+    query.append("\(quote: Into.tableName)")
     if let tableAlias = Into.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }

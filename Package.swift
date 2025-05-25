@@ -43,7 +43,7 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.1"),
     .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.2"),
-    .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"601.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"602.0.0"),
   ],
   targets: [
     .target(

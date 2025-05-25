@@ -262,6 +262,10 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// - Parameter table: A table.
     public mutating func appendInterpolation<T: Table>(_ table: T.Type) {
+      if let schemaName = table.schemaName {
+        appendInterpolation(quote: schemaName)
+        appendLiteral(".")
+      }
       appendInterpolation(quote: table.tableAlias ?? table.tableName)
     }
 

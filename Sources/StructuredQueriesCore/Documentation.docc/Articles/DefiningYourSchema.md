@@ -143,14 +143,19 @@ generated when writing queries will correctly use `"is_completed"`.
 
 ### Custom data types
 
-There are many data types that do not have native support in SQLite. For these data types you must
-define a conformance to ``QueryBindable`` in order to translate values to a format that SQLite does
-understand. The library comes with conformances to aid in representing dates, UUIDs, and JSON, and
-you can define your own conformances for your own custom data types.
+StructuredQueries provides support for many basic Swift data types out of the box, like strings,
+integers, doubles, bytes, and booleans, but you may want to represent custom, domain specific types
+with your table's columns, instead. For these data types you must either define a conformance to
+``QueryBindable`` to translate values to a format that the library does understand, or provide a
+``QueryRepresentable`` type that wraps your domain type.
+
+The library comes with several `QueryRepresentable` conformances to aid in representing dates,
+UUIDs, and JSON, and you can define your own conformances for your own custom data types.
 
 #### Dates
 
-SQLite does not have a native date type, and instead has 3 different ways to represent dates:
+While some relational databases, like MySQL and Postgres, have native support for dates, SQLite
+does _not_. Instead, it has 3 different ways to represent dates:
 
   * Text column interpreted as ISO-8601-formatted string.
   * Int column interpreted as number of seconds since Unix epoch.
@@ -203,6 +208,14 @@ And StructuredQueries will take care of formatting the value for the database:
   }
 }
 
+When querying against a date column with a Swift date, you will need to explicitly bundle up the
+Swift date into the appropriate representation to use various query helpers. This can be done using
+the `#bind` macro:
+
+```swift
+Reminder.where { $0.created > #bind(startDate) }
+```
+
 #### UUID
 
 SQLite also does not have native support for UUIDs. If you try to use a UUID in your tables you
@@ -236,6 +249,14 @@ translate the UUID to text:
   let id: UUID
   var title = ""
 }
+```
+
+When querying against a UUID column with a Swift UUID, you will need to explicitly bundle up the
+Swift UUID into the appropriate representation to use various query helpers. This can be done using
+the `#bind` macro:
+
+```swift
+Reminder.where { $0.id != #bind(reminder.id) }
 ```
 
 #### RawRepresentable
@@ -295,14 +316,15 @@ example, suppose the `Reminder` table had an array of notes:
 
 This does not work because the `@Table` macro does not know how to encode and decode an array
 of strings into a value that SQLite understands. If you annotate this field with
-``JSONRepresentation``, then the library can encode the array of strings to a JSON string when
-storing data in the table, and decode the JSON array into a Swift array when decoding a row:
+``Swift/Decodable/JSONRepresentation``, then the library can encode the array of strings to a JSON
+string when storing data in the table, and decode the JSON array into a Swift array when decoding a
+row:
 
 ```swift
 @Table struct Reminder {
   let id: Int
   var title = ""
-  @Column(as: JSONRepresentation<[String]>.self)
+  @Column(as: [String].JSONRepresentation.self)
   var notes: [String]
 }
 ```

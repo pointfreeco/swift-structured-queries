@@ -27,7 +27,7 @@ jobs:
       - name: Run tests
         run: swift test
       - name: Build release
-        run: swift build -c release
+        run: swift build -c release --build-tests
 
   linux:
     name: Linux

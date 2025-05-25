@@ -22,6 +22,10 @@ extension Date {
   }
 }
 
+extension Date? {
+  public typealias JulianDayRepresentation = Date.JulianDayRepresentation?
+}
+
 extension Date.JulianDayRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .double(2440587.5 + queryOutput.timeIntervalSince1970 / 86400)

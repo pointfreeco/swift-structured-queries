@@ -8,16 +8,16 @@ import Testing
 @Suite(
   .serialized,
   .macros(
-    record: .failed,
-    macros: [
+    [
       "_Draft": TableMacro.self,
       "bind": BindMacro.self,
       "Column": ColumnMacro.self,
       "Ephemeral": EphemeralMacro.self,
-      "Table": TableMacro.self,
       "Selection": SelectionMacro.self,
       "sql": SQLMacro.self,
-    ]
+      "Table": TableMacro.self,
+    ],
+    record: .failed
   )
 ) struct SnapshotTests {}
 

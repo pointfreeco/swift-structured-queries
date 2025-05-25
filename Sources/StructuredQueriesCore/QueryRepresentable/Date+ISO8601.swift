@@ -22,6 +22,10 @@ extension Date {
   }
 }
 
+extension Date? {
+  public typealias ISO8601Representation = Date.ISO8601Representation?
+}
+
 extension Date.ISO8601Representation: QueryBindable {
   public var queryBinding: QueryBinding {
     .text(queryOutput.iso8601String)

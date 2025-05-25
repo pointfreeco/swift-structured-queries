@@ -5,15 +5,6 @@ import StructuredQueries
 import StructuredQueriesSQLite
 import Testing
 
-/*
- TODO: split json association tests into own suite with custom schema
- * exercise Bool? path
- * exercise Data/UUID path with JSON
- * exercise dates
- * exercise JSONRepresentation field (such as [String] notes)
- * exercise path that removes the NULL filter to see how that can come up
- */
-
 extension SnapshotTests {
   @MainActor
   @Suite struct KitchenSinkTests {
@@ -336,8 +327,8 @@ private struct KitchenSink: Codable {
   var julianDayDate: Date
   @Column(as: Date.JulianDayRepresentation?.self)
   var optionalJulianDayDate: Date?
-  @Column(as: JSONRepresentation<[String]>.self)
+  @Column(as: [String].JSONRepresentation.self)
   var jsonArray: [String]
-  @Column(as: JSONRepresentation<[String]>?.self)
+  @Column(as: [String].JSONRepresentation?.self)
   var optionalJSONArray: [String]?
 }

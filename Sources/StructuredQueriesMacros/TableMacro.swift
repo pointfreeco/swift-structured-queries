@@ -49,32 +49,56 @@ extension TableMacro: ExtensionMacro {
     let selfRewriter = SelfRewriter(
       selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
     )
-    let tableName: ExprSyntax
-    if case let .argumentList(arguments) = node.arguments,
-      let expression = arguments.first?.expression
-    {
-      if node.attributeName.identifier == "_Draft" {
-        let memberAccess = expression.cast(MemberAccessExprSyntax.self)
-        let base = memberAccess.base!
-        draftTableType = TypeSyntax("\(base)")
-        tableName = "\(base).tableName"
-      } else {
-        if !expression.isNonEmptyStringLiteral {
-          diagnostics.append(
-            Diagnostic(
-              node: expression,
-              message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
-            )
-          )
-        }
-        tableName = expression.trimmed
-      }
-    } else {
-      tableName = ExprSyntax(
-        StringLiteralExprSyntax(
-          content: declaration.name.trimmed.text.lowerCamelCased().pluralized()
-        )
+    var schemaName: ExprSyntax?
+    var tableName = ExprSyntax(
+      StringLiteralExprSyntax(
+        content: declaration.name.trimmed.text.lowerCamelCased().pluralized()
       )
+    )
+    if case let .argumentList(arguments) = node.arguments {
+      for argumentIndex in arguments.indices {
+        let argument = arguments[argumentIndex]
+        switch argument.label {
+        case nil:
+          if node.attributeName.identifier == "_Draft" {
+            let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
+            let base = memberAccess.base!
+            draftTableType = TypeSyntax("\(base)")
+            tableName = "\(base).tableName"
+          } else {
+            if !argument.expression.isNonEmptyStringLiteral {
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
+                )
+              )
+            }
+            tableName = argument.expression.trimmed
+          }
+
+        case let .some(label) where label.text == "schema":
+          if node.attributeName.identifier == "_Draft" {
+            let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
+            let base = memberAccess.base!
+            draftTableType = TypeSyntax("\(base)")
+            schemaName = "\(base).schemaName"
+          } else {
+            if !argument.expression.isNonEmptyStringLiteral {
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
+                )
+              )
+            }
+            schemaName = argument.expression.trimmed
+          }
+
+        case let argument?:
+          fatalError("Unexpected argument: \(argument)")
+        }
+      }
     }
     for member in declaration.memberBlock.members {
       guard
@@ -545,6 +569,12 @@ extension TableMacro: ExtensionMacro {
     }
 
     var typeAliases: [DeclSyntax] = []
+    var letSchemaName: DeclSyntax?
+    if let schemaName {
+      letSchemaName = """
+        public static let schemaName: Swift.String? = \(schemaName)
+        """
+    }
     var initDecoder: DeclSyntax?
     if declaration.hasMacroApplication("Selection") {
       conformances.append("\(moduleName).PartialSelectStatement")
@@ -579,7 +609,7 @@ extension TableMacro: ExtensionMacro {
         }
         }\(draft)\(typeAliases, separator: "\n")
         public static let columns = TableColumns()
-        public static let tableName = \(tableName)\(initDecoder)\(initFromOther)
+        public static let tableName = \(tableName)\(letSchemaName)\(initDecoder)\(initFromOther)
         }
         """
       )
