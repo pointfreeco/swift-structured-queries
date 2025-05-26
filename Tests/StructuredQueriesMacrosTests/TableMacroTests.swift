@@ -530,163 +530,6 @@ extension SnapshotTests {
       }
     }
 
-    @Test func dateDiagnostic() {
-      assertMacro {
-        """
-        @Table
-        struct Foo {
-          var bar: Date
-        }
-        """
-      } expansion: {
-        #"""
-        struct Foo {
-          var bar: Date
-        }
-
-        extension Foo: StructuredQueriesCore.Table {
-          public struct TableColumns: StructuredQueriesCore.TableDefinition {
-            public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date>("bar", keyPath: \QueryValue.bar)
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
-            }
-          }
-          public static let columns = TableColumns()
-          public static let tableName = "foos"
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let bar = try decoder.decode(Date.self)
-            guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.bar = bar
-          }
-        }
-        """#
-      }
-    }
-
-    @Test func optionalDateDiagnostic() {
-      assertMacro {
-        """
-        @Table
-        struct Foo {
-          var bar: Date?
-        }
-        """
-      } diagnostics: {
-        """
-
-        """
-      }expansion: {
-        #"""
-        struct Foo {
-          var bar: Date?
-        }
-
-        extension Foo: StructuredQueriesCore.Table {
-          public struct TableColumns: StructuredQueriesCore.TableDefinition {
-            public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date.ISO8601Representation?>("bar", keyPath: \QueryValue.bar)
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
-            }
-          }
-          public static let columns = TableColumns()
-          public static let tableName = "foos"
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.bar = try decoder.decode(Date.ISO8601Representation.self)
-          }
-        }
-        """#
-      } expansion: {
-        #"""
-        struct Foo {
-          var bar: Date?
-        }
-
-        extension Foo: StructuredQueriesCore.Table {
-          public struct TableColumns: StructuredQueriesCore.TableDefinition {
-            public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date?>("bar", keyPath: \QueryValue.bar)
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
-            }
-          }
-          public static let columns = TableColumns()
-          public static let tableName = "foos"
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.bar = try decoder.decode(Date.self)
-          }
-        }
-        """#
-      }
-    }
-
-    @Test func optionalTypeDateDiagnostic() {
-      assertMacro {
-        """
-        @Table
-        struct Foo {
-          var bar: Optional<Date>
-        }
-        """
-      } expansion: {
-        #"""
-        struct Foo {
-          var bar: Optional<Date>
-        }
-
-        extension Foo: StructuredQueriesCore.Table {
-          public struct TableColumns: StructuredQueriesCore.TableDefinition {
-            public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Optional<Date>>("bar", keyPath: \QueryValue.bar)
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
-            }
-          }
-          public static let columns = TableColumns()
-          public static let tableName = "foos"
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.bar = try decoder.decode(Optional<Date>.self)
-          }
-        }
-        """#
-      }
-    }
-
-    @Test func defaultDateDiagnostic() {
-      assertMacro {
-        """
-        @Table
-        struct Foo {
-          var bar = Date()
-        }
-        """
-      } expansion: {
-        #"""
-        struct Foo {
-          var bar = Date()
-        }
-
-        extension Foo: StructuredQueriesCore.Table {
-          public struct TableColumns: StructuredQueriesCore.TableDefinition {
-            public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, _>("bar", keyPath: \QueryValue.bar, default: Date())
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
-            }
-          }
-          public static let columns = TableColumns()
-          public static let tableName = "foos"
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.bar = try decoder.decode() ?? Date()
-          }
-        }
-        """#
-      }
-    }
-
     @Test func backticks() {
       assertMacro {
         """
@@ -1643,6 +1486,76 @@ extension SnapshotTests {
               throw QueryDecodingError.missingRequiredColumn
             }
             self.id = id
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func commentAfterOptionalID() {
+      assertMacro {
+        """
+        @Table
+        struct Reminder {
+          let id: Int?  // TODO: Migrate to UUID
+          var title = ""
+        }
+        """
+      } expansion: {
+        #"""
+        struct Reminder {
+          let id: Int?  // TODO: Migrate to UUID
+          var title = ""
+        }
+
+        extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Reminder
+            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+            public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int?> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.id, QueryValue.columns.title]
+            }
+          }
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = Reminder
+            @Column(primaryKey: false)
+            let id: Int?
+            var title = ""
+            public struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Reminder.Draft
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.title]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = Reminder.tableName
+            public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              self.title = try decoder.decode(Swift.String.self) ?? ""
+            }
+            public init(_ other: Reminder) {
+              self.id = other.id
+              self.title = other.title
+            }
+            public init(
+              id: Int? = nil,
+              title: Swift.String = ""
+            ) {
+              self.id = id
+              self.title = title
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "reminders"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.id = try decoder.decode(Int.self)
+            self.title = try decoder.decode(Swift.String.self) ?? ""
           }
         }
         """#

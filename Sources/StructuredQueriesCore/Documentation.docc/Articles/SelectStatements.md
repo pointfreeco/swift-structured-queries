@@ -721,7 +721,8 @@ The `limit(_:offset:)` function is used to change a query's `LIMIT` and `OFFSET`
   }
 }
 
-Multiple chained calls to `limit` will override the limit and offset to the last call:
+Multiple chained calls to `limit` will override the limit and offset to the last call, using the
+existing offset if none is provided:
 
 @Row {
   @Column {
@@ -744,6 +745,22 @@ Multiple chained calls to `limit` will override the limit and offset to the last
     ```swift
     Reminder
       .limit(10)
+      .limit(20, offset: 20)
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT … FROM "reminders"
+    LIMIT 20 OFFSET 20
+    ```
+  }
+}
+
+@Row {
+  @Column {
+    ```swift
+    Reminder
+      .limit(10, offset: 10)
       .limit(20, offset: 20)
     ```
   }

@@ -861,7 +861,7 @@ extension QueryExpression where QueryValue: QueryBindable {
     BinaryOperator(
       lhs: self,
       operator: "BETWEEN",
-      rhs: BinaryOperator<Void>(lhs: lowerBound, operator: "AND", rhs: upperBound)
+      rhs: SQLQueryExpression("\(lowerBound) AND \(upperBound)")
     )
   }
 }

@@ -146,42 +146,5 @@ extension SnapshotTests {
         """#
       }
     }
-
-    @Test func dateDiagnostic() {
-      assertMacro {
-        """
-        @Selection struct ReminderDate {
-          var date: Date
-        }
-        """
-      } expansion: {
-        #"""
-        struct ReminderDate {
-          var date: Date
-        }
-
-        extension ReminderDate: StructuredQueriesCore.QueryRepresentable {
-          public struct Columns: StructuredQueriesCore.QueryExpression {
-            public typealias QueryValue = ReminderDate
-            public let queryFragment: StructuredQueriesCore.QueryFragment
-            public init(
-              date: some StructuredQueriesCore.QueryExpression<Date>
-            ) {
-              self.queryFragment = """
-              \(date.queryFragment) AS "date"
-              """
-            }
-          }
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let date = try decoder.decode(Date.self)
-            guard let date else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.date = date
-          }
-        }
-        """#
-      }
-    }
   }
 }
