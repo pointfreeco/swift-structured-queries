@@ -153,3 +153,9 @@ public macro sql<QueryValue>(
 //     module: "StructuredQueriesMacros",
 //     type: "TableMacro"
 //   )
+
+@Table("test")
+struct Test: Identifiable, Equatable, Codable {
+  var id: Int64?  
+  var something: String // foo
+}

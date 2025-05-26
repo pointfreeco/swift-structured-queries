@@ -139,6 +139,66 @@ extension SnapshotTests {
       }
     }
 
+    @Test func commentOnPrimaryKey() {
+      assertMacro {
+        """
+        @Table
+        struct User {
+          let id: Int? // TODO: Make non-optional
+        }
+        """
+      } expansion: {
+        #"""
+        struct User {
+          let id: Int? // TODO: Make non-optional
+        }
+
+        extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+          public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = User
+            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int?> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.id]
+            }
+          }
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = User
+            @Column(primaryKey: false)
+            let id: Int?
+            public struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = User.Draft
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                [QueryValue.columns.id]
+              }
+            }
+            public static let columns = TableColumns()
+            public static let tableName = User.tableName
+            public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+            }
+            public init(_ other: User) {
+              self.id = other.id
+            }
+            public init(
+              id: Int?  = nil
+            ) {
+              self.id = id
+            }
+          }
+          public static let columns = TableColumns()
+          public static let tableName = "users"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.id = try decoder.decode(Int.self)
+          }
+        }
+        """#
+      }
+    }
+
     @Test func tableName() {
       assertMacro {
         """
