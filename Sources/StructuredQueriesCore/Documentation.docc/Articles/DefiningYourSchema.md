@@ -256,11 +256,11 @@ different representations:
   * Int column interpreted as number of seconds since Unix epoch.
   * Double column interpreted as a Julian day (number of days since November 24, 4713 BC).
 
-By default, StructuredQueries will bind and decode dates as ISO-8601 text. If you want to the
-library to use a different representation (_i.e._ integer or double), you can provide an explicit
-query representation to the `@Column` macro's `as:` argument.
-``Foundation/Date/UnixTimeRepresentation`` will store the date as an integer, and
-``Foundation/Date/JulianDayRepresentation`` will store the date as a floating point number.
+By default, StructuredQueries will bind and decode dates as ISO-8601 text. If you want the library
+to use a different representation (_i.e._ integer or double), you can provide an explicit query
+representation to the `@Column` macro's `as:` argument. ``Foundation/Date/UnixTimeRepresentation``
+will store the date as an integer, and ``Foundation/Date/JulianDayRepresentation`` will store the
+date as a floating point number.
 
 For example:
 
@@ -292,9 +292,9 @@ And StructuredQueries will take care of formatting the value for the database:
   }
 }
 
-When querying against a date column with a Swift date, you will need to explicitly bundle up the
-Swift date into the appropriate representation to use various query helpers. This can be done using
-the `#bind` macro:
+When querying against a date column with a custom representation, you will need to explicitly bundle
+the Swift date up into the appropriate representation to use various query helpers. This can be done
+using the `#bind` macro:
 
 ```swift
 Reminder.where { $0.created > #bind(startDate) }
@@ -315,9 +315,9 @@ To use such custom representations, you can provide it to the `@Column` macro's 
 }
 ```
 
-When querying against a UUID column with a Swift UUID, you will need to explicitly bundle up the
-Swift UUID into the appropriate representation to use various query helpers. This can be done using
-the `#bind` macro:
+When querying against a UUID column with a custom representation, you will need to explicitly bundle
+the Swift UUID up into the appropriate representation to use various query helpers. This can be done
+using the `#bind` macro:
 
 ```swift
 Reminder.where { $0.id != #bind(reminder.id) }
