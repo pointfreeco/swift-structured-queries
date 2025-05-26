@@ -10,10 +10,13 @@
 
 ### Conformances
 
-- ``Foundation/Date/ISO8601Representation``
+- ``Swift/Decodable/JSONRepresentation``
 - ``Foundation/Date/JulianDayRepresentation``
 - ``Foundation/Date/UnixTimeRepresentation``
 - ``Foundation/UUID/BytesRepresentation``
-- ``Foundation/UUID/LowercasedRepresentation``
 - ``Foundation/UUID/UppercasedRepresentation``
-- ``Swift/Decodable/JSONRepresentation``
+
+### Deprecations
+
+- ``Foundation/Date/ISO8601Representation``
+- ``Foundation/UUID/LowercasedRepresentation``

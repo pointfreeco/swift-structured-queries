@@ -113,7 +113,7 @@ extension SnapshotTests {
       assertMacro {
         """
         @Selection struct ReminderDate {
-          @Column(as: Date.ISO8601Representation.self)
+          @Column(as: Date.UnixTimeRepresentation.self)
           var date: Date
         }
         """
@@ -128,7 +128,7 @@ extension SnapshotTests {
             public typealias QueryValue = ReminderDate
             public let queryFragment: StructuredQueriesCore.QueryFragment
             public init(
-              date: some StructuredQueriesCore.QueryExpression<Date.ISO8601Representation>
+              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
             ) {
               self.queryFragment = """
               \(date.queryFragment) AS "date"
@@ -136,7 +136,7 @@ extension SnapshotTests {
             }
           }
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let date = try decoder.decode(Date.ISO8601Representation.self)
+            let date = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let date else {
               throw QueryDecodingError.missingRequiredColumn
             }

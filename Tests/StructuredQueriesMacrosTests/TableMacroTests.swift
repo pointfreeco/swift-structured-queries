@@ -422,7 +422,7 @@ extension SnapshotTests {
         """
         @Table
         struct Foo {
-          @Column(as: Date.ISO8601Representation.self)
+          @Column(as: Date.UnixTimeRepresentation.self)
           var bar: Date
         }
         """
@@ -435,7 +435,7 @@ extension SnapshotTests {
         extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date.ISO8601Representation>("bar", keyPath: \QueryValue.bar)
+            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation>("bar", keyPath: \QueryValue.bar)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               [QueryValue.columns.bar]
             }
@@ -443,7 +443,7 @@ extension SnapshotTests {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let bar = try decoder.decode(Date.ISO8601Representation.self)
+            let bar = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let bar else {
               throw QueryDecodingError.missingRequiredColumn
             }

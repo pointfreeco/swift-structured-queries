@@ -1,52 +1,6 @@
 import Foundation
 
 extension Date {
-  /// A query expression representing a date as an ISO-8601-formatted string (in RFC 3339 format).
-  ///
-  /// ```swift
-  /// @Table
-  /// struct Item {
-  ///   @Column(as: Date.ISO8601Representation.self)
-  ///   var date: Date
-  /// }
-  ///
-  /// Item.insert { $0.date } values: { Date() }
-  /// // INSERT INTO "items" ("date") VALUES ('2018-01-29 00:08:00.000')
-  /// ```
-  public struct ISO8601Representation: QueryRepresentable {
-    public var queryOutput: Date
-
-    public var iso8601String: String {
-      queryOutput.iso8601String
-    }
-
-    public init(queryOutput: Date) {
-      self.queryOutput = queryOutput
-    }
-
-    public init(iso8601String: String) throws {
-      try self.init(queryOutput: Date(iso8601String: iso8601String))
-    }
-  }
-}
-
-extension Date? {
-  public typealias ISO8601Representation = Date.ISO8601Representation?
-}
-
-extension Date.ISO8601Representation: QueryBindable {
-  public var queryBinding: QueryBinding {
-    .text(queryOutput.iso8601String)
-  }
-}
-
-extension Date.ISO8601Representation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
-    try self.init(queryOutput: Date(iso8601String: String(decoder: &decoder)))
-  }
-}
-
-extension Date {
   package var iso8601String: String {
     if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
       return formatted(.iso8601.currentTimestamp(includingFractionalSeconds: true))
@@ -105,12 +59,6 @@ extension Date {
       }
       self = date
     }
-  }
-}
-
-extension Date.ISO8601Representation: SQLiteType {
-  public static var typeAffinity: SQLiteTypeAffinity {
-    String.typeAffinity
   }
 }
 

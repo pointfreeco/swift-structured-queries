@@ -6,7 +6,7 @@ extension UUID {
   /// ```swift
   /// @Table
   /// struct Item {
-  ///   @Column(as: UUID.LowercasedRepresentation.self)
+  ///   @Column(as: UUID.UppercasedRepresentation.self)
   ///   let id: UUID
   /// }
   ///

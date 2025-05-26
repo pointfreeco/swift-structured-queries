@@ -26,7 +26,6 @@ could be restored for a certain amount of time. These tables can be represented 
 struct RemindersList: Identifiable {
   let id: Int
   var title = ""
-  @Column(as: Date.ISO8601Representation?.self)
   var deletedAt: Date?
 }
 @Table
@@ -34,9 +33,7 @@ struct Reminder: Identifiable {
   let id: Int
   var title = ""
   var isCompleted = false
-  @Column(as: Date.ISO8601Representation?.self)
   var dueAt: Date?
-  @Column(as: Date.ISO8601Representation?.self)
   var deletedAt: Date?
   var remindersListID: RemindersList.ID
 }
@@ -207,7 +204,6 @@ struct Reminder {
   let id: Int
   var title = ""
   var isCompleted = false
-  @Column(as: Date.ISO8601Representation?.self)
   var deletedAt: Date?
 
   static let all = Self.where { $0.isDeleted.isNot(nil) }

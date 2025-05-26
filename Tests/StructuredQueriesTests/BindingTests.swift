@@ -76,8 +76,7 @@ extension SnapshotTests {
     @Test func uuids() throws {
       assertQuery(
         SimpleSelect {
-          #bind(UUID(0), as: UUID.LowercasedRepresentation.self)
-            .in([UUID(1), UUID(2)].map { #bind($0) })
+          UUID(0).in([UUID(1), UUID(2)])
         }
       ) {
         """

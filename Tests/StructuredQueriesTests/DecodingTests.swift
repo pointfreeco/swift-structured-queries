@@ -78,12 +78,6 @@ extension SnapshotTests {
     @Test func queryRepresentable() throws {
       #expect(
         try db.execute(
-          SimpleSelect { #sql("'2001-01-01 00:00:00'", as: Date.ISO8601Representation.self) }
-        )
-        .first == Date(timeIntervalSinceReferenceDate: 0)
-      )
-      #expect(
-        try db.execute(
           SimpleSelect { #sql("'2001-01-01 00:00:00'", as: Date.self) }
         )
         .first == Date(timeIntervalSinceReferenceDate: 0)
@@ -104,14 +98,6 @@ extension SnapshotTests {
         try db.execute(
           SimpleSelect {
             #sql("'deadbeef-dead-beef-dead-beefdeadbeef'", as: UUID.self)
-          }
-        )
-        .first == UUID(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef")
-      )
-      #expect(
-        try db.execute(
-          SimpleSelect {
-            #sql("'deadbeef-dead-beef-dead-beefdeadbeef'", as: UUID.LowercasedRepresentation.self)
           }
         )
         .first == UUID(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef")
@@ -148,7 +134,13 @@ extension SnapshotTests {
     @Test func optionalDate() throws {
       #expect(
         try db.execute(
-          SimpleSelect { #sql("NULL", as: Date.ISO8601Representation?.self) }
+          SimpleSelect { #sql("NULL", as: Date?.self) }
+        )
+        .first == .some(.none)
+      )
+      #expect(
+        try db.execute(
+          SimpleSelect { #sql("NULL", as: Date.UnixTimeRepresentation?.self) }
         )
         .first == .some(.none)
       )
@@ -242,7 +234,7 @@ extension SnapshotTests {
       _ = try #require(
         try db.execute(
           SimpleSelect {
-            #bind(Date(timeIntervalSince1970: 0), as: Date.ISO8601Representation.self)
+            #bind(Date(timeIntervalSince1970: 0), as: Date.UnixTimeRepresentation.self)
           }
         )
         .first

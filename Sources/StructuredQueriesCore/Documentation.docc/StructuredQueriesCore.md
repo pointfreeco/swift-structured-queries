@@ -15,7 +15,6 @@ struct Reminder {
   var title = ""
   var isCompleted = false
   var priority: Int?
-  @Column(as: Date.ISO8601Representation?.self)
   var dueDate: Date?
 }
 ```
