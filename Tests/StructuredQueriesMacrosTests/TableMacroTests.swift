@@ -1756,8 +1756,8 @@ extension SnapshotTests {
               self.title = other.title
             }
             public init(
-              id: Int?  // TODO: Migrate to UUID = nil,
-        title:Swift.String = ""
+              id: Int? = nil,
+              title: Swift.String = ""
             ) {
               self.id = id
               self.title = title

@@ -34,7 +34,9 @@ extension TableMacro: ExtensionMacro {
     var diagnostics: [Diagnostic] = []
 
     // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-    var draftBindings: [(PatternBindingSyntax, queryOutputType: TypeSyntax?)] = []
+    var draftBindings: [
+      (PatternBindingSyntax, queryOutputType: TypeSyntax?, optionalize: Bool)
+    ] = []
     // NB: End of workaround
 
     var draftProperties: [DeclSyntax] = []
@@ -223,12 +225,8 @@ extension TableMacro: ExtensionMacro {
         )
       }
 
-      // NB: A compiled bug prevents us from applying the '@_Draft' macro directly
-      if identifier == primaryKey?.identifier {
-        draftBindings.append((binding.optionalized(), columnQueryOutputType))
-      } else {
-        draftBindings.append((binding, columnQueryOutputType))
-      }
+      // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
+      draftBindings.append((binding, columnQueryOutputType, identifier == primaryKey?.identifier))
       // NB: End of workaround
 
       var assignedType: String? {
@@ -459,8 +457,12 @@ extension TableMacro: ExtensionMacro {
       .compactMap(\.memberBlock.members.trimmed)
       var memberwiseArguments: [PatternBindingSyntax] = []
       var memberwiseAssignments: [TokenSyntax] = []
-      for (binding, queryOutputType) in draftBindings {
-        let argument = binding.trimmed.annotated(queryOutputType).rewritten(selfRewriter)
+      for (binding, queryOutputType, optionalize) in draftBindings {
+        var argument = binding.trimmed
+        if optionalize {
+          argument = argument.optionalized()
+        }
+        argument = argument.annotated(queryOutputType).rewritten(selfRewriter)
         if argument.typeAnnotation == nil {
           let identifier =
             (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)

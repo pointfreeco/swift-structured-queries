@@ -153,16 +153,3 @@ public macro sql<QueryValue>(
 //     module: "StructuredQueriesMacros",
 //     type: "TableMacro"
 //   )
-
-@Table
-struct Reminder {
-  let id: Int  // TODO: Migrate to UUID
-  var title = ""
-}
-
-@Table("test")
-struct Test: Identifiable, Equatable, Codable {
-  @Column(primaryKey: false)
-  var id: Int64? // Anything
-  var something: String
-}
