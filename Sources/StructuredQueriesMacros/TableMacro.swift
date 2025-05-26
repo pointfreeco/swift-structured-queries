@@ -34,7 +34,8 @@ extension TableMacro: ExtensionMacro {
     var diagnostics: [Diagnostic] = []
 
     // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-    var draftBindings: [(PatternBindingSyntax, queryOutputType: TypeSyntax?)] = []
+    var draftBindings: [(PatternBindingSyntax, queryOutputType: TypeSyntax?, optionalize: Bool)] =
+      []
     // NB: End of workaround
 
     var draftProperties: [DeclSyntax] = []
@@ -223,12 +224,8 @@ extension TableMacro: ExtensionMacro {
         )
       }
 
-      // NB: A compiled bug prevents us from applying the '@_Draft' macro directly
-      if identifier == primaryKey?.identifier {
-        draftBindings.append((binding.optionalized(), columnQueryOutputType))
-      } else {
-        draftBindings.append((binding, columnQueryOutputType))
-      }
+      // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
+      draftBindings.append((binding, columnQueryOutputType, identifier == primaryKey?.identifier))
       // NB: End of workaround
 
       var assignedType: String? {
@@ -240,67 +237,6 @@ extension TableMacro: ExtensionMacro {
           .as(DeclReferenceExprSyntax.self)?
           .baseName
           .text
-      }
-      if columnQueryValueType == columnQueryOutputType,
-        let typeIdentifier = columnQueryValueType?.identifier ?? assignedType,
-        ["Date", "UUID"].contains(typeIdentifier)
-      {
-        var fixIts: [FixIt] = []
-        let optional = columnQueryValueType?.isOptionalType == true ? "?" : ""
-        if typeIdentifier.hasPrefix("Date") {
-          for representation in ["ISO8601", "UnixTime", "JulianDay"] {
-            var newProperty = property.with(\.leadingTrivia, "")
-            let attribute = "@Column(as: Date.\(representation)Representation\(optional).self)"
-            newProperty.attributes.insert(
-              AttributeListSyntax.Element("\(raw: attribute)")
-                .with(
-                  \.trailingTrivia,
-                  .newline.merging(property.leadingTrivia.indentation(isOnNewline: true))
-                ),
-              at: newProperty.attributes.startIndex
-            )
-            fixIts.append(
-              FixIt(
-                message: MacroExpansionFixItMessage("Insert '\(attribute)'"),
-                changes: [
-                  .replace(
-                    oldNode: Syntax(property),
-                    newNode: Syntax(newProperty.with(\.leadingTrivia, property.leadingTrivia))
-                  )
-                ]
-              )
-            )
-          }
-        } else if typeIdentifier.hasPrefix("UUID") {
-          for representation in ["Lowercased", "Uppercased", "Bytes"] {
-            var newProperty = property.with(\.leadingTrivia, "")
-            let attribute = "@Column(as: UUID.\(representation)Representation\(optional).self)\n"
-            newProperty.attributes.insert(
-              AttributeListSyntax.Element("\(raw: attribute)"),
-              at: newProperty.attributes.startIndex
-            )
-            fixIts.append(
-              FixIt(
-                message: MacroExpansionFixItMessage("Insert '\(attribute)'"),
-                changes: [
-                  .replace(
-                    oldNode: Syntax(property),
-                    newNode: Syntax(newProperty.with(\.leadingTrivia, property.leadingTrivia))
-                  )
-                ]
-              )
-            )
-          }
-        }
-        diagnostics.append(
-          Diagnostic(
-            node: property,
-            message: MacroExpansionErrorMessage(
-              "'\(typeIdentifier)' column requires a query representation"
-            ),
-            fixIts: fixIts
-          )
-        )
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
@@ -459,8 +395,12 @@ extension TableMacro: ExtensionMacro {
       .compactMap(\.memberBlock.members.trimmed)
       var memberwiseArguments: [PatternBindingSyntax] = []
       var memberwiseAssignments: [TokenSyntax] = []
-      for (binding, queryOutputType) in draftBindings {
-        let argument = binding.trimmed.annotated(queryOutputType).rewritten(selfRewriter)
+      for (binding, queryOutputType, optionalize) in draftBindings {
+        var argument = binding.trimmed
+        if optionalize {
+          argument = argument.optionalized()
+        }
+        argument = argument.annotated(queryOutputType).rewritten(selfRewriter)
         if argument.typeAnnotation == nil {
           let identifier =
             (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)

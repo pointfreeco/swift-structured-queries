@@ -20,11 +20,11 @@ extension SnapshotTests {
     @Test func queryValueType() {
       assertMacro {
         #"""
-        \(date) < #bind(Date(), as: Date.ISO8601Representation.self)
+        \(date) < #bind(Date(), as: Date.UnixTimeRepresentation.self)
         """#
       } expansion: {
         #"""
-        \(date) < StructuredQueriesCore.BindQueryExpression(Date(), as: Date.ISO8601Representation.self)
+        \(date) < StructuredQueriesCore.BindQueryExpression(Date(), as: Date.UnixTimeRepresentation.self)
         """#
       }
     }

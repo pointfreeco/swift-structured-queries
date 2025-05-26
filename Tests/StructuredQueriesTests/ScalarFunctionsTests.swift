@@ -13,7 +13,6 @@ extension SnapshotTests {
       var isAdmin: Bool
       var salary: Double
       var referrerID: Int?
-      @Column(as: Date.ISO8601Representation.self)
       var updatedAt: Date
       var image: [UInt8]
     }

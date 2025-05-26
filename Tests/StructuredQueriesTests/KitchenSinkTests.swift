@@ -315,9 +315,7 @@ private struct KitchenSink: Codable {
   var optionalDouble: Double?
   var rawRepresentable: Color
   var optionalRawRepresentable: Color?
-  @Column(as: Date.ISO8601Representation.self)
   var iso8601Date: Date
-  @Column(as: Date.ISO8601Representation?.self)
   var optionalISO8601Date: Date?
   @Column(as: Date.UnixTimeRepresentation.self)
   var unixTimeDate: Date

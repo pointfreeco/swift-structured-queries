@@ -113,7 +113,7 @@ extension SnapshotTests {
       assertMacro {
         """
         @Selection struct ReminderDate {
-          @Column(as: Date.ISO8601Representation.self)
+          @Column(as: Date.UnixTimeRepresentation.self)
           var date: Date
         }
         """
@@ -128,7 +128,7 @@ extension SnapshotTests {
             public typealias QueryValue = ReminderDate
             public let queryFragment: StructuredQueriesCore.QueryFragment
             public init(
-              date: some StructuredQueriesCore.QueryExpression<Date.ISO8601Representation>
+              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
             ) {
               self.queryFragment = """
               \(date.queryFragment) AS "date"
@@ -136,62 +136,7 @@ extension SnapshotTests {
             }
           }
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let date = try decoder.decode(Date.ISO8601Representation.self)
-            guard let date else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.date = date
-          }
-        }
-        """#
-      }
-    }
-
-    @Test func dateDiagnostic() {
-      assertMacro {
-        """
-        @Selection struct ReminderDate {
-          var date: Date
-        }
-        """
-      } diagnostics: {
-        """
-        @Selection struct ReminderDate {
-          var date: Date
-          ┬─────────────
-          ╰─ 🛑 'Date' column requires a query representation
-             ✏️ Insert '@Column(as: Date.ISO8601Representation.self)'
-             ✏️ Insert '@Column(as: Date.UnixTimeRepresentation.self)'
-             ✏️ Insert '@Column(as: Date.JulianDayRepresentation.self)'
-        }
-        """
-      } fixes: {
-        """
-        @Selection struct ReminderDate {
-          @Column(as: Date.ISO8601Representation.self)
-          var date: Date
-        }
-        """
-      } expansion: {
-        #"""
-        struct ReminderDate {
-          var date: Date
-        }
-
-        extension ReminderDate: StructuredQueriesCore.QueryRepresentable {
-          public struct Columns: StructuredQueriesCore.QueryExpression {
-            public typealias QueryValue = ReminderDate
-            public let queryFragment: StructuredQueriesCore.QueryFragment
-            public init(
-              date: some StructuredQueriesCore.QueryExpression<Date.ISO8601Representation>
-            ) {
-              self.queryFragment = """
-              \(date.queryFragment) AS "date"
-              """
-            }
-          }
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let date = try decoder.decode(Date.ISO8601Representation.self)
+            let date = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let date else {
               throw QueryDecodingError.missingRequiredColumn
             }
