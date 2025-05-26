@@ -130,6 +130,49 @@ extension SnapshotTests {
         """
       }
     }
+    
+    @Test func comparisonOptional() async throws {
+      assertInlineSnapshot(of: Row.columns.a.lt(0), as: .sql) {
+        """
+        ("rows"."a" < 0)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a.lte(0), as: .sql) {
+        """
+        ("rows"."a" <= 0)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a.gt(0), as: .sql) {
+        """
+        ("rows"."a" > 0)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a.gte(0), as: .sql) {
+        """
+        ("rows"."a" >= 0)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a < 0, as: .sql) {
+        """
+        ("rows"."a" < 0)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a <= 0, as: .sql) {
+        """
+        ("rows"."a" <= 0)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a > 0, as: .sql) {
+        """
+        ("rows"."a" > 0)
+        """
+      }
+      assertInlineSnapshot(of: Row.columns.a >= 0, as: .sql) {
+        """
+        ("rows"."a" >= 0)
+        """
+      }
+    }
 
     @Test func logic() {
       assertInlineSnapshot(of: Row.columns.bool && Row.columns.bool, as: .sql) {

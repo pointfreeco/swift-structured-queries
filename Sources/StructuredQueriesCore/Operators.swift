@@ -353,6 +353,120 @@ extension QueryExpression where QueryValue: QueryBindable {
   }
 }
 
+extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
+  /// Returns a predicate expression indicating whether the value of the first expression is less
+  /// than that of the second expression.
+  ///
+  /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
+  /// > Consider using ``lt(_:)``, instead.
+  ///
+  /// - Parameters:
+  ///   - lhs: An expression to compare.
+  ///   - rhs: Another expression to compare.
+  /// - Returns: A predicate expression.
+  public static func < (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> {
+    lhs.lt(rhs)
+  }
+
+  /// Returns a predicate expression indicating whether the value of the first expression is greater
+  /// than that of the second expression.
+  ///
+  /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
+  /// > Consider using ``gt(_:)``, instead.
+  ///
+  /// - Parameters:
+  ///   - lhs: An expression to compare.
+  ///   - rhs: Another expression to compare.
+  /// - Returns: A predicate expression.
+  public static func > (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> {
+    lhs.gt(rhs)
+  }
+
+  /// Returns a predicate expression indicating whether the value of the first expression is less
+  /// than or equal to that of the second expression.
+  ///
+  /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
+  /// > Consider using ``lte(_:)``, instead.
+  ///
+  /// - Parameters:
+  ///   - lhs: An expression to compare.
+  ///   - rhs: Another expression to compare.
+  /// - Returns: A predicate expression.
+  public static func <= (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> {
+    lhs.lte(rhs)
+  }
+
+  /// Returns a predicate expression indicating whether the value of the first expression is greater
+  /// than or equal to that of the second expression.
+  ///
+  /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
+  /// > Consider using ``gte(_:)``, instead.
+  ///
+  /// - Parameters:
+  ///   - lhs: An expression to compare.
+  ///   - rhs: Another expression to compare.
+  /// - Returns: A predicate expression.
+  public static func >= (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> {
+    lhs.gte(rhs)
+  }
+
+/// Returns a predicate expression indicating whether the value of the optional first expression is less
+  /// than that of the second expression.
+  ///
+  /// - Parameter other: An expression to compare this one to.
+  /// - Returns: A predicate expression.
+  public func lt(
+    _ other: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "<", rhs: other)
+  }
+
+  /// Returns a predicate expression indicating whether the value of the optional first expression is greater
+  /// than that of the second expression.
+  ///
+  /// - Parameter other: An expression to compare this one to.
+  /// - Returns: A predicate expression.
+  public func gt(
+    _ other: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: ">", rhs: other)
+  }
+
+  /// Returns a predicate expression indicating whether the value of the optional first expression is less
+  /// than or equal to that of the second expression.
+  ///
+  /// - Parameter other: An expression to compare this one to.
+  /// - Returns: A predicate expression.
+  public func lte(
+    _ other: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "<=", rhs: other)
+  }
+
+  /// Returns a predicate expression indicating whether the value of the optional first expression is greater
+  /// than or equal to that of the second expression.
+  ///
+  /// - Parameter other: An expression to compare this one to.
+  /// - Returns: A predicate expression.
+  public func gte(
+    _ other: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: ">=", rhs: other)
+  }
+}
+
 extension QueryExpression where QueryValue == Bool {
   /// Returns a logical AND operation on two predicate expressions.
   ///
