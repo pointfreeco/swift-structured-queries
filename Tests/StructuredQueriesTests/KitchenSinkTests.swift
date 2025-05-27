@@ -43,7 +43,8 @@ extension SnapshotTests {
             "julianDayDate" REAL NOT NULL DEFAULT 2456789.0,
             "optionalJulianDayDate" REAL,
             "jsonArray" TEXT NOT NULL DEFAULT '[]',
-            "optionalJSONArray" TEXT
+            "optionalJSONArray" TEXT,
+            "jsonArrayOfDates" TEXT NOT NULL DEFAULT '[]'
           )
           """
         )
@@ -72,7 +73,8 @@ extension SnapshotTests {
               iso8601Date: Date(timeIntervalSinceReferenceDate: 24 * 60 * 60),
               unixTimeDate: Date(timeIntervalSince1970: 24 * 60 * 60),
               julianDayDate: Date(timeIntervalSinceReferenceDate: 7 * 24 * 60 * 60),
-              jsonArray: ["Hello", "world"]
+              jsonArray: ["Hello", "world"],
+              jsonArrayOfDates: [Date(timeIntervalSinceReferenceDate: 1234567890)]
             ),
             KitchenSink(
               id: 3,
@@ -94,7 +96,8 @@ extension SnapshotTests {
               julianDayDate: Date(timeIntervalSinceReferenceDate: 7 * 24 * 60 * 60),
               optionalJulianDayDate: Date(timeIntervalSinceReferenceDate: 2 * 7 * 24 * 60 * 60),
               jsonArray: ["Hello", "world"],
-              optionalJSONArray: ["Goodnight", "moon"]
+              optionalJSONArray: ["Goodnight", "moon"],
+              jsonArrayOfDates: [Date(timeIntervalSinceReferenceDate: 1234567890)]
             ),
           ]
         )
@@ -106,10 +109,10 @@ extension SnapshotTests {
         KitchenSink.all
       ) {
         """
-        SELECT "kitchenSinks"."id", "kitchenSinks"."kitchenID", "kitchenSinks"."bool", "kitchenSinks"."optionalBool", "kitchenSinks"."string", "kitchenSinks"."optionalString", "kitchenSinks"."int", "kitchenSinks"."optionalInt", "kitchenSinks"."double", "kitchenSinks"."optionalDouble", "kitchenSinks"."rawRepresentable", "kitchenSinks"."optionalRawRepresentable", "kitchenSinks"."iso8601Date", "kitchenSinks"."optionalISO8601Date", "kitchenSinks"."unixTimeDate", "kitchenSinks"."optionalUnixTimeDate", "kitchenSinks"."julianDayDate", "kitchenSinks"."optionalJulianDayDate", "kitchenSinks"."jsonArray", "kitchenSinks"."optionalJSONArray"
+        SELECT "kitchenSinks"."id", "kitchenSinks"."kitchenID", "kitchenSinks"."bool", "kitchenSinks"."optionalBool", "kitchenSinks"."string", "kitchenSinks"."optionalString", "kitchenSinks"."int", "kitchenSinks"."optionalInt", "kitchenSinks"."double", "kitchenSinks"."optionalDouble", "kitchenSinks"."rawRepresentable", "kitchenSinks"."optionalRawRepresentable", "kitchenSinks"."iso8601Date", "kitchenSinks"."optionalISO8601Date", "kitchenSinks"."unixTimeDate", "kitchenSinks"."optionalUnixTimeDate", "kitchenSinks"."julianDayDate", "kitchenSinks"."optionalJulianDayDate", "kitchenSinks"."jsonArray", "kitchenSinks"."optionalJSONArray", "kitchenSinks"."jsonArrayOfDates"
         FROM "kitchenSinks"
         """
-      } results: {
+      }results: {
         """
         ┌──────────────────────────────────────────────────────────┐
         │ KitchenSink(                                             │
@@ -132,7 +135,8 @@ extension SnapshotTests {
         │   julianDayDate: Date(2014-05-11T12:00:00.000Z),         │
         │   optionalJulianDayDate: nil,                            │
         │   jsonArray: [],                                         │
-        │   optionalJSONArray: nil                                 │
+        │   optionalJSONArray: nil,                                │
+        │   jsonArrayOfDates: []                                   │
         │ )                                                        │
         ├──────────────────────────────────────────────────────────┤
         │ KitchenSink(                                             │
@@ -158,7 +162,10 @@ extension SnapshotTests {
         │     [0]: "Hello",                                        │
         │     [1]: "world"                                         │
         │   ],                                                     │
-        │   optionalJSONArray: nil                                 │
+        │   optionalJSONArray: nil,                                │
+        │   jsonArrayOfDates: [                                    │
+        │     [0]: Date(2040-02-14T23:31:30.000Z)                  │
+        │   ]                                                      │
         │ )                                                        │
         ├──────────────────────────────────────────────────────────┤
         │ KitchenSink(                                             │
@@ -187,6 +194,9 @@ extension SnapshotTests {
         │   optionalJSONArray: [                                   │
         │     [0]: "Goodnight",                                    │
         │     [1]: "moon"                                          │
+        │   ],                                                     │
+        │   jsonArrayOfDates: [                                    │
+        │     [0]: Date(2040-02-14T23:31:30.000Z)                  │
         │   ]                                                      │
         │ )                                                        │
         └──────────────────────────────────────────────────────────┘
@@ -201,11 +211,11 @@ extension SnapshotTests {
           .select { ($0, $1.jsonGroupArray()) }
       ) {
         """
-        SELECT "kitchens"."id", json_group_array(CASE WHEN ("kitchenSinks"."id" IS NOT NULL) THEN json_object('id', json_quote("kitchenSinks"."id"), 'kitchenID', json_quote("kitchenSinks"."kitchenID"), 'bool', json(CASE "kitchenSinks"."bool" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'optionalBool', json(CASE "kitchenSinks"."optionalBool" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'string', json_quote("kitchenSinks"."string"), 'optionalString', json_quote("kitchenSinks"."optionalString"), 'int', json_quote("kitchenSinks"."int"), 'optionalInt', json_quote("kitchenSinks"."optionalInt"), 'double', json_quote("kitchenSinks"."double"), 'optionalDouble', json_quote("kitchenSinks"."optionalDouble"), 'rawRepresentable', json_quote("kitchenSinks"."rawRepresentable"), 'optionalRawRepresentable', json_quote("kitchenSinks"."optionalRawRepresentable"), 'iso8601Date', json_quote("kitchenSinks"."iso8601Date"), 'optionalISO8601Date', json_quote("kitchenSinks"."optionalISO8601Date"), 'unixTimeDate', datetime("kitchenSinks"."unixTimeDate", 'unixepoch'), 'optionalUnixTimeDate', datetime("kitchenSinks"."optionalUnixTimeDate", 'unixepoch'), 'julianDayDate', datetime("kitchenSinks"."julianDayDate", 'julianday'), 'optionalJulianDayDate', datetime("kitchenSinks"."optionalJulianDayDate", 'julianday'), 'jsonArray', json("kitchenSinks"."jsonArray"), 'optionalJSONArray', json("kitchenSinks"."optionalJSONArray")) END)
+        SELECT "kitchens"."id", json_group_array(CASE WHEN ("kitchenSinks"."id" IS NOT NULL) THEN json_object('id', json_quote("kitchenSinks"."id"), 'kitchenID', json_quote("kitchenSinks"."kitchenID"), 'bool', json(CASE "kitchenSinks"."bool" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'optionalBool', json(CASE "kitchenSinks"."optionalBool" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'string', json_quote("kitchenSinks"."string"), 'optionalString', json_quote("kitchenSinks"."optionalString"), 'int', json_quote("kitchenSinks"."int"), 'optionalInt', json_quote("kitchenSinks"."optionalInt"), 'double', json_quote("kitchenSinks"."double"), 'optionalDouble', json_quote("kitchenSinks"."optionalDouble"), 'rawRepresentable', json_quote("kitchenSinks"."rawRepresentable"), 'optionalRawRepresentable', json_quote("kitchenSinks"."optionalRawRepresentable"), 'iso8601Date', json_quote("kitchenSinks"."iso8601Date"), 'optionalISO8601Date', json_quote("kitchenSinks"."optionalISO8601Date"), 'unixTimeDate', datetime("kitchenSinks"."unixTimeDate", 'unixepoch'), 'optionalUnixTimeDate', datetime("kitchenSinks"."optionalUnixTimeDate", 'unixepoch'), 'julianDayDate', datetime("kitchenSinks"."julianDayDate", 'julianday'), 'optionalJulianDayDate', datetime("kitchenSinks"."optionalJulianDayDate", 'julianday'), 'jsonArray', json("kitchenSinks"."jsonArray"), 'optionalJSONArray', json("kitchenSinks"."optionalJSONArray"), 'jsonArrayOfDates', json("kitchenSinks"."jsonArrayOfDates")) END)
         FROM "kitchens"
         FULL JOIN "kitchenSinks" ON ("kitchens"."id" IS "kitchenSinks"."kitchenID")
         """
-      } results: {
+      }results: {
         """
         ┌────────────────┬────────────────────────────────────────────────────────────┐
         │ Kitchen(id: 1) │ [                                                          │
@@ -232,7 +242,10 @@ extension SnapshotTests {
         │                │       [0]: "Hello",                                        │
         │                │       [1]: "world"                                         │
         │                │     ],                                                     │
-        │                │     optionalJSONArray: nil                                 │
+        │                │     optionalJSONArray: nil,                                │
+        │                │     jsonArrayOfDates: [                                    │
+        │                │       [0]: Date(2040-02-14T23:31:30.000Z)                  │
+        │                │     ]                                                      │
         │                │   ),                                                       │
         │                │   [1]: KitchenSink(                                        │
         │                │     id: 3,                                                 │
@@ -260,6 +273,9 @@ extension SnapshotTests {
         │                │     optionalJSONArray: [                                   │
         │                │       [0]: "Goodnight",                                    │
         │                │       [1]: "moon"                                          │
+        │                │     ],                                                     │
+        │                │     jsonArrayOfDates: [                                    │
+        │                │       [0]: Date(2040-02-14T23:31:30.000Z)                  │
         │                │     ]                                                      │
         │                │   ),                                                       │
         │                │   [2]: KitchenSink(                                        │
@@ -282,7 +298,8 @@ extension SnapshotTests {
         │                │     julianDayDate: Date(2014-05-11T12:00:00.000Z),         │
         │                │     optionalJulianDayDate: nil,                            │
         │                │     jsonArray: [],                                         │
-        │                │     optionalJSONArray: nil                                 │
+        │                │     optionalJSONArray: nil,                                │
+        │                │     jsonArrayOfDates: []                                   │
         │                │   )                                                        │
         │                │ ]                                                          │
         └────────────────┴────────────────────────────────────────────────────────────┘
@@ -329,4 +346,6 @@ private struct KitchenSink: Codable {
   var jsonArray: [String]
   @Column(as: [String].JSONRepresentation?.self)
   var optionalJSONArray: [String]?
+  @Column(as: [Date].JSONRepresentation.self)
+  var jsonArrayOfDates: [Date]
 }
