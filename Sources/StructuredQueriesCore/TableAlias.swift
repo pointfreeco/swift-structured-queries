@@ -193,6 +193,10 @@ extension TableAlias: QueryRepresentable where Base: QueryRepresentable {
 
 extension TableAlias: Sendable where Base: Sendable {}
 
+extension TableAlias: Equatable where Base: Equatable {}
+
+extension TableAlias: Hashable where Base: Hashable {}
+
 extension TableAlias: Decodable where Base: Decodable {
   public init(from decoder: Decoder) throws {
     do {
