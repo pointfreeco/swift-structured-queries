@@ -984,6 +984,42 @@ extension SnapshotTests {
         └───┴───┘
         """
       }
+
+      assertQuery(
+        Reminder.as(R1.self)
+          .group(by: \.id)
+          .leftJoin(Reminder.as(R2.self).all) { $0.id.eq($1.id) }
+          .limit(1)
+          .select { ($0, $1.jsonGroupArray()) }
+      ) {
+        """
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", json_group_array(CASE WHEN ("r2s"."id" IS NOT NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title")) END)
+        FROM "reminders" AS "r1s"
+        LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
+        GROUP BY "r1s"."id"
+        LIMIT 1
+        """
+      }results: {
+        """
+        ┌────────────────────────────────────────────┬────────────────────────────────────────────────┐
+        │ Reminder(                                  │ [                                              │
+        │   id: 1,                                   │   [0]: TableAlias(                             │
+        │   assignedUserID: 1,                       │     base: Reminder(                            │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z), │       id: 1,                                   │
+        │   isCompleted: false,                      │       assignedUserID: 1,                       │
+        │   isFlagged: false,                        │       dueDate: Date(2001-01-01T00:00:00.000Z), │
+        │   notes: "Milk, Eggs, Apples",             │       isCompleted: false,                      │
+        │   priority: nil,                           │       isFlagged: false,                        │
+        │   remindersListID: 1,                      │       notes: "Milk, Eggs, Apples",             │
+        │   title: "Groceries"                       │       priority: nil,                           │
+        │ )                                          │       remindersListID: 1,                      │
+        │                                            │       title: "Groceries"                       │
+        │                                            │     )                                          │
+        │                                            │   )                                            │
+        │                                            │ ]                                              │
+        └────────────────────────────────────────────┴────────────────────────────────────────────────┘
+        """
+      }
     }
 
     @Test func `case`() {
