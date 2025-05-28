@@ -27,14 +27,16 @@ extension QueryExpression where QueryValue: Codable & QueryBindable & Sendable {
   /// ```
   ///
   /// - Parameters:
+  ///   - isDistinct: An boolean to enable the `DISTINCT` clause to apply to the aggregation.
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this expression.
   public func jsonGroupArray(
+    isDistinct: Bool = false,
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
-    AggregateFunction("json_group_array", self, order: order, filter: filter)
+    AggregateFunction("json_group_array", isDistinct: isDistinct, self, order: order, filter: filter)
   }
 }
 
@@ -85,14 +87,16 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   /// }
   ///
   /// - Parameters:
+  ///   - isDistinct: An boolean to enable the `DISTINCT` clause to apply to the aggregation.
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
   public func jsonGroupArray(
+    isDistinct: Bool = false,
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
-    AggregateFunction("json_group_array", jsonObject, order: order, filter: filter)
+    AggregateFunction("json_group_array", isDistinct: isDistinct, jsonObject, order: order, filter: filter)
   }
 
   private var jsonObject: some QueryExpression<QueryValue> {
