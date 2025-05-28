@@ -251,6 +251,72 @@ extension Table {
       returning: []
     )
   }
+
+  /// An insert statement for a table row, describing a specific unique constraint.
+  ///
+  /// - Parameters:
+  ///   - row: Row to insert.
+  ///   - onConflict: The columns to check for conflict.
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
+  public static func insert<
+    each Constraint: QueryBindable
+  >(
+    _ row: () -> Self,
+    onConflict: (TableColumns) -> (repeat TableColumn<Self, each Constraint>),
+    doUpdate: (inout Updates<Self>) -> Void = { _ in }
+  ) -> InsertOf<Self> {
+    insert(
+      values: { [row()] },
+      onConflict: onConflict,
+      doUpdate: doUpdate
+    )
+  }
+
+  /// An insert statement for a table row, describing a specific unique constraint.
+  ///
+  /// - Parameters:
+  ///   - rows: Rows to insert. An empty array will return an empty query.
+  ///   - onConflict: The columns to check for conflict.
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
+  public static func insert<
+    each Constraint: QueryBindable
+  >(
+    values rows: () -> [Self],
+    onConflict: (TableColumns) -> (repeat TableColumn<Self, each Constraint>),
+    doUpdate: (inout Updates<Self>) -> Void = { _ in }
+  ) -> InsertOf<Self> {
+    var columnNames: [String] = []
+    for column in TableColumns.allColumns {
+      columnNames.append(column.name)
+    }
+    var values: [[QueryFragment]] = []
+    for row in rows() {
+      var value: [QueryFragment] = []
+      for column in TableColumns.allColumns {
+        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+          Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
+        }
+        value.append(open(column))
+      }
+      values.append(value)
+    }
+    var conflictTargetColumnNames: [String] = []
+    for column in repeat each onConflict(Self.columns) {
+      conflictTargetColumnNames.append(column.name)
+    }
+    return Insert(
+      conflictResolution: nil,
+      columnNames: columnNames,
+      conflictTargetColumnNames: conflictTargetColumnNames,
+      values: .values(values),
+      updates: Updates(doUpdate),
+      returning: []
+    )
+  }
 }
 
 extension PrimaryKeyedTable {

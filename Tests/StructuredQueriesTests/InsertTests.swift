@@ -451,6 +451,29 @@ extension SnapshotTests {
       }
     }
 
+    @Test func upsertNonPrimaryKey_onConflictDoUpdate() {
+      assertQuery(
+        ReminderTag.insert {
+          ReminderTag(reminderID: 1, tagID: 3)
+        } onConflict: {
+          ($0.reminderID, $0.tagID)
+        }.returning(\.self)
+      ) {
+        """
+        INSERT INTO "remindersTags"
+        ("reminderID", "tagID")
+        VALUES
+        (1, 3)
+        ON CONFLICT ("reminderID", "tagID") DO NOTHING
+        RETURNING "reminderID", "tagID"
+        """
+      } results: {
+        """
+        ON CONFLICT clause does not match any PRIMARY KEY or UNIQUE constraint
+        """
+      }
+    }
+
     @Test func sql() {
       assertQuery(
         #sql(
