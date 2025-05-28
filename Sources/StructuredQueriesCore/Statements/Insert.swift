@@ -327,6 +327,44 @@ extension PrimaryKeyedTable {
       returning: []
     )
   }
+
+  /// An insert statement for a table row draft.
+  ///
+  /// - Parameters:
+  ///   - rows: Rows to insert. An empty array will return an empty query.
+  ///   - onConflict: The columns to check for conflict.
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
+  public static func insert(
+    values rows: () -> [Draft],
+    onConflict: (Draft.TableColumns) -> TableColumn<Draft, String>,
+    doUpdate: ((inout Updates<Self>) -> Void)? = nil
+  ) -> InsertOf<Self> {
+    var columnNames: [String] = []
+    for column in Draft.TableColumns.allColumns {
+      columnNames.append(column.name)
+    }
+    var values: [[QueryFragment]] = []
+    for row in rows() {
+      var value: [QueryFragment] = []
+      for column in Draft.TableColumns.allColumns {
+        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+          Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
+        }
+        value.append(open(column))
+      }
+      values.append(value)
+    }
+    return Insert(
+      conflictResolution: nil,
+      columnNames: columnNames,
+      conflictTargetColumnNames: [onConflict(Draft.columns).name],
+      values: .values(values),
+      updates: doUpdate.map(Updates.init),
+      returning: []
+    )
+  }
 }
 
 private enum InsertValues {

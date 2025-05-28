@@ -418,6 +418,39 @@ extension SnapshotTests {
       }
     }
 
+    @Test func upsertWithoutID_onConflictDoUpdate() {
+      assertQuery(
+        RemindersList.insert {
+          [
+            RemindersList.Draft(title: "Personal")
+          ]
+        } onConflict: {
+          ($0.title)
+        } doUpdate: {
+          $0.color = 0x00ff00
+        }.returning(\.self)
+      ) {
+        """
+        INSERT INTO "remindersLists"
+        ("id", "color", "title")
+        VALUES
+        (NULL, 4889071, 'Personal')
+        ON CONFLICT ("title") DO UPDATE SET "color" = 65280
+        RETURNING "id", "color", "title"
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ RemindersList(      │
+        │   id: 1,            │
+        │   color: 65280,     │
+        │   title: "Personal" │
+        │ )                   │
+        └─────────────────────┘
+        """
+      }
+    }
+
     @Test func sql() {
       assertQuery(
         #sql(
