@@ -467,7 +467,12 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ON CONFLICT clause does not match any PRIMARY KEY or UNIQUE constraint
+        ┌──────────────────┐
+        │ ReminderTag(     │
+        │   reminderID: 1, │
+        │   tagID: 1       │
+        │ )                │
+        └──────────────────┘
         """
       }
     }
