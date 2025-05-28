@@ -403,9 +403,8 @@ struct Book {
 ### Table definition tools
 
 This library does not come with any tools for actually constructing table definition queries,
-such as "CREATE TABLE", "ALTER TABLE", and so on. That is, there are no APIs for performing the 
+such as `CREATE TABLE`, `ALTER TABLE`, and so on. That is, there are no APIs for performing the 
 following kinds of queries:
-
 
 @Row {
   @Column {
@@ -426,33 +425,34 @@ following kinds of queries:
   }
 }
 
-
 In fact, we recommend all changes to the schema of your database be executed as SQL strings using
 the [`#sql` macro](<doc:SafeSQLStrings>):
 
 ```swift
-#sql("""
+#sql(
+  """
   CREATE TABLE "reminders" (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "title" TEXT NOT NULL,
     "isCompleted" INTEGER NOT NULL DEFAULT 0
   )
-  """)
+  """
+)
 ```
 
-It may seem strange for us to recommend using SQL strings when the library provides such an 
-expansive assortment of tools that make SQL more expressive, type-safe and schema-safe. But there
+It may seem strange for us to recommend using SQL strings when the library provides such an
+expansive assortment of tools that make SQL more expressive, type-safe, and schema-safe. But there
 is a very good reason for this.
 
 Through the lifetime of an application you will perform many migrations on your schema. You will
-add/remove tables, add/remove columns, add/remove indicies, add/remove constraints, and more. 
+add/remove tables, add/remove columns, add/remove indicies, add/remove constraints, and more.
 Each of these alterations to the schema make a snapshot of your entire database's schema that
 is frozen in that moment of time. Once a migration has been shipped and run on a user's device
 it should never be edited again. Therefore it is not appropriate to use the statically known
 symbols exposed by `@Table` to alter your database.
 
-As a concreate example, suppose we _did_ have table definition tools. This would mean creating
-a table could be as simple as this:
+As a concrete example, suppose we _did_ have table definition tools. This would mean creating a
+table could be as simple as this:
 
 ```swift
 @Table struct Reminder {
@@ -506,30 +506,31 @@ ALTER TABLE "reminders" RENAME COLUMN "name" TO "title";
 ```
 
 The second SQL statement fails because there is no "name" column. And the reason this is happening
-is because `Reminder.createTable()` uses the most currently version of the schema where the field
-is "title", not "name". This violates the principle that migrations should be snapshots of your
+is because `Reminder.createTable()` must use the most current version of the schema where the field
+is "title", not "name." This violates the principle that migrations should be snapshots of your
 database's schema frozen in time and should never be edited after shipping to your users. A side
 effect of violating this principle is that we now generate invalid SQL and run the risk of breaking
 our users' app.
 
 If it worries you to write SQL strings by hand, then fear not! For a few reasons:
 
-* Although this library aims to provide type-safe and schema-safe tools for writing SQL, it is
-not a goal to make it so that you _never_ write SQL strings. SQL is an amazing language that has
-stood the test of time, and you will be a better engineer for being able to write it from scratch.
-And sometimes, such as the case with table definitions, it is necessary to write SQL strings.
+  * Although this library aims to provide type-safe and schema-safe tools for writing SQL, it is
+    not a goal to make it so that you _never_ write SQL strings. SQL is an amazing language that has
+    stood the test of time, and you will be a better engineer for being able to write it from
+    scratch. And sometimes, such as the case with table definitions, it is necessary to write SQL
+    strings.
 
-* It may seem dangerous to write SQL strings, afterall, aren't they susceptible to SQL injection
-attacks and typos? The `#sql` macro protects you against any SQL injection attacks, and provides
-some basic linting to make sure your SQL is roughly correct. And typos are not common in table
-definition statements since an unexpect database schema is a very visible bug in your application,
-as opposed to a small part of a "SELECT" statement that is only run every once in awhile in your
-app.
+  * It may seem dangerous to write SQL strings. After all, aren't they susceptible to SQL injection
+    attacks and typos? The `#sql` macro protects you against any SQL injection attacks, and provides
+    some basic linting to make sure your SQL is roughly correct. And typos are not common in table
+    definition statements since an unexpect database schema is a very visible bug in your
+    application, as opposed to a small part of a `SELECT` statement that is only run every once in
+    awhile in your app.
 
-So, we hope that you will consider it a _benefit_ that your application's schema will be 
-defined and maintained as simple SQL strings. It's a simple format that everyone familiar with
-SQLite will understand, and it makes your application most resillient to the ever growing
-changes and demands on your application.
+So, we hope that you will consider it a _benefit_ that your application's schema will be defined and
+maintained as simple SQL strings. It's a simple format that everyone familiar with SQLite will
+understand, and it makes your application most resillient to the ever growing changes and demands on
+your application.
 
 ## Topics
 
