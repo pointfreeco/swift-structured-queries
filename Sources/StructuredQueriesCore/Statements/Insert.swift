@@ -394,7 +394,29 @@ extension PrimaryKeyedTable {
     )
   }
 
-  /// An insert statement for a table row draft.
+  /// An insert statement for a table row draft, describing a specific unique constraint.
+  ///
+  /// - Parameters:
+  ///   - row: Row to insert.
+  ///   - onConflict: The columns to check for conflict.
+  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  /// - Returns: An insert statement.
+  public static func insert<
+    each Constraint: QueryBindable
+  >(
+    _ row: () -> Draft,
+    onConflict: (Draft.TableColumns) -> (repeat TableColumn<Draft, each Constraint>),
+    doUpdate: (inout Updates<Self>) -> Void = { _ in }
+  ) -> InsertOf<Self> {
+    insert(
+      values: { [row()] },
+      onConflict: onConflict,
+      doUpdate: doUpdate
+    )
+  }
+
+  /// An insert statement for a table row draft, describing a specific unique constraint.
   ///
   /// - Parameters:
   ///   - rows: Rows to insert. An empty array will return an empty query.
@@ -402,10 +424,12 @@ extension PrimaryKeyedTable {
   ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
   /// - Returns: An insert statement.
-  public static func insert(
+  public static func insert<
+    each Constraint: QueryBindable
+  >(
     values rows: () -> [Draft],
-    onConflict: (Draft.TableColumns) -> TableColumn<Draft, String>,
-    doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    onConflict: (Draft.TableColumns) -> (repeat TableColumn<Draft, each Constraint>),
+    doUpdate: (inout Updates<Self>) -> Void = { _ in }
   ) -> InsertOf<Self> {
     var columnNames: [String] = []
     for column in Draft.TableColumns.allColumns {
@@ -422,12 +446,16 @@ extension PrimaryKeyedTable {
       }
       values.append(value)
     }
+    var conflictTargetColumnNames: [String] = []
+    for column in repeat each onConflict(Draft.columns) {
+      conflictTargetColumnNames.append(column.name)
+    }
     return Insert(
       conflictResolution: nil,
       columnNames: columnNames,
-      conflictTargetColumnNames: [onConflict(Draft.columns).name],
+      conflictTargetColumnNames: conflictTargetColumnNames,
       values: .values(values),
-      updates: doUpdate.map(Updates.init),
+      updates: Updates(doUpdate),
       returning: []
     )
   }

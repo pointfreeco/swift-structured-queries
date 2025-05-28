@@ -421,9 +421,7 @@ extension SnapshotTests {
     @Test func upsertWithoutID_onConflictDoUpdate() {
       assertQuery(
         RemindersList.insert {
-          [
-            RemindersList.Draft(title: "Personal")
-          ]
+          RemindersList.Draft(title: "Personal")
         } onConflict: {
           ($0.title)
         } doUpdate: {
