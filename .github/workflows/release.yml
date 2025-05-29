@@ -17,14 +17,14 @@ jobs:
         env:
           INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_PROJECT_CHANNEL_WEBHOOK_URL }}
         with:
-          text: swift-structured-queries ${{ github.event.release.tag_name }} has been released.
+          text: ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} has been released.
           blocks: |
             [
               {
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "swift-structured-queries ${{ github.event.release.tag_name}}"
+                  "text": "${{ github.event.repository.name }} ${{ github.event.release.tag_name}}"
                 }
               },
               {
@@ -56,14 +56,14 @@ jobs:
         env:
           INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_RELEASES_WEBHOOK_URL }}
         with:
-          text: swift-structured-queries ${{ github.event.release.tag_name }} has been released.
+          text: ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} has been released.
           blocks: |
             [
               {
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "swift-structured-queries ${{ github.event.release.tag_name}}"
+                  "text": "${{ github.event.repository.name }} ${{ github.event.release.tag_name}}"
                 }
               },
               {
