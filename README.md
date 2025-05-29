@@ -220,10 +220,7 @@ it's as simple as adding it to your `Package.swift`:
 
 ``` swift
 dependencies: [
-  .package(
-    url: "https://github.com/pointfreeco/swift-structured-queries",
-    from: "0.1.0"
-  ),
+  .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.4.0"),
 ]
 ```
 
@@ -234,7 +231,7 @@ And then adding the product to any target that needs access to the library:
 ```
 
 If you are on Swift 6.1 or greater, you can enable package traits that extend the library with
-support for other packages. For example, you can introduce type-safe identifiers to your tables
+support for other libraries. For example, you can introduce type-safe identifiers to your tables
 _via_ [Tagged](https://github.com/pointfreeco/swift-tagged) by enabling the
 `StructuredQueriesTagged` trait:
 

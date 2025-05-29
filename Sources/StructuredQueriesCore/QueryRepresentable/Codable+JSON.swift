@@ -64,6 +64,10 @@ private let jsonDecoder: JSONDecoder = {
 
 private let jsonEncoder: JSONEncoder = {
   var encoder = JSONEncoder()
+  encoder.dateEncodingStrategy = .custom { date, encoder in
+    var container = encoder.singleValueContainer()
+    try container.encode(date.iso8601String)
+  }
   #if DEBUG
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
   #endif

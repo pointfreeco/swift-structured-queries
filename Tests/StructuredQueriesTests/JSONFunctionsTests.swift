@@ -40,6 +40,30 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonGroupArrayDisctinct() {
+      assertQuery(
+        Reminder.select {
+          $0.priority.jsonGroupArray(isDistinct: true)
+        }
+      ) {
+        """
+        SELECT json_group_array(DISTINCT "reminders"."priority")
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────────────────┐
+        │ [              │
+        │   [0]: nil,    │
+        │   [1]: .high,  │
+        │   [2]: .low,   │
+        │   [3]: .medium │
+        │ ]              │
+        └────────────────┘
+        """
+      }
+    }
+
     @Test func jsonArrayLength() {
       assertQuery(
         Reminder.select {

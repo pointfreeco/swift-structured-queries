@@ -24,6 +24,7 @@ that represent those database definitions.
     * [Default representations for dates and UUIDs](#Default-representations-for-dates-and-UUIDs)
 * [Primary keyed tables](#Primary-keyed-tables)
 * [Ephemeral columns](#Ephemeral-columns)
+* [Table definition tools](#Table-definition-tools)
 
 ### Defining a table
 
@@ -443,6 +444,138 @@ struct Book {
   var scratchNotes = ""
 }
 ```
+
+### Table definition tools
+
+This library does not come with any tools for actually constructing table definition queries,
+such as `CREATE TABLE`, `ALTER TABLE`, and so on. That is, there are no APIs for performing the
+following kinds of queries:
+
+@Row {
+  @Column {
+    ```swift
+    Reminder.createTable()
+    // ⚠️ Theoretical API that does
+    //    not actually exist.
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TABLE "reminders" (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "title" TEXT NOT NULL,
+      "isCompleted" INTEGER NOT NULL DEFAULT 0
+    )
+    ```
+  }
+}
+
+In fact, we recommend all changes to the schema of your database be executed as SQL strings using
+the [`#sql` macro](<doc:SafeSQLStrings>):
+
+```swift
+#sql(
+  """
+  CREATE TABLE "reminders" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "title" TEXT NOT NULL,
+    "isCompleted" INTEGER NOT NULL DEFAULT 0
+  )
+  """
+)
+```
+
+It may seem strange for us to recommend using SQL strings when the library provides such an
+expansive assortment of tools that make SQL more expressive, type-safe, and schema-safe. But there
+is a very good reason for this.
+
+Through the lifetime of an application you will perform many migrations on your schema. You will
+add/remove tables, add/remove columns, add/remove indicies, add/remove constraints, and more.
+Each of these alterations to the schema make a snapshot of your entire database's schema that
+is frozen in that moment of time. Once a migration has been shipped and run on a user's device
+it should never be edited again. Therefore it is not appropriate to use the statically known
+symbols exposed by `@Table` to alter your database.
+
+As a concrete example, suppose we _did_ have table definition tools. This would mean creating a
+table could be as simple as this:
+
+```swift
+@Table struct Reminder {
+  let id: Int
+  var name = ""
+}
+
+migrator.migrate("Create 'reminders' table") { db in
+  // ⚠️ Theoretical 'createTable' API. Does not actually exist.
+  try Reminder.createTable().execute(db)
+}
+```
+
+When your app is launched for the first time it will run this migration and make a record of it
+being run so that it is not ever run again.
+
+But then a few days later you decide that you prefer `title` to `name` for the `Reminder` type,
+and so you hope that you can just rename the project, fix any compilation errors, and add a new
+migration:
+
+```diff
+ @Table struct Reminder {
+   let id: Int
+-  var name = ""
++  var title = ""
+ }
+
+ migrator.migrate("Create 'reminders' table") { db in
+   // ⚠️ Theoretical 'createTable' API. Does not actually exist.
+   try Reminder.createTable().execute(db)
+ }
++migrator.migrate("Rename 'name' to 'title'") { db in
++  // ⚠️ Theoretical 'rename(from:)' API. Does not actually exist.
++  try Reminder.title.rename(from: "name").execute(db)
++}
+```
+
+Now when the app launches it rename the column in the database, and make a record that the migration
+has been run so that it is not ever run again.
+
+This will work just fine for all users that have previously run the first migration. But any new
+users that run the whole suite of migrations at once will have the following SQL statements
+executed:
+
+```sql
+CREATE TABLE "reminders" (
+  "id" INTEGER,
+  "title" TEXT
+);
+ALTER TABLE "reminders" RENAME COLUMN "name" TO "title";
+```
+
+The second SQL statement fails because there is no "name" column. And the reason this is happening
+is because `Reminder.createTable()` must use the most current version of the schema where the field
+is "title", not "name." This violates the principle that migrations should be snapshots of your
+database's schema frozen in time and should never be edited after shipping to your users. A side
+effect of violating this principle is that we now generate invalid SQL and run the risk of breaking
+our users' app.
+
+If it worries you to write SQL strings by hand, then fear not! For a few reasons:
+
+  * Although this library aims to provide type-safe and schema-safe tools for writing SQL, it is
+    not a goal to make it so that you _never_ write SQL strings. SQL is an amazing language that has
+    stood the test of time, and you will be a better engineer for being able to write it from
+    scratch. And sometimes, such as the case with table definitions, it is necessary to write SQL
+    strings.
+
+  * It may seem dangerous to write SQL strings. After all, aren't they susceptible to SQL injection
+    attacks and typos? The `#sql` macro protects you against any SQL injection attacks, and provides
+    some basic linting to make sure your SQL is roughly correct. And typos are not common in table
+    definition statements since an unexpect database schema is a very visible bug in your
+    application, as opposed to a small part of a `SELECT` statement that is only run every once in
+    awhile in your app.
+
+So, we hope that you will consider it a _benefit_ that your application's schema will be defined and
+maintained as simple SQL strings. It's a simple format that everyone familiar with SQLite will
+understand, and it makes your application most resillient to the ever growing changes and demands on
+your application.
 
 ## Topics
 
