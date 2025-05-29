@@ -32,7 +32,7 @@ Suppose your database has a table defined with the following create statement:
 
 ```sql
 CREATE TABLE "reminders" (
-  "id" INTEGER PRIMARY KEY AUTOINCREMENT",
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
   "title" TEXT NOT NULL DEFAULT '',
   "isCompleted" INTEGER DEFAULT 0
 )
@@ -119,7 +119,7 @@ RemindersList.tableName  // "reminders_list"
 #### Column names
 
 Properties of Swift types often differ in formatting from the columns they represent in the
-database. Most often this is a different of snake case versus camelcase. In such situations you can
+database. Most often this is a difference of snake case versus camelcase. In such situations you can
 use the `@Column` macro to describe the name of the column as it exists in the database in order
 to have your Swift data type represent the most pristine version of itself:
 
@@ -490,7 +490,7 @@ expansive assortment of tools that make SQL more expressive, type-safe, and sche
 is a very good reason for this.
 
 Through the lifetime of an application you will perform many migrations on your schema. You will
-add/remove tables, add/remove columns, add/remove indicies, add/remove constraints, and more.
+add/remove tables, add/remove columns, add/remove indices, add/remove constraints, and more.
 Each of these alterations to the schema make a snapshot of your entire database's schema that
 is frozen in that moment of time. Once a migration has been shipped and run on a user's device
 it should never be edited again. Therefore it is not appropriate to use the statically known
@@ -568,13 +568,13 @@ If it worries you to write SQL strings by hand, then fear not! For a few reasons
   * It may seem dangerous to write SQL strings. After all, aren't they susceptible to SQL injection
     attacks and typos? The `#sql` macro protects you against any SQL injection attacks, and provides
     some basic linting to make sure your SQL is roughly correct. And typos are not common in table
-    definition statements since an unexpect database schema is a very visible bug in your
+    definition statements since an unexpected database schema is a very visible bug in your
     application, as opposed to a small part of a `SELECT` statement that is only run every once in
     awhile in your app.
 
 So, we hope that you will consider it a _benefit_ that your application's schema will be defined and
 maintained as simple SQL strings. It's a simple format that everyone familiar with SQLite will
-understand, and it makes your application most resillient to the ever growing changes and demands on
+understand, and it makes your application most resilient to the ever growing changes and demands on
 your application.
 
 ## Topics
