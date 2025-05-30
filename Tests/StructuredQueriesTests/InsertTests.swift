@@ -418,6 +418,65 @@ extension SnapshotTests {
       }
     }
 
+    @Test func upsertWithoutID_onConflictDoUpdate() {
+      assertQuery(
+        RemindersList.insert {
+          RemindersList.Draft(title: "Personal")
+        } onConflict: {
+          ($0.title)
+        } doUpdate: {
+          $0.color = 0x00ff00
+        }.returning(\.self)
+      ) {
+        """
+        INSERT INTO "remindersLists"
+        ("id", "color", "title")
+        VALUES
+        (NULL, 4889071, 'Personal')
+        ON CONFLICT ("title") DO UPDATE SET "color" = 65280
+        RETURNING "id", "color", "title"
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ RemindersList(      │
+        │   id: 1,            │
+        │   color: 65280,     │
+        │   title: "Personal" │
+        │ )                   │
+        └─────────────────────┘
+        """
+      }
+    }
+
+    @Test func upsertNonPrimaryKey_onConflictDoUpdate() {
+      assertQuery(
+        ReminderTag.insert {
+          ReminderTag(reminderID: 1, tagID: 3)
+        } onConflict: {
+          ($0.reminderID, $0.tagID)
+        }.returning(\.self)
+      ) {
+        """
+        INSERT INTO "remindersTags"
+        ("reminderID", "tagID")
+        VALUES
+        (1, 3)
+        ON CONFLICT ("reminderID", "tagID") DO NOTHING
+        RETURNING "reminderID", "tagID"
+        """
+      } results: {
+        """
+        ┌──────────────────┐
+        │ ReminderTag(     │
+        │   reminderID: 1, │
+        │   tagID: 1       │
+        │ )                │
+        └──────────────────┘
+        """
+      }
+    }
+
     @Test func sql() {
       assertQuery(
         #sql(

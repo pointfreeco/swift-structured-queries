@@ -128,7 +128,8 @@ extension Database {
       """
       CREATE TABLE "remindersTags" (
         "reminderID" INTEGER NOT NULL REFERENCES "reminders"("id") ON DELETE CASCADE,
-        "tagID" INTEGER NOT NULL REFERENCES "tags"("id") ON DELETE CASCADE
+        "tagID" INTEGER NOT NULL REFERENCES "tags"("id") ON DELETE CASCADE,
+        UNIQUE("reminderID", "tagID")
       )
       """
     )
