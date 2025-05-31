@@ -462,7 +462,7 @@ and reminders associated with the list:
 struct Row {
   let remindersList: RemindersList
   @Column(as: [Milestone].JSONRepresentation.self)
-  let milestons: [Milestone]
+  let milestones: [Milestone]
   @Column(as: [Reminder].JSONRepresentation.self)
   let reminders: [Reminder]
 }
@@ -477,7 +477,7 @@ RemindersList
   .select {
     Row.Columns(
       remindersList: $0,
-      milestons: #sql("\($1.jsonGroupArray(filter: $1.id.isNot(nil))"),
+      milestones: #sql("\($1.jsonGroupArray(filter: $1.id.isNot(nil))"),
       reminders: #sql("\($2.jsonGroupArray(filter: $2.id.isNot(nil))")
     )
   }
