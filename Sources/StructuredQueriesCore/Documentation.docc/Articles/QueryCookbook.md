@@ -472,12 +472,12 @@ It is possible to do this using two left joins and two `jsonGroupArray`s:
 
 ```swift
 RemindersList
-  .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
-  .leftJoin(Milestone.all) { $0.id.eq($2.remindersListID) }
+  .leftJoin(Milestone.all) { $0.id.eq($1.remindersListID) }
+  .leftJoin(Reminder.all) { $0.id.eq($12.remindersListID) }
   .select {
     Row.Columns(
       remindersList: $0,
-      reminders: #sql("\($1.jsonGroupArray(filter: $1.id.isNot(nil))"),
+      milestons: #sql("\($1.jsonGroupArray(filter: $1.id.isNot(nil))"),
       reminders: #sql("\($2.jsonGroupArray(filter: $2.id.isNot(nil))")
     )
   }
