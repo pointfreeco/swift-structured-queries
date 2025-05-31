@@ -473,7 +473,7 @@ It is possible to do this using two left joins and two `jsonGroupArray`s:
 ```swift
 RemindersList
   .leftJoin(Milestone.all) { $0.id.eq($1.remindersListID) }
-  .leftJoin(Reminder.all) { $0.id.eq($12.remindersListID) }
+  .leftJoin(Reminder.all) { $0.id.eq($2.remindersListID) }
   .select {
     Row.Columns(
       remindersList: $0,
