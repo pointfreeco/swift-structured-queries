@@ -429,12 +429,12 @@ RemindersList
 >   ``Select/leftJoin(_:on:)``. That will make sure to select all lists no matter what.
 > * We are using `jsonGroupArray` to encode all reminders associated with a list into a JSON object
 >   and bundle them into an array. And because it's possible to have no reminders in a list,
->   we further use the `filter` option to remove any NULL values from the array.
+>   we further use the `filter` option to remove any `NULL` values from the array.
 > * And lastly, `$1` represents an optionalized table due to the left join, and hence the 
->   `$1.jsonGroupArray(…)` expression actually returns an _optional_ array of reminders. But due
->   to how `json_group_array` works in SQL we can be guaranteed that it always returns an array,
->   and never NULL, and so we are using the `#sql` macro as a quick escape hatch to take 
->   responsibility for the types in this expression.
+>   `$1.jsonGroupArray(…)` expression actually returns an array of _optional_ reminders. But
+>   because we are filtering out `NULL` values we can be guaranteed that every element of the
+>   array can be decoded to a reminder, and so we are using the `#sql` macro as a quick escape
+>   hatch to take responsibility for the types in this expression.
 
 This allows you to fetch all of the data in a single SQLite query and decode the data into a
 collection of `Row` values. There is an extra cost associated with decoding the JSON object,
