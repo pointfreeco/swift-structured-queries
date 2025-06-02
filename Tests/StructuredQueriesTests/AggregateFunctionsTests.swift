@@ -126,9 +126,9 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌───┐
-        │ 1 │
-        └───┘
+        ┌──────┐
+        │ .low │
+        └──────┘
         """
       }
     }

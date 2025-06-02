@@ -258,7 +258,7 @@ extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
   /// Wraps this string expression with the `lower` function.
   ///
   /// - Returns: An expression wrapped with the `lower` function.
-  public func lower() -> some QueryExpression<QueryValue._Optionalized> {
+  public func lower() -> some QueryExpression<QueryValue> {
     QueryFunction("lower", self)
   }
 }
