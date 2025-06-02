@@ -72,7 +72,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
   }
 }
 
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable {
   /// A maximum aggregate of this expression.
   ///
   /// ```swift
@@ -84,7 +84,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A maximum aggregate of this expression.
   public func max(
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<QueryValue?> {
+  ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
     AggregateFunction("max", self, filter: filter)
   }
 
@@ -99,7 +99,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A minimum aggregate of this expression.
   public func min(
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<QueryValue?> {
+  ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
     AggregateFunction("min", self, filter: filter)
   }
 }
