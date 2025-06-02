@@ -290,7 +290,7 @@ extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
   /// Wraps this string expression with the `quote` function.
   ///
   /// - Returns: An expression wrapped with the `quote` function.
-  public func quote() -> some QueryExpression<QueryValue._Optionalized> {
+  public func quote() -> some QueryExpression<QueryValue> {
     QueryFunction("quote", self)
   }
 }
