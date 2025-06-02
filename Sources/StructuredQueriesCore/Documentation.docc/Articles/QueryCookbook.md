@@ -477,11 +477,15 @@ RemindersList
   .select {
     Row.Columns(
       remindersList: $0,
-      milestones: #sql("\($1.jsonGroupArray(filter: $1.id.isNot(nil))"),
-      reminders: #sql("\($2.jsonGroupArray(filter: $2.id.isNot(nil))")
+      milestones: #sql("\($1.jsonGroupArray(isDistinct: true, filter: $1.id.isNot(nil))"),
+      reminders: #sql("\($2.jsonGroupArray(isDistinct: true, filter: $2.id.isNot(nil))")
     )
   }
 ```
+
+> Note: Because we are now joining two independent tables to `RemindersList`, we will get duplicate
+> entries for all pairs of reminders with milestones. To remove those duplicates we use the 
+> `isDistinct` option for `jsonGroupArray`.
 
 This will now load all reminders lists with all of their reminders and milestones in one single
 SQL query.

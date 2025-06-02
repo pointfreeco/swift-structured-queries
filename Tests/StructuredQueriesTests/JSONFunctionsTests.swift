@@ -214,9 +214,9 @@ extension SnapshotTests {
       assertQuery(
         RemindersList
           .group(by: \.id)
-          .leftJoin(Reminder.incomplete) { $0.id.eq($1.remindersListID) }
           .leftJoin(Milestone.all) { $0.id.eq($2.remindersListID) }
-          .select { remindersList, reminder, milestone in
+          .leftJoin(Reminder.incomplete) { $0.id.eq($1.remindersListID) }
+          .select { remindersList, milestone, reminder in
             RemindersListRow.Columns(
               remindersList: remindersList,
               milestones: #sql(
