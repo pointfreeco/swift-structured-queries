@@ -84,7 +84,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A maximum aggregate of this expression.
   public func max(
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<Int?> {
+  ) -> some QueryExpression<QueryValue?> {
     AggregateFunction("max", self, filter: filter)
   }
 
@@ -99,7 +99,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A minimum aggregate of this expression.
   public func min(
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<Int?> {
+  ) -> some QueryExpression<QueryValue?> {
     AggregateFunction("min", self, filter: filter)
   }
 }
