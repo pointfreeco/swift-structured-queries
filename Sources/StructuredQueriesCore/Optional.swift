@@ -133,3 +133,11 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
     self[dynamicMember: \.primaryKey]
   }
 }
+
+extension QueryExpression where QueryValue: _OptionalProtocol {
+  public func map<T>(
+    _ transform: (SQLQueryExpression<QueryValue.Wrapped>) -> some QueryExpression<T>
+  ) -> some QueryExpression<T?> {
+    SQLQueryExpression(transform(SQLQueryExpression(queryFragment)).queryFragment)
+  }
+}
