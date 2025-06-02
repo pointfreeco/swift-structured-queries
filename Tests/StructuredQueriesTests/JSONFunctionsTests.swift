@@ -315,47 +315,6 @@ extension SnapshotTests {
         """
       }
     }
-
-    //    @Test func jsonAssociation_All() throws {
-    //      assertQuery(
-    //        RemindersList
-    //          .group(by: \.id)
-    //          .leftJoin(Reminder.incomplete) { $0.id.eq($1.remindersListID)
-    //          }
-    //          .select {
-    //            remindersList,
-    //            reminder in
-    //            Row.Columns(
-    //              remindersList: remindersList,
-    //              reminderRows: ReminderTag
-    //                .where { $0.reminderID.eq(reminder.id)
-    //                }
-    //                .join(Tag.all) { $0.tagID.eq($1.id) }
-    //                .select {
-    //                  _,
-    //                  tag in
-    //                  ReminderRow.Columns.init(
-    //                    assignedUser: #sql(""),
-    //                    reminder: #sql("\(reminder)"),
-    //                    tags: tag.title.jsonGroupArray()
-    //                  )
-    //                }
-    //
-    ////                ReminderRow.Columns(
-    ////                assignedUser: #sql(""),
-    ////                reminder: reminder,
-    ////                tags: #sql("")
-    //////                  ReminderTag
-    //////                  .where { $0.reminderID.eq(reminder.id) }
-    //////                  .join(Tag.all) { $0.tagID.eq($1.id) }
-    //////                  .select { _, tag in tag }
-    ////              )
-    ////              .json
-    //            )
-    //          }
-    //          .limit(1)
-    //      )
-    //    }
   }
 }
 
@@ -374,11 +333,4 @@ private struct RemindersListRow {
   let milestones: [Milestone]
   @Column(as: [Reminder].JSONRepresentation.self)
   let reminders: [Reminder]
-}
-
-@Selection
-private struct Row {
-  let remindersList: RemindersList
-  @Column(as: [ReminderRow].JSONRepresentation.self)
-  let reminderRows: [ReminderRow]
 }
