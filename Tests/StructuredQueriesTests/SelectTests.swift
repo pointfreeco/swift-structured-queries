@@ -16,6 +16,11 @@ extension SnapshotTests {
       _ = Reminder.where(\.isCompleted).select(\.id)
       _ = Reminder.where(\.isCompleted).select { $0.id }
       _ = Reminder.where(\.isCompleted).select { ($0.id, $0.isCompleted) }
+
+      let condition1 = Int?.some(1) == 2
+      #expect(condition1 == false)
+      let condition2 = Int?.some(1) != 2
+      #expect(condition2 == true)
     }
 
     @Test func selectAll() {
