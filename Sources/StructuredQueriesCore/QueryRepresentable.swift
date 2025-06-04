@@ -14,7 +14,7 @@ import Foundation
 /// and ``Foundation/Date/JulianDayRepresentation`` to represent a date as a floating point number.
 public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
   /// The Swift type this value is ultimately decoded to.
-  associatedtype QueryOutput
+  associatedtype QueryOutput: _OptionalPromotable
 
   /// Wraps a value in this representation.
   ///
