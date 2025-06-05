@@ -444,6 +444,18 @@ extension Select {
     _select(selection)
   }
 
+  /// Creates a new select statement from this one by selecting the given result column.
+  ///
+  /// - Parameter selection: A closure that selects a result column from this select's tables.
+  /// - Returns: A new select statement that selects the given column.
+  @_disfavoredOverload
+  public func select<C: QueryExpression, each J: Table>(
+    _ selection: (From.TableColumns, repeat (each J).TableColumns) -> C
+  ) -> Select<C.QueryValue, From, (repeat each J)>
+  where Columns == (), C.QueryValue: QueryRepresentable, Joins == (repeat each J) {
+    _select(selection)
+  }
+
   /// Creates a new select statement from this one by appending the given result column to its
   /// selection.
   ///
