@@ -27,6 +27,12 @@ extension QueryFragmentBuilder<Bool> {
   ) -> [QueryFragment] {
     [expression.queryFragment]
   }
+
+  public static func buildExpression(
+    _ expression: some QueryExpression<some _OptionalPromotable<Bool?>>
+  ) -> [QueryFragment] {
+    [expression.queryFragment]
+  }
 }
 
 extension QueryFragmentBuilder<()> {

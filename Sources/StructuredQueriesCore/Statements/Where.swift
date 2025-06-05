@@ -20,7 +20,7 @@ extension Table {
   /// - Parameter keyPath: A key path to a Boolean expression to filter by.
   /// - Returns: A `WHERE` clause.
   public static func `where`(
-    _ keyPath: KeyPath<TableColumns, some QueryExpression<Bool>>
+    _ keyPath: KeyPath<TableColumns, some QueryExpression<some _OptionalPromotable<Bool?>>>
   ) -> Where<Self> {
     Where(predicates: [columns[keyPath: keyPath].queryFragment])
   }
@@ -33,7 +33,7 @@ extension Table {
   /// - Returns: A `WHERE` clause.
   @_disfavoredOverload
   public static func `where`(
-    _ predicate: (TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Where<Self> {
     Where(predicates: [predicate(columns).queryFragment])
   }
@@ -285,7 +285,7 @@ extension Where: SelectStatement {
   /// - Parameter keyPath: A key path to a Boolean expression to filter by.
   /// - Returns: A where clause with the added predicate.
   public func `where`(
-    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<Bool>>
+    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<some _OptionalPromotable<Bool?>>>
   ) -> Self {
     var `where` = self
     `where`.predicates.append(From.columns[keyPath: keyPath].queryFragment)
@@ -298,7 +298,7 @@ extension Where: SelectStatement {
   /// - Returns: A where clause with the added predicate.
   @_disfavoredOverload
   public func `where`(
-    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Self {
     var `where` = self
     `where`.predicates.append(predicate(From.columns).queryFragment)
@@ -408,7 +408,7 @@ extension Where: SelectStatement {
 
   /// A select statement for the filtered table with the given `HAVING` clause.
   public func having(
-    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> SelectOf<From> {
     asSelect().having(predicate)
   }
