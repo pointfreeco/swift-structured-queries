@@ -462,7 +462,7 @@ extension Where: SelectStatement {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A select statement that selects `count(*)`.
   public func count(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: ((From.TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> Select<Int, From, ()> {
     asSelect().count(filter: filter)
   }
