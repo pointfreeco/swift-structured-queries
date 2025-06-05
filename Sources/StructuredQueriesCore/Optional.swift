@@ -1,6 +1,8 @@
 public protocol _OptionalProtocol<Wrapped> {
   associatedtype Wrapped
   var _wrapped: Wrapped? { get }
+  static var none: Self { get }
+  static func some(_ wrapped: Wrapped) -> Self
 }
 
 extension Optional: _OptionalProtocol {
