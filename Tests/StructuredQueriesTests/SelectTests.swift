@@ -857,6 +857,21 @@ extension SnapshotTests {
       }
     }
 
+    @Test func countFilter() {
+      assertQuery(Reminder.count { !$0.isCompleted }) {
+        """
+        SELECT count(*) FILTER (WHERE NOT ("reminders"."isCompleted"))
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 7 │
+        └───┘
+        """
+      }
+    }
+
     @Test func map() {
       assertQuery(Reminder.limit(1).select { ($0.id, $0.title) }.map { ($1, $0) }) {
         """

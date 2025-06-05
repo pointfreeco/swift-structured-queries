@@ -37,7 +37,12 @@ extension QueryExpression where QueryValue: Codable & QueryBindable & Sendable {
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
     AggregateFunction(
-      "json_group_array", isDistinct: isDistinct, self, order: order, filter: filter)
+      "json_group_array",
+      isDistinct: isDistinct,
+      [queryFragment],
+      order: order?.queryFragment,
+      filter: filter?.queryFragment
+    )
   }
 }
 
@@ -98,7 +103,12 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
     AggregateFunction(
-      "json_group_array", isDistinct: isDistinct, jsonObject, order: order, filter: filter)
+      "json_group_array",
+      isDistinct: isDistinct,
+      [jsonObject.queryFragment],
+      order: order?.queryFragment,
+      filter: filter?.queryFragment
+    )
   }
 
   private var jsonObject: some QueryExpression<QueryValue> {

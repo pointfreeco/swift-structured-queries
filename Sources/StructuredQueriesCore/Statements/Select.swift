@@ -295,7 +295,7 @@ extension Table {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A select statement that selects `count(*)`.
   public static func count(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> Select<Int, Self, ()> {
     Where().count(filter: filter)
   }
@@ -1321,10 +1321,11 @@ extension Select {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
   public func count<each J: Table>(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> Select<Int, From, (repeat each J)>
   where Columns == (), Joins == (repeat each J) {
-    select { _ in .count(filter: filter) }
+    let filter = filter?(From.columns, repeat (each J).columns)
+    return select { _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
@@ -1332,12 +1333,13 @@ extension Select {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
   public func count<each C: QueryRepresentable, each J: Table>(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> Select<
     (repeat each C, Int), From, (repeat each J)
   >
   where Columns == (repeat each C), Joins == (repeat each J) {
-    select { _ in .count(filter: filter) }
+    let filter = filter?(From.columns, repeat (each J).columns)
+    return select { _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by transforming its selected columns to a new
