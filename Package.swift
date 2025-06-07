@@ -13,6 +13,10 @@ let package = Package(
   ],
   products: [
     .library(
+      name: "ArchiveFix",
+      targets: ["ArchiveFix"]
+    ),
+    .library(
       name: "StructuredQueries",
       targets: ["StructuredQueries"]
     ),
@@ -46,6 +50,12 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"602.0.0"),
   ],
   targets: [
+    .target(
+      name: "ArchiveFix",
+      dependencies: [
+        "StructuredQueries",
+      ]
+    ),
     .target(
       name: "StructuredQueriesCore",
       dependencies: [

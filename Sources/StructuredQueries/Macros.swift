@@ -19,7 +19,7 @@ import StructuredQueriesCore
   named(schemaName),
   named(tableName)
 )
-@attached(member)
+@attached(member, names: arbitrary)
 @attached(memberAttribute)
 public macro Table(
   _ name: String? = nil,
