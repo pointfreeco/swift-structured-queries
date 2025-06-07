@@ -426,6 +426,18 @@ extension Table {
 }
 
 extension PrimaryKeyedTable {
+  /// An insert statement for one or more table rows.
+  ///
+  /// This function can be used to create an insert statement from a ``Draft`` value.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
@@ -443,22 +455,19 @@ extension PrimaryKeyedTable {
     )
   }
 
-  public static func upsert(
-    or conflictResolution: ConflictResolution? = nil,
-    @InsertValuesBuilder<Draft> values: () -> [Draft]
-  ) -> InsertOf<Self> {
-    insert(
-      or: conflictResolution,
-      values: values,
-      onConflict: { $0.primaryKey },
-      doUpdate: { updates in
-        for column in Draft.TableColumns.allColumns where column.name != columns.primaryKey.name {
-          updates.set(column, #""excluded".\#(quote: column.name)"#)
-        }
-      }
-    )
-  }
-
+  /// An insert statement for one or more table rows.
+  ///
+  /// This function can be used to create an insert statement from a ``Draft`` value.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - conflictTargets: Indexed columns to target for conflict resolution.
+  ///   - targetFilter: A filter to apply to conflict target columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
   public static func insert<T1, each T2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
@@ -480,6 +489,37 @@ extension PrimaryKeyedTable {
         where: updateFilter
       )
     }
+  }
+  /// An upsert statement for given drafts.
+  ///
+  /// Generates an insert statement with an upsert clause. Useful for building forms that can both
+  /// insert new records as well as update them.
+  ///
+  /// ```swift
+  /// Reminder.upsert { draft }
+  /// // INSERT INTO "reminders" ("id", …)
+  /// // VALUES (1, …)
+  /// // ON CONFLICT DO UPDATE SET "…" = "excluded"."…", …
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - values: A builder of row values for the given columns.
+  /// - Returns: An insert statement with an upsert clause.
+  public static func upsert(
+    or conflictResolution: ConflictResolution? = nil,
+    @InsertValuesBuilder<Draft> values: () -> [Draft]
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      values: values,
+      onConflict: { $0.primaryKey },
+      doUpdate: { updates in
+        for column in Draft.TableColumns.allColumns where column.name != columns.primaryKey.name {
+          updates.set(column, #""excluded".\#(quote: column.name)"#)
+        }
+      }
+    )
   }
 
   private static func _insert<each ConflictTarget>(

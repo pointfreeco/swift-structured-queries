@@ -50,17 +50,17 @@ extension SnapshotTests {
         )
       )
       try db.execute(
-        Kitchen.insert(
+        Kitchen.insert {
           Kitchen(
             id: 1
           )
-        )
+        }
       )
       try db.execute(
         KitchenSink.insert()
       )
       try db.execute(
-        KitchenSink.insert(
+        KitchenSink.insert {
           [
             KitchenSink(
               id: 2,
@@ -100,7 +100,7 @@ extension SnapshotTests {
               jsonArrayOfDates: [Date(timeIntervalSinceReferenceDate: 1_234_567_890)]
             ),
           ]
-        )
+        }
       )
     }
 

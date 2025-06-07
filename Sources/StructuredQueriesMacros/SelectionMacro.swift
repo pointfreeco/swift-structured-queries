@@ -49,7 +49,6 @@ extension SelectionMacro: ExtensionMacro {
         (binding.typeAnnotation?.type.trimmed
         ?? binding.initializer?.value.literalType)
         .map { selfRewriter.rewrite($0).cast(TypeSyntax.self) }
-      let columnQueryOutputType = columnQueryValueType
 
       for attribute in property.attributes {
         guard

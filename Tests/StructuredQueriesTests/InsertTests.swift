@@ -13,7 +13,7 @@ extension SnapshotTests {
         } values: {
           (1, "Groceries", true, Date(timeIntervalSinceReferenceDate: 0), .high)
           (2, "Haircut", false, Date(timeIntervalSince1970: 0), .low)
-        } onConflict: {
+        } onConflictDoUpdate: {
           $0.title += " Copy"
         }
         .returning(\.self)
@@ -91,7 +91,7 @@ extension SnapshotTests {
 
     @Test
     func emptyValues() {
-      assertQuery(Reminder.insert([])) {
+      assertQuery(Reminder.insert { [] }) {
         """
 
         """
@@ -148,10 +148,10 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Reminder.insert([
-          Reminder(id: 102, remindersListID: 1, title: "Check mailbox"),
-          Reminder(id: 103, remindersListID: 1, title: "Check Slack"),
-        ])
+        Reminder.insert {
+          Reminder(id: 102, remindersListID: 1, title: "Check mailbox")
+          Reminder(id: 103, remindersListID: 1, title: "Check Slack")
+        }
         .returning(\.id)
       ) {
         """
@@ -170,9 +170,9 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Reminder.insert(
+        Reminder.insert {
           Reminder(id: 104, remindersListID: 1, title: "Check pager")
-        )
+        }
         .returning(\.id)
       ) {
         """
@@ -252,9 +252,9 @@ extension SnapshotTests {
       }
 
       assertQuery(
-        Reminder.insert(
+        Reminder.insert {
           Reminder.Draft(remindersListID: 1, title: "Check voicemail")
-        )
+        }
         .returning(\.id)
       ) {
         """
@@ -273,12 +273,12 @@ extension SnapshotTests {
       }
 
       assertQuery(
-        Reminder.insert(
+        Reminder.insert {
           [
             Reminder.Draft(remindersListID: 1, title: "Check mailbox"),
             Reminder.Draft(remindersListID: 1, title: "Check Slack"),
           ]
-        )
+        }
         .returning(\.id)
       ) {
         """
@@ -324,7 +324,7 @@ extension SnapshotTests {
       }
       assertQuery(
         Reminder
-          .upsert(Reminder.Draft(id: 1, remindersListID: 1, title: "Cash check"))
+          .upsert { Reminder.Draft(id: 1, remindersListID: 1, title: "Cash check") }
           .returning(\.self)
       ) {
         """
@@ -368,8 +368,10 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Reminder.upsert(Reminder.Draft(remindersListID: 1))
-          .returning(\.self)
+        Reminder.upsert {
+          Reminder.Draft(remindersListID: 1)
+        }
+        .returning(\.self)
       ) {
         """
         INSERT INTO "reminders"
@@ -400,8 +402,10 @@ extension SnapshotTests {
 
     @Test func upsertWithoutID_OtherConflict() {
       assertQuery(
-        RemindersList.upsert(RemindersList.Draft(title: "Personal"))
-          .returning(\.self)
+        RemindersList.upsert {
+          RemindersList.Draft(title: "Personal")
+        }
+        .returning(\.self)
       ) {
         """
         INSERT INTO "remindersLists"
@@ -532,7 +536,7 @@ extension SnapshotTests {
 
     @Test func noPrimaryKey() {
       assertInlineSnapshot(
-        of: Item.insert(Item()),
+        of: Item.insert { Item() },
         as: .sql
       ) {
         """
