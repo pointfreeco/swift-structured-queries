@@ -1,166 +1,271 @@
 extension Table {
-  /// An insert statement for a table row.
+  /// An insert statement for one or more table rows.
   ///
-  /// A convenience overload that takes a single row.
-  ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - row: A row to insert.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  /// - Returns: An insert statement.
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ row: Self,
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> InsertOf<Self> {
-    insert(or: conflictResolution, [row], onConflict: doUpdate)
-  }
-
-  /// An insert statement for table rows.
-  ///
-  /// This function can be used to create an insert statement for a number of Swift values for a
-  /// ``Table`` conformance.
-  ///
-  /// For example:
+  /// This function can be used to create an insert statement from a ``Table`` value.
   ///
   /// ```swift
-  /// @Table
-  /// struct Tag {
-  ///   var name: String
-  /// }
+  /// let tag = Tag(title: "car")
+  /// Tag.insert { tag }
+  /// // INSERT INTO "tags" ("title")
+  /// // VALUES ('car')
+  /// ```
   ///
-  /// let tags = [
-  ///   Tag(name: "car"),
-  ///   Tag(name: "kids"),
-  ///   Tag(name: "someday"),
-  ///   Tag(name: "optional"),
-  /// ]
+  /// It can also be used to insert multiple rows in a single statement.
   ///
-  /// Tag.insert(tags)
-  /// // INSERT INTO "tags" ("name")
+  /// ```swift
+  /// let tags = ["car", "kids", "someday", "optional"]
+  /// Tag.insert { tags }
+  /// // INSERT INTO "tags" ("title")
   /// // VALUES ('car'), ('kids'), ('someday'), ('optional')
   /// ```
   ///
-  /// To create an insert statement from column values instead of a full record, see
-  /// ``insert(or:_:values:onConflict:)``.
-  ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - rows: Rows to insert. An empty array will return an empty query.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  /// - Returns: An insert statement.
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ rows: [Self],
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> InsertOf<Self> {
-    insert(
-      or: conflictResolution,
-      values: { return rows },
-      onConflict: doUpdate
-    )
-  }
-
-  // NB: This overload allows for the builder to work with full table records.
-  @_documentation(visibility: private)
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ columns: (TableColumns) -> (TableColumns) = { $0 },
-    @InsertValuesBuilder<Self> values rows: () -> [Self],
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> InsertOf<Self> {
-    var columnNames: [String] = []
-    for column in Self.TableColumns.allColumns {
-      columnNames.append(column.name)
-    }
-    var values: [[QueryFragment]] = []
-    for row in rows() {
-      var value: [QueryFragment] = []
-      for column in Self.TableColumns.allColumns {
-        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
-          Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        value.append(open(column))
-      }
-      values.append(value)
-    }
-    return Insert(
-      conflictResolution: conflictResolution,
-      columnNames: columnNames,
-      conflictTargetColumnNames: [],
-      values: .values(values),
-      updates: doUpdate.map(Updates.init),
-      returning: []
-    )
-  }
-
-  /// An insert statement for table values.
-  ///
-  /// This function can be used to create an insert statement for a specified set of columns.
-  ///
-  /// For example:
+  /// The `values` trailing closure is a result builder that will insert any number of expressions,
+  /// one after the other, and supports basic control flow statements.
   ///
   /// ```swift
-  /// Reminder.insert {
-  ///   ($0.remindersListID, $0.title, $0.isFlagged)
-  /// } values: {
-  ///   (list.id, "Groceries", false)
-  ///   (list.id, "Haircut", true)
+  /// Tag.insert {
+  ///   if vehicleOwner {
+  ///     Tag(name: "car")
+  ///   }
+  ///   Tag(name: "kids")
+  ///   Tag(name: "someday")
+  ///   Tag(name: "optional")
   /// }
-  /// // INSERT INTO "reminders" ("remindersListID", "title", "isFlagged")
-  /// // VALUES (42, 'Groceries', 0), (42, 'Haircut', 1)
+  /// // INSERT INTO "tags" ("title")
+  /// // VALUES ('car'), ('kids'), ('someday'), ('optional')
   /// ```
   ///
   /// - Parameters:
   ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - columns: Columns values to be inserted.
-  ///   - rows: A builder of row values for the given columns.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
-  public static func insert<V1: QueryBindable, each V2: QueryBindable>(
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> TableColumns = { $0 },
+    @InsertValuesBuilder<Self> values: () -> [Self],
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> InsertOf<Self> {
+    _insert(
+      or: conflictResolution,
+      values: values,
+      onConflict: { _ -> ()? in nil },
+      where: nil,
+      doUpdate: updates,
+      where: updateFilter
+    )
+  }
+
+  /// An upsert statement for one or more table rows.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - conflictTargets: Indexed columns to target for conflict resolution.
+  ///   - targetFilter: A filter to apply to conflict target columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<T1, each T2>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> TableColumns = { $0 },
+    @InsertValuesBuilder<Self> values: () -> [Self],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil,
+    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> InsertOf<Self> {
+    withoutActuallyEscaping(updates) { updates in
+      _insert(
+        or: conflictResolution,
+        values: values,
+        onConflict: conflictTargets,
+        where: targetFilter,
+        doUpdate: updates,
+        where: updateFilter
+      )
+    }
+  }
+
+  private static func _insert<each ConflictTarget>(
+    or conflictResolution: ConflictResolution?,
+    @InsertValuesBuilder<Self> values: () -> [Self],
+    onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)?,
+    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)?
+  ) -> InsertOf<Self> {
+    var valueFragments: [[QueryFragment]] = []
+    for value in values() {
+      var valueFragment: [QueryFragment] = []
+      for column in TableColumns.allColumns {
+        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+          Value(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
+        }
+        valueFragment.append(open(column))
+      }
+      valueFragments.append(valueFragment)
+    }
+    return _insert(
+      or: conflictResolution,
+      columnNames: TableColumns.allColumns.map(\.name),
+      values: .values(valueFragments),
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
+    )
+  }
+
+  /// An insert statement for one or more table rows.
+  ///
+  /// This function can be used to create an insert statement for a specified set of columns.
+  ///
+  /// ```swift
+  /// Tag.insert {
+  ///   $0.title
+  /// } values: {
+  ///   "car"
+  /// }
+  /// // INSERT INTO "tags" ("title")
+  /// // VALUES ('car')
+  /// ```
+  ///
+  /// It can also be used to insert multiple rows in a single statement.
+  ///
+  /// ```swift
+  /// let tags = ["car", "kids", "someday", "optional"]
+  /// Tag.insert {
+  ///   $0.title
+  /// } values: {
+  ///   tags
+  /// }
+  /// let tags = ["car", "kids", "someday", "optional"]
+  /// Tag.insert { tags }
+  /// // INSERT INTO "tags" ("title")
+  /// // VALUES ('car'), ('kids'), ('someday'), ('optional')
+  /// ```
+  ///
+  /// The `values` trailing closure is a result builder that will insert any number of expressions,
+  /// one after the other, and supports basic control flow statements.
+  ///
+  /// ```swift
+  /// Tag.insert {
+  ///   $0.title
+  /// } values: {
+  ///   if vehicleOwner {
+  ///     "car"
+  ///   }
+  ///   "kids"
+  ///   "someday"
+  ///   "optional"
+  /// }
+  /// // INSERT INTO "tags" ("title")
+  /// // VALUES ('car'), ('kids'), ('someday'), ('optional')
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<V1, each V2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
-    values rows: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> InsertOf<Self> {
     _insert(
       or: conflictResolution,
       columns,
-      values: rows,
-      onConflict: doUpdate
+      values: values,
+      onConflict: { _ -> ()? in nil },
+      where: nil,
+      doUpdate: updates,
+      where: updateFilter
     )
   }
 
-  private static func _insert<each Value: QueryBindable>(
+  /// An upsert statement for one or more table rows.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - conflictTargets: Indexed columns to target for conflict resolution.
+  ///   - targetFilter: A filter to apply to conflict target columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<V1, each V2, T1, each T2>(
     or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
+    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil,
+    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> InsertOf<Self> {
+    withoutActuallyEscaping(updates) { updates in
+      _insert(
+        or: conflictResolution,
+        columns,
+        values: values,
+        onConflict: conflictTargets,
+        where: targetFilter,
+        doUpdate: updates,
+        where: updateFilter
+      )
+    }
+  }
+
+  private static func _insert<each Value, each ConflictTarget>(
+    or conflictResolution: ConflictResolution?,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     @InsertValuesBuilder<(repeat (each Value).QueryOutput)>
-    values rows: () -> [(repeat (each Value).QueryOutput)],
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    values: () -> [(repeat (each Value).QueryOutput)],
+    onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)?,
+    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)?
   ) -> InsertOf<Self> {
     var columnNames: [String] = []
     for column in repeat each columns(Self.columns) {
       columnNames.append(column.name)
     }
-    var values: [[QueryFragment]] = []
-    for row in rows() {
-      var value: [QueryFragment] = []
-      for (columnType, column) in repeat ((each Value).self, each row) {
-        value.append("\(columnType.init(queryOutput: column).queryFragment)")
+    var valueFragments: [[QueryFragment]] = []
+    for value in values() {
+      var valueFragment: [QueryFragment] = []
+      for (columnType, column) in repeat ((each Value).self, each value) {
+        valueFragment.append("\(columnType.init(queryOutput: column).queryFragment)")
       }
-      values.append(value)
+      valueFragments.append(valueFragment)
     }
-    return Insert(
-      conflictResolution: conflictResolution,
+    return _insert(
+      or: conflictResolution,
       columnNames: columnNames,
-      conflictTargetColumnNames: [],
-      values: .values(values),
-      updates: doUpdate.map(Updates.init),
-      returning: []
+      values: .values(valueFragments),
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
     )
   }
 
@@ -173,54 +278,97 @@ extension Table {
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns values to be inserted.
   ///   - selection: A statement that selects the values to be inserted.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
   ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert<
-    V1: QueryBindable,
-    each V2: QueryBindable,
-    C1: QueryExpression<V1>,
-    each C2: QueryExpression,
-    From,
-    Joins
+    V1, each V2, C1: QueryExpression, each C2: QueryExpression, From, Joins
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> Select<(C1, repeat each C2), From, Joins>,
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> InsertOf<Self>
-  where (repeat (each C2).QueryValue) == (repeat each V2) {
+  where C1.QueryValue == V1, (repeat (each C2).QueryValue) == (repeat each V2) {
     _insert(
       or: conflictResolution,
       columns,
       select: selection,
-      onConflict: doUpdate
+      onConflict: { _ -> ()? in nil },
+      where: nil,
+      doUpdate: updates,
+      where: updateFilter
     )
   }
 
+  /// An insert statement for a table selection.
+  ///
+  /// This function can be used to create an insert statement for the results of a ``Select``
+  /// statement.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns values to be inserted.
+  ///   - selection: A statement that selects the values to be inserted.
+  ///   - conflictTargets: Indexed columns to target for conflict resolution.
+  ///   - targetFilter: A filter to apply to conflict target columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<
+    V1, each V2, C1: QueryExpression, each C2: QueryExpression, From, Joins, T1, each T2
+  >(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    select selection: () -> Select<(C1, repeat each C2), From, Joins>,
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil,
+    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> InsertOf<Self>
+  where C1.QueryValue == V1, (repeat (each C2).QueryValue) == (repeat each V2) {
+    withoutActuallyEscaping(updates) { updates in
+      _insert(
+        or: conflictResolution,
+        columns,
+        select: selection,
+        onConflict: conflictTargets,
+        where: targetFilter,
+        doUpdate: updates,
+        where: updateFilter
+      )
+    }
+  }
+
   private static func _insert<
-    each Value: QueryBindable,
-    each ResultColumn: QueryExpression,
-    From,
-    Joins
+    each Value, each ResultColumn: QueryExpression, From, Joins, each ConflictTarget
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     select selection: () -> Select<(repeat each ResultColumn), From, Joins>,
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)?,
+    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)?
   ) -> InsertOf<Self>
   where (repeat (each ResultColumn).QueryValue) == (repeat each Value) {
     var columnNames: [String] = []
     for column in repeat each columns(Self.columns) {
       columnNames.append(column.name)
     }
-    return Insert(
-      conflictResolution: conflictResolution,
+    return _insert(
+      or: conflictResolution,
       columnNames: columnNames,
-      conflictTargetColumnNames: [],
       values: .select(selection().query),
-      updates: doUpdate.map(Updates.init),
-      returning: []
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
     )
   }
 
@@ -233,230 +381,134 @@ extension Table {
   /// // INSERT INTO "reminders" DEFAULT VALUES
   /// ```
   ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
+  /// - Parameter conflictResolution: A conflict resolution algorithm.
   /// - Returns: An insert statement.
   public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    or conflictResolution: ConflictResolution? = nil
   ) -> InsertOf<Self> {
-    Insert(
-      conflictResolution: conflictResolution,
+    _insert(
+      or: conflictResolution,
       columnNames: [],
-      conflictTargetColumnNames: [],
       values: .default,
-      updates: doUpdate.map(Updates.init),
-      returning: []
+      onConflict: { _ -> ()? in nil },
+      where: nil,
+      doUpdate: nil,
+      where: nil
     )
   }
 
-  /// An insert statement for a table row, describing a specific unique constraint.
-  ///
-  /// - Parameters:
-  ///   - row: Row to insert.
-  ///   - onConflict: The columns to check for conflict.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  /// - Returns: An insert statement.
-  public static func insert<
-    each Constraint: QueryBindable
-  >(
-    _ row: () -> Self,
-    onConflict: (TableColumns) -> (repeat TableColumn<Self, each Constraint>),
-    doUpdate: (inout Updates<Self>) -> Void = { _ in }
+  fileprivate static func _insert<each ConflictTarget>(
+    or conflictResolution: ConflictResolution?,
+    columnNames: [String],
+    values: InsertValues,
+    onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)?,
+    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)?
   ) -> InsertOf<Self> {
-    insert(
-      values: { [row()] },
-      onConflict: onConflict,
-      doUpdate: doUpdate
-    )
-  }
-
-  /// An insert statement for a table row, describing a specific unique constraint.
-  ///
-  /// - Parameters:
-  ///   - rows: Rows to insert. An empty array will return an empty query.
-  ///   - onConflict: The columns to check for conflict.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  /// - Returns: An insert statement.
-  public static func insert<
-    each Constraint: QueryBindable
-  >(
-    values rows: () -> [Self],
-    onConflict: (TableColumns) -> (repeat TableColumn<Self, each Constraint>),
-    doUpdate: (inout Updates<Self>) -> Void = { _ in }
-  ) -> InsertOf<Self> {
-    var columnNames: [String] = []
-    for column in TableColumns.allColumns {
-      columnNames.append(column.name)
-    }
-    var values: [[QueryFragment]] = []
-    for row in rows() {
-      var value: [QueryFragment] = []
-      for column in TableColumns.allColumns {
-        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
-          Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        value.append(open(column))
-      }
-      values.append(value)
-    }
     var conflictTargetColumnNames: [String] = []
-    for column in repeat each onConflict(Self.columns) {
-      conflictTargetColumnNames.append(column.name)
+    if let conflictTargets = conflictTargets(Self.columns) {
+      for column in repeat each conflictTargets {
+        conflictTargetColumnNames.append(column.name)
+      }
     }
     return Insert(
-      conflictResolution: nil,
+      conflictResolution: conflictResolution,
       columnNames: columnNames,
       conflictTargetColumnNames: conflictTargetColumnNames,
-      values: .values(values),
-      updates: Updates(doUpdate),
+      conflictTargetFilter: targetFilter?(Self.columns).queryFragment,
+      values: values,
+      updates: updates.map(Updates.init),
+      updateFilter: updateFilter?(Self.columns).queryFragment,
       returning: []
     )
   }
 }
 
 extension PrimaryKeyedTable {
-  /// An insert statement for a table row draft.
-  ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - row: A draft to insert.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  /// - Returns: An insert statement.
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
-    _ row: Draft,
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
+    @InsertValuesBuilder<Draft> values: () -> [Draft],
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> InsertOf<Self> {
-    Self.insert(
+    _insert(
       or: conflictResolution,
-      [row],
-      onConflict: doUpdate
+      values: values,
+      onConflict: { _ -> ()? in nil },
+      where: nil,
+      doUpdate: updates,
+      where: updateFilter
     )
   }
 
-  /// An insert statement for table row drafts.
-  ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - rows: Rows to insert. An empty array will return an empty query.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  /// - Returns: An insert statement.
-  public static func insert(
+  public static func upsert(
     or conflictResolution: ConflictResolution? = nil,
-    _ rows: [Draft],
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> InsertOf<Self> {
-    Self.insert(
-      or: conflictResolution,
-      values: { return rows },
-      onConflict: doUpdate
-    )
-  }
-
-  // NB: This overload allows for the builder to work with full table drafts.
-  @_documentation(visibility: private)
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Draft.TableColumns) -> (Draft.TableColumns) = { $0 },
-    @InsertValuesBuilder<Draft>
-    values rows: () -> [Draft],
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
-  ) -> InsertOf<Self> {
-    var columnNames: [String] = []
-    for column in Draft.TableColumns.allColumns {
-      columnNames.append(column.name)
-    }
-    var values: [[QueryFragment]] = []
-    for row in rows() {
-      var value: [QueryFragment] = []
-      for column in Draft.TableColumns.allColumns {
-        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
-          Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        value.append(open(column))
-      }
-      values.append(value)
-    }
-    return Insert(
-      conflictResolution: conflictResolution,
-      columnNames: columnNames,
-      conflictTargetColumnNames: [Self.columns.primaryKey.name],
-      values: .values(values),
-      updates: doUpdate.map(Updates.init),
-      returning: []
-    )
-  }
-
-  /// An insert statement for a table row draft, describing a specific unique constraint.
-  ///
-  /// - Parameters:
-  ///   - row: Row to insert.
-  ///   - onConflict: The columns to check for conflict.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  /// - Returns: An insert statement.
-  public static func insert<
-    each Constraint: QueryBindable
-  >(
-    _ row: () -> Draft,
-    onConflict: (Draft.TableColumns) -> (repeat TableColumn<Draft, each Constraint>),
-    doUpdate: (inout Updates<Self>) -> Void = { _ in }
+    @InsertValuesBuilder<Draft> values: () -> [Draft]
   ) -> InsertOf<Self> {
     insert(
-      values: { [row()] },
-      onConflict: onConflict,
-      doUpdate: doUpdate
+      or: conflictResolution,
+      values: values,
+      onConflict: { $0.primaryKey },
+      doUpdate: { updates in
+        for column in Draft.TableColumns.allColumns where column.name != columns.primaryKey.name {
+          updates.set(column, #""excluded".\#(quote: column.name)"#)
+        }
+      }
     )
   }
 
-  /// An insert statement for a table row draft, describing a specific unique constraint.
-  ///
-  /// - Parameters:
-  ///   - rows: Rows to insert. An empty array will return an empty query.
-  ///   - onConflict: The columns to check for conflict.
-  ///   - doUpdate: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  /// - Returns: An insert statement.
-  public static func insert<
-    each Constraint: QueryBindable
-  >(
-    values rows: () -> [Draft],
-    onConflict: (Draft.TableColumns) -> (repeat TableColumn<Draft, each Constraint>),
-    doUpdate: (inout Updates<Self>) -> Void = { _ in }
+  public static func insert<T1, each T2>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
+    @InsertValuesBuilder<Draft> values: () -> [Draft],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil,
+    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> InsertOf<Self> {
-    var columnNames: [String] = []
-    for column in Draft.TableColumns.allColumns {
-      columnNames.append(column.name)
+    withoutActuallyEscaping(updates) { updates in
+      _insert(
+        or: conflictResolution,
+        values: values,
+        onConflict: conflictTargets,
+        where: targetFilter,
+        doUpdate: updates,
+        where: updateFilter
+      )
     }
-    var values: [[QueryFragment]] = []
-    for row in rows() {
-      var value: [QueryFragment] = []
+  }
+
+  private static func _insert<each ConflictTarget>(
+    or conflictResolution: ConflictResolution?,
+    @InsertValuesBuilder<Draft> values: () -> [Draft],
+    onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
+    where targetFilter: ((TableColumns) -> any QueryExpression<Bool>)?,
+    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    where updateFilter: ((TableColumns) -> any QueryExpression<Bool>)?
+  ) -> InsertOf<Self> {
+    var valueFragments: [[QueryFragment]] = []
+    for value in values() {
+      var valueFragment: [QueryFragment] = []
       for column in Draft.TableColumns.allColumns {
         func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
-          Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
+          Value(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
         }
-        value.append(open(column))
+        valueFragment.append(open(column))
       }
-      values.append(value)
+      valueFragments.append(valueFragment)
     }
-    var conflictTargetColumnNames: [String] = []
-    for column in repeat each onConflict(Draft.columns) {
-      conflictTargetColumnNames.append(column.name)
-    }
-    return Insert(
-      conflictResolution: nil,
-      columnNames: columnNames,
-      conflictTargetColumnNames: conflictTargetColumnNames,
-      values: .values(values),
-      updates: Updates(doUpdate),
-      returning: []
+    return _insert(
+      or: conflictResolution,
+      columnNames: Draft.TableColumns.allColumns.map(\.name),
+      values: .values(valueFragments),
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
     )
   }
 }
@@ -477,9 +529,31 @@ public struct Insert<Into: Table, Returning> {
   var conflictResolution: ConflictResolution?
   var columnNames: [String]
   var conflictTargetColumnNames: [String]
+  var conflictTargetFilter: QueryFragment?
   fileprivate var values: InsertValues
   var updates: Updates<Into>?
+  var updateFilter: QueryFragment?
   var returning: [QueryFragment]
+
+  fileprivate init(
+    conflictResolution: ConflictResolution?,
+    columnNames: [String],
+    conflictTargetColumnNames: [String],
+    conflictTargetFilter: QueryFragment?,
+    values: InsertValues,
+    updates: Updates<Into>?,
+    updateFilter: QueryFragment?,
+    returning: [QueryFragment]
+  ) {
+    self.conflictResolution = conflictResolution
+    self.columnNames = columnNames
+    self.conflictTargetColumnNames = conflictTargetColumnNames
+    self.conflictTargetFilter = conflictTargetFilter
+    self.values = values
+    self.updates = updates
+    self.updateFilter = updateFilter
+    self.returning = returning
+  }
 
   /// Adds a returning clause to an insert statement.
   ///
@@ -496,8 +570,10 @@ public struct Insert<Into: Table, Returning> {
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       conflictTargetColumnNames: conflictTargetColumnNames,
+      conflictTargetFilter: conflictTargetFilter,
       values: values,
       updates: updates,
+      updateFilter: updateFilter,
       returning: returning
     )
   }
@@ -519,8 +595,10 @@ public struct Insert<Into: Table, Returning> {
       conflictResolution: conflictResolution,
       columnNames: columnNames,
       conflictTargetColumnNames: conflictTargetColumnNames,
+      conflictTargetFilter: conflictTargetFilter,
       values: values,
       updates: updates,
+      updateFilter: updateFilter,
       returning: returning
     )
   }
@@ -552,7 +630,7 @@ extension Insert: Statement {
     case .default:
       query.append("\(.newlineOrSpace)DEFAULT VALUES")
 
-    case let .select(select):
+    case .select(let select):
       query.append("\(.newlineOrSpace)\(select)")
 
     case .values(let values):
@@ -573,9 +651,19 @@ extension Insert: Statement {
         query.append("(")
         query.append(conflictTargetColumnNames.map { "\(quote: $0)" }.joined(separator: ", "))
         query.append(") ")
+        if let conflictTargetFilter {
+          query.append("WHERE \(conflictTargetFilter) ")
+        }
       }
       query.append("DO ")
-      query.append(updates.isEmpty ? "NOTHING" : "UPDATE \(bind: updates)")
+      if updates.isEmpty {
+        query.append("NOTHING")
+      } else {
+        query.append("UPDATE \(bind: updates)")
+        if let updateFilter {
+          query.append(" WHERE \(updateFilter)")
+        }
+      }
     }
     if !returning.isEmpty {
       query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
@@ -611,6 +699,10 @@ public enum InsertValuesBuilder<Value> {
 
   public static func buildExpression(_ expression: Value) -> [Value] {
     [expression]
+  }
+
+  public static func buildExpression(_ expression: [Value]) -> [Value] {
+    expression
   }
 
   public static func buildLimitedAvailability(_ component: [Value]) -> [Value] {

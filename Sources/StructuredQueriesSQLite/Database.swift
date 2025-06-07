@@ -135,21 +135,21 @@ public struct Database {
     for (index, binding) in zip(Int32(1)..., query.bindings) {
       let result =
         switch binding {
-        case let .blob(blob):
+        case .blob(let blob):
           sqlite3_bind_blob(statement, index, Array(blob), Int32(blob.count), SQLITE_TRANSIENT)
-        case let .date(date):
+        case .date(let date):
           sqlite3_bind_text(statement, index, date.iso8601String, -1, SQLITE_TRANSIENT)
-        case let .double(double):
+        case .double(let double):
           sqlite3_bind_double(statement, index, double)
-        case let .int(int):
+        case .int(let int):
           sqlite3_bind_int64(statement, index, Int64(int))
         case .null:
           sqlite3_bind_null(statement, index)
-        case let .text(text):
+        case .text(let text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
-        case let .uuid(uuid):
+        case .uuid(let uuid):
           sqlite3_bind_text(statement, index, uuid.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
-        case let .invalid(error):
+        case .invalid(let error):
           throw error.underlyingError
         }
       guard result == SQLITE_OK else { throw SQLiteError(db: storage.handle) }
@@ -165,9 +165,9 @@ public struct Database {
     @usableFromInline
     var handle: OpaquePointer {
       switch self {
-      case let .owned(storage):
+      case .owned(let storage):
         return storage.handle
-      case let .unowned(handle):
+      case .unowned(let handle):
         return handle
       }
     }

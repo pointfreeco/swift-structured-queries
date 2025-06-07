@@ -56,7 +56,7 @@ extension TableMacro: ExtensionMacro {
         content: declaration.name.trimmed.text.lowerCamelCased().pluralized()
       )
     )
-    if case let .argumentList(arguments) = node.arguments {
+    if case .argumentList(let arguments) = node.arguments {
       for argumentIndex in arguments.indices {
         let argument = arguments[argumentIndex]
         switch argument.label {
@@ -78,7 +78,7 @@ extension TableMacro: ExtensionMacro {
             tableName = argument.expression.trimmed
           }
 
-        case let .some(label) where label.text == "schema":
+        case .some(let label) where label.text == "schema":
           if node.attributeName.identifier == "_Draft" {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
             let base = memberAccess.base!
@@ -130,7 +130,7 @@ extension TableMacro: ExtensionMacro {
         isEphemeral = isEphemeral || attributeName == "Ephemeral"
         guard
           attributeName == "Column" || isEphemeral,
-          case let .argumentList(arguments) = attribute.arguments
+          case .argumentList(let arguments) = attribute.arguments
         else { continue }
 
         for argumentIndex in arguments.indices {
@@ -148,7 +148,7 @@ extension TableMacro: ExtensionMacro {
             }
             columnName = argument.expression
 
-          case let .some(label) where label.text == "as":
+          case .some(let label) where label.text == "as":
             guard
               let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
               memberAccess.declName.baseName.tokenKind == .keyword(.self),
@@ -166,7 +166,7 @@ extension TableMacro: ExtensionMacro {
             columnQueryValueType = "\(raw: base.rewritten(selfRewriter).trimmedDescription)"
             columnQueryOutputType = "\(columnQueryValueType).QueryOutput"
 
-          case let .some(label) where label.text == "primaryKey":
+          case .some(let label) where label.text == "primaryKey":
             guard
               argument.expression.as(BooleanLiteralExprSyntax.self)?.literal.tokenKind
                 == .keyword(.true)
@@ -292,7 +292,7 @@ extension TableMacro: ExtensionMacro {
             var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
             attributeName == "Column",
-            case var .argumentList(arguments) = attribute.arguments
+            case .argumentList(var arguments) = attribute.arguments
           else { continue }
           hasColumnAttribute = true
           var hasPrimaryKeyArgument = false
@@ -589,7 +589,7 @@ extension TableMacro: MemberAttributeMacro {
             let attribute = attribute.as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
             attributeName == "Column",
-            case let .argumentList(arguments) = attribute.arguments,
+            case .argumentList(let arguments) = attribute.arguments,
             arguments.contains(
               where: {
                 $0.label?.text.trimmingBackticks() == "primaryKey"
