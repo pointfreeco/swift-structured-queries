@@ -127,11 +127,17 @@ Reminder.delete(reminder)
 
 - ``Draft``
 - ``find(_:)``
-- ``insert(or:_:onConflict:)``
-- ``upsert(_:)``
+- ``insert(or:_:values:onConflict:where:doUpdate:where:)``
+- ``insert(or:_:values:onConflictDoUpdate:where:)``
 - ``update(or:_:)``
+- ``upsert(or:values:)``
 - ``delete(_:)``
 
 ### Schema definition
 
 - ``PrimaryKeyedTableDefinition``
+
+### Deprecations
+
+- ``insert(or:_:onConflict:)``
+- ``upsert(_:)``

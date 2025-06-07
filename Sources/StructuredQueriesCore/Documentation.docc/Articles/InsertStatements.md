@@ -6,9 +6,10 @@ Learn how to build queries that insert data into a database.
 
 ### Inserting values
 
-The most general way to insert values into a table is the ``Table/insert(or:_:values:onConflict:)``
-function, which takes a trailing closure describing the columns being inserted, as well as a second
-trailing closure describing the values being inserted:
+The most general way to insert values into a table is the
+``Table/insert(or:_:values:onConflict:where:doUpdate:where:)`` function, which takes a trailing
+closure describing the columns being inserted, as well as a second trailing closure describing the
+values being inserted:
 
 @Row {
   @Column {
@@ -85,7 +86,7 @@ As well as introduce conditional or looping logic:
 
 ### Inserting records
 
-It's also possible to insert entire records, either using result builder syntax:
+It's also possible to insert entire records using result builder syntax:
 
 @Row {
   @Column {
@@ -109,50 +110,11 @@ It's also possible to insert entire records, either using result builder syntax:
   }
 }
 
-Or using helpers like ``Table/insert(or:_:onConflict:)`` that take a single reminder or an array:
-
-@Row {
-  @Column {
-    ```swift
-    let remindersTag = RemindersTag(reminderID: 1, tagID: 1)
-    RemindersTag.insert(remindersTag)
-    ```
-  }
-  @Column {
-    ```sql
-    INSERT INTO "remindersTags"
-      ("reminderID", "tagID")
-    VALUES
-      (1, 1)
-    ```
-  }
-}
-@Row {
-  @Column {
-    ```swift
-    let remindersTags = [
-      RemindersTag(reminderID: 1, tagID: 2),
-      RemindersTag(reminderID: 2, tagID: 4),
-    ]
-    RemindersTag.insert(remindersTags)
-    ```
-  }
-  @Column {
-    ```sql
-    INSERT INTO "remindersTags"
-      ("reminderID", "tagID")
-    VALUES
-      (1, 2),
-      (2, 4)
-    ```
-  }
-}
-
 ### Inserting drafts
 
 If your table has a [primary key](<doc:PrimaryKeyedTables>) that is initialized by the database,
 you can insert its associated ``PrimaryKeyedTable/Draft`` type, instead, which omits specifying
-this identifier. Using either result builder syntax:
+this identifier. Using result builder syntax:
 
 @Row {
   @Column {
@@ -180,52 +142,6 @@ this identifier. Using either result builder syntax:
   }
 }
 
-Or using helpers like ``PrimaryKeyedTable/insert(or:_:onConflict:)`` that take a single draft or
-an array:
-
-@Row {
-  @Column {
-    ```swift
-    let draft = Reminder.Draft(
-      title: "Get groceries",
-      isFlagged: true,
-      priority: 3,
-      remindersListID: 1
-    )
-    Reminder.insert(draft)
-    ```
-  }
-  @Column {
-    ```sql
-    INSERT INTO "reminders"
-      ("title",  "isFlagged", "priority", "remindersListID")
-    VALUES
-      ('Get groceries', 1, 3, 1)
-    ```
-  }
-}
-
-@Row {
-  @Column {
-    ```swift
-    let drafts = [
-      Reminder.Draft(title: "Take a walk", priority: 2, remindersListID: 3),
-      Reminder.Draft(title: "Get haircut", isFlagged: true, remindersListID: 2),
-    ]
-    Reminder.insert(drafts)
-    ```
-  }
-  @Column {
-    ```sql
-    INSERT INTO "reminders"
-      ("title",  "isFlagged", "priority", "remindersListID")
-    VALUES
-      ('Take a walk', 0, 2, 3),
-      ('Get haircut', 1, NULL, 2)
-    ```
-  }
-}
-
 ### Upserting drafts
 
 At times your application may want to provide the same business logic for creating a new record and
@@ -245,12 +161,12 @@ ReminderForm(
 ```
 
 When the draft is ready to be committed back to the database, you can use
-``PrimaryKeyedTable/upsert(_:)``, which generates an ``Insert`` with an "upsert" clause:
+``PrimaryKeyedTable/upsert(or:values:)``, which generates an ``Insert`` with an "upsert" clause:
 
 @Row {
   @Column {
     ```swift
-    Reminder.upsert(draft)
+    Reminder.upsert { draft }
     ```
   }
   @Column {
@@ -298,7 +214,7 @@ statement's columns.
 ### Inserting default values
 
 To insert a row into a table where all values have database-provided defaults, use
-``Table/insert(or:onConflict:)``:
+``Table/insert(or:)``:
 
 @Row {
   @Column {
@@ -431,9 +347,9 @@ clause:
 
 ### Inserting values
 
-- ``Table/insert(or:_:values:onConflict:)``
-- ``Table/insert(or:_:onConflict:)``
-- ``Table/insert(or:onConflict:)``
+- ``Table/insert(or:_:values:onConflict:where:doUpdate:where:)``
+- ``Table/insert(or:_:values:onConflictDoUpdate:where:)``
+- ``Table/insert(or:)``
 - ``PrimaryKeyedTable/upsert(_:)``
 
 ### Inserting drafts
@@ -442,7 +358,7 @@ clause:
 
 ### Inserting from a select
 
-- ``Table/insert(or:_:select:onConflict:)``
+- ``Table/insert(or:_:select:onConflict:where:doUpdate:where:)``
 
 ### Statement types
 

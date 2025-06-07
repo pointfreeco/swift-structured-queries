@@ -17,16 +17,16 @@
 - ``order(by:)``
 - ``limit(_:offset:)``
 - ``count(filter:)``
-- ``insert(or:_:onConflict:)``
-- ``insert(or:_:values:onConflict:)``
-- ``insert(or:_:select:onConflict:)``
-- ``insert(or:onConflict:)``
+- ``insert(or:_:values:onConflict:where:doUpdate:where:)``
+- ``insert(or:_:select:onConflict:where:doUpdate:where:)``
+- ``insert(or:)``
 - ``update(or:set:)``
 - ``delete()``
 
 ### Schema definition
 
 - ``tableName``
+- ``schemaName``
 - ``columns-swift.type.property``
 - ``TableColumns``
 - ``TableColumn``
@@ -46,3 +46,11 @@
 
 - ``tableAlias``
 - ``as(_:)``
+
+### Deprecations
+
+- ``insert(or:_:onConflict:)``
+- ``insert(or:_:select:onConflict:)``
+- ``insert(or:_:select:onConflictDoUpdate:where:)``
+- ``insert(or:_:values:onConflict:)``
+- ``insert(or:_:values:onConflictDoUpdate:where:)``

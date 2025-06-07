@@ -561,8 +561,8 @@ private enum InsertValues {
 
 /// An `INSERT` statement.
 ///
-/// This type of statement is returned from ``Table/insert(or:_:values:onConflict:)`` and related
-/// functions.
+/// This type of statement is returned from
+/// ``Table/insert(or:_:values:onConflict:where:doUpdate:where:)`` and related functions.
 ///
 /// To learn more, see <doc:InsertStatements>.
 public struct Insert<Into: Table, Returning> {
@@ -717,8 +717,8 @@ public typealias InsertOf<Into: Table> = Insert<Into, ()>
 
 /// A builder of insert statement values.
 ///
-/// This result builder is used by ``Table/insert(or:_:values:onConflict:)`` to insert any number of
-/// rows into a table.
+/// This result builder is used by ``Table/insert(or:_:values:onConflict:where:doUpdate:where:)`` to
+/// insert any number of rows into a table.
 @resultBuilder
 public enum InsertValuesBuilder<Value> {
   public static func buildArray(_ components: [[Value]]) -> [Value] {
