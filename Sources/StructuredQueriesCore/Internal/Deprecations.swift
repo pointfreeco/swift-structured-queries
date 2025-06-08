@@ -4,7 +4,7 @@ import Foundation
 
 extension Table {
   @available(
-    *, deprecated, message: "Use a trailing closure to specify the row to insert, instead."
+    *, deprecated, message: "Use a trailing closure, instead: 'Table.insert { row }'"
   )
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
@@ -15,7 +15,7 @@ extension Table {
   }
 
   @available(
-    *, deprecated, message: "Use a trailing closure to specify the rows to insert, instead."
+    *, deprecated, message: "Use a trailing closure, instead: 'Table.insert { rows }'"
   )
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
@@ -66,7 +66,7 @@ extension Table {
 
 extension PrimaryKeyedTable {
   @available(
-    *, deprecated, message: "Use a trailing closure to specify the draft to insert, instead."
+    *, deprecated, message: "Use a trailing closure, instead: 'Table.insert { draft }'"
   )
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
@@ -81,7 +81,7 @@ extension PrimaryKeyedTable {
   }
 
   @available(
-    *, deprecated, message: "Use a trailing closure to specify the drafts to insert, instead."
+    *, deprecated, message: "Use a trailing closure, instead: 'Table.insert { drafts }'"
   )
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
@@ -96,7 +96,7 @@ extension PrimaryKeyedTable {
   }
 
   @available(
-    *, deprecated, message: "Use a trailing closure to specify the draft to upsert, instead."
+    *, deprecated, message: "Use a trailing closure, instead: 'Table.upsert { draft }'"
   )
   public static func upsert(
     _ row: Draft
