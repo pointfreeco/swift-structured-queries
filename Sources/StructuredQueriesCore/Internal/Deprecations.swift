@@ -2,8 +2,10 @@ import Foundation
 
 // NB: Deprecated after 0.5.0:
 
-@available(*, deprecated, message: "TODO")
 extension Table {
+  @available(
+    *, deprecated, message: "Use a trailing closure to specify the row to insert, instead."
+  )
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Self,
@@ -12,6 +14,9 @@ extension Table {
     insert(or: conflictResolution, [row], onConflict: doUpdate)
   }
 
+  @available(
+    *, deprecated, message: "Use a trailing closure to specify the rows to insert, instead."
+  )
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Self],
@@ -24,6 +29,7 @@ extension Table {
     )
   }
 
+  @available(*, deprecated, renamed: "insert(or:_:values:onConflictDoUpdate:)")
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
@@ -33,6 +39,7 @@ extension Table {
     insert(or: conflictResolution, columns, values: values, onConflictDoUpdate: updates)
   }
 
+  @available(*, deprecated, renamed: "insert(or:_:values:onConflictDoUpdate:)")
   public static func insert<V1, each V2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
@@ -43,6 +50,7 @@ extension Table {
     insert(or: conflictResolution, columns, values: values, onConflictDoUpdate: updates)
   }
 
+  @available(*, deprecated, renamed: "insert(or:_:select:onConflictDoUpdate:)")
   public static func insert<
     V1, each V2, C1: QueryExpression, each C2: QueryExpression, From, Joins
   >(
@@ -56,8 +64,10 @@ extension Table {
   }
 }
 
-@available(*, deprecated, message: "TODO")
 extension PrimaryKeyedTable {
+  @available(
+    *, deprecated, message: "Use a trailing closure to specify the draft to insert, instead."
+  )
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Draft,
@@ -70,6 +80,9 @@ extension PrimaryKeyedTable {
     )
   }
 
+  @available(
+    *, deprecated, message: "Use a trailing closure to specify the drafts to insert, instead."
+  )
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Draft],
@@ -82,6 +95,9 @@ extension PrimaryKeyedTable {
     )
   }
 
+  @available(
+    *, deprecated, message: "Use a trailing closure to specify the draft to upsert, instead."
+  )
   public static func upsert(
     _ row: Draft
   ) -> InsertOf<Self> {

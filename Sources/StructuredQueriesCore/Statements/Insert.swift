@@ -13,7 +13,12 @@ extension Table {
   /// It can also be used to insert multiple rows in a single statement.
   ///
   /// ```swift
-  /// let tags = ["car", "kids", "someday", "optional"]
+  /// let tags = [
+  ///   Tag(title: "car"),
+  ///   Tag(title: "kids"),
+  ///   Tag(title: "someday"),
+  ///   Tag(title: "optional")
+  /// ]
   /// Tag.insert { tags }
   /// // INSERT INTO "tags" ("title")
   /// // VALUES ('car'), ('kids'), ('someday'), ('optional')
@@ -561,8 +566,9 @@ private enum InsertValues {
 
 /// An `INSERT` statement.
 ///
-/// This type of statement is returned from
-/// ``Table/insert(or:_:values:onConflict:where:doUpdate:where:)`` and related functions.
+/// This type of statement is returned from the
+/// `[Table.insert]<doc:Table/insert(or:_:values:onConflict:where:doUpdate:where:)>` family of
+/// functions.
 ///
 /// To learn more, see <doc:InsertStatements>.
 public struct Insert<Into: Table, Returning> {

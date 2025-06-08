@@ -61,8 +61,9 @@ into the database by providing only a draft:
 @Row {
   @Column {
     ```swift
-    Reminder
-      .insert(Reminder.Draft(title: "Get groceries"))
+    Reminder.insert {
+      Reminder.Draft(title: "Get groceries")
+    }
     ```
   }
   @Column {
@@ -86,7 +87,7 @@ row:
   @Column {
     ```swift
     Reminder
-      .insert(Reminder.Draft(title: "Get groceries"))
+      .insert { Reminder.Draft(title: "Get groceries") }
       .returning(\.id)
     ```
   }
@@ -108,7 +109,7 @@ Or even get back the entire newly inserted row:
   @Column {
     ```swift
     Reminder
-      .insert(Reminder.Draft(title: "Get groceries"))
+      .insert { Reminder.Draft(title: "Get groceries") }
       .returning(\.self)
     ```
   }
