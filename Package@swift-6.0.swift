@@ -1,4 +1,4 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.0
 
 import CompilerPluginSupport
 import PackageDescription
@@ -29,19 +29,11 @@ let package = Package(
       targets: ["StructuredQueriesSQLite"]
     ),
   ],
-  traits: [
-    .trait(
-      name: "StructuredQueriesTagged",
-      description: "Introduce StructuredQueries conformances to the swift-tagged package.",
-      enabledTraits: []
-    )
-  ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
     .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.1"),
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.4"),
-    .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.2"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"602.0.0"),
   ],
@@ -51,11 +43,6 @@ let package = Package(
       dependencies: [
         "StructuredQueriesSupport",
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(
-          name: "Tagged",
-          package: "swift-tagged",
-          condition: .when(traits: ["StructuredQueriesTagged"])
-        ),
       ]
     ),
     .target(
@@ -127,7 +114,7 @@ for index in package.targets.indices {
   package.targets[index].swiftSettings = swiftSettings
 }
 
-#if !canImport(Darwin)
+#if !os(Darwin)
   package.targets.append(
     .systemLibrary(
       name: "StructuredQueriesSQLite3",
@@ -145,6 +132,6 @@ for index in package.targets.indices {
 #if !os(Windows)
   // Add the documentation compiler plugin if possible
   package.dependencies.append(
-    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.4.0")
+    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
   )
 #endif

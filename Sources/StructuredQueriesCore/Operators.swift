@@ -187,6 +187,7 @@ public func != <QueryValue>(
 
 // NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
 @_documentation(visibility: private)
+@_disfavoredOverload
 public func == <QueryValue: _OptionalProtocol>(
   lhs: any QueryExpression<QueryValue>,
   rhs: some QueryExpression<QueryValue.Wrapped>
@@ -196,6 +197,7 @@ public func == <QueryValue: _OptionalProtocol>(
 
 // NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
 @_documentation(visibility: private)
+@_disfavoredOverload
 public func != <QueryValue: _OptionalProtocol>(
   lhs: any QueryExpression<QueryValue>,
   rhs: some QueryExpression<QueryValue.Wrapped>

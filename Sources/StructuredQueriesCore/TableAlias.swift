@@ -193,6 +193,31 @@ extension TableAlias: QueryRepresentable where Base: QueryRepresentable {
 
 extension TableAlias: Sendable where Base: Sendable {}
 
+extension TableAlias: Equatable where Base: Equatable {}
+
+extension TableAlias: Hashable where Base: Hashable {}
+
+extension TableAlias: Decodable where Base: Decodable {
+  public init(from decoder: Decoder) throws {
+    do {
+      self.init(base: try decoder.singleValueContainer().decode(Base.self))
+    } catch {
+      self.init(base: try Base(from: decoder))
+    }
+  }
+}
+
+extension TableAlias: Encodable where Base: Encodable {
+  public func encode(to encoder: Encoder) throws {
+    do {
+      var container = encoder.singleValueContainer()
+      try container.encode(self.base)
+    } catch {
+      try self.base.encode(to: encoder)
+    }
+  }
+}
+
 extension QueryFragment {
   fileprivate func replacingOccurrences<T: Table, A: AliasName>(
     of _: T.Type, with _: A.Type
