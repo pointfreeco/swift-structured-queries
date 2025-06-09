@@ -599,6 +599,26 @@ extension SnapshotTests {
         }
       }
     }
+
+    @Test func onConflict_conditionalWhere() {
+      let condition = false
+      assertQuery(
+        Reminder.insert {
+          Reminder.Draft(remindersListID: 1)
+        } where: {
+          if condition {
+            $0.isFlagged
+          }
+        }
+      ) {
+        """
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (NULL, NULL, NULL, 0, 0, '', NULL, 1, '')
+        """
+      }
+    }
   }
 }
 
