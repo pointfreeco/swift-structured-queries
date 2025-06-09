@@ -21,6 +21,7 @@ that represent those database definitions.
   * [Custom data types](#Custom-data-types)
     * [RawRepresentable](#RawRepresentable)
     * [JSON](#JSON)
+    * [Tagged identifiers](#Tagged-identifiers)
     * [Default representations for dates and UUIDs](#Default-representations-for-dates-and-UUIDs)
 * [Primary keyed tables](#Primary-keyed-tables)
 * [Ephemeral columns](#Ephemeral-columns)
@@ -298,10 +299,11 @@ This adds a new layer of type-safety when constructing queries. Previously compa
 `RemindersList.ID` to a `Reminder.ID` would compile just fine, even though it is a nonsensical thing
 to do. But now, such a comparison is a compile time error:
 
-```
+```swift
 RemindersList.leftJoin(Reminder.all) {
   $0.id == $1.id  // 🛑 Requires the types 'Reminder.ID' and 'RemindersList.ID' be equivalent
 }
+```
 
 #### Default representations for dates and UUIDs
 
