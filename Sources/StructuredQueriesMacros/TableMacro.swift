@@ -486,10 +486,6 @@ extension TableMacro: ExtensionMacro {
       primaryKey != nil
       ? ["Table", "PrimaryKeyedTable"]
       : ["Table"]
-    let schemaConformances: [ExprSyntax] =
-      primaryKey != nil
-      ? ["\(moduleName).TableDefinition", "\(moduleName).PrimaryKeyedTableDefinition"]
-      : ["\(moduleName).TableDefinition"]
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes.contains(where: {
@@ -590,7 +586,6 @@ extension TableMacro: MemberMacro {
     // NB: End of workaround
 
     var draftProperties: [DeclSyntax] = []
-    var draftTableType: TypeSyntax?
     var primaryKey:
       (
         identifier: TokenSyntax,
@@ -599,57 +594,6 @@ extension TableMacro: MemberMacro {
         queryValueType: TypeSyntax?
       )?
     let selfRewriter = SelfRewriter(selfEquivalent: type.name)
-    var schemaName: ExprSyntax?
-    var tableName = ExprSyntax(
-      StringLiteralExprSyntax(
-        content: declaration.name.trimmed.text.lowerCamelCased().pluralized()
-      )
-    )
-    if case let .argumentList(arguments) = node.arguments {
-      for argumentIndex in arguments.indices {
-        let argument = arguments[argumentIndex]
-        switch argument.label {
-        case nil:
-          if node.attributeName.identifier == "_Draft" {
-            let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-            let base = memberAccess.base!.trimmed
-            draftTableType = TypeSyntax("\(base)")
-            tableName = "\(base.trimmed).tableName"
-          } else {
-            if !argument.expression.isNonEmptyStringLiteral {
-              diagnostics.append(
-                Diagnostic(
-                  node: argument.expression,
-                  message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
-                )
-              )
-            }
-            tableName = argument.expression.trimmed
-          }
-
-        case let .some(label) where label.text == "schema":
-          if node.attributeName.identifier == "_Draft" {
-            let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-            let base = memberAccess.base!.trimmed
-            draftTableType = TypeSyntax("\(base)")
-            schemaName = "\(base).schemaName"
-          } else {
-            if !argument.expression.isNonEmptyStringLiteral {
-              diagnostics.append(
-                Diagnostic(
-                  node: argument.expression,
-                  message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
-                )
-              )
-            }
-            schemaName = argument.expression.trimmed
-          }
-
-        case let argument?:
-          fatalError("Unexpected argument: \(argument)")
-        }
-      }
-    }
     for member in declaration.memberBlock.members {
       guard
         let property = member.decl.as(VariableDeclSyntax.self),
@@ -911,15 +855,7 @@ extension TableMacro: MemberMacro {
     }
 
     var draft: DeclSyntax?
-    var initFromOther: DeclSyntax?
-    if let draftTableType {
-      initFromOther = """
-
-        public init(_ other: \(draftTableType)) {
-        \(allColumns.map { "self.\($0) = other.\($0)" as ExprSyntax }, separator: "\n")
-        }
-        """
-    } else if let primaryKey {
+    if let primaryKey {
       columnsProperties.append(
         """
         public var primaryKey: \(moduleName).TableColumn<QueryValue, \(primaryKey.queryValueType)> \
@@ -1070,13 +1006,6 @@ extension TableMacro: MemberMacro {
     }
 
     var typeAliases: [DeclSyntax] = []
-    var letSchemaName: DeclSyntax?
-    if let schemaName {
-      letSchemaName = """
-        public static let schemaName: Swift.String? = \(schemaName)
-        """
-    }
-    var initDecoder: DeclSyntax?
     if declaration.hasMacroApplication("Selection") {
       conformances.append("\(moduleName).PartialSelectStatement")
       typeAliases.append(contentsOf: [
@@ -1088,13 +1017,6 @@ extension TableMacro: MemberMacro {
         public typealias From = Swift.Never
         """,
       ])
-    } else {
-      initDecoder = """
-
-        public init(decoder: inout some \(moduleName).QueryDecoder) throws {
-        \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
-        }
-        """
     }
 
     return [

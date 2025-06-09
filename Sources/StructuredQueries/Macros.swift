@@ -92,6 +92,7 @@ public macro Ephemeral() =
   names: named(Columns),
   named(init(decoder:))
 )
+@attached(member, names: named(Columns))
 public macro Selection() =
   #externalMacro(
     module: "StructuredQueriesMacros",
