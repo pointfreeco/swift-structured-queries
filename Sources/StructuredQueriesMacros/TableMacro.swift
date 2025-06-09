@@ -65,7 +65,7 @@ extension TableMacro: ExtensionMacro {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
             let base = memberAccess.base!
             draftTableType = TypeSyntax("\(base)")
-            tableName = "\(base).tableName"
+            tableName = "\(base.trimmed).tableName"
           } else {
             if !argument.expression.isNonEmptyStringLiteral {
               diagnostics.append(
@@ -614,7 +614,7 @@ extension TableMacro: MemberMacro {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
             let base = memberAccess.base!
             draftTableType = TypeSyntax("\(base)")
-            tableName = "\(base).tableName"
+            tableName = "\(base.trimmed).tableName"
           } else {
             if !argument.expression.isNonEmptyStringLiteral {
               diagnostics.append(
