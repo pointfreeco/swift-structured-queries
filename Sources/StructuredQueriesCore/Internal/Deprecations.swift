@@ -1,6 +1,6 @@
 import Foundation
 
-// NB: Deprecated after 0.5.0:
+// NB: Deprecated after 0.5.1:
 
 extension Table {
   @available(
@@ -22,11 +22,7 @@ extension Table {
     _ rows: [Self],
     onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
-    insert(
-      or: conflictResolution,
-      values: { return rows },
-      onConflict: doUpdate
-    )
+    insert(or: conflictResolution, values: { rows }, onConflict: doUpdate )
   }
 
   @available(*, deprecated, renamed: "insert(or:_:values:onConflictDoUpdate:)")
@@ -73,11 +69,7 @@ extension PrimaryKeyedTable {
     _ row: Draft,
     onConflict updates: ((inout Updates<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
-    insert(
-      or: conflictResolution,
-      values: { row },
-      onConflictDoUpdate: updates
-    )
+    insert(or: conflictResolution, values: { row }, onConflictDoUpdate: updates)
   }
 
   @available(
@@ -88,22 +80,14 @@ extension PrimaryKeyedTable {
     _ rows: [Draft],
     onConflict updates: ((inout Updates<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
-    insert(
-      or: conflictResolution,
-      values: { rows },
-      onConflictDoUpdate: updates
-    )
+    insert(or: conflictResolution, values: { rows }, onConflictDoUpdate: updates)
   }
 
   @available(
     *, deprecated, message: "Use a trailing closure, instead: 'Table.upsert { draft }'"
   )
-  public static func upsert(
-    _ row: Draft
-  ) -> InsertOf<Self> {
-    upsert {
-      row
-    }
+  public static func upsert(_ row: Draft) -> InsertOf<Self> {
+    upsert { row }
   }
 }
 

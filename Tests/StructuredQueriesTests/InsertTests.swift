@@ -332,7 +332,8 @@ extension SnapshotTests {
         ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (1, NULL, NULL, 0, 0, '', NULL, 1, 'Cash check')
-        ON CONFLICT ("id") DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
+        ON CONFLICT ("id")
+        DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
@@ -378,7 +379,8 @@ extension SnapshotTests {
         ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
         VALUES
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, '')
-        ON CONFLICT ("id") DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
+        ON CONFLICT ("id")
+        DO UPDATE SET "assignedUserID" = "excluded"."assignedUserID", "dueDate" = "excluded"."dueDate", "isCompleted" = "excluded"."isCompleted", "isFlagged" = "excluded"."isFlagged", "notes" = "excluded"."notes", "priority" = "excluded"."priority", "remindersListID" = "excluded"."remindersListID", "title" = "excluded"."title"
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
         """
       } results: {
@@ -412,7 +414,8 @@ extension SnapshotTests {
         ("id", "color", "title")
         VALUES
         (NULL, 4889071, 'Personal')
-        ON CONFLICT ("id") DO UPDATE SET "color" = "excluded"."color", "title" = "excluded"."title"
+        ON CONFLICT ("id")
+        DO UPDATE SET "color" = "excluded"."color", "title" = "excluded"."title"
         RETURNING "id", "color", "title"
         """
       } results: {
@@ -427,7 +430,7 @@ extension SnapshotTests {
         RemindersList.insert {
           RemindersList.Draft(title: "Personal")
         } onConflict: {
-          ($0.title)
+          $0.title
         } doUpdate: {
           $0.color = 0x00ff00
         }.returning(\.self)
@@ -437,7 +440,8 @@ extension SnapshotTests {
         ("id", "color", "title")
         VALUES
         (NULL, 4889071, 'Personal')
-        ON CONFLICT ("title") DO UPDATE SET "color" = 65280
+        ON CONFLICT ("title")
+        DO UPDATE SET "color" = 65280
         RETURNING "id", "color", "title"
         """
       } results: {
@@ -459,14 +463,16 @@ extension SnapshotTests {
           ReminderTag(reminderID: 1, tagID: 3)
         } onConflict: {
           ($0.reminderID, $0.tagID)
-        }.returning(\.self)
+        }
+        .returning(\.self)
       ) {
         """
         INSERT INTO "remindersTags"
         ("reminderID", "tagID")
         VALUES
         (1, 3)
-        ON CONFLICT ("reminderID", "tagID") DO NOTHING
+        ON CONFLICT ("reminderID", "tagID")
+        DO NOTHING
         RETURNING "reminderID", "tagID"
         """
       } results: {
@@ -545,6 +551,52 @@ extension SnapshotTests {
         VALUES
         ('', 0)
         """
+      }
+    }
+
+    @Test func onConflictWhereDoUpdateWhere() {
+      assertQuery(
+        Reminder.insert {
+          Reminder.Draft(remindersListID: 1)
+        } onConflict: {
+          $0.id
+        } where: {
+          !$0.isCompleted
+        } doUpdate: {
+          $0.isCompleted = true
+        } where: {
+          $0.isFlagged
+        }
+      ) {
+        """
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+        VALUES
+        (NULL, NULL, NULL, 0, 0, '', NULL, 1, '')
+        ON CONFLICT ("id")
+        WHERE NOT ("reminders"."isCompleted")
+        DO UPDATE SET "isCompleted" = 1
+        WHERE "reminders"."isFlagged"
+        """
+      }
+    }
+
+    @Test func onConflict_invalidUpdateFilters() {
+      withKnownIssue {
+        assertQuery(
+          Reminder.insert {
+            Reminder.Draft(remindersListID: 1)
+          } where: {
+            $0.isFlagged
+          }
+        ) {
+          """
+          INSERT INTO "reminders"
+          ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+          VALUES
+          (NULL, NULL, NULL, 0, 0, '', NULL, 1, '')
+          """
+        }
       }
     }
   }

@@ -1,3 +1,5 @@
+import IssueReporting
+
 extension Table {
   /// An insert statement for one or more table rows.
   ///
@@ -691,28 +693,41 @@ extension Insert: Statement {
       query.append(values.joined(separator: ", "))
     }
 
+    var hasInvalidWhere = false
     if let updates {
       query.append("\(.newlineOrSpace)ON CONFLICT ")
       if !conflictTargetColumnNames.isEmpty {
         query.append("(")
         query.append(conflictTargetColumnNames.map { "\(quote: $0)" }.joined(separator: ", "))
-        query.append(") ")
+        query.append(")\(.newlineOrSpace)")
         if let conflictTargetFilter {
-          query.append("WHERE \(conflictTargetFilter) ")
+          query.append("WHERE \(conflictTargetFilter)\(.newlineOrSpace)")
         }
       }
       query.append("DO ")
       if updates.isEmpty {
         query.append("NOTHING")
+        hasInvalidWhere = updateFilter != nil
       } else {
         query.append("UPDATE \(bind: updates)")
         if let updateFilter {
-          query.append(" WHERE \(updateFilter)")
+          query.append("\(.newlineOrSpace)WHERE \(updateFilter)")
         }
       }
+    } else {
+      hasInvalidWhere = updateFilter != nil
     }
     if !returning.isEmpty {
       query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
+    }
+    if hasInvalidWhere, let updateFilter {
+      reportIssue(
+        """
+        Insert statement has invalid update 'where': \(updateFilter)
+
+        \(query)
+        """
+      )
     }
     return query
   }
