@@ -63,7 +63,7 @@ extension TableMacro: ExtensionMacro {
         case nil:
           if node.attributeName.identifier == "_Draft" {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-            let base = memberAccess.base!
+            let base = memberAccess.base!.trimmed
             draftTableType = TypeSyntax("\(base)")
             tableName = "\(base.trimmed).tableName"
           } else {
@@ -81,7 +81,7 @@ extension TableMacro: ExtensionMacro {
         case let .some(label) where label.text == "schema":
           if node.attributeName.identifier == "_Draft" {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-            let base = memberAccess.base!
+            let base = memberAccess.base!.trimmed
             draftTableType = TypeSyntax("\(base)")
             schemaName = "\(base).schemaName"
           } else {
@@ -612,7 +612,7 @@ extension TableMacro: MemberMacro {
         case nil:
           if node.attributeName.identifier == "_Draft" {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-            let base = memberAccess.base!
+            let base = memberAccess.base!.trimmed
             draftTableType = TypeSyntax("\(base)")
             tableName = "\(base.trimmed).tableName"
           } else {
@@ -630,7 +630,7 @@ extension TableMacro: MemberMacro {
         case let .some(label) where label.text == "schema":
           if node.attributeName.identifier == "_Draft" {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-            let base = memberAccess.base!
+            let base = memberAccess.base!.trimmed
             draftTableType = TypeSyntax("\(base)")
             schemaName = "\(base).schemaName"
           } else {
