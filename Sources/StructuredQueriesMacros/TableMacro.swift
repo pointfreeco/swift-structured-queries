@@ -385,14 +385,25 @@ extension TableMacro: ExtensionMacro {
         """
 
       // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-      let memberBlocks = try expansion(
+      var memberBlocks = try expansion(
         of: "@_Draft(\(type).self)",
-        attachedTo: StructDeclSyntax("\(draft)"),
-        providingExtensionsOf: TypeSyntax("\(type).Draft"),
+        providingMembersOf: StructDeclSyntax("\(draft)"),
         conformingTo: [],
         in: context
       )
-      .compactMap(\.memberBlock.members.trimmed)
+      .compactMap(\.trimmed)
+      memberBlocks.append(
+        contentsOf: try expansion(
+          of: "@_Draft(\(type).self)",
+          attachedTo: StructDeclSyntax("\(draft)"),
+          providingExtensionsOf: TypeSyntax("\(type).Draft"),
+          conformingTo: [],
+          in: context
+        )
+        .flatMap {
+          $0.memberBlock.members.trimmed.map(\.decl)
+        }
+      )
       var memberwiseArguments: [PatternBindingSyntax] = []
       var memberwiseAssignments: [TokenSyntax] = []
       for (binding, queryOutputType, optionalize) in draftBindings {
@@ -457,6 +468,7 @@ extension TableMacro: ExtensionMacro {
         \(memberwiseAssignments.map { "self.\($0) = \($0)" as ExprSyntax }, separator: "\n")
         }
         """
+//      fatalError("XYZ: \(memberBlocks.map(\.description).joined(separator: "\n"))")
       draft = """
 
         public struct Draft: \(moduleName).TableDraft {
@@ -540,7 +552,10 @@ extension TableMacro: ExtensionMacro {
       DeclSyntax(
         """
         \(declaration.attributes.availability)extension \(type)\
-        \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {
+        \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
+        \(typeAliases, separator: "\n")
+        public static var columns: TableColumns { TableColumns() }
+        public static let tableName = \(tableName)\(letSchemaName)\(initDecoder)\(initFromOther)
         }
         """
       )
@@ -550,24 +565,18 @@ extension TableMacro: ExtensionMacro {
 }
 
 extension TableMacro: MemberMacro {
-  public static func expansion(
+  public static func expansion<D: DeclGroupSyntax, C: MacroExpansionContext>(
     of node: AttributeSyntax,
-    providingMembersOf declaration: some DeclGroupSyntax,
+    providingMembersOf declaration: D,
     conformingTo protocols: [TypeSyntax],
-    in context: some MacroExpansionContext
+    in context: C
   ) throws -> [DeclSyntax] {
-    let type = IdentifierTypeSyntax.init(name: declaration.as(StructDeclSyntax.self)!.name)
     guard
       let declaration = declaration.as(StructDeclSyntax.self)
     else {
-      context.diagnose(
-        Diagnostic(
-          node: declaration.introducer,
-          message: MacroExpansionErrorMessage("'@Table' can only be applied to struct types")
-        )
-      )
       return []
     }
+    let type = IdentifierTypeSyntax(name: declaration.name)
     var allColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [String] = []
@@ -577,21 +586,19 @@ extension TableMacro: MemberMacro {
 
     // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
     var draftBindings: [(PatternBindingSyntax, queryOutputType: TypeSyntax?, optionalize: Bool)] =
-    []
+      []
     // NB: End of workaround
 
     var draftProperties: [DeclSyntax] = []
     var draftTableType: TypeSyntax?
     var primaryKey:
-    (
-      identifier: TokenSyntax,
-      label: TokenSyntax?,
-      queryOutputType: TypeSyntax?,
-      queryValueType: TypeSyntax?
-    )?
-    let selfRewriter = SelfRewriter(
-      selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
-    )
+      (
+        identifier: TokenSyntax,
+        label: TokenSyntax?,
+        queryOutputType: TypeSyntax?,
+        queryValueType: TypeSyntax?
+      )?
+    let selfRewriter = SelfRewriter(selfEquivalent: type.name)
     var schemaName: ExprSyntax?
     var tableName = ExprSyntax(
       StringLiteralExprSyntax(
@@ -657,9 +664,9 @@ extension TableMacro: MemberMacro {
         StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
       )
       var columnQueryValueType =
-      (binding.typeAnnotation?.type.trimmed
-       ?? binding.initializer?.value.literalType)
-      .map { $0.rewritten(selfRewriter) }
+        (binding.typeAnnotation?.type.trimmed
+        ?? binding.initializer?.value.literalType)
+        .map { $0.rewritten(selfRewriter) }
       var columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
       var isEphemeral = false
@@ -870,6 +877,7 @@ extension TableMacro: MemberMacro {
           attribute.arguments = .argumentList(arguments)
           property.attributes[attributeIndex] = .attribute(attribute)
         }
+        property = property.trimmed
         if !hasColumnAttribute {
           let attribute = "@Column(primaryKey: false)\n"
           property.attributes.insert(
@@ -884,7 +892,7 @@ extension TableMacro: MemberMacro {
         property.bindings = [binding]
         draftProperties.append(
           DeclSyntax(
-            property.trimmed
+            property
               .with(\.bindingSpecifier.leadingTrivia, "")
               .removingAccessors()
               .rewritten(selfRewriter)
@@ -906,7 +914,7 @@ extension TableMacro: MemberMacro {
     var initFromOther: DeclSyntax?
     if let draftTableType {
       initFromOther = """
-        
+
         public init(_ other: \(draftTableType)) {
         \(allColumns.map { "self.\($0) = other.\($0)" as ExprSyntax }, separator: "\n")
         }
@@ -919,7 +927,7 @@ extension TableMacro: MemberMacro {
         """
       )
       draft = """
-        
+
         @_Draft(\(type).self)
         public struct Draft {
         \(draftProperties, separator: "\n")
@@ -934,7 +942,7 @@ extension TableMacro: MemberMacro {
         conformingTo: [],
         in: context
       )
-        .compactMap(\.memberBlock.members.trimmed)
+      .compactMap(\.memberBlock.members.trimmed)
       var memberwiseArguments: [PatternBindingSyntax] = []
       var memberwiseAssignments: [TokenSyntax] = []
       for (binding, queryOutputType, optionalize) in draftBindings {
@@ -945,9 +953,9 @@ extension TableMacro: MemberMacro {
         argument = argument.annotated(queryOutputType).rewritten(selfRewriter)
         if argument.typeAnnotation == nil {
           let identifier =
-          (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)
+            (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)
             .map { "'\($0)'" }
-          ?? "field"
+            ?? "field"
           diagnostics.append(
             Diagnostic(
               node: binding,
@@ -972,11 +980,11 @@ extension TableMacro: MemberMacro {
                           .with(\.pattern.trailingTrivia, "")
                           .with(
                             \.typeAnnotation,
-                             TypeAnnotationSyntax(
+                            TypeAnnotationSyntax(
                               colon: .colonToken(trailingTrivia: .space),
                               type: IdentifierTypeSyntax(name: "<#Type#>"),
                               trailingTrivia: .space
-                             )
+                            )
                           )
                       )
                     )
@@ -1000,7 +1008,7 @@ extension TableMacro: MemberMacro {
         }
         """
       draft = """
-        
+
         public struct Draft: \(moduleName).TableDraft {
         public typealias PrimaryTable = \(type)
         \(draftProperties, separator: "\n")
@@ -1013,13 +1021,13 @@ extension TableMacro: MemberMacro {
 
     var conformances: [TypeSyntax] = []
     let protocolNames: [TokenSyntax] =
-    primaryKey != nil
-    ? ["Table", "PrimaryKeyedTable"]
-    : ["Table"]
+      primaryKey != nil
+      ? ["Table", "PrimaryKeyedTable"]
+      : ["Table"]
     let schemaConformances: [ExprSyntax] =
-    primaryKey != nil
-    ? ["\(moduleName).TableDefinition", "\(moduleName).PrimaryKeyedTableDefinition"]
-    : ["\(moduleName).TableDefinition"]
+      primaryKey != nil
+      ? ["\(moduleName).TableDefinition", "\(moduleName).PrimaryKeyedTableDefinition"]
+      : ["\(moduleName).TableDefinition"]
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes.contains(where: {
@@ -1062,7 +1070,7 @@ extension TableMacro: MemberMacro {
       conformances.append("\(moduleName).PartialSelectStatement")
       typeAliases.append(contentsOf: [
         """
-        
+
         public typealias QueryValue = Self
         """,
         """
@@ -1071,7 +1079,7 @@ extension TableMacro: MemberMacro {
       ])
     } else {
       initDecoder = """
-        
+
         public init(decoder: inout some \(moduleName).QueryDecoder) throws {
         \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
         }
@@ -1079,20 +1087,18 @@ extension TableMacro: MemberMacro {
     }
 
     return [
-      DeclSyntax(
-        """
-        public struct TableColumns: \(schemaConformances, separator: ", ") {
-        public typealias QueryValue = \(type.trimmed)
-        \(columnsProperties, separator: "\n")
-        public static var allColumns: [any \(moduleName).TableColumnExpression] { \
-        [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
-        }
-        }\(draft)\(typeAliases, separator: "\n")
-        public static let columns = TableColumns()
-        public static let tableName = \(tableName)\(letSchemaName)\(initDecoder)\(initFromOther)
-        """
-      )
+      """
+      public struct TableColumns: \(schemaConformances, separator: ", ") {
+      public typealias QueryValue = \(type.trimmed)
+      \(columnsProperties, separator: "\n")
+      public static var allColumns: [any \(moduleName).TableColumnExpression] { \
+      [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
+      }
+      }
+      """,
+      draft,
     ]
+    .compactMap { $0 }
   }
 }
 

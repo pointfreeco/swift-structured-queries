@@ -9,9 +9,7 @@ import StructuredQueriesCore
   conformances: Table,
   PartialSelectStatement,
   PrimaryKeyedTable,
-  names: named(TableColumns),
-  named(From),
-  named(Draft),
+  names: named(From),
   named(columns),
   named(init(_:)),
   named(init(decoder:)),
@@ -19,7 +17,7 @@ import StructuredQueriesCore
   named(schemaName),
   named(tableName)
 )
-@attached(member, names: arbitrary)
+@attached(member, names: named(Draft), named(TableColumns))
 @attached(memberAttribute)
 public macro Table(
   _ name: String? = nil,
