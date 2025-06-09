@@ -47,7 +47,7 @@ public typealias SelectStatementOf<From: Table, each Join: Table> =
 
 extension SelectStatement {
   public static func `where`<From>(
-    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Self
   where Self == Where<From> {
     Self(predicates: [predicate(From.columns).queryFragment])
