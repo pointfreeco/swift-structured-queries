@@ -1,0 +1,40 @@
+{
+  "configurations" : [
+    {
+      "id" : "A521D97F-8921-4297-B3EA-033EF0FEF039",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "enabled" : false,
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "StructuredQueriesIntegrationTests",
+        "name" : "StructuredQueriesIntegrationTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "StructuredQueriesMacrosTests",
+        "name" : "StructuredQueriesMacrosTests"
+      }
+    },
+    {
+      "enabled" : false,
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "StructuredQueriesTests",
+        "name" : "StructuredQueriesTests"
+      }
+    }
+  ],
+  "version" : 1
+}

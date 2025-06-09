@@ -935,14 +935,25 @@ extension TableMacro: MemberMacro {
         """
 
       // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-      let memberBlocks = try expansion(
+      var memberBlocks = try expansion(
         of: "@_Draft(\(type).self)",
-        attachedTo: StructDeclSyntax("\(draft)"),
-        providingExtensionsOf: TypeSyntax("\(type).Draft"),
+        providingMembersOf: StructDeclSyntax("\(draft)"),
         conformingTo: [],
         in: context
       )
-      .compactMap(\.memberBlock.members.trimmed)
+        .compactMap(\.trimmed)
+      memberBlocks.append(
+        contentsOf: try expansion(
+          of: "@_Draft(\(type).self)",
+          attachedTo: StructDeclSyntax("\(draft)"),
+          providingExtensionsOf: TypeSyntax("\(type).Draft"),
+          conformingTo: [],
+          in: context
+        )
+        .flatMap {
+          $0.memberBlock.members.trimmed.map(\.decl)
+        }
+      )
       var memberwiseArguments: [PatternBindingSyntax] = []
       var memberwiseAssignments: [TokenSyntax] = []
       for (binding, queryOutputType, optionalize) in draftBindings {
