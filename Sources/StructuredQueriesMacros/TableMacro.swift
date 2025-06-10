@@ -56,7 +56,7 @@ extension TableMacro: ExtensionMacro {
         content: declaration.name.trimmed.text.lowerCamelCased().pluralized()
       )
     )
-    if case let .argumentList(arguments) = node.arguments {
+    if case .argumentList(let arguments) = node.arguments {
       for argumentIndex in arguments.indices {
         let argument = arguments[argumentIndex]
         switch argument.label {
@@ -65,7 +65,7 @@ extension TableMacro: ExtensionMacro {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
             let base = memberAccess.base!.trimmed
             draftTableType = TypeSyntax("\(base)")
-            tableName = "\(base.trimmed).tableName"
+            tableName = "\(base).tableName"
           } else {
             if !argument.expression.isNonEmptyStringLiteral {
               diagnostics.append(
@@ -78,7 +78,7 @@ extension TableMacro: ExtensionMacro {
             tableName = argument.expression.trimmed
           }
 
-        case let .some(label) where label.text == "schema":
+        case .some(let label) where label.text == "schema":
           if node.attributeName.identifier == "_Draft" {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
             let base = memberAccess.base!.trimmed
@@ -130,7 +130,7 @@ extension TableMacro: ExtensionMacro {
         isEphemeral = isEphemeral || attributeName == "Ephemeral"
         guard
           attributeName == "Column" || isEphemeral,
-          case let .argumentList(arguments) = attribute.arguments
+          case .argumentList(let arguments) = attribute.arguments
         else { continue }
 
         for argumentIndex in arguments.indices {
@@ -148,7 +148,7 @@ extension TableMacro: ExtensionMacro {
             }
             columnName = argument.expression
 
-          case let .some(label) where label.text == "as":
+          case .some(let label) where label.text == "as":
             guard
               let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
               memberAccess.declName.baseName.tokenKind == .keyword(.self),
@@ -166,7 +166,7 @@ extension TableMacro: ExtensionMacro {
             columnQueryValueType = "\(raw: base.rewritten(selfRewriter).trimmedDescription)"
             columnQueryOutputType = "\(columnQueryValueType).QueryOutput"
 
-          case let .some(label) where label.text == "primaryKey":
+          case .some(let label) where label.text == "primaryKey":
             guard
               argument.expression.as(BooleanLiteralExprSyntax.self)?.literal.tokenKind
                 == .keyword(.true)
@@ -292,7 +292,7 @@ extension TableMacro: ExtensionMacro {
             var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
             attributeName == "Column",
-            case var .argumentList(arguments) = attribute.arguments
+            case .argumentList(var arguments) = attribute.arguments
           else { continue }
           hasColumnAttribute = true
           var hasPrimaryKeyArgument = false
@@ -468,7 +468,6 @@ extension TableMacro: ExtensionMacro {
         \(memberwiseAssignments.map { "self.\($0) = \($0)" as ExprSyntax }, separator: "\n")
         }
         """
-//      fatalError("XYZ: \(memberBlocks.map(\.description).joined(separator: "\n"))")
       draft = """
 
         public struct Draft: \(moduleName).TableDraft {
@@ -550,7 +549,7 @@ extension TableMacro: ExtensionMacro {
         \(declaration.attributes.availability)extension \(type)\
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
         \(typeAliases, separator: "\n")
-        public static var columns: TableColumns { TableColumns() }
+        public static let columns = TableColumns()
         public static let tableName = \(tableName)\(letSchemaName)\(initDecoder)\(initFromOther)
         }
         """
@@ -572,13 +571,13 @@ extension TableMacro: MemberMacro {
     else {
       return []
     }
-    let type = IdentifierTypeSyntax(name: declaration.name)
+    let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
     var allColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
     var decodingAssignments: [String] = []
-    var diagnostics: [Diagnostic] = []
+    var expansionFailed = false
 
     // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
     var draftBindings: [(PatternBindingSyntax, queryOutputType: TypeSyntax?, optionalize: Bool)] =
@@ -623,7 +622,7 @@ extension TableMacro: MemberMacro {
         isEphemeral = isEphemeral || attributeName == "Ephemeral"
         guard
           attributeName == "Column" || isEphemeral,
-          case let .argumentList(arguments) = attribute.arguments
+          case .argumentList(let arguments) = attribute.arguments
         else { continue }
 
         for argumentIndex in arguments.indices {
@@ -632,34 +631,24 @@ extension TableMacro: MemberMacro {
           switch argument.label {
           case nil:
             if !argument.expression.isNonEmptyStringLiteral {
-              diagnostics.append(
-                Diagnostic(
-                  node: argument.expression,
-                  message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
-                )
-              )
+              expansionFailed = true
             }
             columnName = argument.expression
 
-          case let .some(label) where label.text == "as":
+          case .some(let label) where label.text == "as":
             guard
               let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
               memberAccess.declName.baseName.tokenKind == .keyword(.self),
               let base = memberAccess.base
             else {
-              diagnostics.append(
-                Diagnostic(
-                  node: argument.expression,
-                  message: MacroExpansionErrorMessage("Argument 'as' must be a type literal")
-                )
-              )
+              expansionFailed = true
               continue
             }
 
             columnQueryValueType = "\(raw: base.rewritten(selfRewriter).trimmedDescription)"
             columnQueryOutputType = "\(columnQueryValueType).QueryOutput"
 
-          case let .some(label) where label.text == "primaryKey":
+          case .some(let label) where label.text == "primaryKey":
             guard
               argument.expression.as(BooleanLiteralExprSyntax.self)?.literal.tokenKind
                 == .keyword(.true)
@@ -667,31 +656,10 @@ extension TableMacro: MemberMacro {
               isPrimaryKey = false
               break
             }
-            if let primaryKey, let originalLabel = primaryKey.label {
+            if primaryKey != nil {
               var newArguments = arguments
               newArguments.remove(at: argumentIndex)
-              diagnostics.append(
-                Diagnostic(
-                  node: label,
-                  message: MacroExpansionErrorMessage(
-                    "'@Table' only supports a single primary key"
-                  ),
-                  notes: [
-                    Note(
-                      node: Syntax(originalLabel),
-                      position: originalLabel.position,
-                      message: MacroExpansionNoteMessage(
-                        "Primary key already applied to '\(primaryKey.identifier)'"
-                      )
-                    )
-                  ],
-                  fixIt: .replace(
-                    message: MacroExpansionFixItMessage("Remove 'primaryKey: true'"),
-                    oldNode: Syntax(attribute),
-                    newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
-                  )
-                )
-              )
+              expansionFailed = true
             }
             primaryKey = (
               identifier: identifier,
@@ -785,7 +753,7 @@ extension TableMacro: MemberMacro {
             var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
             attributeName == "Column",
-            case var .argumentList(arguments) = attribute.arguments
+            case .argumentList(var arguments) = attribute.arguments
           else { continue }
           hasColumnAttribute = true
           var hasPrimaryKeyArgument = false
@@ -877,7 +845,7 @@ extension TableMacro: MemberMacro {
         conformingTo: [],
         in: context
       )
-        .compactMap(\.trimmed)
+      .compactMap(\.trimmed)
       memberBlocks.append(
         contentsOf: try expansion(
           of: "@_Draft(\(type).self)",
@@ -899,47 +867,7 @@ extension TableMacro: MemberMacro {
         }
         argument = argument.annotated(queryOutputType).rewritten(selfRewriter)
         if argument.typeAnnotation == nil {
-          let identifier =
-            (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)
-            .map { "'\($0)'" }
-            ?? "field"
-          diagnostics.append(
-            Diagnostic(
-              node: binding,
-              message: MacroExpansionErrorMessage(
-                """
-                '@Table' requires \(identifier) to have a type annotation in order to generate a \
-                memberwise initializer
-                """
-              ),
-              fixIts: [
-                FixIt(
-                  message: MacroExpansionFixItMessage(
-                    """
-                    Insert ': <#Type#>'
-                    """
-                  ),
-                  changes: [
-                    .replace(
-                      oldNode: Syntax(binding),
-                      newNode: Syntax(
-                        binding
-                          .with(\.pattern.trailingTrivia, "")
-                          .with(
-                            \.typeAnnotation,
-                            TypeAnnotationSyntax(
-                              colon: .colonToken(trailingTrivia: .space),
-                              type: IdentifierTypeSyntax(name: "<#Type#>"),
-                              trailingTrivia: .space
-                            )
-                          )
-                      )
-                    )
-                  ]
-                )
-              ]
-            )
-          )
+          expansionFailed = true
           continue
         }
         memberwiseArguments.append(argument)
@@ -988,20 +916,10 @@ extension TableMacro: MemberMacro {
     }
 
     if columnsProperties.isEmpty {
-      diagnostics.append(
-        Diagnostic(
-          node: node,
-          message: MacroExpansionErrorMessage(
-            """
-            '@Table' requires at least one stored column property to be defined on '\(type)'
-            """
-          )
-        )
-      )
+      expansionFailed = true
     }
 
-    guard diagnostics.isEmpty else {
-      diagnostics.forEach(context.diagnose)
+    guard !expansionFailed else {
       return []
     }
 
@@ -1066,7 +984,7 @@ extension TableMacro: MemberAttributeMacro {
             let attribute = attribute.as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
             attributeName == "Column",
-            case let .argumentList(arguments) = attribute.arguments,
+            case .argumentList(let arguments) = attribute.arguments,
             arguments.contains(
               where: {
                 $0.label?.text.trimmingBackticks() == "primaryKey"

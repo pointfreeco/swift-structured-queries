@@ -175,7 +175,6 @@ extension SelectionMacro: ExtensionMacro {
     }
 
     let initDecoder: DeclSyntax = """
-
       public init(decoder: inout some \(moduleName).QueryDecoder) throws {
       \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
       }
@@ -206,7 +205,7 @@ extension SelectionMacro: MemberMacro {
     else {
       return []
     }
-    let type = IdentifierTypeSyntax(name: declaration.name)
+    let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
     var allColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []

@@ -28,9 +28,7 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static var columns: TableColumns {
-            TableColumns()
-          }
+          public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
@@ -66,9 +64,7 @@ extension SnapshotTests {
           var email: String?  // TODO: Should this be non-optional?
           /// The user's age.
           var age: Int
-        }
 
-        extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = User
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
@@ -81,14 +77,14 @@ extension SnapshotTests {
               [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = User
-            @Column(primaryKey: false)
             let id: /* TODO: UUID */ Int?
             var email: String?
             var age: Int
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = User.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
               public let age = StructuredQueriesCore.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
@@ -97,7 +93,9 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = User.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
               self.email = try decoder.decode(String.self)
@@ -107,6 +105,7 @@ extension SnapshotTests {
               }
               self.age = age
             }
+
             public init(_ other: User) {
               self.id = other.id
               self.email = other.email
@@ -122,6 +121,9 @@ extension SnapshotTests {
               self.age = age
             }
           }
+        }
+
+        extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "users"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -154,9 +156,7 @@ extension SnapshotTests {
         #"""
         struct Foo {
           var bar: Int
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
@@ -164,6 +164,9 @@ extension SnapshotTests {
               [QueryValue.columns.bar]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foo"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -230,9 +233,7 @@ extension SnapshotTests {
         #"""
         struct Bar {
           var baz: Int
-        }
 
-        extension Bar: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Bar
             public let baz = StructuredQueriesCore.TableColumn<QueryValue, Int>("baz", keyPath: \QueryValue.baz)
@@ -240,6 +241,9 @@ extension SnapshotTests {
               [QueryValue.columns.baz]
             }
           }
+        }
+
+        extension Bar: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "bar"
           public static let schemaName: Swift.String? = "foo"
@@ -313,9 +317,7 @@ extension SnapshotTests {
           var c2 = 1
           var c3 = 1.2
           var c4 = ""
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let c1 = StructuredQueriesCore.TableColumn<QueryValue, Swift.Bool>("c1", keyPath: \QueryValue.c1, default: true)
@@ -326,6 +328,9 @@ extension SnapshotTests {
               [QueryValue.columns.c1, QueryValue.columns.c2, QueryValue.columns.c3, QueryValue.columns.c4]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -352,9 +357,7 @@ extension SnapshotTests {
         #"""
         struct Foo {
           var bar: Int
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("Bar", keyPath: \QueryValue.bar)
@@ -362,6 +365,9 @@ extension SnapshotTests {
               [QueryValue.columns.bar]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -433,9 +439,7 @@ extension SnapshotTests {
         #"""
         struct Foo {
           var bar: Date
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation>("bar", keyPath: \QueryValue.bar)
@@ -443,6 +447,9 @@ extension SnapshotTests {
               [QueryValue.columns.bar]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -471,9 +478,7 @@ extension SnapshotTests {
         struct Foo {
           var bar: Int
           var baz: Int { 42 }
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
@@ -481,6 +486,9 @@ extension SnapshotTests {
               [QueryValue.columns.bar]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -509,9 +517,7 @@ extension SnapshotTests {
         struct Foo {
           var bar: Int
           static var baz: Int { 42 }
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
@@ -519,6 +525,9 @@ extension SnapshotTests {
               [QueryValue.columns.bar]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -545,9 +554,7 @@ extension SnapshotTests {
         #"""
         struct Foo {
           var `bar`: Int
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let `bar` = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.`bar`)
@@ -555,6 +562,9 @@ extension SnapshotTests {
               [QueryValue.columns.`bar`]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -581,9 +591,7 @@ extension SnapshotTests {
         #"""
         struct Foo {
           var bar: ID<Self>
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, ID<Foo>>("bar", keyPath: \QueryValue.bar)
@@ -591,6 +599,9 @@ extension SnapshotTests {
               [QueryValue.columns.bar]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -617,9 +628,7 @@ extension SnapshotTests {
         #"""
         struct Foo {
           var bar = ID<Self>()
-        }
 
-        extension Foo: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, _>("bar", keyPath: \QueryValue.bar, default: ID<Foo>())
@@ -627,6 +636,9 @@ extension SnapshotTests {
               [QueryValue.columns.bar]
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -653,9 +665,7 @@ extension SnapshotTests {
         struct User {
           let id: ID<Self, UUID>
           var referrerID: ID<Self, UUID>?
-        }
 
-        extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = User
             public let id = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>>("id", keyPath: \QueryValue.id)
@@ -667,12 +677,13 @@ extension SnapshotTests {
               [QueryValue.columns.id, QueryValue.columns.referrerID]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = User
-            @Column(as: ID<User, UUID.BytesRepresentation>?.self, primaryKey: false) let id: ID<User, UUID>?
-            @Column(as: ID<User, UUID.BytesRepresentation>?.self) var referrerID: ID<User, UUID>?
+            let id: ID<User, UUID>?
+            var referrerID: ID<User, UUID>?
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = User.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("id", keyPath: \QueryValue.id)
               public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
@@ -680,11 +691,14 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = User.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
               self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
             }
+
             public init(_ other: User) {
               self.id = other.id
               self.referrerID = other.referrerID
@@ -697,6 +711,9 @@ extension SnapshotTests {
               self.referrerID = referrerID
             }
           }
+        }
+
+        extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "users"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -726,9 +743,7 @@ extension SnapshotTests {
         struct SyncUp {
           var name: String
           var computed: Int
-        }
 
-        extension SyncUp: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = SyncUp
             public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
@@ -736,6 +751,9 @@ extension SnapshotTests {
               [QueryValue.columns.name]
             }
           }
+        }
+
+        extension SyncUp: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "syncUps"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -766,9 +784,7 @@ extension SnapshotTests {
           let id: Int
           var name: String
           var computed: Int
-        }
 
-        extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = SyncUp
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
@@ -780,13 +796,13 @@ extension SnapshotTests {
               [QueryValue.columns.id, QueryValue.columns.name]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = SyncUp
-            @Column(primaryKey: false)
             let id: Int?
             var name: String
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = SyncUp.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
@@ -794,7 +810,9 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = SyncUp.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
               let name = try decoder.decode(String.self)
@@ -803,6 +821,7 @@ extension SnapshotTests {
               }
               self.name = name
             }
+
             public init(_ other: SyncUp) {
               self.id = other.id
               self.name = other.name
@@ -815,6 +834,9 @@ extension SnapshotTests {
               self.name = name
             }
           }
+        }
+
+        extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "syncUps"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -864,9 +886,7 @@ extension SnapshotTests {
         struct SyncUp {
           let id: Int
           var seconds: <#Type#> = 60 * 5
-        }
 
-        extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = SyncUp
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
@@ -878,13 +898,13 @@ extension SnapshotTests {
               [QueryValue.columns.id, QueryValue.columns.seconds]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = SyncUp
-            @Column(primaryKey: false)
             let id: Int?
             var seconds: <#Type#> = 60 * 5
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = SyncUp.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let seconds = StructuredQueriesCore.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
@@ -892,11 +912,14 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = SyncUp.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
               self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 5
             }
+
             public init(_ other: SyncUp) {
               self.id = other.id
               self.seconds = other.seconds
@@ -909,6 +932,9 @@ extension SnapshotTests {
               self.seconds = seconds
             }
           }
+        }
+
+        extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "syncUps"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -941,9 +967,7 @@ extension SnapshotTests {
           var id: Int
           var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
           var name = ""
-        }
 
-        extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = RemindersList
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
@@ -956,14 +980,14 @@ extension SnapshotTests {
               [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = RemindersList
-            @Column(primaryKey: false)
             var id: Int?
-            @Column(as: Color.HexRepresentation.self) var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+            var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
             var name = ""
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = RemindersList.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let color = StructuredQueriesCore.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
               public let name = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
@@ -972,12 +996,15 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = RemindersList.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
               self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
               self.name = try decoder.decode(Swift.String.self) ?? ""
             }
+
             public init(_ other: RemindersList) {
               self.id = other.id
               self.color = other.color
@@ -993,6 +1020,9 @@ extension SnapshotTests {
               self.name = name
             }
           }
+        }
+
+        extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "remindersLists"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -1044,9 +1074,7 @@ extension SnapshotTests {
         var name: String {
           willSet { print(newValue) }
         }
-      }
 
-      extension Foo: StructuredQueriesCore.Table {
         public struct TableColumns: StructuredQueriesCore.TableDefinition {
           public typealias QueryValue = Foo
           public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
@@ -1054,6 +1082,9 @@ extension SnapshotTests {
             [QueryValue.columns.name]
           }
         }
+      }
+
+      extension Foo: StructuredQueriesCore.Table {
         public static let columns = TableColumns()
         public static let tableName = "foos"
         public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -1104,17 +1135,15 @@ extension SnapshotTests {
                 [QueryValue.columns.id]
               }
             }
-            public static var columns: TableColumns {
-              TableColumns()
-            }
+            public static let columns = TableColumns()
 
-            public static let tableName = Foo .tableName
+            public static let tableName = Foo.tableName
 
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
             }
 
-            public init(_ other: Foo ) {
+            public init(_ other: Foo) {
               self.id = other.id
             }
             public init(
@@ -1126,9 +1155,7 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static var columns: TableColumns {
-            TableColumns()
-          }
+          public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1201,9 +1228,7 @@ extension SnapshotTests {
         }
 
         extension Foo.Draft: StructuredQueriesCore.Table {
-          public static var columns: TableColumns {
-            TableColumns()
-          }
+          public static let columns = TableColumns()
           public static let tableName = Foo.tableName
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1242,9 +1267,7 @@ extension SnapshotTests {
           var name: String {
             willSet { print(newValue) }
           }
-        }
 
-        extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Foo
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
@@ -1256,13 +1279,13 @@ extension SnapshotTests {
               [QueryValue.columns.id, QueryValue.columns.name]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Foo
-            @Column(primaryKey: false)
             var id: Int?
             var name: String
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = Foo.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
@@ -1270,7 +1293,9 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = Foo.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
               let name = try decoder.decode(String.self)
@@ -1279,6 +1304,7 @@ extension SnapshotTests {
               }
               self.name = name
             }
+
             public init(_ other: Foo) {
               self.id = other.id
               self.name = other.name
@@ -1291,6 +1317,9 @@ extension SnapshotTests {
               self.name = name
             }
           }
+        }
+
+        extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -1329,9 +1358,7 @@ extension SnapshotTests {
           var title = ""
           var date: Date?
           var priority: Priority?
-        }
 
-        extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
@@ -1345,15 +1372,15 @@ extension SnapshotTests {
               [QueryValue.columns.id, QueryValue.columns.title, QueryValue.columns.date, QueryValue.columns.priority]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Reminder
-            @Column(primaryKey: false)
             let id: Int?
             var title = ""
-            @Column(as: Date.UnixTimeRepresentation?.self) var date: Date?
+            var date: Date?
             var priority: Priority?
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = Reminder.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
               public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
@@ -1363,13 +1390,16 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = Reminder.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
               self.title = try decoder.decode(Swift.String.self) ?? ""
               self.date = try decoder.decode(Date.UnixTimeRepresentation.self)
               self.priority = try decoder.decode(Priority.self)
             }
+
             public init(_ other: Reminder) {
               self.id = other.id
               self.title = other.title
@@ -1388,6 +1418,9 @@ extension SnapshotTests {
               self.priority = priority
             }
           }
+        }
+
+        extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "reminders"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -1418,9 +1451,7 @@ extension SnapshotTests {
         #"""
         struct Reminder {
           let id: UUID
-        }
 
-        extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
             public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation>("id", keyPath: \QueryValue.id)
@@ -1431,21 +1462,25 @@ extension SnapshotTests {
               [QueryValue.columns.id]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Reminder
-            @Column(as: UUID.BytesRepresentation?.self, primaryKey: false) let id: UUID?
+            let id: UUID?
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = Reminder.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation?>("id", keyPath: \QueryValue.id)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [QueryValue.columns.id]
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = Reminder.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(UUID.BytesRepresentation.self)
             }
+
             public init(_ other: Reminder) {
               self.id = other.id
             }
@@ -1455,6 +1490,9 @@ extension SnapshotTests {
               self.id = id
             }
           }
+        }
+
+        extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "reminders"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -1482,9 +1520,7 @@ extension SnapshotTests {
         #"""
         struct Reminder {
           let id: Int
-        }
 
-        extension Reminder: StructuredQueriesCore.Table {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Reminder
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
@@ -1492,6 +1528,9 @@ extension SnapshotTests {
               [QueryValue.columns.id]
             }
           }
+        }
+
+        extension Reminder: StructuredQueriesCore.Table {
           public static let columns = TableColumns()
           public static let tableName = "reminders"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -1520,9 +1559,7 @@ extension SnapshotTests {
         struct Reminder {
           let id: Int?  // TODO: Migrate to UUID
           var title = ""
-        }
 
-        extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
@@ -1534,13 +1571,13 @@ extension SnapshotTests {
               [QueryValue.columns.id, QueryValue.columns.title]
             }
           }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Reminder
-            @Column(primaryKey: false)
-            let id: Int?
+            let id: Int?  // TODO: Migrate to UUID
             var title = ""
             public struct TableColumns: StructuredQueriesCore.TableDefinition {
-              public typealias QueryValue = Reminder.Draft
+              public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
@@ -1548,11 +1585,14 @@ extension SnapshotTests {
               }
             }
             public static let columns = TableColumns()
+
             public static let tableName = Reminder.tableName
+
             public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
               self.title = try decoder.decode(Swift.String.self) ?? ""
             }
+
             public init(_ other: Reminder) {
               self.id = other.id
               self.title = other.title
@@ -1565,6 +1605,9 @@ extension SnapshotTests {
               self.title = title
             }
           }
+        }
+
+        extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
           public static let columns = TableColumns()
           public static let tableName = "reminders"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {

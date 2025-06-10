@@ -20,8 +20,8 @@ import StructuredQueriesCore
 @attached(member, names: named(Draft), named(TableColumns))
 @attached(memberAttribute)
 public macro Table(
-  _ name: String? = nil,
-  schema schemaName: String? = nil
+  _ name: String = "",
+  schema schemaName: String = ""
 ) =
   #externalMacro(
     module: "StructuredQueriesMacros",
@@ -35,9 +35,9 @@ public macro Table(
 ///   - representableType: A type that represents the property type in a query expression. For types
 ///     that don't have a single representation in SQL, like `Date` and `UUID`.
 ///   - primaryKey: The column is its table's auto-incrementing primary key.
-@attached(accessor, names: named(willSet))
+@attached(peer)
 public macro Column(
-  _ name: String? = nil,
+  _ name: String = "",
   as representableType: (any QueryRepresentable.Type)? = nil,
   primaryKey: Bool = false
 ) =
@@ -49,7 +49,7 @@ public macro Column(
 /// Tells Structured Queries not to consider the annotated property a column of the table
 ///
 /// Like SwiftData's `@Transient` macro, but for SQL.
-@attached(accessor, names: named(willSet))
+@attached(peer)
 public macro Ephemeral() =
   #externalMacro(
     module: "StructuredQueriesMacros",
@@ -132,22 +132,3 @@ public macro sql<QueryValue>(
   as queryValueType: QueryValue.Type = QueryValue.self
 ) -> SQLQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
-
-// NB: Due to a bug in Swift, this macro is expanded internally by the '@Table' macro.
-// @attached(
-//   memberAttribute
-// )
-// @attached(
-//   extension,
-//   conformances: Table,
-//   names: named(TableColumns),
-//   named(columns),
-//   named(init(_:)),
-//   named(init(decoder:)),
-//   named(tableName)
-// )
-// public macro _Draft<T: Table>(_: T.Type) =
-//   #externalMacro(
-//     module: "StructuredQueriesMacros",
-//     type: "TableMacro"
-//   )
