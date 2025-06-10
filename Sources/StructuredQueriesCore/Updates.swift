@@ -5,7 +5,7 @@
 ///
 /// To learn more, see <doc:UpdateStatements>.
 @dynamicMemberLookup
-public struct Updates<Base: Table> {
+public struct Updates<Base: Table>: Sendable {
   private var updates: [(String, QueryFragment)] = []
 
   init(_ body: (inout Self) -> Void) {

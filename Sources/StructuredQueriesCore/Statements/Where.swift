@@ -58,7 +58,7 @@ extension Table {
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
-public struct Where<From: Table> {
+public struct Where<From: Table>: Sendable {
   public static func + (lhs: Self, rhs: Self) -> Self {
     Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
   }

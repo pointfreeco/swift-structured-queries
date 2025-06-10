@@ -37,7 +37,7 @@ public struct With<QueryValue>: Statement {
   }
 }
 
-public struct CommonTableExpressionClause: QueryExpression {
+public struct CommonTableExpressionClause: QueryExpression, Sendable {
   public typealias QueryValue = ()
   let tableName: QueryFragment
   let select: QueryFragment
