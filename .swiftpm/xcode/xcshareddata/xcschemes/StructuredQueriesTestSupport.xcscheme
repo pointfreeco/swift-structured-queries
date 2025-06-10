@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "ArchiveFix"
-               BuildableName = "ArchiveFix"
-               BlueprintName = "ArchiveFix"
+               BlueprintIdentifier = "StructuredQueriesTestSupport"
+               BuildableName = "StructuredQueriesTestSupport"
+               BlueprintName = "StructuredQueriesTestSupport"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -31,7 +31,7 @@
       shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -50,9 +50,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "ArchiveFix"
-            BuildableName = "ArchiveFix"
-            BlueprintName = "ArchiveFix"
+            BlueprintIdentifier = "StructuredQueriesTestSupport"
+            BuildableName = "StructuredQueriesTestSupport"
+            BlueprintName = "StructuredQueriesTestSupport"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>
