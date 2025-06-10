@@ -581,24 +581,27 @@ extension SnapshotTests {
       }
     }
 
-    @Test func onConflict_invalidUpdateFilters() {
-      withKnownIssue {
-        assertQuery(
-          Reminder.insert {
-            Reminder.Draft(remindersListID: 1)
-          } where: {
-            $0.isFlagged
+    // NB: This currently crashes in Xcode 26.
+    #if swift(<6.2)
+      @Test func onConflict_invalidUpdateFilters() {
+        withKnownIssue {
+          assertQuery(
+            Reminder.insert {
+              Reminder.Draft(remindersListID: 1)
+            } where: {
+              $0.isFlagged
+            }
+          ) {
+            """
+            INSERT INTO "reminders"
+            ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+            VALUES
+            (NULL, NULL, NULL, 0, 0, '', NULL, 1, '')
+            """
           }
-        ) {
-          """
-          INSERT INTO "reminders"
-          ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
-          VALUES
-          (NULL, NULL, NULL, 0, 0, '', NULL, 1, '')
-          """
         }
       }
-    }
+    #endif
 
     @Test func onConflict_conditionalWhere() {
       let condition = false

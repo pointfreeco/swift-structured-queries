@@ -1,12 +1,14 @@
 public protocol _OptionalProtocol<Wrapped> {
   associatedtype Wrapped
   var _wrapped: Wrapped? { get }
-  static var none: Self { get }
-  static func some(_ wrapped: Wrapped) -> Self
+  static var _none: Self { get }
+  static func _some(_ wrapped: Wrapped) -> Self
 }
 
 extension Optional: _OptionalProtocol {
   public var _wrapped: Wrapped? { self }
+  public static var _none: Self { .none }
+  public static func _some(_ wrapped: Wrapped) -> Self { .some(wrapped) }
 }
 
 public protocol _OptionalPromotable<_Optionalized> {

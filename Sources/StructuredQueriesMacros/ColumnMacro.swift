@@ -1,15 +1,12 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-public enum ColumnMacro: AccessorMacro {
-  public static func expansion<
-    Context: MacroExpansionContext,
-    Declaration: DeclSyntaxProtocol
-  >(
+public enum ColumnMacro: PeerMacro {
+  public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(
     of node: AttributeSyntax,
-    providingAccessorsOf declaration: Declaration,
-    in context: Context
-  ) throws -> [AccessorDeclSyntax] {
-    return []
+    providingPeersOf declaration: D,
+    in context: C
+  ) throws -> [DeclSyntax] {
+    []
   }
 }
