@@ -458,7 +458,7 @@ extension Table {
       conflictTargetColumnNames: conflictTargetColumnNames,
       conflictTargetFilter: targetFilter(Self.columns),
       values: values,
-      updates: updates.map(Updates.init),
+      updates: updates.map { Updates($0) },
       updateFilter: updateFilter(Self.columns),
       returning: []
     )

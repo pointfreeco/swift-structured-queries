@@ -581,6 +581,8 @@ extension SnapshotTests {
       }
     }
 
+    // NB: This currently crashes in Xcode 26. 
+#if swift(<6.2)
     @Test func onConflict_invalidUpdateFilters() {
       withKnownIssue {
         assertQuery(
@@ -599,6 +601,7 @@ extension SnapshotTests {
         }
       }
     }
+    #endif
 
     @Test func onConflict_conditionalWhere() {
       let condition = false
