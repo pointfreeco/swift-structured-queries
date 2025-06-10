@@ -233,7 +233,7 @@ extension SelectionMacro: MemberMacro {
           let attribute = attribute.as(AttributeSyntax.self),
           let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
           attributeName == "Column",
-          case let .argumentList(arguments) = attribute.arguments
+          case .argumentList(let arguments) = attribute.arguments
         else { continue }
 
         for argumentIndex in arguments.indices {
@@ -259,7 +259,7 @@ extension SelectionMacro: MemberMacro {
               )
             )
 
-          case let .some(label) where label.text == "as":
+          case .some(let label) where label.text == "as":
             guard
               let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
               memberAccess.declName.baseName.tokenKind == .keyword(.self),
@@ -276,7 +276,7 @@ extension SelectionMacro: MemberMacro {
 
             columnQueryValueType = "\(raw: base.trimmedDescription)"
 
-          case let .some(label) where label.text == "primaryKey":
+          case .some(let label) where label.text == "primaryKey":
             var newArguments = arguments
             newArguments.remove(at: argumentIndex)
             diagnostics.append(

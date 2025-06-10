@@ -29,10 +29,10 @@ extension SnapshotTests {
           )
         )
         try db.execute(
-          Row.insert([
-            Row.Draft(isDeleted: false),
-            Row.Draft(isDeleted: true),
-          ])
+          Row.insert {
+            Row.Draft(isDeleted: false)
+            Row.Draft(isDeleted: true)
+          }
         )
       }
 
@@ -304,10 +304,10 @@ extension SnapshotTests {
           )
         )
         try db.execute(
-          Row.insert([
-            Row.Draft(isDeleted: false),
-            Row.Draft(isDeleted: true),
-          ])
+          Row.insert {
+            Row.Draft(isDeleted: false)
+            Row.Draft(isDeleted: true)
+          }
         )
       }
 
@@ -538,10 +538,10 @@ extension SnapshotTests {
           )
         )
         try db.execute(
-          Row.insert([
-            Row.Draft(isDeleted: false),
-            Row.Draft(isDeleted: true),
-          ])
+          Row.insert {
+            Row.Draft(isDeleted: false)
+            Row.Draft(isDeleted: true)
+          }
         )
       }
 

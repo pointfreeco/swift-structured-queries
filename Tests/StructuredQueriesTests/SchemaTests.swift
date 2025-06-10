@@ -25,7 +25,7 @@ extension SnapshotTests {
     }
 
     @Test func insert() {
-      assertQuery(Reminder.insert(Reminder.Draft(remindersListID: 1))) {
+      assertQuery(Reminder.insert { Reminder.Draft(remindersListID: 1) }) {
         """
         INSERT INTO "main"."reminders"
         ("id", "remindersListID")

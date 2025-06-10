@@ -162,7 +162,7 @@ extension SnapshotTests {
           """
         )
       )
-      try database.execute(Row.insert(Row(id: UUID(1))))
+      try database.execute(Row.insert { Row(id: UUID(1)) })
       assertQuery(
         Row.find(UUID(1))
       ) {
