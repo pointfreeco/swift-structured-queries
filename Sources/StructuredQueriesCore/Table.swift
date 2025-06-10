@@ -1,9 +1,15 @@
+#if swift(>=6.2)
+  public typealias _SendableMetatype = SendableMetatype
+#else
+  public protocol _SendableMetatype {}
+#endif
+
 /// A type representing a database table.
 ///
 /// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
 /// generate a conformance.
 @dynamicMemberLookup
-public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self {
+public protocol Table: QueryRepresentable, _SendableMetatype where TableColumns.QueryValue == Self {
   /// A type that describes this table's columns.
   associatedtype TableColumns: TableDefinition
 
