@@ -210,7 +210,7 @@ extension SelectionMacro: MemberMacro {
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
     var decodingAssignments: [String] = []
-    var diagnostics: [Diagnostic] = []
+    var expansionFailed = false
 
     let selfRewriter = SelfRewriter(selfEquivalent: type.name)
     for member in declaration.memberBlock.members {
@@ -243,21 +243,7 @@ extension SelectionMacro: MemberMacro {
           case nil:
             var newArguments = arguments
             newArguments.remove(at: argumentIndex)
-            diagnostics.append(
-              Diagnostic(
-                node: argument,
-                message: MacroExpansionErrorMessage(
-                  "'@Selection' column names are not supported"
-                ),
-                fixIt: .replace(
-                  message: MacroExpansionFixItMessage(
-                    "Remove '\(argument.trimmed)'"
-                  ),
-                  oldNode: Syntax(attribute),
-                  newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
-                )
-              )
-            )
+            expansionFailed = true
 
           case .some(let label) where label.text == "as":
             guard
@@ -265,12 +251,7 @@ extension SelectionMacro: MemberMacro {
               memberAccess.declName.baseName.tokenKind == .keyword(.self),
               let base = memberAccess.base
             else {
-              diagnostics.append(
-                Diagnostic(
-                  node: argument.expression,
-                  message: MacroExpansionErrorMessage("Argument 'as' must be a type literal")
-                )
-              )
+              expansionFailed = true
               continue
             }
 
@@ -279,21 +260,7 @@ extension SelectionMacro: MemberMacro {
           case .some(let label) where label.text == "primaryKey":
             var newArguments = arguments
             newArguments.remove(at: argumentIndex)
-            diagnostics.append(
-              Diagnostic(
-                node: label,
-                message: MacroExpansionErrorMessage(
-                  "'@Selection' primary keys are not supported"
-                ),
-                fixIt: .replace(
-                  message: MacroExpansionFixItMessage(
-                    "Remove '\(argument.trimmed)'"
-                  ),
-                  oldNode: Syntax(attribute),
-                  newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
-                )
-              )
-            )
+            expansionFailed = true
 
           case let argument?:
             fatalError("Unexpected argument: \(argument)")
@@ -348,8 +315,7 @@ extension SelectionMacro: MemberMacro {
       conformances = protocolNames.map { "\(moduleName).\($0)" }
     }
 
-    guard diagnostics.isEmpty else {
-      diagnostics.forEach(context.diagnose)
+    guard !expansionFailed else {
       return []
     }
 
