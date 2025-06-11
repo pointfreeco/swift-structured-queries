@@ -90,7 +90,7 @@ extension PrimaryKeyedTable {
 /// ``Where/update(or:set:)``.
 ///
 /// To learn more, see <doc:UpdateStatements>.
-public struct Update<From: Table, Returning> {
+public struct Update<From: Table, Returning>: Sendable {
   var conflictResolution: ConflictResolution?
   var updates: Updates<From>
   var `where`: [QueryFragment] = []

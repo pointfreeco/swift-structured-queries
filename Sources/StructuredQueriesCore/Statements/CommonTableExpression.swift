@@ -1,6 +1,6 @@
 /// Creates a common table expression that can be used to factor subqueries, or create hierarchical
 /// or recursive queries of trees and graphs.
-public struct With<QueryValue>: Statement {
+public struct With<QueryValue>: Statement, Sendable {
   public typealias From = Never
 
   var ctes: [CommonTableExpressionClause]

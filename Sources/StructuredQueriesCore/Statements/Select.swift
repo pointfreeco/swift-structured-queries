@@ -1421,7 +1421,7 @@ extension Select: SelectStatement {
     var query: QueryFragment = "SELECT"
     let columns =
       columns.isEmpty
-      ? [From.columns.queryFragment] + joins.map { $0.table.columns.queryFragment }
+      ? [From.columns.queryFragment] + joins.map(\.columns)
       : columns.map(\.queryFragment)
     if distinct {
       query.append(" DISTINCT")
@@ -1472,17 +1472,21 @@ public struct _JoinClause: QueryExpression, Sendable {
   }
 
   let `operator`: QueryFragment?
-  let table: any Table.Type
+  let tableName: String
+  let tableAlias: String?
   let constraint: QueryFragment
+  let columns: QueryFragment
 
-  init(
+  init<T: Table>(
     operator: Operator?,
-    table: any Table.Type,
+    table: T.Type,
     constraint: some QueryExpression<Bool>
   ) {
     self.operator = `operator`?.queryFragment
-    self.table = table
+    self.tableName = table.tableName
+    self.tableAlias = table.tableAlias
     self.constraint = constraint.queryFragment
+    self.columns = table.columns.queryFragment
   }
 
   public var queryFragment: QueryFragment {
@@ -1490,8 +1494,8 @@ public struct _JoinClause: QueryExpression, Sendable {
     if let `operator` {
       query.append("\(`operator`) ")
     }
-    query.append("JOIN \(quote: table.tableName) ")
-    if let tableAlias = table.tableAlias {
+    query.append("JOIN \(quote: tableName) ")
+    if let tableAlias {
       query.append("AS \(quote: tableAlias) ")
     }
     query.append("ON \(constraint)")

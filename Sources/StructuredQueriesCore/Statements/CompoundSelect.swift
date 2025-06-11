@@ -11,7 +11,7 @@ extension PartialSelectStatement {
   public func union(
     all: Bool = false,
     _ other: some PartialSelectStatement<QueryValue>
-  ) -> some PartialSelectStatement<QueryValue> {
+  ) -> some PartialSelectStatement<QueryValue> & Sendable {
     CompoundSelect(lhs: self, operator: all ? .unionAll : .union, rhs: other)
   }
 
@@ -25,7 +25,7 @@ extension PartialSelectStatement {
   /// - Returns: A compound select statement.
   public func intersect<F, J>(
     _ other: some SelectStatement<QueryValue, F, J>
-  ) -> some PartialSelectStatement<QueryValue> {
+  ) -> some PartialSelectStatement<QueryValue> & Sendable {
     CompoundSelect(lhs: self, operator: .intersect, rhs: other)
   }
 
@@ -38,12 +38,12 @@ extension PartialSelectStatement {
   /// - Returns: A compound select statement.
   public func except<F, J>(
     _ other: some SelectStatement<QueryValue, F, J>
-  ) -> some PartialSelectStatement<QueryValue> {
+  ) -> some PartialSelectStatement<QueryValue> & Sendable {
     CompoundSelect(lhs: self, operator: .except, rhs: other)
   }
 }
 
-private struct CompoundSelect<QueryValue>: PartialSelectStatement {
+private struct CompoundSelect<QueryValue>: PartialSelectStatement, Sendable {
   typealias From = Never
   typealias Joins = Never
 

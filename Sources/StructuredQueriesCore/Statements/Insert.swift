@@ -598,7 +598,7 @@ extension PrimaryKeyedTable {
   }
 }
 
-private enum InsertValues {
+private enum InsertValues: Sendable {
   case `default`
   case values([[QueryFragment]])
   case select(QueryFragment)
@@ -611,7 +611,7 @@ private enum InsertValues {
 /// functions.
 ///
 /// To learn more, see <doc:InsertStatements>.
-public struct Insert<Into: Table, Returning> {
+public struct Insert<Into: Table, Returning>: Sendable {
   var conflictResolution: ConflictResolution?
   var columnNames: [String]
   var conflictTargetColumnNames: [String]
