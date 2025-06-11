@@ -16,3 +16,5 @@ public struct BindQueryExpression<QueryValue: QueryBindable>: QueryExpression {
     base.queryFragment
   }
 }
+
+extension BindQueryExpression: Sendable where QueryValue: Sendable {}

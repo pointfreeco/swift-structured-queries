@@ -23,7 +23,7 @@
 /// // LEFT JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
 /// // GROUP BY "remindersLists"."id"
 /// ```
-public struct Case<Base, QueryValue: _OptionalPromotable> {
+public struct Case<Base, QueryValue: _OptionalPromotable>: Sendable {
   var base: QueryFragment?
 
   /// Creates a SQL `CASE` expression builder.
@@ -76,7 +76,7 @@ public struct Case<Base, QueryValue: _OptionalPromotable> {
 }
 
 /// A `CASE` expression builder.
-public struct Cases<Base, QueryValue: _OptionalProtocol>: QueryExpression {
+public struct Cases<Base, QueryValue: _OptionalProtocol>: QueryExpression, Sendable {
   var base: QueryFragment?
   var cases: [QueryFragment]
 
