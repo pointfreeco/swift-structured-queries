@@ -12,6 +12,7 @@ struct RemindersList: Codable, Equatable, Identifiable {
   let id: Int
   var color = 0x4a99ef
   var title = ""
+  var position = 0
 }
 
 @Table
@@ -79,7 +80,8 @@ extension Database {
       CREATE TABLE "remindersLists" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "color" INTEGER NOT NULL DEFAULT 4889071,
-        "title" TEXT NOT NULL DEFAULT ''
+        "title" TEXT NOT NULL DEFAULT '',
+        "position" INTEGER NOT NULL DEFAULT 0
       )
       """
     )
