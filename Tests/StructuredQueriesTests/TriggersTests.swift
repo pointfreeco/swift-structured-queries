@@ -10,13 +10,13 @@ extension SnapshotTests {
     @Test func basics() {
       assertQuery(
         RemindersList.createTemporaryTrigger(
-          .after(.insert { new in
+          after: .insert { new in
             RemindersList
               .update {
                 $0.position = RemindersList.select { ($0.position.max() ?? -1) + 1 }
               }
               .where { $0.id.eq(new.id) }
-          })
+          }
         )
       ) {
         """

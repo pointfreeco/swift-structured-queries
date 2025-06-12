@@ -1,101 +1,201 @@
 extension Table {
-  public static func createTemporaryTrigger<Begin: Statement>(
-    _ when: TemporaryTrigger<Self, Begin>.When,
+  /// A `CREATE TEMPORARY TRIGGER` statement.
+  ///
+  /// - Parameters:
+  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
+  ///     operation, and source location.
+  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
+  ///   - operation: The trigger's operation.
+  ///   - fileID: The source `#fileID` associated with the trigger.
+  ///   - line: The source `#line` associated with the trigger.
+  ///   - column: The source `#column` associated with the trigger.
+  /// - Returns: A temporary trigger.
+  public static func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    after operation: TemporaryTrigger<Self>.Operation,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
-  ) -> TemporaryTrigger<Self, Begin> {
-    TemporaryTrigger(when: when, fileID: fileID, line: line, column: column)
+  ) -> TemporaryTrigger<Self> {
+    TemporaryTrigger(
+      name: name,
+      ifNotExists: ifNotExists,
+      operation: operation,
+      fileID: fileID,
+      line: line,
+      column: column
+    )
   }
 }
 
-// TODO: 'RAISE'
-public struct TemporaryTrigger<On: Table, Begin: Statement>: Statement {
+public struct TemporaryTrigger<On: Table>: Statement {
   public typealias From = Never
   public typealias Joins = ()
   public typealias QueryValue = ()
 
-  // TODO: 'WHEN expr'?
-  public enum When: QueryExpression {
+  public struct Operation: QueryExpression {
     public typealias QueryValue = ()
 
-    public enum Operation: QueryExpression {
-      public typealias QueryValue = ()
+    public enum _Old: AliasName { public static var aliasName: String { "old" } }
+    public enum _New: AliasName { public static var aliasName: String { "new" } }
 
-      public enum Old: AliasName { public static var aliasName: String { "old" } }
-      public enum New: AliasName { public static var aliasName: String { "new" } }
-
-      case insert(@Sendable (TableAlias<On, New>.TableColumns) -> Begin)
-      // TODO: 'OF column-name, …'?
-      case update(
-        @Sendable (TableAlias<On, Old>.TableColumns, TableAlias<On, New>.TableColumns) -> Begin
+    public typealias Old = TableAlias<On, _Old>.TableColumns
+    public typealias New = TableAlias<On, _New>.TableColumns
+    
+    /// An `AFTER INSERT` trigger operation.
+    ///
+    /// - Parameters:
+    ///   - perform: A statement to perform for each triggered row.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `AFTER INSERT` trigger operation.
+    public static func insert(
+      forEachRow perform: (New) -> some Statement,
+      when condition: ((New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self(
+        kind: .insert(operation: perform(On.as(_New.self).columns).query),
+        when: condition?(On.as(_New.self).columns).queryFragment
       )
-      case delete(@Sendable (TableAlias<On, Old>.TableColumns) -> Begin)
-
-      var description: String {
-        switch self {
-        case .insert: "insert"
-        case .update: "update"
-        case .delete: "delete"
-        }
-      }
-
-      public var queryFragment: QueryFragment {
-        var query: QueryFragment
-        var begin: QueryFragment
-        switch self {
-        case .insert(let statement):
-          query = "INSERT"
-          begin = statement(On.as(New.self).columns).query
-        case .update(let statement):
-          query = "UPDATE"
-          begin = statement(On.as(Old.self).columns, On.as(New.self).columns).query
-        case .delete(let statement):
-          query = "DELETE"
-          begin = statement(On.as(Old.self).columns).query
-        }
-        query.append(" ON \(On.self)\(.newlineOrSpace)FOR EACH ROW BEGIN")
-        query.append("\(.newlineOrSpace)\(begin.indented());\(.newlineOrSpace)END")
-        return query
-      }
     }
 
-    case before(Operation)
-    case after(Operation)
-    // TODO: 'insteadOf'?
-
-    var description: String {
-      switch self {
-      case .before(let operation):
-        "before_\(operation.description)"
-      case .after(let operation):
-        "after_\(operation.description)"
-      }
+    /// An `AFTER UPDATE` trigger operation.
+    ///
+    /// - Parameters:
+    ///   - perform: A statement to perform for each triggered row.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `AFTER UPDATE` trigger operation.
+    public static func update(
+      forEachRow perform: (Old, New) -> some Statement,
+      when condition: ((Old, New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      update(
+        of: { _ in },
+        forEachRow: perform,
+        when: condition
+      )
     }
+
+    /// An `AFTER UPDATE` trigger operation.
+    ///
+    /// - Parameters:
+    ///   - columns: Updated columns to scope the operation to.
+    ///   - perform: A statement to perform for each triggered row.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `AFTER UPDATE` trigger operation.
+    public static func update<each Column>(
+      of columns: (On.TableColumns) -> (repeat TableColumn<On, each Column>),
+      forEachRow perform: (Old, New) -> some Statement,
+      when condition: ((Old, New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      var columnNames: [String] = []
+      for column in repeat each columns(On.columns) {
+        columnNames.append(column.name)
+      }
+      return Self(
+        kind: .update(
+          operation: perform(On.as(_Old.self).columns, On.as(_New.self).columns).query,
+          columnNames: columnNames
+        ),
+        when: condition?(On.as(_Old.self).columns, On.as(_New.self).columns).queryFragment
+      )
+    }
+
+    /// An `AFTER DELETE` trigger operation.
+    ///
+    /// - Parameters:
+    ///   - perform: A statement to perform for each triggered row.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `AFTER DELETE` trigger operation.
+    public static func delete(
+      forEachRow perform: (Old) -> some Statement,
+      when condition: ((Old) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self(
+        kind: .delete(operation: perform(On.as(_Old.self).columns).query),
+        when: condition?(On.as(_Old.self).columns).queryFragment
+      )
+    }
+
+    private enum Kind {
+      case insert(operation: QueryFragment)
+      case update(operation: QueryFragment, columnNames: [String])
+      case delete(operation: QueryFragment)
+    }
+
+    private let kind: Kind
+    private let when: QueryFragment?
 
     public var queryFragment: QueryFragment {
-      switch self {
-      case .before(let operation):
-        "BEFORE \(operation)"
-      case .after(let operation):
-        "AFTER \(operation)"
+      var query: QueryFragment = "AFTER"
+      let statement: QueryFragment
+      switch kind {
+      case .insert(let begin):
+        query.append(" INSERT")
+        statement = begin
+      case .update(let begin, let columnNames):
+        query.append(" UPDATE")
+        if !columnNames.isEmpty {
+          query.append(
+            " OF \(columnNames.map { QueryFragment(quote: $0) }.joined(separator: ", "))"
+          )
+        }
+        statement = begin
+      case .delete(let begin):
+        query.append(" DELETE")
+        statement = begin
+      }
+      query.append(" ON \(On.self)\(.newlineOrSpace)FOR EACH ROW")
+      if let when {
+        query.append(" WHEN \(when)")
+      }
+      query.append(" BEGIN")
+      query.append("\(.newlineOrSpace)\(statement.indented());\(.newlineOrSpace)END")
+      return query
+    }
+
+    fileprivate var description: String {
+      switch kind {
+      case .insert: "after_insert"
+      case .update: "after_update"
+      case .delete: "after_delete"
       }
     }
   }
 
-  fileprivate let when: When
-  let fileID: StaticString
-  let line: UInt
-  let column: UInt
+  fileprivate let name: String?
+  fileprivate let ifNotExists: Bool
+  fileprivate let operation: Operation
+  fileprivate let fileID: StaticString
+  fileprivate let line: UInt
+  fileprivate let column: UInt
+
+  /// Returns a `DROP TRIGGER` statement for this trigger.
+  ///
+  /// - Parameter ifExists: Adds an `IF EXISTS` condition to the `DROP TRIGGER`.
+  /// - Returns: A `DROP TRIGGER` statement for this trigger.
+  public func drop(ifExists: Bool = false) -> some Statement {
+    var query: QueryFragment = "DROP TRIGGER"
+    if ifExists {
+      query.append(" IF EXISTS")
+    }
+    query.append(" \(triggerName)")
+    return SQLQueryExpression(query)
+  }
 
   public var query: QueryFragment {
-    let query: QueryFragment = """
-      CREATE TEMPORARY TRIGGER\(.newlineOrSpace)\(triggerName.indented())\(.newlineOrSpace)\(when)
-      """
+    var query: QueryFragment = "CREATE TEMPORARY TRIGGER"
+    if ifNotExists {
+      query.append(" IF NOT EXISTS")
+    }
+    query.append("\(.newlineOrSpace)\(triggerName.indented())\(.newlineOrSpace)\(operation)")
     return "\(raw: query.debugDescription)"
   }
 
   private var triggerName: QueryFragment {
-    "\(quote: "\(when.description)_on_\(On.tableName)@\(fileID):\(line):\(column)")"
+    guard let name else {
+      return "\(quote: "\(operation.description)_on_\(On.tableName)@\(fileID):\(line):\(column)")"
+    }
+    return "\(quote: name)"
   }
 }
