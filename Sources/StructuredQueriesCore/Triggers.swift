@@ -33,7 +33,7 @@ extension Table {
   public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
-    afterUpdateTouch updates: (Updates<Self>) -> Void,
+    afterUpdateTouch updates: (inout Updates<Self>) -> Void,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -42,7 +42,7 @@ extension Table {
       name: name,
       ifNotExists: ifNotExists,
       operation: .update { _, _ in
-        Self.update { updates($0) }
+        Self.update { updates(&$0) }
       },
       fileID: fileID,
       line: line,
@@ -50,6 +50,7 @@ extension Table {
     )
   }
 
+  // TODO: Touchable protocol with Date: Touchable, UUID: Touchable, ?
   public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
