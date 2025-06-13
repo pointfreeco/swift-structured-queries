@@ -1,3 +1,5 @@
+import Foundation
+
 extension Table {
   /// A `CREATE TEMPORARY TRIGGER` statement.
   ///
@@ -22,6 +24,48 @@ extension Table {
       name: name,
       ifNotExists: ifNotExists,
       operation: operation,
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  public func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterUpdateTouch updates: (Updates<Self>) -> Void,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    TemporaryTrigger(
+      name: name,
+      ifNotExists: ifNotExists,
+      operation: .update { _, _ in
+        Self.update { updates($0) }
+      },
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  public func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterUpdateTouch date: KeyPath<TableColumns, TableColumn<Self, Date>>,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    TemporaryTrigger(
+      name: name,
+      ifNotExists: ifNotExists,
+      operation: .update { _, _ in
+        Self.update {
+          $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
+        }
+      },
       fileID: fileID,
       line: line,
       column: column
