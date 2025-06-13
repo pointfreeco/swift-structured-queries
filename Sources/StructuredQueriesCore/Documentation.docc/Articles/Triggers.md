@@ -1,0 +1,189 @@
+# Triggers
+
+Learn how to build trigger statements that can monitor the database for events and react.
+
+## Overview
+
+[Triggers](https://sqlite.org/lang_createtrigger.html) are operations that execute in your database
+when some specific database event occurs. StructuredQueries comes with tools to create _temporary_
+triggers in a type-safe and schema-safe fashion.
+
+### Trigger basics
+
+One of the most common use cases for a trigger is refreshing an "updatedAt" timestamp on a row when
+it is updated in the database. One can create such a trigger SQL statement using the 
+``Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)`` static method:
+
+@Row {
+  @Column {
+    ```swift
+    Reminder.createTemporaryTrigger(
+      "reminders_updatedAt",
+      after: .update { _, _ in
+        Reminder.update { 
+          $0.updatedAt = #sql("datetime('subsec')") 
+        }
+      }
+    )
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TEMPORARY TRIGGER "reminders_updatedAt"
+    AFTER UPDATE ON "reminders"
+    FOR EACH ROW
+    BEGIN
+      UPDATE "reminders"
+      SET "updatedAt" = datetime('subsec');
+    END
+    ```
+  }
+}
+
+This will make it so that anytime a reminder is updated in the database its `updatedAt` will be 
+refreshed with the current time immediately.
+
+This pattern of updating a timestamp when a row changes is so common that the library comes with
+a specialized tool just for that kind of trigger, ``Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
+
+@Row {
+  @Column {
+    ```swift
+    Reminder
+      .createTemporaryTrigger(
+        afterUpdateTouch: { 
+          $0.updatedAt = datetime('subsec')
+        }
+      )
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TEMPORARY TRIGGER "reminders_updatedAt"
+    AFTER UPDATE ON "reminders"
+    FOR EACH ROW
+    BEGIN
+      UPDATE "reminders"
+      SET "updatedAt" = datetime('subsec');
+    END
+    ```
+  }
+}
+
+And further, the pattern of specifically updating a _timestamp_ column is so common that the library
+comes with another specialized too just for that kind of trigger, 
+``Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
+
+
+@Row {
+  @Column {
+    ```swift
+    Reminder
+      .createTemporaryTrigger(
+        afterUpdateTouch: \.updatedAt
+      )
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TEMPORARY TRIGGER "reminders_updatedAt"
+    AFTER UPDATE ON "reminders"
+    FOR EACH ROW
+    BEGIN
+      UPDATE "reminders"
+      SET "updatedAt" = datetime('subsec');
+    END
+    ```
+  }
+}
+
+
+### More types of triggers
+
+There are 3 kinds of triggers depending on the event being listened for in the database: an 
+update trigger, an insert trigger, and a deletion trigger. For each of these kinds of triggers one
+can perform 4 kinds of actions: a select, insert, update or delete. All 12 combinations of these
+kinds of triggers are supported by the library.
+
+> Note: Technically SQLite supports "BEFORE" triggers and "AFTER" triggers, but the documentation
+> recommends against using "BEFORE" triggers as it can lead to undefined behavior. Therefore 
+> Structured Queries does not expose "BEFORE" triggers in its API. If you want to go against the
+> recommendations of SQLite and create a "BEFORE" trigger, you can always write a trigger as a 
+> SQL string (see <docs:SafeSQLStrings> for more info).
+
+Here are a few examples to show you the possibilities with triggers:
+
+#### Non-empty tables
+
+One can use triggers to enforce that a table is never fully emptied out. For example, suppose you
+want to make sure that the "remindersLists" table always has at least one row. Then one can
+use an "AFTER DELETE" trigger with an "INSERT" action to insert a stub reminders list when it
+detects the last list was deleted:
+
+@Row {
+  @Column {
+    ```swift
+    RemindersList.createTemporaryTrigger(
+      "nonEmptyRemindersLists",
+      after: .delete { _ in
+        RemindersList
+          .insert { 
+            RemindersList.Draft(title: "Personal") 
+          }
+      } when: { _ in
+        !RemindersList.all.exists()
+      }
+    )
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TEMPORARY TRIGGER "nonEmptyRemindersLists"
+    AFTER DELETE ON "remindersLists"
+    FOR EACH ROW WHEN NOT (EXISTS (SELECT * FROM "remindersLists"))
+    BEGIN
+      INSERT INTO "remindersLists"
+      ("id", "color", "title")
+      VALUES
+      (NULL, 0xffaaff00, 'Personal');
+    END
+    ```
+  }
+}
+
+#### Invoke Swift code from triggers
+
+One can use triggers with a "SELECT" action to invoke Swift code when an event occurs in your
+database. For example, suppose you want to execute a Swift function a new reminder is inserted
+into the database. First you must register the function with SQLite and that depends on what
+SQLite driver you are using ([here][grdb-add-function] is how to do it in GRDB). Suppose we 
+registered a function called `didInsertReminder`, and further suppose it takes one argument
+of the ID of the newly inserted reminder.
+
+Then one can invoke this function whenever a reminder is inserted into the database with the 
+following trigger:
+
+[grdb-add-function]: https://swiftpackageindex.com/groue/grdb.swift/v7.5.0/documentation/grdb/database/add(function:)
+
+@Row {
+  @Column {
+    ```swift
+    RemindersList.createTemporaryTrigger(
+      "insertReminderCallback",
+      after: .insert { new in
+        #sql("SELECT didInsertReminder(\(new.id))")
+      }
+    )
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TEMPORARY TRIGGER "insertReminderCallback"
+    AFTER DELETE ON "reminders"
+    FOR EACH ROW
+    BEGIN
+      SELECT didInsertReminder("new"."id")
+    END
+    ```
+  }
+}
