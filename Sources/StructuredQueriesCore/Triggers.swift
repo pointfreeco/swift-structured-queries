@@ -72,6 +72,8 @@ extension Table {
       column: column
     )
   }
+
+  // TODO: createTemporaryTrigge(afterUpdate: { $0... }, touch: { $0... = })
 }
 
 public struct TemporaryTrigger<On: Table>: Statement {
