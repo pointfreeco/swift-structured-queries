@@ -30,7 +30,7 @@ extension Table {
     )
   }
 
-  public func createTemporaryTrigger(
+  public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterUpdateTouch updates: (Updates<Self>) -> Void,
@@ -50,7 +50,7 @@ extension Table {
     )
   }
 
-  public func createTemporaryTrigger(
+  public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterUpdateTouch date: KeyPath<TableColumns, TableColumn<Self, Date>>,
