@@ -30,7 +30,15 @@ extension QueryFragment {
     #if DEBUG
       guard isTesting else { return self }
       var query = self
-      query.string = "  \(query.string.replacingOccurrences(of: "\n", with: "\n  "))"
+      query.segments.insert(.sql("  "), at: 0)
+      for index in query.segments.indices {
+        switch query.segments[index] {
+        case .sql(let sql):
+          query.segments[index] = .sql(sql.replacingOccurrences(of: "\n", with: "\n  "))
+        case .binding:
+          continue
+        }
+      }
       return query
     #else
       return self

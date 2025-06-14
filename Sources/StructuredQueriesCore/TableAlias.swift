@@ -223,8 +223,16 @@ extension QueryFragment {
     of _: T.Type, with _: A.Type
   ) -> QueryFragment {
     var query = self
-    query.string = query.string
-      .replacingOccurrences(of: T.tableName.quoted(), with: A.aliasName.quoted())
+    for index in query.segments.indices {
+      switch query.segments[index] {
+      case .sql(let sql):
+        query.segments[index] = .sql(
+          sql.replacingOccurrences(of: T.tableName.quoted(), with: A.aliasName.quoted())
+        )
+      case .binding:
+        continue
+      }
+    }
     return query
   }
 }
