@@ -127,12 +127,21 @@ public struct Database {
   func withStatement<R>(
     _ query: QueryFragment, body: (OpaquePointer) throws -> R
   ) throws -> R {
+    let (sql, bindings) = query.segments.reduce(into: (sql: "", bindings: [QueryBinding]())) {
+      switch $1 {
+      case .sql(let sql):
+        $0.sql.append(sql)
+      case .binding(let binding):
+        $0.sql.append("?")
+        $0.bindings.append(binding)
+      }
+    }
     var statement: OpaquePointer?
-    let code = sqlite3_prepare_v2(storage.handle, query.string, -1, &statement, nil)
+    let code = sqlite3_prepare_v2(storage.handle, sql, -1, &statement, nil)
     guard code == SQLITE_OK, let statement
     else { throw SQLiteError(db: storage.handle) }
     defer { sqlite3_finalize(statement) }
-    for (index, binding) in zip(Int32(1)..., query.bindings) {
+    for (index, binding) in zip(Int32(1)..., bindings) {
       let result =
         switch binding {
         case .blob(let blob):
