@@ -30,6 +30,8 @@ extension Table {
     )
   }
 
+  // TODO: write tests on these below:
+
   public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
@@ -38,11 +40,13 @@ extension Table {
     line: UInt = #line,
     column: UInt = #column
   ) -> TemporaryTrigger<Self> {
-    TemporaryTrigger(
-      name: name,
+    Self.createTemporaryTrigger(
+      name,
       ifNotExists: ifNotExists,
-      operation: .update { _, _ in
-        Self.update { updates(&$0) }
+      after: .update { _, new in
+        Self
+          .where { $0.rowid.eq(new.rowid) }
+          .update { updates(&$0) }
       },
       fileID: fileID,
       line: line,
@@ -59,22 +63,20 @@ extension Table {
     line: UInt = #line,
     column: UInt = #column
   ) -> TemporaryTrigger<Self> {
-    TemporaryTrigger(
-      name: name,
+    Self.createTemporaryTrigger(
+      name,
       ifNotExists: ifNotExists,
-      operation: .update { _, _ in
-        Self.update {
-          $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
-        }
+      afterUpdateTouch: {
+        $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
       },
       fileID: fileID,
       line: line,
-      column: column
-    )
+      column: column)
   }
 
-  // TODO: createTemporaryTrigge(afterUpdate: { $0... }, touch: { $0... = })
-  // TODO: createTemporaryTrigge(afterUpdate: \.self, touch: \.updatedAt)
+  // TODO: createTemporaryTrigger(afterUpdateTouch: \.updatedAt)
+  // TODO: createTemporaryTrigger(afterUpdate: { $0... }, touch: { $0... = })
+  // TODO: createTemporaryTrigger(afterUpdate: \.self, touch: \.updatedAt)
 }
 
 public struct TemporaryTrigger<On: Table>: Statement {
