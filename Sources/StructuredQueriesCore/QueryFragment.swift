@@ -5,39 +5,44 @@ import StructuredQueriesSupport
 /// You will typically create instances of this type using string literals, where bindings are
 /// directly interpolated into the string. This most commonly occurs when using the `#sql` macro,
 /// which takes values of this type.
-public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
-  #if DEBUG
-    /// The underlying SQL string.
-    public var string: String
-  #else
-    /// The underlying SQL string.
-    public package(set) var string: String
-  #endif
+public struct QueryFragment: Hashable, Sendable {
+  /// A segment of a query fragment.
+  public enum Segment: Hashable, Sendable {
+    /// A raw SQL fragment.
+    case sql(String)
 
-  #if DEBUG
-    /// An array of parameterized statement bindings.
-    public var bindings: [QueryBinding]
-  #else
-    /// An array of parameterized statement bindings.
-    public package(set) var bindings: [QueryBinding]
-  #endif
+    /// A binding.
+    case binding(QueryBinding)
+  }
 
-  init(_ string: String = "", _ bindings: [QueryBinding] = []) {
-    self.string = string
-    self.bindings = bindings
+  /// An array of segments backing this query fragment.
+  public internal(set) var segments: [Segment] = []
+
+  fileprivate init(segments: [Segment]) {
+    self.segments = segments
+  }
+
+  init(_ string: String = "") {
+    self.init(segments: [.sql(string)])
   }
 
   /// A Boolean value indicating whether the query fragment is empty.
   public var isEmpty: Bool {
-    return string.isEmpty && bindings.isEmpty
+    segments.allSatisfy {
+      switch $0 {
+      case .sql(let sql):
+        sql.isEmpty
+      case .binding:
+        false
+      }
+    }
   }
 
   /// Appends the given fragment to this query fragment.
   ///
   /// - Parameter other: Another query fragment.
   public mutating func append(_ other: Self) {
-    string.append(other.string)
-    bindings.append(contentsOf: other.bindings)
+    segments.append(contentsOf: other.segments)
   }
 
   /// Appends a given query fragment to another fragment.
@@ -52,35 +57,35 @@ public struct QueryFragment: Hashable, Sendable, CustomDebugStringConvertible {
     return query
   }
 
-  public var debugDescription: String {
-    var compiled = ""
-    var bindings = bindings
-    var currentDelimiter: Character?
-    compiled.reserveCapacity(string.count)
-    let delimiters: [Character: Character] = [
-      #"""#: #"""#,
-      "'": "'",
-      "`": "`",
-      "[": "]",
-    ]
-    for character in string {
-      if let delimiter = currentDelimiter {
-        if delimiter == character,
-          compiled.last != character || compiled.last == delimiters[delimiter]
-        {
-          currentDelimiter = nil
-        }
-        compiled.append(character)
-      } else if delimiters.keys.contains(character) {
-        currentDelimiter = character
-        compiled.append(character)
-      } else if character == "?" {
-        compiled.append(bindings.removeFirst().debugDescription)
-      } else {
-        compiled.append(character)
+  /// Returns a prepared SQL string and associated bindings for this query.
+  ///
+  /// - Parameter template: Prepare a template string for a binding at a given 1-based offset.
+  /// - Returns: A SQL string and array of associated bindings.
+  public func prepare(
+    _ template: (_ offset: Int) -> String
+  ) -> (sql: String, bindings: [QueryBinding]) {
+    segments.enumerated().reduce(into: (sql: "", bindings: [QueryBinding]())) {
+      switch $1.element {
+      case .sql(let sql):
+        $0.sql.append(sql)
+      case .binding(let binding):
+        $0.sql.append(template($1.offset + 1))
+        $0.bindings.append(binding)
       }
     }
-    return compiled
+  }
+}
+
+extension QueryFragment: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    segments.reduce(into: "") { debugDescription, segment in
+      switch segment {
+      case .sql(let sql):
+        debugDescription.append(sql)
+      case .binding(let binding):
+        debugDescription.append(binding.debugDescription)
+      }
+    }
   }
 }
 
@@ -103,7 +108,7 @@ extension [QueryFragment] {
 
 extension QueryFragment: ExpressibleByStringInterpolation {
   public init(stringInterpolation: StringInterpolation) {
-    self.init(stringInterpolation.string, stringInterpolation.bindings)
+    self.init(segments: stringInterpolation.segments)
   }
 
   public init(stringLiteral value: String) {
@@ -132,16 +137,14 @@ extension QueryFragment: ExpressibleByStringInterpolation {
   }
 
   public struct StringInterpolation: StringInterpolationProtocol {
-    public var string = ""
-    public var bindings: [QueryBinding] = []
+    fileprivate var segments: [Segment] = []
 
     public init(literalCapacity: Int, interpolationCount: Int) {
-      string.reserveCapacity(literalCapacity)
-      bindings.reserveCapacity(interpolationCount)
+      segments.reserveCapacity(interpolationCount)
     }
 
     public mutating func appendLiteral(_ literal: String) {
-      string.append(literal)
+      segments.append(.sql(literal))
     }
 
     /// Append a quoted fragment to the interpolation.
@@ -162,7 +165,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       quote sql: String,
       delimiter: QuoteDelimiter = .identifier
     ) {
-      string.append(sql.quoted(delimiter))
+      segments.append(.sql(sql.quoted(delimiter)))
     }
 
     /// Append a raw SQL string to the interpolation.
@@ -174,7 +177,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// - Parameter sql: A raw query string.
     public mutating func appendInterpolation(raw sql: String) {
-      string.append(sql)
+      segments.append(.sql(sql))
     }
 
     /// Append a raw lossless string to the interpolation.
@@ -191,23 +194,21 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// - Parameter sql: A raw query string.
     public mutating func appendInterpolation(raw sql: some LosslessStringConvertible) {
-      string.append(sql.description)
+      segments.append(.sql(sql.description))
     }
 
     /// Append a query binding to the interpolation.
     ///
     /// - Parameter binding: A query binding.
     public mutating func appendInterpolation(_ binding: QueryBinding) {
-      string.append("?")
-      bindings.append(binding)
+      segments.append(.binding(binding))
     }
 
     /// Append a query fragment to the interpolation.
     ///
     /// - Parameter fragment: A query fragment.
     public mutating func appendInterpolation(_ fragment: QueryFragment) {
-      string.append(fragment.string)
-      bindings.append(contentsOf: fragment.bindings)
+      segments.append(contentsOf: fragment.segments)
     }
 
     /// Append a query expression to the interpolation.
