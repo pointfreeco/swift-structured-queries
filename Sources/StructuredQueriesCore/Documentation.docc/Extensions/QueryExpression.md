@@ -28,3 +28,8 @@
 
 - ``jsonArrayLength()``
 - ``jsonGroupArray(order:filter:)``
+
+### Optionality
+
+- ``map(_:)``
+- ``flatMap(_:)``

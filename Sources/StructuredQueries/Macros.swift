@@ -132,3 +132,10 @@ public macro sql<QueryValue>(
   as queryValueType: QueryValue.Type = QueryValue.self
 ) -> SQLQueryExpression<QueryValue> =
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
+
+@freestanding(expression)
+public macro sql(
+  _ queryFragment: QueryFragment,
+  as queryValueType: Any.Type = Any.self
+) -> SQLQueryExpression<Any> =
+  #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")

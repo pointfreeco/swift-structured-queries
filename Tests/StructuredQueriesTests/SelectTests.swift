@@ -644,6 +644,23 @@ extension SnapshotTests {
         └───────┴───┘
         """
       }
+
+      assertQuery(
+        Reminder.select { ($0.isCompleted, $0.id.count()) }.group { #sql("\($0.isCompleted)") }
+      ) {
+        """
+        SELECT "reminders"."isCompleted", count("reminders"."id")
+        FROM "reminders"
+        GROUP BY "reminders"."isCompleted"
+        """
+      } results: {
+        """
+        ┌───────┬───┐
+        │ false │ 7 │
+        │ true  │ 3 │
+        └───────┴───┘
+        """
+      }
     }
 
     @Test func having() {
@@ -1151,6 +1168,50 @@ extension SnapshotTests {
         │                     │ )                                          │
         └─────────────────────┴────────────────────────────────────────────┘
         """
+      }
+    }
+
+    @Test func optionalMapAndFlatMap() {
+      do {
+        let query: some Statement<Bool?> = Reminder.select {
+          $0.priority.map { $0 < Priority.high }
+        }
+        assertQuery(query) {
+          """
+          SELECT ("reminders"."priority" < 3)
+          FROM "reminders"
+          """
+        } results: {
+          """
+          ┌───────┐
+          │ nil   │
+          │ nil   │
+          │ false │
+          │ nil   │
+          │ nil   │
+          │ false │
+          │ true  │
+          │ false │
+          │ nil   │
+          │ true  │
+          └───────┘
+          """
+        }
+      }
+      do {
+        let query: some Statement<Int?> = Reminder.select { $0.priority.flatMap { $0.max() } }
+        assertQuery(query) {
+          """
+          SELECT max("reminders"."priority")
+          FROM "reminders"
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 3 │
+          └───┘
+          """
+        }
       }
     }
   }
