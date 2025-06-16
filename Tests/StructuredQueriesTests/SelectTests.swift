@@ -1170,6 +1170,50 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func optionalMapAndFlatMap() {
+      do {
+        let query: some Statement<Bool?> = Reminder.select {
+          $0.priority.map { $0 < Priority.high }
+        }
+        assertQuery(query) {
+          """
+          SELECT ("reminders"."priority" < 3)
+          FROM "reminders"
+          """
+        } results: {
+          """
+          ┌───────┐
+          │ nil   │
+          │ nil   │
+          │ false │
+          │ nil   │
+          │ nil   │
+          │ false │
+          │ true  │
+          │ false │
+          │ nil   │
+          │ true  │
+          └───────┘
+          """
+        }
+      }
+      do {
+        let query: some Statement<Int?> = Reminder.select { $0.priority.flatMap { $0.max() } }
+        assertQuery(query) {
+          """
+          SELECT max("reminders"."priority")
+          FROM "reminders"
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 3 │
+          └───┘
+          """
+        }
+      }
+    }
   }
 }
 
