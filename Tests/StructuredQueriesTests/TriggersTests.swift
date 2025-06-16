@@ -34,5 +34,43 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func dateDiagnostic() {
+      withKnownIssue {
+        assertQuery(
+          Reminder.createTemporaryTrigger(
+            after: .update { _, new in
+              Reminder
+                .update { $0.dueDate = Date(timeIntervalSinceReferenceDate: 0) }
+                .where { $0.id.eq(new.id) }
+            }
+          )
+        ) {
+          """
+          CREATE TEMPORARY TRIGGER
+            "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:41:42"
+          AFTER UPDATE ON "reminders"
+          FOR EACH ROW BEGIN
+            UPDATE "reminders"
+            SET "dueDate" = '2001-01-01 00:00:00.000'
+            WHERE ("reminders"."id" = "new"."id");
+          END
+          """
+        }
+      } matching: {
+        $0.description.contains(
+          """
+          Cannot bind a date to a trigger statement. Specify dates using the '#sql' macro, \
+          instead. For example, the current date:
+
+              #sql("datetime()")
+
+          Or a constant date:
+
+              #sql("'2018-01-29 00:08:00'")
+          """
+        )
+      }
+    }
   }
 }
