@@ -46,7 +46,7 @@ public macro Column(
     type: "ColumnMacro"
   )
 
-/// Tells Structured Queries not to consider the annotated property a column of the table
+/// Tells StructuredQueries not to consider the annotated property a column of the table.
 ///
 /// Like SwiftData's `@Transient` macro, but for SQL.
 @attached(peer)
