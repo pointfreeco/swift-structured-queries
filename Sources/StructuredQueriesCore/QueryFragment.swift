@@ -6,13 +6,16 @@ import StructuredQueriesSupport
 /// directly interpolated into the string. This most commonly occurs when using the `#sql` macro,
 /// which takes values of this type.
 public struct QueryFragment: Hashable, Sendable {
-  // TODO: Call this 'Element' and make 'QueryFragment' a collection of them?
+  /// A segment of a query fragment.
   public enum Segment: Hashable, Sendable {
+    /// A raw SQL fragment.
     case sql(String)
+
+    /// A binding.
     case binding(QueryBinding)
   }
 
-  // TODO: Make 'private(set)' and add APIs to support extensibility like 'indent()'?
+  /// An array of segments backing this query fragment.
   public internal(set) var segments: [Segment] = []
 
   fileprivate init(segments: [Segment]) {
@@ -52,6 +55,24 @@ public struct QueryFragment: Hashable, Sendable {
     var query = lhs
     query += rhs
     return query
+  }
+
+  /// Returns a prepared SQL string and associated bindings for this query.
+  ///
+  /// - Parameter template: Prepare a template string for a binding at a given 1-based offset.
+  /// - Returns: A SQL string and array of associated bindings.
+  public func prepare(
+    _ template: (_ offset: Int) -> String
+  ) -> (sql: String, bindings: [QueryBinding]) {
+    segments.enumerated().reduce(into: (sql: "", bindings: [QueryBinding]())) {
+      switch $1.element {
+      case .sql(let sql):
+        $0.sql.append(sql)
+      case .binding(let binding):
+        $0.sql.append(template($1.offset + 1))
+        $0.bindings.append(binding)
+      }
+    }
   }
 }
 
@@ -119,7 +140,6 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     fileprivate var segments: [Segment] = []
 
     public init(literalCapacity: Int, interpolationCount: Int) {
-      // TODO: Should all the segments' strings share the same contiguous storage as substring/span?
       segments.reserveCapacity(interpolationCount)
     }
 
