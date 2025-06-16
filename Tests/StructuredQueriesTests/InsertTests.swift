@@ -411,12 +411,12 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "remindersLists"
-        ("id", "color", "title")
+        ("id", "color", "title", "position")
         VALUES
-        (NULL, 4889071, 'Personal')
+        (NULL, 4889071, 'Personal', 0)
         ON CONFLICT ("id")
-        DO UPDATE SET "color" = "excluded"."color", "title" = "excluded"."title"
-        RETURNING "id", "color", "title"
+        DO UPDATE SET "color" = "excluded"."color", "title" = "excluded"."title", "position" = "excluded"."position"
+        RETURNING "id", "color", "title", "position"
         """
       } results: {
         """
@@ -437,22 +437,23 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "remindersLists"
-        ("id", "color", "title")
+        ("id", "color", "title", "position")
         VALUES
-        (NULL, 4889071, 'Personal')
+        (NULL, 4889071, 'Personal', 0)
         ON CONFLICT ("title")
         DO UPDATE SET "color" = 65280
-        RETURNING "id", "color", "title"
+        RETURNING "id", "color", "title", "position"
         """
       } results: {
         """
-        ┌─────────────────────┐
-        │ RemindersList(      │
-        │   id: 1,            │
-        │   color: 65280,     │
-        │   title: "Personal" │
-        │ )                   │
-        └─────────────────────┘
+        ┌──────────────────────┐
+        │ RemindersList(       │
+        │   id: 1,             │
+        │   color: 65280,      │
+        │   title: "Personal", │
+        │   position: 0        │
+        │ )                    │
+        └──────────────────────┘
         """
       }
     }
@@ -525,17 +526,18 @@ extension SnapshotTests {
         ("title")
         VALUES
         ('cruise')
-        RETURNING "id", "color", "title"
+        RETURNING "id", "color", "title", "position"
         """
       } results: {
         """
-        ┌───────────────────┐
-        │ RemindersList(    │
-        │   id: 4,          │
-        │   color: 4889071, │
-        │   title: "cruise" │
-        │ )                 │
-        └───────────────────┘
+        ┌────────────────────┐
+        │ RemindersList(     │
+        │   id: 4,           │
+        │   color: 4889071,  │
+        │   title: "cruise", │
+        │   position: 0      │
+        │ )                  │
+        └────────────────────┘
         """
       }
     }

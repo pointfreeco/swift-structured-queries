@@ -78,7 +78,6 @@ extension Table {
     )
   }
 
-
   // TODO: createTemporaryTrigger(afterUpdateTouch: \.updatedAt)
   // TODO: createTemporaryTrigger(afterUpdate: { $0... }, touch: { $0... = })
   // TODO: createTemporaryTrigger(afterUpdate: \.self, touch: \.updatedAt)
@@ -97,7 +96,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
 
     public typealias Old = TableAlias<On, _Old>.TableColumns
     public typealias New = TableAlias<On, _New>.TableColumns
-    
+
     /// An `AFTER INSERT` trigger operation.
     ///
     /// - Parameters:

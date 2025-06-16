@@ -224,7 +224,7 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", json_group_array(CASE WHEN ("reminders"."id" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")) END) AS "reminders"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", json_group_array(CASE WHEN ("reminders"."id" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")) END) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE NOT ("reminders"."isCompleted")
@@ -238,7 +238,8 @@ extension SnapshotTests {
         │   remindersList: RemindersList(                │
         │     id: 1,                                     │
         │     color: 4889071,                            │
-        │     title: "Personal"                          │
+        │     title: "Personal",                         │
+        │     position: 0                                │
         │   ),                                           │
         │   reminders: [                                 │
         │     [0]: Reminder(                             │

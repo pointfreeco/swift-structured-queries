@@ -184,32 +184,35 @@ extension SnapshotTests {
           .select { ($0, $1.id.count()) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", count("reminders"."id")
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", count("reminders"."id")
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         """
       } results: {
         """
-        ┌─────────────────────┬───┐
-        │ RemindersList(      │ 5 │
-        │   id: 1,            │   │
-        │   color: 4889071,   │   │
-        │   title: "Personal" │   │
-        │ )                   │   │
-        ├─────────────────────┼───┤
-        │ RemindersList(      │ 3 │
-        │   id: 2,            │   │
-        │   color: 15567157,  │   │
-        │   title: "Family"   │   │
-        │ )                   │   │
-        ├─────────────────────┼───┤
-        │ RemindersList(      │ 2 │
-        │   id: 3,            │   │
-        │   color: 11689427,  │   │
-        │   title: "Business" │   │
-        │ )                   │   │
-        └─────────────────────┴───┘
+        ┌──────────────────────┬───┐
+        │ RemindersList(       │ 5 │
+        │   id: 1,             │   │
+        │   color: 4889071,    │   │
+        │   title: "Personal", │   │
+        │   position: 0        │   │
+        │ )                    │   │
+        ├──────────────────────┼───┤
+        │ RemindersList(       │ 3 │
+        │   id: 2,             │   │
+        │   color: 15567157,   │   │
+        │   title: "Family",   │   │
+        │   position: 0        │   │
+        │ )                    │   │
+        ├──────────────────────┼───┤
+        │ RemindersList(       │ 2 │
+        │   id: 3,             │   │
+        │   color: 11689427,   │   │
+        │   title: "Business", │   │
+        │   position: 0        │   │
+        │ )                    │   │
+        └──────────────────────┴───┘
         """
       }
     }

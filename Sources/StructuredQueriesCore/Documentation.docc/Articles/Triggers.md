@@ -11,7 +11,7 @@ triggers in a type-safe and schema-safe fashion.
 ### Trigger basics
 
 One of the most common use cases for a trigger is refreshing an "updatedAt" timestamp on a row when
-it is updated in the database. One can create such a trigger SQL statement using the 
+it is updated in the database. One can create such a trigger SQL statement using the
 ``Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)`` static method:
 
 @Row {
@@ -20,8 +20,8 @@ it is updated in the database. One can create such a trigger SQL statement using
     Reminder.createTemporaryTrigger(
       "reminders_updatedAt",
       after: .update { _, _ in
-        Reminder.update { 
-          $0.updatedAt = #sql("datetime('subsec')") 
+        Reminder.update {
+          $0.updatedAt = #sql("datetime('subsec')")
         }
       }
     )
@@ -40,7 +40,7 @@ it is updated in the database. One can create such a trigger SQL statement using
   }
 }
 
-This will make it so that anytime a reminder is updated in the database its `updatedAt` will be 
+This will make it so that anytime a reminder is updated in the database its `updatedAt` will be
 refreshed with the current time immediately.
 
 This pattern of updating a timestamp when a row changes is so common that the library comes with
@@ -52,7 +52,7 @@ a specialized tool just for that kind of trigger,
     ```swift
     Reminder
       .createTemporaryTrigger(
-        afterUpdateTouch: { 
+        afterUpdateTouch: {
           $0.updatedAt = datetime('subsec')
         }
       )
@@ -72,7 +72,7 @@ a specialized tool just for that kind of trigger,
 }
 
 And further, the pattern of specifically updating a _timestamp_ column is so common that the library
-comes with another specialized too just for that kind of trigger, 
+comes with another specialized too just for that kind of trigger,
 ``Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
 
 
@@ -127,8 +127,8 @@ last list was deleted:
       "nonEmptyRemindersLists",
       after: .delete { _ in
         RemindersList
-          .insert { 
-            RemindersList.Draft(title: "Personal") 
+          .insert {
+            RemindersList.Draft(title: "Personal")
           }
       } when: { _ in
         !RemindersList.all.exists()

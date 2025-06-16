@@ -19,7 +19,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
@@ -32,7 +32,8 @@ extension SnapshotTests {
         │   remindersList: RemindersList( │
         │     id: 1,                      │
         │     color: 4889071,             │
-        │     title: "Personal"           │
+        │     title: "Personal",          │
+        │     position: 0                 │
         │   ),                            │
         │   remindersCount: 5             │
         │ )                               │
@@ -41,7 +42,8 @@ extension SnapshotTests {
         │   remindersList: RemindersList( │
         │     id: 2,                      │
         │     color: 15567157,            │
-        │     title: "Family"             │
+        │     title: "Family",            │
+        │     position: 0                 │
         │   ),                            │
         │   remindersCount: 3             │
         │ )                               │
@@ -54,7 +56,7 @@ extension SnapshotTests {
           .map { RemindersListAndReminderCount.Columns(remindersList: $1, remindersCount: $0) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
@@ -67,7 +69,8 @@ extension SnapshotTests {
         │   remindersList: RemindersList( │
         │     id: 1,                      │
         │     color: 4889071,             │
-        │     title: "Personal"           │
+        │     title: "Personal",          │
+        │     position: 0                 │
         │   ),                            │
         │   remindersCount: 5             │
         │ )                               │
@@ -76,7 +79,8 @@ extension SnapshotTests {
         │   remindersList: RemindersList( │
         │     id: 2,                      │
         │     color: 15567157,            │
-        │     title: "Family"             │
+        │     title: "Family",            │
+        │     position: 0                 │
         │   ),                            │
         │   remindersCount: 3             │
         │ )                               │
