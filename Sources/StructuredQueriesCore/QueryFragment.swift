@@ -25,7 +25,14 @@ public struct QueryFragment: Hashable, Sendable {
 
   /// A Boolean value indicating whether the query fragment is empty.
   public var isEmpty: Bool {
-    segments.isEmpty
+    segments.allSatisfy {
+      switch $0 {
+      case .sql(let sql):
+        sql.isEmpty
+      case .binding(let binding):
+        false
+      }
+    }
   }
 
   /// Appends the given fragment to this query fragment.
