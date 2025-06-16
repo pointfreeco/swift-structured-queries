@@ -112,6 +112,21 @@ extension SnapshotTests {
         """
       }
     }
+	  
+	@Test func maxDate() {
+	  assertQuery(Reminder.select { $0.dueDate.max() }) {
+	    """
+	    SELECT max("reminders"."dueDate")
+	    FROM "reminders"
+	    """
+	  }results: {
+	    """
+	    ┌────────────────────────────────┐
+	    │ Date(2001-01-05T00:00:00.000Z) │
+	    └────────────────────────────────┘
+	    """
+	  }
+	}
 
     @Test func min() {
       assertInlineSnapshot(of: User.columns.id.min(), as: .sql) {
@@ -126,12 +141,27 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌───┐
-        │ 1 │
-        └───┘
+        ┌──────┐
+        │ .low │
+        └──────┘
         """
       }
     }
+	  
+	@Test func minDate() {
+		assertQuery(Reminder.select { $0.dueDate.min() }) {
+		  """
+		  SELECT min("reminders"."dueDate")
+		  FROM "reminders"
+		  """
+		} results: {
+		  """
+		  ┌────────────────────────────────┐
+		  │ Date(2000-06-25T00:00:00.000Z) │
+		  └────────────────────────────────┘
+		  """
+		}
+	}
 
     @Test func sum() {
       assertInlineSnapshot(of: User.columns.id.sum(), as: .sql) {

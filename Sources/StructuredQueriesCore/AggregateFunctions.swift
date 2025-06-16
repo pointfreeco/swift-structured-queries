@@ -1,3 +1,5 @@
+import Foundation
+
 extension QueryExpression where QueryValue: QueryBindable {
   /// A count aggregate of this expression.
   ///
@@ -96,9 +98,10 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A maximum aggregate of this expression.
   public func max(
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<Int?> {
+  ) -> some QueryExpression<QueryValue> {
     AggregateFunction("max", [queryFragment], filter: filter?.queryFragment)
   }
+
 
   /// A minimum aggregate of this expression.
   ///
@@ -111,7 +114,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A minimum aggregate of this expression.
   public func min(
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<Int?> {
+  ) -> some QueryExpression<QueryValue> {
     AggregateFunction("min", [queryFragment], filter: filter?.queryFragment)
   }
 }
