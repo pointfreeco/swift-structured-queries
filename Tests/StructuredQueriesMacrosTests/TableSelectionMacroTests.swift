@@ -19,9 +19,7 @@ extension SnapshotTests {
         struct ReminderListWithCount {
           let reminderList: ReminderList 
           let remindersCount: Int
-        }
 
-        extension ReminderListWithCount: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = ReminderListWithCount
             public let reminderList = StructuredQueriesCore.TableColumn<QueryValue, ReminderList>("reminderList", keyPath: \QueryValue.reminderList)
@@ -30,13 +28,7 @@ extension SnapshotTests {
               [QueryValue.columns.reminderList, QueryValue.columns.remindersCount]
             }
           }
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public static let columns = TableColumns()
-          public static let tableName = "reminderListWithCounts"
-        }
 
-        extension ReminderListWithCount: StructuredQueriesCore.QueryRepresentable {
           public struct Columns: StructuredQueriesCore.QueryExpression {
             public typealias QueryValue = ReminderListWithCount
             public let queryFragment: StructuredQueriesCore.QueryFragment
@@ -49,6 +41,16 @@ extension SnapshotTests {
               """
             }
           }
+        }
+
+        extension ReminderListWithCount: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public static let columns = TableColumns()
+          public static let tableName = "reminderListWithCounts"
+        }
+
+        extension ReminderListWithCount: StructuredQueriesCore.QueryRepresentable {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderList = try decoder.decode(ReminderList.self)
             let remindersCount = try decoder.decode(Int.self)

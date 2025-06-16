@@ -57,7 +57,9 @@ your database without specifying the id. The library comes with a special
 into the database by providing only a draft:
 
 ```swift
-Reminder.insert(Reminder.Draft(title: "Get groceries"))
+Reminder.insert {
+  Reminder.Draft(title: "Get groceries")
+}
 // INSERT INTO "reminders"
 //   ("title")
 // VALUES
@@ -73,7 +75,7 @@ row:
 
 ```swift
 Reminder
-  .insert(Reminder.Draft(title: "Get groceries"))
+  .insert { Reminder.Draft(title: "Get groceries") }
   .returning(\.id)
 // INSERT INTO "reminders"
 //   ("title")
@@ -87,7 +89,7 @@ Or even get back the entire newly inserted row:
 
 ```swift
 Reminder
-  .insert(Reminder.Draft(title: "Get groceries"))
+  .insert { Reminder.Draft(title: "Get groceries") }
   .returning(\.self)
 // INSERT INTO "reminders"
 //   ("title")
@@ -127,11 +129,17 @@ Reminder.delete(reminder)
 
 - ``Draft``
 - ``find(_:)``
-- ``insert(or:_:onConflict:)``
-- ``upsert(_:)``
+- ``insert(or:_:values:onConflict:where:doUpdate:where:)``
+- ``insert(or:_:values:onConflictDoUpdate:where:)``
 - ``update(or:_:)``
+- ``upsert(or:values:)``
 - ``delete(_:)``
 
 ### Schema definition
 
 - ``PrimaryKeyedTableDefinition``
+
+### Deprecations
+
+- ``insert(or:_:onConflict:)``
+- ``upsert(_:)``

@@ -21,6 +21,7 @@ that represent those database definitions.
   * [Custom data types](#Custom-data-types)
     * [RawRepresentable](#RawRepresentable)
     * [JSON](#JSON)
+    * [Tagged identifiers](#Tagged-identifiers)
     * [Default representations for dates and UUIDs](#Default-representations-for-dates-and-UUIDs)
 * [Primary keyed tables](#Primary-keyed-tables)
 * [Ephemeral columns](#Ephemeral-columns)
@@ -188,12 +189,12 @@ and will decode data from the database using the `RawRepresentable` conformance 
 @Row {
   @Column {
     ```swift
-    Reminder.insert(
+    Reminder.insert {
       Reminder.Draft(
         title: "Get haircut",
         priority: .medium
       )
-    )
+    }
     ```
   }
   @Column {
@@ -239,12 +240,12 @@ With that you can insert reminders with notes like so:
 @Row {
   @Column {
     ```swift
-    Reminder.insert(
+    Reminder.insert {
       Reminder.Draft(
         title: "Get groceries",
         notes: ["Milk", "Eggs", "Bananas"]
       )
-    )
+    }
     ```
   }
   @Column {
@@ -298,10 +299,11 @@ This adds a new layer of type-safety when constructing queries. Previously compa
 `RemindersList.ID` to a `Reminder.ID` would compile just fine, even though it is a nonsensical thing
 to do. But now, such a comparison is a compile time error:
 
-```
+```swift
 RemindersList.leftJoin(Reminder.all) {
   $0.id == $1.id  // 🛑 Requires the types 'Reminder.ID' and 'RemindersList.ID' be equivalent
 }
+```
 
 #### Default representations for dates and UUIDs
 
@@ -340,9 +342,9 @@ And StructuredQueries will take care of formatting the value for the database:
 @Row {
   @Column {
     ```swift
-    Reminder.insert(
+    Reminder.insert {
       Reminder.Draft(date: Date())
-    )
+    }
     ```
   }
   @Column {
