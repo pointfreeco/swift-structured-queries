@@ -46,25 +46,25 @@ public struct QueryBindingError: Error, Hashable {
 extension QueryBinding: CustomDebugStringConvertible {
   public var debugDescription: String {
     switch self {
-    case let .blob(data):
+    case .blob(let data):
       return String(decoding: data, as: UTF8.self)
         .debugDescription
         .dropLast()
         .dropFirst()
         .quoted(.text)
-    case let .date(date):
+    case .date(let date):
       return date.iso8601String.quoted(.text)
-    case let .double(value):
+    case .double(let value):
       return "\(value)"
-    case let .int(value):
+    case .int(let value):
       return "\(value)"
     case .null:
       return "NULL"
-    case let .text(string):
+    case .text(let string):
       return string.quoted(.text)
-    case let .uuid(uuid):
+    case .uuid(let uuid):
       return uuid.uuidString.lowercased().quoted(.text)
-    case let .invalid(error):
+    case .invalid(let error):
       return "<invalid: \(error.underlyingError.localizedDescription)>"
     }
   }

@@ -325,7 +325,7 @@ extension SnapshotTests {
       )
 
       try db.execute(
-        Reminder.insert(reminder)
+        Reminder.insert { reminder }
       )
 
       try db.execute(

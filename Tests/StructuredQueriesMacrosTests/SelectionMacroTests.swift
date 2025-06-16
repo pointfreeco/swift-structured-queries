@@ -18,9 +18,7 @@ extension SnapshotTests {
         struct PlayerAndTeam {
           let player: Player
           let team: Team
-        }
 
-        extension PlayerAndTeam: StructuredQueriesCore.QueryRepresentable {
           public struct Columns: StructuredQueriesCore.QueryExpression {
             public typealias QueryValue = PlayerAndTeam
             public let queryFragment: StructuredQueriesCore.QueryFragment
@@ -33,6 +31,9 @@ extension SnapshotTests {
               """
             }
           }
+        }
+
+        extension PlayerAndTeam: StructuredQueriesCore.QueryRepresentable {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let player = try decoder.decode(Player.self)
             let team = try decoder.decode(Team.self)
@@ -80,9 +81,7 @@ extension SnapshotTests {
         struct ReminderTitleAndListTitle {
           var reminderTitle: String 
           var listTitle: String?
-        }
 
-        extension ReminderTitleAndListTitle: StructuredQueriesCore.QueryRepresentable {
           public struct Columns: StructuredQueriesCore.QueryExpression {
             public typealias QueryValue = ReminderTitleAndListTitle
             public let queryFragment: StructuredQueriesCore.QueryFragment
@@ -95,6 +94,9 @@ extension SnapshotTests {
               """
             }
           }
+        }
+
+        extension ReminderTitleAndListTitle: StructuredQueriesCore.QueryRepresentable {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderTitle = try decoder.decode(String.self)
             let listTitle = try decoder.decode(String.self)
@@ -121,9 +123,7 @@ extension SnapshotTests {
         #"""
         struct ReminderDate {
           var date: Date
-        }
 
-        extension ReminderDate: StructuredQueriesCore.QueryRepresentable {
           public struct Columns: StructuredQueriesCore.QueryExpression {
             public typealias QueryValue = ReminderDate
             public let queryFragment: StructuredQueriesCore.QueryFragment
@@ -135,6 +135,9 @@ extension SnapshotTests {
               """
             }
           }
+        }
+
+        extension ReminderDate: StructuredQueriesCore.QueryRepresentable {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let date = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let date else {

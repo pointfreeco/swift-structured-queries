@@ -387,22 +387,16 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table grouped by the given column.
-  public func group<C: QueryExpression>(by grouping: (From.TableColumns) -> C) -> Select<
-    (), From, ()
-  >
-  where C.QueryValue: QueryDecodable {
+  public func group<C: QueryExpression>(
+    by grouping: (From.TableColumns) -> C
+  ) -> Select<(), From, ()> {
     asSelect().group(by: grouping)
   }
 
   /// A select statement for the filtered table grouped by the given columns.
   public func group<C1: QueryExpression, C2: QueryExpression, each C3: QueryExpression>(
     by grouping: (From.TableColumns) -> (C1, C2, repeat each C3)
-  ) -> SelectOf<From>
-  where
-    C1.QueryValue: QueryDecodable,
-    C2.QueryValue: QueryDecodable,
-    repeat (each C3).QueryValue: QueryDecodable
-  {
+  ) -> SelectOf<From> {
     asSelect().group(by: grouping)
   }
 
