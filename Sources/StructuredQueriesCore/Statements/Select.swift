@@ -1533,11 +1533,9 @@ extension CopyOnWrite: Sendable where Value: Sendable {}
 
 extension CopyOnWrite.Storage: @unchecked Sendable where Value: Sendable {}
 
-private struct ExistsSelect<T: Table, S: Statement>: SelectStatement {
-  typealias From = T
+private struct ExistsSelect<From: Table, S: Statement>: SelectStatement {
   typealias QueryValue = Bool
   let statement: S
-
   var query: QueryFragment {
     "SELECT EXISTS\(statement)"
   }
