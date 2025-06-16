@@ -73,7 +73,8 @@ extension Table {
       },
       fileID: fileID,
       line: line,
-      column: column)
+      column: column
+    )
   }
 
 
