@@ -29,7 +29,7 @@ public struct QueryFragment: Hashable, Sendable {
       switch $0 {
       case .sql(let sql):
         sql.isEmpty
-      case .binding(let binding):
+      case .binding:
         false
       }
     }
