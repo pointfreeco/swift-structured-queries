@@ -644,6 +644,23 @@ extension SnapshotTests {
         └───────┴───┘
         """
       }
+
+      assertQuery(
+        Reminder.select { ($0.isCompleted, $0.id.count()) }.group { #sql("\($0.isCompleted)") }
+      ) {
+        """
+        SELECT "reminders"."isCompleted", count("reminders"."id")
+        FROM "reminders"
+        GROUP BY "reminders"."isCompleted"
+        """
+      } results: {
+        """
+        ┌───────┬───┐
+        │ false │ 7 │
+        │ true  │ 3 │
+        └───────┴───┘
+        """
+      }
     }
 
     @Test func having() {
