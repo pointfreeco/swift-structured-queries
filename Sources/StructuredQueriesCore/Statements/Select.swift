@@ -212,7 +212,7 @@ extension Table {
   /// - Returns: A select statement that groups by the given column.
   public static func group<C: QueryExpression>(
     by grouping: (TableColumns) -> C
-  ) -> SelectOf<Self> where C.QueryValue: QueryDecodable {
+  ) -> SelectOf<Self> {
     Where().group(by: grouping)
   }
 
@@ -226,12 +226,7 @@ extension Table {
     each C3: QueryExpression
   >(
     by grouping: (TableColumns) -> (C1, C2, repeat each C3)
-  ) -> SelectOf<Self>
-  where
-    C1.QueryValue: QueryDecodable,
-    C2.QueryValue: QueryDecodable,
-    repeat (each C3).QueryValue: QueryDecodable
-  {
+  ) -> SelectOf<Self> {
     Where().group(by: grouping)
   }
 
@@ -1182,8 +1177,7 @@ extension Select {
   /// - Returns: A new select statement that groups by the given column.
   public func group<C: QueryExpression, each J: Table>(
     by grouping: (From.TableColumns, repeat (each J).TableColumns) -> C
-  ) -> Self
-  where C.QueryValue: QueryDecodable, Joins == (repeat each J) {
+  ) -> Self where Joins == (repeat each J) {
     _group(by: grouping)
   }
 
@@ -1199,13 +1193,7 @@ extension Select {
     each J: Table
   >(
     by grouping: (From.TableColumns, repeat (each J).TableColumns) -> (C1, C2, repeat each C3)
-  ) -> Self
-  where
-    C1.QueryValue: QueryDecodable,
-    C2.QueryValue: QueryDecodable,
-    repeat (each C3).QueryValue: QueryDecodable,
-    Joins == (repeat each J)
-  {
+  ) -> Self where Joins == (repeat each J) {
     _group(by: grouping)
   }
 
@@ -1214,11 +1202,7 @@ extension Select {
     each J: Table
   >(
     by grouping: (From.TableColumns, repeat (each J).TableColumns) -> (repeat each C)
-  ) -> Self
-  where
-    repeat (each C).QueryValue: QueryDecodable,
-    Joins == (repeat each J)
-  {
+  ) -> Self where Joins == (repeat each J) {
     var select = self
     select.group
       .append(
