@@ -3,6 +3,8 @@ import Foundation
 extension Table {
   /// A `CREATE TEMPORARY TRIGGER` statement.
   ///
+  /// > Important: TODO: explain how implicit names are handled and how trigger helpers should always take file/line/column. and put in name/file/line/column parameters.
+  ///
   /// - Parameters:
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
   ///     operation, and source location.
@@ -73,6 +75,7 @@ extension Table {
       line: line,
       column: column)
   }
+
 
   // TODO: createTemporaryTrigger(afterUpdateTouch: \.updatedAt)
   // TODO: createTemporaryTrigger(afterUpdate: { $0... }, touch: { $0... = })
