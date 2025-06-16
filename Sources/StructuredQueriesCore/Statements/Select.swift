@@ -294,6 +294,13 @@ extension Table {
   ) -> Select<Int, Self, ()> {
     Where().count(filter: filter)
   }
+
+  /// A select statement for if this table contains any rows.
+  ///
+  /// - Returns: A select statement that selects `exists()`.
+  public static func exists() -> some PartialSelectStatement<Bool> {
+    ExistsSelect<Self, _>(statement: all)
+  }
 }
 
 public struct _SelectClauses: Sendable {
@@ -1525,3 +1532,13 @@ private struct CopyOnWrite<Value> {
 extension CopyOnWrite: Sendable where Value: Sendable {}
 
 extension CopyOnWrite.Storage: @unchecked Sendable where Value: Sendable {}
+
+private struct ExistsSelect<T: Table, S: Statement>: SelectStatement {
+  typealias From = T
+  typealias QueryValue = Bool
+  let statement: S
+
+  var query: QueryFragment {
+    "SELECT EXISTS\(statement)"
+  }
+}
