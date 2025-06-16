@@ -1,5 +1,3 @@
-import Foundation
-
 extension QueryExpression where QueryValue: QueryBindable {
   /// A count aggregate of this expression.
   ///
