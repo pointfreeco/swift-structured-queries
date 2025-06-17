@@ -118,7 +118,7 @@ extension SnapshotTests {
         RemindersList.insert {
           RemindersList.Draft(title: "New list")
         }
-          .returning(\.id)
+        .returning(\.id)
       )
       let remindersListID = try #require(remindersListIDs.first)
 
