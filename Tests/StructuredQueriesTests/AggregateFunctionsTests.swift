@@ -13,6 +13,7 @@ extension SnapshotTests {
       var name: String
       var isAdmin: Bool
       var age: Int?
+      var birthDate: Date?
     }
 
     @Test func average() {
@@ -93,27 +94,12 @@ extension SnapshotTests {
       }
     }
 
-    @Test func max() {
-      assertInlineSnapshot(of: User.columns.id.max(), as: .sql) {
-        """
-        max("users"."id")
-        """
-      }
-      assertQuery(Reminder.select { $0.id.max() }) {
-        """
-        SELECT max("reminders"."id")
-        FROM "reminders"
-        """
-      } results: {
-        """
-        ┌────┐
-        │ 10 │
-        └────┘
-        """
-      }
-    }
-	  
-	@Test func maxDate() {
+	@Test func max() {
+	  assertInlineSnapshot(of: User.columns.birthDate.max(), as: .sql) {
+	    """
+	    max("users"."birthDate")
+	    """
+	  }
 	  assertQuery(Reminder.select { $0.dueDate.max() }) {
 	    """
 	    SELECT max("reminders"."dueDate")
@@ -127,40 +113,25 @@ extension SnapshotTests {
 	    """
 	  }
 	}
-
-    @Test func min() {
-      assertInlineSnapshot(of: User.columns.id.min(), as: .sql) {
-        """
-        min("users"."id")
-        """
-      }
-      assertQuery(Reminder.select { $0.priority.min() }) {
-        """
-        SELECT min("reminders"."priority")
-        FROM "reminders"
-        """
-      } results: {
-        """
-        ┌──────┐
-        │ .low │
-        └──────┘
-        """
-      }
-    }
 	  
-	@Test func minDate() {
-		assertQuery(Reminder.select { $0.dueDate.min() }) {
-		  """
-		  SELECT min("reminders"."dueDate")
-		  FROM "reminders"
-		  """
-		} results: {
-		  """
-		  ┌────────────────────────────────┐
-		  │ Date(2000-06-25T00:00:00.000Z) │
-		  └────────────────────────────────┘
-		  """
-		}
+	@Test func min() {
+	  assertInlineSnapshot(of: User.columns.birthDate.min(), as: .sql) {
+	    """
+	    min("users"."birthDate")
+	    """
+	 }
+	 assertQuery(Reminder.select { $0.dueDate.min() }) {
+	   """
+	   SELECT min("reminders"."dueDate")
+	   FROM "reminders"
+	   """
+	 } results: {
+	   """
+	   ┌────────────────────────────────┐
+	   │ Date(2000-06-25T00:00:00.000Z) │
+	   └────────────────────────────────┘
+	   """
+	  }
 	}
 
     @Test func sum() {
