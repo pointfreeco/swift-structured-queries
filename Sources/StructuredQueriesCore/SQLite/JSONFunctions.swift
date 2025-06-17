@@ -110,8 +110,32 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
       filter: filter?.queryFragment
     )
   }
+}
 
-  private var jsonObject: some QueryExpression<QueryValue> {
+
+extension PrimaryKeyedTableDefinition {
+  public func jsonGroupArray<Wrapped: Codable & Sendable>(
+    isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[Wrapped].JSONRepresentation>
+  where QueryValue == Wrapped?
+  {
+    let filterQueryFragment = if let filter {
+      self.primaryKey.isNot(nil).and(filter).queryFragment
+    } else {
+      self.primaryKey.isNot(nil).queryFragment
+    }
+    return AggregateFunction(
+      "json_group_array",
+      isDistinct: isDistinct,
+      [jsonObject.queryFragment],
+      order: order?.queryFragment,
+      filter: filterQueryFragment
+    )
+  }
+
+  fileprivate var jsonObject: some QueryExpression<QueryValue> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
 
@@ -143,8 +167,8 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
       } else if Value.self == Date.JulianDayRepresentation.self {
         return "\(quote: column.name, delimiter: .text), datetime(\(column), 'julianday')"
       } else if let codableType = TableColumn.QueryValue.QueryOutput.self
-        as? any (Codable & Sendable).Type,
-        isJSONRepresentation(codableType)
+                  as? any (Codable & Sendable).Type,
+                isJSONRepresentation(codableType)
       {
         return "\(quote: column.name, delimiter: .text), json(\(column))"
       } else {
