@@ -352,74 +352,99 @@
         )
     }
 
-    // public subscript<
-    //   each C: QueryRepresentable,
-    //   each J1: Table,
-    //   J2: Table,
-    //   J3: Table
-    // >(
-    //   dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Select<(), From.PrimaryTable, (J2, J3)>>
-    // ) -> Select<(repeat each C), From, (repeat each J1, J2, J3)>
-    // where Columns == (repeat each C), Joins == (repeat each J1) {
-    //   self + From.PrimaryTable.self[keyPath: keyPath]
-    // }
-    //
-    // public subscript<
-    //   each C1: QueryRepresentable,
-    //   C2: QueryRepresentable,
-    //   each J1: Table,
-    //   J2: Table,
-    //   J3: Table
-    // >(
-    //   dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Select<C2, From, (J2, J3)>>
-    // ) -> Select<(repeat each C1, C2), From, (repeat each J1, J2, J3)>
-    // where Columns == (repeat each C1), Joins == (repeat each J1) {
-    //   self + From.PrimaryTable.self[keyPath: keyPath]
-    // }
-    //
-    // public subscript<
-    //   each C1: QueryRepresentable,
-    //   C2: QueryRepresentable,
-    //   C3: QueryRepresentable,
-    //   each J1: Table,
-    //   J2: Table,
-    //   J3: Table
-    // >(
-    //   dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Select<(C2, C3), From, (J2, J3)>>
-    // ) -> Select<(repeat each C1, C2, C3), From, (repeat each J1, J2, J3)>
-    // where Columns == (repeat each C1), Joins == (repeat each J1) {
-    //   self + From.PrimaryTable.self[keyPath: keyPath]
-    // }
-    //
-    // public subscript<
-    //   each C1: QueryRepresentable,
-    //   C2: QueryRepresentable,
-    //   C3: QueryRepresentable,
-    //   C4: QueryRepresentable,
-    //   each J1: Table,
-    //   J2: Table,
-    //   J3: Table
-    // >(
-    //   dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Select<(C2, C3, C4), From, (J2, J3)>>
-    // ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J1, J2, J3)>
-    // where Columns == (repeat each C1), Joins == (repeat each J1) {
-    //   self + From.PrimaryTable.self[keyPath: keyPath]
-    // }
-    //
-    // public subscript<
-    //   each C1: QueryRepresentable,
-    //   C2: QueryRepresentable,
-    //   C3: QueryRepresentable,
-    //   C4: QueryRepresentable,
-    //   C5: QueryRepresentable,
-    //   each J1: Table,
-    //   J2: Table,
-    //   J3: Table
-    // >(
-    //   dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Select<(C2, C3, C4, C5), From, (J2, J3)>>
-    // ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J1, J2, J3)>
-    // where Columns == (repeat each C1), Joins == (repeat each J1) {
-    //   self + From.PrimaryTable.self[keyPath: keyPath]
-    // }
+    public subscript<
+      each C: QueryRepresentable,
+      each J1: Table,
+      J2: Table,
+      J3: Table
+    >(
+      dynamicMember keyPath: KeyPath<
+        From.PrimaryTable.Type, Select<(), From.PrimaryTable, (J2, J3)>
+      >
+    ) -> Select<(repeat each C), From, (repeat each J1, J2, J3)>
+    where Columns == (repeat each C), Joins == (repeat each J1) {
+      self
+        + unsafeBitCast(
+          From.PrimaryTable.self[keyPath: keyPath],
+          to: Select<(), From, (J2, J3)>.self
+        )
+    }
+
+    public subscript<
+      each C1: QueryRepresentable,
+      C2: QueryRepresentable,
+      each J1: Table,
+      J2: Table,
+      J3: Table
+    >(
+      dynamicMember keyPath: KeyPath<
+        From.PrimaryTable.Type, Select<C2, From.PrimaryTable, (J2, J3)>
+      >
+    ) -> Select<(repeat each C1, C2), From, (repeat each J1, J2, J3)>
+    where Columns == (repeat each C1), Joins == (repeat each J1) {
+      self
+        + unsafeBitCast(
+          From.PrimaryTable.self[keyPath: keyPath],
+          to: Select<C2, From, (J2, J3)>.self
+        )
+    }
+
+    public subscript<
+      each C1: QueryRepresentable,
+      C2: QueryRepresentable,
+      C3: QueryRepresentable,
+      each J1: Table,
+      J2: Table,
+      J3: Table
+    >(
+      dynamicMember keyPath: KeyPath<
+        From.PrimaryTable.Type, Select<(C2, C3), From.PrimaryTable, (J2, J3)>
+      >
+    ) -> Select<(repeat each C1, C2, C3), From, (repeat each J1, J2, J3)>
+    where Columns == (repeat each C1), Joins == (repeat each J1) {
+      self + unsafeBitCast(
+        From.PrimaryTable.self[keyPath: keyPath],
+        to: Select<(C2, C3), From, (J2, J3)>.self
+      )
+    }
+
+     public subscript<
+       each C1: QueryRepresentable,
+       C2: QueryRepresentable,
+       C3: QueryRepresentable,
+       C4: QueryRepresentable,
+       each J1: Table,
+       J2: Table,
+       J3: Table
+     >(
+      dynamicMember
+      keyPath: KeyPath<From.PrimaryTable.Type, Select<(C2, C3, C4), From.PrimaryTable, (J2, J3)>>
+     ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J1, J2, J3)>
+     where Columns == (repeat each C1), Joins == (repeat each J1) {
+       self + unsafeBitCast(
+        From.PrimaryTable.self[keyPath: keyPath],
+        to: Select<(C2, C3, C4), From, (J2, J3)>.self
+      )
+     }
+
+     public subscript<
+       each C1: QueryRepresentable,
+       C2: QueryRepresentable,
+       C3: QueryRepresentable,
+       C4: QueryRepresentable,
+       C5: QueryRepresentable,
+       each J1: Table,
+       J2: Table,
+       J3: Table
+     >(
+      dynamicMember
+      keyPath: KeyPath<From.PrimaryTable.Type, Select<(C2, C3, C4, C5), From.PrimaryTable, (J2, J3)>>
+     ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J1, J2, J3)>
+    where Columns == (repeat each C1), Joins == (repeat each J1) {
+      self + unsafeBitCast(
+        From.PrimaryTable.self[keyPath: keyPath],
+        to: Select<(C2, C3, C4, C5), From, (J2, J3)>.self
+      )
+    }
   }
 #endif
