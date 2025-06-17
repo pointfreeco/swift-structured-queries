@@ -81,8 +81,8 @@ extension PrimaryKeyedTable {
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A `WHERE` clause.
-  public static func find(_ primaryKey: some QueryExpression<TableColumns.PrimaryKey>) -> Where<Self> {
-    Self.where { $0.primaryKey.eq(primaryKey) }
+  public static func find(_ primaryKey: TableColumns.PrimaryKey.QueryOutput) -> Where<Self> {
+    Self.where { $0.primaryKey.eq(TableColumns.PrimaryKey(queryOutput: primaryKey)) }
   }
 }
 
@@ -131,7 +131,7 @@ extension Select where From: PrimaryKeyedTable {
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A select statement filtered by the given key.
-  public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
+  public func find(_ primaryKey: From.TableColumns.PrimaryKey.QueryOutput) -> Self {
     self.and(From.find(primaryKey))
   }
 }
