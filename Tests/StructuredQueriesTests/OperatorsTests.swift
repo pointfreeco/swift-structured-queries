@@ -24,12 +24,12 @@ extension SnapshotTests {
       }
       assertInlineSnapshot(of: Row.columns.a == Row.columns.c, as: .sql) {
         """
-        ("rows"."a" = "rows"."c")
+        ("rows"."a" IS "rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.a == Row.columns.a, as: .sql) {
         """
-        ("rows"."a" = "rows"."a")
+        ("rows"."a" IS "rows"."a")
         """
       }
       assertInlineSnapshot(of: Row.columns.a == nil as Int?, as: .sql) {
@@ -64,12 +64,12 @@ extension SnapshotTests {
       }
       assertInlineSnapshot(of: Row.columns.a != Row.columns.c, as: .sql) {
         """
-        ("rows"."a" <> "rows"."c")
+        ("rows"."a" IS NOT "rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.a != Row.columns.a, as: .sql) {
         """
-        ("rows"."a" <> "rows"."a")
+        ("rows"."a" IS NOT "rows"."a")
         """
       }
       assertInlineSnapshot(of: Row.columns.a != nil as Int?, as: .sql) {

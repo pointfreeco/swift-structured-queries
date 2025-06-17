@@ -170,7 +170,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   ///
   /// ```swift
   /// Item.select { $0.price.total() }
-  /// // SELECT sum("items"."price") FROM "items"
+  /// // SELECT total("items"."price") FROM "items"
   /// ```
   ///
   /// - Parameters:

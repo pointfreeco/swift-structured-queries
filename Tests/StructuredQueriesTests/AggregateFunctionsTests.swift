@@ -13,6 +13,7 @@ extension SnapshotTests {
       var name: String
       var isAdmin: Bool
       var age: Int?
+      var birthDate: Date?
     }
 
     @Test func average() {
@@ -94,41 +95,41 @@ extension SnapshotTests {
     }
 
     @Test func max() {
-      assertInlineSnapshot(of: User.columns.id.max(), as: .sql) {
+      assertInlineSnapshot(of: User.columns.birthDate.max(), as: .sql) {
         """
-        max("users"."id")
+        max("users"."birthDate")
         """
       }
-      assertQuery(Reminder.select { $0.id.max() }) {
+      assertQuery(Reminder.select { $0.dueDate.max() }) {
         """
-        SELECT max("reminders"."id")
+        SELECT max("reminders"."dueDate")
         FROM "reminders"
         """
       } results: {
         """
-        ┌────┐
-        │ 10 │
-        └────┘
+        ┌────────────────────────────────┐
+        │ Date(2001-01-05T00:00:00.000Z) │
+        └────────────────────────────────┘
         """
       }
     }
 
     @Test func min() {
-      assertInlineSnapshot(of: User.columns.id.min(), as: .sql) {
+      assertInlineSnapshot(of: User.columns.birthDate.min(), as: .sql) {
         """
-        min("users"."id")
+        min("users"."birthDate")
         """
       }
-      assertQuery(Reminder.select { $0.priority.min() }) {
+      assertQuery(Reminder.select { $0.dueDate.min() }) {
         """
-        SELECT min("reminders"."priority")
+        SELECT min("reminders"."dueDate")
         FROM "reminders"
         """
       } results: {
         """
-        ┌──────┐
-        │ .low │
-        └──────┘
+        ┌────────────────────────────────┐
+        │ Date(2000-06-25T00:00:00.000Z) │
+        └────────────────────────────────┘
         """
       }
     }
