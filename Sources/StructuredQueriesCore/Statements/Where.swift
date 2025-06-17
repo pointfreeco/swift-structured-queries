@@ -80,6 +80,13 @@ public struct Where<From: Table> {
     public subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
       self + From.self[keyPath: keyPath]
     }
+
+    public subscript(
+      dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Where<From.PrimaryTable>>
+    ) -> Self
+    where From: TableDraft {
+      self + unsafeBitCast(From.PrimaryTable.self[keyPath: keyPath], to: Self.self)
+    }
   #endif
 }
 

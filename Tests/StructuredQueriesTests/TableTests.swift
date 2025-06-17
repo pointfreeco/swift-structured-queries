@@ -54,6 +54,23 @@ extension SnapshotTests {
           └─────────────────────────────────────────────┘
           """
         }
+        assertQuery(Row.Draft.where { $0.id > Optional(0) }) {
+          """
+          SELECT "rows"."id", "rows"."isDeleted"
+          FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          ORDER BY "rows"."id" DESC
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultSelect.Row.Draft( │
+          │   id: 1,                                          │
+          │   isDeleted: false                                │
+          │ )                                                 │
+          └───────────────────────────────────────────────────┘
+          """
+        }
         assertQuery(Row.select(\.id)) {
           """
           SELECT "rows"."id"
@@ -326,6 +343,22 @@ extension SnapshotTests {
           │   isDeleted: false                         │
           │ )                                          │
           └────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(Row.Draft.where { $0.id > Optional(0) }) {
+          """
+          SELECT "rows"."id", "rows"."isDeleted"
+          FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          """
+        } results: {
+          """
+          ┌──────────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row.Draft( │
+          │   id: 1,                                         │
+          │   isDeleted: false                               │
+          │ )                                                │
+          └──────────────────────────────────────────────────┘
           """
         }
         assertQuery(Row.unscoped) {
