@@ -1312,7 +1312,7 @@ extension SnapshotTests {
         }
       }
       do {
-        let query: some Statement<Int?> = Reminder.select { $0.priority.flatMap { $0.max() } }
+        let query: some Statement<Priority?> = Reminder.select { $0.priority.flatMap { $0.max() } }
         assertQuery(query) {
           """
           SELECT max("reminders"."priority")
@@ -1320,9 +1320,9 @@ extension SnapshotTests {
           """
         } results: {
           """
-          ┌───┐
-          │ 3 │
-          └───┘
+          ┌───────┐
+          │ .high │
+          └───────┘
           """
         }
       }
