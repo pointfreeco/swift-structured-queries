@@ -192,7 +192,7 @@ public func == <QueryValue: _OptionalProtocol>(
   lhs: any QueryExpression<QueryValue>,
   rhs: some QueryExpression<QueryValue.Wrapped>
 ) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS" : "=", rhs: rhs)
+  BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
 }
 
 // NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
@@ -202,7 +202,7 @@ public func != <QueryValue: _OptionalProtocol>(
   lhs: any QueryExpression<QueryValue>,
   rhs: some QueryExpression<QueryValue.Wrapped>
 ) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: isNull(lhs) ? "IS NOT" : "<>", rhs: rhs)
+  BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
 }
 
 // NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
@@ -211,7 +211,7 @@ public func == <QueryValue: _OptionalProtocol>(
   lhs: any QueryExpression<QueryValue>,
   rhs: some QueryExpression<QueryValue>
 ) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS" : "=", rhs: rhs)
+  BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
 }
 
 // NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
@@ -220,7 +220,7 @@ public func != <QueryValue: _OptionalProtocol>(
   lhs: any QueryExpression<QueryValue>,
   rhs: some QueryExpression<QueryValue>
 ) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: isNull(lhs) || isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
+  BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
 }
 
 // NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.

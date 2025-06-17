@@ -23,6 +23,18 @@ public protocol TableDraft: Table {
 }
 
 extension TableDraft {
+  public static subscript(
+    dynamicMember keyPath: KeyPath<PrimaryTable.Type, some Statement<PrimaryTable>>
+  ) -> some Statement<Self> {
+    SQLQueryExpression("\(PrimaryTable.self[keyPath: keyPath])")
+  }
+
+  public static subscript(
+    dynamicMember keyPath: KeyPath<PrimaryTable.Type, some SelectStatementOf<PrimaryTable>>
+  ) -> SelectOf<Self> {
+    unsafeBitCast(PrimaryTable.self[keyPath: keyPath].asSelect(), to: SelectOf<Self>.self)
+  }
+
   public static var all: SelectOf<Self> {
     unsafeBitCast(PrimaryTable.all.asSelect(), to: SelectOf<Self>.self)
   }
@@ -42,6 +54,14 @@ where QueryValue: PrimaryKeyedTable {
 
   /// The column representing this table's primary key.
   var primaryKey: TableColumn<QueryValue, PrimaryKey> { get }
+}
+
+extension TableDefinition where QueryValue: TableDraft {
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<QueryValue.PrimaryTable.TableColumns, Member>
+  ) -> Member {
+    QueryValue.PrimaryTable.columns[keyPath: keyPath]
+  }
 }
 
 extension PrimaryKeyedTableDefinition {
