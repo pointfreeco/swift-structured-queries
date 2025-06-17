@@ -1,5 +1,41 @@
 import Foundation
 
+// NB: Deprecated after 0.6.0:
+
+extension QueryFragment {
+  @available(
+    *,
+    deprecated,
+    message: "Use 'QueryFragment.segments' to build up a SQL string and bindings in a single loop."
+  )
+  public var string: String {
+    segments.reduce(into: "") { string, segment in
+      switch segment {
+      case .sql(let sql):
+        string.append(sql)
+      case .binding:
+        string.append("?")
+      }
+    }
+  }
+
+  @available(
+    *,
+    deprecated,
+    message: "Use 'QueryFragment.segments' to build up a SQL string and bindings in a single loop."
+  )
+  public var bindings: [QueryBinding] {
+    segments.reduce(into: []) { bindings, segment in
+      switch segment {
+      case .sql:
+        break
+      case .binding(let binding):
+        bindings.append(binding)
+      }
+    }
+  }
+}
+
 // NB: Deprecated after 0.5.1:
 
 extension Table {
@@ -53,7 +89,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> Select<(C1, repeat each C2), From, Joins>,
-    onConflict updates: ((inout Updates<Self>) -> Void)?,
+    onConflict updates: ((inout Updates<Self>) -> Void)?
   ) -> InsertOf<Self>
   where C1.QueryValue == V1, (repeat (each C2).QueryValue) == (repeat each V2) {
     insert(or: conflictResolution, columns, select: selection, onConflictDoUpdate: updates)
