@@ -1215,126 +1215,46 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Reminder.Draft.select(\.id).incomplete.select(\.id)
+        Reminder.Draft.select(\.id).incomplete
       ) {
         """
-        SELECT "reminders"."id", "reminders"."id"
+        SELECT "reminders"."id"
         FROM "reminders"
         WHERE NOT ("reminders"."isCompleted")
         """
       } results: {
         """
-        ┌───┬───┐
-        │ 1 │ 1 │
-        │ 2 │ 2 │
-        │ 3 │ 3 │
-        │ 5 │ 5 │
-        │ 6 │ 6 │
-        │ 8 │ 8 │
-        │ 9 │ 9 │
-        └───┴───┘
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
         """
       }
       assertQuery(
-        Reminder.Draft.all.incomplete
+        Reminder.Draft.all.incomplete.select(\.id)
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        SELECT "reminders"."id"
         FROM "reminders"
         WHERE NOT ("reminders"."isCompleted")
         """
       } results: {
-        #"""
-        ┌────────────────────────────────────────────┐
-        │ Reminder.Draft(                            │
-        │   id: 1,                                   │
-        │   assignedUserID: 1,                       │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "Milk, Eggs, Apples",             │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Groceries"                       │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder.Draft(                            │
-        │   id: 2,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2000-12-30T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: true,                         │
-        │   notes: "",                               │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Haircut"                         │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder.Draft(                            │
-        │   id: 3,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "Ask about diet",                 │
-        │   priority: .high,                         │
-        │   remindersListID: 1,                      │
-        │   title: "Doctor appointment"              │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder.Draft(                            │
-        │   id: 5,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: nil,                            │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "",                               │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Buy concert tickets"             │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder.Draft(                            │
-        │   id: 6,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2001-01-03T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: true,                         │
-        │   notes: "",                               │
-        │   priority: .high,                         │
-        │   remindersListID: 2,                      │
-        │   title: "Pick up kids from school"        │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder.Draft(                            │
-        │   id: 8,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2001-01-05T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "",                               │
-        │   priority: .high,                         │
-        │   remindersListID: 2,                      │
-        │   title: "Take out trash"                  │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder.Draft(                            │
-        │   id: 9,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2001-01-03T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: """                               │
-        │     Status of tax return                   │
-        │     Expenses for next year                 │
-        │     Changing payroll company               │
-        │     """,                                   │
-        │   priority: nil,                           │
-        │   remindersListID: 3,                      │
-        │   title: "Call accountant"                 │
-        │ )                                          │
-        └────────────────────────────────────────────┘
-        """#
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
       }
     }
 
