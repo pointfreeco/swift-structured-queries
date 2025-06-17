@@ -120,7 +120,8 @@ extension QueryExpression where QueryValue: FloatingPoint {
   }
 }
 
-extension QueryExpression where QueryValue: Numeric {
+extension QueryExpression
+where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric {
   /// Wraps this numeric query expression with the `abs` function.
   ///
   /// - Returns: An expression wrapped with the `abs` function.
@@ -251,14 +252,18 @@ extension QueryExpression where QueryValue == String {
   public func instr(_ occurrence: some QueryExpression<QueryValue>) -> some QueryExpression<Int> {
     QueryFunction("instr", self, occurrence)
   }
+}
 
+extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
   /// Wraps this string expression with the `lower` function.
   ///
   /// - Returns: An expression wrapped with the `lower` function.
   public func lower() -> some QueryExpression<QueryValue> {
     QueryFunction("lower", self)
   }
+}
 
+extension QueryExpression where QueryValue == String {
   /// Wraps this string expression with the `ltrim` function.
   ///
   /// - Parameter characters: Characters to trim.
@@ -279,14 +284,18 @@ extension QueryExpression where QueryValue == String {
   public func octetLength() -> some QueryExpression<Int> {
     QueryFunction("octet_length", self)
   }
+}
 
+extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
   /// Wraps this string expression with the `quote` function.
   ///
   /// - Returns: An expression wrapped with the `quote` function.
   public func quote() -> some QueryExpression<QueryValue> {
     QueryFunction("quote", self)
   }
+}
 
+extension QueryExpression where QueryValue == String {
   /// Creates an expression invoking the `replace` function.
   ///
   /// - Parameters:
@@ -346,13 +355,15 @@ extension QueryExpression where QueryValue == String {
       return QueryFunction("trim", self)
     }
   }
+}
 
+extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
   /// Wraps this string query expression with the `unhex` function.
   ///
   /// - Parameter characters: Non-hexadecimal characters to skip.
   /// - Returns: An optional blob expression of the `unhex` function wrapping this expression.
   public func unhex(
-    _ characters: (some QueryExpression<QueryValue>)? = QueryValue?.none
+    _ characters: (some QueryExpression<String>)? = String?.none
   ) -> some QueryExpression<[UInt8]?> {
     if let characters {
       return QueryFunction("unhex", self, characters)

@@ -84,7 +84,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
   }
 }
 
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable {
   /// A maximum aggregate of this expression.
   ///
   /// ```swift
@@ -96,7 +96,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A maximum aggregate of this expression.
   public func max(
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<Int?> {
+  ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
     AggregateFunction("max", [queryFragment], filter: filter?.queryFragment)
   }
 
@@ -111,7 +111,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A minimum aggregate of this expression.
   public func min(
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<Int?> {
+  ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
     AggregateFunction("min", [queryFragment], filter: filter?.queryFragment)
   }
 }
@@ -170,7 +170,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   ///
   /// ```swift
   /// Item.select { $0.price.total() }
-  /// // SELECT sum("items"."price") FROM "items"
+  /// // SELECT total("items"."price") FROM "items"
   /// ```
   ///
   /// - Parameters:

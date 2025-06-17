@@ -66,6 +66,12 @@ struct ReminderTag: Equatable {
   let tagID: Int
 }
 
+@Table struct Milestone: Codable, Equatable {
+  let id: Int
+  var remindersListID: RemindersList.ID
+  var title = ""
+}
+
 extension Database {
   static func `default`() throws -> Database {
     let db = try Database()
@@ -137,12 +143,11 @@ extension Database {
     )
     try execute(
       """
-      CREATE INDEX "index_remindersTags_on_reminderID" ON "remindersTags"("reminderID")
-      """
-    )
-    try execute(
-      """
-      CREATE INDEX "index_remindersTags_on_tagID" ON "remindersTags"("tagID")
+      CREATE TABLE "milestones" (
+        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "remindersListID" INTEGER NOT NULL REFERENCES "remindersLists"("id") ON DELETE CASCADE,
+        "title" TEXT NOT NULL DEFAULT ''
+      )
       """
     )
   }
@@ -246,6 +251,9 @@ extension Database {
       ReminderTag(reminderID: 2, tagID: 4)
       ReminderTag(reminderID: 4, tagID: 1)
       ReminderTag(reminderID: 4, tagID: 2)
+      Milestone.Draft(remindersListID: 1, title: "Phase 1")
+      Milestone.Draft(remindersListID: 1, title: "Phase 2")
+      Milestone.Draft(remindersListID: 1, title: "Phase 3")
     }
     .forEach(execute)
   }

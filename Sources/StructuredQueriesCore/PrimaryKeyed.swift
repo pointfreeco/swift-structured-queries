@@ -22,6 +22,24 @@ public protocol TableDraft: Table {
   init(_ primaryTable: PrimaryTable)
 }
 
+extension TableDraft {
+  public static subscript(
+    dynamicMember keyPath: KeyPath<PrimaryTable.Type, some Statement<PrimaryTable>>
+  ) -> some Statement<Self> {
+    SQLQueryExpression("\(PrimaryTable.self[keyPath: keyPath])")
+  }
+
+  public static subscript(
+    dynamicMember keyPath: KeyPath<PrimaryTable.Type, some SelectStatementOf<PrimaryTable>>
+  ) -> SelectOf<Self> {
+    unsafeBitCast(PrimaryTable.self[keyPath: keyPath].asSelect(), to: SelectOf<Self>.self)
+  }
+
+  public static var all: SelectOf<Self> {
+    unsafeBitCast(PrimaryTable.all.asSelect(), to: SelectOf<Self>.self)
+  }
+}
+
 /// A type representing a database table's columns.
 ///
 /// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
@@ -36,6 +54,14 @@ where QueryValue: PrimaryKeyedTable {
 
   /// The column representing this table's primary key.
   var primaryKey: TableColumn<QueryValue, PrimaryKey> { get }
+}
+
+extension TableDefinition where QueryValue: TableDraft {
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<QueryValue.PrimaryTable.TableColumns, Member>
+  ) -> Member {
+    QueryValue.PrimaryTable.columns[keyPath: keyPath]
+  }
 }
 
 extension PrimaryKeyedTableDefinition {
@@ -60,6 +86,22 @@ extension PrimaryKeyedTable {
   }
 }
 
+extension TableDraft {
+  /// A where clause filtered by a primary key.
+  ///
+  /// - Parameter primaryKey: A primary key identifying a table row.
+  /// - Returns: A `WHERE` clause.
+  public static func find(
+    _ primaryKey: PrimaryTable.TableColumns.PrimaryKey.QueryOutput
+  ) -> Where<Self> {
+    Self.where { _ in
+      PrimaryTable.columns.primaryKey.eq(
+        PrimaryTable.TableColumns.PrimaryKey(queryOutput: primaryKey)
+      )
+    }
+  }
+}
+
 extension Where where From: PrimaryKeyedTable {
   /// Adds a primary key condition to a where clause.
   ///
@@ -67,6 +109,40 @@ extension Where where From: PrimaryKeyedTable {
   /// - Returns: A where clause with the added primary key.
   public func find(_ primaryKey: From.TableColumns.PrimaryKey.QueryOutput) -> Self {
     self.where { $0.primaryKey.eq(From.TableColumns.PrimaryKey(queryOutput: primaryKey)) }
+  }
+}
+
+extension Where where From: TableDraft {
+  /// Adds a primary key condition to a where clause.
+  ///
+  /// - Parameter primaryKey: A primary key.
+  /// - Returns: A where clause with the added primary key.
+  public func find(_ primaryKey: From.PrimaryTable.TableColumns.PrimaryKey.QueryOutput) -> Self {
+    self.where { _ in
+      From.PrimaryTable.columns.primaryKey.eq(
+        From.PrimaryTable.TableColumns.PrimaryKey(queryOutput: primaryKey)
+      )
+    }
+  }
+}
+
+extension Select where From: PrimaryKeyedTable {
+  /// A select statement filtered by a primary key.
+  ///
+  /// - Parameter primaryKey: A primary key identifying a table row.
+  /// - Returns: A select statement filtered by the given key.
+  public func find(_ primaryKey: From.TableColumns.PrimaryKey.QueryOutput) -> Self {
+    self.and(From.find(primaryKey))
+  }
+}
+
+extension Select where From: TableDraft {
+  /// A select statement filtered by a primary key.
+  ///
+  /// - Parameter primaryKey: A primary key identifying a table row.
+  /// - Returns: A select statement filtered by the given key.
+  public func find(_ primaryKey: From.PrimaryTable.TableColumns.PrimaryKey.QueryOutput) -> Self {
+    self.and(From.find(primaryKey))
   }
 }
 
@@ -80,6 +156,20 @@ extension Update where From: PrimaryKeyedTable {
   }
 }
 
+extension Update where From: TableDraft {
+  /// An update statement filtered by a primary key.
+  ///
+  /// - Parameter primaryKey: A primary key identifying a table row.
+  /// - Returns: An update statement filtered by the given key.
+  public func find(_ primaryKey: From.PrimaryTable.TableColumns.PrimaryKey.QueryOutput) -> Self {
+    self.where { _ in
+      From.PrimaryTable.columns.primaryKey.eq(
+        From.PrimaryTable.TableColumns.PrimaryKey(queryOutput: primaryKey)
+      )
+    }
+  }
+}
+
 extension Delete where From: PrimaryKeyedTable {
   /// A delete statement filtered by a primary key.
   ///
@@ -90,12 +180,16 @@ extension Delete where From: PrimaryKeyedTable {
   }
 }
 
-extension Select where From: PrimaryKeyedTable {
-  /// A select statement filtered by a primary key.
+extension Delete where From: TableDraft {
+  /// A delete statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
-  /// - Returns: A select statement filtered by the given key.
-  public func find(_ primaryKey: From.TableColumns.PrimaryKey.QueryOutput) -> Self {
-    self.and(From.find(primaryKey))
+  /// - Returns: A delete statement filtered by the given key.
+  public func find(_ primaryKey: From.PrimaryTable.TableColumns.PrimaryKey.QueryOutput) -> Self {
+    self.where { _ in
+      From.PrimaryTable.columns.primaryKey.eq(
+        From.PrimaryTable.TableColumns.PrimaryKey(queryOutput: primaryKey)
+      )
+    }
   }
 }

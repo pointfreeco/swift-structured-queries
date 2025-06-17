@@ -236,7 +236,7 @@ extension Table {
   ///   columns.
   /// - Returns: A select statement that is filtered by the given predicate.
   public static func having(
-    _ predicate: (TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> SelectOf<Self> {
     Where().having(predicate)
   }
@@ -1110,7 +1110,7 @@ extension Select {
   /// - Parameter keyPath: A key path from this select's table to a Boolean expression to filter by.
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
   public func `where`(
-    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<Bool>>
+    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<some _OptionalPromotable<Bool?>>>
   ) -> Self
   where Joins == () {
     var select = self
@@ -1125,7 +1125,9 @@ extension Select {
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
   @_disfavoredOverload
   public func `where`<each J: Table>(
-    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<
+      some _OptionalPromotable<Bool?>
+    >
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
@@ -1218,7 +1220,9 @@ extension Select {
   /// - Returns: A new select statement that appends the given predicate to its `HAVING` clause.
   @_disfavoredOverload
   public func having<each J: Table>(
-    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<
+      some _OptionalPromotable<Bool?>
+    >
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
