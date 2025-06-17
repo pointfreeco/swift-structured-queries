@@ -418,23 +418,17 @@ RemindersList
   .select {
     Row.Columns(
       remindersList: $0,
-      reminders: #sql("\($1.jsonGroupArray(filter: $1.id.isNot(nil)))")
+      reminders: $1.jsonGroupArray()
     )
   }
 ```
 
-> Note: There are 3 important things to note about this query:
+> Note: There are 2 important things to note about this query:
 >
 > * Since not every reminders list will have a reminder associated with it, we are using a 
 >   ``Select/leftJoin(_:on:)``. That will make sure to select all lists no matter what.
-> * We are using `jsonGroupArray` to encode all reminders associated with a list into a JSON object
->   and bundle them into an array. And because it's possible to have no reminders in a list,
->   we further use the `filter` option to remove any `NULL` values from the array.
-> * And lastly, `$1` represents an optionalized table due to the left join, and hence the 
->   `$1.jsonGroupArray(…)` expression actually returns an array of _optional_ reminders. But
->   because we are filtering out `NULL` values we can be guaranteed that every element of the
->   array can be decoded to a reminder, and so we are using the `#sql` macro as a quick escape
->   hatch to take responsibility for the types in this expression.
+> * The left join introduces _optional_ reminders, but we are using a special overload of
+>   `jsonGroupArray` on optionals that automatically filters out `nil` reminders and unwraps them.
 
 This allows you to fetch all of the data in a single SQLite query and decode the data into a
 collection of `Row` values. There is an extra cost associated with decoding the JSON object,
@@ -477,8 +471,8 @@ RemindersList
   .select {
     Row.Columns(
       remindersList: $0,
-      milestones: #sql("\($1.jsonGroupArray(isDistinct: true, filter: $1.id.isNot(nil))"),
-      reminders: #sql("\($2.jsonGroupArray(isDistinct: true, filter: $2.id.isNot(nil))")
+      milestones: $1.jsonGroupArray(isDistinct: true),
+      reminders: $2.jsonGroupArray(isDistinct: true)
     )
   }
 ```
