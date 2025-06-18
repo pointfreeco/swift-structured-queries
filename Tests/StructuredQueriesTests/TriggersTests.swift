@@ -8,20 +8,19 @@ import Testing
 extension SnapshotTests {
   @Suite struct TriggersTests {
     @Test func basics() {
-      assertQuery(
-        RemindersList.createTemporaryTrigger(
-          after: .insert { new in
-            RemindersList
-              .update {
-                $0.position = RemindersList.select { ($0.position.max() ?? -1) + 1 }
-              }
-              .where { $0.id.eq(new.id) }
-          }
-        )
-      ) {
+      let trigger = RemindersList.createTemporaryTrigger(
+        after: .insert { new in
+          RemindersList
+            .update {
+              $0.position = RemindersList.select { ($0.position.max() ?? -1) + 1 }
+            }
+            .where { $0.id.eq(new.id) }
+        }
+      )
+      assertQuery(trigger) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:12:45"
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:11:57"
         AFTER INSERT ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
@@ -31,6 +30,11 @@ extension SnapshotTests {
           )
           WHERE ("remindersLists"."id" = "new"."id");
         END
+        """
+      }
+      assertQuery(trigger.drop()) {
+        """
+        DROP TRIGGER "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:11:57"
         """
       }
     }
@@ -48,7 +52,7 @@ extension SnapshotTests {
         ) {
           """
           CREATE TEMPORARY TRIGGER
-            "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:41:42"
+            "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:45:42"
           AFTER UPDATE ON "reminders"
           FOR EACH ROW BEGIN
             UPDATE "reminders"
@@ -83,7 +87,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:78:45"
+          "after_update_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:82:45"
         AFTER UPDATE ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
@@ -100,7 +104,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:99:40"
+          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:103:40"
         AFTER UPDATE ON "reminders"
         FOR EACH ROW BEGIN
           UPDATE "reminders"

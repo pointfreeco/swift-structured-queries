@@ -150,7 +150,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
   public typealias Joins = ()
   public typealias QueryValue = ()
 
-  fileprivate enum When: String {
+  fileprivate enum When: QueryFragment {
     case before = "BEFORE"
     case after = "AFTER"
   }
@@ -263,7 +263,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
         }
         statement = begin
       case .delete(let begin):
-        query.append(" DELETE")
+        query.append("DELETE")
         statement = begin
       }
       query.append(" ON \(On.self)\(.newlineOrSpace)FOR EACH ROW")
@@ -311,7 +311,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
       query.append(" IF NOT EXISTS")
     }
     query.append("\(.newlineOrSpace)\(triggerName.indented())")
-    query.append("\(.newlineOrSpace)\(raw: when.rawValue) \(operation)")
+    query.append("\(.newlineOrSpace)\(when.rawValue) \(operation)")
     return query.segments.reduce(into: QueryFragment()) {
       switch $1 {
       case .sql(let sql):
