@@ -832,8 +832,9 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// - Parameter expression: A sequence of expressions.
   /// - Returns: A predicate expression indicating whether this expression is in the given sequence
-  public func `in`(_ expression: [some QueryExpression<QueryValue>]) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "IN", rhs: Array.Expression(elements: expression))
+  public func `in`<S: Sequence>(_ expression: S) -> some QueryExpression<Bool>
+  where S.Element: QueryExpression<QueryValue> {
+    BinaryOperator(lhs: self, operator: "IN", rhs: S.Expression(elements: expression))
   }
 
   /// Returns a predicate expression indicating whether the expression is in a subquery.
@@ -868,7 +869,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   }
 }
 
-extension Array where Element: QueryBindable {
+extension Sequence where Element: QueryBindable {
   /// Returns a predicate expression indicating whether the sequence contains the given expression.
   ///
   /// An alias for ``QueryExpression/in(_:)``, flipped.
@@ -977,16 +978,15 @@ private struct LikeOperator<
   }
 }
 
-extension Array where Element: QueryExpression, Element.QueryValue: QueryBindable {
-  fileprivate struct Expression: QueryExpression {
-    typealias QueryValue = Array
+extension Sequence where Element: QueryExpression, Element.QueryValue: QueryBindable {
+  fileprivate typealias Expression = _SequenceExpression<Self>
+}
 
-    let elements: [Element]
-    init(elements: [Element]) {
-      self.elements = elements
-    }
-    var queryFragment: QueryFragment {
-      "(\(elements.map(\.queryFragment).joined(separator: ", ")))"
-    }
+fileprivate struct _SequenceExpression<S: Sequence>: QueryExpression
+where S.Element: QueryExpression, S.Element.QueryValue: QueryBindable {
+  typealias QueryValue = S
+  let queryFragment: QueryFragment
+  init(elements: S) {
+    queryFragment = elements.map(\.queryFragment).joined(separator: ", ")
   }
 }
