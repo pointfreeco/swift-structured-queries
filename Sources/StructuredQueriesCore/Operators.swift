@@ -982,11 +982,11 @@ extension Sequence where Element: QueryExpression, Element.QueryValue: QueryBind
   fileprivate typealias Expression = _SequenceExpression<Self>
 }
 
-fileprivate struct _SequenceExpression<S: Sequence>: QueryExpression
+private struct _SequenceExpression<S: Sequence>: QueryExpression
 where S.Element: QueryExpression, S.Element.QueryValue: QueryBindable {
   typealias QueryValue = S
   let queryFragment: QueryFragment
   init(elements: S) {
-    queryFragment = elements.map(\.queryFragment).joined(separator: ", ")
+    queryFragment = "(\(elements.map(\.queryFragment).joined(separator: ", ")))"
   }
 }
