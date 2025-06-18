@@ -296,7 +296,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
   ///
   /// - Parameter ifExists: Adds an `IF EXISTS` condition to the `DROP TRIGGER`.
   /// - Returns: A `DROP TRIGGER` statement for this trigger.
-  public func drop(ifExists: Bool = false) -> some Statement {
+  public func drop(ifExists: Bool = false) -> some Statement<()> {
     var query: QueryFragment = "DROP TRIGGER"
     if ifExists {
       query.append(" IF EXISTS")
