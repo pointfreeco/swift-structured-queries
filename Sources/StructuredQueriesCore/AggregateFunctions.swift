@@ -46,10 +46,10 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A string concatenation aggregate of this expression.
-  public func groupConcat(
+  public func groupConcat<T: _OptionalPromotable<Bool?>>(
     _ separator: (some QueryExpression)? = String?.none,
     order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: (any QueryExpression<T>)? = Bool?.none
   ) -> some QueryExpression<String?> {
     AggregateFunction(
       "group_concat",

@@ -68,7 +68,7 @@ extension Table {
     _ other: some SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<(repeat each C), Self, (F, repeat each J)> {
     Where().join(other, on: constraint)
   }
@@ -85,7 +85,7 @@ extension Table {
     _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<(repeat each C), Self, F> {
     Where().join(other, on: constraint)
   }
@@ -104,7 +104,7 @@ extension Table {
     _ other: some SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<
     (repeat (each C)._Optionalized),
     Self,
@@ -125,7 +125,7 @@ extension Table {
     _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<(repeat (each C)._Optionalized), Self, F._Optionalized> {
     Where().leftJoin(other, on: constraint)
   }
@@ -144,7 +144,7 @@ extension Table {
     _ other: some SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<(repeat each C), Self._Optionalized, (F, repeat each J)> {
     Where<Self>().rightJoin(other, on: constraint)
   }
@@ -161,7 +161,7 @@ extension Table {
     _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<(repeat each C), Self._Optionalized, F> {
     Where<Self>().rightJoin(other, on: constraint)
   }
@@ -180,7 +180,7 @@ extension Table {
     _ other: some SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
       (TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<
     (repeat (each C)._Optionalized),
     Self._Optionalized,
@@ -201,7 +201,7 @@ extension Table {
     _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
       (TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<(repeat (each C)._Optionalized), Self._Optionalized, F._Optionalized> {
     Where<Self>().fullJoin(other, on: constraint)
   }
@@ -600,7 +600,7 @@ extension Select {
         From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
         repeat (each J2).TableColumns
       )
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>
   where Columns == (repeat each C1), Joins == (repeat each J1) {
     let other = other.asSelect()
@@ -639,7 +639,7 @@ extension Select {
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
       (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>
   where Columns == (repeat each C1), Joins == (repeat each J) {
     let other = other.asSelect()
@@ -675,7 +675,7 @@ extension Select {
     _ other: any SelectStatement<(), F, (repeat each J)>,
     on constraint: (
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<QueryValue, From, (F, repeat each J)> where QueryValue: QueryRepresentable {
     let other = other.asSelect()
     let join = _JoinClause(
@@ -718,7 +718,7 @@ extension Select {
         From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
         repeat (each J2).TableColumns
       )
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
     From,
@@ -765,7 +765,7 @@ extension Select {
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
       (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<
     (repeat each C1, repeat (each C2)._Optionalized),
     From,
@@ -810,7 +810,7 @@ extension Select {
     _ other: any SelectStatement<(), F, (repeat each J)>,
     on constraint: (
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<QueryValue, From, (F._Optionalized, repeat (each J)._Optionalized)>
   where QueryValue: QueryRepresentable {
     let other = other.asSelect()
@@ -854,7 +854,7 @@ extension Select {
         From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
         repeat (each J2).TableColumns
       )
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
     From._Optionalized,
@@ -901,7 +901,7 @@ extension Select {
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
       (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat each C2),
     From._Optionalized,
@@ -946,7 +946,7 @@ extension Select {
     _ other: any SelectStatement<(), F, (repeat each J)>,
     on constraint: (
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<QueryValue, From._Optionalized, (F, repeat each J)>
   where QueryValue: QueryRepresentable {
     let other = other.asSelect()
@@ -990,7 +990,7 @@ extension Select {
         From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
         repeat (each J2).TableColumns
       )
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
     From._Optionalized,
@@ -1037,7 +1037,7 @@ extension Select {
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: (
       (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<
     (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized),
     From._Optionalized,
@@ -1082,7 +1082,7 @@ extension Select {
     _ other: any SelectStatement<(), F, (repeat each J)>,
     on constraint: (
       (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
-    ) -> some QueryExpression<Bool>
+    ) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Select<QueryValue, From._Optionalized, (F._Optionalized, repeat (each J)._Optionalized)>
   where QueryValue: QueryRepresentable {
     let other = other.asSelect()
@@ -1466,7 +1466,7 @@ public struct _JoinClause: QueryExpression {
   init(
     operator: Operator?,
     table: any Table.Type,
-    constraint: some QueryExpression<Bool>
+    constraint: some QueryExpression<some _OptionalPromotable<Bool?>>
   ) {
     self.operator = `operator`?.queryFragment
     self.table = table
