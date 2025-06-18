@@ -72,5 +72,43 @@ extension SnapshotTests {
         )
       }
     }
+
+    @Test func afterUpdateTouch() {
+      assertQuery(
+        RemindersList.createTemporaryTrigger(
+          afterUpdateTouch: {
+            $0.position += 1
+          }
+        )
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_update_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:78:45"
+        AFTER UPDATE ON "remindersLists"
+        FOR EACH ROW BEGIN
+          UPDATE "remindersLists"
+          SET "position" = ("remindersLists"."position" + 1)
+          WHERE ("remindersLists"."rowid" = "new"."rowid");
+        END
+        """
+      }
+    }
+
+    @Test func afterUpdateTouchDate() {
+      assertQuery(
+        Reminder.createTemporaryTrigger(afterUpdateTouch: \.updatedAt)
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:99:40"
+        AFTER UPDATE ON "reminders"
+        FOR EACH ROW BEGIN
+          UPDATE "reminders"
+          SET "updatedAt" = datetime('subsec')
+          WHERE ("reminders"."rowid" = "new"."rowid");
+        END
+        """
+      }
+    }
   }
 }

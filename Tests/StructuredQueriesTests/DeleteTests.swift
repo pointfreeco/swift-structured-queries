@@ -47,23 +47,24 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders"
         WHERE ("reminders"."id" = 1)
-        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt"
         """
-      } results: {
+      }results: {
         """
-        ┌────────────────────────────────────────────┐
-        │ Reminder(                                  │
-        │   id: 1,                                   │
-        │   assignedUserID: 1,                       │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "Milk, Eggs, Apples",             │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Groceries"                       │
-        │ )                                          │
-        └────────────────────────────────────────────┘
+        ┌─────────────────────────────────────────────┐
+        │ Reminder(                                   │
+        │   id: 1,                                    │
+        │   assignedUserID: 1,                        │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: false,                         │
+        │   notes: "Milk, Eggs, Apples",              │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Groceries",                       │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
         """
       }
       assertQuery(Reminder.count()) {

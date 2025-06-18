@@ -2,9 +2,11 @@ import Foundation
 import IssueReporting
 
 extension Table {
-  /// A `CREATE TEMPORARY TRIGGER` statement.
+  /// A `CREATE TEMPORARY TRIGGER` statement that executes after a database event.
   ///
-  /// > Important: TODO: explain how implicit names are handled and how trigger helpers should always take file/line/column. and put in name/file/line/column parameters.
+  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
+  /// > provided. If you build your own trigger helper that call this function, then your helper
+  /// > should also take fileID, line and column arguments and pass them to this function.
   ///
   /// - Parameters:
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
@@ -27,14 +29,63 @@ extension Table {
       name: name,
       ifNotExists: ifNotExists,
       operation: operation,
+      when: .after,
       fileID: fileID,
       line: line,
       column: column
     )
   }
 
-  // TODO: write tests on these below:
+  /// A `CREATE TEMPORARY TRIGGER` statement that executes before a database event.
+  ///
+  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
+  /// > provided. If you build your own trigger helper that call this function, then your helper
+  /// > should also take fileID, line and column arguments and pass them to this function.
+  ///
+  /// - Parameters:
+  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
+  ///     operation, and source location.
+  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
+  ///   - operation: The trigger's operation.
+  ///   - fileID: The source `#fileID` associated with the trigger.
+  ///   - line: The source `#line` associated with the trigger.
+  ///   - column: The source `#column` associated with the trigger.
+  /// - Returns: A temporary trigger.
+  public static func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    before operation: TemporaryTrigger<Self>.Operation,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    TemporaryTrigger(
+      name: name,
+      ifNotExists: ifNotExists,
+      operation: operation,
+      when: .before,
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
 
+  /// A `CREATE TEMPORARY TRIGGER` statement that applies additional updates to a row that has just
+  /// been updated.
+  ///
+  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
+  /// > provided. If you build your own trigger helper that call this function, then your helper
+  /// > should also take fileID, line and column arguments and pass them to this function.
+  ///
+  /// - Parameters:
+  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
+  ///     operation, and source location.
+  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
+  ///   - updates: The updates to apply after the row has been updated.
+  ///   - fileID: The source `#fileID` associated with the trigger.
+  ///   - line: The source `#line` associated with the trigger.
+  ///   - column: The source `#column` associated with the trigger.
+  /// - Returns: A temporary trigger.
   public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
@@ -57,7 +108,22 @@ extension Table {
     )
   }
 
-  // TODO: Touchable protocol with Date: Touchable, UUID: Touchable, ?
+  /// A `CREATE TEMPORARY TRIGGER` statement that updates a datetime column when a row has been updated.
+  /// been updated.
+  ///
+  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
+  /// > provided. If you build your own trigger helper that call this function, then your helper
+  /// > should also take fileID, line and column arguments and pass them to this function.
+  /// 
+  /// - Parameters:
+  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
+  ///     operation, and source location.
+  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
+  ///   - date: A key path to a datetime column.
+  ///   - fileID: The source `#fileID` associated with the trigger.
+  ///   - line: The source `#line` associated with the trigger.
+  ///   - column: The source `#column` associated with the trigger.
+  /// - Returns: A temporary trigger.
   public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
@@ -77,16 +143,17 @@ extension Table {
       column: column
     )
   }
-
-  // TODO: createTemporaryTrigger(afterUpdateTouch: \.updatedAt)
-  // TODO: createTemporaryTrigger(afterUpdate: { $0... }, touch: { $0... = })
-  // TODO: createTemporaryTrigger(afterUpdate: \.self, touch: \.updatedAt)
 }
 
 public struct TemporaryTrigger<On: Table>: Statement {
   public typealias From = Never
   public typealias Joins = ()
   public typealias QueryValue = ()
+
+  fileprivate enum When: String {
+    case before = "BEFORE"
+    case after = "AFTER"
+  }
 
   public struct Operation: QueryExpression {
     public typealias QueryValue = ()
@@ -181,14 +248,14 @@ public struct TemporaryTrigger<On: Table>: Statement {
     private let when: QueryFragment?
 
     public var queryFragment: QueryFragment {
-      var query: QueryFragment = "AFTER"
+      var query: QueryFragment = ""
       let statement: QueryFragment
       switch kind {
       case .insert(let begin):
-        query.append(" INSERT")
+        query.append("INSERT")
         statement = begin
       case .update(let begin, let columnNames):
-        query.append(" UPDATE")
+        query.append("UPDATE")
         if !columnNames.isEmpty {
           query.append(
             " OF \(columnNames.map { QueryFragment(quote: $0) }.joined(separator: ", "))"
@@ -220,6 +287,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
   fileprivate let name: String?
   fileprivate let ifNotExists: Bool
   fileprivate let operation: Operation
+  fileprivate let when: When
   fileprivate let fileID: StaticString
   fileprivate let line: UInt
   fileprivate let column: UInt
@@ -242,7 +310,8 @@ public struct TemporaryTrigger<On: Table>: Statement {
     if ifNotExists {
       query.append(" IF NOT EXISTS")
     }
-    query.append("\(.newlineOrSpace)\(triggerName.indented())\(.newlineOrSpace)\(operation)")
+    query.append("\(.newlineOrSpace)\(triggerName.indented())")
+    query.append("\(.newlineOrSpace)\(raw: when.rawValue) \(operation)")
     return query.segments.reduce(into: QueryFragment()) {
       switch $1 {
       case .sql(let sql):

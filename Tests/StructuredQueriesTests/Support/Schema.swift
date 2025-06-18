@@ -28,6 +28,7 @@ struct Reminder: Codable, Equatable, Identifiable {
   var priority: Priority?
   var remindersListID: Int
   var title = ""
+  var updatedAt: Date = Date(timeIntervalSinceReferenceDate: 1234567890)
   static func searching(_ text: String) -> Where<Reminder> {
     Self.where {
       $0.title.collate(.nocase).contains(text)
@@ -107,7 +108,8 @@ extension Database {
         "remindersListID" INTEGER NOT NULL REFERENCES "remindersLists"("id") ON DELETE CASCADE,
         "notes" TEXT NOT NULL DEFAULT '',
         "priority" INTEGER,
-        "title" TEXT NOT NULL DEFAULT ''
+        "title" TEXT NOT NULL DEFAULT '',
+        "updatedAt" TEXT NOT NULL DEFAULT (datetime('subsec'))
       )
       """
     )
