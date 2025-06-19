@@ -912,7 +912,7 @@ extension Statement where QueryValue: QueryBindable {
   }
 }
 
-extension Statement {
+extension PartialSelectStatement {
   /// Returns a predicate expression indicating whether this subquery contains any element.
   ///
   /// - Returns: A predicate expression indicating whether this subquery contains any element.
