@@ -143,6 +143,68 @@ extension Table {
       column: column
     )
   }
+
+  public static func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterUpdateTouch date: KeyPath<TableColumns, TableColumn<Self, Date?>>,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      afterUpdateTouch: {
+        $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
+      },
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  public static func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterInsertTouch updates: (inout Updates<Self>) -> Void,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      after: .insert { new in
+        Self
+          .where { $0.rowid.eq(new.rowid) }
+          .update { updates(&$0) }
+      },
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  public static func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterInsertTouch date: KeyPath<TableColumns, TableColumn<Self, Date?>>,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      afterUpdateTouch: {
+        $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
+      },
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
 }
 
 public struct TemporaryTrigger<On: Table>: Statement {
