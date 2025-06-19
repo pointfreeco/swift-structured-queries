@@ -227,6 +227,31 @@ extension SnapshotTests {
         └─────────────────────┘
         """
       }
+
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          Values("vacation")
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT 'vacation'
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ Tag(                │
+        │   id: 8,            │
+        │   title: "vacation" │
+        │ )                   │
+        └─────────────────────┘
+        """
+      }
     }
 
     @Test func draft() {
