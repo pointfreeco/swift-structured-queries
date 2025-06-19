@@ -571,6 +571,20 @@ extension SnapshotTests {
     }
 
     @Test func exists() {
+      assertQuery(Values(Reminder.exists())) {
+        """
+        SELECT EXISTS (
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+          FROM "reminders"
+        )
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
       assertQuery(Values(Reminder.where { $0.id == 1 }.exists())) {
         """
         SELECT EXISTS (
