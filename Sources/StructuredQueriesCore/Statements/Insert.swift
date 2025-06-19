@@ -303,13 +303,11 @@ extension Table {
     V1,
     each V2,
     C1: QueryExpression,
-    each C2: QueryExpression,
-    From,
-    Joins
+    each C2: QueryExpression
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    select selection: () -> Select<(C1, repeat each C2), From, Joins>,
+    select selection: () -> some PartialSelectStatement<(C1, repeat each C2)>,
     onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
@@ -346,14 +344,12 @@ extension Table {
     each V2,
     C1: QueryExpression,
     each C2: QueryExpression,
-    From,
-    Joins,
     T1,
     each T2
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    select selection: () -> Select<(C1, repeat each C2), From, Joins>,
+    select selection: () -> some PartialSelectStatement<(C1, repeat each C2)>,
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -380,13 +376,11 @@ extension Table {
   private static func _insert<
     each Value,
     each ResultColumn: QueryExpression,
-    From,
-    Joins,
     each ConflictTarget
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
-    select selection: () -> Select<(repeat each ResultColumn), From, Joins>,
+    select selection: () -> some PartialSelectStatement<(repeat each ResultColumn)>,
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
