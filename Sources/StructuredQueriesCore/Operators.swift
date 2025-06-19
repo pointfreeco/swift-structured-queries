@@ -917,7 +917,7 @@ extension PartialSelectStatement {
   ///
   /// - Returns: A predicate expression indicating whether this subquery contains any element.
   public func exists() -> some QueryExpression<Bool> {
-    SQLQueryExpression("EXISTS \(self)")
+    SQLQueryExpression("EXISTS \(self.queryFragment)")
   }
 }
 
