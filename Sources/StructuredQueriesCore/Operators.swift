@@ -926,7 +926,7 @@ extension Table {
   ///
   /// - Returns: A predicate expression indicating whether this subquery contains any element.
   public static func exists() -> some QueryExpression<Bool> {
-    SQLQueryExpression("EXISTS \(all)")
+    all.exists()
   }
 }
 
