@@ -921,6 +921,15 @@ extension Statement {
   }
 }
 
+extension Table {
+  /// Returns a predicate expression indicating whether this table contains any element.
+  ///
+  /// - Returns: A predicate expression indicating whether this subquery contains any element.
+  public static func exists() -> some QueryExpression<Bool> {
+    SQLQueryExpression("EXISTS \(all)")
+  }
+}
+
 private struct UnaryOperator<QueryValue>: QueryExpression {
   let `operator`: QueryFragment
   let base: QueryFragment
