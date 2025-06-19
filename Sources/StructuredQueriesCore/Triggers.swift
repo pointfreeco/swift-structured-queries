@@ -197,7 +197,7 @@ extension Table {
     Self.createTemporaryTrigger(
       name,
       ifNotExists: ifNotExists,
-      afterUpdateTouch: {
+      afterInsertTouch: {
         $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
       },
       fileID: fileID,
