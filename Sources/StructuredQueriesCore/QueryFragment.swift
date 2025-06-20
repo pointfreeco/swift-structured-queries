@@ -64,15 +64,20 @@ public struct QueryFragment: Hashable, Sendable {
   public func prepare(
     _ template: (_ offset: Int) -> String
   ) -> (sql: String, bindings: [QueryBinding]) {
-    segments.enumerated().reduce(into: (sql: "", bindings: [QueryBinding]())) {
-      switch $1.element {
-      case .sql(let sql):
-        $0.sql.append(sql)
+    var sql = ""
+    var bindings: [QueryBinding] = []
+    var offset = 1
+    for segment in segments {
+      switch segment {
+      case .sql(let fragment):
+        sql.append(fragment)
       case .binding(let binding):
-        $0.sql.append(template($0.bindings.count + 1))
-        $0.bindings.append(binding)
+        defer { offset += 1 }
+        sql.append(template(offset))
+        bindings.append(binding)
       }
     }
+    return (sql, bindings)
   }
 }
 
