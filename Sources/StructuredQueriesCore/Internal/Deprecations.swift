@@ -84,14 +84,13 @@ extension Table {
 
   @available(*, deprecated, renamed: "insert(or:_:select:onConflictDoUpdate:)")
   public static func insert<
-    V1, each V2, C1: QueryExpression, each C2: QueryExpression, From, Joins
+    V1, each V2, From, Joins
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    select selection: () -> Select<(C1, repeat each C2), From, Joins>,
+    select selection: () -> Select<(V1, repeat each V2), From, Joins>,
     onConflict updates: ((inout Updates<Self>) -> Void)?
-  ) -> InsertOf<Self>
-  where C1.QueryValue == V1, (repeat (each C2).QueryValue) == (repeat each V2) {
+  ) -> InsertOf<Self> {
     insert(or: conflictResolution, columns, select: selection, onConflictDoUpdate: updates)
   }
 }

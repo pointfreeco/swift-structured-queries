@@ -473,15 +473,6 @@ extension SnapshotTests {
         DO NOTHING
         RETURNING "reminderID", "tagID"
         """
-      } results: {
-        """
-        ┌──────────────────┐
-        │ ReminderTag(     │
-        │   reminderID: 1, │
-        │   tagID: 1       │
-        │ )                │
-        └──────────────────┘
-        """
       }
     }
 
@@ -618,6 +609,30 @@ extension SnapshotTests {
         ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt")
         VALUES
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, '', '2040-02-14 23:31:30.000')
+        """
+      }
+    }
+
+    @Test func insertSelectSQL() {
+      assertQuery(
+        RemindersList.insert {
+          $0.title
+        } select: {
+          Values(#sql("'Groceries'"))
+        }
+        .returning(\.id)
+      ) {
+        """
+        INSERT INTO "remindersLists"
+        ("title")
+        SELECT 'Groceries'
+        RETURNING "id"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 4 │
+        └───┘
         """
       }
     }

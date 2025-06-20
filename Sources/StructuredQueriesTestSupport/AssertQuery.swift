@@ -97,6 +97,22 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
         line: line,
         column: column
       )
+    } else if results != nil {
+      assertInlineSnapshot(
+        of: table,
+        as: .lines,
+        message: "Results expected to be empty",
+        syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+          trailingClosureLabel: "results",
+          trailingClosureOffset: snapshotTrailingClosureOffset + 1
+        ),
+        matches: results,
+        fileID: fileID,
+        file: filePath,
+        function: function,
+        line: line,
+        column: column
+      )
     }
   } catch {
     assertInlineSnapshot(

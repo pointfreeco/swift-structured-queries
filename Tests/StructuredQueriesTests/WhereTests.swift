@@ -42,6 +42,24 @@ extension SnapshotTests {
       }
     }
 
+    @Test(.snapshots(record: .never)) func emptyResults() {
+      withKnownIssue("This assert should fail") {
+        assertQuery(
+          Reminder.where { $0.isCompleted && !$0.isCompleted }
+        ) {
+          """
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+          FROM "reminders"
+          WHERE ("reminders"."isCompleted") AND ("reminders"."isFlagged")
+          """
+        } results: {
+          """
+          Results
+          """
+        }
+      }
+    }
+
     @Test func or() {
       assertQuery(
         Reminder.where(\.isCompleted).or(Reminder.where(\.isFlagged))
