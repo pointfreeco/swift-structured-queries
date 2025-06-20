@@ -647,6 +647,30 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func insertSelectSQL() {
+      assertQuery(
+        RemindersList.insert {
+          $0.title
+        } select: {
+          Values(#sql("'Groceries'"))
+        }
+        .returning(\.id)
+      ) {
+        """
+        INSERT INTO "remindersLists"
+        ("title")
+        SELECT 'Groceries'
+        RETURNING "id"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 4 │
+        └───┘
+        """
+      }
+    }
   }
 }
 

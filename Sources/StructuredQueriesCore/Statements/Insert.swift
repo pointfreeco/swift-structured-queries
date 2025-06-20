@@ -301,18 +301,15 @@ extension Table {
   /// - Returns: An insert statement.
   public static func insert<
     V1,
-    each V2,
-    C1: QueryExpression,
-    each C2: QueryExpression
+    each V2
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    select selection: () -> some PartialSelectStatement<(C1, repeat each C2)>,
+    select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
     onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self>
-  where C1.QueryValue == V1, (repeat (each C2).QueryValue) == (repeat each V2) {
+  ) -> InsertOf<Self> {
     _insert(
       or: conflictResolution,
       columns,
@@ -342,14 +339,12 @@ extension Table {
   public static func insert<
     V1,
     each V2,
-    C1: QueryExpression,
-    each C2: QueryExpression,
     T1,
     each T2
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    select selection: () -> some PartialSelectStatement<(C1, repeat each C2)>,
+    select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -358,8 +353,7 @@ extension Table {
     doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self>
-  where C1.QueryValue == V1, (repeat (each C2).QueryValue) == (repeat each V2) {
+  ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
         or: conflictResolution,
@@ -375,20 +369,18 @@ extension Table {
 
   private static func _insert<
     each Value,
-    each ResultColumn: QueryExpression,
     each ConflictTarget
   >(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
-    select selection: () -> some PartialSelectStatement<(repeat each ResultColumn)>,
+    select selection: () -> some PartialSelectStatement<(repeat each Value)>,
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
     doUpdate updates: ((inout Updates<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self>
-  where (repeat (each ResultColumn).QueryValue) == (repeat each Value) {
+  ) -> InsertOf<Self> {
     var columnNames: [String] = []
     for column in repeat each columns(Self.columns) {
       columnNames.append(column.name)
