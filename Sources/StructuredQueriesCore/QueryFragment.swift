@@ -69,7 +69,7 @@ public struct QueryFragment: Hashable, Sendable {
       case .sql(let sql):
         $0.sql.append(sql)
       case .binding(let binding):
-        $0.sql.append(template($1.offset + 1))
+        $0.sql.append(template($0.bindings.count + 1))
         $0.bindings.append(binding)
       }
     }
