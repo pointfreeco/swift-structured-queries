@@ -124,30 +124,10 @@ extension Table {
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
   /// - Returns: A temporary trigger.
-  public static func createTemporaryTrigger(
+  public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
     _ name: String? = nil,
     ifNotExists: Bool = false,
-    afterUpdateTouch date: KeyPath<TableColumns, TableColumn<Self, Date>>,
-    fileID: StaticString = #fileID,
-    line: UInt = #line,
-    column: UInt = #column
-  ) -> TemporaryTrigger<Self> {
-    Self.createTemporaryTrigger(
-      name,
-      ifNotExists: ifNotExists,
-      afterUpdateTouch: {
-        $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
-      },
-      fileID: fileID,
-      line: line,
-      column: column
-    )
-  }
-
-  public static func createTemporaryTrigger(
-    _ name: String? = nil,
-    ifNotExists: Bool = false,
-    afterUpdateTouch date: KeyPath<TableColumns, TableColumn<Self, Date?>>,
+    afterUpdateTouch date: KeyPath<TableColumns, TableColumn<Self, D>>,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -186,10 +166,10 @@ extension Table {
     )
   }
 
-  public static func createTemporaryTrigger(
+  public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
     _ name: String? = nil,
     ifNotExists: Bool = false,
-    afterInsertTouch date: KeyPath<TableColumns, TableColumn<Self, Date?>>,
+    afterInsertTouch date: KeyPath<TableColumns, TableColumn<Self, D>>,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
