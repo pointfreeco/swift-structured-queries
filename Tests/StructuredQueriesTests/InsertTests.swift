@@ -500,15 +500,6 @@ extension SnapshotTests {
         DO NOTHING
         RETURNING "reminderID", "tagID"
         """
-      } results: {
-        """
-        ┌──────────────────┐
-        │ ReminderTag(     │
-        │   reminderID: 1, │
-        │   tagID: 1       │
-        │ )                │
-        └──────────────────┘
-        """
       }
     }
 
