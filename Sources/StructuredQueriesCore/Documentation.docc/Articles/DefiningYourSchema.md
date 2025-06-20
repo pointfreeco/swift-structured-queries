@@ -189,12 +189,12 @@ and will decode data from the database using the `RawRepresentable` conformance 
 @Row {
   @Column {
     ```swift
-    Reminder.insert(
+    Reminder.insert {
       Reminder.Draft(
         title: "Get haircut",
         priority: .medium
       )
-    )
+    }
     ```
   }
   @Column {
@@ -240,12 +240,12 @@ With that you can insert reminders with notes like so:
 @Row {
   @Column {
     ```swift
-    Reminder.insert(
+    Reminder.insert {
       Reminder.Draft(
         title: "Get groceries",
         notes: ["Milk", "Eggs", "Bananas"]
       )
-    )
+    }
     ```
   }
   @Column {
@@ -342,9 +342,9 @@ And StructuredQueries will take care of formatting the value for the database:
 @Row {
   @Column {
     ```swift
-    Reminder.insert(
+    Reminder.insert {
       Reminder.Draft(date: Date())
-    )
+    }
     ```
   }
   @Column {

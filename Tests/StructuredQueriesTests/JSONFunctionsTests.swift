@@ -86,20 +86,20 @@ extension SnapshotTests {
     @Test func queryJSON() throws {
       try db.execute(Reminder.delete())
       try db.execute(
-        Reminder.insert([
+        Reminder.insert {
           Reminder.Draft(
             notes: #"""
               [{"body": "* Milk\n* Eggs"},{"body": "* Eggs"},]
               """#,
             remindersListID: 1,
             title: "Get groceries"
-          ),
+          )
           Reminder.Draft(
             notes: "[]",
             remindersListID: 1,
             title: "Call accountant"
-          ),
-        ])
+          )
+        }
       )
 
       assertQuery(
@@ -136,13 +136,13 @@ extension SnapshotTests {
             ReminderRow.Columns(
               assignedUser: user,
               reminder: reminder,
-              tags: #sql("\(tag.jsonGroupArray())")
+              tags: tag.jsonGroupArray()
             )
           }
           .limit(2)
       ) {
         """
-        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(CASE WHEN ("tags"."id" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) AS "tags"
+        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title" AS "reminder", json_group_array(CASE WHEN ("tags"."id" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id" IS NOT NULL)) AS "tags"
         FROM "reminders"
         LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
         LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
@@ -214,18 +214,21 @@ extension SnapshotTests {
       assertQuery(
         RemindersList
           .group(by: \.id)
-          .leftJoin(Reminder.incomplete) { $0.id.eq($1.remindersListID) }
-          .select { remindersList, reminder in
+          .leftJoin(Milestone.all) { $0.id.eq($1.remindersListID) }
+          .leftJoin(Reminder.incomplete) { $0.id.eq($2.remindersListID) }
+          .select {
             RemindersListRow.Columns(
-              remindersList: remindersList,
-              reminders: #sql("\(reminder.jsonGroupArray())")
+              remindersList: $0,
+              milestones: $1.jsonGroupArray(isDistinct: true),
+              reminders: $2.jsonGroupArray(isDistinct: true)
             )
           }
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", json_group_array(CASE WHEN ("reminders"."id" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")) END) AS "reminders"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" AS "remindersList", json_group_array(DISTINCT CASE WHEN ("milestones"."id" IS NOT NULL) THEN json_object('id', json_quote("milestones"."id"), 'remindersListID', json_quote("milestones"."remindersListID"), 'title', json_quote("milestones"."title")) END) FILTER (WHERE ("milestones"."id" IS NOT NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."id" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title")) END) FILTER (WHERE ("reminders"."id" IS NOT NULL)) AS "reminders"
         FROM "remindersLists"
+        LEFT JOIN "milestones" ON ("remindersLists"."id" = "milestones"."remindersListID")
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE NOT ("reminders"."isCompleted")
         GROUP BY "remindersLists"."id"
@@ -240,6 +243,23 @@ extension SnapshotTests {
         │     color: 4889071,                            │
         │     title: "Personal"                          │
         │   ),                                           │
+        │   milestones: [                                │
+        │     [0]: Milestone(                            │
+        │       id: 1,                                   │
+        │       remindersListID: 1,                      │
+        │       title: "Phase 1"                         │
+        │     ),                                         │
+        │     [1]: Milestone(                            │
+        │       id: 2,                                   │
+        │       remindersListID: 1,                      │
+        │       title: "Phase 2"                         │
+        │     ),                                         │
+        │     [2]: Milestone(                            │
+        │       id: 3,                                   │
+        │       remindersListID: 1,                      │
+        │       title: "Phase 3"                         │
+        │     )                                          │
+        │   ],                                           │
         │   reminders: [                                 │
         │     [0]: Reminder(                             │
         │       id: 1,                                   │
@@ -295,7 +315,7 @@ extension SnapshotTests {
 }
 
 @Selection
-private struct ReminderRow {
+private struct ReminderRow: Codable {
   let assignedUser: User?
   let reminder: Reminder
   @Column(as: [Tag].JSONRepresentation.self)
@@ -305,6 +325,8 @@ private struct ReminderRow {
 @Selection
 private struct RemindersListRow {
   let remindersList: RemindersList
+  @Column(as: [Milestone].JSONRepresentation.self)
+  let milestones: [Milestone]
   @Column(as: [Reminder].JSONRepresentation.self)
   let reminders: [Reminder]
 }

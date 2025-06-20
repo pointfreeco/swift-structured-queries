@@ -349,7 +349,7 @@ table. For example, querying for all reminders lists along with an array of the 
 list. We'd like to be able to query for this data and decode it into a collection of values
 from the following data type:
 
-```struct
+```swift
 struct Row {
   let remindersList: RemindersList
   let reminders: [Reminder]
@@ -395,7 +395,7 @@ Another way to do this is to use the `@Selection` macro described above
 (<doc:QueryCookbook#Custom-selections>), along with a ``Swift/Decodable/JSONRepresentation`` of the
 collection of reminders you want to load for each list:
 
-```struct
+```swift
 @Selection
 struct Row {
   let remindersList: RemindersList
@@ -414,7 +414,7 @@ columns of [primary keyed tables](<doc:PrimaryKeyedTables>):
 
 ```swift
 RemindersList
-  .join(Reminder.all) { $0.id.eq($1.remindersListID) }
+  .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
   .select {
     Row.Columns(
       remindersList: $0,
@@ -423,8 +423,63 @@ RemindersList
   }
 ```
 
+> Note: There are 2 important things to note about this query:
+>
+> * Since not every reminders list will have a reminder associated with it, we are using a
+>   ``Select/leftJoin(_:on:)``. That will make sure to select all lists no matter what.
+> * The left join introduces _optional_ reminders, but we are using a special overload of
+>   `jsonGroupArray` on optionals that automatically filters out `nil` reminders and unwraps them.
+
 This allows you to fetch all of the data in a single SQLite query and decode the data into a
 collection of `Row` values. There is an extra cost associated with decoding the JSON object,
 but that cost may be smaller than executing multiple SQLite requests and transforming the data
 into `Row` manually, not to mention the additional code you need to write and maintain to process
 the data.
+
+It is even possible to load multiple associations at once. For example, suppose that there is a
+`Milestone` table that is associated with a `RemindersList`:
+
+```swift
+@Table
+struct Milestone: Identifiable, Codable {
+  let id: Int
+  var title = ""
+  var remindersListID: RemindersList.ID
+}
+```
+
+And suppose you would like to fetch all `RemindersList`s along with the collection of all milestones
+and reminders associated with the list:
+
+```struct
+@Selection
+struct Row {
+  let remindersList: RemindersList
+  @Column(as: [Milestone].JSONRepresentation.self)
+  let milestones: [Milestone]
+  @Column(as: [Reminder].JSONRepresentation.self)
+  let reminders: [Reminder]
+}
+```
+
+It is possible to do this using two left joins and two `jsonGroupArray`s:
+
+```swift
+RemindersList
+  .leftJoin(Milestone.all) { $0.id.eq($1.remindersListID) }
+  .leftJoin(Reminder.all) { $0.id.eq($2.remindersListID) }
+  .select {
+    Row.Columns(
+      remindersList: $0,
+      milestones: $1.jsonGroupArray(isDistinct: true),
+      reminders: $2.jsonGroupArray(isDistinct: true)
+    )
+  }
+```
+
+> Note: Because we are now joining two independent tables to `RemindersList`, we will get duplicate
+> entries for all pairs of reminders with milestones. To remove those duplicates we use the
+> `isDistinct` option for `jsonGroupArray`.
+
+This will now load all reminders lists with all of their reminders and milestones in one single
+SQL query.

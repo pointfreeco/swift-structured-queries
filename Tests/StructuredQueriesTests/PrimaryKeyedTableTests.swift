@@ -116,7 +116,39 @@ extension SnapshotTests {
       }
 
       assertQuery(
+        Reminder.Draft.find(1).select { ($0.id, $0.title) }
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" = 1)
+        """
+      } results: {
+        """
+        ┌───┬─────────────┐
+        │ 1 │ "Groceries" │
+        └───┴─────────────┘
+        """
+      }
+
+      assertQuery(
         Reminder.select { ($0.id, $0.title) }.find(2)
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" = 2)
+        """
+      } results: {
+        """
+        ┌───┬───────────┐
+        │ 2 │ "Haircut" │
+        └───┴───────────┘
+        """
+      }
+
+      assertQuery(
+        Reminder.Draft.select { ($0.id, $0.title) }.find(2)
       ) {
         """
         SELECT "reminders"."id", "reminders"."title"
@@ -162,7 +194,7 @@ extension SnapshotTests {
           """
         )
       )
-      try database.execute(Row.insert(Row(id: UUID(1))))
+      try database.execute(Row.insert { Row(id: UUID(1)) })
       assertQuery(
         Row.find(UUID(1))
       ) {

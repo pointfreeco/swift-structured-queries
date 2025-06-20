@@ -212,7 +212,7 @@ extension Table {
   /// - Returns: A select statement that groups by the given column.
   public static func group<C: QueryExpression>(
     by grouping: (TableColumns) -> C
-  ) -> SelectOf<Self> where C.QueryValue: QueryDecodable {
+  ) -> SelectOf<Self> {
     Where().group(by: grouping)
   }
 
@@ -226,12 +226,7 @@ extension Table {
     each C3: QueryExpression
   >(
     by grouping: (TableColumns) -> (C1, C2, repeat each C3)
-  ) -> SelectOf<Self>
-  where
-    C1.QueryValue: QueryDecodable,
-    C2.QueryValue: QueryDecodable,
-    repeat (each C3).QueryValue: QueryDecodable
-  {
+  ) -> SelectOf<Self> {
     Where().group(by: grouping)
   }
 
@@ -241,7 +236,7 @@ extension Table {
   ///   columns.
   /// - Returns: A select statement that is filtered by the given predicate.
   public static func having(
-    _ predicate: (TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> SelectOf<Self> {
     Where().having(predicate)
   }
@@ -295,7 +290,7 @@ extension Table {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A select statement that selects `count(*)`.
   public static func count(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> Select<Int, Self, ()> {
     Where().count(filter: filter)
   }
@@ -439,6 +434,18 @@ extension Select {
   @_disfavoredOverload
   public func select<C: QueryExpression, each J: Table>(
     _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C
+  ) -> Select<C.QueryValue, From, (repeat each J)>
+  where Columns == (), C.QueryValue: QueryRepresentable, Joins == (repeat each J) {
+    _select(selection)
+  }
+
+  /// Creates a new select statement from this one by selecting the given result column.
+  ///
+  /// - Parameter selection: A closure that selects a result column from this select's tables.
+  /// - Returns: A new select statement that selects the given column.
+  @_disfavoredOverload
+  public func select<C: QueryExpression, each J: Table>(
+    _ selection: (From.TableColumns, repeat (each J).TableColumns) -> C
   ) -> Select<C.QueryValue, From, (repeat each J)>
   where Columns == (), C.QueryValue: QueryRepresentable, Joins == (repeat each J) {
     _select(selection)
@@ -1103,7 +1110,7 @@ extension Select {
   /// - Parameter keyPath: A key path from this select's table to a Boolean expression to filter by.
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
   public func `where`(
-    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<Bool>>
+    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<some _OptionalPromotable<Bool?>>>
   ) -> Self
   where Joins == () {
     var select = self
@@ -1118,7 +1125,9 @@ extension Select {
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
   @_disfavoredOverload
   public func `where`<each J: Table>(
-    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<
+      some _OptionalPromotable<Bool?>
+    >
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
@@ -1170,8 +1179,7 @@ extension Select {
   /// - Returns: A new select statement that groups by the given column.
   public func group<C: QueryExpression, each J: Table>(
     by grouping: (From.TableColumns, repeat (each J).TableColumns) -> C
-  ) -> Self
-  where C.QueryValue: QueryDecodable, Joins == (repeat each J) {
+  ) -> Self where Joins == (repeat each J) {
     _group(by: grouping)
   }
 
@@ -1187,13 +1195,7 @@ extension Select {
     each J: Table
   >(
     by grouping: (From.TableColumns, repeat (each J).TableColumns) -> (C1, C2, repeat each C3)
-  ) -> Self
-  where
-    C1.QueryValue: QueryDecodable,
-    C2.QueryValue: QueryDecodable,
-    repeat (each C3).QueryValue: QueryDecodable,
-    Joins == (repeat each J)
-  {
+  ) -> Self where Joins == (repeat each J) {
     _group(by: grouping)
   }
 
@@ -1202,11 +1204,7 @@ extension Select {
     each J: Table
   >(
     by grouping: (From.TableColumns, repeat (each J).TableColumns) -> (repeat each C)
-  ) -> Self
-  where
-    repeat (each C).QueryValue: QueryDecodable,
-    Joins == (repeat each J)
-  {
+  ) -> Self where Joins == (repeat each J) {
     var select = self
     select.group
       .append(
@@ -1222,7 +1220,9 @@ extension Select {
   /// - Returns: A new select statement that appends the given predicate to its `HAVING` clause.
   @_disfavoredOverload
   public func having<each J: Table>(
-    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<
+      some _OptionalPromotable<Bool?>
+    >
   ) -> Self
   where Joins == (repeat each J) {
     var select = self
@@ -1309,10 +1309,11 @@ extension Select {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
   public func count<each J: Table>(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> Select<Int, From, (repeat each J)>
   where Columns == (), Joins == (repeat each J) {
-    select { _ in .count(filter: filter) }
+    let filter = filter?(From.columns, repeat (each J).columns)
+    return select { _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
@@ -1320,12 +1321,13 @@ extension Select {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
   public func count<each C: QueryRepresentable, each J: Table>(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> Select<
     (repeat each C, Int), From, (repeat each J)
   >
   where Columns == (repeat each C), Joins == (repeat each J) {
-    select { _ in .count(filter: filter) }
+    let filter = filter?(From.columns, repeat (each J).columns)
+    return select { _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by transforming its selected columns to a new

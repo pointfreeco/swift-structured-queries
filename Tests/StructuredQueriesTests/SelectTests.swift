@@ -644,6 +644,23 @@ extension SnapshotTests {
         └───────┴───┘
         """
       }
+
+      assertQuery(
+        Reminder.select { ($0.isCompleted, $0.id.count()) }.group { #sql("\($0.isCompleted)") }
+      ) {
+        """
+        SELECT "reminders"."isCompleted", count("reminders"."id")
+        FROM "reminders"
+        GROUP BY "reminders"."isCompleted"
+        """
+      } results: {
+        """
+        ┌───────┬───┐
+        │ false │ 7 │
+        │ true  │ 3 │
+        └───────┴───┘
+        """
+      }
     }
 
     @Test func having() {
@@ -853,6 +870,21 @@ extension SnapshotTests {
         ┌────┐
         │ 10 │
         └────┘
+        """
+      }
+    }
+
+    @Test func countFilter() {
+      assertQuery(Reminder.count { !$0.isCompleted }) {
+        """
+        SELECT count(*) FILTER (WHERE NOT ("reminders"."isCompleted"))
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 7 │
+        └───┘
         """
       }
     }
@@ -1094,7 +1126,7 @@ extension SnapshotTests {
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
-        WHERE ifnull(("reminders"."priority" = 3), 0)
+        WHERE ifnull(("reminders"."priority" IS 3), 0)
         """
       } results: {
         """
@@ -1136,6 +1168,163 @@ extension SnapshotTests {
         │                     │ )                                          │
         └─────────────────────┴────────────────────────────────────────────┘
         """
+      }
+    }
+
+    @Test func reusableStaticHelperOnDraft() {
+      assertQuery(
+        Reminder.Draft.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE NOT ("reminders"."isCompleted")
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.where { _ in true }.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE 1 AND NOT ("reminders"."isCompleted")
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.select(\.id).incomplete
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE NOT ("reminders"."isCompleted")
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.all.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE NOT ("reminders"."isCompleted")
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+    }
+
+    @Test func reusableColumnHelperOnDraft() {
+      assertQuery(
+        Reminder.Draft.select(\.isHighPriority)
+      ) {
+        """
+        SELECT ("reminders"."priority" IS 3)
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───────┐
+        │ false │
+        │ false │
+        │ true  │
+        │ false │
+        │ false │
+        │ true  │
+        │ false │
+        │ true  │
+        │ false │
+        │ false │
+        └───────┘
+        """
+      }
+    }
+
+    @Test func optionalMapAndFlatMap() {
+      do {
+        let query: some Statement<Bool?> = Reminder.select {
+          $0.priority.map { $0 < Priority.high }
+        }
+        assertQuery(query) {
+          """
+          SELECT ("reminders"."priority" < 3)
+          FROM "reminders"
+          """
+        } results: {
+          """
+          ┌───────┐
+          │ nil   │
+          │ nil   │
+          │ false │
+          │ nil   │
+          │ nil   │
+          │ false │
+          │ true  │
+          │ false │
+          │ nil   │
+          │ true  │
+          └───────┘
+          """
+        }
+      }
+      do {
+        let query: some Statement<Priority?> = Reminder.select { $0.priority.flatMap { $0.max() } }
+        assertQuery(query) {
+          """
+          SELECT max("reminders"."priority")
+          FROM "reminders"
+          """
+        } results: {
+          """
+          ┌───────┐
+          │ .high │
+          └───────┘
+          """
+        }
       }
     }
   }

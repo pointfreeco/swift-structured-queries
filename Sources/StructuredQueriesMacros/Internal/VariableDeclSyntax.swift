@@ -20,7 +20,7 @@ extension VariableDeclSyntax {
       switch binding.accessorBlock?.accessors {
       case .getter:
         return true
-      case let .accessors(accessors):
+      case .accessors(let accessors):
         for accessor in accessors {
           if accessor.accessorSpecifier.tokenKind == .keyword(.get) {
             return true

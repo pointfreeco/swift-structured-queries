@@ -19,14 +19,13 @@ extension SnapshotTests {
 
     @Test func bytes() throws {
       assertQuery(
-        Record
-          .insert(
-            Record.Draft(
-              id: UUID(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef"),
-              name: "Blob"
-            )
+        Record.insert {
+          Record.Draft(
+            id: UUID(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef"),
+            name: "Blob"
           )
-          .returning(\.self)
+        }
+        .returning(\.self)
       ) {
         #"""
         INSERT INTO "records"
@@ -50,14 +49,13 @@ extension SnapshotTests {
 
     @Test func overflow() throws {
       assertQuery(
-        Record
-          .insert(
-            Record.Draft(
-              id: UUID(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef"),
-              duration: UInt64.max
-            )
+        Record.insert {
+          Record.Draft(
+            id: UUID(uuidString: "deadbeef-dead-beef-dead-beefdeadbeef"),
+            duration: UInt64.max
           )
-          .returning(\.self)
+        }
+        .returning(\.self)
       ) {
         #"""
         INSERT INTO "records"

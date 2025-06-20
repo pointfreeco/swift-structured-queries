@@ -20,7 +20,7 @@ extension Table {
   /// - Parameter keyPath: A key path to a Boolean expression to filter by.
   /// - Returns: A `WHERE` clause.
   public static func `where`(
-    _ keyPath: KeyPath<TableColumns, some QueryExpression<Bool>>
+    _ keyPath: KeyPath<TableColumns, some QueryExpression<some _OptionalPromotable<Bool?>>>
   ) -> Where<Self> {
     Where(predicates: [columns[keyPath: keyPath].queryFragment])
   }
@@ -33,7 +33,7 @@ extension Table {
   /// - Returns: A `WHERE` clause.
   @_disfavoredOverload
   public static func `where`(
-    _ predicate: (TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Where<Self> {
     Where(predicates: [predicate(columns).queryFragment])
   }
@@ -79,6 +79,13 @@ public struct Where<From: Table> {
 
     public subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
       self + From.self[keyPath: keyPath]
+    }
+
+    public subscript(
+      dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Where<From.PrimaryTable>>
+    ) -> Self
+    where From: TableDraft {
+      self + unsafeBitCast(From.PrimaryTable.self[keyPath: keyPath], to: Self.self)
     }
   #endif
 }
@@ -285,7 +292,7 @@ extension Where: SelectStatement {
   /// - Parameter keyPath: A key path to a Boolean expression to filter by.
   /// - Returns: A where clause with the added predicate.
   public func `where`(
-    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<Bool>>
+    _ keyPath: KeyPath<From.TableColumns, some QueryExpression<some _OptionalPromotable<Bool?>>>
   ) -> Self {
     var `where` = self
     `where`.predicates.append(From.columns[keyPath: keyPath].queryFragment)
@@ -298,7 +305,7 @@ extension Where: SelectStatement {
   /// - Returns: A where clause with the added predicate.
   @_disfavoredOverload
   public func `where`(
-    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> Self {
     var `where` = self
     `where`.predicates.append(predicate(From.columns).queryFragment)
@@ -387,28 +394,22 @@ extension Where: SelectStatement {
   }
 
   /// A select statement for the filtered table grouped by the given column.
-  public func group<C: QueryExpression>(by grouping: (From.TableColumns) -> C) -> Select<
-    (), From, ()
-  >
-  where C.QueryValue: QueryDecodable {
+  public func group<C: QueryExpression>(
+    by grouping: (From.TableColumns) -> C
+  ) -> Select<(), From, ()> {
     asSelect().group(by: grouping)
   }
 
   /// A select statement for the filtered table grouped by the given columns.
   public func group<C1: QueryExpression, C2: QueryExpression, each C3: QueryExpression>(
     by grouping: (From.TableColumns) -> (C1, C2, repeat each C3)
-  ) -> SelectOf<From>
-  where
-    C1.QueryValue: QueryDecodable,
-    C2.QueryValue: QueryDecodable,
-    repeat (each C3).QueryValue: QueryDecodable
-  {
+  ) -> SelectOf<From> {
     asSelect().group(by: grouping)
   }
 
   /// A select statement for the filtered table with the given `HAVING` clause.
   public func having(
-    _ predicate: (From.TableColumns) -> some QueryExpression<Bool>
+    _ predicate: (From.TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
   ) -> SelectOf<From> {
     asSelect().having(predicate)
   }
@@ -462,7 +463,7 @@ extension Where: SelectStatement {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A select statement that selects `count(*)`.
   public func count(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: ((From.TableColumns) -> any QueryExpression<Bool>)? = nil
   ) -> Select<Int, From, ()> {
     asSelect().count(filter: filter)
   }

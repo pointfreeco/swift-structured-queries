@@ -1,10 +1,14 @@
 public protocol _OptionalProtocol<Wrapped> {
   associatedtype Wrapped
   var _wrapped: Wrapped? { get }
+  static var _none: Self { get }
+  static func _some(_ wrapped: Wrapped) -> Self
 }
 
 extension Optional: _OptionalProtocol {
   public var _wrapped: Wrapped? { self }
+  public static var _none: Self { .none }
+  public static func _some(_ wrapped: Wrapped) -> Self { .some(wrapped) }
 }
 
 public protocol _OptionalPromotable<_Optionalized> {
@@ -131,5 +135,45 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
 
   public var primaryKey: TableColumn<Optional, Wrapped.TableColumns.PrimaryKey.QueryValue?> {
     self[dynamicMember: \.primaryKey]
+  }
+}
+
+extension QueryExpression where QueryValue: _OptionalProtocol {
+  /// Creates and optionalizes a new expression from this one by applying an unwrapped version of
+  /// this expression to a given closure.
+  ///
+  /// ```swift
+  /// Reminder.where {
+  ///   $0.dueDate.map { $0 > Date() }
+  /// }
+  /// // SELECT … FROM "reminders"
+  /// // WHERE "reminders"."dueDate" > '2018-01-29 00:08:00.000'
+  /// ```
+  ///
+  /// - Parameter transform: A closure that takes an unwrapped version of this expression.
+  /// - Returns: The result of the transform function, optionalized.
+  public func map<T>(
+    _ transform: (SQLQueryExpression<QueryValue.Wrapped>) -> some QueryExpression<T>
+  ) -> some QueryExpression<T?> {
+    SQLQueryExpression(transform(SQLQueryExpression(queryFragment)).queryFragment)
+  }
+
+  /// Creates a new optional expression from this one by applying an unwrapped version of this
+  /// expression to a given closure.
+  ///
+  /// ```swift
+  /// Reminder.select {
+  ///   $0.dueDate.flatMap { $0.max() }
+  /// }
+  /// // SELECT max("reminders"."dueDate") FROM "reminders"
+  /// // => [Date?]
+  /// ```
+  ///
+  /// - Parameter transform: A closure that takes an unwrapped version of this expression.
+  /// - Returns: The result of the transform function.
+  public func flatMap<T>(
+    _ transform: (SQLQueryExpression<QueryValue.Wrapped>) -> some QueryExpression<T?>
+  ) -> some QueryExpression<T?> {
+    SQLQueryExpression(transform(SQLQueryExpression(queryFragment)).queryFragment)
   }
 }
