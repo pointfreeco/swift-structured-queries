@@ -40,10 +40,10 @@ extension SnapshotTests {
       }
     }
 
-    @Test func emptyResults() {
+    @Test(.snapshots(record: .never)) func emptyResults() {
       withKnownIssue("This assert should fail") {
         assertQuery(
-          Reminder.where(\.isCompleted).and(Reminder.where(\.isFlagged))
+          Reminder.where { $0.isCompleted && !$0.isCompleted }
         ) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
@@ -51,45 +51,9 @@ extension SnapshotTests {
         WHERE ("reminders"."isCompleted") AND ("reminders"."isFlagged")
         """
         } results: {
-        """
-        ┌────────────────────────────────────────────┐
-        │ Reminder(                                  │
-        │   id: 4,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2000-06-25T00:00:00.000Z), │
-        │   isCompleted: true,                       │
-        │   isFlagged: false,                        │
-        │   notes: "",                               │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Take a walk"                     │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder(                                  │
-        │   id: 7,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2000-12-30T00:00:00.000Z), │
-        │   isCompleted: true,                       │
-        │   isFlagged: false,                        │
-        │   notes: "",                               │
-        │   priority: .low,                          │
-        │   remindersListID: 2,                      │
-        │   title: "Get laundry"                     │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder(                                  │
-        │   id: 10,                                  │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2000-12-30T00:00:00.000Z), │
-        │   isCompleted: true,                       │
-        │   isFlagged: false,                        │
-        │   notes: "",                               │
-        │   priority: .medium,                       │
-        │   remindersListID: 3,                      │
-        │   title: "Send weekly emails"              │
-        │ )                                          │
-        └────────────────────────────────────────────┘
-        """
+          """
+          Results
+          """
         }
       }
     }

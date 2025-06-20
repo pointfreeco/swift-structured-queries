@@ -146,6 +146,7 @@ extension SnapshotTests {
       )
     }
 
+    @available(*, deprecated)
     @Test func recordWithOptionalDate() throws {
       struct Record: Equatable, QueryDecodable, QueryRepresentable {
         var date: Date?
