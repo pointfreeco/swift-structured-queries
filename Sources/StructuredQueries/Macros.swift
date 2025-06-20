@@ -139,3 +139,25 @@ public macro sql(
   as queryValueType: Any.Type = Any.self
 ) -> SQLQueryExpression<Any> =
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
+
+
+func samples() {
+
+  // Defining the `select` inline, the `order` compiles
+  let x = Parent
+    .join(Child.all) { $0.childId.eq($1.id) }
+  let x2 = x
+    .order { a, b in a.id }
+
+}
+
+@Table
+struct Parent: Identifiable {
+  let id: Int
+  let childId: Child.ID?
+}
+
+@Table
+struct Child: Identifiable {
+  let id: Int
+}

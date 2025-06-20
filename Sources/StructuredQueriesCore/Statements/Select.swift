@@ -1269,6 +1269,17 @@ extension Select {
     return select
   }
 
+  @_disfavoredOverload
+  public func order<each J: Table>(
+    @QueryFragmentBuilder<()>
+    by ordering: ((From.TableColumns, repeat (each J).TableColumns)) -> [QueryFragment]
+  ) -> Self
+  where Joins == (repeat each J) {
+    var select = self
+    select.order.append(contentsOf: ordering((From.columns, repeat (each J).columns)))
+    return select
+  }
+
   /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
   ///
   /// - Parameters:
