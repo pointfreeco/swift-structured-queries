@@ -233,8 +233,8 @@ public struct TemporaryTrigger<On: Table>: Statement {
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `AFTER INSERT` trigger operation.
     public static func insert(
-      forEachRow perform: (New) -> some Statement,
-      when condition: ((New) -> any QueryExpression<Bool>)? = nil
+      forEachRow perform: (_ new: New) -> some Statement,
+      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       Self(
         kind: .insert(operation: perform(On.as(_New.self).columns).query),
@@ -249,8 +249,8 @@ public struct TemporaryTrigger<On: Table>: Statement {
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `AFTER UPDATE` trigger operation.
     public static func update(
-      forEachRow perform: (Old, New) -> some Statement,
-      when condition: ((Old, New) -> any QueryExpression<Bool>)? = nil
+      forEachRow perform: (_ old: Old, _ new: New) -> some Statement,
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       update(
         of: { _ in },
@@ -268,8 +268,8 @@ public struct TemporaryTrigger<On: Table>: Statement {
     /// - Returns: An `AFTER UPDATE` trigger operation.
     public static func update<each Column>(
       of columns: (On.TableColumns) -> (repeat TableColumn<On, each Column>),
-      forEachRow perform: (Old, New) -> some Statement,
-      when condition: ((Old, New) -> any QueryExpression<Bool>)? = nil
+      forEachRow perform: (_ old: Old, _ new: New) -> some Statement,
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       var columnNames: [String] = []
       for column in repeat each columns(On.columns) {
@@ -291,8 +291,8 @@ public struct TemporaryTrigger<On: Table>: Statement {
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `AFTER DELETE` trigger operation.
     public static func delete(
-      forEachRow perform: (Old) -> some Statement,
-      when condition: ((Old) -> any QueryExpression<Bool>)? = nil
+      forEachRow perform: (_ old: Old) -> some Statement,
+      when condition: ((_ old: Old) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       Self(
         kind: .delete(operation: perform(On.as(_Old.self).columns).query),
