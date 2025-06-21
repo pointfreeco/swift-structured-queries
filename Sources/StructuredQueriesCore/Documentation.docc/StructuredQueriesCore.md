@@ -124,6 +124,7 @@ reading to learn more about building SQL with StructuredQueries.
 - <doc:UpdateStatements>
 - <doc:DeleteStatements>
 - <doc:WhereClauses>
+- <doc:Triggers>
 - <doc:CommonTableExpressions>
 - <doc:StatementTypes>
 

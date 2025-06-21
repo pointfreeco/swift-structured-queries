@@ -101,25 +101,26 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "reminders"
-        SET "assignedUserID" = 1, "dueDate" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries'
+        SET "assignedUserID" = 1, "dueDate" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries', "updatedAt" = '2040-02-14 23:31:30.000'
         WHERE ("reminders"."id" = 1)
-        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt"
         """
       } results: {
         """
-        ┌────────────────────────────────────────────┐
-        │ Reminder(                                  │
-        │   id: 1,                                   │
-        │   assignedUserID: 1,                       │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: true,                       │
-        │   isFlagged: false,                        │
-        │   notes: "Milk, Eggs, Apples",             │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Groceries"                       │
-        │ )                                          │
-        └────────────────────────────────────────────┘
+        ┌─────────────────────────────────────────────┐
+        │ Reminder(                                   │
+        │   id: 1,                                    │
+        │   assignedUserID: 1,                        │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: true,                        │
+        │   isFlagged: false,                         │
+        │   notes: "Milk, Eggs, Apples",              │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Groceries",                       │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
         """
       }
     }
@@ -270,23 +271,24 @@ extension SnapshotTests {
         UPDATE "reminders" AS "rs"
         SET "title" = ("rs"."title" || ' 2')
         WHERE ("rs"."id" = 1)
-        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt"
         """
       } results: {
         """
-        ┌────────────────────────────────────────────┐
-        │ Reminder(                                  │
-        │   id: 1,                                   │
-        │   assignedUserID: 1,                       │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "Milk, Eggs, Apples",             │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Groceries 2"                     │
-        │ )                                          │
-        └────────────────────────────────────────────┘
+        ┌─────────────────────────────────────────────┐
+        │ Reminder(                                   │
+        │   id: 1,                                    │
+        │   assignedUserID: 1,                        │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: false,                         │
+        │   notes: "Milk, Eggs, Apples",              │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Groceries 2",                     │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
         """
       }
     }
@@ -340,7 +342,7 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "reminders"
-        SET "assignedUserID" = NULL, "dueDate" = NULL, "isCompleted" = 1, "isFlagged" = 0, "notes" = '', "priority" = NULL, "remindersListID" = 1, "title" = 'Buy iPhone'
+        SET "assignedUserID" = NULL, "dueDate" = NULL, "isCompleted" = 1, "isFlagged" = 0, "notes" = '', "priority" = NULL, "remindersListID" = 1, "title" = 'Buy iPhone', "updatedAt" = '2040-02-14 23:31:30.000'
         WHERE ("reminders"."id" = 100)
         """
       }

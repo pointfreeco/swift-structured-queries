@@ -12,6 +12,7 @@ struct RemindersList: Codable, Equatable, Identifiable {
   let id: Int
   var color = 0x4a99ef
   var title = ""
+  var position = 0
 }
 
 @Table
@@ -27,6 +28,7 @@ struct Reminder: Codable, Equatable, Identifiable {
   var priority: Priority?
   var remindersListID: Int
   var title = ""
+  var updatedAt: Date = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
   static func searching(_ text: String) -> Where<Reminder> {
     Self.where {
       $0.title.collate(.nocase).contains(text)
@@ -85,7 +87,8 @@ extension Database {
       CREATE TABLE "remindersLists" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "color" INTEGER NOT NULL DEFAULT 4889071,
-        "title" TEXT NOT NULL DEFAULT ''
+        "title" TEXT NOT NULL DEFAULT '',
+        "position" INTEGER NOT NULL DEFAULT 0
       )
       """
     )
@@ -105,7 +108,8 @@ extension Database {
         "remindersListID" INTEGER NOT NULL REFERENCES "remindersLists"("id") ON DELETE CASCADE,
         "notes" TEXT NOT NULL DEFAULT '',
         "priority" INTEGER,
-        "title" TEXT NOT NULL DEFAULT ''
+        "title" TEXT NOT NULL DEFAULT '',
+        "updatedAt" TEXT NOT NULL DEFAULT (datetime('subsec'))
       )
       """
     )

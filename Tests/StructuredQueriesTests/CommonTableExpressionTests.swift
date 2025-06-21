@@ -108,7 +108,7 @@ extension SnapshotTests {
               .select { ($1.remindersListID, $0.title, !$0.isFlagged, true) }
               .limit(1)
           }
-          .returning(\.self)
+          .returning { ($0.id, $0.title) }
         }
       ) {
         """
@@ -123,23 +123,13 @@ extension SnapshotTests {
         FROM "incompleteReminders"
         JOIN "reminders" ON ("incompleteReminders"."title" = "reminders"."title")
         LIMIT 1
-        RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title"
+        RETURNING "id", "title"
         """
       } results: {
         """
-        ┌────────────────────────┐
-        │ Reminder(              │
-        │   id: 11,              │
-        │   assignedUserID: nil, │
-        │   dueDate: nil,        │
-        │   isCompleted: true,   │
-        │   isFlagged: true,     │
-        │   notes: "",           │
-        │   priority: nil,       │
-        │   remindersListID: 1,  │
-        │   title: "Groceries"   │
-        │ )                      │
-        └────────────────────────┘
+        ┌────┬─────────────┐
+        │ 11 │ "Groceries" │
+        └────┴─────────────┘
         """
       }
     }

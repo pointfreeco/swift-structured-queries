@@ -42,3 +42,18 @@ extension QueryFragmentBuilder<()> {
     Array(repeat each expression)
   }
 }
+
+extension QueryFragmentBuilder<any Statement> {
+  public static func buildExpression(
+    _ expression: some Statement
+  ) -> [QueryFragment] {
+    [expression.query]
+  }
+
+  public static func buildBlock(
+    _ first: [QueryFragment],
+    _ rest: [QueryFragment]...
+  ) -> [QueryFragment] {
+    first + rest.flatMap(\.self)
+  }
+}

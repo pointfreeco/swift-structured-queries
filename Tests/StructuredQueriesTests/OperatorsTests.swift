@@ -425,7 +425,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
         WHERE ("reminders"."id" BETWEEN coalesce((
           SELECT min("reminders"."id")
@@ -437,43 +437,46 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌────────────────────────────────────────────┐
-        │ Reminder(                                  │
-        │   id: 1,                                   │
-        │   assignedUserID: 1,                       │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "Milk, Eggs, Apples",             │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Groceries"                       │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder(                                  │
-        │   id: 2,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2000-12-30T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: true,                         │
-        │   notes: "",                               │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Haircut"                         │
-        │ )                                          │
-        ├────────────────────────────────────────────┤
-        │ Reminder(                                  │
-        │   id: 3,                                   │
-        │   assignedUserID: nil,                     │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "Ask about diet",                 │
-        │   priority: .high,                         │
-        │   remindersListID: 1,                      │
-        │   title: "Doctor appointment"              │
-        │ )                                          │
-        └────────────────────────────────────────────┘
+        ┌─────────────────────────────────────────────┐
+        │ Reminder(                                   │
+        │   id: 1,                                    │
+        │   assignedUserID: 1,                        │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: false,                         │
+        │   notes: "Milk, Eggs, Apples",              │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Groceries",                       │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        ├─────────────────────────────────────────────┤
+        │ Reminder(                                   │
+        │   id: 2,                                    │
+        │   assignedUserID: nil,                      │
+        │   dueDate: Date(2000-12-30T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: true,                          │
+        │   notes: "",                                │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Haircut",                         │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        ├─────────────────────────────────────────────┤
+        │ Reminder(                                   │
+        │   id: 3,                                    │
+        │   assignedUserID: nil,                      │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: false,                         │
+        │   notes: "Ask about diet",                  │
+        │   priority: .high,                          │
+        │   remindersListID: 1,                       │
+        │   title: "Doctor appointment",              │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
         """
       }
     }
@@ -571,7 +574,7 @@ extension SnapshotTests {
       assertQuery(Values(Reminder.exists())) {
         """
         SELECT EXISTS (
-          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
           FROM "reminders"
         )
         """
@@ -585,7 +588,7 @@ extension SnapshotTests {
       assertQuery(Values(Reminder.where { $0.id == 1 }.exists())) {
         """
         SELECT EXISTS (
-          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
           FROM "reminders"
           WHERE ("reminders"."id" = 1)
         )
@@ -600,7 +603,7 @@ extension SnapshotTests {
       assertQuery(Values(Reminder.where { $0.id == 100 }.exists())) {
         """
         SELECT EXISTS (
-          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
           FROM "reminders"
           WHERE ("reminders"."id" = 100)
         )

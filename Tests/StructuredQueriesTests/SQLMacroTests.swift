@@ -18,26 +18,27 @@ extension SnapshotTests {
         )
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
         ORDER BY "reminders"."id"
         LIMIT 1
         """
       } results: {
         """
-        ┌────────────────────────────────────────────┐
-        │ Reminder(                                  │
-        │   id: 1,                                   │
-        │   assignedUserID: 1,                       │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │   isCompleted: false,                      │
-        │   isFlagged: false,                        │
-        │   notes: "Milk, Eggs, Apples",             │
-        │   priority: nil,                           │
-        │   remindersListID: 1,                      │
-        │   title: "Groceries"                       │
-        │ )                                          │
-        └────────────────────────────────────────────┘
+        ┌─────────────────────────────────────────────┐
+        │ Reminder(                                   │
+        │   id: 1,                                    │
+        │   assignedUserID: 1,                        │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: false,                         │
+        │   notes: "Milk, Eggs, Apples",              │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Groceries",                       │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
         """
       }
     }
@@ -59,8 +60,8 @@ extension SnapshotTests {
       ) {
         """
         SELECT
-          "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title",
-          "remindersLists"."id", "remindersLists"."color", "remindersLists"."title"
+          "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt",
+          "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position"
         FROM "reminders"
         JOIN "remindersLists"
           ON "reminders"."remindersListID" = "remindersLists"."id"
@@ -68,19 +69,20 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌────────────────────────────────────────────┬─────────────────────┐
-        │ Reminder(                                  │ RemindersList(      │
-        │   id: 1,                                   │   id: 1,            │
-        │   assignedUserID: 1,                       │   color: 4889071,   │
-        │   dueDate: Date(2001-01-01T00:00:00.000Z), │   title: "Personal" │
-        │   isCompleted: false,                      │ )                   │
-        │   isFlagged: false,                        │                     │
-        │   notes: "Milk, Eggs, Apples",             │                     │
-        │   priority: nil,                           │                     │
-        │   remindersListID: 1,                      │                     │
-        │   title: "Groceries"                       │                     │
-        │ )                                          │                     │
-        └────────────────────────────────────────────┴─────────────────────┘
+        ┌─────────────────────────────────────────────┬──────────────────────┐
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 1,                                    │   id: 1,             │
+        │   assignedUserID: 1,                        │   color: 4889071,    │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │   title: "Personal", │
+        │   isCompleted: false,                       │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: "Milk, Eggs, Apples",              │                      │
+        │   priority: nil,                            │                      │
+        │   remindersListID: 1,                       │                      │
+        │   title: "Groceries",                       │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        └─────────────────────────────────────────────┴──────────────────────┘
         """
       }
     }
@@ -99,31 +101,33 @@ extension SnapshotTests {
         )
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "remindersLists"."id", "remindersLists"."color", "remindersLists"."title" 
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" 
         FROM "reminders" JOIN "remindersLists" ON "reminders"."remindersListID" = "remindersLists"."id" LIMIT 1
         """
       } results: {
         """
-        ┌──────────────────────────────────────────────┐
-        │ ReminderWithList(                            │
-        │   reminder: Reminder(                        │
-        │     id: 1,                                   │
-        │     assignedUserID: 1,                       │
-        │     dueDate: Date(2001-01-01T00:00:00.000Z), │
-        │     isCompleted: false,                      │
-        │     isFlagged: false,                        │
-        │     notes: "Milk, Eggs, Apples",             │
-        │     priority: nil,                           │
-        │     remindersListID: 1,                      │
-        │     title: "Groceries"                       │
-        │   ),                                         │
-        │   list: RemindersList(                       │
-        │     id: 1,                                   │
-        │     color: 4889071,                          │
-        │     title: "Personal"                        │
-        │   )                                          │
-        │ )                                            │
-        └──────────────────────────────────────────────┘
+        ┌───────────────────────────────────────────────┐
+        │ ReminderWithList(                             │
+        │   reminder: Reminder(                         │
+        │     id: 1,                                    │
+        │     assignedUserID: 1,                        │
+        │     dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │     isCompleted: false,                       │
+        │     isFlagged: false,                         │
+        │     notes: "Milk, Eggs, Apples",              │
+        │     priority: nil,                            │
+        │     remindersListID: 1,                       │
+        │     title: "Groceries",                       │
+        │     updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │   ),                                          │
+        │   list: RemindersList(                        │
+        │     id: 1,                                    │
+        │     color: 4889071,                           │
+        │     title: "Personal",                        │
+        │     position: 0                               │
+        │   )                                           │
+        │ )                                             │
+        └───────────────────────────────────────────────┘
         """
       }
     }
