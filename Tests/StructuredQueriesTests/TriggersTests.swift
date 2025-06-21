@@ -114,5 +114,41 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func multiStatement() {
+      let trigger = RemindersList.createTemporaryTrigger(
+        after: .insert { new in
+          RemindersList
+            .update {
+              $0.position = RemindersList.select { ($0.position.max() ?? -1) + 1 }
+            }
+            .where { $0.id.eq(new.id) }
+          RemindersList
+            .where { $0.position.eq(0) }
+            .delete()
+          RemindersList
+            .select(\.position)
+        }
+      )
+      assertQuery(trigger) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:119:57"
+        AFTER INSERT ON "remindersLists"
+        FOR EACH ROW BEGIN
+          UPDATE "remindersLists"
+          SET "position" = (
+            SELECT (coalesce(max("remindersLists"."position"), -1) + 1)
+            FROM "remindersLists"
+          )
+          WHERE ("remindersLists"."id" = "new"."id");
+          DELETE FROM "remindersLists"
+          WHERE ("remindersLists"."position" = 0);
+          SELECT "remindersLists"."position"
+          FROM "remindersLists";
+        END
+        """
+      }
+    }
   }
 }

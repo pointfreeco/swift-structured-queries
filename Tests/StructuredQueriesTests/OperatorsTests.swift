@@ -574,11 +574,11 @@ extension SnapshotTests {
       assertQuery(Values(Reminder.exists())) {
         """
         SELECT EXISTS (
-          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title"
+          SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
           FROM "reminders"
         )
         """
-      } results: {
+      }results: {
         """
         ┌──────┐
         │ true │

@@ -213,11 +213,11 @@ public struct TemporaryTrigger<On: Table>: Statement {
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `AFTER INSERT` trigger operation.
     public static func insert(
-      forEachRow perform: (_ new: New) -> some Statement,
+      @MultiStatementBuilder forEachRow perform: (_ new: New) -> [any Statement],
       when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       Self(
-        kind: .insert(operation: perform(On.as(_New.self).columns).query),
+        kind: .insert(operation: perform(On.as(_New.self).columns)),
         when: condition?(On.as(_New.self).columns).queryFragment
       )
     }
@@ -229,7 +229,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `AFTER UPDATE` trigger operation.
     public static func update(
-      forEachRow perform: (_ old: Old, _ new: New) -> some Statement,
+      @MultiStatementBuilder forEachRow perform: (_ old: Old, _ new: New) -> [any Statement],
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       update(
@@ -248,7 +248,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
     /// - Returns: An `AFTER UPDATE` trigger operation.
     public static func update<each Column>(
       of columns: (On.TableColumns) -> (repeat TableColumn<On, each Column>),
-      forEachRow perform: (_ old: Old, _ new: New) -> some Statement,
+      @MultiStatementBuilder forEachRow perform: (_ old: Old, _ new: New) -> [any Statement],
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       var columnNames: [String] = []
@@ -257,7 +257,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
       }
       return Self(
         kind: .update(
-          operation: perform(On.as(_Old.self).columns, On.as(_New.self).columns).query,
+          operation: perform(On.as(_Old.self).columns, On.as(_New.self).columns),
           columnNames: columnNames
         ),
         when: condition?(On.as(_Old.self).columns, On.as(_New.self).columns).queryFragment
@@ -271,31 +271,32 @@ public struct TemporaryTrigger<On: Table>: Statement {
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `AFTER DELETE` trigger operation.
     public static func delete(
-      forEachRow perform: (_ old: Old) -> some Statement,
+      @MultiStatementBuilder forEachRow perform: (_ old: Old) -> [any Statement],
       when condition: ((_ old: Old) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       Self(
-        kind: .delete(operation: perform(On.as(_Old.self).columns).query),
+        kind: .delete(operation: perform(On.as(_Old.self).columns)),
         when: condition?(On.as(_Old.self).columns).queryFragment
       )
     }
 
     private enum Kind {
-      case insert(operation: QueryFragment)
-      case update(operation: QueryFragment, columnNames: [String])
-      case delete(operation: QueryFragment)
+      case insert(operation: [any Statement])
+      case update(operation: [any Statement], columnNames: [String])
+      case delete(operation: [any Statement])
     }
 
     private let kind: Kind
     private let when: QueryFragment?
 
     public var queryFragment: QueryFragment {
+      let statementSeparator: QueryFragment = ";\(.newlineOrSpace)"
       var query: QueryFragment = ""
       let statement: QueryFragment
       switch kind {
       case .insert(let begin):
         query.append("INSERT")
-        statement = begin
+        statement = begin.map(\.query).joined(separator: statementSeparator)
       case .update(let begin, let columnNames):
         query.append("UPDATE")
         if !columnNames.isEmpty {
@@ -303,10 +304,10 @@ public struct TemporaryTrigger<On: Table>: Statement {
             " OF \(columnNames.map { QueryFragment(quote: $0) }.joined(separator: ", "))"
           )
         }
-        statement = begin
+        statement = begin.map(\.query).joined(separator: statementSeparator)
       case .delete(let begin):
         query.append("DELETE")
-        statement = begin
+        statement = begin.map(\.query).joined(separator: statementSeparator)
       }
       query.append(" ON \(On.self)\(.newlineOrSpace)FOR EACH ROW")
       if let when {
@@ -423,5 +424,21 @@ public struct TemporaryTrigger<On: Table>: Statement {
       return "\(quote: "\(operation.description)_on_\(On.tableName)@\(fileID):\(line):\(column)")"
     }
     return "\(quote: name)"
+  }
+}
+
+@resultBuilder
+public enum MultiStatementBuilder {
+  public static func buildPartialBlock(
+    first: some Statement
+  ) -> [some Statement] {
+    [first]
+  }
+
+  public static func buildPartialBlock(
+    accumulated: [any Statement],
+    next: some Statement
+  ) -> [any Statement] {
+    accumulated + [next]
   }
 }
