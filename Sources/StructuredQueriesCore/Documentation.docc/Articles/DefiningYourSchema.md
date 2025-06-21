@@ -407,7 +407,7 @@ Reminder.where { $0.id != #bind(reminder.id) }
 
 ### Primary keyed tables
 
-It is possible to tell let the `@Table` macro know which property of your data type is the primary
+It is possible to let the `@Table` macro know which property of your data type is the primary
 key for the table in the database, and doing so unlocks new APIs for inserting, updating, and
 deleting records. By default the `@Table` macro will assume any property named `id` is the
 primary key, or you can explicitly specify it with the `primaryKey:` argument of the `@Column`
