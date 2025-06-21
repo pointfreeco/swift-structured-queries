@@ -23,7 +23,7 @@ extension SnapshotTests {
         ORDER BY "reminders"."id"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────┐
         │ Reminder(                                   │
@@ -67,7 +67,7 @@ extension SnapshotTests {
           ON "reminders"."remindersListID" = "remindersLists"."id"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────┬──────────────────────┐
         │ Reminder(                                   │ RemindersList(       │
@@ -104,7 +104,7 @@ extension SnapshotTests {
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" 
         FROM "reminders" JOIN "remindersLists" ON "reminders"."remindersListID" = "remindersLists"."id" LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌───────────────────────────────────────────────┐
         │ ReminderWithList(                             │

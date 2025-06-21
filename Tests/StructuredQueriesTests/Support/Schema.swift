@@ -28,7 +28,7 @@ struct Reminder: Codable, Equatable, Identifiable {
   var priority: Priority?
   var remindersListID: Int
   var title = ""
-  var updatedAt: Date = Date(timeIntervalSinceReferenceDate: 1234567890)
+  var updatedAt: Date = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
   static func searching(_ text: String) -> Where<Reminder> {
     Self.where {
       $0.title.collate(.nocase).contains(text)

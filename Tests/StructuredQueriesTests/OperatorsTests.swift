@@ -435,7 +435,7 @@ extension SnapshotTests {
           FROM "reminders"
         ), 0) / 3))
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────┐
         │ Reminder(                                   │
@@ -578,7 +578,7 @@ extension SnapshotTests {
           FROM "reminders"
         )
         """
-      }results: {
+      } results: {
         """
         ┌──────┐
         │ true │
@@ -593,7 +593,7 @@ extension SnapshotTests {
           WHERE ("reminders"."id" = 1)
         )
         """
-      }results: {
+      } results: {
         """
         ┌──────┐
         │ true │
@@ -608,7 +608,7 @@ extension SnapshotTests {
           WHERE ("reminders"."id" = 100)
         )
         """
-      }results: {
+      } results: {
         """
         ┌───────┐
         │ false │

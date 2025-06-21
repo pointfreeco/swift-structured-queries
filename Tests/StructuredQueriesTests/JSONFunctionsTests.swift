@@ -150,7 +150,7 @@ extension SnapshotTests {
         GROUP BY "reminders"."id"
         LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌───────────────────────────────────────────────┐
         │ ReminderRow(                                  │
@@ -236,7 +236,7 @@ extension SnapshotTests {
         GROUP BY "remindersLists"."id"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────────┐
         │ RemindersListRow(                               │

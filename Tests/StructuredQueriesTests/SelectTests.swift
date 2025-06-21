@@ -173,7 +173,7 @@ extension SnapshotTests {
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
-      }results: {
+      } results: {
         #"""
         ┌─────────────────────────────────────────────┬──────────────────────┐
         │ Reminder(                                   │ RemindersList(       │
@@ -372,7 +372,7 @@ extension SnapshotTests {
         RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
         LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌────────────────┬─────────────────────────────────────────────┐
         │ User(          │ Reminder(                                   │
@@ -416,7 +416,7 @@ extension SnapshotTests {
         RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
         LIMIT 2
         """
-      }results: {
+      } results: {
         """
         ┌────────────────┬─────────────────────────────────────────────┐
         │ User(          │ Reminder(                                   │
@@ -500,7 +500,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE "reminders"."isCompleted"
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────┐
         │ Reminder(                                   │
@@ -926,7 +926,7 @@ extension SnapshotTests {
         FROM "reminders"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────┐
         │ Reminder(                                   │
@@ -998,7 +998,7 @@ extension SnapshotTests {
         JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────┬─────────────────────────────────────────────┐
         │ Reminder(                                   │ Reminder(                                   │
@@ -1055,7 +1055,7 @@ extension SnapshotTests {
         GROUP BY "r1s"."id"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────┬─────────────────────────────────────────────────┐
         │ Reminder(                                   │ [                                               │
@@ -1148,7 +1148,7 @@ extension SnapshotTests {
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE ifnull(("reminders"."priority" IS 3), 0)
         """
-      }results: {
+      } results: {
         """
         ┌──────────────────────┬─────────────────────────────────────────────┐
         │ RemindersList(       │ Reminder(                                   │

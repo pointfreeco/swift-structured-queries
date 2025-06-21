@@ -12,7 +12,7 @@ extension SnapshotTests {
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
         """
-      }results: {
+      } results: {
         #"""
         ┌─────────────────────────────────────────────┐
         │ Reminder(                                   │
@@ -242,7 +242,7 @@ extension SnapshotTests {
         JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
         GROUP BY "reminders"."id"
         """
-      }results: {
+      } results: {
         """
         ┌─────────────────────────────────────────────┬────────────────────┐
         │ Reminder(                                   │ "someday,optional" │

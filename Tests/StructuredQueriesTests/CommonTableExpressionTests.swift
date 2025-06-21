@@ -125,7 +125,7 @@ extension SnapshotTests {
         LIMIT 1
         RETURNING "id", "title"
         """
-      }results: {
+      } results: {
         """
         ┌────┬─────────────┐
         │ 11 │ "Groceries" │

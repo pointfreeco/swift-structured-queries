@@ -114,7 +114,7 @@ extension Table {
   /// > Important: A name for the trigger is automatically derived from the arguments if one is not
   /// > provided. If you build your own trigger helper that call this function, then your helper
   /// > should also take fileID, line and column arguments and pass them to this function.
-  /// 
+  ///
   /// - Parameters:
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
   ///     operation, and source location.
