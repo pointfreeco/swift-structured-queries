@@ -161,7 +161,7 @@ reminder is inserted into the database with the  following trigger:
 @Row {
   @Column {
     ```swift
-    RemindersList.createTemporaryTrigger(
+    Reminders.createTemporaryTrigger(
       after: .insert { new in
         #sql("SELECT didInsertReminder(\(new.id))")
       }
@@ -170,8 +170,8 @@ reminder is inserted into the database with the  following trigger:
   }
   @Column {
     ```sql
-    CREATE TEMPORARY TRIGGER "after_insert_on_remindersLists@"
-    AFTER DELETE ON "reminders"
+    CREATE TEMPORARY TRIGGER "after_insert_on_reminders@…"
+    AFTER INSERT ON "reminders"
     FOR EACH ROW
     BEGIN
       SELECT didInsertReminder("new"."id")
