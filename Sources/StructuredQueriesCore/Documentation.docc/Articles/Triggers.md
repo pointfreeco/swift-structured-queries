@@ -18,7 +18,6 @@ it is updated in the database. One can create such a trigger SQL statement using
   @Column {
     ```swift
     Reminder.createTemporaryTrigger(
-      "reminders_updatedAt",
       after: .update { _, _ in
         Reminder.update {
           $0.updatedAt = #sql("datetime('subsec')")
@@ -29,7 +28,7 @@ it is updated in the database. One can create such a trigger SQL statement using
   }
   @Column {
     ```sql
-    CREATE TEMPORARY TRIGGER "reminders_updatedAt"
+    CREATE TEMPORARY TRIGGER "after_update_on_reminders@…"
     AFTER UPDATE ON "reminders"
     FOR EACH ROW
     BEGIN
@@ -50,17 +49,16 @@ a specialized tool just for that kind of trigger,
 @Row {
   @Column {
     ```swift
-    Reminder
-      .createTemporaryTrigger(
-        afterUpdateTouch: {
-          $0.updatedAt = datetime('subsec')
-        }
-      )
+    Reminder.createTemporaryTrigger(
+      afterUpdateTouch: {
+        $0.updatedAt = datetime('subsec')
+      }
+    )
     ```
   }
   @Column {
     ```sql
-    CREATE TEMPORARY TRIGGER "reminders_updatedAt"
+    CREATE TEMPORARY TRIGGER "after_update_on_reminders@…"
     AFTER UPDATE ON "reminders"
     FOR EACH ROW
     BEGIN
@@ -79,15 +77,14 @@ comes with another specialized too just for that kind of trigger,
 @Row {
   @Column {
     ```swift
-    Reminder
-      .createTemporaryTrigger(
-        afterUpdateTouch: \.updatedAt
-      )
+    Reminder.createTemporaryTrigger(
+      afterUpdateTouch: \.updatedAt
+    )
     ```
   }
   @Column {
     ```sql
-    CREATE TEMPORARY TRIGGER "reminders_updatedAt"
+    CREATE TEMPORARY TRIGGER "after_update_on_reminders@…"
     AFTER UPDATE ON "reminders"
     FOR EACH ROW
     BEGIN
@@ -102,14 +99,13 @@ comes with another specialized too just for that kind of trigger,
 
 There are 3 kinds of triggers depending on the event being listened for in the database: inserts,
 updates, and deletes. For each of these kinds of triggers one can perform 4 kinds of actions: a
-select, insert, update, or delete. All 12 combinations of these kinds of triggers are supported by
-the library.
+select, insert, update, or delete. Each action can be performed either before or after the event
+being listened for executes. All 24 combinations of these kinds of triggers are supported by the
+library.
 
-> Note: Technically SQLite supports `BEFORE` triggers and `AFTER` triggers, but the documentation
-> recommends against using `BEFORE` triggers as it can lead to undefined behavior. Therefore
-> StructuredQueries does not expose `BEFORE` triggers in its API. If you want to go against the
-> recommendations of SQLite and create a `BEFORE` trigger, you can always write a trigger as a SQL
-> string (see <docs:SafeSQLStrings> for more info).
+> Tip: SQLite generally
+> [recommends against](https://sqlite.org/lang_createtrigger.html#cautions_on_the_use_of_before_triggers)
+> using `BEFORE` triggers, as it can lead to undefined behavior.
 
 Here are a few examples to show you the possibilities with triggers:
 
@@ -124,21 +120,19 @@ last list was deleted:
   @Column {
     ```swift
     RemindersList.createTemporaryTrigger(
-      "nonEmptyRemindersLists",
       after: .delete { _ in
-        RemindersList
-          .insert {
-            RemindersList.Draft(title: "Personal")
-          }
+        RemindersList.insert {
+          RemindersList.Draft(title: "Personal")
+        }
       } when: { _ in
-        !RemindersList.all.exists()
+        !RemindersList.exists()
       }
     )
     ```
   }
   @Column {
     ```sql
-    CREATE TEMPORARY TRIGGER "nonEmptyRemindersLists"
+    CREATE TEMPORARY TRIGGER "after_delete_on_remindersLists@…"
     AFTER DELETE ON "remindersLists"
     FOR EACH ROW WHEN NOT (EXISTS (SELECT * FROM "remindersLists"))
     BEGIN
@@ -168,7 +162,6 @@ reminder is inserted into the database with the  following trigger:
   @Column {
     ```swift
     RemindersList.createTemporaryTrigger(
-      "insertReminderCallback",
       after: .insert { new in
         #sql("SELECT didInsertReminder(\(new.id))")
       }
@@ -177,7 +170,7 @@ reminder is inserted into the database with the  following trigger:
   }
   @Column {
     ```sql
-    CREATE TEMPORARY TRIGGER "insertReminderCallback"
+    CREATE TEMPORARY TRIGGER "after_insert_on_remindersLists@"
     AFTER DELETE ON "reminders"
     FOR EACH ROW
     BEGIN
