@@ -4,9 +4,11 @@ import IssueReporting
 extension Table {
   /// A `CREATE TEMPORARY TRIGGER` statement that executes after a database event.
   ///
+  /// See <doc:Triggers> for more information.
+  ///
   /// > Important: A name for the trigger is automatically derived from the arguments if one is not
   /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take fileID, line and column arguments and pass them to this function.
+  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
   ///
   /// - Parameters:
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
@@ -38,9 +40,11 @@ extension Table {
 
   /// A `CREATE TEMPORARY TRIGGER` statement that executes before a database event.
   ///
+  /// See <doc:Triggers> for more information.
+  ///
   /// > Important: A name for the trigger is automatically derived from the arguments if one is not
   /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take fileID, line and column arguments and pass them to this function.
+  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
   ///
   /// - Parameters:
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
@@ -73,9 +77,11 @@ extension Table {
   /// A `CREATE TEMPORARY TRIGGER` statement that applies additional updates to a row that has just
   /// been updated.
   ///
+  /// See <doc:Triggers> for more information.
+  ///
   /// > Important: A name for the trigger is automatically derived from the arguments if one is not
   /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take fileID, line and column arguments and pass them to this function.
+  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
   ///
   /// - Parameters:
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
@@ -108,12 +114,14 @@ extension Table {
     )
   }
 
-  /// A `CREATE TEMPORARY TRIGGER` statement that updates a datetime column when a row has been updated.
-  /// been updated.
+  /// A `CREATE TEMPORARY TRIGGER` statement that updates a datetime column when a row has been
+  /// updated.
+  ///
+  /// See <doc:Triggers> for more information.
   ///
   /// > Important: A name for the trigger is automatically derived from the arguments if one is not
   /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take fileID, line and column arguments and pass them to this function.
+  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
   ///
   /// - Parameters:
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
@@ -144,6 +152,24 @@ extension Table {
     )
   }
 
+  /// A `CREATE TEMPORARY TRIGGER` statement that applies additional updates to a row that has just
+  /// been inserted.
+  ///
+  /// See <doc:Triggers> for more information.
+  ///
+  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
+  /// > provided. If you build your own trigger helper that call this function, then your helper
+  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
+  ///
+  /// - Parameters:
+  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
+  ///     operation, and source location.
+  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
+  ///   - updates: The updates to apply after the row has been inserted.
+  ///   - fileID: The source `#fileID` associated with the trigger.
+  ///   - line: The source `#line` associated with the trigger.
+  ///   - column: The source `#column` associated with the trigger.
+  /// - Returns: A temporary trigger.
   public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
@@ -166,6 +192,24 @@ extension Table {
     )
   }
 
+  /// A `CREATE TEMPORARY TRIGGER` statement that updates a datetime column when a row has been
+  /// inserted.
+  ///
+  /// See <doc:Triggers> for more information.
+  ///
+  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
+  /// > provided. If you build your own trigger helper that call this function, then your helper
+  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
+  ///
+  /// - Parameters:
+  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
+  ///     operation, and source location.
+  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
+  ///   - date: A key path to a datetime column.
+  ///   - fileID: The source `#fileID` associated with the trigger.
+  ///   - line: The source `#line` associated with the trigger.
+  ///   - column: The source `#column` associated with the trigger.
+  /// - Returns: A temporary trigger.
   public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
     _ name: String? = nil,
     ifNotExists: Bool = false,
@@ -187,6 +231,13 @@ extension Table {
   }
 }
 
+/// A `CREATE TEMPORARY TRIGGER` statement.
+///
+/// This type of statement is returned from the
+/// `[Table.createTemporaryTrigger]<doc:Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)>` family of
+/// functions.
+///
+/// To learn more, see <doc:Triggers>.
 public struct TemporaryTrigger<On: Table>: Statement {
   public typealias From = Never
   public typealias Joins = ()
@@ -196,7 +247,10 @@ public struct TemporaryTrigger<On: Table>: Statement {
     case before = "BEFORE"
     case after = "AFTER"
   }
-
+  
+  /// The database event used in a trigger.
+  ///
+  /// To learn more, see <doc:Triggers>.
   public struct Operation: QueryExpression {
     public typealias QueryValue = ()
 

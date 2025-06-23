@@ -179,3 +179,16 @@ reminder is inserted into the database with the  following trigger:
     ```
   }
 }
+
+
+## Topics
+
+### Creating temporary triggers
+
+- ``Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
+- ``Table/createTemporaryTrigger(_:ifNotExists:before:fileID:line:column:)``
+
+### Touching records
+
+- ``Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:fileID:line:column:)``
+- ``Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``
