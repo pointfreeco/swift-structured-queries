@@ -45,7 +45,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Self,
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Upsert<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, [row], onConflict: doUpdate)
   }
@@ -56,7 +56,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Self],
-    onConflict doUpdate: ((inout Updates<Self>) -> Void)? = nil
+    onConflict doUpdate: ((inout Upsert<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, values: { rows }, onConflict: doUpdate)
   }
@@ -66,7 +66,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
     @InsertValuesBuilder<Self> values: () -> [Self],
-    onConflict updates: ((inout Updates<Self>) -> Void)?
+    onConflict updates: ((inout Upsert<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, columns, values: values, onConflictDoUpdate: updates)
   }
@@ -77,7 +77,7 @@ extension Table {
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
     values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
-    onConflict updates: ((inout Updates<Self>) -> Void)?
+    onConflict updates: ((inout Upsert<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, columns, values: values, onConflictDoUpdate: updates)
   }
@@ -89,7 +89,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> Select<(V1, repeat each V2), From, Joins>,
-    onConflict updates: ((inout Updates<Self>) -> Void)?
+    onConflict updates: ((inout Upsert<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, columns, select: selection, onConflictDoUpdate: updates)
   }
@@ -102,7 +102,7 @@ extension PrimaryKeyedTable {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ row: Draft,
-    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
+    onConflict updates: ((inout Upsert<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, values: { row }, onConflictDoUpdate: updates)
   }
@@ -113,7 +113,7 @@ extension PrimaryKeyedTable {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ rows: [Draft],
-    onConflict updates: ((inout Updates<Self>) -> Void)? = nil
+    onConflict updates: ((inout Upsert<Self>) -> Void)? = nil
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, values: { rows }, onConflictDoUpdate: updates)
   }

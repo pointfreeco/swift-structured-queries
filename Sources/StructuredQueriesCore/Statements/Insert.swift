@@ -54,7 +54,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
     @InsertValuesBuilder<Self> values: () -> [Self],
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    onConflictDoUpdate updates: ((inout Upsert<Self>) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -89,7 +89,7 @@ extension Table {
     ),
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    doUpdate updates: (inout Upsert<Self>) -> Void = { _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -111,7 +111,7 @@ extension Table {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Upsert<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -197,7 +197,7 @@ extension Table {
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
     values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    onConflictDoUpdate updates: ((inout Upsert<Self>) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -234,7 +234,7 @@ extension Table {
     ),
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    doUpdate updates: (inout Upsert<Self>) -> Void = { _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -259,7 +259,7 @@ extension Table {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Upsert<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -306,7 +306,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    onConflictDoUpdate updates: ((inout Upsert<Self>) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -350,7 +350,7 @@ extension Table {
     ),
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    doUpdate updates: (inout Upsert<Self>) -> Void = { _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -377,7 +377,7 @@ extension Table {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Upsert<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -428,7 +428,7 @@ extension Table {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Upsert<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -444,7 +444,7 @@ extension Table {
       conflictTargetColumnNames: conflictTargetColumnNames,
       conflictTargetFilter: targetFilter(Self.columns),
       values: values,
-      updates: updates.map { Updates($0) },
+      updates: updates.map { Upsert($0) },
       updateFilter: updateFilter(Self.columns),
       returning: []
     )
@@ -468,7 +468,7 @@ extension PrimaryKeyedTable {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
     @InsertValuesBuilder<Draft> values: () -> [Draft],
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    onConflictDoUpdate updates: ((inout Upsert<Self>) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -504,7 +504,7 @@ extension PrimaryKeyedTable {
     ),
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    doUpdate updates: (inout Upsert<Self>) -> Void = { _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -545,7 +545,7 @@ extension PrimaryKeyedTable {
       onConflict: { $0.primaryKey },
       doUpdate: { updates in
         for column in Draft.TableColumns.allColumns where column.name != columns.primaryKey.name {
-          updates.set(column, #""excluded".\#(quote: column.name)"#)
+          updates.updates.set(column, #""excluded".\#(quote: column.name)"#)
         }
       }
     )
@@ -557,7 +557,7 @@ extension PrimaryKeyedTable {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Upsert<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -590,6 +590,49 @@ private enum InsertValues {
   case select(QueryFragment)
 }
 
+@dynamicMemberLookup
+public struct Upsert<Base: Table>: QueryExpression {
+  public typealias QueryValue = Never
+
+  public struct Excluded: AliasName {
+    public static var aliasName: String {
+      "excluded"
+    }
+  }
+
+  init(_ body: (inout Self) -> Void) {
+    body(&self)
+  }
+
+  fileprivate var updates = Updates<Base>()
+
+  public var excluded: TableAlias<Base, Excluded>.TableColumns {
+    Base.as(Excluded.self).columns
+  }
+
+  public subscript<Member>(dynamicMember keyPath: KeyPath<Updates<Base>, Member>) -> Member {
+    updates[keyPath: keyPath]
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: WritableKeyPath<Updates<Base>, Member>
+  ) -> Member {
+    get { updates[keyPath: keyPath] }
+    set { updates[keyPath: keyPath] = newValue }
+  }
+
+  public subscript<Value>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Value>>
+  ) -> any QueryExpression<Value> {
+    get { updates[dynamicMember: keyPath] }
+    set { updates[dynamicMember: keyPath] = newValue }
+  }
+
+  public var queryFragment: QueryFragment {
+    updates.queryFragment
+  }
+}
+
 /// An `INSERT` statement.
 ///
 /// This type of statement is returned from the
@@ -603,7 +646,7 @@ public struct Insert<Into: Table, Returning> {
   var conflictTargetColumnNames: [String]
   var conflictTargetFilter: [QueryFragment]
   fileprivate var values: InsertValues
-  var updates: Updates<Into>?
+  var updates: Upsert<Into>?
   var updateFilter: [QueryFragment]
   var returning: [QueryFragment]
 
@@ -613,7 +656,7 @@ public struct Insert<Into: Table, Returning> {
     conflictTargetColumnNames: [String],
     conflictTargetFilter: [QueryFragment],
     values: InsertValues,
-    updates: Updates<Into>?,
+    updates: Upsert<Into>?,
     updateFilter: [QueryFragment],
     returning: [QueryFragment]
   ) {
