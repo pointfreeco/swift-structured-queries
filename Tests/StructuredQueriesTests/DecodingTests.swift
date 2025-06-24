@@ -73,6 +73,18 @@ extension SnapshotTests {
         )
         .first == .high
       )
+      #expect(
+        try db.execute(
+          SimpleSelect { #sql("", as: Priority?.self) }
+        )
+        .first == .some(.none)
+      )
+      #expect(
+        try db.execute(
+          SimpleSelect { #sql("NULL", as: Priority?.self) }
+        )
+        .first == .some(.none)
+      )
     }
 
     @Test func queryRepresentable() throws {
