@@ -60,6 +60,7 @@ public struct Updates<Base: Table, Excluded: Sendable> {
   }
 }
 
+/// A convenience type alias for a non-upsert set of updates.
 public typealias UpdatesOf<Base: Table> = Updates<Base, ()>
 
 extension Updates: QueryExpression {
