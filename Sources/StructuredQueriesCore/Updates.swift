@@ -5,10 +5,18 @@
 ///
 /// To learn more, see <doc:UpdateStatements>.
 @dynamicMemberLookup
-public struct Updates<Base: Table> {
+public struct Updates<Base: Table, Excluded: Sendable> {
+  /// The value that would have been inserted in an [insert statement](<doc:InsertStatements>) had
+  /// there been no conflict.
+  public let excluded: Excluded
+
   private var updates: [(String, QueryFragment)] = []
 
-  init(_ body: (inout Self) -> Void) {
+  init(
+    _ body: (inout Self) -> Void,
+    excluded: Excluded = ()
+  ) {
+    self.excluded = excluded
     body(&self)
   }
 
@@ -51,6 +59,8 @@ public struct Updates<Base: Table> {
     }
   }
 }
+
+public typealias UpdatesOf<Base: Table> = Updates<Base, ()>
 
 extension Updates: QueryExpression {
   public typealias QueryValue = Never
