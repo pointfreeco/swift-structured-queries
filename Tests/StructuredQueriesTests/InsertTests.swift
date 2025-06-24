@@ -476,6 +476,36 @@ extension SnapshotTests {
       }
     }
 
+    @Test func upsertRepresentation() {
+      assertQuery(
+        Item.insert {
+          $0.notes
+        } values: {
+          ["Hello", "World"]
+        } onConflictDoUpdate: {
+          $0.notes = ["Goodnight", "Moon"]
+        }
+      ) {
+        """
+        INSERT INTO "items"
+        ("notes")
+        VALUES
+        ('[
+          "Hello",
+          "World"
+        ]')
+        ON CONFLICT DO UPDATE SET "notes" = '[
+          "Goodnight",
+          "Moon"
+        ]'
+        """
+      } results: {
+        """
+        no such table: items
+        """
+      }
+    }
+
     @Test func sql() {
       assertQuery(
         #sql(
@@ -537,9 +567,11 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "items"
-        ("title", "quantity")
+        ("title", "quantity", "notes")
         VALUES
-        ('', 0)
+        ('', 0, '[
+
+        ]')
         """
       }
     }
@@ -642,4 +674,6 @@ extension SnapshotTests {
 @Table private struct Item {
   var title = ""
   var quantity = 0
+  @Column(as: [String].JSONRepresentation.self)
+  var notes: [String] = []
 }
