@@ -77,3 +77,15 @@ where Value.QueryOutput: Sendable {
     )
   }
 }
+
+/// A type that describes how a table column is generated (e.g. SQLite generated columns).
+///
+/// You provide a value of this type to a `@Column` macro to differentiate between generated columns
+/// that are physically stored in the database table and those that are "virtual".
+///
+/// ```swift
+/// @Column(generated: .stored)
+/// ```
+public enum GeneratedColumn {
+  case virtual, stored
+}
