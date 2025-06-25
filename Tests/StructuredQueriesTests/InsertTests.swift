@@ -585,7 +585,7 @@ extension SnapshotTests {
         } where: {
           !$0.isCompleted
         } doUpdate: {
-          $0.isCompleted = $0.excluded.isCompleted
+          $0.isCompleted = $1.isCompleted
         } where: {
           $0.isFlagged
         }

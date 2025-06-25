@@ -35,7 +35,7 @@ extension Table {
   /// - Returns: An update statement.
   public static func update(
     or conflictResolution: ConflictResolution? = nil,
-    set updates: (inout UpdatesOf<Self>) -> Void
+    set updates: (inout Updates<Self>) -> Void
   ) -> UpdateOf<Self> {
     Update(conflictResolution: conflictResolution, updates: Updates(updates))
   }
@@ -92,7 +92,7 @@ extension PrimaryKeyedTable {
 /// To learn more, see <doc:UpdateStatements>.
 public struct Update<From: Table, Returning> {
   var conflictResolution: ConflictResolution?
-  var updates: UpdatesOf<From>
+  var updates: Updates<From>
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
 
