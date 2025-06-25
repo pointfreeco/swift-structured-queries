@@ -673,6 +673,10 @@ extension SnapshotTests {
       // _ = Item(title: "Pencil Box", quantity: 100, notes: #bind([]))
       assertInlineSnapshot(
         of: Item.insert {
+          // Item.Selection(…)
+          // Item.Values(…)
+          // Item.Expression(…)
+          // Item.Query(…)
           Item.Columns(title: "Pencil Box", quantity: 100, notes: #bind([]))
         },
         as: .sql
@@ -780,7 +784,7 @@ extension Item: StructuredQueriesCore.Table {
     self.notes = try decoder.decode([String].JSONRepresentation.self) ?? []
   }
 
-  @available(*, unavailable, message: "Use 'Item.Columns.init', instead.")
+  @available(*, unavailable, renamed: "Item.Columns.init(title:quantity:notes:)")
   public init(
     title: some StructuredQueriesCore.QueryExpression<Swift.String>,
     quantity: some StructuredQueriesCore.QueryExpression<Swift.Int>,
