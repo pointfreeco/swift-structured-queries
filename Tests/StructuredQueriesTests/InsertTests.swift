@@ -668,10 +668,119 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func insertTableSelectionColumns() {
+      assertInlineSnapshot(
+        of: Item.insert {
+          Item.Columns(title: "Pencil Box", quantity: 100, notes: #bind([]))
+        },
+        as: .sql
+      ) {
+        """
+        INSERT INTO "items"
+        ("title", "quantity", "notes")
+        VALUES
+        ('Pencil Box', 100, '[
+
+        ]')
+        """
+      }
+    }
   }
 }
 
-@Table private struct Item {
+extension TableSelection {
+  public static func insert(
+    @InsertValuesBuilder<Columns>
+    _ rows: () -> [Columns]
+  ) -> InsertOf<Self> {
+    var values: [[QueryFragment]] = []
+    for row in rows() {
+      var value: [QueryFragment] = []
+      defer { values.append(value) }
+      for column in row.allColumns {
+        value.append(column.queryFragment)
+      }
+    }
+    return Insert(
+      conflictResolution: nil,
+      columnNames: TableColumns.allColumns.map(\.name),
+      conflictTargetColumnNames: [],
+      conflictTargetFilter: [],
+      values: .values(values),
+      updates: nil,
+      updateFilter: [],
+      returning: []
+    )
+  }
+}
+
+public protocol SelectionColumns<QueryValue>: QueryExpression where QueryValue: TableSelection {
+  var allColumns: [any QueryExpression] { get }
+}
+
+extension SelectionColumns {
+  public var queryFragment: QueryFragment {
+    zip(QueryValue.TableColumns.allColumns, allColumns)
+      .map { "\($1) AS \(quote: $0.name)" }.joined(separator: ", ")
+  }
+}
+
+public protocol TableSelection<Columns>: Table {
+  associatedtype Columns: SelectionColumns<Self>
+}
+
+private struct Item: TableSelection {
+  var title = ""
+  var quantity = 0
+  var notes: [String] = []
+
+  public struct Columns: SelectionColumns {
+    public typealias QueryValue = Item
+    public let allColumns: [any QueryExpression]
+    public init(
+      title: some StructuredQueriesCore.QueryExpression<Swift.String>,
+      quantity: some StructuredQueriesCore.QueryExpression<Swift.Int>,
+      notes: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>
+    ) {
+      self.allColumns = [title, quantity, notes]
+    }
+  }
+
+  public struct TableColumns: StructuredQueriesCore.TableDefinition {
+    public typealias QueryValue = Item
+    public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>(
+      "title",
+      keyPath: \QueryValue.title,
+      default: ""
+    )
+    public let quantity = StructuredQueriesCore.TableColumn<QueryValue, Swift.Int>(
+      "quantity",
+      keyPath: \QueryValue.quantity,
+      default: 0
+    )
+    public let notes = StructuredQueriesCore.TableColumn<QueryValue, [String].JSONRepresentation>(
+      "notes",
+      keyPath: \QueryValue.notes,
+      default: []
+    )
+    public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+      [QueryValue.columns.title, QueryValue.columns.quantity, QueryValue.columns.notes]
+    }
+  }
+}
+
+extension Item: StructuredQueriesCore.Table {
+  public static let columns = TableColumns()
+  public static let tableName = "items"
+  public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+    self.title = try decoder.decode(Swift.String.self) ?? ""
+    self.quantity = try decoder.decode(Swift.Int.self) ?? 0
+    self.notes = try decoder.decode([String].JSONRepresentation.self) ?? []
+  }
+}
+
+@Table private struct _Item {
   var title = ""
   var quantity = 0
   @Column(as: [String].JSONRepresentation.self)
