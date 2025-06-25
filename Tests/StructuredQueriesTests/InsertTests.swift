@@ -670,6 +670,7 @@ extension SnapshotTests {
     }
 
     @Test func insertTableSelectionColumns() {
+      // _ = Item(title: "Pencil Box", quantity: 100, notes: #bind([]))
       assertInlineSnapshot(
         of: Item.insert {
           Item.Columns(title: "Pencil Box", quantity: 100, notes: #bind([]))
@@ -777,6 +778,15 @@ extension Item: StructuredQueriesCore.Table {
     self.title = try decoder.decode(Swift.String.self) ?? ""
     self.quantity = try decoder.decode(Swift.Int.self) ?? 0
     self.notes = try decoder.decode([String].JSONRepresentation.self) ?? []
+  }
+
+  @available(*, unavailable, message: "Use 'Item.Columns.init', instead.")
+  public init(
+    title: some StructuredQueriesCore.QueryExpression<Swift.String>,
+    quantity: some StructuredQueriesCore.QueryExpression<Swift.Int>,
+    notes: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>
+  ) {
+    fatalError()
   }
 }
 
