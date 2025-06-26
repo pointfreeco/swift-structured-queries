@@ -25,6 +25,7 @@ that represent those database definitions.
     * [Default representations for dates and UUIDs](#Default-representations-for-dates-and-UUIDs)
 * [Primary keyed tables](#Primary-keyed-tables)
 * [Ephemeral columns](#Ephemeral-columns)
+* [Generated columns](#Generated-columns)
 * [Table definition tools](#Table-definition-tools)
 
 ### Defining a table
@@ -444,6 +445,31 @@ struct Book {
   var title: String
   @Ephemeral
   var scratchNotes = ""
+}
+```
+
+### Generated columns
+
+Some databases, including SQLite, support [generated columns](https://www.sqlite.org/gencol.html), 
+which are columns whose values are computed from other columns in the same row. Since these columns 
+are read-only from an application's perspective, they should be included in `SELECT` statements but
+excluded from `INSERT` or `UPDATE` statements.
+
+You can mark a property as a generated column by using the `generated` parameter of the `@Column` 
+macro with a value of `.stored` or `.virtual`. This ensures the property is decoded when
+fetching data but is not included in the `Draft` type used for creating or updating records. 
+
+For example, if your database computes a stored `endAt` timestamp, you can model it like this:
+
+```swift
+@Table
+struct Event {
+  let id: UUID
+  var startAt: Date
+  var duration: TimeInterval
+
+  @Column(generated: .stored)
+  var endAt: Date
 }
 ```
 

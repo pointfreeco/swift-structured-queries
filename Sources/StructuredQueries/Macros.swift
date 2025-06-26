@@ -34,11 +34,14 @@ public macro Table(
 ///   - name: The column's name. Defaults to the property's name, _e.g._ 'id' becomes `"id"`.
 ///   - representableType: A type that represents the property type in a query expression. For types
 ///     that don't have a single representation in SQL, like `Date` and `UUID`.
+///   - generated: Allows to declare the column as a read-only database computed column, making it
+///     available for queries but not for updates.
 ///   - primaryKey: The column is its table's auto-incrementing primary key.
 @attached(peer)
 public macro Column(
   _ name: String = "",
   as representableType: (any QueryRepresentable.Type)? = nil,
+  generated: GeneratedColumn? = nil,
   primaryKey: Bool = false
 ) =
   #externalMacro(
