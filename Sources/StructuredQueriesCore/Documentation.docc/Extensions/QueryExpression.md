@@ -28,6 +28,7 @@
 
 - ``jsonArrayLength()``
 - ``jsonGroupArray(order:filter:)``
+- ``jsonPatch(_:)``
 
 ### Optionality
 

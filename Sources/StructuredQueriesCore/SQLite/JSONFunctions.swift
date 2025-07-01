@@ -2,6 +2,17 @@ import Foundation
 import StructuredQueriesSupport
 
 extension QueryExpression {
+  /// Passes this expression and the given one to the `json_patch` function.
+  ///
+  /// - Parameter other: A JSON object to patch this object with.
+  /// - Returns: A JSON expression of the result of the invoking the `json_patch` function.
+  public func jsonPatch<QueryOutput: Codable>(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue>
+  where QueryValue == _CodableJSONRepresentation<QueryOutput> {
+    QueryFunction("json_patch", self, other)
+  }
+
   /// Wraps this expression with the `json_array_length` function.
   ///
   /// ```swift
