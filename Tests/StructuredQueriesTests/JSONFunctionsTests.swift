@@ -318,6 +318,27 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func jsonPatch() {
+      assertQuery(Values(#bind(["a": 1]).jsonPatch(#bind(["b": 2])))) {
+        """
+        SELECT json_patch('{
+          "a" : 1
+        }', '{
+          "b" : 2
+        }')
+        """
+      } results: {
+        """
+        ┌───────────┐
+        │ [         │
+        │   "a": 1, │
+        │   "b": 2  │
+        │ ]         │
+        └───────────┘
+        """
+      }
+    }
   }
 }
 
