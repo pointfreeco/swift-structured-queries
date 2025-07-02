@@ -8,10 +8,10 @@ extension RangeReplaceableCollection {
   }
 
   package init<each Q: QueryExpression>(_ elements: repeat each Q)
-  where Element == any QueryExpression {
+  where Element == any QueryExpression & Sendable {
     self.init()
     for element in repeat each elements {
-      append(element)
+      append(SQLQueryExpression(element))
     }
   }
 

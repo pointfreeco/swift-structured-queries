@@ -1,5 +1,5 @@
 /// A type that represents a full or partial SQL query.
-public protocol QueryExpression<QueryValue>: Sendable {
+public protocol QueryExpression<QueryValue> {
   /// The Swift data type representation of the expression's SQL data type.
   ///
   /// For example, a `TEXT` expression may be represented as a `String` query value.
