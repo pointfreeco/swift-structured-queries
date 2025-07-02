@@ -481,7 +481,7 @@ extension Where: SelectStatement {
   /// - Returns: An update statement.
   public func update(
     or conflictResolution: ConflictResolution? = nil,
-    set updates: (inout Updates<From>) -> Void
+    set updates: (inout UpdatesOf<From>) -> Void
   ) -> UpdateOf<From> {
     Update(
       conflictResolution: conflictResolution,

@@ -95,7 +95,7 @@ extension Table {
   public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
-    afterUpdateTouch updates: (inout Updates<Self>) -> Void,
+    afterUpdateTouch updates: (inout UpdatesOf<Self>) -> Void,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -173,7 +173,7 @@ extension Table {
   public static func createTemporaryTrigger(
     _ name: String? = nil,
     ifNotExists: Bool = false,
-    afterInsertTouch updates: (inout Updates<Self>) -> Void,
+    afterInsertTouch updates: (inout UpdatesOf<Self>) -> Void,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
