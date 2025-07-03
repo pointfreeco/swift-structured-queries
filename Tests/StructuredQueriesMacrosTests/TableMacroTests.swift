@@ -464,6 +464,145 @@ extension SnapshotTests {
       }
     }
 
+    @Test func columnGenerated() throws {
+      assertMacro {
+        """
+        @Table struct User {
+          var name: String
+          @Column(generated: .stored)
+          let generated: String
+        }
+        """
+      } expansion: {
+        #"""
+        struct User {
+          var name: String
+          let generated: String
+
+          public struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = User
+            public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+            public let generated = StructuredQueriesCore.TableColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.name, QueryValue.columns.generated]
+            }
+          }
+        }
+
+        extension User: StructuredQueriesCore.Table {
+          public static let columns = TableColumns()
+          public static let tableName = "users"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let name = try decoder.decode(String.self)
+            let generated = try decoder.decode(String.self)
+            guard let name else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let generated else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.name = name
+            self.generated = generated
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func columnGeneratedPrimaryKeyedTable() throws {
+      assertMacro {
+        """
+        @Table struct User {
+          let id: Int
+          var name: String
+          @Column(generated: .stored)
+          var generated: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct User {
+          let id: Int
+          var name: String
+          var generated: Int
+
+          public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = User
+            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+            public let generated = StructuredQueriesCore.TableColumn<QueryValue, Int>("generated", keyPath: \QueryValue.generated)
+            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.id, QueryValue.columns.name, QueryValue.columns.generated]
+            }
+          }
+
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = User
+            let id: Int?
+            var name: String
+            public struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.name]
+              }
+            }
+            public static let columns = TableColumns()
+
+            public static let tableName = User.tableName
+
+            public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              let name = try decoder.decode(String.self)
+              guard let name else {
+                throw QueryDecodingError.missingRequiredColumn
+              }
+              self.name = name
+            }
+
+            public init(_ other: User) {
+              self.id = other.id
+              self.name = other.name
+            }
+            public init(
+              id: Int? = nil,
+              name: String
+            ) {
+              self.id = id
+              self.name = name
+            }
+          }
+        }
+
+        extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+          public static let columns = TableColumns()
+          public static let tableName = "users"
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            let name = try decoder.decode(String.self)
+            let generated = try decoder.decode(Int.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let name else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let generated else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.name = name
+            self.generated = generated
+          }
+        }
+        """#
+      }
+    }
+
     @Test func computed() {
       assertMacro {
         """
