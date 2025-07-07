@@ -209,6 +209,18 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       segments.append(.binding(binding))
     }
 
+    /// Append a query representable output to the interpolation.
+    ///
+    /// - Parameters:
+    ///   - queryOutput: A query representable output.
+    ///   - representableType: The type of query representation.
+    public mutating func appendInterpolation<QueryValue: QueryBindable>(
+      _ queryOutput: QueryValue.QueryOutput,
+      as representableType: QueryValue.Type
+    ) {
+      appendInterpolation(QueryValue(queryOutput: queryOutput))
+    }
+
     /// Append a query fragment to the interpolation.
     ///
     /// - Parameter fragment: A query fragment.
