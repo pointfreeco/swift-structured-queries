@@ -1014,7 +1014,7 @@ extension TableMacro: MemberMacro {
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
       [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
       }
-      public static var queryFragment: String { \(fragmentLiteral) }
+      public var queryFragment: QueryFragment { \(fragmentLiteral) }
       }
       """,
       draft,
