@@ -603,7 +603,7 @@ extension TableMacro: MemberMacro {
     }
     let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
     var allColumns: [TokenSyntax] = []
-    var selectableColumnsLiterals: [String] = []
+    var selectedColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
@@ -725,11 +725,7 @@ extension TableMacro: MemberMacro {
         )
       }
 
-      // Capture all column string literals for the query fragment
-      selectableColumnsLiterals.append(
-        columnName.as(StringLiteralExprSyntax.self)?.segments.description
-          ?? identifier.text.trimmingBackticks()
-      )
+      selectedColumns.append(identifier)
 
       if !isGenerated {
         // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
@@ -989,8 +985,6 @@ extension TableMacro: MemberMacro {
       return []
     }
 
-    let selectableColumns = selectableColumnsLiterals.map { "\"\($0)\"" }.joined(separator: ", ")
-
     var typeAliases: [DeclSyntax] = []
     if declaration.hasMacroApplication("Selection") {
       conformances.append("\(moduleName).PartialSelectStatement")
@@ -1014,8 +1008,7 @@ extension TableMacro: MemberMacro {
       [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
       }
       public var queryFragment: QueryFragment {
-        QueryFragment(stringLiteral: [\(raw: selectableColumns)].map { "\\"\\(QueryValue.tableName)\\".\\"\\($0)\\"" }
-        .joined(separator: ", "))
+      "\(selectedColumns.map { #"\(self.\#($0))"# as ExprSyntax }, separator: ", ")"
       }
       }
       """,
