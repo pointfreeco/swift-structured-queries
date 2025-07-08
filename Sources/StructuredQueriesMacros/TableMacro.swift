@@ -261,18 +261,33 @@ extension TableMacro: ExtensionMacro {
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
-      columnsProperties.append(
-        """
-        public let \(identifier) = \(moduleName).TableColumn<\
-        QueryValue, \
-        \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
-        >(\
-        \(columnName), \
-        keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+      if isGenerated {
+        columnsProperties.append(
+          """
+          public var \(identifier): some \(moduleName).QueryExpression<\(raw: columnQueryValueType?.trimmedDescription ?? "_")> {
+              \(moduleName).TableColumn<\
+              QueryValue, \
+              \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+              >(\
+              \(columnName), \
+              keyPath: \\QueryValue.\(identifier))
+          }
+          """
         )
-        """
-      )
-      allColumns.append(identifier)
+      } else {
+        columnsProperties.append(
+          """
+          public let \(identifier) = \(moduleName).TableColumn<\
+          QueryValue, \
+          \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+          >(\
+          \(columnName), \
+          keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+          )
+          """
+        )
+        allColumns.append(identifier)
+      }
       let decodedType = columnQueryValueType?.asNonOptionalType()
       if let defaultValue {
         decodings.append(
@@ -596,6 +611,7 @@ extension TableMacro: MemberMacro {
     }
     let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
     var allColumns: [TokenSyntax] = []
+    var selectableColumns: [String] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
@@ -717,6 +733,12 @@ extension TableMacro: MemberMacro {
         )
       }
 
+      // Capture all column string literals for the query fragment
+      selectableColumns.append(
+        columnName.as(StringLiteralExprSyntax.self)?.segments.description
+          ?? identifier.text.trimmingBackticks()
+      )
+
       if !isGenerated {
         // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
         draftBindings.append((binding, columnQueryOutputType, identifier == primaryKey?.identifier))
@@ -735,18 +757,34 @@ extension TableMacro: MemberMacro {
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
-      columnsProperties.append(
-        """
-        public let \(identifier) = \(moduleName).TableColumn<\
-        QueryValue, \
-        \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
-        >(\
-        \(columnName), \
-        keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+      if isGenerated {
+        columnsProperties.append(
+          """
+          public var \(identifier): some \(moduleName).QueryExpression<\(raw: columnQueryValueType?.trimmedDescription ?? "_")> { \
+          \(moduleName).TableColumn<\
+          QueryValue, \
+          \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+          >(\
+          \(columnName), \
+          keyPath: \\QueryValue.\(identifier)\
+          )
+          }
+          """
         )
-        """
-      )
-      allColumns.append(identifier)
+      } else {
+        columnsProperties.append(
+          """
+          public let \(identifier) = \(moduleName).TableColumn<\
+          QueryValue, \
+          \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+          >(\
+          \(columnName), \
+          keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+          )
+          """
+        )
+        allColumns.append(identifier)
+      }
       let decodedType = columnQueryValueType?.asNonOptionalType()
       if let defaultValue {
         decodings.append(
@@ -959,6 +997,9 @@ extension TableMacro: MemberMacro {
       return []
     }
 
+    let queryFragmentString = selectableColumns.map { "\"\($0)\"" }
+      .joined(separator: ", ")
+    let fragmentLiteral = StringLiteralExprSyntax(content: queryFragmentString)
     var typeAliases: [DeclSyntax] = []
     if declaration.hasMacroApplication("Selection") {
       conformances.append("\(moduleName).PartialSelectStatement")
@@ -981,6 +1022,7 @@ extension TableMacro: MemberMacro {
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
       [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
       }
+      public static var queryFragment: String { \(fragmentLiteral) }
       }
       """,
       draft,
