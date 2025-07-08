@@ -186,28 +186,36 @@ extension SnapshotTests {
       }
     }
 
-    @Test func uuid() throws {
+    @Test func uuidAndGeneratedColumn() throws {
       try database.execute(
         #sql(
           """
-          CREATE TABLE "rows" (id TEXT PRIMARY KEY NOT NULL)
+          CREATE TABLE "rows" (
+            "id" TEXT PRIMARY KEY NOT NULL,
+            "isDeleted" INTEGER NOT NULL DEFAULT 0,
+            "isNotDeleted" INTEGER NOT NULL AS (NOT "isDeleted")
+          )
           """
         )
       )
-      try database.execute(Row.insert { Row(id: UUID(1)) })
+      try database.execute(Row.insert { Row.Draft(id: UUID(1)) })
       assertQuery(
         Row.find(UUID(1))
       ) {
         """
-        SELECT "rows"."id"
+        SELECT "rows"."id", "rows"."isDeleted", "rows"."isNotDeleted"
         FROM "rows"
         WHERE ("rows"."id" = '00000000-0000-0000-0000-000000000001')
         """
       } results: {
         """
-        ┌─────────────────────────────────────────────────────┐
-        │ Row(id: UUID(00000000-0000-0000-0000-000000000001)) │
-        └─────────────────────────────────────────────────────┘
+        ┌───────────────────────────────────────────────────┐
+        │ Row(                                              │
+        │   id: UUID(00000000-0000-0000-0000-000000000001), │
+        │   isDeleted: false,                               │
+        │   isNotDeleted: true                              │
+        │ )                                                 │
+        └───────────────────────────────────────────────────┘
         """
       }
     }
@@ -222,4 +230,7 @@ extension SnapshotTests {
 @Table
 private struct Row {
   let id: UUID
+  var isDeleted = false
+  @Column(generated: .virtual)
+  let isNotDeleted: Bool
 }
