@@ -603,7 +603,7 @@ extension TableMacro: MemberMacro {
     }
     let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
     var allColumns: [TokenSyntax] = []
-    var selectableColumns: [String] = []
+    var selectableColumnsLiterals: [String] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
@@ -726,7 +726,7 @@ extension TableMacro: MemberMacro {
       }
 
       // Capture all column string literals for the query fragment
-      selectableColumns.append(
+      selectableColumnsLiterals.append(
         columnName.as(StringLiteralExprSyntax.self)?.segments.description
           ?? identifier.text.trimmingBackticks()
       )
@@ -989,9 +989,8 @@ extension TableMacro: MemberMacro {
       return []
     }
 
-    let queryFragmentString = selectableColumns.map { "\"\($0)\"" }
-      .joined(separator: ", ")
-    let fragmentLiteral = StringLiteralExprSyntax(content: queryFragmentString)
+    let selectableColumns = selectableColumnsLiterals.map { "\"\($0)\"" }.joined(separator: ", ")
+
     var typeAliases: [DeclSyntax] = []
     if declaration.hasMacroApplication("Selection") {
       conformances.append("\(moduleName).PartialSelectStatement")
@@ -1014,7 +1013,10 @@ extension TableMacro: MemberMacro {
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
       [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
       }
-      public var queryFragment: QueryFragment { \(fragmentLiteral) }
+      public var queryFragment: QueryFragment {
+        QueryFragment(stringLiteral: [\(raw: selectableColumns)].map { "\\"\\(QueryValue.tableName)\\".\\"\\($0)\\"" }
+        .joined(separator: ", "))
+      }
       }
       """,
       draft,
