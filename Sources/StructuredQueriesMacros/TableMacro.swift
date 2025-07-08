@@ -214,14 +214,6 @@ extension TableMacro: ExtensionMacro {
                 .baseName.text,
               ["stored", "virtual"].contains(memberName)
             else {
-              diagnostics.append(
-                Diagnostic(
-                  node: argument.expression,
-                  message: MacroExpansionErrorMessage(
-                    "Argument 'generated' must be '.stored' or '.virtual'"
-                  )
-                )
-              )
               continue
             }
             isGenerated = true
