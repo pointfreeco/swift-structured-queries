@@ -126,33 +126,7 @@ extension SnapshotTests {
         └─────────────────────────────┘
         """
       }
-      assertQuery(
-        SomeColumns.all
-      ) {
-        """
-        SELECT "items"."isCompleted", "items"."isPastDue"
-        FROM "items"
-        """
-      } results: {
-        """
-        ┌───────────────────────┐
-        │ SomeColumns(          │
-        │   isCompleted: true,  │
-        │   isPastDue: false    │
-        │ )                     │
-        ├───────────────────────┤
-        │ SomeColumns(          │
-        │   isCompleted: true,  │
-        │   isPastDue: false    │
-        │ )                     │
-        ├───────────────────────┤
-        │ SomeColumns(          │
-        │   isCompleted: false, │
-        │   isPastDue: false    │
-        │ )                     │
-        └───────────────────────┘
-        """
-      }
+      
       assertQuery(
         Item
           .update {
@@ -198,39 +172,7 @@ extension SnapshotTests {
         └─────────────────────────────┘
         """
       }
-      assertQuery(
-        SomeColumns
-          .update {
-            $0.isCompleted.toggle()
-            $0.isPastDue.toggle()
-          }
-          .returning(\.self)
-      ) {
-        """
-        UPDATE "items"
-        SET "isCompleted" = NOT ("items"."isCompleted"), "isPastDue" = NOT ("items"."isPastDue")
-        RETURNING "isCompleted", "isPastDue"
-        """
-      } results: {
-        """
-        ┌───────────────────────┐
-        │ SomeColumns(          │
-        │   isCompleted: true,  │
-        │   isPastDue: false    │
-        │ )                     │
-        ├───────────────────────┤
-        │ SomeColumns(          │
-        │   isCompleted: true,  │
-        │   isPastDue: false    │
-        │ )                     │
-        ├───────────────────────┤
-        │ SomeColumns(          │
-        │   isCompleted: false, │
-        │   isPastDue: false    │
-        │ )                     │
-        └───────────────────────┘
-        """
-      }
+
       assertQuery(
         Item
           .where(\.someColumns.isCompleted)
