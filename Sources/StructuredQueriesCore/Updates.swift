@@ -8,7 +8,7 @@
 public struct Updates<Base: Table> {
   private var updates: [(String, QueryFragment)] = []
 
-  init(_ body: (inout Self) -> Void) {
+  package init(_ body: (inout Self) -> Void) {
     body(&self)
   }
 
@@ -57,5 +57,14 @@ extension Updates: QueryExpression {
 
   public var queryFragment: QueryFragment {
     "SET \(updates.map { "\(quote: $0) = \($1)" }.joined(separator: ", "))"
+  }
+}
+
+extension Updates {
+  public subscript<Member: TableDefinition>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, Member>
+  ) -> Updates<Member.QueryValue> {
+    get { Updates<Member.QueryValue> { _ in } }
+    set { updates.append(contentsOf: newValue.updates) }
   }
 }

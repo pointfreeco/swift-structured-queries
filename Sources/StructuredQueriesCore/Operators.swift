@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: _OptionalPromotable {
   /// A predicate expression indicating whether two query expressions are equal.
   ///
   /// ```swift
@@ -963,7 +963,7 @@ struct BinaryOperator<QueryValue>: QueryExpression {
   }
 
   var queryFragment: QueryFragment {
-    "(\(lhs) \(`operator`) \(rhs))"
+    "(\(lhs)) \(`operator`) (\(rhs))"
   }
 }
 

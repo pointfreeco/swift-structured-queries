@@ -12,7 +12,7 @@ import Foundation
 /// offsets from the Unix epoch, or double Julian day numbers. This library defaults to ISO-8601
 /// text, but provides ``Foundation/Date/UnixTimeRepresentation`` to represent a date as an integer,
 /// and ``Foundation/Date/JulianDayRepresentation`` to represent a date as a floating point number.
-public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
+public protocol QueryRepresentable<QueryOutput>: QueryDecodable, QueryExpression {
   /// The Swift type this value is ultimately decoded to.
   associatedtype QueryOutput
 
