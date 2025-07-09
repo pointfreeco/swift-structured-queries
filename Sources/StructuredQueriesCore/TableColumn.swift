@@ -2,7 +2,8 @@
 ///
 /// This protocol has a single conformance, ``TableColumn``, and simply provides type erasure over
 /// a table's columns. You should not conform to this protocol directly.
-public protocol TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
+public protocol TableColumnExpression<Root, Value>: QueryExpression
+where Value == QueryValue, Value.QueryOutput: Sendable {
   associatedtype Root: Table
   associatedtype Value: QueryRepresentable & QueryBindable
 

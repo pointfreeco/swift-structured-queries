@@ -41,7 +41,14 @@ extension SnapshotTests {
             someColumns: SomeColumns(isCompleted: true, isPastDue: false)
           )
         }
-      )
+      ) {
+        """
+        INSERT INTO "items"
+        ("title", "quantity", "isCompleted", "isPastDue")
+        VALUES
+        ('Hello', 24, 1, 0)
+        """
+      }
       assertQuery(
         Item.insert {
           ($0.title, $0.quantity, $0.someColumns.isCompleted, $0.someColumns.isPastDue)
@@ -104,6 +111,11 @@ extension SnapshotTests {
         │ )                     │
         ├───────────────────────┤
         │ SomeColumns(          │
+        │   isCompleted: true,  │
+        │   isPastDue: false    │
+        │ )                     │
+        ├───────────────────────┤
+        │ SomeColumns(          │
         │   isCompleted: false, │
         │   isPastDue: false    │
         │ )                     │
@@ -129,6 +141,15 @@ extension SnapshotTests {
         │ Item(                       │
         │   title: "Hello",           │
         │   quantity: 42,             │
+        │   someColumns: SomeColumns( │
+        │     isCompleted: false,     │
+        │     isPastDue: true         │
+        │   )                         │
+        │ )                           │
+        ├─────────────────────────────┤
+        │ Item(                       │
+        │   title: "Hello",           │
+        │   quantity: 24,             │
         │   someColumns: SomeColumns( │
         │     isCompleted: false,     │
         │     isPastDue: true         │
@@ -168,6 +189,11 @@ extension SnapshotTests {
         │ )                     │
         ├───────────────────────┤
         │ SomeColumns(          │
+        │   isCompleted: true,  │
+        │   isPastDue: false    │
+        │ )                     │
+        ├───────────────────────┤
+        │ SomeColumns(          │
         │   isCompleted: false, │
         │   isPastDue: false    │
         │ )                     │
@@ -191,6 +217,15 @@ extension SnapshotTests {
         │ Item(                       │
         │   title: "Hello",           │
         │   quantity: 42,             │
+        │   someColumns: SomeColumns( │
+        │     isCompleted: true,      │
+        │     isPastDue: false        │
+        │   )                         │
+        │ )                           │
+        ├─────────────────────────────┤
+        │ Item(                       │
+        │   title: "Hello",           │
+        │   quantity: 24,             │
         │   someColumns: SomeColumns( │
         │     isCompleted: true,      │
         │     isPastDue: false        │
@@ -255,7 +290,7 @@ private struct Item {
     public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
       [QueryValue.columns.title]
         + [QueryValue.columns.quantity]
-        + SomeColumns.TableColumns.allColumns
+        + SubtableColumns<QueryValue, SomeColumns>.allColumns(keyPath: \.someColumns)
     }
     public var queryFragment: QueryFragment {
       "\(self.title), \(self.quantity), \(self.someColumns)"

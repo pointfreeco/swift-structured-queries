@@ -73,6 +73,24 @@ extension Updates {
 public struct SubtableColumns<Root: Table, Value: Table>: QueryExpression {
   public typealias QueryValue = Value
 
+  public static func allColumns(keyPath: KeyPath<Root, Value> & Sendable) -> [any TableColumnExpression] {
+    return Value.TableColumns.allColumns.map { column in
+      func open<R, V>(
+        _ column: some TableColumnExpression<R, V>
+      ) -> any TableColumnExpression {
+        let keyPath = keyPath.appending(
+          path: unsafeDowncast(column.keyPath, to: KeyPath<Value, V.QueryOutput>.self)
+        )
+        return TableColumn<Root, V>(
+          column.name,
+          keyPath: keyPath.unsafeSendable(),
+          default: column.defaultValue
+        )
+      }
+      return open(column)
+    }
+  }
+
   let keyPath: KeyPath<Root, Value> & Sendable
 
   public init(keyPath: KeyPath<Root, Value> & Sendable) {
