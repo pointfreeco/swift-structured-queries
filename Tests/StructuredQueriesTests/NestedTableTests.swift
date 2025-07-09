@@ -74,14 +74,14 @@ extension SnapshotTests {
           .order(by: \.someColumns.isCompleted)
       ) {
         """
-        SELECT "items"."title", "items"."quantity", "items"."isCompleted", "items"."isPastDue", ("items"."isCompleted", "items"."isPastDue") = (0, 0)
+        SELECT "items"."title", "items"."quantity", "items"."isCompleted", "items"."isPastDue", (("items"."isCompleted", "items"."isPastDue") = (0, 0))
         FROM "items"
         WHERE "items"."isCompleted"
         GROUP BY "items"."isCompleted"
         HAVING "items"."isCompleted"
         ORDER BY "items"."isCompleted"
         """
-      } results: {
+      }results: {
         """
         ┌─────────────────────────────┬───────┐
         │ Item(                       │ false │
@@ -93,6 +93,37 @@ extension SnapshotTests {
         │   )                         │       │
         │ )                           │       │
         └─────────────────────────────┴───────┘
+        """
+      }
+      assertQuery(
+        Item
+          .where {
+            $0.eq(
+              Item(
+                title: "Hello",
+                quantity: 42,
+                someColumns: SomeColumns(isCompleted: true, isPastDue: false)
+              )
+            )
+          }
+      ) {
+        """
+        SELECT "items"."title", "items"."quantity", "items"."isCompleted", "items"."isPastDue"
+        FROM "items"
+        WHERE (("items"."title", "items"."quantity", "items"."isCompleted", "items"."isPastDue") = ('Hello', 42, 1, 0))
+        """
+      } results: {
+        """
+        ┌─────────────────────────────┐
+        │ Item(                       │
+        │   title: "Hello",           │
+        │   quantity: 42,             │
+        │   someColumns: SomeColumns( │
+        │     isCompleted: true,      │
+        │     isPastDue: false        │
+        │   )                         │
+        │ )                           │
+        └─────────────────────────────┘
         """
       }
       assertQuery(
@@ -302,7 +333,7 @@ extension Item: StructuredQueriesCore.Table {
   public static let columns = TableColumns()
   public static let tableName = "items"
   var queryFragment: StructuredQueriesCore.QueryFragment {
-    "\(bind: self.title), \(self.quantity)"
+    "\(self.title.queryFragment), \(self.quantity.queryFragment), \(self.someColumns.queryFragment)"
   }
   public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
     self.title = try decoder.decode(Swift.String.self) ?? ""
@@ -342,7 +373,7 @@ extension SomeColumns: StructuredQueriesCore.Table {
   public static let columns = TableColumns()
   public static let tableName = "items"
   var queryFragment: StructuredQueriesCore.QueryFragment {
-    "\(bind: self.isCompleted), \(self.isPastDue)"
+    "\(self.isCompleted.queryFragment), \(self.isPastDue.queryFragment)"
   }
   public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
     self.isCompleted = try decoder.decode(Swift.Bool.self) ?? false
