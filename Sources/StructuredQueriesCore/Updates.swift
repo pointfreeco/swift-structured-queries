@@ -61,10 +61,36 @@ extension Updates: QueryExpression {
 }
 
 extension Updates {
-  public subscript<Member: TableDefinition>(
-    dynamicMember keyPath: KeyPath<Base.TableColumns, Member>
+  public subscript<Member: Table>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, SubtableColumns<Base, Member>>
   ) -> Updates<Member.QueryValue> {
     get { Updates<Member.QueryValue> { _ in } }
     set { updates.append(contentsOf: newValue.updates) }
+  }
+}
+
+@dynamicMemberLookup
+public struct SubtableColumns<Root: Table, Value: Table>: QueryExpression {
+  public typealias QueryValue = Value
+
+  let keyPath: KeyPath<Root, Value> & Sendable
+
+  public init(keyPath: KeyPath<Root, Value> & Sendable) {
+    self.keyPath = keyPath
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Value.TableColumns, TableColumn<Value, Member>> & Sendable
+  ) -> TableColumn<Root, Member> {
+    let column = Value.columns[keyPath: keyPath]
+    return TableColumn<Root, Member>(
+      column.name,
+      keyPath: self.keyPath.appending(path: column._keyPath).unsafeSendable(),
+      default: column.defaultValue
+    )
+  }
+
+  public var queryFragment: QueryFragment {
+    Value.columns.queryFragment
   }
 }

@@ -33,22 +33,29 @@ extension SnapshotTests {
           """
         )
       )
-      // assertQuery(
-      //   Item.insert {
-      //     Item(
-      //       title: "Hello",
-      //       quantity: 24,
-      //       someColumns: SomeColumns(isCompleted: true, isPastDue: false)
-      //     )
-      //   }
-      // )
-      // assertQuery(
-      //   Item.insert {
-      //     ($0.title, $0.quantity, $0.someColumns.isCompleted, $0.someColumns.isPastDue)
-      //   } values: {
-      //     ("Hello", 24, true, false)
-      //   }
-      // )
+      assertQuery(
+        Item.insert {
+          Item(
+            title: "Hello",
+            quantity: 24,
+            someColumns: SomeColumns(isCompleted: true, isPastDue: false)
+          )
+        }
+      )
+      assertQuery(
+        Item.insert {
+          ($0.title, $0.quantity, $0.someColumns.isCompleted, $0.someColumns.isPastDue)
+        } values: {
+          ("Blob", 42, false, false)
+        }
+      ) {
+        """
+        INSERT INTO "items"
+        ("title", "quantity", "isCompleted", "isPastDue")
+        VALUES
+        ('Blob', 42, 0, 0)
+        """
+      }
       assertQuery(
         Item
           // TODO: Should use 'is' and 'is' should not require optionality?
@@ -90,12 +97,17 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌──────────────────────┐
-        │ SomeColumns(         │
-        │   isCompleted: true, │
-        │   isPastDue: false   │
-        │ )                    │
-        └──────────────────────┘
+        ┌───────────────────────┐
+        │ SomeColumns(          │
+        │   isCompleted: true,  │
+        │   isPastDue: false    │
+        │ )                     │
+        ├───────────────────────┤
+        │ SomeColumns(          │
+        │   isCompleted: false, │
+        │   isPastDue: false    │
+        │ )                     │
+        └───────────────────────┘
         """
       }
       assertQuery(
@@ -122,6 +134,15 @@ extension SnapshotTests {
         │     isPastDue: true         │
         │   )                         │
         │ )                           │
+        ├─────────────────────────────┤
+        │ Item(                       │
+        │   title: "Blob",            │
+        │   quantity: 42,             │
+        │   someColumns: SomeColumns( │
+        │     isCompleted: true,      │
+        │     isPastDue: true         │
+        │   )                         │
+        │ )                           │
         └─────────────────────────────┘
         """
       }
@@ -140,12 +161,17 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌──────────────────────┐
-        │ SomeColumns(         │
-        │   isCompleted: true, │
-        │   isPastDue: false   │
-        │ )                    │
-        └──────────────────────┘
+        ┌───────────────────────┐
+        │ SomeColumns(          │
+        │   isCompleted: true,  │
+        │   isPastDue: false    │
+        │ )                     │
+        ├───────────────────────┤
+        │ SomeColumns(          │
+        │   isCompleted: false, │
+        │   isPastDue: false    │
+        │ )                     │
+        └───────────────────────┘
         """
       }
       assertQuery(
@@ -225,7 +251,7 @@ private struct Item {
       keyPath: \QueryValue.quantity,
       default: 0
     )
-    public var someColumns: SomeColumns.TableColumns { SomeColumns.columns }
+    public let someColumns = SubtableColumns(keyPath: \QueryValue.someColumns)
     public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
       [QueryValue.columns.title]
         + [QueryValue.columns.quantity]
