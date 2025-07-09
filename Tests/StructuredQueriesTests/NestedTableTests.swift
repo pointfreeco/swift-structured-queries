@@ -321,7 +321,7 @@ private struct Item {
     public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
       [QueryValue.columns.title]
         + [QueryValue.columns.quantity]
-        + SubtableColumns<QueryValue, SomeColumns>.allColumns(keyPath: \.someColumns)
+        + SubtableColumns.allColumns(keyPath: \QueryValue.someColumns)
     }
     public var queryFragment: QueryFragment {
       "\(self.title), \(self.quantity), \(self.someColumns)"
