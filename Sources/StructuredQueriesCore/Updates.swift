@@ -59,3 +59,12 @@ extension Updates: QueryExpression {
     "SET \(updates.map { "\(quote: $0) = \($1)" }.joined(separator: ", "))"
   }
 }
+
+extension Updates {
+  public subscript<Member: Table>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, SubtableColumns<Base, Member>>
+  ) -> Updates<Member.QueryValue> {
+    get { Updates<Member.QueryValue> { _ in } }
+    set { updates.append(contentsOf: newValue.updates) }
+  }
+}

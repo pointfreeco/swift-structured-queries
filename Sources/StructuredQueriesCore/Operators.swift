@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: _OptionalPromotable {
   /// A predicate expression indicating whether two query expressions are equal.
   ///
   /// ```swift
@@ -861,10 +861,8 @@ extension QueryExpression where QueryValue: QueryBindable {
     _ lowerBound: some QueryExpression<QueryValue>,
     and upperBound: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(
-      lhs: self,
-      operator: "BETWEEN",
-      rhs: SQLQueryExpression("\(lowerBound) AND \(upperBound)")
+    SQLQueryExpression(
+      "\(self) BETWEEN \(lowerBound) AND \(upperBound)"
     )
   }
 }
@@ -963,7 +961,7 @@ struct BinaryOperator<QueryValue>: QueryExpression {
   }
 
   var queryFragment: QueryFragment {
-    "(\(lhs) \(`operator`) \(rhs))"
+    "((\(lhs)) \(`operator`) (\(rhs)))"
   }
 }
 
