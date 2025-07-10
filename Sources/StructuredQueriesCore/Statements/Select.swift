@@ -298,7 +298,7 @@ extension Table {
 
 public struct _SelectClauses: Sendable {
   var distinct = false
-  var columns: [any QueryExpression] = []
+  var columns: [any QueryExpression & Sendable] = []
   var joins: [_JoinClause] = []
   var `where`: [QueryFragment] = []
   var group: [QueryFragment] = []
@@ -316,7 +316,7 @@ public struct _SelectClauses: Sendable {
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
-public struct Select<Columns, From: Table, Joins> {
+public struct Select<Columns, From: Table, Joins>: Sendable {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   @CopyOnWrite var clauses = _SelectClauses()
 
@@ -325,7 +325,7 @@ public struct Select<Columns, From: Table, Joins> {
     set { clauses.distinct = newValue }
     _modify { yield &clauses.distinct }
   }
-  fileprivate var columns: [any QueryExpression] {
+  fileprivate var columns: [any QueryExpression & Sendable] {
     get { clauses.columns }
     set { clauses.columns = newValue }
     _modify { yield &clauses.columns }
@@ -363,7 +363,7 @@ public struct Select<Columns, From: Table, Joins> {
 
   fileprivate init(
     distinct: Bool,
-    columns: [any QueryExpression],
+    columns: [any QueryExpression & Sendable],
     joins: [_JoinClause],
     where: [QueryFragment],
     group: [QueryFragment],
@@ -1409,7 +1409,7 @@ extension Select: SelectStatement {
     var query: QueryFragment = "SELECT"
     let columns =
       columns.isEmpty
-      ? [From.columns.queryFragment] + joins.map { $0.table.columns.queryFragment }
+      ? [From.columns.queryFragment] + joins.map(\.columns)
       : columns.map(\.queryFragment)
     if distinct {
       query.append(" DISTINCT")
@@ -1448,7 +1448,7 @@ extension Select: SelectStatement {
 public typealias SelectOf<From: Table, each Join: Table> =
   Select<(), From, (repeat each Join)>
 
-public struct _JoinClause: QueryExpression {
+public struct _JoinClause: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
   struct Operator {
@@ -1460,17 +1460,21 @@ public struct _JoinClause: QueryExpression {
   }
 
   let `operator`: QueryFragment?
-  let table: any Table.Type
+  let tableName: String
+  let tableAlias: String?
   let constraint: QueryFragment
+  let columns: QueryFragment
 
-  init(
+  init<T: Table>(
     operator: Operator?,
-    table: any Table.Type,
+    table: T.Type,
     constraint: some QueryExpression<Bool>
   ) {
     self.operator = `operator`?.queryFragment
-    self.table = table
+    self.tableName = table.tableName
+    self.tableAlias = table.tableAlias
     self.constraint = constraint.queryFragment
+    self.columns = table.columns.queryFragment
   }
 
   public var queryFragment: QueryFragment {
@@ -1478,8 +1482,8 @@ public struct _JoinClause: QueryExpression {
     if let `operator` {
       query.append("\(`operator`) ")
     }
-    query.append("JOIN \(quote: table.tableName) ")
-    if let tableAlias = table.tableAlias {
+    query.append("JOIN \(quote: tableName) ")
+    if let tableAlias {
       query.append("AS \(quote: tableAlias) ")
     }
     query.append("ON \(constraint)")
@@ -1487,7 +1491,7 @@ public struct _JoinClause: QueryExpression {
   }
 }
 
-public struct _LimitClause: QueryExpression {
+public struct _LimitClause: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
   let maxLength: QueryFragment

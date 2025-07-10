@@ -31,7 +31,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
@@ -101,7 +103,9 @@ extension SnapshotTests {
                 "\(self.id), \(self.email), \(self.age)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = User.tableName
 
@@ -133,7 +137,9 @@ extension SnapshotTests {
         }
 
         extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "users"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -179,7 +185,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foo"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
@@ -259,7 +267,9 @@ extension SnapshotTests {
         }
 
         extension Bar: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "bar"
           public static let schemaName: Swift.String? = "foo"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
@@ -349,7 +359,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.c1 = try decoder.decode(Swift.Bool.self) ?? true
@@ -389,7 +401,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
@@ -474,7 +488,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Date.UnixTimeRepresentation.self)
@@ -668,7 +684,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
@@ -710,7 +728,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
@@ -750,7 +770,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let `bar` = try decoder.decode(Int.self)
@@ -790,7 +812,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(ID<Foo>.self)
@@ -830,7 +854,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.bar = try decoder.decode() ?? ID<Foo>()
@@ -887,7 +913,9 @@ extension SnapshotTests {
                 "\(self.id), \(self.referrerID)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = User.tableName
 
@@ -911,7 +939,9 @@ extension SnapshotTests {
         }
 
         extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "users"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
@@ -954,7 +984,9 @@ extension SnapshotTests {
         }
 
         extension SyncUp: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "syncUps"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(String.self)
@@ -1015,7 +1047,9 @@ extension SnapshotTests {
                 "\(self.id), \(self.name)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = SyncUp.tableName
 
@@ -1043,7 +1077,9 @@ extension SnapshotTests {
         }
 
         extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "syncUps"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1123,7 +1159,9 @@ extension SnapshotTests {
                 "\(self.id), \(self.seconds)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = SyncUp.tableName
 
@@ -1147,7 +1185,9 @@ extension SnapshotTests {
         }
 
         extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "syncUps"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1213,7 +1253,9 @@ extension SnapshotTests {
                 "\(self.id), \(self.color), \(self.name)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = RemindersList.tableName
 
@@ -1241,7 +1283,9 @@ extension SnapshotTests {
         }
 
         extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "remindersLists"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1306,7 +1350,9 @@ extension SnapshotTests {
       }
 
       extension Foo: StructuredQueriesCore.Table {
-        public static let columns = TableColumns()
+        public static var columns: TableColumns {
+          TableColumns()
+        }
         public static let tableName = "foos"
         public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
           let name = try decoder.decode(String.self)
@@ -1362,7 +1408,9 @@ extension SnapshotTests {
                 "\(self.id)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = Foo.tableName
 
@@ -1382,7 +1430,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1458,7 +1508,9 @@ extension SnapshotTests {
         }
 
         extension Foo.Draft: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = Foo.tableName
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1528,7 +1580,9 @@ extension SnapshotTests {
                 "\(self.id), \(self.name)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = Foo.tableName
 
@@ -1556,7 +1610,9 @@ extension SnapshotTests {
         }
 
         extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "foos"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1631,7 +1687,9 @@ extension SnapshotTests {
                 "\(self.id), \(self.title), \(self.date), \(self.priority)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = Reminder.tableName
 
@@ -1663,7 +1721,9 @@ extension SnapshotTests {
         }
 
         extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "reminders"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1721,7 +1781,9 @@ extension SnapshotTests {
                 "\(self.id)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = Reminder.tableName
 
@@ -1741,7 +1803,9 @@ extension SnapshotTests {
         }
 
         extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "reminders"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(UUID.BytesRepresentation.self)
@@ -1782,7 +1846,9 @@ extension SnapshotTests {
         }
 
         extension Reminder: StructuredQueriesCore.Table {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "reminders"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
@@ -1841,7 +1907,9 @@ extension SnapshotTests {
                 "\(self.id), \(self.title)"
               }
             }
-            public static let columns = TableColumns()
+            public static var columns: TableColumns {
+              TableColumns()
+            }
 
             public static let tableName = Reminder.tableName
 
@@ -1865,7 +1933,9 @@ extension SnapshotTests {
         }
 
         extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "reminders"
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Int.self)
