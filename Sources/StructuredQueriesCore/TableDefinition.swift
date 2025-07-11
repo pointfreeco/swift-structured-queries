@@ -7,6 +7,7 @@ public protocol TableDefinition<QueryValue>: QueryExpression where QueryValue: T
   /// An array of this table's columns.
   static var allColumns: [any TableColumnExpression] { get }
 
+  /// An array of this table's writable (non-generated) columns.
   static var writableColumns: [any WritableTableColumnExpression] { get }
 }
 

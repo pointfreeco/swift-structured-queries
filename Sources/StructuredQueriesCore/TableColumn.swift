@@ -20,6 +20,7 @@ public protocol TableColumnExpression<Root, Value>: QueryExpression where Value 
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
 }
 
+/// A type representing a _writable_ table column, _i.e._ not a generated column.
 public protocol WritableTableColumnExpression<Root, Value>: TableColumnExpression {
   func _aliased<Name: AliasName>(
     _ alias: Name.Type
@@ -104,6 +105,10 @@ public enum GeneratedColumnStorage {
   case virtual, stored
 }
 
+/// A type representing a generated column.
+///
+/// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros to
+/// generate values of this type.
 public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
   TableColumnExpression,
   Sendable
