@@ -125,6 +125,17 @@ public struct TableAlias<
       #endif
     }
 
+    public static var writableColumns: [any WritableTableColumnExpression] {
+      #if compiler(>=6.1)
+        return Base.TableColumns.writableColumns.map { $0._aliased(Name.self) }
+      #else
+        func open(_ column: some TableColumnExpression) -> any TableColumnExpression {
+          column._aliased(Name.self)
+        }
+        return Base.TableColumns.writableColumns.map { open($0) }
+      #endif
+    }
+
     public typealias QueryValue = TableAlias
 
     public subscript<Member>(

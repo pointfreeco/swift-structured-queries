@@ -3,6 +3,8 @@ extension Never: Table {
     public typealias QueryValue = Never
 
     public static var allColumns: [any TableColumnExpression] { [] }
+
+    public static var writableColumns: [any WritableTableColumnExpression] { [] }
   }
 
   public static var columns: TableColumns {
