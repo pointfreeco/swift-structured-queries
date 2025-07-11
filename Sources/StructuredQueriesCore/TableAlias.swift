@@ -129,7 +129,9 @@ public struct TableAlias<
       #if compiler(>=6.1)
         return Base.TableColumns.writableColumns.map { $0._aliased(Name.self) }
       #else
-        func open(_ column: some TableColumnExpression) -> any TableColumnExpression {
+      func open(
+        _ column: some WritableTableColumnExpression
+      ) -> any WritableTableColumnExpression {
           column._aliased(Name.self)
         }
         return Base.TableColumns.writableColumns.map { open($0) }
