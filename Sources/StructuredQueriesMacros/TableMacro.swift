@@ -222,10 +222,10 @@ extension TableMacro: ExtensionMacro {
                 Diagnostic(
                   node: property.bindingSpecifier,
                   message: MacroExpansionErrorMessage(
-                    "Generated property must be 'let'"
+                    "Generated column property must be declared with a 'let'"
                   ),
                   fixIt: .replace(
-                    message: MacroExpansionFixItMessage("Replace with 'let'"),
+                    message: MacroExpansionFixItMessage("Replace 'var' with 'let'"),
                     oldNode: Syntax(property.bindingSpecifier),
                     newNode: Syntax(
                       property.bindingSpecifier.with(\.tokenKind, .keyword(.let))

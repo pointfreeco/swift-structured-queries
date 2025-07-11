@@ -581,8 +581,8 @@ extension SnapshotTests {
           @Column(generated: .stored)
           var generated: String
           ┬──
-          ╰─ 🛑 Generated property must be 'let'
-             ✏️ Replace with 'let'
+          ╰─ 🛑 Generated column property must be declared with a 'let'
+             ✏️ Replace 'var' with 'let'
         }
         """
       }fixes: {
