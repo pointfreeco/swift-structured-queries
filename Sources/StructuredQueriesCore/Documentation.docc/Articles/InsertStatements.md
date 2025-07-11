@@ -363,9 +363,9 @@ And many include an optional upsert clause. You can unconditionally upsert using
   @Column {
     ```swift
     Reminder.insert {
-      ($0.isCompleted, $0.title, $0.priority)
+      ($0.isCompleted, $0.priority, $0.title)
     } values: {
-      (false, "Get groceries", 3)
+      (false, .high, "Get groceries")
     } onConflictDoUpdate: {
       $0.title += " (Copy)"
     }
@@ -376,9 +376,7 @@ And many include an optional upsert clause. You can unconditionally upsert using
     INSERT INTO "reminders"
       ("isCompleted", "title", "priority")
     VALUES
-      (0, 'Get groceries', 3),
-      (0, 'Take a walk', 1),
-      (1, 'Get haircut', NULL)
+      (0, 3, 'Get groceries'),
     ON CONFLICT DO UPDATE SET
       "title" = ("reminders"."title" || ' (Copy)')
     ```
@@ -391,11 +389,11 @@ Or you can conditionally upsert from given indexed columns using `onConflict:doU
   @Column {
     ```swift
     Reminder.insert {
-      ($0.isCompleted, $0.title, $0.priority)
+      ($0.isCompleted, $0.priority, $0.title)
     } values: {
-      (false, "Get groceries", 3)
+      (false, .high, "Get groceries")
     } onConflict: {
-      $0.id
+      $0.title
     } doUpdate: {
       $0.title += " (Copy)"
     }
@@ -404,16 +402,47 @@ Or you can conditionally upsert from given indexed columns using `onConflict:doU
   @Column {
     ```sql
     INSERT INTO "reminders"
-      ("isCompleted", "title", "priority")
+      ("isCompleted", "priority", "title")
     VALUES
-      (0, 'Get groceries', 3),
-      (0, 'Take a walk', 1),
-      (1, 'Get haircut', NULL)
-    ON CONFLICT ("id") DO UPDATE SET
+      (0, 3, 'Get groceries'),
+    ON CONFLICT ("title") DO UPDATE SET
       "title" = ("reminders"."title" || ' (Copy)')
     ```
   }
 }
+
+Upsert clauses have an additional, special ``Updates/excluded`` qualifier for referring to a row
+that failed to insert.
+
+```swift
+@Row {
+  @Column {
+    ```swift
+    Reminder.insert {
+      ($0.isCompleted, $0.priority, $0.title)
+    } values: {
+      (false, .high, "Get groceries")
+    } onConflict: {
+      $0.title
+    } doUpdate: {
+      $0.isCompleted = $0.excluded.isCompleted
+      $0.priority = $0.excluded.priority
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    INSERT INTO "reminders"
+      ("isCompleted", "priority", "title")
+    VALUES
+      (0, 3, 'Get groceries'),
+    ON CONFLICT ("title") DO UPDATE SET
+      "isCompleted" = "excluded"."isCompleted",
+      "priority" = "excluded"."priority"
+    ```
+  }
+}
+```
 
 `WHERE` conditions are also supported, on both the conflict and update clauses.
 
@@ -437,6 +466,10 @@ Or you can conditionally upsert from given indexed columns using `onConflict:doU
 ### Inserting from a select
 
 - ``Table/insert(or:_:select:onConflict:where:doUpdate:where:)``
+
+### Upserts
+
+- ``Table/Excluded``
 
 ### Statement types
 

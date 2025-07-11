@@ -585,7 +585,7 @@ extension SnapshotTests {
         } where: {
           !$0.isCompleted
         } doUpdate: {
-          $0.isCompleted = true
+          $0.isCompleted = $1.isCompleted
         } where: {
           $0.isFlagged
         }
@@ -597,7 +597,7 @@ extension SnapshotTests {
         (NULL, NULL, NULL, 0, 0, '', NULL, 1, '', '2040-02-14 23:31:30.000')
         ON CONFLICT ("id")
         WHERE NOT ("reminders"."isCompleted")
-        DO UPDATE SET "isCompleted" = 1
+        DO UPDATE SET "isCompleted" = "excluded"."isCompleted"
         WHERE "reminders"."isFlagged"
         """
       }

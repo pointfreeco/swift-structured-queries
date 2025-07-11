@@ -1,6 +1,10 @@
 import IssueReporting
 
 extension Table {
+  /// Columns referencing the value that would have been inserted in an
+  /// [insert statement](<doc:InsertStatements>) had there been no conflict.
+  public typealias Excluded = TableAlias<Self, _ExcludedName>.TableColumns
+
   /// An insert statement for one or more table rows.
   ///
   /// This function can be used to create an insert statement from a ``Table`` value.
@@ -54,7 +58,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
     @InsertValuesBuilder<Self> values: () -> [Self],
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -64,6 +68,72 @@ extension Table {
       onConflict: { _ -> ()? in nil },
       where: { _ in return [] },
       doUpdate: updates,
+      where: updateFilter
+    )
+  }
+
+  /// An insert statement for one or more table rows.
+  ///
+  /// This function can be used to create an insert statement from a ``Table`` value.
+  ///
+  /// ```swift
+  /// let tag = Tag(title: "car")
+  /// Tag.insert { tag }
+  /// // INSERT INTO "tags" ("title")
+  /// // VALUES ('car')
+  /// ```
+  ///
+  /// It can also be used to insert multiple rows in a single statement.
+  ///
+  /// ```swift
+  /// let tags = [
+  ///   Tag(title: "car"),
+  ///   Tag(title: "kids"),
+  ///   Tag(title: "someday"),
+  ///   Tag(title: "optional")
+  /// ]
+  /// Tag.insert { tags }
+  /// // INSERT INTO "tags" ("title")
+  /// // VALUES ('car'), ('kids'), ('someday'), ('optional')
+  /// ```
+  ///
+  /// The `values` trailing closure is a result builder that will insert any number of expressions,
+  /// one after the other, and supports basic control flow statements.
+  ///
+  /// ```swift
+  /// Tag.insert {
+  ///   if vehicleOwner {
+  ///     Tag(name: "car")
+  ///   }
+  ///   Tag(name: "kids")
+  ///   Tag(name: "someday")
+  ///   Tag(name: "optional")
+  /// }
+  /// // INSERT INTO "tags" ("title")
+  /// // VALUES ('car'), ('kids'), ('someday'), ('optional')
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> TableColumns = { $0 },
+    @InsertValuesBuilder<Self> values: () -> [Self],
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      columns,
+      values: values,
+      onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
       where: updateFilter
     )
   }
@@ -89,7 +159,7 @@ extension Table {
     ),
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -105,13 +175,49 @@ extension Table {
     }
   }
 
+  /// An upsert statement for one or more table rows.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - conflictTargets: Indexed columns to target for conflict resolution.
+  ///   - targetFilter: A filter to apply to conflict target columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<T1, each T2>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> TableColumns = { $0 },
+    @InsertValuesBuilder<Self> values: () -> [Self],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>) -> Void,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      columns,
+      values: values,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: { row, _ in updates(&row) },
+      where: updateFilter
+    )
+  }
+
   private static func _insert<each ConflictTarget>(
     or conflictResolution: ConflictResolution?,
     @InsertValuesBuilder<Self> values: () -> [Self],
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Updates<Self>, Excluded) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -199,7 +305,7 @@ extension Table {
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
     values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -210,6 +316,34 @@ extension Table {
       onConflict: { _ -> ()? in nil },
       where: { _ in return [] },
       doUpdate: updates,
+      where: updateFilter
+    )
+  }
+
+  /// An insert statement for one or more table rows.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<V1, each V2>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
+    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      columns,
+      values: values,
+      onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
       where: updateFilter
     )
   }
@@ -236,7 +370,7 @@ extension Table {
     ),
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -253,6 +387,43 @@ extension Table {
     }
   }
 
+  /// An upsert statement for one or more table rows.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - conflictTargets: Indexed columns to target for conflict resolution.
+  ///   - targetFilter: A filter to apply to conflict target columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<V1, each V2, T1, each T2>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
+    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>) -> Void,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      columns,
+      values: values,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: { row, _ in updates(&row) },
+      where: updateFilter
+    )
+  }
+
   private static func _insert<each Value, each ConflictTarget>(
     or conflictResolution: ConflictResolution?,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
@@ -261,7 +432,7 @@ extension Table {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Updates<Self>, Excluded) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -308,7 +479,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -319,6 +490,39 @@ extension Table {
       onConflict: { _ -> ()? in nil },
       where: { _ in return [] },
       doUpdate: updates,
+      where: updateFilter
+    )
+  }
+
+  /// An insert statement for a table selection.
+  ///
+  /// This function can be used to create an insert statement for the results of a ``Select``
+  /// statement.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns values to be inserted.
+  ///   - selection: A statement that selects the values to be inserted.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<
+    V1,
+    each V2
+  >(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      columns,
+      select: selection,
+      onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
       where: updateFilter
     )
   }
@@ -352,7 +556,7 @@ extension Table {
     ),
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -369,6 +573,50 @@ extension Table {
     }
   }
 
+  /// An insert statement for a table selection.
+  ///
+  /// This function can be used to create an insert statement for the results of a ``Select``
+  /// statement.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns values to be inserted.
+  ///   - selection: A statement that selects the values to be inserted.
+  ///   - conflictTargets: Indexed columns to target for conflict resolution.
+  ///   - targetFilter: A filter to apply to conflict target columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert<
+    V1,
+    each V2,
+    T1,
+    each T2
+  >(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>) -> Void,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      columns,
+      select: selection,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: { row, _ in updates(&row) },
+      where: updateFilter
+    )
+  }
+
   private static func _insert<
     each Value,
     each ConflictTarget
@@ -379,7 +627,7 @@ extension Table {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Updates<Self>, Excluded) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -430,7 +678,7 @@ extension Table {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Updates<Self>, Excluded) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -446,7 +694,7 @@ extension Table {
       conflictTargetColumnNames: conflictTargetColumnNames,
       conflictTargetFilter: targetFilter(Self.columns),
       values: values,
-      updates: updates.map { Updates($0) },
+      updates: updates.map { updates in Updates { updates(&$0, Excluded.QueryValue.columns) } },
       updateFilter: updateFilter(Self.columns),
       returning: []
     )
@@ -470,7 +718,7 @@ extension PrimaryKeyedTable {
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
     @InsertValuesBuilder<Draft> values: () -> [Draft],
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)? = nil,
+    onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -480,6 +728,35 @@ extension PrimaryKeyedTable {
       onConflict: { _ -> ()? in nil },
       where: { _ in return [] },
       doUpdate: updates,
+      where: updateFilter
+    )
+  }
+
+  /// An insert statement for one or more table rows.
+  ///
+  /// This function can be used to create an insert statement from a ``Draft`` value.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  /// - Returns: An insert statement.
+  public static func insert(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
+    @InsertValuesBuilder<Draft> values: () -> [Draft],
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      columns,
+      values: values,
+      onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
       where: updateFilter
     )
   }
@@ -506,7 +783,7 @@ extension PrimaryKeyedTable {
     ),
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void = { _ in },
+    doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -521,6 +798,43 @@ extension PrimaryKeyedTable {
       )
     }
   }
+
+  /// An insert statement for one or more table rows.
+  ///
+  /// This function can be used to create an insert statement from a ``Draft`` value.
+  ///
+  /// - Parameters:
+  ///   - conflictResolution: A conflict resolution algorithm.
+  ///   - columns: Columns to insert.
+  ///   - values: A builder of row values for the given columns.
+  ///   - conflictTargets: Indexed columns to target for conflict resolution.
+  ///   - targetFilter: A filter to apply to conflict target columns.
+  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
+  ///     existing row.
+  ///   - updateFilter: A filter to apply to the update clause.
+  public static func insert<T1, each T2>(
+    or conflictResolution: ConflictResolution? = nil,
+    _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
+    @InsertValuesBuilder<Draft> values: () -> [Draft],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>) -> Void,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    insert(
+      or: conflictResolution,
+      values: values,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: { row, _ in updates(&row) },
+      where: updateFilter
+    )
+  }
+
   /// An upsert statement for given drafts.
   ///
   /// Generates an insert statement with an upsert clause. Useful for building forms that can both
@@ -545,10 +859,10 @@ extension PrimaryKeyedTable {
       or: conflictResolution,
       values: values,
       onConflict: { $0.primaryKey },
-      doUpdate: { updates in
-        for column in Draft.TableColumns.writableColumns
+      doUpdate: { updates, _ in
+        for (column, excluded) in zip(Draft.TableColumns.writableColumns, Excluded.writableColumns)
         where column.name != columns.primaryKey.name {
-          updates.set(column, #""excluded".\#(quote: column.name)"#)
+          updates.set(column, excluded.queryFragment)
         }
       }
     )
@@ -560,7 +874,7 @@ extension PrimaryKeyedTable {
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>) -> Void)?,
+    doUpdate updates: ((inout Updates<Self>, Excluded) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
@@ -810,4 +1124,8 @@ public enum InsertValuesBuilder<Value> {
   public static func buildPartialBlock(accumulated: [Value], next: [Value]) -> [Value] {
     accumulated + next
   }
+}
+
+public struct _ExcludedName: AliasName {
+  public static var aliasName: String { "excluded" }
 }
