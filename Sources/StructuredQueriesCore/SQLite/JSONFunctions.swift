@@ -180,11 +180,12 @@ extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Coda
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[Wrapped].JSONRepresentation>
   where QueryValue == Wrapped? {
+    let primaryKeyCheck = self.primaryKey.isNot(nil)
     let filterQueryFragment =
-      if let filter {
-        self.primaryKey.isNot(nil).and(filter).queryFragment
+      if let filter, filter.queryFragment != primaryKeyCheck.queryFragment {
+        primaryKeyCheck.and(filter).queryFragment
       } else {
-        self.primaryKey.isNot(nil).queryFragment
+        primaryKeyCheck.queryFragment
       }
     return AggregateFunction(
       "json_group_array",
