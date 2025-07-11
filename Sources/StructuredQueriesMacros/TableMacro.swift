@@ -216,6 +216,25 @@ extension TableMacro: ExtensionMacro {
             else {
               continue
             }
+            guard property.bindingSpecifier.tokenKind == .keyword(.let)
+            else {
+              diagnostics.append(
+                Diagnostic(
+                  node: property.bindingSpecifier,
+                  message: MacroExpansionErrorMessage(
+                    "Generated column property must be declared with a 'let'"
+                  ),
+                  fixIt: .replace(
+                    message: MacroExpansionFixItMessage("Replace 'var' with 'let'"),
+                    oldNode: Syntax(property.bindingSpecifier),
+                    newNode: Syntax(
+                      property.bindingSpecifier.with(\.tokenKind, .keyword(.let))
+                    )
+                  )
+                )
+              )
+              continue
+            }
             isGenerated = true
 
           case let argument?:
@@ -256,13 +275,16 @@ extension TableMacro: ExtensionMacro {
       if isGenerated {
         columnsProperties.append(
           """
-          public var \(identifier): some \(moduleName).QueryExpression<\(raw: columnQueryValueType?.trimmedDescription ?? "_")> {
-              \(moduleName).TableColumn<\
-              QueryValue, \
-              \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
-              >(\
-              \(columnName), \
-              keyPath: \\QueryValue.\(identifier))
+          public var \(identifier): \(moduleName).GeneratedColumn<\
+          QueryValue, \
+          \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
+          > {
+          \(moduleName).GeneratedColumn<\
+          QueryValue, \
+          \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+          >(\
+          \(columnName), \
+          keyPath: \\QueryValue.\(identifier))
           }
           """
         )
@@ -603,6 +625,7 @@ extension TableMacro: MemberMacro {
     }
     let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
     var allColumns: [TokenSyntax] = []
+    var writableColumns: [TokenSyntax] = []
     var selectedColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [String] = []
@@ -748,8 +771,11 @@ extension TableMacro: MemberMacro {
       if isGenerated {
         columnsProperties.append(
           """
-          public var \(identifier): some \(moduleName).QueryExpression<\(raw: columnQueryValueType?.trimmedDescription ?? "_")> { \
-          \(moduleName).TableColumn<\
+          public var \(identifier): \(moduleName).GeneratedColumn<\
+          QueryValue, \
+          \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
+          > { \
+          \(moduleName).GeneratedColumn<\
           QueryValue, \
           \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
           >(\
@@ -759,6 +785,7 @@ extension TableMacro: MemberMacro {
           }
           """
         )
+        allColumns.append(identifier)
       } else {
         columnsProperties.append(
           """
@@ -772,6 +799,7 @@ extension TableMacro: MemberMacro {
           """
         )
         allColumns.append(identifier)
+        writableColumns.append(identifier)
       }
       let decodedType = columnQueryValueType?.asNonOptionalType()
       if let defaultValue {
@@ -1006,6 +1034,9 @@ extension TableMacro: MemberMacro {
       \(columnsProperties, separator: "\n")
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
       [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
+      }
+      public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] { \
+      [\(writableColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
       }
       public var queryFragment: QueryFragment {
       "\(selectedColumns.map { #"\(self.\#($0))"# as ExprSyntax }, separator: ", ")"

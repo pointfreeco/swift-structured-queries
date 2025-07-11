@@ -94,6 +94,10 @@ extension Optional: Table where Wrapped: Table {
       Wrapped.TableColumns.allColumns
     }
 
+    public static var writableColumns: [any WritableTableColumnExpression] {
+      Wrapped.TableColumns.writableColumns
+    }
+
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, TableColumn<Wrapped, Member>>
     ) -> TableColumn<Optional, Member?> {

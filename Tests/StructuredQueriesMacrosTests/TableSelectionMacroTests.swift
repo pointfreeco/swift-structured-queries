@@ -27,6 +27,9 @@ extension SnapshotTests {
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               [QueryValue.columns.reminderList, QueryValue.columns.remindersCount]
             }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [QueryValue.columns.reminderList, QueryValue.columns.remindersCount]
+            }
             public var queryFragment: QueryFragment {
               "\(self.reminderList), \(self.remindersCount)"
             }

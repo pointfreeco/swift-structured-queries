@@ -41,7 +41,7 @@ public macro Table(
 public macro Column(
   _ name: String = "",
   as representableType: (any QueryRepresentable.Type)? = nil,
-  generated: GeneratedColumn? = nil,
+  generated: GeneratedColumnStorage? = nil,
   primaryKey: Bool = false
 ) =
   #externalMacro(

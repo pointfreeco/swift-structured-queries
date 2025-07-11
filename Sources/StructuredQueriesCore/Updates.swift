@@ -40,7 +40,10 @@ public struct Updates<Base: Table> {
 
   @_disfavoredOverload
   public subscript<Value: QueryExpression>(
-    dynamicMember keyPath: KeyPath<Base.TableColumns, some TableColumnExpression<Base, Value>>
+    dynamicMember keyPath: KeyPath<
+    Base.TableColumns,
+    some WritableTableColumnExpression<Base, Value>
+    >
   ) -> Value.QueryOutput {
     @available(*, unavailable)
     get { fatalError() }

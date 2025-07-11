@@ -198,7 +198,16 @@ extension SnapshotTests {
           """
         )
       )
-      try database.execute(Row.insert { Row.Draft(id: UUID(1)) })
+      assertQuery(
+        Row.insert { Row.Draft(id: UUID(1)) }
+      ) {
+        """
+        INSERT INTO "rows"
+        ("id", "isDeleted")
+        VALUES
+        ('00000000-0000-0000-0000-000000000001', 0)
+        """
+      }
       assertQuery(
         Row.find(UUID(1))
       ) {
@@ -216,6 +225,43 @@ extension SnapshotTests {
         │   isNotDeleted: true                              │
         │ )                                                 │
         └───────────────────────────────────────────────────┘
+        """
+      }
+      assertQuery(
+        Row.insert { $0.id } values: { UUID(2) }.returning(\.self)
+      ) {
+        """
+        INSERT INTO "rows"
+        ("id")
+        VALUES
+        ('00000000-0000-0000-0000-000000000002')
+        RETURNING "id", "isDeleted", "isNotDeleted"
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────┐
+        │ Row(                                              │
+        │   id: UUID(00000000-0000-0000-0000-000000000002), │
+        │   isDeleted: false,                               │
+        │   isNotDeleted: true                              │
+        │ )                                                 │
+        └───────────────────────────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func tableAliasGenerated() {
+      enum R: AliasName {}
+      assertQuery(
+        Row.as(R.self).select(\.isNotDeleted)
+      ) {
+        """
+        SELECT "rs"."isNotDeleted"
+        FROM "rows" AS "rs"
+        """
+      } results: {
+        """
+        no such table: rows
         """
       }
     }
