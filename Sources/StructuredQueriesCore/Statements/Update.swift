@@ -68,8 +68,8 @@ extension PrimaryKeyedTable {
     _ row: Self
   ) -> UpdateOf<Self> {
     update(or: conflictResolution) { updates in
-      for column in TableColumns.allColumns where column.name != columns.primaryKey.name {
-        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) {
+      for column in TableColumns.writableColumns where column.name != columns.primaryKey.name {
+        func open<Root, Value>(_ column: some WritableTableColumnExpression<Root, Value>) {
           updates.set(
             column,
             Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
