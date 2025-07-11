@@ -86,6 +86,10 @@ extension PrimaryKeyedTable {
   ) -> Where<Self> {
     Self.where { $0.primaryKey.eq(primaryKey) }
   }
+
+  public var primaryKey: PrimaryKey.QueryOutput {
+    self[keyPath: Self.columns.primaryKey.keyPath]
+  }
 }
 
 extension TableDraft {
