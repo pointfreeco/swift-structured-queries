@@ -585,7 +585,7 @@ extension SnapshotTests {
              ✏️ Replace 'var' with 'let'
         }
         """
-      }fixes: {
+      } fixes: {
         """
         @Table struct User {
           var name: String

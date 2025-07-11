@@ -228,7 +228,11 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Row.insert { $0.id } values: { UUID(2) }.returning(\.self)
+        Row.insert {
+          $0.id
+        } values: {
+          UUID(2)
+        }.returning(\.self)
       ) {
         """
         INSERT INTO "rows"
