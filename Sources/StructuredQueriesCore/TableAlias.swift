@@ -125,6 +125,19 @@ public struct TableAlias<
       #endif
     }
 
+    public static var writableColumns: [any WritableTableColumnExpression] {
+      #if compiler(>=6.1)
+        return Base.TableColumns.writableColumns.map { $0._aliased(Name.self) }
+      #else
+        func open(
+          _ column: some WritableTableColumnExpression
+        ) -> any WritableTableColumnExpression {
+          column._aliased(Name.self)
+        }
+        return Base.TableColumns.writableColumns.map { open($0) }
+      #endif
+    }
+
     public typealias QueryValue = TableAlias
 
     public subscript<Member>(
@@ -132,6 +145,16 @@ public struct TableAlias<
     ) -> TableColumn<TableAlias, Member> {
       let column = Base.columns[keyPath: keyPath]
       return TableColumn<TableAlias, Member>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column._keyPath]
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, GeneratedColumn<Base, Member>>
+    ) -> GeneratedColumn<TableAlias, Member> {
+      let column = Base.columns[keyPath: keyPath]
+      return GeneratedColumn<TableAlias, Member>(
         column.name,
         keyPath: \.[member: \Member.self, column: column._keyPath]
       )

@@ -186,28 +186,133 @@ extension SnapshotTests {
       }
     }
 
-    @Test func uuid() throws {
+    @Test func uuidAndGeneratedColumn() throws {
       try database.execute(
         #sql(
           """
-          CREATE TABLE "rows" (id TEXT PRIMARY KEY NOT NULL)
+          CREATE TABLE "rows" (
+            "id" TEXT PRIMARY KEY NOT NULL,
+            "isDeleted" INTEGER NOT NULL DEFAULT 0,
+            "isNotDeleted" INTEGER NOT NULL AS (NOT "isDeleted")
+          )
           """
         )
       )
-      try database.execute(Row.insert { Row(id: UUID(1)) })
+      assertQuery(
+        Row.insert { Row.Draft(id: UUID(1)) }
+      ) {
+        """
+        INSERT INTO "rows"
+        ("id", "isDeleted")
+        VALUES
+        ('00000000-0000-0000-0000-000000000001', 0)
+        """
+      }
       assertQuery(
         Row.find(UUID(1))
       ) {
         """
-        SELECT "rows"."id"
+        SELECT "rows"."id", "rows"."isDeleted", "rows"."isNotDeleted"
         FROM "rows"
         WHERE ("rows"."id" = '00000000-0000-0000-0000-000000000001')
         """
       } results: {
         """
-        ┌─────────────────────────────────────────────────────┐
-        │ Row(id: UUID(00000000-0000-0000-0000-000000000001)) │
-        └─────────────────────────────────────────────────────┘
+        ┌───────────────────────────────────────────────────┐
+        │ Row(                                              │
+        │   id: UUID(00000000-0000-0000-0000-000000000001), │
+        │   isDeleted: false,                               │
+        │   isNotDeleted: true                              │
+        │ )                                                 │
+        └───────────────────────────────────────────────────┘
+        """
+      }
+      assertQuery(
+        Row.insert {
+          $0.id
+        } values: {
+          UUID(2)
+        }.returning(\.self)
+      ) {
+        """
+        INSERT INTO "rows"
+        ("id")
+        VALUES
+        ('00000000-0000-0000-0000-000000000002')
+        RETURNING "id", "isDeleted", "isNotDeleted"
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────┐
+        │ Row(                                              │
+        │   id: UUID(00000000-0000-0000-0000-000000000002), │
+        │   isDeleted: false,                               │
+        │   isNotDeleted: true                              │
+        │ )                                                 │
+        └───────────────────────────────────────────────────┘
+        """
+      }
+      assertQuery(
+        Row
+          .update(Row(id: UUID(2), isDeleted: true, isNotDeleted: false))
+          .returning(\.self)
+      ) {
+        """
+        UPDATE "rows"
+        SET "isDeleted" = 1
+        WHERE ("rows"."id" = '00000000-0000-0000-0000-000000000002')
+        RETURNING "id", "isDeleted", "isNotDeleted"
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────┐
+        │ Row(                                              │
+        │   id: UUID(00000000-0000-0000-0000-000000000002), │
+        │   isDeleted: true,                                │
+        │   isNotDeleted: false                             │
+        │ )                                                 │
+        └───────────────────────────────────────────────────┘
+        """
+      }
+      assertQuery(
+        Row
+          .upsert { Row.Draft(id: UUID(2), isDeleted: false) }
+          .returning(\.self)
+      ) {
+        """
+        INSERT INTO "rows"
+        ("id", "isDeleted")
+        VALUES
+        ('00000000-0000-0000-0000-000000000002', 0)
+        ON CONFLICT ("id")
+        DO UPDATE SET "isDeleted" = "excluded"."isDeleted"
+        RETURNING "id", "isDeleted", "isNotDeleted"
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────┐
+        │ Row(                                              │
+        │   id: UUID(00000000-0000-0000-0000-000000000002), │
+        │   isDeleted: false,                               │
+        │   isNotDeleted: true                              │
+        │ )                                                 │
+        └───────────────────────────────────────────────────┘
+        """
+      }
+      enum R: AliasName {}
+      assertQuery(
+        Row.as(R.self).select(\.isNotDeleted)
+      ) {
+        """
+        SELECT "rs"."isNotDeleted"
+        FROM "rows" AS "rs"
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        │ true │
+        └──────┘
         """
       }
     }
@@ -222,4 +327,7 @@ extension SnapshotTests {
 @Table
 private struct Row {
   let id: UUID
+  var isDeleted = false
+  @Column(generated: .virtual)
+  let isNotDeleted: Bool
 }

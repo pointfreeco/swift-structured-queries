@@ -2,6 +2,17 @@ import Foundation
 import StructuredQueriesSupport
 
 extension QueryExpression {
+  /// Passes this expression and the given one to the `json_patch` function.
+  ///
+  /// - Parameter other: A JSON object to patch this object with.
+  /// - Returns: A JSON expression of the result of the invoking the `json_patch` function.
+  public func jsonPatch<QueryOutput: Codable>(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue>
+  where QueryValue == _CodableJSONRepresentation<QueryOutput> {
+    QueryFunction("json_patch", self, other)
+  }
+
   /// Wraps this expression with the `json_array_length` function.
   ///
   /// ```swift
@@ -59,7 +70,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   ///     ```swift
   ///     @Selection struct Row {
   ///       let remindersList: RemindersList
-  ///       @Column(as: JSONRepresentation<[Reminder]>.self)
+  ///       @Column(as: [Reminder].JSONRepresentation.self)
   ///       let reminders: [Reminder]
   ///     }
   ///     RemindersList
@@ -76,15 +87,15 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   ///     ```sql
   ///      SELECT
   ///       "remindersLists".…,
-  ///       iif(
-  ///         "reminders"."id" IS NULL,
-  ///         NULL,
+  ///       CASE WHEN
+  ///         ("reminders"."id" IS NOT NULL)
+  ///       THEN
   ///         json_object(
   ///           'id', json_quote("id"),
   ///           'title', json_quote("title"),
   ///           'priority', json_quote("priority")
   ///         )
-  ///       )
+  ///       END AS "reminders"
   ///     FROM "remindersLists"
   ///     JOIN "reminders"
   ///       ON ("remindersLists"."id" = "reminders"."remindersListID")
@@ -112,7 +123,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
   }
 }
 
-extension PrimaryKeyedTableDefinition {
+extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Codable & Sendable {
   /// A JSON array representation of the aggregation of a table's columns.
   ///
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
@@ -125,7 +136,7 @@ extension PrimaryKeyedTableDefinition {
   ///     ```swift
   ///     @Selection struct Row {
   ///       let remindersList: RemindersList
-  ///       @Column(as: JSONRepresentation<[Reminder]>.self)
+  ///       @Column(as: [Reminder].JSONRepresentation.self)
   ///       let reminders: [Reminder]
   ///     }
   ///     RemindersList
@@ -142,15 +153,15 @@ extension PrimaryKeyedTableDefinition {
   ///     ```sql
   ///      SELECT
   ///       "remindersLists".…,
-  ///       iif(
-  ///         "reminders"."id" IS NULL,
-  ///         NULL,
+  ///       CASE WHEN
+  ///         ("reminders"."id" IS NOT NULL)
+  ///       THEN
   ///         json_object(
   ///           'id', json_quote("id"),
   ///           'title', json_quote("title"),
   ///           'priority', json_quote("priority")
   ///         )
-  ///       )
+  ///       END AS "reminders"
   ///     FROM "remindersLists"
   ///     JOIN "reminders"
   ///       ON ("remindersLists"."id" = "reminders"."remindersListID")
@@ -183,6 +194,9 @@ extension PrimaryKeyedTableDefinition {
       filter: filterQueryFragment
     )
   }
+}
+
+extension PrimaryKeyedTableDefinition {
 
   fileprivate var jsonObject: some QueryExpression<QueryValue> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {

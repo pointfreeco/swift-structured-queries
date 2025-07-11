@@ -224,8 +224,10 @@ extension Table {
     var valueFragments: [[QueryFragment]] = []
     for value in values() {
       var valueFragment: [QueryFragment] = []
-      for column in TableColumns.allColumns {
-        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+      for column in TableColumns.writableColumns {
+        func open<Root, Value>(
+          _ column: some WritableTableColumnExpression<Root, Value>
+        ) -> QueryFragment {
           Value(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
         }
         valueFragment.append(open(column))
@@ -234,7 +236,7 @@ extension Table {
     }
     return _insert(
       or: conflictResolution,
-      columnNames: TableColumns.allColumns.map(\.name),
+      columnNames: TableColumns.writableColumns.map(\.name),
       values: .values(valueFragments),
       onConflict: conflictTargets,
       where: targetFilter,
@@ -858,7 +860,7 @@ extension PrimaryKeyedTable {
       values: values,
       onConflict: { $0.primaryKey },
       doUpdate: { updates, _ in
-        for (column, excluded) in zip(Draft.TableColumns.allColumns, Excluded.allColumns)
+        for (column, excluded) in zip(Draft.TableColumns.writableColumns, Excluded.writableColumns)
         where column.name != columns.primaryKey.name {
           updates.set(column, excluded.queryFragment)
         }
@@ -879,8 +881,10 @@ extension PrimaryKeyedTable {
     var valueFragments: [[QueryFragment]] = []
     for value in values() {
       var valueFragment: [QueryFragment] = []
-      for column in Draft.TableColumns.allColumns {
-        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+      for column in Draft.TableColumns.writableColumns {
+        func open<Root, Value>(
+          _ column: some WritableTableColumnExpression<Root, Value>
+        ) -> QueryFragment {
           Value(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
         }
         valueFragment.append(open(column))
@@ -889,7 +893,7 @@ extension PrimaryKeyedTable {
     }
     return _insert(
       or: conflictResolution,
-      columnNames: Draft.TableColumns.allColumns.map(\.name),
+      columnNames: Draft.TableColumns.writableColumns.map(\.name),
       values: .values(valueFragments),
       onConflict: conflictTargets,
       where: targetFilter,

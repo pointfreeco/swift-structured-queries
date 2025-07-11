@@ -1049,7 +1049,7 @@ extension SnapshotTests {
           .select { ($0, $1.jsonGroupArray()) }
       ) {
         """
-        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."id" IS NOT NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END)
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."id" IS NOT NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."id" IS NOT NULL))
         FROM "reminders" AS "r1s"
         LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
         GROUP BY "r1s"."id"
@@ -1075,6 +1075,40 @@ extension SnapshotTests {
         │                                             │   )                                             │
         │                                             │ ]                                               │
         └─────────────────────────────────────────────┴─────────────────────────────────────────────────┘
+        """
+      }
+
+      // force empty join
+      assertQuery(
+        Reminder.as(R1.self)
+          .group(by: \.id)
+          .leftJoin(Reminder.as(R2.self).all) { $0.id.eq($1.id) && $0.id.eq(42) }
+          .limit(1)
+          .select { ($0, $1.jsonGroupArray()) }
+      ) {
+        """
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."id" IS NOT NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."id" IS NOT NULL))
+        FROM "reminders" AS "r1s"
+        LEFT JOIN "reminders" AS "r2s" ON (("r1s"."id" = "r2s"."id") AND ("r1s"."id" = 42))
+        GROUP BY "r1s"."id"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┬────┐
+        │ Reminder(                                   │ [] │
+        │   id: 1,                                    │    │
+        │   assignedUserID: 1,                        │    │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │    │
+        │   isCompleted: false,                       │    │
+        │   isFlagged: false,                         │    │
+        │   notes: "Milk, Eggs, Apples",              │    │
+        │   priority: nil,                            │    │
+        │   remindersListID: 1,                       │    │
+        │   title: "Groceries",                       │    │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │    │
+        │ )                                           │    │
+        └─────────────────────────────────────────────┴────┘
         """
       }
     }

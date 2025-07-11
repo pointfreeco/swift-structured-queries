@@ -121,6 +121,7 @@ extension TableMacro: ExtensionMacro {
       var columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
       var isEphemeral = false
+      var isGenerated = false
 
       for attribute in property.attributes {
         guard
@@ -207,6 +208,35 @@ extension TableMacro: ExtensionMacro {
               queryValueType: columnQueryValueType
             )
 
+          case .some(let label) where label.text == "generated":
+            guard
+              let memberName = argument.expression.as(MemberAccessExprSyntax.self)?.declName
+                .baseName.text,
+              ["stored", "virtual"].contains(memberName)
+            else {
+              continue
+            }
+            guard property.bindingSpecifier.tokenKind == .keyword(.let)
+            else {
+              diagnostics.append(
+                Diagnostic(
+                  node: property.bindingSpecifier,
+                  message: MacroExpansionErrorMessage(
+                    "Generated column property must be declared with a 'let'"
+                  ),
+                  fixIt: .replace(
+                    message: MacroExpansionFixItMessage("Replace 'var' with 'let'"),
+                    oldNode: Syntax(property.bindingSpecifier),
+                    newNode: Syntax(
+                      property.bindingSpecifier.with(\.tokenKind, .keyword(.let))
+                    )
+                  )
+                )
+              )
+              continue
+            }
+            isGenerated = true
+
           case let argument?:
             fatalError("Unexpected argument: \(argument)")
           }
@@ -224,9 +254,11 @@ extension TableMacro: ExtensionMacro {
         )
       }
 
-      // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-      draftBindings.append((binding, columnQueryOutputType, identifier == primaryKey?.identifier))
-      // NB: End of workaround
+      if !isGenerated {
+        // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
+        draftBindings.append((binding, columnQueryOutputType, identifier == primaryKey?.identifier))
+        // NB: End of workaround
+      }
 
       var assignedType: String? {
         binding
@@ -240,18 +272,36 @@ extension TableMacro: ExtensionMacro {
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
-      columnsProperties.append(
-        """
-        public let \(identifier) = \(moduleName).TableColumn<\
-        QueryValue, \
-        \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
-        >(\
-        \(columnName), \
-        keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+      if isGenerated {
+        columnsProperties.append(
+          """
+          public var \(identifier): \(moduleName).GeneratedColumn<\
+          QueryValue, \
+          \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
+          > {
+          \(moduleName).GeneratedColumn<\
+          QueryValue, \
+          \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+          >(\
+          \(columnName), \
+          keyPath: \\QueryValue.\(identifier))
+          }
+          """
         )
-        """
-      )
-      allColumns.append(identifier)
+      } else {
+        columnsProperties.append(
+          """
+          public let \(identifier) = \(moduleName).TableColumn<\
+          QueryValue, \
+          \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+          >(\
+          \(columnName), \
+          keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+          )
+          """
+        )
+        allColumns.append(identifier)
+      }
       let decodedType = columnQueryValueType?.asNonOptionalType()
       if let defaultValue {
         decodings.append(
@@ -284,79 +334,81 @@ extension TableMacro: ExtensionMacro {
         )
       }
 
-      if let primaryKey, primaryKey.identifier == identifier {
-        var hasColumnAttribute = false
-        var property = property
-        for attributeIndex in property.attributes.indices {
-          guard
-            var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
-            let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
-            attributeName == "Column",
-            case .argumentList(var arguments) = attribute.arguments
-          else { continue }
-          hasColumnAttribute = true
-          var hasPrimaryKeyArgument = false
-          for argumentIndex in arguments.indices {
-            var argument = arguments[argumentIndex]
-            defer { arguments[argumentIndex] = argument }
-            switch argument.label?.text {
-            case "as":
-              if var expression = argument.expression.as(MemberAccessExprSyntax.self) {
-                expression.base = "\(expression.base)?"
-                argument.expression = ExprSyntax(expression)
+      if !isGenerated {
+        if let primaryKey, primaryKey.identifier == identifier {
+          var hasColumnAttribute = false
+          var property = property
+          for attributeIndex in property.attributes.indices {
+            guard
+              var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
+              let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
+              attributeName == "Column",
+              case .argumentList(var arguments) = attribute.arguments
+            else { continue }
+            hasColumnAttribute = true
+            var hasPrimaryKeyArgument = false
+            for argumentIndex in arguments.indices {
+              var argument = arguments[argumentIndex]
+              defer { arguments[argumentIndex] = argument }
+              switch argument.label?.text {
+              case "as":
+                if var expression = argument.expression.as(MemberAccessExprSyntax.self) {
+                  expression.base = "\(expression.base)?"
+                  argument.expression = ExprSyntax(expression)
+                }
+
+              case "primaryKey":
+                hasPrimaryKeyArgument = true
+                argument.expression = ExprSyntax(BooleanLiteralExprSyntax(false))
+
+              default:
+                break
               }
-
-            case "primaryKey":
-              hasPrimaryKeyArgument = true
-              argument.expression = ExprSyntax(BooleanLiteralExprSyntax(false))
-
-            default:
-              break
             }
-          }
-          if !hasPrimaryKeyArgument {
-            arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
-              trailingTrivia: .space
-            )
-            arguments.append(
-              LabeledExprSyntax(
-                label: "primaryKey",
-                expression: BooleanLiteralExprSyntax(false)
+            if !hasPrimaryKeyArgument {
+              arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
+                trailingTrivia: .space
               )
+              arguments.append(
+                LabeledExprSyntax(
+                  label: "primaryKey",
+                  expression: BooleanLiteralExprSyntax(false)
+                )
+              )
+            }
+            attribute.arguments = .argumentList(arguments)
+            property.attributes[attributeIndex] = .attribute(attribute)
+          }
+          if !hasColumnAttribute {
+            let attribute = "@Column(primaryKey: false)\n"
+            property.attributes.insert(
+              AttributeListSyntax.Element("\(raw: attribute)"),
+              at: property.attributes.startIndex
             )
           }
-          attribute.arguments = .argumentList(arguments)
-          property.attributes[attributeIndex] = .attribute(attribute)
-        }
-        if !hasColumnAttribute {
-          let attribute = "@Column(primaryKey: false)\n"
-          property.attributes.insert(
-            AttributeListSyntax.Element("\(raw: attribute)"),
-            at: property.attributes.startIndex
+          var binding = binding
+          if let type = binding.typeAnnotation?.type.asOptionalType() {
+            binding.typeAnnotation?.type = type
+          }
+          property.bindings = [binding]
+          draftProperties.append(
+            DeclSyntax(
+              property.trimmed
+                .with(\.bindingSpecifier.leadingTrivia, "")
+                .removingAccessors()
+                .rewritten(selfRewriter)
+            )
+          )
+        } else {
+          draftProperties.append(
+            DeclSyntax(
+              property.trimmed
+                .with(\.bindingSpecifier.leadingTrivia, "")
+                .removingAccessors()
+                .rewritten(selfRewriter)
+            )
           )
         }
-        var binding = binding
-        if let type = binding.typeAnnotation?.type.asOptionalType() {
-          binding.typeAnnotation?.type = type
-        }
-        property.bindings = [binding]
-        draftProperties.append(
-          DeclSyntax(
-            property.trimmed
-              .with(\.bindingSpecifier.leadingTrivia, "")
-              .removingAccessors()
-              .rewritten(selfRewriter)
-          )
-        )
-      } else {
-        draftProperties.append(
-          DeclSyntax(
-            property.trimmed
-              .with(\.bindingSpecifier.leadingTrivia, "")
-              .removingAccessors()
-              .rewritten(selfRewriter)
-          )
-        )
       }
     }
 
@@ -573,6 +625,8 @@ extension TableMacro: MemberMacro {
     }
     let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
     var allColumns: [TokenSyntax] = []
+    var writableColumns: [TokenSyntax] = []
+    var selectedColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
@@ -613,6 +667,7 @@ extension TableMacro: MemberMacro {
       var columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
       var isEphemeral = false
+      var isGenerated = false
 
       for attribute in property.attributes {
         guard
@@ -668,6 +723,14 @@ extension TableMacro: MemberMacro {
               queryValueType: columnQueryValueType
             )
 
+          case .some(let label) where label.text == "generated":
+            guard
+              let memberName = argument.expression.as(MemberAccessExprSyntax.self)?.declName
+                .baseName.text,
+              ["stored", "virtual"].contains(memberName)
+            else { continue }
+            isGenerated = true
+
           case let argument?:
             fatalError("Unexpected argument: \(argument)")
           }
@@ -685,9 +748,13 @@ extension TableMacro: MemberMacro {
         )
       }
 
-      // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-      draftBindings.append((binding, columnQueryOutputType, identifier == primaryKey?.identifier))
-      // NB: End of workaround
+      selectedColumns.append(identifier)
+
+      if !isGenerated {
+        // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
+        draftBindings.append((binding, columnQueryOutputType, identifier == primaryKey?.identifier))
+        // NB: End of workaround
+      }
 
       var assignedType: String? {
         binding
@@ -701,18 +768,39 @@ extension TableMacro: MemberMacro {
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
-      columnsProperties.append(
-        """
-        public let \(identifier) = \(moduleName).TableColumn<\
-        QueryValue, \
-        \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
-        >(\
-        \(columnName), \
-        keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+      if isGenerated {
+        columnsProperties.append(
+          """
+          public var \(identifier): \(moduleName).GeneratedColumn<\
+          QueryValue, \
+          \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
+          > { \
+          \(moduleName).GeneratedColumn<\
+          QueryValue, \
+          \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+          >(\
+          \(columnName), \
+          keyPath: \\QueryValue.\(identifier)\
+          )
+          }
+          """
         )
-        """
-      )
-      allColumns.append(identifier)
+        allColumns.append(identifier)
+      } else {
+        columnsProperties.append(
+          """
+          public let \(identifier) = \(moduleName).TableColumn<\
+          QueryValue, \
+          \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
+          >(\
+          \(columnName), \
+          keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+          )
+          """
+        )
+        allColumns.append(identifier)
+        writableColumns.append(identifier)
+      }
       let decodedType = columnQueryValueType?.asNonOptionalType()
       if let defaultValue {
         decodings.append(
@@ -745,80 +833,82 @@ extension TableMacro: MemberMacro {
         )
       }
 
-      if let primaryKey, primaryKey.identifier == identifier {
-        var hasColumnAttribute = false
-        var property = property
-        for attributeIndex in property.attributes.indices {
-          guard
-            var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
-            let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
-            attributeName == "Column",
-            case .argumentList(var arguments) = attribute.arguments
-          else { continue }
-          hasColumnAttribute = true
-          var hasPrimaryKeyArgument = false
-          for argumentIndex in arguments.indices {
-            var argument = arguments[argumentIndex]
-            defer { arguments[argumentIndex] = argument }
-            switch argument.label?.text {
-            case "as":
-              if var expression = argument.expression.as(MemberAccessExprSyntax.self) {
-                expression.base = "\(expression.base)?"
-                argument.expression = ExprSyntax(expression)
+      if !isGenerated {
+        if let primaryKey, primaryKey.identifier == identifier {
+          var hasColumnAttribute = false
+          var property = property
+          for attributeIndex in property.attributes.indices {
+            guard
+              var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
+              let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
+              attributeName == "Column",
+              case .argumentList(var arguments) = attribute.arguments
+            else { continue }
+            hasColumnAttribute = true
+            var hasPrimaryKeyArgument = false
+            for argumentIndex in arguments.indices {
+              var argument = arguments[argumentIndex]
+              defer { arguments[argumentIndex] = argument }
+              switch argument.label?.text {
+              case "as":
+                if var expression = argument.expression.as(MemberAccessExprSyntax.self) {
+                  expression.base = "\(expression.base)?"
+                  argument.expression = ExprSyntax(expression)
+                }
+
+              case "primaryKey":
+                hasPrimaryKeyArgument = true
+                argument.expression = ExprSyntax(BooleanLiteralExprSyntax(false))
+
+              default:
+                break
               }
-
-            case "primaryKey":
-              hasPrimaryKeyArgument = true
-              argument.expression = ExprSyntax(BooleanLiteralExprSyntax(false))
-
-            default:
-              break
             }
-          }
-          if !hasPrimaryKeyArgument {
-            arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
-              trailingTrivia: .space
-            )
-            arguments.append(
-              LabeledExprSyntax(
-                label: "primaryKey",
-                expression: BooleanLiteralExprSyntax(false)
+            if !hasPrimaryKeyArgument {
+              arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
+                trailingTrivia: .space
               )
+              arguments.append(
+                LabeledExprSyntax(
+                  label: "primaryKey",
+                  expression: BooleanLiteralExprSyntax(false)
+                )
+              )
+            }
+            attribute.arguments = .argumentList(arguments)
+            property.attributes[attributeIndex] = .attribute(attribute)
+          }
+          property = property.trimmed
+          if !hasColumnAttribute {
+            let attribute = "@Column(primaryKey: false)\n"
+            property.attributes.insert(
+              AttributeListSyntax.Element("\(raw: attribute)"),
+              at: property.attributes.startIndex
             )
           }
-          attribute.arguments = .argumentList(arguments)
-          property.attributes[attributeIndex] = .attribute(attribute)
-        }
-        property = property.trimmed
-        if !hasColumnAttribute {
-          let attribute = "@Column(primaryKey: false)\n"
-          property.attributes.insert(
-            AttributeListSyntax.Element("\(raw: attribute)"),
-            at: property.attributes.startIndex
+          var binding = binding
+          if let type = binding.typeAnnotation?.type.asOptionalType() {
+            binding.typeAnnotation?.type = type
+          }
+          property.bindings = [binding]
+          draftProperties.append(
+            DeclSyntax(
+              property
+                .with(\.bindingSpecifier.leadingTrivia, "")
+                .removingAccessors()
+                .rewritten(selfRewriter)
+            )
+          )
+        } else {
+          draftProperties.append(
+            DeclSyntax(
+              property.trimmed
+                .with(\.bindingSpecifier.leadingTrivia, "")
+                .removingAccessors()
+                .rewritten(selfRewriter)
+            )
           )
         }
-        var binding = binding
-        if let type = binding.typeAnnotation?.type.asOptionalType() {
-          binding.typeAnnotation?.type = type
-        }
-        property.bindings = [binding]
-        draftProperties.append(
-          DeclSyntax(
-            property
-              .with(\.bindingSpecifier.leadingTrivia, "")
-              .removingAccessors()
-              .rewritten(selfRewriter)
-          )
-        )
-      } else {
-        draftProperties.append(
-          DeclSyntax(
-            property.trimmed
-              .with(\.bindingSpecifier.leadingTrivia, "")
-              .removingAccessors()
-              .rewritten(selfRewriter)
-          )
-        )
       }
     }
 
@@ -944,6 +1034,12 @@ extension TableMacro: MemberMacro {
       \(columnsProperties, separator: "\n")
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
       [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
+      }
+      public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] { \
+      [\(writableColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
+      }
+      public var queryFragment: QueryFragment {
+      "\(selectedColumns.map { #"\(self.\#($0))"# as ExprSyntax }, separator: ", ")"
       }
       }
       """,
