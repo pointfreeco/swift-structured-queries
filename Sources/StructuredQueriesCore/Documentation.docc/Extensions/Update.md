@@ -14,5 +14,4 @@
 
 - ``UpdateOf``
 - ``Updates``
-- ``UpdatesOf``
 - ``ConflictResolution``
