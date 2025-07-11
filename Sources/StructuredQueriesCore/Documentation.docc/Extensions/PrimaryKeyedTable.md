@@ -125,6 +125,11 @@ Reminder.delete(reminder)
 
 ## Topics
 
+### Primary keys
+
+- ``PrimaryKey``
+- ``primaryKey-swift.property``
+
 ### Drafts
 
 - ``Draft``
