@@ -857,10 +857,10 @@ extension PrimaryKeyedTable {
       or: conflictResolution,
       values: values,
       onConflict: { $0.primaryKey },
-      doUpdate: { updates, excluded in
-        // TODO: Use 'excluded' here?
-        for column in Draft.TableColumns.allColumns where column.name != columns.primaryKey.name {
-          updates.set(column, #""excluded".\#(quote: column.name)"#)
+      doUpdate: { updates, _ in
+        for (column, excluded) in zip(Draft.TableColumns.allColumns, Excluded.allColumns)
+        where column.name != columns.primaryKey.name {
+          updates.set(column, excluded.queryFragment)
         }
       }
     )
