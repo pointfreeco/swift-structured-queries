@@ -250,6 +250,22 @@ extension SnapshotTests {
       }
     }
 
+    @Test func tableAliasGenerated() {
+      enum R: AliasName {}
+      assertQuery(
+        Row.as(R.self).select(\.isNotDeleted)
+      ) {
+        """
+        SELECT "rs"."isNotDeleted"
+        FROM "rows" AS "rs"
+        """
+      } results: {
+        """
+        no such table: rows
+        """
+      }
+    }
+
     @Test func joinWith() {
       // RemindersList.join(Reminder.all, with: \.remindersListID)
       // Reminder.join(RemindersList.all, with: \.remindersListID)

@@ -147,6 +147,16 @@ public struct TableAlias<
         keyPath: \.[member: \Member.self, column: column._keyPath]
       )
     }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, GeneratedColumn<Base, Member>>
+    ) -> GeneratedColumn<TableAlias, Member> {
+      let column = Base.columns[keyPath: keyPath]
+      return GeneratedColumn<TableAlias, Member>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column._keyPath]
+      )
+    }
   }
 }
 
