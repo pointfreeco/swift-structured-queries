@@ -644,7 +644,7 @@ extension SnapshotTests {
           let id: Int
           var name: String
           @Column(generated: .stored)
-          var generated: Int
+          let generated: Int
         }
         """
       } expansion: {
@@ -652,7 +652,7 @@ extension SnapshotTests {
         struct User {
           let id: Int
           var name: String
-          var generated: Int
+          let generated: Int
 
           public struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = User
