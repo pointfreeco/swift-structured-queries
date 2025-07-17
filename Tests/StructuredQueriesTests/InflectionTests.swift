@@ -1,4 +1,4 @@
-import StructuredQueriesSupport
+import StructuredQueriesCore
 import Testing
 
 @Suite struct InflectionTests {

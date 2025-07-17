@@ -41,9 +41,9 @@ let package = Package(
     .target(
       name: "StructuredQueriesCore",
       dependencies: [
-        "StructuredQueriesSupport",
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-      ]
+      ],
+      exclude: ["Symbolic Links/README.md"]
     ),
     .target(
       name: "StructuredQueries",
@@ -55,10 +55,10 @@ let package = Package(
     .macro(
       name: "StructuredQueriesMacros",
       dependencies: [
-        "StructuredQueriesSupport",
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-      ]
+      ],
+      exclude: ["Symbolic Links/README.md"]
     ),
     .target(
       name: "StructuredQueriesSQLite",
@@ -94,8 +94,6 @@ let package = Package(
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
       ]
     ),
-
-    .target(name: "StructuredQueriesSupport"),
   ],
   swiftLanguageModes: [.v6]
 )

@@ -1,5 +1,4 @@
 import Foundation
-import StructuredQueriesSupport
 
 /// A type identifying a table alias.
 ///

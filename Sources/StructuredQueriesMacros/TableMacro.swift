@@ -1,4 +1,3 @@
-import StructuredQueriesSupport
 import SwiftBasicFormat
 import SwiftDiagnostics
 import SwiftSyntax
