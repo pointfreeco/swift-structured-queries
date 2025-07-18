@@ -37,7 +37,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     set updates: (inout Updates<Self>) -> Void
   ) -> UpdateOf<Self> {
-    Update(isEmpty: false, conflictResolution: conflictResolution, updates: Updates(updates))
+    Where().update(or: conflictResolution, set: updates)
   }
 }
 

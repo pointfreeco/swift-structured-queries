@@ -8,7 +8,7 @@ extension Table {
   ///
   /// - Returns: A delete statement.
   public static func delete() -> DeleteOf<Self> {
-    Delete(isEmpty: false)
+    Where().delete()
   }
 }
 

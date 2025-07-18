@@ -365,6 +365,8 @@ extension Where: SelectStatement {
   /// - Parameter other: Another where clause.
   /// - Returns: A where clause that `AND`s the given where clauses together.
   public func and(_ other: Self) -> Self {
+    guard !predicates.isEmpty else { return other }
+    guard !other.predicates.isEmpty else { return self }
     var `where` = self
     `where`.predicates = [
       """
@@ -381,6 +383,8 @@ extension Where: SelectStatement {
   /// - Parameter other: Another where clause.
   /// - Returns: A where clause that `OR`s the given where clauses together.
   public func or(_ other: Self) -> Self {
+    guard !predicates.isEmpty else { return other }
+    guard !other.predicates.isEmpty else { return self }
     var `where` = self
     `where`.predicates = [
       """
@@ -397,7 +401,9 @@ extension Where: SelectStatement {
   /// - Returns: A where clause that `NOT`s this where clause.
   public func not() -> Self {
     var `where` = self
-    `where`.predicates = ["NOT (\(`where`.predicates.joined(separator: " AND ")))"]
+    `where`.predicates = [
+      "NOT (\(predicates.isEmpty ? "1" : predicates.joined(separator: " AND ")))"
+    ]
     return `where`
   }
 
