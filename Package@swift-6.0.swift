@@ -41,7 +41,7 @@ let package = Package(
     .target(
       name: "StructuredQueriesCore",
       dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
       ],
       exclude: ["Symbolic Links/README.md"]
     ),
