@@ -129,6 +129,22 @@ extension SnapshotTests {
           └─────────────────────────────────────────────┘
           """
         }
+        assertQuery(
+          Row
+            .delete()
+            .where { $0.id > 0 }
+            .returning(\.self)
+        ) {
+          """
+          DELETE FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+
+          """
+        }
 
         assertQuery(
           Row
@@ -157,8 +173,8 @@ extension SnapshotTests {
       @Test func update() throws {
         assertQuery(
           Row
-            .where { $0.id > 0 }
             .update { $0.isDeleted.toggle() }
+            .where { $0.id > 0 }
             .returning(\.self)
         ) {
           """
@@ -175,6 +191,23 @@ extension SnapshotTests {
           │   isDeleted: true                           │
           │ )                                           │
           └─────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Row
+            .where { $0.id > 0 }
+            .update { $0.isDeleted.toggle() }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "rows"
+          SET "isDeleted" = NOT ("rows"."isDeleted")
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+
           """
         }
 
@@ -386,8 +419,8 @@ extension SnapshotTests {
       @Test func delete() throws {
         assertQuery(
           Row
-            .where { $0.id > 0 }
             .delete()
+            .where { $0.id > 0 }
             .returning(\.self)
         ) {
           """
@@ -403,6 +436,22 @@ extension SnapshotTests {
           │   isDeleted: false                         │
           │ )                                          │
           └────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Row
+            .where { $0.id > 0 }
+            .delete()
+            .returning(\.self)
+        ) {
+          """
+          DELETE FROM "rows"
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+
           """
         }
 
@@ -433,8 +482,8 @@ extension SnapshotTests {
       @Test func update() throws {
         assertQuery(
           Row
-            .where { $0.id > 0 }
             .update { $0.isDeleted.toggle() }
+            .where { $0.id > 0 }
             .returning(\.self)
         ) {
           """
@@ -451,6 +500,23 @@ extension SnapshotTests {
           │   isDeleted: true                          │
           │ )                                          │
           └────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Row
+            .where { $0.id > 0 }
+            .update { $0.isDeleted.toggle() }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "rows"
+          SET "isDeleted" = NOT ("rows"."isDeleted")
+          WHERE NOT ("rows"."isDeleted") AND ("rows"."id" > 0)
+          RETURNING "id", "isDeleted"
+          """
+        } results: {
+          """
+
           """
         }
 
