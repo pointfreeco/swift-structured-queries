@@ -265,17 +265,33 @@ extension SnapshotTests {
             .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
         } query: {
           Reminder
-            .none
             .delete()
             .returning(\.title)
         }
       ) {
         """
-
+        WITH "incompleteReminders" AS (
+          SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
+        )
+        DELETE FROM "reminders"
+        RETURNING "reminders"."title"
         """
       } results: {
         """
-
+        ┌────────────────────────────┐
+        │ "Groceries"                │
+        │ "Haircut"                  │
+        │ "Doctor appointment"       │
+        │ "Take a walk"              │
+        │ "Buy concert tickets"      │
+        │ "Pick up kids from school" │
+        │ "Get laundry"              │
+        │ "Take out trash"           │
+        │ "Call accountant"          │
+        │ "Send weekly emails"       │
+        └────────────────────────────┘
         """
       }
     }

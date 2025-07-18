@@ -133,16 +133,6 @@ public struct Delete<From: Table, Returning> {
       returning: returning
     )
   }
-
-  public var unscoped: Delete<From, ()> {
-    From.unscoped.delete()
-  }
-
-  public var none: Self {
-    var delete = self
-    delete.isEmpty = true
-    return delete
-  }
 }
 
 /// A convenience type alias for a non-`RETURNING ``Delete``.

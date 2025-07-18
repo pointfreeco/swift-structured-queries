@@ -1382,14 +1382,17 @@ extension Select {
     )
   }
 
+  /// Returns a fully unscoped version of this select statement.
   public var unscoped: Where<From> {
     From.unscoped
   }
 
+  /// Returns this select statement unchanged.
   public var all: Self {
     self
   }
 
+  /// Returns an empty select statement.
   public var none: Self {
     var select = self
     select.isEmpty = true

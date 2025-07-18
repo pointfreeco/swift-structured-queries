@@ -22,6 +22,9 @@
 
 ### Transforming queries
 
+- ``unscoped``
+- ``all``
+- ``none``
 - ``map(_:)``
 - ``subscript(dynamicMember:)``
 - ``StructuredQueriesCore/+(_:_:)``
