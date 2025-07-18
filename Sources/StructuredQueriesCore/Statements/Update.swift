@@ -95,6 +95,7 @@ public struct Update<From: Table, Returning> {
   var updates: Updates<From>
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
+  var isEmpty = false
 
   /// Adds a condition to an update statement.
   ///
@@ -186,6 +187,16 @@ public struct Update<From: Table, Returning> {
       returning: returning
     )
   }
+
+  public var unscoped: Delete<From, ()> {
+    From.unscoped.delete()
+  }
+
+  public var none: Self {
+    var delete = self
+    delete.isEmpty = true
+    return delete
+  }
 }
 
 /// A convenience type alias for a non-`RETURNING ``Update``.
@@ -195,7 +206,7 @@ extension Update: Statement {
   public typealias QueryValue = Returning
 
   public var query: QueryFragment {
-    guard !updates.isEmpty
+    guard !isEmpty, !updates.isEmpty
     else { return "" }
 
     var query: QueryFragment = "UPDATE "

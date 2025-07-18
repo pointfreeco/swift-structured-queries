@@ -46,6 +46,26 @@ extension SnapshotTests {
       }
     }
 
+    @Test func empty() {
+      assertQuery(
+        Reminder.none.select { ("reminder", $0.title) }
+          .union(RemindersList.select { ("list", $0.title) })
+          .union(Tag.none.select { ("tag", $0.title) })
+      ) {
+        """
+        SELECT 'list', "remindersLists"."title"
+        FROM "remindersLists"
+        """
+      } results: {
+        """
+        ┌────────┬────────────┐
+        │ "list" │ "Business" │
+        │ "list" │ "Family"   │
+        │ "list" │ "Personal" │
+        └────────┴────────────┘
+        """
+      }
+    }
     @Test func commonTableExpression() {
       assertQuery(
         With {

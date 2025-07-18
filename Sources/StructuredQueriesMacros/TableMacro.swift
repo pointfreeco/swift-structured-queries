@@ -567,7 +567,7 @@ extension TableMacro: ExtensionMacro {
       return []
     }
 
-    var typeAliases: [DeclSyntax] = []
+    var statics: [DeclSyntax] = []
     var letSchemaName: DeclSyntax?
     if let schemaName {
       letSchemaName = """
@@ -577,7 +577,7 @@ extension TableMacro: ExtensionMacro {
     var initDecoder: DeclSyntax?
     if declaration.hasMacroApplication("Selection") {
       conformances.append("\(moduleName).PartialSelectStatement")
-      typeAliases.append(contentsOf: [
+      statics.append(contentsOf: [
         """
 
         public typealias QueryValue = Self
@@ -585,6 +585,9 @@ extension TableMacro: ExtensionMacro {
         """
         public typealias From = Swift.Never
         """,
+        // """
+        // public static var all: Where<Self> { none }
+        // """,
       ])
     } else {
       initDecoder = """
@@ -600,7 +603,7 @@ extension TableMacro: ExtensionMacro {
         """
         \(declaration.attributes.availability)extension \(type)\
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
-        \(typeAliases, separator: "\n")
+        \(statics, separator: "\n")
         public static let columns = TableColumns()
         public static let tableName = \(tableName)\(letSchemaName)\(initDecoder)\(initFromOther)
         }

@@ -38,6 +38,7 @@ extension PrimaryKeyedTable {
 public struct Delete<From: Table, Returning> {
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
+  var isEmpty = false
 
   /// Adds a condition to a delete statement.
   ///
@@ -130,6 +131,16 @@ public struct Delete<From: Table, Returning> {
       returning: returning
     )
   }
+
+  public var unscoped: Delete<From, ()> {
+    From.unscoped.delete()
+  }
+
+  public var none: Self {
+    var delete = self
+    delete.isEmpty = true
+    return delete
+  }
 }
 
 /// A convenience type alias for a non-`RETURNING ``Delete``.
@@ -139,6 +150,7 @@ extension Delete: Statement {
   public typealias QueryValue = Returning
 
   public var query: QueryFragment {
+    guard !isEmpty else { return "" }
     var query: QueryFragment = "DELETE FROM "
     if let schemaName = From.schemaName {
       query.append("\(quote: schemaName).")

@@ -959,6 +959,24 @@ extension SnapshotTests {
       }
     }
 
+    @Test func none() {
+      #expect(RemindersList.none.query.isEmpty)
+      #expect(RemindersList.none.select(\.id).query.isEmpty)
+      #expect(RemindersList.join(Reminder.none) { _, _ in true }.query.isEmpty)
+      #expect(RemindersList.none.join(Reminder.all) { _, _ in true }.query.isEmpty)
+      #expect(RemindersList.leftJoin(Reminder.none) { _, _ in true }.query.isEmpty)
+      #expect(RemindersList.none.leftJoin(Reminder.all) { _, _ in true }.query.isEmpty)
+      #expect(RemindersList.rightJoin(Reminder.none) { _, _ in true }.query.isEmpty)
+      #expect(RemindersList.none.rightJoin(Reminder.all) { _, _ in true }.query.isEmpty)
+      #expect(RemindersList.fullJoin(Reminder.none) { _, _ in true }.query.isEmpty)
+      #expect(RemindersList.none.fullJoin(Reminder.all) { _, _ in true }.query.isEmpty)
+      #expect(Reminder.none.where(\.isCompleted).query.isEmpty)
+      #expect(Reminder.none.group(by: \.id).query.isEmpty)
+      #expect(Reminder.none.having(\.isCompleted).query.isEmpty)
+      #expect(Reminder.none.order(by: \.id).query.isEmpty)
+      #expect(Reminder.none.limit(1).query.isEmpty)
+    }
+
     #if compiler(>=6.1)
       @Test func dynamicMember() {
         assertQuery(

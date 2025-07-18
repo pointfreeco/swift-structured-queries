@@ -159,6 +159,16 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func empty() {
+      assertQuery(
+        Reminder.none.delete()
+      ) {
+        """
+
+        """
+      }
+    }
   }
 }
 

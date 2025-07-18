@@ -587,6 +587,10 @@ extension SnapshotTests {
           FROM "rows" AS "rs"
           WHERE CAST("rs"."id" AS TEXT) = '"rs"'
           """
+        } results: {
+          """
+
+          """
         }
       }
     }
