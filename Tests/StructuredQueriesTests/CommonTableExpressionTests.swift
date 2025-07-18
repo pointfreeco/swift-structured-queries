@@ -213,6 +213,73 @@ extension SnapshotTests {
       }
     }
 
+    @Test func empty() {
+      assertQuery(
+        With {
+          Reminder
+            .where { !$0.isCompleted }
+            .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
+        } query: {
+          Reminder
+            .none
+            .delete()
+            .returning(\.title)
+        }
+      ) {
+        """
+
+        """
+      } results: {
+        """
+
+        """
+      }
+      assertQuery(
+        With {
+          Reminder
+            .none
+            .where { !$0.isCompleted }
+            .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
+        } query: {
+          Reminder
+            .delete()
+            .returning(\.title)
+        }
+      ) {
+        """
+
+        """
+      } results: {
+        """
+
+        """
+      }
+      assertQuery(
+        With {
+          Reminder
+            .none
+            .where { !$0.isCompleted }
+            .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
+          Reminder
+            .where { !$0.isCompleted }
+            .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
+        } query: {
+          Reminder
+            .none
+            .delete()
+            .returning(\.title)
+        }
+      ) {
+        """
+
+        """
+      } results: {
+        """
+
+        """
+      }
+    }
+
     @Test func recursive() {
       assertQuery(
         With {

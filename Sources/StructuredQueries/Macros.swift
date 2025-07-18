@@ -10,7 +10,6 @@ import StructuredQueriesCore
   PartialSelectStatement,
   PrimaryKeyedTable,
   names: named(From),
-  // named(all),
   named(columns),
   named(init(_:)),
   named(init(decoder:)),

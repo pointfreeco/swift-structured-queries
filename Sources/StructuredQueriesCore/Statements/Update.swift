@@ -37,7 +37,7 @@ extension Table {
     or conflictResolution: ConflictResolution? = nil,
     set updates: (inout Updates<Self>) -> Void
   ) -> UpdateOf<Self> {
-    Update(conflictResolution: conflictResolution, updates: Updates(updates))
+    Update(isEmpty: false, conflictResolution: conflictResolution, updates: Updates(updates))
   }
 }
 
@@ -91,11 +91,11 @@ extension PrimaryKeyedTable {
 ///
 /// To learn more, see <doc:UpdateStatements>.
 public struct Update<From: Table, Returning> {
+  var isEmpty: Bool
   var conflictResolution: ConflictResolution?
   var updates: Updates<From>
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
-  var isEmpty = false
 
   /// Adds a condition to an update statement.
   ///
@@ -160,6 +160,7 @@ public struct Update<From: Table, Returning> {
       returning.append("\(quote: resultColumn.name)")
     }
     return Update<From, (repeat each QueryValue)>(
+      isEmpty: false,
       conflictResolution: conflictResolution,
       updates: updates,
       where: `where`,
@@ -181,6 +182,7 @@ public struct Update<From: Table, Returning> {
       returning.append("\(quote: resultColumn.name)")
     }
     return Update<From, From>(
+      isEmpty: isEmpty,
       conflictResolution: conflictResolution,
       updates: updates,
       where: `where`,

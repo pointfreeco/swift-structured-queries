@@ -8,7 +8,7 @@ extension Table {
   ///
   /// - Returns: A delete statement.
   public static func delete() -> DeleteOf<Self> {
-    Delete()
+    Delete(isEmpty: false)
   }
 }
 
@@ -23,7 +23,7 @@ extension PrimaryKeyedTable {
   /// - Parameter row: A row to delete.
   /// - Returns: A delete statement.
   public static func delete(_ row: Self) -> DeleteOf<Self> {
-    Delete()
+    delete()
       .where {
         $0.primaryKey.eq(TableColumns.PrimaryKey(queryOutput: row[keyPath: $0.primaryKey.keyPath]))
       }
@@ -36,9 +36,9 @@ extension PrimaryKeyedTable {
 ///
 /// To learn more, see <doc:DeleteStatements>.
 public struct Delete<From: Table, Returning> {
+  var isEmpty: Bool
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
-  var isEmpty = false
 
   /// Adds a condition to a delete statement.
   ///
@@ -108,6 +108,7 @@ public struct Delete<From: Table, Returning> {
       returning.append("\(quote: resultColumn.name)")
     }
     return Delete<From, (repeat each QueryValue)>(
+      isEmpty: isEmpty,
       where: `where`,
       returning: Array(repeat each selection(From.columns))
     )
@@ -127,6 +128,7 @@ public struct Delete<From: Table, Returning> {
       returning.append("\(quote: resultColumn.name)")
     }
     return Delete<From, From>(
+      isEmpty: isEmpty,
       where: `where`,
       returning: returning
     )

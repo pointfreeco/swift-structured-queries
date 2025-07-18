@@ -479,8 +479,8 @@ extension Where: SelectStatement {
   /// A delete statement for the filtered table.
   public func delete() -> DeleteOf<From> {
     Delete(
-      where: scope == .unscoped ? predicates : From.all._selectClauses.where + predicates,
-      isEmpty: scope == .empty
+      isEmpty: scope == .empty,
+      where: scope == .unscoped ? predicates : From.all._selectClauses.where + predicates
     )
   }
 
@@ -495,10 +495,10 @@ extension Where: SelectStatement {
     set updates: (inout Updates<From>) -> Void
   ) -> UpdateOf<From> {
     Update(
+      isEmpty: scope == .empty,
       conflictResolution: conflictResolution,
       updates: Updates(updates),
-      where: scope == .unscoped ? predicates : From.all._selectClauses.where + predicates,
-      isEmpty: scope == .empty
+      where: scope == .unscoped ? predicates : From.all._selectClauses.where + predicates
     )
   }
 

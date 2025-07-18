@@ -585,9 +585,6 @@ extension TableMacro: ExtensionMacro {
         """
         public typealias From = Swift.Never
         """,
-        // """
-        // public static var all: Where<Self> { none }
-        // """,
       ])
     } else {
       initDecoder = """
