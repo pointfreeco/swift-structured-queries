@@ -40,6 +40,36 @@ extension SnapshotTests {
         └───┘
         """
       }
+      assertQuery(
+        Reminder.all.and(Reminder.where(\.isFlagged)).count()
+      ) {
+        """
+        SELECT count(*)
+        FROM "reminders"
+        WHERE "reminders"."isFlagged"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 2 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.where(\.isFlagged).and(Reminder.all).count()
+      ) {
+        """
+        SELECT count(*)
+        FROM "reminders"
+        WHERE "reminders"."isFlagged"
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 2 │
+        └───┘
+        """
+      }
     }
 
     @Test(.snapshots(record: .never)) func emptyResults() {
@@ -93,6 +123,36 @@ extension SnapshotTests {
         └───┘
         """
       }
+      assertQuery(
+        Reminder.all.or(Reminder.where(\.isFlagged)).count()
+      ) {
+        """
+        SELECT count(*)
+        FROM "reminders"
+        WHERE "reminders"."isFlagged"
+        """
+      }results: {
+        """
+        ┌───┐
+        │ 2 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.where(\.isFlagged).or(Reminder.all).count()
+      ) {
+        """
+        SELECT count(*)
+        FROM "reminders"
+        WHERE "reminders"."isFlagged"
+        """
+      }results: {
+        """
+        ┌───┐
+        │ 2 │
+        └───┘
+        """
+      }
     }
 
     @Test func not() {
@@ -125,6 +185,21 @@ extension SnapshotTests {
         """
         ┌───┐
         │ 7 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.all.not().count()
+      ) {
+        """
+        SELECT count(*)
+        FROM "reminders"
+        WHERE NOT (1)
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 0 │
         └───┘
         """
       }
