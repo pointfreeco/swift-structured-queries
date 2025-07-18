@@ -131,7 +131,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE "reminders"."isFlagged"
         """
-      }results: {
+      } results: {
         """
         ┌───┐
         │ 2 │
@@ -146,7 +146,7 @@ extension SnapshotTests {
         FROM "reminders"
         WHERE "reminders"."isFlagged"
         """
-      }results: {
+      } results: {
         """
         ┌───┐
         │ 2 │
