@@ -227,6 +227,10 @@ extension SnapshotTests {
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
         WHERE ("remindersLists"."id" = 4) AND "reminders"."isCompleted"
         """
+      } results: {
+        """
+
+        """
       }
     }
   }

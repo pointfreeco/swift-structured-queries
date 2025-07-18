@@ -29,12 +29,19 @@ public struct With<QueryValue>: Statement {
   }
 
   public var query: QueryFragment {
+    guard !statement.isEmpty else { return "" }
+    let cteFragments = ctes.compactMap(\.queryFragment.presence)
+    guard !cteFragments.isEmpty else { return "" }
     var query: QueryFragment = "WITH "
     query.append(
-      "\(ctes.map(\.queryFragment).joined(separator: ", "))\(.newlineOrSpace)\(statement)"
+      "\(cteFragments.joined(separator: ", "))\(.newlineOrSpace)\(statement)"
     )
     return query
   }
+}
+
+extension QueryFragment {
+  fileprivate var presence: Self? { isEmpty ? nil : self }
 }
 
 public struct CommonTableExpressionClause: QueryExpression {
@@ -42,7 +49,8 @@ public struct CommonTableExpressionClause: QueryExpression {
   let tableName: QueryFragment
   let select: QueryFragment
   public var queryFragment: QueryFragment {
-    "\(tableName) AS (\(.newline)\(select.indented())\(.newline))"
+    guard !select.isEmpty else { return "" }
+    return "\(tableName) AS (\(.newline)\(select.indented())\(.newline))"
   }
 }
 

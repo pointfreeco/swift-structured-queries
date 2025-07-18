@@ -297,6 +297,7 @@ extension Table {
 }
 
 public struct _SelectClauses: Sendable {
+  var isEmpty = false
   var distinct = false
   var columns: [any QueryExpression] = []
   var joins: [_JoinClause] = []
@@ -320,6 +321,11 @@ public struct Select<Columns, From: Table, Joins> {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   @CopyOnWrite var clauses = _SelectClauses()
 
+  fileprivate var isEmpty: Bool {
+    get { clauses.isEmpty }
+    set { clauses.isEmpty = newValue }
+    _modify { yield &clauses.isEmpty }
+  }
   fileprivate var distinct: Bool {
     get { clauses.distinct }
     set { clauses.distinct = newValue }
@@ -362,6 +368,7 @@ public struct Select<Columns, From: Table, Joins> {
   }
 
   fileprivate init(
+    isEmpty: Bool,
     distinct: Bool,
     columns: [any QueryExpression],
     joins: [_JoinClause],
@@ -371,6 +378,7 @@ public struct Select<Columns, From: Table, Joins> {
     order: [QueryFragment],
     limit: _LimitClause?
   ) {
+    self.isEmpty = isEmpty
     self.columns = columns
     self.distinct = distinct
     self.joins = joins
@@ -387,7 +395,8 @@ public struct Select<Columns, From: Table, Joins> {
 }
 
 extension Select {
-  init(where: [QueryFragment] = []) {
+  init(isEmpty: Bool = false, where: [QueryFragment] = []) {
+    self.isEmpty = isEmpty
     self.where = `where`
   }
 
@@ -558,6 +567,7 @@ extension Select {
     Joins == (repeat each J)
   {
     Select<(repeat each C1, repeat (each C2).QueryValue), From, (repeat each J)>(
+      isEmpty: isEmpty,
       distinct: distinct,
       columns: columns + Array(repeat each selection((From.columns, repeat (each J).columns))),
       joins: joins,
@@ -612,6 +622,7 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J1, F, repeat each J2)>(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -651,6 +662,7 @@ extension Select {
       )
     )
     return Select<(repeat each C1, repeat each C2), From, (repeat each J, F)>(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -686,6 +698,7 @@ extension Select {
       )
     )
     return Select<QueryValue, From, (F, repeat each J)>(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -738,6 +751,7 @@ extension Select {
       From,
       (repeat each J1, F._Optionalized, repeat (each J2)._Optionalized)
     >(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -785,6 +799,7 @@ extension Select {
       From,
       (repeat each J, F._Optionalized)
     >(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -822,6 +837,7 @@ extension Select {
       )
     )
     return Select<QueryValue, From, (F._Optionalized, repeat (each J)._Optionalized)>(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -874,6 +890,7 @@ extension Select {
       From._Optionalized,
       (repeat (each J1)._Optionalized, F, repeat each J2)
     >(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -921,6 +938,7 @@ extension Select {
       From._Optionalized,
       (repeat (each J)._Optionalized, F)
     >(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -958,6 +976,7 @@ extension Select {
       )
     )
     return Select<QueryValue, From._Optionalized, (F, repeat each J)>(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -1010,6 +1029,7 @@ extension Select {
       From._Optionalized,
       (repeat (each J1)._Optionalized, F._Optionalized, repeat (each J2)._Optionalized)
     >(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -1057,6 +1077,7 @@ extension Select {
       From._Optionalized,
       (repeat (each J)._Optionalized, F._Optionalized)
     >(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -1094,6 +1115,7 @@ extension Select {
       )
     )
     return Select<QueryValue, From._Optionalized, (F._Optionalized, repeat (each J)._Optionalized)>(
+      isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
       joins: joins + [join] + other.joins,
@@ -1348,6 +1370,7 @@ extension Select {
       SQLQueryExpression(iterator.next()!.queryFragment)
     }
     return Select<(repeat (each C2).QueryValue), From, Joins>(
+      isEmpty: isEmpty,
       distinct: distinct,
       columns: Array(repeat each transform(repeat { _ in next() }((each C1).self))),
       joins: joins,
@@ -1357,6 +1380,23 @@ extension Select {
       order: order,
       limit: limit
     )
+  }
+
+  /// Returns a fully unscoped version of this select statement.
+  public var unscoped: Where<From> {
+    From.unscoped
+  }
+
+  /// Returns this select statement unchanged.
+  public var all: Self {
+    self
+  }
+
+  /// Returns an empty select statement.
+  public var none: Self {
+    var select = self
+    select.isEmpty = true
+    return select
   }
 }
 
@@ -1387,6 +1427,7 @@ public func + <
   return Select<
     (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
   >(
+    isEmpty: lhs.isEmpty || rhs.isEmpty,
     distinct: lhs.distinct || rhs.distinct,
     columns: lhs.columns + rhs.columns,
     joins: lhs.joins + rhs.joins,
@@ -1406,6 +1447,7 @@ extension Select: SelectStatement {
   }
 
   public var query: QueryFragment {
+    guard !isEmpty else { return "" }
     var query: QueryFragment = "SELECT"
     let columns =
       columns.isEmpty

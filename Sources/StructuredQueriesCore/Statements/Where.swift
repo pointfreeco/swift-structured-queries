@@ -64,7 +64,7 @@ public struct Where<From: Table> {
   }
 
   var predicates: [QueryFragment] = []
-  var unscoped = false
+  var scope = Scope.default
 
   #if compiler(>=6.1)
     public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
@@ -94,12 +94,20 @@ extension Where: SelectStatement {
   public typealias QueryValue = ()
 
   public func asSelect() -> SelectOf<From> {
-    (unscoped ? Select() : Select(clauses: From.all._selectClauses))
-      .and(self)
+    let select: SelectOf<From>
+    switch scope {
+    case .default:
+      select = Select(clauses: From.all._selectClauses)
+    case .empty:
+      select = Select(isEmpty: true, where: predicates)
+    case .unscoped:
+      select = Select()
+    }
+    return select.and(self)
   }
 
   public var _selectClauses: _SelectClauses {
-    _SelectClauses(where: predicates)
+    _SelectClauses(isEmpty: scope == .empty, where: predicates)
   }
 
   /// A select statement for a column of the filtered table.
@@ -476,7 +484,10 @@ extension Where: SelectStatement {
 
   /// A delete statement for the filtered table.
   public func delete() -> DeleteOf<From> {
-    Delete(where: unscoped ? predicates : From.all._selectClauses.where + predicates)
+    Delete(
+      isEmpty: scope == .empty,
+      where: scope == .unscoped ? predicates : From.all._selectClauses.where + predicates
+    )
   }
 
   /// An update statement for the filtered table.
@@ -490,9 +501,10 @@ extension Where: SelectStatement {
     set updates: (inout Updates<From>) -> Void
   ) -> UpdateOf<From> {
     Update(
+      isEmpty: scope == .empty,
       conflictResolution: conflictResolution,
       updates: Updates(updates),
-      where: unscoped ? predicates : From.all._selectClauses.where + predicates
+      where: scope == .unscoped ? predicates : From.all._selectClauses.where + predicates
     )
   }
 

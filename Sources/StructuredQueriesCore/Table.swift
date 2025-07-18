@@ -49,12 +49,6 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   static var all: DefaultScope { get }
 }
 
-extension Table where DefaultScope == Where<Self> {
-  public static var all: DefaultScope {
-    Where()
-  }
-}
-
 extension Table {
   /// A select statement on the table with no constraints.
   ///
@@ -86,7 +80,11 @@ extension Table {
   /// // SELECT "reminders"."id" FROM "reminders"
   /// ```
   public static var unscoped: Where<Self> {
-    Where(unscoped: true)
+    Where(scope: .unscoped)
+  }
+
+  public static var none: Where<Self> {
+    Where(scope: .empty)
   }
 
   public static var tableAlias: String? {
@@ -110,5 +108,11 @@ extension Table {
     dynamicMember keyPath: KeyPath<TableColumns, TableColumn<Self, Member>>
   ) -> TableColumn<Self, Member> {
     columns[keyPath: keyPath]
+  }
+}
+
+extension Table where DefaultScope == Where<Self> {
+  public static var all: DefaultScope {
+    Where()
   }
 }

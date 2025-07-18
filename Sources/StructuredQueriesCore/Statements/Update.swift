@@ -91,6 +91,7 @@ extension PrimaryKeyedTable {
 ///
 /// To learn more, see <doc:UpdateStatements>.
 public struct Update<From: Table, Returning> {
+  var isEmpty: Bool
   var conflictResolution: ConflictResolution?
   var updates: Updates<From>
   var `where`: [QueryFragment] = []
@@ -159,6 +160,7 @@ public struct Update<From: Table, Returning> {
       returning.append("\(quote: resultColumn.name)")
     }
     return Update<From, (repeat each QueryValue)>(
+      isEmpty: false,
       conflictResolution: conflictResolution,
       updates: updates,
       where: `where`,
@@ -180,6 +182,7 @@ public struct Update<From: Table, Returning> {
       returning.append("\(quote: resultColumn.name)")
     }
     return Update<From, From>(
+      isEmpty: isEmpty,
       conflictResolution: conflictResolution,
       updates: updates,
       where: `where`,
@@ -195,7 +198,7 @@ extension Update: Statement {
   public typealias QueryValue = Returning
 
   public var query: QueryFragment {
-    guard !updates.isEmpty
+    guard !isEmpty, !updates.isEmpty
     else { return "" }
 
     var query: QueryFragment = "UPDATE "

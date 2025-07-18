@@ -393,6 +393,16 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func empty() {
+      assertQuery(
+        Reminder.none.update { $0.isCompleted.toggle() }
+      ) {
+        """
+
+        """
+      }
+    }
   }
 }
 
