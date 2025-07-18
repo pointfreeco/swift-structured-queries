@@ -1,5 +1,3 @@
-import StructuredQueriesSupport
-
 /// A type representing a SQL string and its bindings.
 ///
 /// You will typically create instances of this type using string literals, where bindings are
