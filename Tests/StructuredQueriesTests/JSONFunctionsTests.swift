@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesTestSupport
 import StructuredQueriesSQLite
 import Testing
 
@@ -212,6 +213,61 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonAssociation_Filtering() throws {
+      let noFilterSpecified = Reminder
+        .group(by: \.id)
+        .leftJoin(ReminderTag.all) { $0.id.eq($1.reminderID) }
+        .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
+        .leftJoin(User.all) { $0.assignedUserID.eq($3.id) }
+        .select { reminder, _, tag, user in
+          ReminderRow.Columns(
+            assignedUser: user,
+            reminder: reminder,
+            tags: tag.jsonGroupArray()
+          )
+        }
+      
+      let tagIdNotNilFilterSpecified = Reminder
+        .group(by: \.id)
+        .leftJoin(ReminderTag.all) { $0.id.eq($1.reminderID) }
+        .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
+        .leftJoin(User.all) { $0.assignedUserID.eq($3.id) }
+        .select { reminder, _, tag, user in
+          ReminderRow.Columns(
+            assignedUser: user,
+            reminder: reminder,
+            tags: tag.jsonGroupArray(filter: tag.id.isNot(nil))
+          )
+        }
+
+      #expect(noFilterSpecified.query == tagIdNotNilFilterSpecified.query)
+      
+      let otherFilterSpecified = Reminder
+        .group(by: \.id)
+        .leftJoin(ReminderTag.all) { $0.id.eq($1.reminderID) }
+        .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
+        .leftJoin(User.all) { $0.assignedUserID.eq($3.id) }
+        .select { reminder, _, tag, user in
+          ReminderRow.Columns(
+            assignedUser: user,
+            reminder: reminder,
+            tags: tag.jsonGroupArray(filter: tag.id.eq(4))
+          )
+        }
+
+      assertInlineSnapshot(of: otherFilterSpecified, as: .sql) {
+        """
+        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt" AS "reminder", json_group_array(CASE WHEN ("tags"."id" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE (("tags"."id" IS NOT NULL) AND ("tags"."id" = 4))) AS "tags"
+        FROM "reminders"
+        LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
+        LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
+        LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        GROUP BY "reminders"."id"
+        """
+      }
+
+    }
+    
     @Test func jsonAssociation_RemindersList() throws {
       assertQuery(
         RemindersList
