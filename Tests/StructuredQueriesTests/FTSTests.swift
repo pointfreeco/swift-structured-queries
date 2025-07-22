@@ -21,7 +21,7 @@ extension SnapshotTests {
         WHERE ("reminderTexts" MATCH 'take OR apple')
         ORDER BY "reminderTexts"."rank"
         """
-      }results: {
+      } results: {
         """
         ┌──────────────────────┬──────────────────────────┐
         │ "Groceries"          │ "Milk, Eggs, **Apple**s" │
@@ -43,7 +43,7 @@ extension SnapshotTests {
         FROM "reminderTexts"
         LIMIT 1
         """
-      }results: {
+      } results: {
         """
         ┌────────────┬─────┐
         │ "Personal" │ nil │
