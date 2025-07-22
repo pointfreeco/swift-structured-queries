@@ -2,6 +2,7 @@
 ///
 /// Apply this protocol to a `@Table` declaration to introduce FTS5 helpers.
 public protocol FTS5: Table {}
+
 extension TableDefinition where QueryValue: FTS5 {
   @available(*, deprecated, message: "Virtual tables are not 'rowid' tables")
   public var rowid: some QueryExpression<Int> {
