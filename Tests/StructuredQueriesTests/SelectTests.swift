@@ -1402,6 +1402,20 @@ extension SnapshotTests {
         }
       }
     }
+
+    @Test func singleJoinChaining() {
+      let base = Reminder.group(by: \.id).join(ReminderTag.all) { $0.id.eq($1.reminderID) }
+      _ = base.select { r, _ in r.isCompleted }
+      _ = base.where { r, _ in r.isCompleted }
+      _ = base.group { r, _ in r.isCompleted }
+      _ = base.having { r, _ in r.isCompleted }
+      _ = base.order { r, _ in r.isCompleted }
+      _ = base.limit { r, _ in r.title.length() }
+      _ = base.limit(1)
+      _ = base.count()
+      _ = base.count { r, _ in r.isCompleted }
+      _ = base.map {}
+    }
   }
 }
 
