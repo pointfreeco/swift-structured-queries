@@ -195,17 +195,6 @@ public enum SQLMacro: ExpressionMacro {
           )
         )
       }
-    } else {
-      context.diagnose(
-        Diagnostic(
-          node: argument,
-          message: MacroExpansionErrorMessage(
-            """
-            '#sql' requires a query literal.
-            """
-          )
-        )
-      )
     }
     return "\(moduleName).SQLQueryExpression(\(argument))"
   }
