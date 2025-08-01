@@ -570,6 +570,7 @@ extension TableMacro: ExtensionMacro {
     var letSchemaName: DeclSyntax?
     if let schemaName {
       letSchemaName = """
+
         public static let schemaName: Swift.String? = \(schemaName)
         """
     }
@@ -1038,7 +1039,7 @@ extension TableMacro: MemberMacro {
       [\(writableColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
       }
       public var queryFragment: QueryFragment {
-      "\(selectedColumns.map { #"\(self.\#($0))"# as ExprSyntax }, separator: ", ")"
+      "\(raw: selectedColumns.map { #"\(self.\#($0))"# }.joined(separator: ", "))"
       }
       }
       """,
