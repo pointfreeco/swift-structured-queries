@@ -20,6 +20,7 @@ extension TableDefinition {
   //
   // > Referencing subscript 'subscript(dynamicMember:)' on 'TableDefinition' requires that 'T'
   // > conform to 'TableDraft'
+  @_disfavoredOverload
   public subscript<Member>(
     dynamicMember keyPath: KeyPath<Self, Member>
   ) -> Member {
