@@ -15,4 +15,15 @@ extension TableDefinition {
   public var queryFragment: QueryFragment {
     Self.allColumns.map(\.queryFragment).joined(separator: ", ")
   }
+
+  // NB: Without this identity subscript, a more confusing error is produced for missing columns:
+  //
+  // > Referencing subscript 'subscript(dynamicMember:)' on 'TableDefinition' requires that 'T'
+  // > conform to 'TableDraft'
+  @_disfavoredOverload
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Self, Member>
+  ) -> Member {
+    self[keyPath: keyPath]
+  }
 }
