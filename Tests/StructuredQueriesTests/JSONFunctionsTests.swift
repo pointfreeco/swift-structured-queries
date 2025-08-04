@@ -344,7 +344,7 @@ extension SnapshotTests {
       assertQuery(
         Reminder
           .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
-          .select { ($0, $1.jsonObject) }
+          .select { ($0, $1.jsonObject()) }
       ) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", json_object('id', json_quote("remindersLists"."id"), 'color', json_quote("remindersLists"."color"), 'title', json_quote("remindersLists"."title"), 'position', json_quote("remindersLists"."position"))

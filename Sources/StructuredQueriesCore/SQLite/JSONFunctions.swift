@@ -115,7 +115,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
     AggregateFunction(
       "json_group_array",
       isDistinct: isDistinct,
-      [jsonObject.queryFragment],
+      [jsonObject().queryFragment],
       order: order?.queryFragment,
       filter: filter?.queryFragment
     )
@@ -188,7 +188,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Coda
     return AggregateFunction(
       "json_group_array",
       isDistinct: isDistinct,
-      [QueryValue.columns.jsonObject.queryFragment],
+      [QueryValue.columns.jsonObject().queryFragment],
       order: order?.queryFragment,
       filter: filterQueryFragment
     )
@@ -196,7 +196,10 @@ extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Coda
 }
 
 extension TableDefinition where QueryValue: Codable & Sendable {
-  public var jsonObject: some QueryExpression<_CodableJSONRepresentation<QueryValue>> {
+  /// A JSON representation of a table's columns.
+  ///
+  /// Useful for referencing a table row in a larger JSON selection.
+  public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<QueryValue>> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
 
@@ -244,7 +247,10 @@ extension TableDefinition where QueryValue: Codable & Sendable {
 }
 
 extension Optional.TableColumns where QueryValue: Codable & Sendable {
-  public var jsonObject: some QueryExpression<_CodableJSONRepresentation<Wrapped>?> {
-    Case().when(rowid.isNot(nil), then: Wrapped.columns.jsonObject)
+  /// A JSON representation of a table's columns.
+  ///
+  /// Useful for referencing a table row in a larger JSON selection.
+  public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<Wrapped>?> {
+    Case().when(rowid.isNot(nil), then: Wrapped.columns.jsonObject())
   }
 }
