@@ -195,8 +195,8 @@ extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Coda
   }
 }
 
-extension TableDefinition {
-  public var jsonObject: some QueryExpression<QueryValue> {
+extension TableDefinition where QueryValue: Codable & Sendable {
+  public var jsonObject: some QueryExpression<_CodableJSONRepresentation<QueryValue>> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
 
@@ -243,8 +243,8 @@ extension TableDefinition {
   }
 }
 
-extension Optional.TableColumns {
-  public var jsonObject: some QueryExpression<QueryValue> {
+extension Optional.TableColumns where QueryValue: Codable & Sendable {
+  public var jsonObject: some QueryExpression<_CodableJSONRepresentation<Wrapped>?> {
     Case().when(rowid.isNot(nil), then: Wrapped.columns.jsonObject)
   }
 }
