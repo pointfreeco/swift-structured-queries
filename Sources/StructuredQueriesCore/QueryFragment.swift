@@ -3,6 +3,9 @@
 /// You will typically create instances of this type using string literals, where bindings are
 /// directly interpolated into the string. This most commonly occurs when using the `#sql` macro,
 /// which takes values of this type.
+///
+/// > Tip: The `#sql` macro performs basic linting and validation of a SQL string literal. Prefer it
+/// > for creating `QueryFragment`s where possible.
 public struct QueryFragment: Hashable, Sendable {
   /// A segment of a query fragment.
   public enum Segment: Hashable, Sendable {
