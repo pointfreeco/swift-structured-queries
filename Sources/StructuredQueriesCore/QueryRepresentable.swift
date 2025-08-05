@@ -47,6 +47,8 @@ extension Double: QueryRepresentable {}
 
 extension Float: QueryRepresentable {}
 
+extension Decimal: QueryRepresentable {}
+
 extension Int: QueryRepresentable {}
 
 extension Int8: QueryRepresentable {}
