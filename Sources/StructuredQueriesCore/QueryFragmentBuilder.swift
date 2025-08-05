@@ -22,6 +22,10 @@ public enum QueryFragmentBuilder<Clause> {
 }
 
 extension QueryFragmentBuilder<Bool> {
+  public static func buildArray(_ components: [[QueryFragment]]) -> [QueryFragment] {
+    components.map { $0.joined(separator: " AND ") }
+  }
+
   public static func buildExpression(
     _ expression: some QueryExpression<Bool>
   ) -> [QueryFragment] {
