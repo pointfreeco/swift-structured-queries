@@ -23,4 +23,20 @@ extension URL: QueryBindable {
   }
 }
 
+extension Decimal: QueryBindable {
+  public var queryBinding: QueryBinding {
+    .text(description)
+  }
+
+  public init(decoder: inout some QueryDecoder) throws {
+    let string = try String(decoder: &decoder)
+    guard let decimal = Decimal(string: string) else {
+      throw InvalidDecimal()
+    }
+    self = decimal
+  }
+}
+
 private struct InvalidURL: Error {}
+
+private struct InvalidDecimal: Error {}
