@@ -5,11 +5,9 @@ import StructuredQueriesSQLite
 
 @Table
 struct RemindersList: Codable, Equatable, Identifiable {
-  static var withReminderCount: Select<Int, Self, Reminder> {
-    group(by: \.id)
-      .join(Reminder.all) { $0.id.eq($1.remindersListID) }
-      .select { $1.id.count() }
-  }
+  static let withReminderCount = group(by: \.id)
+    .join(Reminder.all) { $0.id.eq($1.remindersListID) }
+    .select { $1.id.count() }
 
   let id: Int
   var color = 0x4a99ef
@@ -19,7 +17,7 @@ struct RemindersList: Codable, Equatable, Identifiable {
 
 @Table
 struct Reminder: Codable, Equatable, Identifiable {
-  static var incomplete: Where<Self> {  Self.where { !$0.isCompleted } }
+  static let incomplete = Self.where { !$0.isCompleted }
 
   let id: Int
   var assignedUserID: User.ID?
