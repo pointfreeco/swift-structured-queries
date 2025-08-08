@@ -296,10 +296,10 @@ extension Table {
   }
 }
 
-public struct _SelectClauses {
+public struct _SelectClauses: Sendable {
   var isEmpty = false
   var distinct = false
-  var columns: [any QueryExpression] = []
+  var columns: [QueryFragment] = []
   var joins: [_JoinClause] = []
   var `where`: [QueryFragment] = []
   var group: [QueryFragment] = []
@@ -331,7 +331,7 @@ public struct Select<Columns, From: Table, Joins> {
     set { clauses.distinct = newValue }
     _modify { yield &clauses.distinct }
   }
-  fileprivate var columns: [any QueryExpression] {
+  fileprivate var columns: [QueryFragment] {
     get { clauses.columns }
     set { clauses.columns = newValue }
     _modify { yield &clauses.columns }
@@ -370,7 +370,7 @@ public struct Select<Columns, From: Table, Joins> {
   fileprivate init(
     isEmpty: Bool,
     distinct: Bool,
-    columns: [any QueryExpression],
+    columns: [QueryFragment],
     joins: [_JoinClause],
     where: [QueryFragment],
     group: [QueryFragment],
@@ -1527,7 +1527,7 @@ extension Select {
   {
     var iterator = columns.makeIterator()
     func next<Element>() -> SQLQueryExpression<Element> {
-      SQLQueryExpression(iterator.next()!.queryFragment)
+      SQLQueryExpression(iterator.next()!)
     }
     return Select<(repeat (each C2).QueryValue), From, Joins>(
       isEmpty: isEmpty,
@@ -1611,8 +1611,8 @@ extension Select: SelectStatement {
     var query: QueryFragment = "SELECT"
     let columns =
       columns.isEmpty
-      ? [From.columns.queryFragment] + joins.map { $0.table.columns.queryFragment }
-      : columns.map(\.queryFragment)
+      ? [From.columns.queryFragment] + joins.map { $0.tableColumns }
+      : columns
     if distinct {
       query.append(" DISTINCT")
     }
@@ -1650,7 +1650,7 @@ extension Select: SelectStatement {
 public typealias SelectOf<From: Table, each Join: Table> =
   Select<(), From, (repeat each Join)>
 
-public struct _JoinClause: QueryExpression {
+public struct _JoinClause: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
   struct Operator {
@@ -1661,18 +1661,22 @@ public struct _JoinClause: QueryExpression {
     let queryFragment: QueryFragment
   }
 
-  let `operator`: QueryFragment?
-  let table: any Table.Type
   let constraint: QueryFragment
+  let `operator`: QueryFragment?
+  let tableAlias: String?
+  let tableColumns: QueryFragment
+  let tableName: String
 
   init(
     operator: Operator?,
     table: any Table.Type,
     constraint: some QueryExpression<Bool>
   ) {
-    self.operator = `operator`?.queryFragment
-    self.table = table
     self.constraint = constraint.queryFragment
+    self.operator = `operator`?.queryFragment
+    tableAlias = table.tableAlias
+    tableColumns = table.columns.queryFragment
+    tableName = table.tableName
   }
 
   public var queryFragment: QueryFragment {
@@ -1680,8 +1684,8 @@ public struct _JoinClause: QueryExpression {
     if let `operator` {
       query.append("\(`operator`) ")
     }
-    query.append("JOIN \(quote: table.tableName) ")
-    if let tableAlias = table.tableAlias {
+    query.append("JOIN \(quote: tableName) ")
+    if let tableAlias = tableAlias {
       query.append("AS \(quote: tableAlias) ")
     }
     query.append("ON \(constraint)")
@@ -1689,7 +1693,7 @@ public struct _JoinClause: QueryExpression {
   }
 }
 
-public struct _LimitClause: QueryExpression {
+public struct _LimitClause: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
   let maxLength: QueryFragment
@@ -1727,3 +1731,7 @@ private struct CopyOnWrite<Value> {
     }
   }
 }
+
+extension CopyOnWrite: Sendable where Value: Sendable {}
+
+extension CopyOnWrite.Storage: @unchecked Sendable where Value: Sendable {}

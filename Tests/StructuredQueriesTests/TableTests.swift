@@ -12,9 +12,7 @@ extension SnapshotTests {
 
       @Table
       struct Row {
-        static var all: SelectOf<Self> {
-          unscoped.where { !$0.isDeleted }.order { $0.id.desc() }
-        }
+        static let all = unscoped.where { !$0.isDeleted }.order { $0.id.desc() }
         let id: Int
         var isDeleted = false
       }
@@ -339,9 +337,7 @@ extension SnapshotTests {
 
       @Table
       struct Row {
-        static var all: Where<Self> {
-          Self.where { !$0.isDeleted }
-        }
+        static let all = Self.where { !$0.isDeleted }
         let id: Int
         var isDeleted = false
       }
@@ -616,16 +612,15 @@ extension SnapshotTests {
 
       @Table
       struct Row {
-        static var all: Where<Self> {
+        static let all =
           unscoped
-            .where {
-              #sql(
+          .where {
+            #sql(
               """
               CAST(\($0.id) AS TEXT) = '"rows"'
               """
-              )
-            }
-        }
+            )
+          }
         let id: Int
         var isDeleted = false
       }

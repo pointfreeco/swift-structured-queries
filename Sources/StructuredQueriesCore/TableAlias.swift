@@ -89,7 +89,7 @@ public struct TableAlias<
   public static var all: SelectOf<Self> {
     var select = unsafeBitCast(Base.all.asSelect(), to: SelectOf<Self>.self)
     select.clauses.columns = select.clauses.columns.map {
-      SQLQueryExpression($0.queryFragment.replacingOccurrences(of: Base.self, with: Name.self))
+      $0.replacingOccurrences(of: Base.self, with: Name.self)
     }
     select.clauses.where = select.clauses.where
       .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
