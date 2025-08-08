@@ -2,7 +2,7 @@
 ///
 /// Values of this type are supplied to ``QueryExpression/collate(_:)`` to describe how a string
 /// should be compared in a query.
-public struct Collation: QueryExpression {
+public struct Collation: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
   /// Initializes a collating sequence name from a query fragment.

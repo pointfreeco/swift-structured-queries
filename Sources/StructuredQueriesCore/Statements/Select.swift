@@ -296,7 +296,7 @@ extension Table {
   }
 }
 
-public struct _SelectClauses: Sendable {
+public struct _SelectClauses {
   var isEmpty = false
   var distinct = false
   var columns: [any QueryExpression] = []
@@ -1727,7 +1727,3 @@ private struct CopyOnWrite<Value> {
     }
   }
 }
-
-extension CopyOnWrite: Sendable where Value: Sendable {}
-
-extension CopyOnWrite.Storage: @unchecked Sendable where Value: Sendable {}

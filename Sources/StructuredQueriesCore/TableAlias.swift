@@ -105,14 +105,14 @@ public struct TableAlias<
   let base: Base
 
   subscript<Member: QueryRepresentable>(
-    member _: KeyPath<Member, Member> & Sendable,
-    column keyPath: KeyPath<Base, Member.QueryOutput> & Sendable
+    member _: KeyPath<Member, Member>,
+    column keyPath: KeyPath<Base, Member.QueryOutput>
   ) -> Member.QueryOutput {
     base[keyPath: keyPath]
   }
 
   @dynamicMemberLookup
-  public struct TableColumns: TableDefinition {
+  public struct TableColumns: Sendable, TableDefinition {
     public static var allColumns: [any TableColumnExpression] {
       #if compiler(>=6.1)
         return Base.TableColumns.allColumns.map { $0._aliased(Name.self) }

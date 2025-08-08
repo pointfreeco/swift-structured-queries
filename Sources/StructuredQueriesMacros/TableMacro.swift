@@ -601,7 +601,7 @@ extension TableMacro: ExtensionMacro {
         \(declaration.attributes.availability)extension \(type)\
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
         \(statics, separator: "\n")
-        public static let columns = TableColumns()
+        public static var columns: TableColumns { TableColumns() }
         public static let tableName = \(tableName)\(letSchemaName)\(initDecoder)\(initFromOther)
         }
         """
