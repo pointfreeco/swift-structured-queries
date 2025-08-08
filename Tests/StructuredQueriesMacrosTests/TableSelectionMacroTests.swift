@@ -52,7 +52,9 @@ extension SnapshotTests {
         extension ReminderListWithCount: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
           public typealias From = Swift.Never
-          public static let columns = TableColumns()
+          public static var columns: TableColumns {
+            TableColumns()
+          }
           public static let tableName = "reminderListWithCounts"
         }
 

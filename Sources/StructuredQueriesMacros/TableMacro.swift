@@ -416,7 +416,7 @@ extension TableMacro: ExtensionMacro {
     if let draftTableType {
       initFromOther = """
 
-        public init(_ other: \(draftTableType)) {
+        public nonisolated init(_ other: \(draftTableType)) {
         \(allColumns.map { "self.\($0) = other.\($0)" as ExprSyntax }, separator: "\n")
         }
         """
@@ -571,7 +571,7 @@ extension TableMacro: ExtensionMacro {
     if let schemaName {
       letSchemaName = """
 
-        public static let schemaName: Swift.String? = \(schemaName)
+        public nonisolated static let schemaName: Swift.String? = \(schemaName)
         """
     }
     var initDecoder: DeclSyntax?
@@ -589,7 +589,7 @@ extension TableMacro: ExtensionMacro {
     } else {
       initDecoder = """
 
-        public init(decoder: inout some \(moduleName).QueryDecoder) throws {
+        public nonisolated init(decoder: inout some \(moduleName).QueryDecoder) throws {
         \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
         }
         """
@@ -598,11 +598,11 @@ extension TableMacro: ExtensionMacro {
     return [
       DeclSyntax(
         """
-        \(declaration.attributes.availability)extension \(type)\
+        \(declaration.attributes.availability)nonisolated extension \(type)\
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
         \(statics, separator: "\n")
-        public static let columns = TableColumns()
-        public static let tableName = \(tableName)\(letSchemaName)\(initDecoder)\(initFromOther)
+        public nonisolated static var columns: TableColumns { TableColumns() }
+        public nonisolated static var tableName: String { \(tableName) }\(letSchemaName)\(initDecoder)\(initFromOther)
         }
         """
       )
@@ -1029,7 +1029,7 @@ extension TableMacro: MemberMacro {
 
     return [
       """
-      public struct TableColumns: \(schemaConformances, separator: ", ") {
+      public nonisolated struct TableColumns: \(schemaConformances, separator: ", ") {
       public typealias QueryValue = \(type.trimmed)
       \(columnsProperties, separator: "\n")
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
