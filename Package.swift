@@ -1,4 +1,4 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.2
 
 import CompilerPluginSupport
 import PackageDescription
@@ -46,6 +46,13 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"602.0.0"),
   ],
   targets: [
+    .target(
+      name: "MainActorExplorations",
+      dependencies: ["StructuredQueries"],
+      swiftSettings: [
+        .defaultIsolation(MainActor.self)
+      ]
+    ),
     .target(
       name: "StructuredQueriesCore",
       dependencies: [
