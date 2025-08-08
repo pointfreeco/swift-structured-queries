@@ -2,22 +2,12 @@ import Foundation
 import StructuredQueries
 
 @Table
-public struct Reminder {
-  public let id: UUID
-  public var title = ""
-  public func foo() {}
+struct SyncUp {
+  let id: Int
+  var seconds: Int = 60 * 5
 }
 
 @concurrent func foo() async {
-  let r = Reminder(id: UUID())
-  r.foo()
-}
-
-@MainActor
-class Foo {
-  func foo() {}
-}
-
-func bar(foo: Foo) {
-  foo.foo()
+  SyncUp.all
+  SyncUp.Draft.all
 }

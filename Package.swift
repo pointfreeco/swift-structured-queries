@@ -13,6 +13,10 @@ let package = Package(
   ],
   products: [
     .library(
+      name: "MainActorExplorations",
+      targets: ["MainActorExplorations"]
+    ),
+    .library(
       name: "StructuredQueries",
       targets: ["StructuredQueries"]
     ),
