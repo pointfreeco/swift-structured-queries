@@ -317,7 +317,7 @@ public struct _SelectClauses: Sendable {
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
-public struct Select<Columns, From: Table, Joins> {
+public struct Select<Columns, From: Table, Joins>: Sendable {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   @CopyOnWrite var clauses = _SelectClauses()
 
