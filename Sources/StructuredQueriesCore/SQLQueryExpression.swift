@@ -2,7 +2,7 @@
 ///
 /// It is not common to interact with this type directly. A value of this type is returned from the
 /// `#sql` macro. See <doc:SafeSQLStrings> for more information.
-public struct SQLQueryExpression<QueryValue>: Statement {
+public struct SQLQueryExpression<QueryValue>: Sendable, Statement {
   public typealias From = Never
 
   public let queryFragment: QueryFragment
