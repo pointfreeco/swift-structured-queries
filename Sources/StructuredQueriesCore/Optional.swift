@@ -80,8 +80,8 @@ extension Optional: Table where Wrapped: Table {
   }
 
   fileprivate subscript<Member: QueryRepresentable>(
-    member _: KeyPath<Member, Member> & Sendable,
-    column keyPath: KeyPath<Wrapped, Member.QueryOutput> & Sendable
+    member _: KeyPath<Member, Member>,
+    column keyPath: KeyPath<Wrapped, Member.QueryOutput>
   ) -> Member.QueryOutput? {
     self?[keyPath: keyPath]
   }
