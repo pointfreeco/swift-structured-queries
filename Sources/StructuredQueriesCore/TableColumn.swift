@@ -40,7 +40,8 @@ extension WritableTableColumnExpression {
 /// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros to
 /// generate values of this type.
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
-  WritableTableColumnExpression {
+  WritableTableColumnExpression
+{
   public typealias QueryValue = Value
 
   public let name: String
@@ -108,7 +109,8 @@ public enum GeneratedColumnStorage {
 /// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros to
 /// generate values of this type.
 public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
-  TableColumnExpression {
+  TableColumnExpression
+{
   public typealias QueryValue = Value
 
   public let name: String

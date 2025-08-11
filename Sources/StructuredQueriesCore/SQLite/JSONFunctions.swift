@@ -203,8 +203,7 @@ extension TableDefinition where QueryValue: Codable {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
 
-      func isJSONRepresentation<T: Codable>(_: T.Type, isOptional: Bool = false) -> Bool
-      {
+      func isJSONRepresentation<T: Codable>(_: T.Type, isOptional: Bool = false) -> Bool {
         func isOptionalJSONRepresentation<U: _OptionalProtocol>(_: U.Type) -> Bool {
           if let codableType = U.Wrapped.self as? any Codable.Type {
             return isJSONRepresentation(codableType, isOptional: true)
