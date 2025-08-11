@@ -817,7 +817,7 @@ functions, which apply the appropriate SQL operator between each statement.
   @Column {
     ```swift
     RemindersList.select(\.title)
-      .intersect(Reminder.select(\.title))
+      .except(Reminder.select(\.title))
     ```
   }
   @Column {
