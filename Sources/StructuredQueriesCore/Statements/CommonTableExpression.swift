@@ -1,6 +1,6 @@
 /// Creates a common table expression that can be used to factor subqueries, or create hierarchical
 /// or recursive queries of trees and graphs.
-public struct With<QueryValue>: Statement {
+public struct With<QueryValue>: Statement, Sendable {
   public typealias From = Never
 
   var ctes: [CommonTableExpressionClause]
@@ -44,7 +44,7 @@ extension QueryFragment {
   fileprivate var presence: Self? { isEmpty ? nil : self }
 }
 
-public struct CommonTableExpressionClause: QueryExpression {
+public struct CommonTableExpressionClause: QueryExpression, Sendable {
   public typealias QueryValue = ()
   let tableName: QueryFragment
   let select: QueryFragment
