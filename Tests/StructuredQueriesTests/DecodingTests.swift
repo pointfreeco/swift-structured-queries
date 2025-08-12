@@ -129,6 +129,12 @@ extension SnapshotTests {
             )
           )
       )
+      #expect(
+        try db.execute(
+          SimpleSelect { #sql("1234567890", as: Duration.SecondsRepresentation.self) }
+        )
+        .first == Duration(secondsComponent: 1234567890, attosecondsComponent: 0)
+      )
     }
 
     @Test func optionalDate() throws {
