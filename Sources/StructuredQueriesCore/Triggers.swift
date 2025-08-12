@@ -238,7 +238,7 @@ extension Table {
 /// functions.
 ///
 /// To learn more, see <doc:Triggers>.
-public struct TemporaryTrigger<On: Table>: Statement {
+public struct TemporaryTrigger<On: Table>: Sendable, Statement {
   public typealias From = Never
   public typealias Joins = ()
   public typealias QueryValue = ()
@@ -251,7 +251,7 @@ public struct TemporaryTrigger<On: Table>: Statement {
   /// The database event used in a trigger.
   ///
   /// To learn more, see <doc:Triggers>.
-  public struct Operation: QueryExpression {
+  public struct Operation: Sendable, QueryExpression {
     public typealias QueryValue = ()
 
     public enum _Old: AliasName { public static var aliasName: String { "old" } }
