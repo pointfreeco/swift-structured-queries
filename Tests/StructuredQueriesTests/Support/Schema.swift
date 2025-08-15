@@ -73,10 +73,21 @@ struct ReminderTag: Equatable {
   var title = ""
 }
 
+@Table
+struct ReminderText: FTS5 {
+  let reminderID: Reminder.ID
+  let title: String
+  let notes: String
+  let listID: RemindersList.ID
+  let listTitle: String
+  let tags: String
+}
+
 extension Database {
   static func `default`() throws -> Database {
     let db = try Database()
     try db.migrate()
+    try db.installTriggers()
     try db.seedDatabase()
     return db
   }
@@ -151,6 +162,101 @@ extension Database {
         "title" TEXT NOT NULL DEFAULT ''
       )
       """
+    )
+    try execute(
+      """
+      CREATE VIRTUAL TABLE "reminderTexts" USING fts5(
+        "reminderID" UNINDEXED,
+        "title",
+        "notes",
+        "listID" UNINDEXED,
+        "listTitle",
+        "tags",
+        tokenize = 'trigram'
+      )
+      """
+    )
+  }
+
+  func installTriggers() throws {
+    try execute(
+      Reminder.createTemporaryTrigger(
+        after: .insert { new in
+          ReminderText.insert {
+            ($0.reminderID, $0.title, $0.notes, $0.listID, $0.listTitle, $0.tags)
+          } select: {
+            Reminder
+              .find(new.id)
+              .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
+              .select { ($0.id, $0.title, $0.notes, $1.id, $1.title, "") }
+          }
+        }
+      )
+    )
+    try execute(
+      Reminder.createTemporaryTrigger(
+        after: .update {
+          ($0.title, $0.notes, $0.remindersListID)
+        } forEachRow: { _, new in
+          ReminderText
+            .where { $0.reminderID.eq(new.id) }
+            .update {
+              $0.title = new.title
+              $0.notes = new.notes
+              $0.listID = new.remindersListID
+            }
+        }
+      )
+    )
+    try execute(
+      Reminder.createTemporaryTrigger(
+        after: .delete { old in
+          ReminderText
+            .where { $0.reminderID.eq(old.id) }
+            .delete()
+        }
+      )
+    )
+    try execute(
+      RemindersList.createTemporaryTrigger(
+        after: .update {
+          $0.title
+        } forEachRow: { _, new in
+          ReminderText
+            .where { $0.listID.eq(new.id) }
+            .update { $0.listTitle = new.title }
+        }
+      )
+    )
+    try execute(
+      ReminderTag.createTemporaryTrigger(
+        after: .insert { new in
+          ReminderText
+            .where { $0.reminderID.eq(new.reminderID) }
+            .update {
+              $0.tags =
+                ReminderTag
+                .where { $0.reminderID.eq(new.reminderID) }
+                .join(Tag.all) { $0.tagID.eq($1.id) }
+                .select { $1.title.groupConcat(" ") ?? "" }
+            }
+        }
+      )
+    )
+    try execute(
+      ReminderTag.createTemporaryTrigger(
+        after: .delete { old in
+          ReminderText
+            .where { $0.reminderID.eq(old.reminderID) }
+            .update {
+              $0.tags =
+                ReminderTag
+                .where { $0.reminderID.eq(old.reminderID) }
+                .join(Tag.all) { $0.tagID.eq($1.id) }
+                .select { $1.title.groupConcat(" ") ?? "" }
+            }
+        }
+      )
     )
   }
 
