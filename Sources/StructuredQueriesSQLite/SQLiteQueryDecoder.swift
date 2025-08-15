@@ -28,6 +28,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
     defer { currentIndex += 1 }
+    precondition(sqlite3_column_count(statement) > currentIndex)
     guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
     return [UInt8](
       UnsafeRawBufferPointer(
@@ -51,6 +52,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func decode(_ columnType: Double.Type) throws -> Double? {
     defer { currentIndex += 1 }
+    precondition(sqlite3_column_count(statement) > currentIndex)
     guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
     return sqlite3_column_double(statement, currentIndex)
   }
@@ -63,6 +65,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func decode(_ columnType: Int64.Type) throws -> Int64? {
     defer { currentIndex += 1 }
+    precondition(sqlite3_column_count(statement) > currentIndex)
     guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
     return sqlite3_column_int64(statement, currentIndex)
   }
@@ -70,6 +73,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func decode(_ columnType: String.Type) throws -> String? {
     defer { currentIndex += 1 }
+    precondition(sqlite3_column_count(statement) > currentIndex)
     guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
     return String(cString: sqlite3_column_text(statement, currentIndex))
   }

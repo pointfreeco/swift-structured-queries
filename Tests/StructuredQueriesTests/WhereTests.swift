@@ -233,5 +233,22 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func buildArray() {
+      let terms = ["daily", "monthly"]
+      assertQuery(
+        RemindersList.where {
+          for term in terms {
+            $0.title.contains(term)
+          }
+        }
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position"
+        FROM "remindersLists"
+        WHERE ("remindersLists"."title" LIKE '%daily%') AND ("remindersLists"."title" LIKE '%monthly%')
+        """
+      }
+    }
   }
 }

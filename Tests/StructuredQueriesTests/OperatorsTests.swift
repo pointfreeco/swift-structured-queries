@@ -342,6 +342,11 @@ extension SnapshotTests {
         ("rows"."string" LIKE '%a%')
         """
       }
+      assertInlineSnapshot(of: Row.columns.string.contains("a"[...]), as: .sql) {
+        """
+        ("rows"."string" LIKE '%a%')
+        """
+      }
       assertInlineSnapshot(of: Row.update { $0.string += "!" }, as: .sql) {
         """
         UPDATE "rows"

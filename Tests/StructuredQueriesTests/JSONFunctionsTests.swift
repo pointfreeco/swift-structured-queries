@@ -142,7 +142,7 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt" AS "reminder", json_group_array(CASE WHEN ("tags"."id" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id" IS NOT NULL)) AS "tags"
+        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt" AS "reminder", json_group_array(CASE WHEN ("tags"."rowid" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id" IS NOT NULL)) AS "tags"
         FROM "reminders"
         LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
         LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
@@ -228,7 +228,7 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", json_group_array(DISTINCT CASE WHEN ("milestones"."id" IS NOT NULL) THEN json_object('id', json_quote("milestones"."id"), 'remindersListID', json_quote("milestones"."remindersListID"), 'title', json_quote("milestones"."title")) END) FILTER (WHERE ("milestones"."id" IS NOT NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."id" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")) END) FILTER (WHERE ("reminders"."id" IS NOT NULL)) AS "reminders"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", json_group_array(DISTINCT CASE WHEN ("milestones"."rowid" IS NOT NULL) THEN json_object('id', json_quote("milestones"."id"), 'remindersListID', json_quote("milestones"."remindersListID"), 'title', json_quote("milestones"."title")) END) FILTER (WHERE ("milestones"."id" IS NOT NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."rowid" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")) END) FILTER (WHERE ("reminders"."id" IS NOT NULL)) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "milestones" ON ("remindersLists"."id" = "milestones"."remindersListID")
         LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
@@ -337,6 +337,158 @@ extension SnapshotTests {
         │ ]         │
         └───────────┘
         """
+      }
+    }
+
+    @Test func jsonObject() {
+      assertQuery(
+        Reminder
+          .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
+          .select { ($0, $1.jsonObject()) }
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", json_object('id', json_quote("remindersLists"."id"), 'color', json_quote("remindersLists"."color"), 'title', json_quote("remindersLists"."title"), 'position', json_quote("remindersLists"."position"))
+        FROM "reminders"
+        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        """
+      } results: {
+        #"""
+        ┌─────────────────────────────────────────────┬──────────────────────┐
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 1,                                    │   id: 1,             │
+        │   assignedUserID: 1,                        │   color: 4889071,    │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │   title: "Personal", │
+        │   isCompleted: false,                       │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: "Milk, Eggs, Apples",              │                      │
+        │   priority: nil,                            │                      │
+        │   remindersListID: 1,                       │                      │
+        │   title: "Groceries",                       │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 2,                                    │   id: 1,             │
+        │   assignedUserID: nil,                      │   color: 4889071,    │
+        │   dueDate: Date(2000-12-30T00:00:00.000Z),  │   title: "Personal", │
+        │   isCompleted: false,                       │   position: 0        │
+        │   isFlagged: true,                          │ )                    │
+        │   notes: "",                                │                      │
+        │   priority: nil,                            │                      │
+        │   remindersListID: 1,                       │                      │
+        │   title: "Haircut",                         │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 3,                                    │   id: 1,             │
+        │   assignedUserID: nil,                      │   color: 4889071,    │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │   title: "Personal", │
+        │   isCompleted: false,                       │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: "Ask about diet",                  │                      │
+        │   priority: .high,                          │                      │
+        │   remindersListID: 1,                       │                      │
+        │   title: "Doctor appointment",              │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 4,                                    │   id: 1,             │
+        │   assignedUserID: nil,                      │   color: 4889071,    │
+        │   dueDate: Date(2000-06-25T00:00:00.000Z),  │   title: "Personal", │
+        │   isCompleted: true,                        │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: "",                                │                      │
+        │   priority: nil,                            │                      │
+        │   remindersListID: 1,                       │                      │
+        │   title: "Take a walk",                     │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 5,                                    │   id: 1,             │
+        │   assignedUserID: nil,                      │   color: 4889071,    │
+        │   dueDate: nil,                             │   title: "Personal", │
+        │   isCompleted: false,                       │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: "",                                │                      │
+        │   priority: nil,                            │                      │
+        │   remindersListID: 1,                       │                      │
+        │   title: "Buy concert tickets",             │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 6,                                    │   id: 2,             │
+        │   assignedUserID: nil,                      │   color: 15567157,   │
+        │   dueDate: Date(2001-01-03T00:00:00.000Z),  │   title: "Family",   │
+        │   isCompleted: false,                       │   position: 0        │
+        │   isFlagged: true,                          │ )                    │
+        │   notes: "",                                │                      │
+        │   priority: .high,                          │                      │
+        │   remindersListID: 2,                       │                      │
+        │   title: "Pick up kids from school",        │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 7,                                    │   id: 2,             │
+        │   assignedUserID: nil,                      │   color: 15567157,   │
+        │   dueDate: Date(2000-12-30T00:00:00.000Z),  │   title: "Family",   │
+        │   isCompleted: true,                        │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: "",                                │                      │
+        │   priority: .low,                           │                      │
+        │   remindersListID: 2,                       │                      │
+        │   title: "Get laundry",                     │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 8,                                    │   id: 2,             │
+        │   assignedUserID: nil,                      │   color: 15567157,   │
+        │   dueDate: Date(2001-01-05T00:00:00.000Z),  │   title: "Family",   │
+        │   isCompleted: false,                       │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: "",                                │                      │
+        │   priority: .high,                          │                      │
+        │   remindersListID: 2,                       │                      │
+        │   title: "Take out trash",                  │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 9,                                    │   id: 3,             │
+        │   assignedUserID: nil,                      │   color: 11689427,   │
+        │   dueDate: Date(2001-01-03T00:00:00.000Z),  │   title: "Business", │
+        │   isCompleted: false,                       │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: """                                │                      │
+        │     Status of tax return                    │                      │
+        │     Expenses for next year                  │                      │
+        │     Changing payroll company                │                      │
+        │     """,                                    │                      │
+        │   priority: nil,                            │                      │
+        │   remindersListID: 3,                       │                      │
+        │   title: "Call accountant",                 │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        ├─────────────────────────────────────────────┼──────────────────────┤
+        │ Reminder(                                   │ RemindersList(       │
+        │   id: 10,                                   │   id: 3,             │
+        │   assignedUserID: nil,                      │   color: 11689427,   │
+        │   dueDate: Date(2000-12-30T00:00:00.000Z),  │   title: "Business", │
+        │   isCompleted: true,                        │   position: 0        │
+        │   isFlagged: false,                         │ )                    │
+        │   notes: "",                                │                      │
+        │   priority: .medium,                        │                      │
+        │   remindersListID: 3,                       │                      │
+        │   title: "Send weekly emails",              │                      │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │                      │
+        │ )                                           │                      │
+        └─────────────────────────────────────────────┴──────────────────────┘
+        """#
       }
     }
   }

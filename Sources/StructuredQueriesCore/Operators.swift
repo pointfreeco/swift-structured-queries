@@ -710,8 +710,8 @@ extension QueryExpression where QueryValue == String {
   ///
   /// - Parameter pattern: A string expression describing the `GLOB` pattern.
   /// - Returns: A predicate expression.
-  public func glob(_ pattern: QueryValue) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "GLOB", rhs: pattern)
+  public func glob(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "GLOB", rhs: "\(pattern)")
   }
 
   /// A predicate expression from this string expression matched against another _via_ the `LIKE`
@@ -726,8 +726,11 @@ extension QueryExpression where QueryValue == String {
   ///   - pattern: A string expression describing the `LIKE` pattern.
   ///   - escape: An optional character for the `ESCAPE` clause.
   /// - Returns: A predicate expression.
-  public func like(_ pattern: QueryValue, escape: Character? = nil) -> some QueryExpression<Bool> {
-    LikeOperator(string: self, pattern: pattern, escape: escape)
+  public func like(
+    _ pattern: some StringProtocol,
+    escape: Character? = nil
+  ) -> some QueryExpression<Bool> {
+    LikeOperator(string: self, pattern: "\(pattern)", escape: escape)
   }
 
   /// A predicate expression from this string expression matched against another _via_ the `LIKE`
@@ -740,7 +743,7 @@ extension QueryExpression where QueryValue == String {
   ///
   /// - Parameter other: A string expression describing the prefix.
   /// - Returns: A predicate expression.
-  public func hasPrefix(_ other: QueryValue) -> some QueryExpression<Bool> {
+  public func hasPrefix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
     like("\(other)%")
   }
 
@@ -754,7 +757,7 @@ extension QueryExpression where QueryValue == String {
   ///
   /// - Parameter other: A string expression describing the suffix.
   /// - Returns: A predicate expression.
-  public func hasSuffix(_ other: QueryValue) -> some QueryExpression<Bool> {
+  public func hasSuffix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
     like("%\(other)")
   }
 
@@ -769,7 +772,7 @@ extension QueryExpression where QueryValue == String {
   /// - Parameter other: A string expression describing the infix.
   /// - Returns: A predicate expression.
   @_disfavoredOverload
-  public func contains(_ other: QueryValue) -> some QueryExpression<Bool> {
+  public func contains(_ other: some StringProtocol) -> some QueryExpression<Bool> {
     like("%\(other)%")
   }
 }

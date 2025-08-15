@@ -70,9 +70,10 @@ extension PrimaryKeyedTableDefinition {
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: An expression representing the number of rows in this table.
   public func count(
+    distinct isDistinct: Bool = false,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<Int> {
-    primaryKey.count(filter: filter)
+    primaryKey.count(distinct: isDistinct, filter: filter)
   }
 }
 

@@ -1,5 +1,5 @@
 /// A conflict resolution algorithm.
-public struct ConflictResolution: QueryExpression {
+public struct ConflictResolution: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
   /// The `ABORT` conflict resolution algorithm.

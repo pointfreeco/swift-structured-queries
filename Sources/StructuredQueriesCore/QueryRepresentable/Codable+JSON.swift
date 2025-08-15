@@ -1,6 +1,6 @@
 import Foundation
 
-public struct _CodableJSONRepresentation<QueryOutput: Codable & Sendable>: QueryRepresentable {
+public struct _CodableJSONRepresentation<QueryOutput: Codable>: QueryRepresentable {
   public var queryOutput: QueryOutput
 
   public init(queryOutput: QueryOutput) {

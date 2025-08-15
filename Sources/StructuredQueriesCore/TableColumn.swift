@@ -40,16 +40,15 @@ extension WritableTableColumnExpression {
 /// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros to
 /// generate values of this type.
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
-  WritableTableColumnExpression,
-  Sendable
-where Value.QueryOutput: Sendable {
+  WritableTableColumnExpression
+{
   public typealias QueryValue = Value
 
   public let name: String
 
   public let defaultValue: Value.QueryOutput?
 
-  let _keyPath: KeyPath<Root, Value.QueryOutput> & Sendable
+  let _keyPath: KeyPath<Root, Value.QueryOutput>
 
   public var keyPath: KeyPath<Root, Value.QueryOutput> {
     _keyPath
@@ -57,7 +56,7 @@ where Value.QueryOutput: Sendable {
 
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput> & Sendable,
+    keyPath: KeyPath<Root, Value.QueryOutput>,
     default defaultValue: Value.QueryOutput? = nil
   ) {
     self.name = name
@@ -67,7 +66,7 @@ where Value.QueryOutput: Sendable {
 
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput> & Sendable,
+    keyPath: KeyPath<Root, Value.QueryOutput>,
     default defaultValue: Value? = nil
   ) where Value == Value.QueryOutput {
     self.name = name
@@ -110,16 +109,15 @@ public enum GeneratedColumnStorage {
 /// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros to
 /// generate values of this type.
 public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
-  TableColumnExpression,
-  Sendable
-where Value.QueryOutput: Sendable {
+  TableColumnExpression
+{
   public typealias QueryValue = Value
 
   public let name: String
 
   public let defaultValue: Value.QueryOutput?
 
-  let _keyPath: KeyPath<Root, Value.QueryOutput> & Sendable
+  let _keyPath: KeyPath<Root, Value.QueryOutput>
 
   public var keyPath: KeyPath<Root, Value.QueryOutput> {
     _keyPath
@@ -127,7 +125,7 @@ where Value.QueryOutput: Sendable {
 
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput> & Sendable,
+    keyPath: KeyPath<Root, Value.QueryOutput>,
     default defaultValue: Value.QueryOutput? = nil
   ) {
     self.name = name
@@ -137,7 +135,7 @@ where Value.QueryOutput: Sendable {
 
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput> & Sendable,
+    keyPath: KeyPath<Root, Value.QueryOutput>,
     default defaultValue: Value? = nil
   ) where Value == Value.QueryOutput {
     self.name = name

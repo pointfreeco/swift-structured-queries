@@ -31,10 +31,10 @@ extension TableDefinition where QueryValue: FTS5 {
   ///
   /// - Parameter pattern: A string expression describing the `MATCH` pattern.
   /// - Returns: A predicate expression.
-  public func match(_ pattern: some QueryExpression<String>) -> some QueryExpression<Bool> {
+  public func match(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
     SQLQueryExpression(
       """
-      (\(QueryValue.self) MATCH \(pattern))
+      (\(QueryValue.self) MATCH \(bind: "\(pattern)")
       """
     )
   }
@@ -75,7 +75,7 @@ extension TableColumnExpression where Root: FTS5 {
   ///
   /// - Parameter pattern: A string expression describing the `MATCH` pattern.
   /// - Returns: A predicate expression.
-  public func match(_ pattern: some QueryExpression<String>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "MATCH", rhs: pattern)
+  public func match(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "MATCH", rhs: "\(pattern)")
   }
 }

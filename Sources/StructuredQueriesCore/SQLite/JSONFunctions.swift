@@ -20,13 +20,13 @@ extension QueryExpression {
   /// ```
   ///
   /// - Returns: An integer expression of the `json_array_length` function wrapping this expression.
-  public func jsonArrayLength<Element: Codable & Sendable>() -> some QueryExpression<Int>
+  public func jsonArrayLength<Element: Codable>() -> some QueryExpression<Int>
   where QueryValue == [Element].JSONRepresentation {
     QueryFunction("json_array_length", self)
   }
 }
 
-extension QueryExpression where QueryValue: Codable & QueryBindable & Sendable {
+extension QueryExpression where QueryValue: Codable & QueryBindable {
   /// A JSON array aggregate of this expression
   ///
   /// Concatenates all of the values in a group.
@@ -56,7 +56,7 @@ extension QueryExpression where QueryValue: Codable & QueryBindable & Sendable {
   }
 }
 
-extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
+extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   /// A JSON array representation of the aggregation of a table's columns.
   ///
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
@@ -115,14 +115,14 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable & Sendable {
     AggregateFunction(
       "json_group_array",
       isDistinct: isDistinct,
-      [jsonObject.queryFragment],
+      [jsonObject().queryFragment],
       order: order?.queryFragment,
       filter: filter?.queryFragment
     )
   }
 }
 
-extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Codable & Sendable {
+extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Codable {
   /// A JSON array representation of the aggregation of a table's columns.
   ///
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
@@ -173,7 +173,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Coda
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
-  public func jsonGroupArray<Wrapped: Codable & Sendable>(
+  public func jsonGroupArray<Wrapped: Codable>(
     isDistinct: Bool = false,
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
@@ -188,23 +188,24 @@ extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Coda
     return AggregateFunction(
       "json_group_array",
       isDistinct: isDistinct,
-      [jsonObject.queryFragment],
+      [QueryValue.columns.jsonObject().queryFragment],
       order: order?.queryFragment,
       filter: filterQueryFragment
     )
   }
 }
 
-extension PrimaryKeyedTableDefinition {
-
-  fileprivate var jsonObject: some QueryExpression<QueryValue> {
+extension TableDefinition where QueryValue: Codable {
+  /// A JSON representation of a table's columns.
+  ///
+  /// Useful for referencing a table row in a larger JSON selection.
+  public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<QueryValue>> {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
 
-      func isJSONRepresentation<T: Codable & Sendable>(_: T.Type, isOptional: Bool = false) -> Bool
-      {
+      func isJSONRepresentation<T: Codable>(_: T.Type, isOptional: Bool = false) -> Bool {
         func isOptionalJSONRepresentation<U: _OptionalProtocol>(_: U.Type) -> Bool {
-          if let codableType = U.Wrapped.self as? any (Codable & Sendable).Type {
+          if let codableType = U.Wrapped.self as? any Codable.Type {
             return isJSONRepresentation(codableType, isOptional: true)
           } else {
             return false
@@ -229,7 +230,7 @@ extension PrimaryKeyedTableDefinition {
       } else if Value.self == Date.JulianDayRepresentation.self {
         return "\(quote: column.name, delimiter: .text), datetime(\(column), 'julianday')"
       } else if let codableType = TableColumn.QueryValue.QueryOutput.self
-        as? any (Codable & Sendable).Type,
+        as? any Codable.Type,
         isJSONRepresentation(codableType)
       {
         return "\(quote: column.name, delimiter: .text), json(\(column))"
@@ -240,8 +241,15 @@ extension PrimaryKeyedTableDefinition {
     let fragment: QueryFragment = Self.allColumns
       .map { open($0) }
       .joined(separator: ", ")
-    return SQLQueryExpression(
-      "CASE WHEN \(primaryKey.isNot(nil)) THEN json_object(\(fragment)) END"
-    )
+    return QueryFunction("json_object", SQLQueryExpression(fragment))
+  }
+}
+
+extension Optional.TableColumns where QueryValue: Codable {
+  /// A JSON representation of a table's columns.
+  ///
+  /// Useful for referencing a table row in a larger JSON selection.
+  public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<Wrapped>?> {
+    Case().when(rowid.isNot(nil), then: Wrapped.columns.jsonObject())
   }
 }
