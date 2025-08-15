@@ -76,6 +76,6 @@ extension TableColumnExpression where Root: FTS5 {
   /// - Parameter pattern: A string expression describing the `MATCH` pattern.
   /// - Returns: A predicate expression.
   public func match(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "MATCH", rhs: "\(pattern)")
+    Root.columns.match("\(name):\(pattern)")
   }
 }
