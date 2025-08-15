@@ -34,7 +34,7 @@ extension TableDefinition where QueryValue: FTS5 {
   public func match(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
     SQLQueryExpression(
       """
-      (\(QueryValue.self) MATCH \(bind: "\(pattern)")
+      (\(QueryValue.self) MATCH \(bind: "\(pattern)"))
       """
     )
   }
