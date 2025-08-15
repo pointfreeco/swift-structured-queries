@@ -48,8 +48,8 @@ extension TableColumnExpression where Root: FTS5 {
   ///   - close: A closing delimiter denoting the end of a match, _e.g._, `"</b>"`.
   /// - Returns: A string expression highlighting matches in this column.
   public func highlight(
-    _ open: String,
-    _ close: String
+    _ open: some StringProtocol,
+    _ close: some StringProtocol
   ) -> some QueryExpression<String> {
     SQLQueryExpression(
       """
@@ -59,8 +59,8 @@ extension TableColumnExpression where Root: FTS5 {
       SELECT "cid" FROM pragma_table_info(\(quote: Root.tableName, delimiter: .text)) \
       WHERE "name" = \(quote: name, delimiter: .text)\
       ),
-      \(quote: open, delimiter: .text), \
-      \(quote: close, delimiter: .text)\
+      \(quote: "\(open)", delimiter: .text), \
+      \(quote: "\(close)", delimiter: .text)\
       )
       """
     )
@@ -77,5 +77,37 @@ extension TableColumnExpression where Root: FTS5 {
   /// - Returns: A predicate expression.
   public func match(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
     Root.columns.match("\(name):\(pattern)")
+  }
+
+  /// A string expression highlighting matches in text fragments of this column using the given
+  /// delimiters.
+  ///
+  /// - Parameters:
+  ///   - open: An opening delimiter denoting the beginning of a match, _e.g._ `"<b>"`.
+  ///   - close: A closing delimiter denoting the end of a match, _e.g._, `"</b>"`.
+  ///   - ellipsis: Text indicating a truncation of text in the column.
+  ///   - tokens: The maximum number of tokens in the returned text.
+  /// - Returns: A string expression highlighting matches in this column.
+  public func snippet(
+    _ open: some StringProtocol,
+    _ close: some StringProtocol,
+    _ ellipsis: some StringProtocol,
+    _ tokens: Int
+  ) -> some QueryExpression<String> {
+    SQLQueryExpression(
+      """
+      snippet(\
+      \(Root.self), \
+      (\
+      SELECT "cid" FROM pragma_table_info(\(quote: Root.tableName, delimiter: .text)) \
+      WHERE "name" = \(quote: name, delimiter: .text)\
+      ),
+      \(quote: "\(open)", delimiter: .text), \
+      \(quote: "\(close)", delimiter: .text), \
+      \(quote: "\(ellipsis)", delimiter: .text), \
+      \(raw: tokens)\
+      )
+      """
+    )
   }
 }
