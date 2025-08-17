@@ -733,24 +733,6 @@ extension QueryExpression where QueryValue == String {
     LikeOperator(string: self, pattern: "\(pattern)", escape: escape)
   }
 
-  /// A predicate expression from this string expression matched against another _via_ the `MATCH`
-  /// operator.
-  ///
-  /// ```swift
-  /// Reminder.where { $0.title.match("get") }
-  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" MATCH 'get')
-  /// ```
-  ///
-  /// - Parameter pattern: A string expression describing the `MATCH` pattern.
-  /// - Returns: A predicate expression.
-  public func match(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
-    BinaryOperator(
-      lhs: self,
-      operator: "MATCH",
-      rhs: "\(pattern)"
-    )
-  }
-
   /// A predicate expression from this string expression matched against another _via_ the `LIKE`
   /// operator given a prefix.
   ///
