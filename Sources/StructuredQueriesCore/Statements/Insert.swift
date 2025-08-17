@@ -57,14 +57,15 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [Self],
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     _insert(
       or: conflictResolution,
-      values: values,
+      columnNames: TableColumns.writableColumns.map(\.name),
+      values: .values(values()),
       onConflict: { _ -> ()? in nil },
       where: { _ in return [] },
       doUpdate: updates,
@@ -124,7 +125,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [Self],
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
@@ -153,7 +154,7 @@ extension Table {
   public static func insert<T1, each T2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [Self],
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -166,7 +167,8 @@ extension Table {
     withoutActuallyEscaping(updates) { updates in
       _insert(
         or: conflictResolution,
-        values: values,
+        columnNames: TableColumns.writableColumns.map(\.name),
+        values: .values(values()),
         onConflict: conflictTargets,
         where: targetFilter,
         doUpdate: updates,
@@ -190,7 +192,7 @@ extension Table {
   public static func insert<T1, each T2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [Self],
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -207,40 +209,6 @@ extension Table {
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: { row, _ in updates(&row) },
-      where: updateFilter
-    )
-  }
-
-  private static func _insert<each ConflictTarget>(
-    or conflictResolution: ConflictResolution?,
-    @InsertValuesBuilder<Self> values: () -> [Self],
-    onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
-    @QueryFragmentBuilder<Bool>
-    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>, Excluded) -> Void)?,
-    @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self> {
-    var valueFragments: [[QueryFragment]] = []
-    for value in values() {
-      var valueFragment: [QueryFragment] = []
-      for column in TableColumns.writableColumns {
-        func open<Root, Value>(
-          _ column: some WritableTableColumnExpression<Root, Value>
-        ) -> QueryFragment {
-          Value(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        valueFragment.append(open(column))
-      }
-      valueFragments.append(valueFragment)
-    }
-    return _insert(
-      or: conflictResolution,
-      columnNames: TableColumns.writableColumns.map(\.name),
-      values: .values(valueFragments),
-      onConflict: conflictTargets,
-      where: targetFilter,
-      doUpdate: updates,
       where: updateFilter
     )
   }
@@ -303,8 +271,8 @@ extension Table {
   public static func insert<V1, each V2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
-    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
     onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
@@ -333,8 +301,8 @@ extension Table {
   public static func insert<V1, each V2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
-    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
     onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
@@ -363,8 +331,8 @@ extension Table {
   public static func insert<V1, each V2, T1, each T2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
-    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -402,8 +370,8 @@ extension Table {
   public static func insert<V1, each V2, T1, each T2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
-    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -427,8 +395,8 @@ extension Table {
   private static func _insert<each Value, each ConflictTarget>(
     or conflictResolution: ConflictResolution?,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
-    @InsertValuesBuilder<(repeat (each Value).QueryOutput)>
-    values: () -> [(repeat (each Value).QueryOutput)],
+    @InsertValuesBuilder<(repeat each Value)>
+    values: () -> [[QueryFragment]],
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
     @QueryFragmentBuilder<Bool>
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
@@ -440,18 +408,10 @@ extension Table {
     for column in repeat each columns(Self.columns) {
       columnNames.append(column.name)
     }
-    var valueFragments: [[QueryFragment]] = []
-    for value in values() {
-      var valueFragment: [QueryFragment] = []
-      for (columnType, column) in repeat ((each Value).self, each value) {
-        valueFragment.append("\(columnType.init(queryOutput: column).queryFragment)")
-      }
-      valueFragments.append(valueFragment)
-    }
     return _insert(
       or: conflictResolution,
       columnNames: columnNames,
-      values: .values(valueFragments),
+      values: .values(values()),
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: updates,
@@ -702,139 +662,6 @@ extension Table {
 }
 
 extension PrimaryKeyedTable {
-  /// An insert statement for one or more table rows.
-  ///
-  /// This function can be used to create an insert statement from a ``Draft`` value.
-  ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - columns: Columns to insert.
-  ///   - values: A builder of row values for the given columns.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  ///   - updateFilter: A filter to apply to the update clause.
-  /// - Returns: An insert statement.
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
-    @InsertValuesBuilder<Draft> values: () -> [Draft],
-    onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
-    @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self> {
-    _insert(
-      or: conflictResolution,
-      values: values,
-      onConflict: { _ -> ()? in nil },
-      where: { _ in return [] },
-      doUpdate: updates,
-      where: updateFilter
-    )
-  }
-
-  /// An insert statement for one or more table rows.
-  ///
-  /// This function can be used to create an insert statement from a ``Draft`` value.
-  ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - columns: Columns to insert.
-  ///   - values: A builder of row values for the given columns.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  ///   - updateFilter: A filter to apply to the update clause.
-  /// - Returns: An insert statement.
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
-    @InsertValuesBuilder<Draft> values: () -> [Draft],
-    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
-    @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self> {
-    insert(
-      or: conflictResolution,
-      columns,
-      values: values,
-      onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
-      where: updateFilter
-    )
-  }
-
-  /// An insert statement for one or more table rows.
-  ///
-  /// This function can be used to create an insert statement from a ``Draft`` value.
-  ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - columns: Columns to insert.
-  ///   - values: A builder of row values for the given columns.
-  ///   - conflictTargets: Indexed columns to target for conflict resolution.
-  ///   - targetFilter: A filter to apply to conflict target columns.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  ///   - updateFilter: A filter to apply to the update clause.
-  public static func insert<T1, each T2>(
-    or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
-    @InsertValuesBuilder<Draft> values: () -> [Draft],
-    onConflict conflictTargets: (TableColumns) -> (
-      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
-    ),
-    @QueryFragmentBuilder<Bool>
-    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
-    @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self> {
-    withoutActuallyEscaping(updates) { updates in
-      _insert(
-        or: conflictResolution,
-        values: values,
-        onConflict: conflictTargets,
-        where: targetFilter,
-        doUpdate: updates,
-        where: updateFilter
-      )
-    }
-  }
-
-  /// An insert statement for one or more table rows.
-  ///
-  /// This function can be used to create an insert statement from a ``Draft`` value.
-  ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - columns: Columns to insert.
-  ///   - values: A builder of row values for the given columns.
-  ///   - conflictTargets: Indexed columns to target for conflict resolution.
-  ///   - targetFilter: A filter to apply to conflict target columns.
-  ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
-  ///     existing row.
-  ///   - updateFilter: A filter to apply to the update clause.
-  public static func insert<T1, each T2>(
-    or conflictResolution: ConflictResolution? = nil,
-    _ columns: (Draft.TableColumns) -> Draft.TableColumns = { $0 },
-    @InsertValuesBuilder<Draft> values: () -> [Draft],
-    onConflict conflictTargets: (TableColumns) -> (
-      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
-    ),
-    @QueryFragmentBuilder<Bool>
-    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: (inout Updates<Self>) -> Void,
-    @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self> {
-    insert(
-      or: conflictResolution,
-      values: values,
-      onConflict: conflictTargets,
-      where: targetFilter,
-      doUpdate: { row, _ in updates(&row) },
-      where: updateFilter
-    )
-  }
-
   /// An upsert statement for given drafts.
   ///
   /// Generates an insert statement with an upsert clause. Useful for building forms that can both
@@ -853,7 +680,7 @@ extension PrimaryKeyedTable {
   /// - Returns: An insert statement with an upsert clause.
   public static func upsert(
     or conflictResolution: ConflictResolution? = nil,
-    @InsertValuesBuilder<Draft> values: () -> [Draft]
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]]
   ) -> InsertOf<Self> {
     insert(
       or: conflictResolution,
@@ -865,40 +692,6 @@ extension PrimaryKeyedTable {
           updates.set(column, excluded.queryFragment)
         }
       }
-    )
-  }
-
-  private static func _insert<each ConflictTarget>(
-    or conflictResolution: ConflictResolution?,
-    @InsertValuesBuilder<Draft> values: () -> [Draft],
-    onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
-    @QueryFragmentBuilder<Bool>
-    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
-    doUpdate updates: ((inout Updates<Self>, Excluded) -> Void)?,
-    @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
-  ) -> InsertOf<Self> {
-    var valueFragments: [[QueryFragment]] = []
-    for value in values() {
-      var valueFragment: [QueryFragment] = []
-      for column in Draft.TableColumns.writableColumns {
-        func open<Root, Value>(
-          _ column: some WritableTableColumnExpression<Root, Value>
-        ) -> QueryFragment {
-          Value(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        valueFragment.append(open(column))
-      }
-      valueFragments.append(valueFragment)
-    }
-    return _insert(
-      or: conflictResolution,
-      columnNames: Draft.TableColumns.writableColumns.map(\.name),
-      values: .values(valueFragments),
-      onConflict: conflictTargets,
-      where: targetFilter,
-      doUpdate: updates,
-      where: updateFilter
     )
   }
 }
@@ -1085,43 +878,148 @@ public typealias InsertOf<Into: Table> = Insert<Into, ()>
 /// insert any number of rows into a table.
 @resultBuilder
 public enum InsertValuesBuilder<Value> {
-  public static func buildArray(_ components: [[Value]]) -> [Value] {
+  public static func buildExpression(_ expression: [Value]) -> [[QueryFragment]]
+  where Value: Table {
+    var valueFragments: [[QueryFragment]] = []
+    for value in expression {
+      var valueFragment: [QueryFragment] = []
+      for column in Value.TableColumns.writableColumns {
+        func open<Root, Member>(
+          _ column: some WritableTableColumnExpression<Root, Member>
+        ) -> QueryFragment {
+          Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
+        }
+        valueFragment.append(open(column))
+      }
+      valueFragments.append(valueFragment)
+    }
+    return valueFragments
+  }
+
+  @_disfavoredOverload
+  public static func buildExpression(_ expression: [Value.Draft]) -> [[QueryFragment]]
+  where Value: PrimaryKeyedTable {
+    var valueFragments: [[QueryFragment]] = []
+    for value in expression {
+      var valueFragment: [QueryFragment] = []
+      for column in Value.Draft.TableColumns.writableColumns {
+        func open<Root, Member>(
+          _ column: some WritableTableColumnExpression<Root, Member>
+        ) -> QueryFragment {
+          Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
+        }
+        valueFragment.append(open(column))
+      }
+      valueFragments.append(valueFragment)
+    }
+    return valueFragments
+  }
+
+  @_disfavoredOverload
+  public static func buildExpression<V: QueryExpression>(
+    _ expression: [V]
+  ) -> [[QueryFragment]]
+  where
+    Value == V.QueryValue,
+    V.QueryValue: QueryRepresentable & QueryBindable
+  {
+    [expression.map(\.queryFragment)]
+  }
+
+  @_disfavoredOverload
+  public static func buildExpression(
+    _ expression: [Value.QueryOutput]
+  ) -> [[QueryFragment]]
+  where Value: QueryRepresentable & QueryBindable {
+    [expression.map { Value(queryOutput: $0).queryFragment }]
+  }
+
+  public static func buildExpression(_ expression: Value) -> [[QueryFragment]]
+  where Value: Table {
+    buildExpression([expression])
+  }
+
+  public static func buildExpression(_ expression: Value.Draft) -> [[QueryFragment]]
+  where Value: PrimaryKeyedTable {
+    buildExpression([expression])
+  }
+
+  @_disfavoredOverload
+  public static func buildExpression<V: QueryExpression>(
+    _ expression: V
+  ) -> [[QueryFragment]]
+  where
+    Value == V.QueryValue,
+    V.QueryValue: QueryRepresentable & QueryBindable
+  {
+    buildExpression([expression])
+  }
+
+  public static func buildExpression(
+    _ expression: Value.QueryOutput
+  ) -> [[QueryFragment]]
+  where Value: QueryRepresentable & QueryBindable {
+    buildExpression([expression])
+  }
+
+  @_disfavoredOverload
+  public static func buildExpression<each V: QueryExpression>(
+    _ expression: (repeat each V)
+  ) -> [[QueryFragment]]
+  where
+    Value == (repeat (each V).QueryValue),
+    repeat (each V).QueryValue: QueryRepresentable & QueryBindable
+  {
+    var valueFragment: [QueryFragment] = []
+    for column in repeat each expression {
+      valueFragment.append(column.queryFragment)
+    }
+    return [valueFragment]
+  }
+
+  public static func buildExpression<each V: QueryRepresentable & QueryBindable>(
+    _ expression: (repeat (each V).QueryOutput)
+  ) -> [[QueryFragment]]
+  where Value == (repeat each V) {
+    var valueFragment: [QueryFragment] = []
+    for (columnType, column) in repeat ((each V).self, each expression) {
+      valueFragment.append(columnType.init(queryOutput: column).queryFragment)
+    }
+    return [valueFragment]
+  }
+
+  public static func buildArray(_ components: [[[QueryFragment]]]) -> [[QueryFragment]] {
     components.flatMap(\.self)
   }
 
-  public static func buildBlock(_ components: [Value]) -> [Value] {
+  public static func buildBlock(_ components: [[QueryFragment]]) -> [[QueryFragment]] {
     components
   }
 
-  public static func buildEither(first component: [Value]) -> [Value] {
+  public static func buildEither(first component: [[QueryFragment]]) -> [[QueryFragment]] {
     component
   }
 
-  public static func buildEither(second component: [Value]) -> [Value] {
+  public static func buildEither(second component: [[QueryFragment]]) -> [[QueryFragment]] {
     component
   }
 
-  public static func buildExpression(_ expression: Value) -> [Value] {
-    [expression]
-  }
-
-  public static func buildExpression(_ expression: [Value]) -> [Value] {
-    expression
-  }
-
-  public static func buildLimitedAvailability(_ component: [Value]) -> [Value] {
+  public static func buildLimitedAvailability(_ component: [[QueryFragment]]) -> [[QueryFragment]] {
     component
   }
 
-  public static func buildOptional(_ component: [Value]?) -> [Value] {
+  public static func buildOptional(_ component: [[QueryFragment]]?) -> [[QueryFragment]] {
     component ?? []
   }
 
-  public static func buildPartialBlock(first: [Value]) -> [Value] {
+  public static func buildPartialBlock(first: [[QueryFragment]]) -> [[QueryFragment]] {
     first
   }
 
-  public static func buildPartialBlock(accumulated: [Value], next: [Value]) -> [Value] {
+  public static func buildPartialBlock(
+    accumulated: [[QueryFragment]],
+    next: [[QueryFragment]]
+  ) -> [[QueryFragment]] {
     accumulated + next
   }
 }

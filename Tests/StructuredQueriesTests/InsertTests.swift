@@ -13,6 +13,7 @@ extension SnapshotTests {
         } values: {
           (1, "Groceries", true, Date(timeIntervalSinceReferenceDate: 0), .high)
           (2, "Haircut", false, Date(timeIntervalSince1970: 0), .low)
+          (#sql("3"), #sql("'Schedule doctor appointment'"), #sql("0"), #sql("NULL"), #sql("2"))
         } onConflictDoUpdate: {
           $0.title += " Copy"
         }
@@ -22,7 +23,7 @@ extension SnapshotTests {
         INSERT INTO "reminders"
         ("remindersListID", "title", "isCompleted", "dueDate", "priority")
         VALUES
-        (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1)
+        (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1), (3, 'Schedule doctor appointment', 0, NULL, 2)
         ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy')
         RETURNING "id"
         """
@@ -31,6 +32,7 @@ extension SnapshotTests {
         ┌────┐
         │ 11 │
         │ 12 │
+        │ 13 │
         └────┘
         """
       }
@@ -247,7 +249,8 @@ extension SnapshotTests {
 
       assertQuery(
         Reminder.insert {
-          Reminder.Draft(remindersListID: 1, title: "Check voicemail")
+          Reminder(id: 12, remindersListID: 1, title: "Check voicemail")
+          Reminder.Draft(remindersListID: 1, title: "Check pager")
         }
         .returning(\.id)
       ) {
@@ -255,13 +258,14 @@ extension SnapshotTests {
         INSERT INTO "reminders"
         ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt")
         VALUES
-        (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail', '2040-02-14 23:31:30.000')
+        (12, NULL, NULL, 0, 0, '', NULL, 1, 'Check voicemail', '2040-02-14 23:31:30.000'), (NULL, NULL, NULL, 0, 0, '', NULL, 1, 'Check pager', '2040-02-14 23:31:30.000')
         RETURNING "id"
         """
       } results: {
         """
         ┌────┐
         │ 12 │
+        │ 13 │
         └────┘
         """
       }
@@ -285,8 +289,8 @@ extension SnapshotTests {
       } results: {
         """
         ┌────┐
-        │ 13 │
         │ 14 │
+        │ 15 │
         └────┘
         """
       }

@@ -67,7 +67,7 @@ public struct Seeds: Sequence {
   /// [SharingGRDB]: https://github.com/pointfreeco/sharing-grdb
   ///
   /// - Parameter build: A result builder closure that prepares statements to insert every built row.
-  public init(@InsertValuesBuilder<any Table> _ build: () -> [any Table]) {
+  public init(@SeedsBuilder _ build: () -> [any Table]) {
     self.seeds = build()
   }
 
@@ -101,5 +101,48 @@ public struct Seeds: Sequence {
         return insertBatch(firstType)
       }
     }
+  }
+}
+
+@resultBuilder
+public enum SeedsBuilder {
+  public static func buildArray(_ components: [[any Table]]) -> [any Table] {
+    components.flatMap(\.self)
+  }
+
+  public static func buildBlock(_ components: [any Table]) -> [any Table] {
+    components
+  }
+
+  public static func buildEither(first component: [any Table]) -> [any Table] {
+    component
+  }
+
+  public static func buildEither(second component: [any Table]) -> [any Table] {
+    component
+  }
+
+  public static func buildExpression(_ expression: some Table) -> [any Table] {
+    [expression]
+  }
+
+  public static func buildExpression(_ expression: [any Table]) -> [any Table] {
+    expression
+  }
+
+  public static func buildLimitedAvailability(_ component: [any Table]) -> [any Table] {
+    component
+  }
+
+  public static func buildOptional(_ component: [any Table]?) -> [any Table] {
+    component ?? []
+  }
+
+  public static func buildPartialBlock(first: [any Table]) -> [any Table] {
+    first
+  }
+
+  public static func buildPartialBlock(accumulated: [any Table], next: [any Table]) -> [any Table] {
+    accumulated + next
   }
 }
