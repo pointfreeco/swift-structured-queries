@@ -14,26 +14,24 @@ extension SnapshotTests {
         }
         """
       } expansion: {
-        #"""
+        """
         struct PlayerAndTeam {
           let player: Player
           let team: Team
 
-          public struct Columns: StructuredQueriesCore.QueryExpression {
+          public struct Columns: StructuredQueriesCore.SelectedColumns {
             public typealias QueryValue = PlayerAndTeam
-            public let queryFragment: StructuredQueriesCore.QueryFragment
+            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
             public init(
               player: some StructuredQueriesCore.QueryExpression<Player>,
               team: some StructuredQueriesCore.QueryExpression<Team>
             ) {
-              self.queryFragment = """
-              \(player.queryFragment) AS "player", \(team.queryFragment) AS "team"
-              """
+              self.selection = [("player", player.queryFragment), ("team", team.queryFragment)]
             }
           }
         }
 
-        extension PlayerAndTeam: StructuredQueriesCore.QueryRepresentable {
+        extension PlayerAndTeam: StructuredQueriesCore.Selection {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let player = try decoder.decode(Player.self)
             let team = try decoder.decode(Team.self)
@@ -47,7 +45,7 @@ extension SnapshotTests {
             self.team = team
           }
         }
-        """#
+        """
       }
     }
 
@@ -77,26 +75,24 @@ extension SnapshotTests {
         }
         """
       } expansion: {
-        #"""
+        """
         struct ReminderTitleAndListTitle {
           var reminderTitle: String 
           var listTitle: String?
 
-          public struct Columns: StructuredQueriesCore.QueryExpression {
+          public struct Columns: StructuredQueriesCore.SelectedColumns {
             public typealias QueryValue = ReminderTitleAndListTitle
-            public let queryFragment: StructuredQueriesCore.QueryFragment
+            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
             public init(
               reminderTitle: some StructuredQueriesCore.QueryExpression<String>,
               listTitle: some StructuredQueriesCore.QueryExpression<String?>
             ) {
-              self.queryFragment = """
-              \(reminderTitle.queryFragment) AS "reminderTitle", \(listTitle.queryFragment) AS "listTitle"
-              """
+              self.selection = [("reminderTitle", reminderTitle.queryFragment), ("listTitle", listTitle.queryFragment)]
             }
           }
         }
 
-        extension ReminderTitleAndListTitle: StructuredQueriesCore.QueryRepresentable {
+        extension ReminderTitleAndListTitle: StructuredQueriesCore.Selection {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderTitle = try decoder.decode(String.self)
             let listTitle = try decoder.decode(String.self)
@@ -107,7 +103,7 @@ extension SnapshotTests {
             self.listTitle = listTitle
           }
         }
-        """#
+        """
       }
     }
 
@@ -120,24 +116,22 @@ extension SnapshotTests {
         }
         """
       } expansion: {
-        #"""
+        """
         struct ReminderDate {
           var date: Date
 
-          public struct Columns: StructuredQueriesCore.QueryExpression {
+          public struct Columns: StructuredQueriesCore.SelectedColumns {
             public typealias QueryValue = ReminderDate
-            public let queryFragment: StructuredQueriesCore.QueryFragment
+            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
             public init(
               date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
             ) {
-              self.queryFragment = """
-              \(date.queryFragment) AS "date"
-              """
+              self.selection = [("date", date.queryFragment)]
             }
           }
         }
 
-        extension ReminderDate: StructuredQueriesCore.QueryRepresentable {
+        extension ReminderDate: StructuredQueriesCore.Selection {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let date = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let date else {
@@ -146,7 +140,7 @@ extension SnapshotTests {
             self.date = date
           }
         }
-        """#
+        """
       }
     }
   }

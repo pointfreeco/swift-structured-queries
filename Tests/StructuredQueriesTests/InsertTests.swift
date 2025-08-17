@@ -580,6 +580,26 @@ extension SnapshotTests {
       }
     }
 
+    @Test func selectedColumns() {
+      assertInlineSnapshot(
+        of: Item.insert {
+          Item.Columns(
+            title: #sql("'Foo'"),
+            quantity: #sql("42"),
+            notes: #sql("[]")
+          )
+        },
+        as: .sql
+      ) {
+        """
+        INSERT INTO "items"
+        ("title", "quantity", "notes")
+        VALUES
+        ('Foo', 42, [])
+        """
+      }
+    }
+
     @Test func onConflictWhereDoUpdateWhere() {
       assertQuery(
         Reminder.insert {
@@ -675,7 +695,7 @@ extension SnapshotTests {
   }
 }
 
-@Table private struct Item {
+@Table @Selection private struct Item {
   var title = ""
   var quantity = 0
   @Column(as: [String].JSONRepresentation.self)

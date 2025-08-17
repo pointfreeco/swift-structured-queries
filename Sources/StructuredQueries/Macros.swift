@@ -91,7 +91,7 @@ public macro Ephemeral() =
 /// or common table expression.
 @attached(
   extension,
-  conformances: QueryRepresentable,
+  conformances: Selection,
   names: named(Columns),
   named(init(decoder:))
 )
