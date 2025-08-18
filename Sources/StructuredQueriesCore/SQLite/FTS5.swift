@@ -1,27 +1,11 @@
+import IssueReporting
+
 /// A virtual table using the FTS5 extension.
 ///
 /// Apply this protocol to a `@Table` declaration to introduce FTS5 helpers.
 public protocol FTS5: Table {}
 
 extension TableDefinition where QueryValue: FTS5 {
-  @available(*, deprecated, message: "Virtual tables are not 'rowid' tables")
-  public var rowid: some QueryExpression<Int> {
-    SQLQueryExpression(
-      """
-      \(QueryValue.self)."rowid"
-      """
-    )
-  }
-
-  /// An expression representing the search result's rank.
-  public var rank: some QueryExpression<Double?> {
-    SQLQueryExpression(
-      """
-      \(QueryValue.self)."rank"
-      """
-    )
-  }
-
   /// A predicate expression from this table matched against another _via_ the `MATCH` operator.
   ///
   /// ```swift
@@ -35,6 +19,24 @@ extension TableDefinition where QueryValue: FTS5 {
     SQLQueryExpression(
       """
       (\(QueryValue.self) MATCH \(bind: "\(pattern)"))
+      """
+    )
+  }
+
+  /// An expression representing the search result's rank.
+  public var rank: some QueryExpression<Double?> {
+    SQLQueryExpression(
+      """
+      \(QueryValue.self)."rank"
+      """
+    )
+  }
+
+  @available(*, deprecated, message: "Virtual tables are not 'rowid' tables")
+  public var rowid: some QueryExpression<Int> {
+    SQLQueryExpression(
+      """
+      \(QueryValue.self)."rowid"
       """
     )
   }
@@ -55,10 +57,7 @@ extension TableColumnExpression where Root: FTS5 {
       """
       highlight(\
       \(Root.self), \
-      (\
-      SELECT "cid" FROM pragma_table_info(\(quote: Root.tableName, delimiter: .text)) \
-      WHERE "name" = \(quote: name, delimiter: .text)\
-      ),
+      (\(cid)),
       \(quote: "\(open)", delimiter: .text), \
       \(quote: "\(close)", delimiter: .text)\
       )
@@ -98,15 +97,23 @@ extension TableColumnExpression where Root: FTS5 {
       """
       snippet(\
       \(Root.self), \
-      (\
-      SELECT "cid" FROM pragma_table_info(\(quote: Root.tableName, delimiter: .text)) \
-      WHERE "name" = \(quote: name, delimiter: .text)\
-      ),
+      (\(cid)),
       \(quote: "\(open)", delimiter: .text), \
       \(quote: "\(close)", delimiter: .text), \
       \(quote: "\(ellipsis)", delimiter: .text), \
       \(raw: tokens)\
       )
+      """
+    )
+  }
+}
+
+extension TableColumnExpression {
+  fileprivate var cid: some Statement<Int> {
+    SQLQueryExpression(
+      """
+      SELECT "cid" FROM pragma_table_info(\(quote: Root.tableName, delimiter: .text)) \
+      WHERE "name" = \(quote: name, delimiter: .text)
       """
     )
   }
