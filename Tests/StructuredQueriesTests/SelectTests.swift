@@ -1410,16 +1410,20 @@ extension SnapshotTests {
       _ = base.leftJoin(RemindersList.all) { _, _, _ in true }
       _ = base.rightJoin(RemindersList.all) { _, _, _ in true }
       _ = base.fullJoin(RemindersList.all) { _, _, _ in true }
-      _ = base
+      _ =
+        base
         .join(RemindersList.all) { _, _, _ in true }
         .join(RemindersList.all) { _, _, _, _ in true }
-      _ = base
+      _ =
+        base
         .leftJoin(RemindersList.all) { _, _, _ in true }
         .leftJoin(RemindersList.all) { _, _, _, _ in true }
-      _ = base
+      _ =
+        base
         .rightJoin(RemindersList.all) { _, _, _ in true }
         .rightJoin(RemindersList.all) { _, _, _, _ in true }
-      _ = base
+      _ =
+        base
         .fullJoin(RemindersList.all) { _, _, _ in true }
         .fullJoin(RemindersList.all) { _, _, _, _ in true }
       _ = base.where { r, _ in r.isCompleted }
