@@ -1064,7 +1064,7 @@ extension Select {
       operator: .right,
       table: F.self,
       constraint: constraint(
-        (From.columns, Joins.columns, F.columns,)
+        (From.columns, Joins.columns, F.columns)
       )
     )
     return Select<(), From._Optionalized, (Joins._Optionalized, F)>(
