@@ -719,7 +719,25 @@ extension Select {
       (From.TableColumns, Joins.TableColumns, F.TableColumns)
     ) -> some QueryExpression<Bool>
   ) -> Select<(), From, (Joins, F)> where Joins: Table {
-    fatalError()
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: .inner,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, Joins.columns, F.columns)
+      )
+    )
+    return Select<(), From, (Joins, F)>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
   }
 
   /// Creates a new select statement from this one by left-joining another table.
