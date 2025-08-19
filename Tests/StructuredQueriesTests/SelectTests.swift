@@ -1406,6 +1406,22 @@ extension SnapshotTests {
     @Test func singleJoinChaining() {
       let base = Reminder.group(by: \.id).join(ReminderTag.all) { $0.id.eq($1.reminderID) }
       _ = base.select { r, _ in r.isCompleted }
+      _ = base.join(RemindersList.all) { _, _, _ in true }
+      _ = base.leftJoin(RemindersList.all) { _, _, _ in true }
+      _ = base.rightJoin(RemindersList.all) { _, _, _ in true }
+      _ = base.fullJoin(RemindersList.all) { _, _, _ in true }
+      _ = base
+        .join(RemindersList.all) { _, _, _ in true }
+        .join(RemindersList.all) { _, _, _, _ in true }
+      _ = base
+        .leftJoin(RemindersList.all) { _, _, _ in true }
+        .leftJoin(RemindersList.all) { _, _, _, _ in true }
+      _ = base
+        .rightJoin(RemindersList.all) { _, _, _ in true }
+        .rightJoin(RemindersList.all) { _, _, _, _ in true }
+      _ = base
+        .fullJoin(RemindersList.all) { _, _, _ in true }
+        .fullJoin(RemindersList.all) { _, _, _, _ in true }
       _ = base.where { r, _ in r.isCompleted }
       _ = base.group { r, _ in r.isCompleted }
       _ = base.having { r, _ in r.isCompleted }

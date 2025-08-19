@@ -710,6 +710,36 @@ extension Select {
     )
   }
 
+  @_disfavoredOverload
+  @_documentation(visibility: private)
+  public func join<F: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatementOf<F>,
+    on constraint: (
+      (From.TableColumns, Joins.TableColumns, F.TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<(), From, (Joins, F)> where Joins: Table {
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: .inner,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, Joins.columns, F.columns)
+      )
+    )
+    return Select<(), From, (Joins, F)>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
   /// Creates a new select statement from this one by left-joining another table.
   ///
   /// - Parameters:
@@ -837,6 +867,37 @@ extension Select {
       )
     )
     return Select<QueryValue, From, (F._Optionalized, repeat (each J)._Optionalized)>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  @_disfavoredOverload
+  @_documentation(visibility: private)
+  public func leftJoin<F: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatementOf<F>,
+    on constraint: (
+      (From.TableColumns, Joins.TableColumns, F.TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<(), From, (Joins, F._Optionalized)>
+  where Joins: Table {
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: .left,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, Joins.columns, F.columns)
+      )
+    )
+    return Select<(), From, (Joins, F._Optionalized)>(
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
@@ -988,6 +1049,37 @@ extension Select {
     )
   }
 
+  @_disfavoredOverload
+  @_documentation(visibility: private)
+  public func rightJoin<F: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatementOf<F>,
+    on constraint: (
+      (From.TableColumns, Joins.TableColumns, F.TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<(), From._Optionalized, (Joins._Optionalized, F)>
+  where Joins: Table {
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: .right,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, Joins.columns, F.columns,)
+      )
+    )
+    return Select<(), From._Optionalized, (Joins._Optionalized, F)>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
   /// Creates a new select statement from this one by full-joining another table.
   ///
   /// - Parameters:
@@ -1115,6 +1207,37 @@ extension Select {
       )
     )
     return Select<QueryValue, From._Optionalized, (F._Optionalized, repeat (each J)._Optionalized)>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  @_disfavoredOverload
+  @_documentation(visibility: private)
+  public func fullJoin<F: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatementOf<F>,
+    on constraint: (
+      (From.TableColumns, Joins.TableColumns, F.TableColumns)
+    ) -> some QueryExpression<Bool>
+  ) -> Select<(), From._Optionalized, (Joins._Optionalized, F._Optionalized)>
+  where Joins: Table {
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: .full,
+      table: F.self,
+      constraint: constraint(
+        (From.columns, Joins.columns, F.columns)
+      )
+    )
+    return Select<(), From._Optionalized, (Joins._Optionalized, F._Optionalized)>(
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
