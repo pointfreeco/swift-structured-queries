@@ -60,7 +60,7 @@ extension SnapshotTests {
         """
         SELECT "reminderTexts"."reminderID", "reminderTexts"."title", "reminderTexts"."notes", "reminderTexts"."listID", "reminderTexts"."listTitle", "reminderTexts"."tags"
         FROM "reminderTexts"
-        WHERE ("reminderTexts" MATCH 'title:take')
+        WHERE ("reminderTexts" MATCH 'title:"take"')
         """
       } results: {
         """
