@@ -155,7 +155,7 @@ extension SelectionMacro: ExtensionMacro {
     }
 
     var conformances: [TypeSyntax] = []
-    let protocolNames: [TokenSyntax] = ["QueryRepresentable"]
+    let protocolNames: [TokenSyntax] = ["_Selection"]
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes.contains(where: {
@@ -300,8 +300,8 @@ extension SelectionMacro: MemberMacro {
     }
 
     var conformances: [TypeSyntax] = []
-    let protocolNames: [TokenSyntax] = ["QueryRepresentable"]
-    let schemaConformances: [ExprSyntax] = ["\(moduleName).QueryExpression"]
+    let protocolNames: [TokenSyntax] = ["_Selection"]
+    let schemaConformances: [ExprSyntax] = ["\(moduleName)._SelectedColumns"]
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes.contains(where: {
@@ -324,19 +324,17 @@ extension SelectionMacro: MemberMacro {
       .joined(separator: ",\n")
     let initAssignment: [String] =
       allColumns
-      .map { #"\(\#($0.name).queryFragment) AS \#($0.name.text.quoted())"# }
+      .map { #"(\#($0.name.text.quoted()), \#($0.name).queryFragment)"# }
 
     return [
       """
       public struct Columns: \(schemaConformances, separator: ", ") {
       public typealias QueryValue = \(type.trimmed)
-      public let queryFragment: \(moduleName).QueryFragment
+      public let selection: [(aliasName: String, expression: \(moduleName).QueryFragment)]
       public init(
       \(raw: initArguments)
       ) {
-      self.queryFragment = \"\"\"
-      \(raw: initAssignment.joined(separator: ", "))
-      \"\"\"
+      self.selection = [\(raw: initAssignment.joined(separator: ", "))]
       }
       }
       """

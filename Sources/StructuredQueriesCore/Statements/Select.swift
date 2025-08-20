@@ -643,6 +643,7 @@ extension Select {
   /// - Returns: A new select statement that joins the given table and combines their clauses
   ///   together.
   @_documentation(visibility: private)
+  @_disfavoredOverload
   public func join<
     each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
   >(
@@ -681,6 +682,7 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that joins the given table and combines their clauses
   ///   together.
+  @_disfavoredOverload
   @_documentation(visibility: private)
   public func join<F: Table, each J: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
@@ -801,6 +803,7 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that left-joins the given table and combines their clauses
   ///   together.
+  @_disfavoredOverload
   @_documentation(visibility: private)
   public func leftJoin<
     each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
@@ -849,6 +852,7 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that left-joins the given table and combines their clauses
   ///   together.
+  @_disfavoredOverload
   @_documentation(visibility: private)
   public func leftJoin<F: Table, each J: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
@@ -971,6 +975,7 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that right-joins the given table and combines their clauses
   ///   together.
+  @_disfavoredOverload
   @_documentation(visibility: private)
   public func rightJoin<
     each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
@@ -1019,6 +1024,7 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that right-joins the given table and combines their clauses
   ///   together.
+  @_disfavoredOverload
   @_documentation(visibility: private)
   public func rightJoin<F: Table, each J: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
@@ -1141,6 +1147,7 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that full-joins the given table and combines their clauses
   ///   together.
+  @_disfavoredOverload
   @_documentation(visibility: private)
   public func fullJoin<
     each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
@@ -1189,6 +1196,7 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that full-joins the given table and combines their clauses
   ///   together.
+  @_disfavoredOverload
   @_documentation(visibility: private)
   public func fullJoin<F: Table, each J: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.

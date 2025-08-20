@@ -65,7 +65,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [Self],
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflict updates: ((inout Updates<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, columns, values: values, onConflictDoUpdate: updates)
@@ -75,8 +75,8 @@ extension Table {
   public static func insert<V1, each V2>(
     or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
-    @InsertValuesBuilder<(V1.QueryOutput, repeat (each V2).QueryOutput)>
-    values: () -> [(V1.QueryOutput, repeat (each V2).QueryOutput)],
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
     onConflict updates: ((inout Updates<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, columns, values: values, onConflictDoUpdate: updates)

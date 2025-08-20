@@ -35,16 +35,14 @@ extension SnapshotTests {
             }
           }
 
-          public struct Columns: StructuredQueriesCore.QueryExpression {
+          public struct Columns: StructuredQueriesCore._SelectedColumns {
             public typealias QueryValue = ReminderListWithCount
-            public let queryFragment: StructuredQueriesCore.QueryFragment
+            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
             public init(
               reminderList: some StructuredQueriesCore.QueryExpression<ReminderList>,
               remindersCount: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.queryFragment = """
-              \(reminderList.queryFragment) AS "reminderList", \(remindersCount.queryFragment) AS "remindersCount"
-              """
+              self.selection = [("reminderList", reminderList.queryFragment), ("remindersCount", remindersCount.queryFragment)]
             }
           }
         }
@@ -60,7 +58,7 @@ extension SnapshotTests {
           }
         }
 
-        extension ReminderListWithCount: StructuredQueriesCore.QueryRepresentable {
+        extension ReminderListWithCount: StructuredQueriesCore._Selection {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderList = try decoder.decode(ReminderList.self)
             let remindersCount = try decoder.decode(Int.self)
