@@ -44,6 +44,8 @@ import StructuredQueriesCore
 ///   - snapshotTrailingClosureOffset: The trailing closure offset of the `sql` snapshot. Defaults
 ///     to `1` for invoking this helper directly, but if you write a wrapper function that automates
 ///     the `execute` trailing closure, you should pass `0` instead.
+///   - assertSql: Whether to snapshot the SQL fragment. Defaults to true, but you may prefer false
+///     if you write a wrapper function for other purposes.
 ///   - fileID: The source `#fileID` associated with the assertion.
 ///   - filePath: The source `#filePath` associated with the assertion.
 ///   - function: The source `#function` associated with the assertion
@@ -56,27 +58,30 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
   sql: (() -> String)? = nil,
   results: (() -> String)? = nil,
   snapshotTrailingClosureOffset: Int = 1,
+  assertSql: Bool = true,
   fileID: StaticString = #fileID,
   filePath: StaticString = #filePath,
   function: StaticString = #function,
   line: UInt = #line,
   column: UInt = #column
 ) {
-  assertInlineSnapshot(
-    of: query,
-    as: .sql,
-    message: "Query did not match",
-    syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
-      trailingClosureLabel: "sql",
-      trailingClosureOffset: snapshotTrailingClosureOffset
-    ),
-    matches: sql,
-    fileID: fileID,
-    file: filePath,
-    function: function,
-    line: line,
-    column: column
-  )
+  if assertSql {
+    assertInlineSnapshot(
+      of: query,
+      as: .sql,
+      message: "Query did not match",
+      syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+        trailingClosureLabel: "sql",
+        trailingClosureOffset: snapshotTrailingClosureOffset
+      ),
+      matches: sql,
+      fileID: fileID,
+      file: filePath,
+      function: function,
+      line: line,
+      column: column
+    )
+  }
   do {
     let rows = try execute(query)
     var table = ""
@@ -88,7 +93,7 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
         message: "Results did not match",
         syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
           trailingClosureLabel: "results",
-          trailingClosureOffset: snapshotTrailingClosureOffset + 1
+          trailingClosureOffset: assertSql ? snapshotTrailingClosureOffset + 1 : snapshotTrailingClosureOffset
         ),
         matches: results,
         fileID: fileID,
@@ -104,7 +109,7 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
         message: "Results expected to be empty",
         syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
           trailingClosureLabel: "results",
-          trailingClosureOffset: snapshotTrailingClosureOffset + 1
+          trailingClosureOffset: assertSql ? snapshotTrailingClosureOffset + 1 : snapshotTrailingClosureOffset
         ),
         matches: results,
         fileID: fileID,
@@ -121,7 +126,7 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
       message: "Results did not match",
       syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
         trailingClosureLabel: "results",
-        trailingClosureOffset: snapshotTrailingClosureOffset + 1
+        trailingClosureOffset: assertSql ? snapshotTrailingClosureOffset + 1 : snapshotTrailingClosureOffset
       ),
       matches: results,
       fileID: fileID,
@@ -199,6 +204,140 @@ public func assertQuery<S: SelectStatement, each J: Table>(
     sql: sql,
     results: results,
     snapshotTrailingClosureOffset: snapshotTrailingClosureOffset,
+    fileID: fileID,
+    filePath: filePath,
+    function: function,
+    line: line,
+    column: column
+  )
+}
+
+/// A snapshot testing helper for database content.
+///
+/// This helper can be used to generate snapshots of results of the query decoded back into Swift.
+///
+/// ```swift
+/// assertSelect(
+///   Reminder.select(\.title).order(by: \.title)
+/// ) {
+///   try db.execute($0)
+/// } results: {
+///   """
+///   ┌────────────────────────────┐
+///   │ "Buy concert tickets"      │
+///   │ "Call accountant"          │
+///   │ "Doctor appointment"       │
+///   │ "Get laundry"              │
+///   │ "Groceries"                │
+///   │ "Haircut"                  │
+///   │ "Pick up kids from school" │
+///   │ "Send weekly emails"       │
+///   │ "Take a walk"              │
+///   │ "Take out trash"           │
+///   └────────────────────────────┘
+///   """
+/// }
+/// ```
+///
+/// - Parameters:
+///   - query: A statement.
+///   - execute: A closure responsible for executing the query and returning the results.
+///   - results: A snapshot of the results.
+///   - snapshotTrailingClosureOffset: The trailing closure offset of the `sql` snapshot. Defaults
+///     to `1` for invoking this helper directly, but if you write a wrapper function that automates
+///     the `execute` trailing closure, you should pass `0` instead.
+///   - fileID: The source `#fileID` associated with the assertion.
+///   - filePath: The source `#filePath` associated with the assertion.
+///   - function: The source `#function` associated with the assertion
+///   - line: The source `#line` associated with the assertion.
+///   - column: The source `#column` associated with the assertion.
+@_disfavoredOverload
+public func assertSelect<each V: QueryRepresentable, S: Statement<(repeat each V)>>(
+  _ query: S,
+  execute: (S) throws -> [(repeat (each V).QueryOutput)],
+  results: (() -> String)? = nil,
+  snapshotTrailingClosureOffset: Int = 1,
+  assertSql: Bool = true,
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  function: StaticString = #function,
+  line: UInt = #line,
+  column: UInt = #column
+) {
+  assertQuery(
+    query,
+    execute: execute,
+    sql: nil,
+    results: results,
+    snapshotTrailingClosureOffset: snapshotTrailingClosureOffset,
+    assertSql: false,
+    fileID: fileID,
+    filePath: filePath,
+    function: function,
+    line: line,
+    column: column
+  )
+}
+
+/// A snapshot testing helper for database content.
+///
+/// This helper can be used to generate snapshots of results of the query decoded back into Swift.
+///
+/// ```swift
+/// assertSelect(
+///   Reminder.select(\.title).order(by: \.title)
+/// ) {
+///   try db.execute($0)
+/// } results: {
+///   """
+///   ┌────────────────────────────┐
+///   │ "Buy concert tickets"      │
+///   │ "Call accountant"          │
+///   │ "Doctor appointment"       │
+///   │ "Get laundry"              │
+///   │ "Groceries"                │
+///   │ "Haircut"                  │
+///   │ "Pick up kids from school" │
+///   │ "Send weekly emails"       │
+///   │ "Take a walk"              │
+///   │ "Take out trash"           │
+///   └────────────────────────────┘
+///   """
+/// }
+/// ```
+///
+/// - Parameters:
+///   - query: A statement.
+///   - execute: A closure responsible for executing the query and returning the results.
+///   - results: A snapshot of the results.
+///   - snapshotTrailingClosureOffset: The trailing closure offset of the `sql` snapshot. Defaults
+///     to `1` for invoking this helper directly, but if you write a wrapper function that automates
+///     the `execute` trailing closure, you should pass `0` instead.
+///   - fileID: The source `#fileID` associated with the assertion.
+///   - filePath: The source `#filePath` associated with the assertion.
+///   - function: The source `#function` associated with the assertion
+///   - line: The source `#line` associated with the assertion.
+///   - column: The source `#column` associated with the assertion.
+public func assertSelect<S: SelectStatement, each J: Table>(
+  _ query: S,
+  execute: (Select<(S.From, repeat each J), S.From, (repeat each J)>) throws -> [(
+    S.From.QueryOutput, repeat (each J).QueryOutput
+  )],
+  results: (() -> String)? = nil,
+  snapshotTrailingClosureOffset: Int = 1,
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  function: StaticString = #function,
+  line: UInt = #line,
+  column: UInt = #column
+) where S.QueryValue == (), S.Joins == (repeat each J) {
+  assertQuery(
+    query.selectStar(),
+    execute: execute,
+    sql: nil,
+    results: results,
+    snapshotTrailingClosureOffset: snapshotTrailingClosureOffset,
+    assertSql: false,
     fileID: fileID,
     filePath: filePath,
     function: function,
