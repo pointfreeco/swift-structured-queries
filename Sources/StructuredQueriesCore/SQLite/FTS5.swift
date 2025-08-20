@@ -66,7 +66,7 @@ extension TableColumnExpression where Root: FTS5 {
   /// - Parameter pattern: A string expression describing the `MATCH` pattern.
   /// - Returns: A predicate expression.
   public func match(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
-    Root.columns.match("\(name):\(pattern)")
+    Root.columns.match("\(name):\(pattern.quoted(.text))")
   }
 
   /// A string expression highlighting matches in text fragments of this column using the given
