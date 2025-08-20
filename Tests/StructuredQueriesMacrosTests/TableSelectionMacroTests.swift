@@ -35,7 +35,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Columns: StructuredQueriesCore.SelectedColumns {
+          public struct Columns: StructuredQueriesCore._SelectedColumns {
             public typealias QueryValue = ReminderListWithCount
             public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
             public init(
@@ -58,7 +58,7 @@ extension SnapshotTests {
           }
         }
 
-        extension ReminderListWithCount: StructuredQueriesCore.Selection {
+        extension ReminderListWithCount: StructuredQueriesCore._Selection {
           public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderList = try decoder.decode(ReminderList.self)
             let remindersCount = try decoder.decode(Int.self)

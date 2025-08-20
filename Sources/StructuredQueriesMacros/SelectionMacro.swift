@@ -155,7 +155,7 @@ extension SelectionMacro: ExtensionMacro {
     }
 
     var conformances: [TypeSyntax] = []
-    let protocolNames: [TokenSyntax] = ["Selection"]
+    let protocolNames: [TokenSyntax] = ["_Selection"]
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes.contains(where: {
@@ -300,8 +300,8 @@ extension SelectionMacro: MemberMacro {
     }
 
     var conformances: [TypeSyntax] = []
-    let protocolNames: [TokenSyntax] = ["Selection"]
-    let schemaConformances: [ExprSyntax] = ["\(moduleName).SelectedColumns"]
+    let protocolNames: [TokenSyntax] = ["_Selection"]
+    let schemaConformances: [ExprSyntax] = ["\(moduleName)._SelectedColumns"]
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes.contains(where: {
