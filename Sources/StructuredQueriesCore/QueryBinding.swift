@@ -5,6 +5,9 @@ public enum QueryBinding: Hashable, Sendable {
   /// A value that should be bound to a statement as bytes.
   case blob([UInt8])
 
+  /// A value that should be bound to a statement as a boolean.
+  case bool(Bool)
+
   /// A value that should be bound to a statement as a double.
   case double(Double)
 
@@ -65,6 +68,8 @@ extension QueryBinding: CustomDebugStringConvertible {
       return uuid.uuidString.lowercased().quoted(.text)
     case .invalid(let error):
       return "<invalid: \(error.underlyingError.localizedDescription)>"
+    case .bool(let bool):
+      return bool ? "1" : "0"
     }
   }
 }
