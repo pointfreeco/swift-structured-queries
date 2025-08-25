@@ -127,7 +127,9 @@ extension Table {
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
-  ///   - date: A key path to a datetime column.
+  ///   - dateColumn: A key path to a datetime column.
+  ///   - dateFunction: A database function that returns the current date. Include parentheses in
+  ///     string, i.e. `"customDate()"`.
   ///   - expression: The expression used to generate the datetime.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
@@ -136,8 +138,8 @@ extension Table {
   public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
     _ name: String? = nil,
     ifNotExists: Bool = false,
-    afterUpdateTouch date: KeyPath<TableColumns, TableColumn<Self, D>>,
-    expression: String = "datetime('subsec')",
+    afterUpdateTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
+    date dateFunction: StaticString = "datetime('subsec')",
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -146,7 +148,7 @@ extension Table {
       name,
       ifNotExists: ifNotExists,
       afterUpdateTouch: {
-        $0[dynamicMember: date] = SQLQueryExpression("\(raw: expression)")
+        $0[dynamicMember: dateColumn] = SQLQueryExpression("\(raw: dateFunction.description)")
       },
       fileID: fileID,
       line: line,
@@ -207,7 +209,9 @@ extension Table {
   ///   - name: The trigger's name. By default a unique name is generated depending using the table,
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
-  ///   - date: A key path to a datetime column.
+  ///   - dateColumn: A key path to a datetime column.
+  ///   - dateFunction: A database function that returns the current date. Include parentheses in
+  ///     string, i.e. `"customDate()"`.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
@@ -215,7 +219,8 @@ extension Table {
   public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
     _ name: String? = nil,
     ifNotExists: Bool = false,
-    afterInsertTouch date: KeyPath<TableColumns, TableColumn<Self, D>>,
+    afterInsertTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
+    date dateFunction: StaticString = "datetime('subsec')",
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -224,7 +229,7 @@ extension Table {
       name,
       ifNotExists: ifNotExists,
       afterInsertTouch: {
-        $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
+        $0[dynamicMember: dateColumn] = SQLQueryExpression("\(raw: dateFunction.description)")
       },
       fileID: fileID,
       line: line,
