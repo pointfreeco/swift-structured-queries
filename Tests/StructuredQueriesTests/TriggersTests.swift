@@ -115,6 +115,23 @@ extension SnapshotTests {
       }
     }
 
+    @Test func afterUpdateTouchCustomDate() {
+      assertQuery(
+        Reminder.createTemporaryTrigger(afterUpdateTouch: \.updatedAt, expression: "customDate()")
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:120:40"
+        AFTER UPDATE ON "reminders"
+        FOR EACH ROW BEGIN
+          UPDATE "reminders"
+          SET "updatedAt" = customDate()
+          WHERE ("reminders"."rowid" = "new"."rowid");
+        END
+        """
+      }
+    }
+
     @Test func multiStatement() {
       let trigger = RemindersList.createTemporaryTrigger(
         after: .insert { new in
@@ -133,7 +150,7 @@ extension SnapshotTests {
       assertQuery(trigger) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:119:57"
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:136:57"
         AFTER INSERT ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"

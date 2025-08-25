@@ -128,6 +128,7 @@ extension Table {
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
   ///   - date: A key path to a datetime column.
+  ///   - expression: The expression used to generate the datetime.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
@@ -136,6 +137,7 @@ extension Table {
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterUpdateTouch date: KeyPath<TableColumns, TableColumn<Self, D>>,
+    expression: String = "datetime('subsec')",
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -144,7 +146,7 @@ extension Table {
       name,
       ifNotExists: ifNotExists,
       afterUpdateTouch: {
-        $0[dynamicMember: date] = SQLQueryExpression("datetime('subsec')")
+        $0[dynamicMember: date] = SQLQueryExpression("\(raw: expression)")
       },
       fileID: fileID,
       line: line,
