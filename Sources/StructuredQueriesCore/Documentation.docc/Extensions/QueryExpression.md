@@ -27,8 +27,8 @@
 ### JSON functions
 
 - ``jsonArrayLength()``
-- ``jsonGroupArray(order:filter:)``
-- ``jsonObject()``
+- ``jsonGroupArray(distinct:order:filter:)``
+- ``TableDefinition/jsonObject()``
 - ``jsonPatch(_:)``
 
 ### Optionality

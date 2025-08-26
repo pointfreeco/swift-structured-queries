@@ -411,8 +411,7 @@ Or you can conditionally upsert from given indexed columns using `onConflict:doU
   }
 }
 
-Upsert clauses have an additional, special ``Updates/excluded`` qualifier for referring to a row
-that failed to insert.
+Upsert clauses have an additional, special argument for referring to a row that failed to insert.
 
 ```swift
 @Row {
@@ -425,8 +424,8 @@ that failed to insert.
     } onConflict: {
       $0.title
     } doUpdate: {
-      $0.isCompleted = $0.excluded.isCompleted
-      $0.priority = $0.excluded.priority
+      $0.isCompleted = $1.isCompleted
+      $0.priority = $1.priority
     }
     ```
   }
@@ -460,7 +459,6 @@ that failed to insert.
 
 ### Inserting drafts
 
-- ``PrimaryKeyedTable/insert(or:_:values:onConflictDoUpdate:where:)``
 - ``PrimaryKeyedTable/upsert(or:values:)``
 
 ### Inserting from a select

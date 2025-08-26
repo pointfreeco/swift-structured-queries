@@ -133,7 +133,7 @@ extension Reminder.TableColumns {
 ```
 
 Then you can use these helpers when building a query. For example, you can use
-``PrimaryKeyedTableDefinition/count(filter:)`` to count the number of past due, current and
+``PrimaryKeyedTableDefinition/count(distinct:filter:)`` to count the number of past due, current and
 scheduled reminders in one single query like so:
 
 @Row {
@@ -409,8 +409,8 @@ struct Row {
 
 This allows the query to serialize the associated rows into JSON, which are then deserialized into
 a `Row` type. To construct such a query you can use the
-``PrimaryKeyedTableDefinition/jsonGroupArray(order:filter:)`` property that is defined on the
-columns of [primary keyed tables](<doc:PrimaryKeyedTables>):
+``PrimaryKeyedTableDefinition/jsonGroupArray(distinct:order:filter:)`` property that is defined on
+the columns of [primary keyed tables](<doc:PrimaryKeyedTables>):
 
 ```swift
 RemindersList
@@ -471,8 +471,8 @@ RemindersList
   .select {
     Row.Columns(
       remindersList: $0,
-      milestones: $1.jsonGroupArray(isDistinct: true),
-      reminders: $2.jsonGroupArray(isDistinct: true)
+      milestones: $1.jsonGroupArray(distinct: true),
+      reminders: $2.jsonGroupArray(distinct: true)
     )
   }
 ```
