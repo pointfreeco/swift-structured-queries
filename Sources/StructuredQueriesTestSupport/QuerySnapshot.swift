@@ -15,7 +15,7 @@ extension Snapshotting where Value: Statement {
   ///   """
   /// }
   /// ```
-    public static var sql: Snapshotting<Value, String> {
+  public static var sql: Snapshotting<Value, String> {
     SimplySnapshotting.lines.pullback(\.query.debugDescription)
   }
 }
