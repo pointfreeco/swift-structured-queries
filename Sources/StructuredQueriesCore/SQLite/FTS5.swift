@@ -13,7 +13,7 @@ extension TableDefinition where QueryValue: FTS5 {
   public func bm25(
     _ rankings: [PartialKeyPath<Self>: Double]
   ) -> some QueryExpression<Double> {
-    guard !rankings.isEmpty else { return SQLQueryExpression("1") }
+    guard !rankings.isEmpty else { return SQLQueryExpression("0") }
     var queryFragments: [QueryFragment] = ["\(QueryValue.self)"]
     var columnNameToRanking: QueryFragment = """
       CASE "name"
