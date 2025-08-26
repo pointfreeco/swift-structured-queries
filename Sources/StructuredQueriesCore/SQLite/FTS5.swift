@@ -104,7 +104,7 @@ extension TableColumnExpression where Root: FTS5 {
   ///
   /// ```swift
   /// ReminderText.where { $0.title.match("get") }
-  /// // SELECT … FROM "reminderTexts" WHERE ("reminderTexts"."title" MATCH 'get')
+  /// // SELECT … FROM "reminderTexts" WHERE ("reminderTexts" MATCH 'title:"get"')
   /// ```
   ///
   /// - Parameter pattern: A string expression describing the `MATCH` pattern.
