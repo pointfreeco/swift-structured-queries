@@ -6,7 +6,7 @@ public enum QuoteDelimiter: String {
 }
 
 extension StringProtocol {
-  public func quoted(_ delimiter: QuoteDelimiter = .identifier) -> String {
+  package func quoted(_ delimiter: QuoteDelimiter = .identifier) -> String {
     let delimiter = delimiter.rawValue
     return delimiter + replacingOccurrences(of: delimiter, with: delimiter + delimiter) + delimiter
   }
