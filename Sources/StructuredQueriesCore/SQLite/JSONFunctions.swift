@@ -42,7 +42,7 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this expression.
   public func jsonGroupArray(
-    isDistinct: Bool = false,
+    distinct isDistinct: Bool = false,
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
@@ -108,7 +108,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
   public func jsonGroupArray(
-    isDistinct: Bool = false,
+    distinct isDistinct: Bool = false,
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
@@ -174,7 +174,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Coda
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
   public func jsonGroupArray<Wrapped: Codable>(
-    isDistinct: Bool = false,
+    distinct isDistinct: Bool = false,
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[Wrapped].JSONRepresentation>

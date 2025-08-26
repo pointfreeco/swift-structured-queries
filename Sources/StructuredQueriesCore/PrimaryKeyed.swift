@@ -67,7 +67,10 @@ extension TableDefinition where QueryValue: TableDraft {
 extension PrimaryKeyedTableDefinition {
   /// A query expression representing the number of rows in this table.
   ///
-  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
+  /// - Parameters:
+  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
+  ///     the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: An expression representing the number of rows in this table.
   public func count(
     distinct isDistinct: Bool = false,
