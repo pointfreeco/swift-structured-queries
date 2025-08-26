@@ -116,7 +116,6 @@ Explore the full list of operators below.
 - ``QueryExpression/+(_:_:)``
 - ``QueryExpression/like(_:escape:)``
 - ``QueryExpression/glob(_:)``
-- ``QueryExpression/match(_:)``
 - ``QueryExpression/hasPrefix(_:)``
 - ``QueryExpression/hasSuffix(_:)``
 - ``QueryExpression/contains(_:)``
@@ -128,7 +127,7 @@ Explore the full list of operators below.
 
 - ``QueryExpression/in(_:)``
 - ``Statement/contains(_:)``
-- ``Statement/exists()``
+- ``PartialSelectStatement/exists()``
 - ``Swift/Array``
 - ``Swift/ClosedRange``
 

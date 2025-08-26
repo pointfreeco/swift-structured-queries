@@ -138,4 +138,5 @@ reading to learn more about building SQL with StructuredQueries.
 
 ### Advanced
 
+- <doc:FullTextSearch>
 - <doc:Integration>
