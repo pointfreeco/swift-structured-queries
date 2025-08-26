@@ -11,40 +11,41 @@ extension TableDefinition where QueryValue: FTS5 {
   /// - Parameter rankings: A dictionary mapping columns to accuracy of a match.
   /// - Returns: A BM25 ranking function.
   public func bm25(
-    _ rankings: [PartialKeyPath<Self>: Double]
+    _ rankings: [PartialKeyPath<Self>: Double] = [:]
   ) -> some QueryExpression<Double> {
-    guard !rankings.isEmpty else { return SQLQueryExpression("0") }
     var queryFragments: [QueryFragment] = ["\(QueryValue.self)"]
-    var columnNameToRanking: QueryFragment = """
-      CASE "name"
-      """
-    for (keyPath, ranking) in rankings {
-      guard let column = self[keyPath: keyPath] as? any WritableTableColumnExpression
-      else {
-        reportIssue(
-          """
-          Key path cannot be used in 'bm25' function: \(keyPath)
+    if !rankings.isEmpty {
+      var columnNameToRanking: QueryFragment = """
+        CASE "name"
+        """
+      for (keyPath, ranking) in rankings {
+        guard let column = self[keyPath: keyPath] as? any WritableTableColumnExpression
+        else {
+          reportIssue(
+            """
+            Key path cannot be used in 'bm25' function: \(keyPath)
 
-          Must be a key path to a table column on '\(QueryValue.self)'.
+            Must be a key path to a table column on '\(QueryValue.self)'.
+            """
+          )
+          continue
+        }
+        columnNameToRanking.append(
+          """
+           WHEN \(bind: column.name) THEN \(ranking)
           """
         )
-        continue
       }
-      columnNameToRanking.append(
-        """
-         WHEN \(bind: column.name) THEN \(ranking)
-        """
-      )
-    }
-    columnNameToRanking.append(" ELSE 1 END")
-    for offset in Self.writableColumns.indices {
-      queryFragments.append(
-        """
-        (SELECT \(columnNameToRanking) \
-        FROM pragma_table_info(\(quote: QueryValue.tableName, delimiter: .text)) \
-        WHERE "cid" = \(offset))
-        """
-      )
+      columnNameToRanking.append(" ELSE 1 END")
+      for offset in Self.writableColumns.indices {
+        queryFragments.append(
+          """
+          (SELECT \(columnNameToRanking) \
+          FROM pragma_table_info(\(quote: QueryValue.tableName, delimiter: .text)) \
+          WHERE "cid" = \(offset))
+          """
+        )
+      }
     }
     return SQLQueryExpression("bm25(\(queryFragments.joined(separator: ", ")))")
   }
