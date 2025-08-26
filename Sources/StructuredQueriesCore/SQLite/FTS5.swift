@@ -11,7 +11,7 @@ extension TableDefinition where QueryValue: FTS5 {
   /// - Parameter rankings: A dictionary mapping columns to accuracy of a match.
   /// - Returns: A BM25 ranking function.
   public func bm25(
-    _ rankings: [PartialKeyPath<Self>: Double] = [:]
+    _ rankings: KeyValuePairs<PartialKeyPath<Self>, Double> = [:]
   ) -> some QueryExpression<Double> {
     var queryFragments: [QueryFragment] = ["\(QueryValue.self)"]
     if !rankings.isEmpty {
