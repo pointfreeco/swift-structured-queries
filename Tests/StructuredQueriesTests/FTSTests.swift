@@ -87,5 +87,57 @@ extension SnapshotTests {
       }
     }
 
+    @Test func bm25() {
+      assertQuery(
+        ReminderText
+          .where { $0.match("Week") }
+          .order { $0.bm25([\.title: 10, \.notes: 5, \.tags: 2]) }
+      ) {
+        """
+        SELECT "reminderTexts"."reminderID", "reminderTexts"."title", "reminderTexts"."notes", "reminderTexts"."listID", "reminderTexts"."listTitle", "reminderTexts"."tags"
+        FROM "reminderTexts"
+        WHERE ("reminderTexts" MATCH 'Week')
+        ORDER BY bm25("reminderTexts", (SELECT CASE "name" WHEN 'title' THEN 10.0 WHEN 'notes' THEN 5.0 WHEN 'tags' THEN 2.0 ELSE 1 END FROM pragma_table_info('reminderTexts') WHERE "cid" = 0), (SELECT CASE "name" WHEN 'title' THEN 10.0 WHEN 'notes' THEN 5.0 WHEN 'tags' THEN 2.0 ELSE 1 END FROM pragma_table_info('reminderTexts') WHERE "cid" = 1), (SELECT CASE "name" WHEN 'title' THEN 10.0 WHEN 'notes' THEN 5.0 WHEN 'tags' THEN 2.0 ELSE 1 END FROM pragma_table_info('reminderTexts') WHERE "cid" = 2), (SELECT CASE "name" WHEN 'title' THEN 10.0 WHEN 'notes' THEN 5.0 WHEN 'tags' THEN 2.0 ELSE 1 END FROM pragma_table_info('reminderTexts') WHERE "cid" = 3), (SELECT CASE "name" WHEN 'title' THEN 10.0 WHEN 'notes' THEN 5.0 WHEN 'tags' THEN 2.0 ELSE 1 END FROM pragma_table_info('reminderTexts') WHERE "cid" = 4), (SELECT CASE "name" WHEN 'title' THEN 10.0 WHEN 'notes' THEN 5.0 WHEN 'tags' THEN 2.0 ELSE 1 END FROM pragma_table_info('reminderTexts') WHERE "cid" = 5))
+        """
+      } results: {
+        """
+        ┌────────────────────────────────┐
+        │ ReminderText(                  │
+        │   reminderID: 10,              │
+        │   title: "Send weekly emails", │
+        │   notes: "",                   │
+        │   listID: 3,                   │
+        │   listTitle: "Business",       │
+        │   tags: ""                     │
+        │ )                              │
+        └────────────────────────────────┘
+        """
+      }
+      assertQuery(
+        ReminderText
+          .where { $0.match("Week") }
+          .order { $0.bm25() }
+      ) {
+        """
+        SELECT "reminderTexts"."reminderID", "reminderTexts"."title", "reminderTexts"."notes", "reminderTexts"."listID", "reminderTexts"."listTitle", "reminderTexts"."tags"
+        FROM "reminderTexts"
+        WHERE ("reminderTexts" MATCH 'Week')
+        ORDER BY bm25("reminderTexts")
+        """
+      } results: {
+        """
+        ┌────────────────────────────────┐
+        │ ReminderText(                  │
+        │   reminderID: 10,              │
+        │   title: "Send weekly emails", │
+        │   notes: "",                   │
+        │   listID: 3,                   │
+        │   listTitle: "Business",       │
+        │   tags: ""                     │
+        │ )                              │
+        └────────────────────────────────┘
+        """
+      }
+    }
   }
 }

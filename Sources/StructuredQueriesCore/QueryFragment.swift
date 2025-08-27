@@ -150,6 +150,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     }
 
     public mutating func appendLiteral(_ literal: String) {
+      guard !literal.isEmpty else { return }
       segments.append(.sql(literal))
     }
 
@@ -183,7 +184,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// - Parameter sql: A raw query string.
     public mutating func appendInterpolation(raw sql: String) {
-      segments.append(.sql(sql))
+      appendLiteral(sql)
     }
 
     /// Append a raw lossless string to the interpolation.
@@ -200,7 +201,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// - Parameter sql: A raw query string.
     public mutating func appendInterpolation(raw sql: some LosslessStringConvertible) {
-      segments.append(.sql(sql.description))
+      appendLiteral(sql.description)
     }
 
     /// Append a query binding to the interpolation.

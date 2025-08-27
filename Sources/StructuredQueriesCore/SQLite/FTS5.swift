@@ -2,16 +2,72 @@ import IssueReporting
 
 /// A virtual table using the FTS5 extension.
 ///
-/// Apply this protocol to a `@Table` declaration to introduce FTS5 helpers.
+/// Apply this protocol to a `@Table` declaration to introduce [FTS5] helpers.
+///
+/// [FTS5]: https://www.sqlite.org/fts5.html
 public protocol FTS5: Table {}
 
 extension TableDefinition where QueryValue: FTS5 {
+  /// A BM25 ranking function for the given column-accuracy mapping.
+  ///
+  /// - Parameter rankings: A dictionary mapping columns to accuracy of a match.
+  /// - Returns: A BM25 ranking function.
+  public func bm25(
+    _ rankings: KeyValuePairs<PartialKeyPath<Self>, Double> = [:]
+  ) -> some QueryExpression<Double> {
+    var queryFragments: [QueryFragment] = ["\(QueryValue.self)"]
+    if !rankings.isEmpty {
+      var columnNameToRanking: QueryFragment = """
+        CASE "name"
+        """
+      for (keyPath, ranking) in rankings {
+        guard let column = self[keyPath: keyPath] as? any WritableTableColumnExpression
+        else {
+          reportIssue(
+            """
+            Key path cannot be used in 'bm25' function: \(keyPath)
+
+            Must be a key path to a table column on '\(QueryValue.self)'.
+            """
+          )
+          continue
+        }
+        columnNameToRanking.append(
+          """
+           WHEN \(bind: column.name) THEN \(ranking)
+          """
+        )
+      }
+      columnNameToRanking.append(" ELSE 1 END")
+      for offset in Self.writableColumns.indices {
+        queryFragments.append(
+          """
+          (SELECT \(columnNameToRanking) \
+          FROM pragma_table_info(\(quote: QueryValue.tableName, delimiter: .text)) \
+          WHERE "cid" = \(offset))
+          """
+        )
+      }
+    }
+    return SQLQueryExpression("bm25(\(queryFragments.joined(separator: ", ")))")
+  }
+
   /// A predicate expression from this table matched against another _via_ the `MATCH` operator.
   ///
   /// ```swift
   /// ReminderText.where { $0.match("get") }
   /// // SELECT … FROM "reminderTexts" WHERE ("reminderTexts" MATCH 'get')
   /// ```
+  ///
+  /// > Important: Avoid passing a string entered by the user directly to this operator. FTS5
+  /// > queries have a distinct [syntax] that can specify particular columns and refine a search in
+  /// > various ways. If FTS5 is given a query with invalid syntax, it can even throw SQL errors at
+  /// > runtime.
+  /// >
+  /// > Instead, consider transforming the user's input into a query by quoting, prefixing, and/or
+  /// > combining inputs from your UI into a valid query before handing it off to SQLite.
+  ///
+  /// [syntax]: https://www.sqlite.org/fts5.html#full_text_query_syntax
   ///
   /// - Parameter pattern: A string expression describing the `MATCH` pattern.
   /// - Returns: A predicate expression.
@@ -60,7 +116,7 @@ extension TableColumnExpression where Root: FTS5 {
   ///
   /// ```swift
   /// ReminderText.where { $0.title.match("get") }
-  /// // SELECT … FROM "reminderTexts" WHERE ("reminderTexts"."title" MATCH 'get')
+  /// // SELECT … FROM "reminderTexts" WHERE ("reminderTexts" MATCH 'title:"get"')
   /// ```
   ///
   /// - Parameter pattern: A string expression describing the `MATCH` pattern.
