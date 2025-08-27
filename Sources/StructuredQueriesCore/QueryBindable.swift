@@ -9,14 +9,25 @@ public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryVa
 
   /// A value that can be bound to a parameter of a SQL statement.
   var queryBinding: QueryBinding { get }
+
+  init?(queryBinding: QueryBinding)
 }
 
 extension QueryBindable {
   public var queryFragment: QueryFragment { "\(queryBinding)" }
+
+  public init?(queryBinding: QueryBinding) {
+    guard let queryValue = QueryValue(queryBinding: queryBinding) else { return nil }
+    self.init(queryBinding: queryValue.queryBinding)
+  }
 }
 
 extension [UInt8]: QueryBindable, QueryExpression {
   public var queryBinding: QueryBinding { .blob(self) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .blob = queryBinding else { return nil }
+    self.init(queryBinding: queryBinding)
+  }
 }
 
 extension Bool: QueryBindable {
@@ -25,10 +36,18 @@ extension Bool: QueryBindable {
 
 extension Double: QueryBindable {
   public var queryBinding: QueryBinding { .double(self) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .double = queryBinding else { return nil }
+    self.init(queryBinding: queryBinding)
+  }
 }
 
 extension Date: QueryBindable {
   public var queryBinding: QueryBinding { .date(self) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .date = queryBinding else { return nil }
+    self.init(queryBinding: queryBinding)
+  }
 }
 
 extension Float: QueryBindable {
@@ -53,10 +72,18 @@ extension Int32: QueryBindable {
 
 extension Int64: QueryBindable {
   public var queryBinding: QueryBinding { .int(self) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int = queryBinding else { return nil }
+    self.init(queryBinding: queryBinding)
+  }
 }
 
 extension String: QueryBindable {
   public var queryBinding: QueryBinding { .text(self) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .text = queryBinding else { return nil }
+    self.init(queryBinding: queryBinding)
+  }
 }
 
 extension UInt8: QueryBindable {
@@ -83,6 +110,10 @@ extension UInt64: QueryBindable {
 
 extension UUID: QueryBindable {
   public var queryBinding: QueryBinding { .uuid(self) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .uuid = queryBinding else { return nil }
+    self.init(queryBinding: queryBinding)
+  }
 }
 
 extension DefaultStringInterpolation {

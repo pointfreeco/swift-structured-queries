@@ -11,6 +11,15 @@ public struct Database {
   @usableFromInline
   let storage: Storage
 
+  public var handle: OpaquePointer {
+    switch storage {
+    case .owned(let storage):
+      return storage.handle
+    case .unowned(let handle):
+      return handle
+    }
+  }
+
   public init(_ ptr: OpaquePointer) {
     self.storage = .unowned(ptr)
   }
