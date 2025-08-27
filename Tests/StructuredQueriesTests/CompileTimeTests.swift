@@ -19,3 +19,21 @@ private var remindersQuery: some Statement<ReminderRow> {
       )
     }
 }
+
+@Table
+private struct Foo {
+  var id: Int
+  var barId: Int?
+}
+@Table
+private struct Bar {
+  var id: Int
+  var baz: String?
+}
+func dynamicMemberLookup() {
+  _ = Foo.all
+    .leftJoin(Bar.all) { $0.barId.eq($1.id) }
+    .where { f, b in
+      b.baz.is(nil)
+    }
+}
