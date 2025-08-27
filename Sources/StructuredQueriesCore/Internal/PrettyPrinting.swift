@@ -4,7 +4,7 @@ import IssueReporting
 extension QueryFragment {
   @inlinable
   @inline(__always)
-  static var newlineOrSpace: Self {
+  public static var newlineOrSpace: Self {
     #if DEBUG
       return isTesting ? "\n" : " "
     #else
@@ -14,7 +14,7 @@ extension QueryFragment {
 
   @inlinable
   @inline(__always)
-  static var newline: Self {
+    public static var newline: Self {
     #if DEBUG
       return isTesting ? "\n" : ""
     #else
@@ -26,7 +26,7 @@ extension QueryFragment {
     @inlinable
     @inline(__always)
   #endif
-  func indented() -> Self {
+    public func indented() -> Self {
     #if DEBUG
       guard isTesting else { return self }
       var query = self

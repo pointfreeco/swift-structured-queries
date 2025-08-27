@@ -187,7 +187,7 @@ struct DataCorruptedError: Error {
 }
 
 @usableFromInline
-struct OverflowError: Error {
+package struct OverflowError: Error {
   @usableFromInline
-  init() {}
+  package init() {}
 }

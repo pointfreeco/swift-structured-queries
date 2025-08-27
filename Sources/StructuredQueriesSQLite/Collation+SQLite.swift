@@ -1,3 +1,5 @@
+import StructuredQueriesCore
+
 extension Collation {
   /// The `BINARY` collating sequence that compares text based off its underlying bytes.
   public static let binary = Self(rawValue: "BINARY")

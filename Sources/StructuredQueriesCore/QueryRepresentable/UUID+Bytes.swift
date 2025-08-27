@@ -47,9 +47,3 @@ extension UUID.BytesRepresentation: QueryDecodable {
 
   private struct InvalidBytes: Error {}
 }
-
-extension UUID.BytesRepresentation: SQLiteType {
-  public static var typeAffinity: SQLiteTypeAffinity {
-    [UInt8].typeAffinity
-  }
-}

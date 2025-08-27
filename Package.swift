@@ -25,7 +25,7 @@ let package = Package(
       targets: ["StructuredQueriesTestSupport"]
     ),
     .library(
-      name: "_StructuredQueriesSQLite",
+      name: "StructuredQueriesSQLite",
       targets: ["StructuredQueriesSQLite"]
     ),
   ],

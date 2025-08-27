@@ -61,7 +61,7 @@ extension SnapshotTests {
         INSERT INTO "records"
         ("id", "name", "duration")
         VALUES
-        ('\u{07AD}��ޭ��ޭ��ޭ��', '', <invalid: The operation couldn’t be completed. (StructuredQueriesCore.OverflowError error 1.)>)
+        ('\u{07AD}��ޭ��ޭ��ޭ��', '', <invalid: UInt64 overflow>)
         RETURNING "id", "name", "duration"
         """#
       } results: {

@@ -21,9 +21,10 @@ extension [UInt8]: QueryBindable, QueryExpression {
   public var queryBinding: some QueryBinding { BlobBinding(self) }
 }
 
-extension Bool: QueryBindable {
-  public var queryBinding: some QueryBinding { BoolBinding(self) }
-}
+// Bool is not universally supported across databases.
+// SQLite stores booleans as integers (0/1).
+// PostgreSQL has native boolean support.
+// Database-specific modules should provide their own Bool support.
 
 extension Double: QueryBindable {
   public var queryBinding: some QueryBinding { DoubleBinding(self) }

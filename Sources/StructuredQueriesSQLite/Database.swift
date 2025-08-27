@@ -145,6 +145,7 @@ public struct Database {
     case let blob as BlobBinding:
       return sqlite3_bind_blob(statement, index, Array(blob.value), Int32(blob.value.count), SQLITE_TRANSIENT)
     case let bool as BoolBinding:
+      // SQLite stores booleans as integers
       return sqlite3_bind_int64(statement, index, bool.value ? 1 : 0)
     case let date as DateBinding:
       return sqlite3_bind_text(statement, index, date.value.iso8601String, -1, SQLITE_TRANSIENT)

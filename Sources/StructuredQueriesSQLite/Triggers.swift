@@ -1,5 +1,6 @@
 import Foundation
 import IssueReporting
+import StructuredQueries
 
 extension Table {
   /// A `CREATE TEMPORARY TRIGGER` statement that executes after a database event.
@@ -436,8 +437,6 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
             $0.append(hex)
           }
           $0.append("unhex(\(quote: hex, delimiter: .text))")
-        case let bool as BoolBinding:
-          $0.append(bool.value ? "1" : "0")
         case let double as DoubleBinding:
           $0.append("\(raw: double.value)")
         case let date as DateBinding:

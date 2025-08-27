@@ -1,37 +1,4 @@
-extension QueryExpression where QueryValue: QueryBindable {
-  public func cast<Other: SQLiteType>(
-    as _: Other.Type = Other.self
-  ) -> some QueryExpression<Other> {
-    Cast(base: self)
-  }
-}
-
-extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
-  public func cast<Other: _OptionalPromotable & SQLiteType>(
-    as _: Other.Type = Other.self
-  ) -> some QueryExpression<Other._Optionalized>
-  where Other._Optionalized: SQLiteType {
-    Cast(base: self)
-  }
-
-  @available(
-    *, deprecated, message: "Cast optional to non-optional produces invalid query expression"
-  )
-  public func cast<Other: SQLiteType>(
-    as _: Other.Type = Other.self
-  ) -> some QueryExpression<Other> {
-    Cast(base: self)
-  }
-}
-
-extension QueryExpression where QueryValue: SQLiteType {
-  @available(*, deprecated, message: "Cast to same query value type always succeeds")
-  public func cast(
-    as _: QueryValue.Type = QueryValue.self
-  ) -> some QueryExpression<QueryValue> {
-    self
-  }
-}
+import StructuredQueriesCore
 
 public protocol SQLiteType: QueryBindable {
   static var typeAffinity: SQLiteTypeAffinity { get }
@@ -72,9 +39,8 @@ extension SQLiteType where Self: FloatingPoint {
 extension Double: SQLiteType {}
 extension Float: SQLiteType {}
 
-extension Bool: SQLiteType {
-  public static var typeAffinity: SQLiteTypeAffinity { Int.typeAffinity }
-}
+// Bool is not a native SQLite type. SQLite stores booleans as integers (0/1).
+// Use explicit conversion: myBool ? 1 : 0, or use BoolAsInt wrapper.
 
 extension String: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity { .text }
@@ -86,13 +52,6 @@ extension [UInt8]: SQLiteType {
 
 extension Optional: SQLiteType where Wrapped: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity { Wrapped.typeAffinity }
-}
-
-private struct Cast<QueryValue: SQLiteType, Base: QueryExpression>: QueryExpression {
-  let base: Base
-  var queryFragment: QueryFragment {
-    "CAST(\(base.queryFragment) AS \(QueryValue.typeAffinity.rawValue))"
-  }
 }
 
 extension RawRepresentable where RawValue: SQLiteType {

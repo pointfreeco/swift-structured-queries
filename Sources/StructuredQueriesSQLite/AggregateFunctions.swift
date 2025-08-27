@@ -1,3 +1,5 @@
+import StructuredQueries
+
 extension QueryExpression where QueryValue: QueryBindable {
   /// A count aggregate of this expression.
   ///
@@ -18,7 +20,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// - Returns: A count aggregate of this expression.
   public func count(
     distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: (some QueryExpression<Bool>)? = nil
   ) -> some QueryExpression<Int> {
     AggregateFunction(
       "count",
@@ -27,6 +29,16 @@ extension QueryExpression where QueryValue: QueryBindable {
       filter: filter?.queryFragment
     )
   }
+    
+    public func count(
+      distinct isDistinct: Bool = false
+    ) -> some QueryExpression<Int> {
+      AggregateFunction(
+        "count",
+        isDistinct: isDistinct,
+        [queryFragment]
+      )
+    }
 }
 
 extension QueryExpression
@@ -48,8 +60,8 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
   /// - Returns: A string concatenation aggregate of this expression.
   public func groupConcat(
     _ separator: (some QueryExpression)? = String?.none,
-    order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    order: (some QueryExpression)? = nil,
+    filter: (some QueryExpression<Bool>)? = nil
   ) -> some QueryExpression<String?> {
     AggregateFunction(
       "group_concat",
@@ -58,6 +70,15 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
       filter: filter?.queryFragment
     )
   }
+    
+    public func groupConcat(
+      _ separator: (some QueryExpression)? = String?.none
+    ) -> some QueryExpression<String?> {
+      AggregateFunction(
+        "group_concat",
+        separator.map { [queryFragment, $0.queryFragment] } ?? [queryFragment]
+      )
+    }
 
   /// A string concatenation aggregate of this expression.
   ///
@@ -71,8 +92,8 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
   /// - Returns: A string concatenation aggregate of this expression.
   public func groupConcat(
     distinct isDistinct: Bool,
-    order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    order: (some QueryExpression)? = nil,
+    filter: (some QueryExpression<Bool>)? = nil
   ) -> some QueryExpression<String?> {
     AggregateFunction(
       "group_concat",
@@ -95,10 +116,16 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable 
   /// - Parameters filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A maximum aggregate of this expression.
   public func max(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: (some QueryExpression<Bool>)
   ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
-    AggregateFunction("max", [queryFragment], filter: filter?.queryFragment)
+    AggregateFunction("max", [queryFragment], filter: filter.queryFragment)
   }
+    
+    public func max(
+//      filter: (some QueryExpression<Bool>)? = nil
+    ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
+      AggregateFunction("max", [queryFragment])
+    }
 
   /// A minimum aggregate of this expression.
   ///
@@ -110,10 +137,15 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable 
   /// - Parameters filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A minimum aggregate of this expression.
   public func min(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: (some QueryExpression<Bool>)? = nil
   ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
     AggregateFunction("min", [queryFragment], filter: filter?.queryFragment)
   }
+    
+    public func min(
+    ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
+      AggregateFunction("min", [queryFragment])
+    }
 }
 
 extension QueryExpression
@@ -132,10 +164,16 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   /// - Returns: An average aggregate of this expression.
   public func avg(
     distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: (some QueryExpression<Bool>)? = nil
   ) -> some QueryExpression<Double?> {
     AggregateFunction("avg", isDistinct: isDistinct, [queryFragment], filter: filter?.queryFragment)
   }
+    
+    public func avg(
+      distinct isDistinct: Bool = false,
+    ) -> some QueryExpression<Double?> {
+      AggregateFunction("avg", isDistinct: isDistinct, [queryFragment])
+    }
 
   /// An sum aggregate of this expression.
   ///
@@ -151,7 +189,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   /// - Returns: A sum aggregate of this expression.
   public func sum(
     distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: (some QueryExpression<Bool>)? = nil
   ) -> SQLQueryExpression<QueryValue._Optionalized> {
     // NB: We must explicitly erase here to avoid a runtime crash with opaque return types
     // TODO: Report issue to Swift team.
@@ -180,7 +218,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   /// - Returns: A total aggregate of this expression.
   public func total(
     distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    filter: (some QueryExpression<Bool>)? = nil
   ) -> some QueryExpression<QueryValue> {
     AggregateFunction(
       "total",
@@ -216,7 +254,7 @@ public struct AggregateFunction<QueryValue>: QueryExpression, Sendable {
   var order: QueryFragment?
   var filter: QueryFragment?
 
-  init(
+  public init(
     _ name: QueryFragment,
     isDistinct: Bool = false,
     _ arguments: [QueryFragment] = [],

@@ -51,12 +51,6 @@ extension _CodableJSONRepresentation: QueryBindable {
 
 private struct EncodingError: Error {}
 
-extension _CodableJSONRepresentation: SQLiteType {
-  public static var typeAffinity: SQLiteTypeAffinity {
-    String.typeAffinity
-  }
-}
-
 private let jsonDecoder: JSONDecoder = {
   var decoder = JSONDecoder()
   decoder.dateDecodingStrategy = .custom {

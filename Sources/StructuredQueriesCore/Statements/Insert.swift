@@ -1,10 +1,12 @@
 import IssueReporting
 
 extension Table {
-  /// Columns referencing the value that would have been inserted in an
-  /// [insert statement](<doc:InsertStatements>) had there been no conflict.
-  public typealias Excluded = TableAlias<Self, _ExcludedName>.TableColumns
+    /// Columns referencing the value that would have been inserted in an
+    /// [insert statement](<doc:InsertStatements>) had there been no conflict.
+    public typealias Excluded = TableAlias<Self, _ExcludedName>.TableColumns
+}
 
+extension Table {
   /// An insert statement for one or more table rows.
   ///
   /// This function can be used to create an insert statement from a ``Table`` value.

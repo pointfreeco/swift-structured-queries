@@ -65,6 +65,11 @@ public struct Where<From: Table>: Sendable {
 
   var predicates: [QueryFragment] = []
   var scope = Scope.default
+    
+    public init(predicates: [QueryFragment] = [], scope: Scope = Scope.default) {
+        self.predicates = predicates
+        self.scope = scope
+    }
 
   #if compiler(>=6.1)
     public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
@@ -470,16 +475,6 @@ extension Where: SelectStatement {
   /// - Returns: A select statement with a limit and optional offset.
   public func limit(_ maxLength: Int, offset: Int? = nil) -> SelectOf<From> {
     asSelect().limit(maxLength, offset: offset)
-  }
-
-  /// A select statement for the filtered table's row count.
-  ///
-  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
-  /// - Returns: A select statement that selects `count(*)`.
-  public func count(
-    filter: ((From.TableColumns) -> any QueryExpression<Bool>)? = nil
-  ) -> Select<Int, From, ()> {
-    asSelect().count(filter: filter)
   }
 
   /// A delete statement for the filtered table.

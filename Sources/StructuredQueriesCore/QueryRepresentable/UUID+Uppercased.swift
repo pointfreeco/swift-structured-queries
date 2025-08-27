@@ -42,9 +42,3 @@ extension UUID.UppercasedRepresentation: QueryDecodable {
 
   private struct InvalidString: Error {}
 }
-
-extension UUID.UppercasedRepresentation: SQLiteType {
-  public static var typeAffinity: SQLiteTypeAffinity {
-    String.typeAffinity
-  }
-}

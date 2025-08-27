@@ -92,18 +92,6 @@ public struct BlobBinding: QueryBinding, Hashable, Sendable {
   }
 }
 
-/// A binding that represents a boolean value.
-public struct BoolBinding: QueryBinding, Hashable, Sendable {
-  public let value: Bool
-  
-  public init(_ value: Bool) {
-    self.value = value
-  }
-  
-  public var debugDescription: String {
-    value ? "1" : "0"
-  }
-}
 
 /// A binding that represents a double-precision floating point value.
 public struct DoubleBinding: QueryBinding, Hashable, Sendable {
@@ -245,13 +233,6 @@ extension QueryBinding where Self == BlobBinding {
   /// Creates a blob binding.
   public static func blob(_ value: [UInt8]) -> BlobBinding {
     BlobBinding(value)
-  }
-}
-
-extension QueryBinding where Self == BoolBinding {
-  /// Creates a boolean binding.
-  public static func bool(_ value: Bool) -> BoolBinding {
-    BoolBinding(value)
   }
 }
 

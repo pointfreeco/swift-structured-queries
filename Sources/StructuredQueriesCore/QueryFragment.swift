@@ -23,7 +23,7 @@ public struct QueryFragment: Hashable, Sendable {
     self.segments = segments
   }
 
-  init(_ string: String = "") {
+  public init(_ string: String = "") {
     self.init(segments: [.sql(string)])
   }
 

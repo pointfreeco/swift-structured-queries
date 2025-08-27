@@ -1,4 +1,5 @@
 import Foundation
+import StructuredQueriesCore
 
 extension QueryExpression {
   /// Passes this expression and the given one to the `json_patch` function.
@@ -43,15 +44,15 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
   /// - Returns: A JSON array aggregate of this expression.
   public func jsonGroupArray(
     isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+//    order: (some QueryExpression)? = Bool?.none,
+//    filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
     AggregateFunction(
       "json_group_array",
       isDistinct: isDistinct,
       [queryFragment],
-      order: order?.queryFragment,
-      filter: filter?.queryFragment
+//      order: order?.queryFragment,
+//      filter: filter?.queryFragment
     )
   }
 }
@@ -109,15 +110,15 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   /// - Returns: A JSON array aggregate of this table.
   public func jsonGroupArray(
     isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+//    order: (some QueryExpression)? = Bool?.none,
+//    filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
     AggregateFunction(
       "json_group_array",
       isDistinct: isDistinct,
       [jsonObject().queryFragment],
-      order: order?.queryFragment,
-      filter: filter?.queryFragment
+//      order: order?.queryFragment,
+//      filter: filter?.queryFragment
     )
   }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import StructuredQueries
 
 extension QueryExpression where QueryValue == Bool {
   /// Wraps this expression with the `likelihood` function given a probability.
@@ -401,7 +402,7 @@ public struct QueryFunction<QueryValue>: QueryExpression {
   let name: QueryFragment
   let arguments: [QueryFragment]
 
-  init<each Argument: QueryExpression>(_ name: QueryFragment, _ arguments: repeat each Argument) {
+  package init<each Argument: QueryExpression>(_ name: QueryFragment, _ arguments: repeat each Argument) {
     self.name = name
     self.arguments = Array(repeat each arguments)
   }
