@@ -28,6 +28,15 @@ extension SnapshotTests {
   }
 }
 
+
+
+
+
+
+
+
+
+
 // ---
 import Foundation
 import SQLite3
@@ -49,6 +58,34 @@ func _$dateTime(
 var __$dateTime: CustomFunction<String?, Date, Never> {
   CustomFunction("dateTime", isDeterministic: false, body: dateTime(_:))
 }
+
+//struct DateTime: DatabaseFunction {
+//  typealias Input = String?
+////
+//  typealias Output = Date
+////
+//  typealias Failure = Never
+////
+//  typealias Result = SQLQueryExpression<Date>
+//
+//  let name = "dateTime"
+//  let isDeterministic = false
+//  func callAsFunction(
+//    _ input: some QueryExpression<String?> = String?.none
+//  ) -> Result {
+//    SQLQueryExpression("\(quote: name)(\(input))")
+//  }
+//}
+// ---
+//protocol DatabaseFunction<Input, Output, Failure> {
+//  associatedtype Input
+//  associatedtype Output: QueryBindable where Output.QueryValue == Result.QueryValue
+//  associatedtype Failure: Error
+//  associatedtype Result: QueryExpression
+//  var name: String { get }
+//  var isDeterministic: Bool { get }
+//  func callAsFunction(_ input: some QueryExpression<Input>) throws(Failure) -> Result
+//}
 // ---
 // Library code:
 @available(macOS 14, *)
