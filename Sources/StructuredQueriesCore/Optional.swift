@@ -23,9 +23,31 @@ extension [UInt8]: _OptionalPromotable where Element: _OptionalPromotable {}
 
 extension Optional: QueryBindable where Wrapped: QueryBindable {
   public typealias QueryValue = Wrapped.QueryValue?
+  public typealias Query = OptionalBinding<Wrapped.Query>
 
-  public var queryBinding: QueryBinding {
-    self?.queryBinding ?? .null
+  public var queryBinding: Query {
+    OptionalBinding(self?.queryBinding)
+  }
+}
+
+/// A binding that wraps an optional value.
+public struct OptionalBinding<Wrapped: QueryBinding>: QueryBinding {
+  public let wrapped: Wrapped?
+  
+  public init(_ wrapped: Wrapped?) {
+    self.wrapped = wrapped
+  }
+  
+  public var debugDescription: String {
+    wrapped?.debugDescription ?? "NULL"
+  }
+  
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.wrapped == rhs.wrapped
+  }
+  
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(wrapped)
   }
 }
 

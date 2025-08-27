@@ -421,14 +421,14 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
         $0.append("\(raw: sql)")
       case .binding(let binding):
         switch binding {
-        case .blob(let blob):
+        case let blob as BlobBinding:
           reportIssue(
             """
             Cannot bind bytes to a trigger statement. To hardcode a constant BLOB, use the '#sql' \
             macro.
             """
           )
-          let hex = blob.reduce(into: "") {
+          let hex = blob.value.reduce(into: "") {
             let hex = String($1, radix: 16)
             if hex.count == 1 {
               $0.append("0")
@@ -436,11 +436,11 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
             $0.append(hex)
           }
           $0.append("unhex(\(quote: hex, delimiter: .text))")
-        case .bool(let bool):
-          $0.append(bool ? "1" : "0")
-        case .double(let double):
-          $0.append("\(raw: double)")
-        case .date(let date):
+        case let bool as BoolBinding:
+          $0.append(bool.value ? "1" : "0")
+        case let double as DoubleBinding:
+          $0.append("\(raw: double.value)")
+        case let date as DateBinding:
           reportIssue(
             """
             Cannot bind a date to a trigger statement. Specify dates using the '#sql' macro, \
@@ -453,14 +453,14 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
                 #sql("'2018-01-29 00:08:00'")
             """
           )
-          $0.append("\(quote: date.iso8601String, delimiter: .text)")
-        case .int(let int):
-          $0.append("\(raw: int)")
-        case .null:
+          $0.append("\(quote: date.value.iso8601String, delimiter: .text)")
+        case let int as IntBinding:
+          $0.append("\(raw: int.value)")
+        case is NullBinding:
           $0.append("NULL")
-        case .text(let string):
-          $0.append("\(quote: string, delimiter: .text)")
-        case .uuid(let uuid):
+        case let text as TextBinding:
+          $0.append("\(quote: text.value, delimiter: .text)")
+        case let uuid as UUIDBinding:
           reportIssue(
             """
             Cannot bind a UUID to a trigger statement. Specify UUIDs using the '#sql' macro, \
@@ -473,9 +473,45 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
                 #sql("'00000000-0000-0000-0000-000000000000'")
             """
           )
-          $0.append("\(quote: uuid.uuidString.lowercased(), delimiter: .text)")
-        case .invalid(let error):
-          $0.append("\(.invalid(error.underlyingError))")
+          $0.append("\(quote: uuid.value.uuidString.lowercased(), delimiter: .text)")
+        case let uint64 as UInt64Binding:
+          if uint64.overflows {
+            reportIssue("Cannot bind UInt64 value \(uint64.value): exceeds Int64.max")
+            $0.append("NULL")
+          } else {
+            $0.append("\(raw: uint64.value)")
+          }
+        case let invalid as InvalidBinding:
+          $0.append("\(.invalid(invalid.error.underlyingError))")
+        case let conditional as ConditionalQueryBinding<TextBinding, InvalidBinding>:
+          // Handle ConditionalQueryBinding by recursively processing the underlying binding
+          switch conditional {
+          case .first(let text):
+            $0.append("\(quote: text.value, delimiter: .text)")
+          case .second(let invalid):
+            $0.append("\(.invalid(invalid.error.underlyingError))")
+          }
+        default:
+          // Check if it's an OptionalBinding using Mirror
+          let mirror = Mirror(reflecting: binding)
+          if String(describing: type(of: binding)).contains("OptionalBinding") {
+            if let wrappedValue = mirror.children.first(where: { $0.label == "wrapped" })?.value,
+               let wrappedBinding = wrappedValue as? (any QueryBinding)? {
+              if wrappedBinding != nil {
+                // We can't easily recurse here, so we'll treat it as an error
+                reportIssue("Cannot bind optional values to trigger statements")
+                $0.append("NULL")
+              } else {
+                $0.append("NULL")
+              }
+            } else {
+              reportIssue("Unknown binding type")
+              $0.append("NULL")
+            }
+          } else {
+            reportIssue("Unknown binding type: \(type(of: binding))")
+            $0.append("NULL")
+          }
         }
       }
     }

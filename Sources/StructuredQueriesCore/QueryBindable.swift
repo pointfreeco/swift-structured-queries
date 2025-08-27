@@ -8,7 +8,9 @@ public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryVa
   associatedtype QueryValue = Self
 
   /// A value that can be bound to a parameter of a SQL statement.
-  var queryBinding: QueryBinding { get }
+    associatedtype Query: QueryBinding
+    
+    var queryBinding: Query { get }
 }
 
 extension QueryBindable {
@@ -16,73 +18,69 @@ extension QueryBindable {
 }
 
 extension [UInt8]: QueryBindable, QueryExpression {
-  public var queryBinding: QueryBinding { .blob(self) }
+  public var queryBinding: some QueryBinding { BlobBinding(self) }
 }
 
 extension Bool: QueryBindable {
-  public var queryBinding: QueryBinding { .bool(self) }
+  public var queryBinding: some QueryBinding { BoolBinding(self) }
 }
 
 extension Double: QueryBindable {
-  public var queryBinding: QueryBinding { .double(self) }
+  public var queryBinding: some QueryBinding { DoubleBinding(self) }
 }
 
 extension Date: QueryBindable {
-  public var queryBinding: QueryBinding { .date(self) }
+  public var queryBinding: some QueryBinding { DateBinding(self) }
 }
 
 extension Float: QueryBindable {
-  public var queryBinding: QueryBinding { .double(Double(self)) }
+  public var queryBinding: some QueryBinding { DoubleBinding(Double(self)) }
 }
 
 extension Int: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public var queryBinding: some QueryBinding { IntBinding(Int64(self)) }
 }
 
 extension Int8: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public var queryBinding: some QueryBinding { IntBinding(Int64(self)) }
 }
 
 extension Int16: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public var queryBinding: some QueryBinding { IntBinding(Int64(self)) }
 }
 
 extension Int32: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public var queryBinding: some QueryBinding { IntBinding(Int64(self)) }
 }
 
 extension Int64: QueryBindable {
-  public var queryBinding: QueryBinding { .int(self) }
+  public var queryBinding: some QueryBinding { IntBinding(self) }
 }
 
 extension String: QueryBindable {
-  public var queryBinding: QueryBinding { .text(self) }
+  public var queryBinding: some QueryBinding { TextBinding(self) }
 }
 
 extension UInt8: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public var queryBinding: some QueryBinding { IntBinding(Int64(self)) }
 }
 
 extension UInt16: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public var queryBinding: some QueryBinding { IntBinding(Int64(self)) }
 }
 
 extension UInt32: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public var queryBinding: some QueryBinding { IntBinding(Int64(self)) }
 }
 
 extension UInt64: QueryBindable {
-  public var queryBinding: QueryBinding {
-    if self > UInt64(Int64.max) {
-      return .invalid(OverflowError())
-    } else {
-      return .int(Int64(self))
-    }
+  public var queryBinding: some QueryBinding {
+    UInt64Binding(self)
   }
 }
 
 extension UUID: QueryBindable {
-  public var queryBinding: QueryBinding { .uuid(self) }
+  public var queryBinding: some QueryBinding { UUIDBinding(self) }
 }
 
 extension DefaultStringInterpolation {
@@ -113,9 +111,9 @@ extension DefaultStringInterpolation {
 }
 
 extension QueryBindable where Self: LosslessStringConvertible {
-  public var queryBinding: QueryBinding { description.queryBinding }
+  public var queryBinding: some QueryBinding { description.queryBinding }
 }
 
 extension QueryBindable where Self: RawRepresentable, RawValue: QueryBindable {
-  public var queryBinding: QueryBinding { rawValue.queryBinding }
+  public var queryBinding: some QueryBinding { rawValue.queryBinding }
 }

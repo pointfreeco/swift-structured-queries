@@ -134,30 +134,58 @@ public struct Database {
     else { throw SQLiteError(db: storage.handle) }
     defer { sqlite3_finalize(statement) }
     for (index, binding) in zip(Int32(1)..., bindings) {
-      let result =
-        switch binding {
-        case .blob(let blob):
-          sqlite3_bind_blob(statement, index, Array(blob), Int32(blob.count), SQLITE_TRANSIENT)
-        case .bool(let bool):
-          sqlite3_bind_int64(statement, index, bool ? 1 : 0)
-        case .date(let date):
-          sqlite3_bind_text(statement, index, date.iso8601String, -1, SQLITE_TRANSIENT)
-        case .double(let double):
-          sqlite3_bind_double(statement, index, double)
-        case .int(let int):
-          sqlite3_bind_int64(statement, index, Int64(int))
-        case .null:
-          sqlite3_bind_null(statement, index)
-        case .text(let text):
-          sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
-        case .uuid(let uuid):
-          sqlite3_bind_text(statement, index, uuid.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
-        case .invalid(let error):
-          throw error.underlyingError
-        }
+      let result = try bindValue(binding, to: statement, at: index)
       guard result == SQLITE_OK else { throw SQLiteError(db: storage.handle) }
     }
     return try body(statement)
+  }
+  
+  private func bindValue(_ binding: any QueryBinding, to statement: OpaquePointer, at index: Int32) throws -> Int32 {
+    switch binding {
+    case let blob as BlobBinding:
+      return sqlite3_bind_blob(statement, index, Array(blob.value), Int32(blob.value.count), SQLITE_TRANSIENT)
+    case let bool as BoolBinding:
+      return sqlite3_bind_int64(statement, index, bool.value ? 1 : 0)
+    case let date as DateBinding:
+      return sqlite3_bind_text(statement, index, date.value.iso8601String, -1, SQLITE_TRANSIENT)
+    case let double as DoubleBinding:
+      return sqlite3_bind_double(statement, index, double.value)
+    case let int as IntBinding:
+      return sqlite3_bind_int64(statement, index, int.value)
+    case is NullBinding:
+      return sqlite3_bind_null(statement, index)
+    case let text as TextBinding:
+      return sqlite3_bind_text(statement, index, text.value, -1, SQLITE_TRANSIENT)
+    case let uuid as UUIDBinding:
+      return sqlite3_bind_text(statement, index, uuid.value.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
+    case let uint64 as UInt64Binding:
+      if let int64Value = uint64.int64Value {
+        return sqlite3_bind_int64(statement, index, int64Value)
+      } else {
+        throw OverflowError()
+      }
+    case let invalid as InvalidBinding:
+      throw invalid.error.underlyingError
+    case let conditional as ConditionalQueryBinding<TextBinding, InvalidBinding>:
+      // Handle ConditionalQueryBinding by recursively processing the underlying binding
+      return try bindValue(conditional.underlyingBinding, to: statement, at: index)
+    default:
+      // Check if it's an OptionalBinding
+      let mirror = Mirror(reflecting: binding)
+      if String(describing: type(of: binding)).contains("OptionalBinding") {
+        // Try to extract the wrapped value
+        if let wrappedValue = mirror.children.first(where: { $0.label == "wrapped" })?.value {
+          if let wrappedBinding = wrappedValue as? (any QueryBinding)? {
+            if let unwrapped = wrappedBinding {
+              return try bindValue(unwrapped, to: statement, at: index)
+            } else {
+              return sqlite3_bind_null(statement, index)
+            }
+          }
+        }
+      }
+      throw InvalidBindingError()
+    }
   }
 
   @usableFromInline

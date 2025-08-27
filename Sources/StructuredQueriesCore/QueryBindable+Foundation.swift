@@ -1,7 +1,7 @@
 import Foundation
 
 extension Data: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public var queryBinding: some QueryBinding {
     .blob([UInt8](self))
   }
 
@@ -11,7 +11,7 @@ extension Data: QueryBindable {
 }
 
 extension URL: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public var queryBinding: some QueryBinding {
     .text(absoluteString)
   }
 

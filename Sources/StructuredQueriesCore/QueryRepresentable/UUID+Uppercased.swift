@@ -27,7 +27,7 @@ extension UUID? {
 }
 
 extension UUID.UppercasedRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public var queryBinding: some QueryBinding {
     .text(queryOutput.uuidString)
   }
 }

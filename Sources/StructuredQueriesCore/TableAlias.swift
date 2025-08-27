@@ -190,7 +190,7 @@ extension TableAlias: QueryExpression where Base: QueryExpression {
 }
 
 extension TableAlias: QueryBindable where Base: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public var queryBinding: some QueryBinding {
     base.queryBinding
   }
 }

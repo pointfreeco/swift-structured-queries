@@ -27,7 +27,7 @@ extension UUID? {
 }
 
 extension UUID.BytesRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public var queryBinding: some QueryBinding {
     .blob(withUnsafeBytes(of: queryOutput.uuid, [UInt8].init))
   }
 }

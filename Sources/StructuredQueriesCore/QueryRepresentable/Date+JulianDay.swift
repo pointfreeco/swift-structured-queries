@@ -27,7 +27,7 @@ extension Date? {
 }
 
 extension Date.JulianDayRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public var queryBinding: some QueryBinding {
     .double(2440587.5 + queryOutput.timeIntervalSince1970 / 86400)
   }
 }

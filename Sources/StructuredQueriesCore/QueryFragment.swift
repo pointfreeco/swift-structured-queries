@@ -8,12 +8,12 @@
 /// > for creating `QueryFragment`s where possible.
 public struct QueryFragment: Hashable, Sendable {
   /// A segment of a query fragment.
-  public enum Segment: Hashable, Sendable {
+  public enum Segment: Sendable {
     /// A raw SQL fragment.
     case sql(String)
 
     /// A binding.
-    case binding(QueryBinding)
+    case binding(any QueryBinding)
   }
 
   /// An array of segments backing this query fragment.
@@ -64,9 +64,9 @@ public struct QueryFragment: Hashable, Sendable {
   /// - Returns: A SQL string and array of associated bindings.
   public func prepare(
     _ template: (_ offset: Int) -> String
-  ) -> (sql: String, bindings: [QueryBinding]) {
+  ) -> (sql: String, bindings: [any QueryBinding]) {
     var sql = ""
-    var bindings: [QueryBinding] = []
+    var bindings: [any QueryBinding] = []
     var offset = 1
     for segment in segments {
       switch segment {
@@ -79,6 +79,31 @@ public struct QueryFragment: Hashable, Sendable {
       }
     }
     return (sql, bindings)
+  }
+}
+
+extension QueryFragment.Segment: Hashable {
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    switch (lhs, rhs) {
+    case (.sql(let l), .sql(let r)):
+      return l == r
+    case (.binding(let l), .binding(let r)):
+      // Use type-erased equality check
+      return AnyHashable(l) == AnyHashable(r)
+    default:
+      return false
+    }
+  }
+  
+  public func hash(into hasher: inout Hasher) {
+    switch self {
+    case .sql(let sql):
+      hasher.combine(0)
+      hasher.combine(sql)
+    case .binding(let binding):
+      hasher.combine(1)
+      hasher.combine(AnyHashable(binding))
+    }
   }
 }
 
@@ -206,7 +231,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     /// Append a query binding to the interpolation.
     ///
     /// - Parameter binding: A query binding.
-    public mutating func appendInterpolation(_ binding: QueryBinding) {
+    public mutating func appendInterpolation(_ binding: any QueryBinding) {
       segments.append(.binding(binding))
     }
 

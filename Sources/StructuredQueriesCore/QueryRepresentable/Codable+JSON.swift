@@ -39,14 +39,17 @@ extension Optional where Wrapped: Codable {
 }
 
 extension _CodableJSONRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
-    do {
-      return try .text(String(decoding: jsonEncoder.encode(queryOutput), as: UTF8.self))
-    } catch {
-      return .invalid(error)
+  @QueryBindingBuilder
+  public var queryBinding: some QueryBinding {
+    if let encoded = try? jsonEncoder.encode(queryOutput) {
+      TextBinding(String(decoding: encoded, as: UTF8.self))
+    } else {
+      InvalidBinding(QueryBindingError(underlyingError: EncodingError()))
     }
   }
 }
+
+private struct EncodingError: Error {}
 
 extension _CodableJSONRepresentation: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity {

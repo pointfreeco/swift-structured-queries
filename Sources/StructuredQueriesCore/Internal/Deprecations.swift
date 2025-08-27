@@ -166,7 +166,7 @@ extension Date? {
   message: "ISO-8601 text is the default representation and is no longer explicitly needed."
 )
 extension Date.ISO8601Representation: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public var queryBinding: some QueryBinding {
     .text(queryOutput.iso8601String)
   }
 }
@@ -223,7 +223,7 @@ extension UUID? {
   message: "Lowercased text is the default representation and is no longer explicitly needed."
 )
 extension UUID.LowercasedRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public var queryBinding: some QueryBinding {
     .text(queryOutput.uuidString.lowercased())
   }
 }
