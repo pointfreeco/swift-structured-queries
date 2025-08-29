@@ -25,8 +25,8 @@ extension QueryBindable {
 extension [UInt8]: QueryBindable, QueryExpression {
   public var queryBinding: QueryBinding { .blob(self) }
   public init?(queryBinding: QueryBinding) {
-    guard case .blob = queryBinding else { return nil }
-    self.init(queryBinding: queryBinding)
+    guard case .blob(let value) = queryBinding else { return nil }
+    self = value
   }
 }
 
@@ -37,16 +37,16 @@ extension Bool: QueryBindable {
 extension Double: QueryBindable {
   public var queryBinding: QueryBinding { .double(self) }
   public init?(queryBinding: QueryBinding) {
-    guard case .double = queryBinding else { return nil }
-    self.init(queryBinding: queryBinding)
+    guard case .double(let value) = queryBinding else { return nil }
+    self = value
   }
 }
 
 extension Date: QueryBindable {
   public var queryBinding: QueryBinding { .date(self) }
   public init?(queryBinding: QueryBinding) {
-    guard case .date = queryBinding else { return nil }
-    self.init(queryBinding: queryBinding)
+    guard case .date(let value) = queryBinding else { return nil }
+    self = value
   }
 }
 
@@ -73,16 +73,16 @@ extension Int32: QueryBindable {
 extension Int64: QueryBindable {
   public var queryBinding: QueryBinding { .int(self) }
   public init?(queryBinding: QueryBinding) {
-    guard case .int = queryBinding else { return nil }
-    self.init(queryBinding: queryBinding)
+    guard case .int(let value) = queryBinding else { return nil }
+    self = value
   }
 }
 
 extension String: QueryBindable {
   public var queryBinding: QueryBinding { .text(self) }
   public init?(queryBinding: QueryBinding) {
-    guard case .text = queryBinding else { return nil }
-    self.init(queryBinding: queryBinding)
+    guard case let .text(value) = queryBinding else { return nil }
+    self = value
   }
 }
 
@@ -111,8 +111,8 @@ extension UInt64: QueryBindable {
 extension UUID: QueryBindable {
   public var queryBinding: QueryBinding { .uuid(self) }
   public init?(queryBinding: QueryBinding) {
-    guard case .uuid = queryBinding else { return nil }
-    self.init(queryBinding: queryBinding)
+    guard case .uuid(let value) = queryBinding else { return nil }
+    self = value
   }
 }
 

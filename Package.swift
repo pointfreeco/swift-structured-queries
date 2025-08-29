@@ -21,12 +21,16 @@ let package = Package(
       targets: ["StructuredQueriesCore"]
     ),
     .library(
-      name: "StructuredQueriesTestSupport",
-      targets: ["StructuredQueriesTestSupport"]
+      name: "StructuredQueriesSQLite",
+      targets: ["StructuredQueriesSQLite"]
     ),
     .library(
-      name: "_StructuredQueriesSQLite",
-      targets: ["StructuredQueriesSQLite"]
+      name: "StructuredQueriesSQLiteCore",
+      targets: ["StructuredQueriesSQLiteCore"]
+    ),
+    .library(
+      name: "StructuredQueriesTestSupport",
+      targets: ["StructuredQueriesTestSupport"]
     ),
   ],
   traits: [
@@ -47,6 +51,13 @@ let package = Package(
   ],
   targets: [
     .target(
+      name: "StructuredQueries",
+      dependencies: [
+        "StructuredQueriesCore",
+        "StructuredQueriesMacros",
+      ]
+    ),
+    .target(
       name: "StructuredQueriesCore",
       dependencies: [
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
@@ -58,13 +69,6 @@ let package = Package(
       ],
       exclude: ["Symbolic Links/README.md"]
     ),
-    .target(
-      name: "StructuredQueries",
-      dependencies: [
-        "StructuredQueriesCore",
-        "StructuredQueriesMacros",
-      ]
-    ),
     .macro(
       name: "StructuredQueriesMacros",
       dependencies: [
@@ -73,12 +77,29 @@ let package = Package(
       ],
       exclude: ["Symbolic Links/README.md"]
     ),
+
     .target(
       name: "StructuredQueriesSQLite",
       dependencies: [
-        "StructuredQueries"
+        "StructuredQueriesSQLiteCore",
+        "StructuredQueriesSQLiteMacros",
       ]
     ),
+    .target(
+      name: "StructuredQueriesSQLiteCore",
+      dependencies: [
+        "StructuredQueriesCore",
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
+      ]
+    ),
+    .macro(
+      name: "StructuredQueriesSQLiteMacros",
+      dependencies: [
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+      ]
+    ),
+
     .target(
       name: "StructuredQueriesTestSupport",
       dependencies: [
@@ -90,8 +111,8 @@ let package = Package(
     .testTarget(
       name: "StructuredQueriesMacrosTests",
       dependencies: [
-        "StructuredQueries",
         "StructuredQueriesMacros",
+        "StructuredQueriesSQLiteMacros",
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "MacroTesting", package: "swift-macro-testing"),
       ]
@@ -102,9 +123,17 @@ let package = Package(
         "StructuredQueries",
         "StructuredQueriesSQLite",
         "StructuredQueriesTestSupport",
+        "_StructuredQueriesSQLite",
         .product(name: "CustomDump", package: "swift-custom-dump"),
         .product(name: "Dependencies", package: "swift-dependencies"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+      ]
+    ),
+
+    .target(
+      name: "_StructuredQueriesSQLite",
+      dependencies: [
+        "StructuredQueriesSQLite"
       ]
     ),
   ],
@@ -128,14 +157,14 @@ for index in package.targets.indices {
 #if !canImport(Darwin)
   package.targets.append(
     .systemLibrary(
-      name: "StructuredQueriesSQLite3",
+      name: "_StructuredQueriesSQLite3",
       providers: [.apt(["libsqlite3-dev"])]
     )
   )
 
   for index in package.targets.indices {
-    if package.targets[index].name == "StructuredQueriesSQLite" {
-      package.targets[index].dependencies.append("StructuredQueriesSQLite3")
+    if package.targets[index].name == "_StructuredQueriesSQLite" {
+      package.targets[index].dependencies.append("_StructuredQueriesSQLite3")
     }
   }
 #endif

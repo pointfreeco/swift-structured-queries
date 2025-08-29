@@ -1,7 +1,7 @@
 import Foundation
 import StructuredQueries
-import StructuredQueriesSQLite
 import Testing
+import _StructuredQueriesSQLite
 
 extension SnapshotTests {
   struct DecodingTests {
