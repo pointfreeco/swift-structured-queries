@@ -4,6 +4,8 @@ builder:
     - documentation_targets:
         - StructuredQueriesCore
         - StructuredQueries
+        - StructuredQueriesSQLiteCore
+        - StructuredQueriesSQLite
       custom_documentation_parameters:
         - '--enable-experimental-overloaded-symbol-presentation'
         # - '--enable-experimental-combined-documentation'
