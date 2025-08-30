@@ -43,7 +43,7 @@ extension SnapshotTests {
     @Test func jsonGroupArrayDisctinct() {
       assertQuery(
         Reminder.select {
-          $0.priority.jsonGroupArray(isDistinct: true)
+          $0.priority.jsonGroupArray(distinct: true)
         }
       ) {
         """
@@ -221,8 +221,8 @@ extension SnapshotTests {
           .select {
             RemindersListRow.Columns(
               remindersList: $0,
-              milestones: $1.jsonGroupArray(isDistinct: true),
-              reminders: $2.jsonGroupArray(isDistinct: true)
+              milestones: $1.jsonGroupArray(distinct: true),
+              reminders: $2.jsonGroupArray(distinct: true)
             )
           }
           .limit(1)

@@ -118,6 +118,7 @@ extension Optional: Table where Wrapped: Table {
       Member?.some(Wrapped.columns[keyPath: keyPath])
     }
 
+    @_disfavoredOverload
     public subscript<QueryValue>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, some QueryExpression<QueryValue?>>
     ) -> some QueryExpression<QueryValue?> {
