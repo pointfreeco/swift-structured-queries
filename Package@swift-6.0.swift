@@ -72,6 +72,7 @@ let package = Package(
     .target(
       name: "StructuredQueriesSQLite",
       dependencies: [
+        "StructuredQueries",
         "StructuredQueriesSQLiteCore",
         "StructuredQueriesSQLiteMacros",
       ]
