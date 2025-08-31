@@ -92,7 +92,7 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     let functionTypeName = context.makeUniqueName(declarationName)
     let databaseFunctionName = StringLiteralExprSyntax(content: functionName)
-    var argumentCount = declaration.signature.parameterClause.parameters.count
+    let argumentCount = declaration.signature.parameterClause.parameters.count
 
     var bodyArguments: [String] = []
     var signature = declaration.signature
