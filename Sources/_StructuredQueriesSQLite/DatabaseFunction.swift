@@ -1,21 +1,21 @@
 import Foundation
 
-extension DatabaseFunction {
+extension ScalarDatabaseFunction {
   public func install(_ db: OpaquePointer) {
-    let body = Unmanaged.passRetained(AnyBody(body: invoke)).toOpaque()
+    let body = Unmanaged.passRetained(ScalarDatabaseFunctionContext(self)).toOpaque()
     sqlite3_create_function_v2(
       db,
       name,
       Int32(argumentCount ?? -1),
       SQLITE_UTF8 | (isDeterministic ? SQLITE_DETERMINISTIC : 0),
       body,
-      { ctx, argc, argv in
+      { context, argumentCount, arguments in
         do {
-          let body = Unmanaged<AnyBody>
-            .fromOpaque(sqlite3_user_data(ctx))
+          let body = Unmanaged<ScalarDatabaseFunctionContext>
+            .fromOpaque(sqlite3_user_data(context))
             .takeUnretainedValue()
-          let arguments: [QueryBinding] = try (0..<argc).map { idx in
-            let value = argv?[Int(idx)]
+          let arguments: [QueryBinding] = try (0..<argumentCount).map { idx in
+            let value = arguments?[Int(idx)]
             switch sqlite3_value_type(value) {
             case SQLITE_BLOB:
               if let blob = sqlite3_value_blob(value) {
@@ -38,16 +38,16 @@ extension DatabaseFunction {
             }
           }
           let output = body(arguments)
-          try output.result(db: ctx)
+          try output.result(db: context)
         } catch {
-          sqlite3_result_error(ctx, error.localizedDescription, -1)
+          sqlite3_result_error(context, error.localizedDescription, -1)
         }
       },
       nil,
       nil,
-      { ctx in
-        guard let ctx else { return }
-        Unmanaged<AnyObject>.fromOpaque(ctx).release()
+      { context in
+        guard let context else { return }
+        Unmanaged<ScalarDatabaseFunctionContext>.fromOpaque(context).release()
       }
     )
   }
@@ -57,10 +57,10 @@ private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.sel
 
 private struct UnknownType: Error {}
 
-private final class AnyBody {
+private final class ScalarDatabaseFunctionContext {
   let body: ([QueryBinding]) -> QueryBinding
-  init(body: @escaping ([QueryBinding]) -> QueryBinding) {
-    self.body = body
+  init(_ function: some ScalarDatabaseFunction) {
+    body = function.invoke
   }
   func callAsFunction(_ arguments: [QueryBinding]) -> QueryBinding {
     body(arguments)

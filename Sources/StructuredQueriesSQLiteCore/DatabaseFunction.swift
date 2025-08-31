@@ -12,7 +12,9 @@ public protocol DatabaseFunction {
   /// Whether or not the function is deterministic (or "pure" or "referentially transparent"),
   /// _i.e._ given an input it will always return the same output.
   var isDeterministic: Bool { get }
+}
 
+public protocol ScalarDatabaseFunction: DatabaseFunction {
   /// The function body. Transforms a collection of bindings handed to the function into a binding
   /// returned to the query.
   ///

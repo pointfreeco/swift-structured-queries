@@ -183,7 +183,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       """,
       """
       \(attributes)\(access)struct \(functionTypeName): \
-      StructuredQueriesSQLiteCore.DatabaseFunction {
+      StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
       public let name = \(databaseFunctionName)
       public let argumentCount: Int? = \(raw: argumentCount)
       public let isDeterministic = \(raw: isDeterministic)
