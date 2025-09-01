@@ -2,20 +2,20 @@ import Foundation
 
 extension ScalarDatabaseFunction {
   public func install(_ db: OpaquePointer) {
-    let body = Unmanaged.passRetained(ScalarDatabaseFunctionContext(self)).toOpaque()
+    let box = Unmanaged.passRetained(ScalarDatabaseFunctionBox(self)).toOpaque()
     sqlite3_create_function_v2(
       db,
       name,
       Int32(argumentCount ?? -1),
       SQLITE_UTF8 | (isDeterministic ? SQLITE_DETERMINISTIC : 0),
-      body,
+      box,
       { context, argumentCount, arguments in
         do {
-          let body = Unmanaged<ScalarDatabaseFunctionContext>
+          let box = Unmanaged<ScalarDatabaseFunctionBox>
             .fromOpaque(sqlite3_user_data(context))
             .takeUnretainedValue()
           let arguments = try [QueryBinding](argumentCount: argumentCount, arguments: arguments)
-          let output = body(arguments)
+          let output = box.function.invoke(arguments)
           try output.result(db: context)
         } catch {
           sqlite3_result_error(context, error.localizedDescription, -1)
@@ -25,19 +25,16 @@ extension ScalarDatabaseFunction {
       nil,
       { context in
         guard let context else { return }
-        Unmanaged<ScalarDatabaseFunctionContext>.fromOpaque(context).release()
+        Unmanaged<ScalarDatabaseFunctionBox>.fromOpaque(context).release()
       }
     )
   }
 }
 
-private final class ScalarDatabaseFunctionContext {
-  let body: ([QueryBinding]) -> QueryBinding
+private final class ScalarDatabaseFunctionBox {
+  let function: any ScalarDatabaseFunction
   init(_ function: some ScalarDatabaseFunction) {
-    body = function.invoke
-  }
-  func callAsFunction(_ arguments: [QueryBinding]) -> QueryBinding {
-    body(arguments)
+    self.function = function
   }
 }
 
@@ -90,6 +87,41 @@ extension QueryBinding {
       sqlite3_result_text(db, value.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
     case .invalid(let error):
       throw error.underlyingError
+    }
+  }
+}
+
+private final class Stream<Element>: Sequence {
+  private let condition = NSCondition()
+  private var buffer: [Element] = []
+  private var isFinished = false
+
+  func send(_ element: Element) {
+    condition.withLock {
+      buffer.append(element)
+      condition.signal()
+    }
+  }
+
+  func finish() {
+    condition.withLock {
+      isFinished = true
+      condition.broadcast()
+    }
+  }
+
+  func makeIterator() -> Iterator { Iterator(base: self) }
+
+  struct Iterator: IteratorProtocol {
+    fileprivate let base: Stream
+    mutating func next() -> Element? {
+      base.condition.withLock {
+        while base.buffer.isEmpty && !base.isFinished {
+          base.condition.wait()
+        }
+        guard !base.buffer.isEmpty else { return nil }
+        return base.buffer.removeFirst()
+      }
     }
   }
 }

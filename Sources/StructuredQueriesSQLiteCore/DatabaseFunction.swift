@@ -1,7 +1,7 @@
 /// A type representing a database function.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macros to
-/// generate a conformance.
+/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
+/// a conformance.
 public protocol DatabaseFunction {
   /// The name of the function.
   var name: String { get }
@@ -15,7 +15,7 @@ public protocol DatabaseFunction {
 }
 
 public protocol ScalarDatabaseFunction: DatabaseFunction {
-  /// The function body. Transforms a collection of bindings handed to the function into a binding
+  /// The function body. Transforms an array of bindings handed to the function into a binding
   /// returned to the query.
   ///
   /// - Parameter arguments: Arguments passed to the database function.

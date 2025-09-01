@@ -75,7 +75,7 @@ extension SnapshotTests {
         """
       }
     }
-    
+
     @DatabaseFunction
     func throwing() throws -> String {
       struct Failure: LocalizedError {
