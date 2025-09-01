@@ -8,6 +8,50 @@ import IssueReporting
 public protocol FTS5: Table {}
 
 extension TableDefinition where QueryValue: FTS5 {
+  /// A BM25 ranking function for the given column-accuracy mapping.
+  ///
+  /// - Parameter rankings: A dictionary mapping columns to accuracy of a match.
+  /// - Returns: A BM25 ranking function.
+  public func bm25(
+    _ rankings: KeyValuePairs<PartialKeyPath<Self>, Double> = [:]
+  ) -> some QueryExpression<Double> {
+    var queryFragments: [QueryFragment] = ["\(QueryValue.self)"]
+    if !rankings.isEmpty {
+      var columnNameToRanking: QueryFragment = """
+        CASE "name"
+        """
+      for (keyPath, ranking) in rankings {
+        guard let column = self[keyPath: keyPath] as? any WritableTableColumnExpression
+        else {
+          reportIssue(
+            """
+            Key path cannot be used in 'bm25' function: \(keyPath)
+
+            Must be a key path to a table column on '\(QueryValue.self)'.
+            """
+          )
+          continue
+        }
+        columnNameToRanking.append(
+          """
+           WHEN \(bind: column.name) THEN \(ranking)
+          """
+        )
+      }
+      columnNameToRanking.append(" ELSE 1 END")
+      for offset in Self.writableColumns.indices {
+        queryFragments.append(
+          """
+          (SELECT \(columnNameToRanking) \
+          FROM pragma_table_info(\(quote: QueryValue.tableName, delimiter: .text)) \
+          WHERE "cid" = \(offset))
+          """
+        )
+      }
+    }
+    return SQLQueryExpression("bm25(\(queryFragments.joined(separator: ", ")))")
+  }
+
   /// A predicate expression from this table matched against another _via_ the `MATCH` operator.
   ///
   /// ```swift
@@ -72,7 +116,7 @@ extension TableColumnExpression where Root: FTS5 {
   ///
   /// ```swift
   /// ReminderText.where { $0.title.match("get") }
-  /// // SELECT … FROM "reminderTexts" WHERE ("reminderTexts" MATCH 'title:\"get\"')
+  /// // SELECT … FROM "reminderTexts" WHERE ("reminderTexts" MATCH 'title:"get"')
   /// ```
   ///
   /// - Parameter pattern: A string expression describing the `MATCH` pattern.
