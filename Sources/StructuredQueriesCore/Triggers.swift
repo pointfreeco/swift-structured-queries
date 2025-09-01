@@ -128,8 +128,8 @@ extension Table {
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
   ///   - dateColumn: A key path to a datetime column.
-  ///   - dateFunction: A database function that returns the current date, _e.g._,
-  ///     `#sql("date('subsec'))"`.
+  ///   - dateFunction: A database function that returns the current datetime, _e.g._,
+  ///     `#sql("datetime('subsec'))"`.
   ///   - expression: The expression used to generate the datetime.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
@@ -139,7 +139,7 @@ extension Table {
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterUpdateTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
-    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("date('subsec')"),
+    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -210,8 +210,8 @@ extension Table {
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
   ///   - dateColumn: A key path to a datetime column.
-  ///   - dateFunction: A database function that returns the current date, _e.g._,
-  ///     `#sql("date('subsec'))"`.
+  ///   - dateFunction: A database function that returns the current datetime, _e.g._,
+  ///     `#sql("datetime('subsec'))"`.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
@@ -220,7 +220,7 @@ extension Table {
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterInsertTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
-    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("date('subsec')"),
+    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
