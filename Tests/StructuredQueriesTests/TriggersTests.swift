@@ -117,7 +117,7 @@ extension SnapshotTests {
 
     @Test func afterUpdateTouchCustomDate() {
       assertQuery(
-        Reminder.createTemporaryTrigger(afterUpdateTouch: \.updatedAt, date: "customDate()")
+        Reminder.createTemporaryTrigger(afterUpdateTouch: \.updatedAt, date: #sql("customDate()"))
       ) {
         """
         CREATE TEMPORARY TRIGGER

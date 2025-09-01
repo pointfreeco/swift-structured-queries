@@ -128,8 +128,8 @@ extension Table {
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
   ///   - dateColumn: A key path to a datetime column.
-  ///   - dateFunction: A database function that returns the current date. Include parentheses in
-  ///     string, i.e. `"customDate()"`.
+  ///   - dateFunction: A database function that returns the current date, _e.g._,
+  ///     `#sql("date('subsec'))"`.
   ///   - expression: The expression used to generate the datetime.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
@@ -139,7 +139,7 @@ extension Table {
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterUpdateTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
-    date dateFunction: StaticString = "datetime('subsec')",
+    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("date('subsec')"),
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -148,7 +148,7 @@ extension Table {
       name,
       ifNotExists: ifNotExists,
       afterUpdateTouch: {
-        $0[dynamicMember: dateColumn] = SQLQueryExpression("\(raw: dateFunction.description)")
+        $0[dynamicMember: dateColumn] = dateFunction
       },
       fileID: fileID,
       line: line,
@@ -210,8 +210,8 @@ extension Table {
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
   ///   - dateColumn: A key path to a datetime column.
-  ///   - dateFunction: A database function that returns the current date. Include parentheses in
-  ///     string, i.e. `"customDate()"`.
+  ///   - dateFunction: A database function that returns the current date, _e.g._,
+  ///     `#sql("date('subsec'))"`.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
@@ -220,7 +220,7 @@ extension Table {
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterInsertTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
-    date dateFunction: StaticString = "datetime('subsec')",
+    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("date('subsec')"),
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -229,7 +229,7 @@ extension Table {
       name,
       ifNotExists: ifNotExists,
       afterInsertTouch: {
-        $0[dynamicMember: dateColumn] = SQLQueryExpression("\(raw: dateFunction.description)")
+        $0[dynamicMember: dateColumn] = dateFunction
       },
       fileID: fileID,
       line: line,
