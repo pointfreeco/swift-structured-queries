@@ -3,7 +3,10 @@
 /// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
 /// a conformance.
 public protocol DatabaseFunction<Input, Output> {
+  /// A type representing the function's arguments.
   associatedtype Input
+
+  /// A type representing the function's return value.
   associatedtype Output
 
   /// The name of the function.
@@ -27,6 +30,10 @@ public protocol ScalarDatabaseFunction<Input, Output>: DatabaseFunction {
 }
 
 extension ScalarDatabaseFunction {
+  /// A function call expression.
+  ///
+  /// - Parameter input: Expressions representing the arguments of the function.
+  /// - Returns: An expression representing the function call.
   public func callAsFunction<each T: QueryExpression>(
     _ input: repeat each T
   ) -> some QueryExpression<Output>
