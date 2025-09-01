@@ -2,8 +2,8 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
-import StructuredQueriesSQLite
 import Testing
+import _StructuredQueriesSQLite
 
 extension SnapshotTests {
   @Suite struct TriggersTests {

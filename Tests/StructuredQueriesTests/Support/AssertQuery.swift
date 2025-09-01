@@ -1,7 +1,7 @@
 import Dependencies
 import StructuredQueries
-import StructuredQueriesSQLite
 import StructuredQueriesTestSupport
+import _StructuredQueriesSQLite
 
 func assertQuery<S: SelectStatement, each J: Table>(
   _ query: S,

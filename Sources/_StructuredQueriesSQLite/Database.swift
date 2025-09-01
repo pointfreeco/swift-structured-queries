@@ -1,15 +1,17 @@
 import Foundation
-import StructuredQueries
-
-#if canImport(Darwin)
-  import SQLite3
-#else
-  import StructuredQueriesSQLite3
-#endif
 
 public struct Database {
   @usableFromInline
   let storage: Storage
+
+  public var handle: OpaquePointer {
+    switch storage {
+    case .owned(let storage):
+      return storage.handle
+    case .unowned(let handle):
+      return handle
+    }
+  }
 
   public init(_ ptr: OpaquePointer) {
     self.storage = .unowned(ptr)
@@ -190,7 +192,7 @@ public struct Database {
 
 private struct InvalidBindingError: Error {}
 
-private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
 @usableFromInline
 struct SQLiteError: LocalizedError {
