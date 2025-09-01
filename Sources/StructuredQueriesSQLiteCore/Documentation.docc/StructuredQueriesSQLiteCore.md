@@ -12,3 +12,4 @@ custom database functions, and more.
 ### Custom functions
 
 - ``DatabaseFunction``
+- ``ScalarDatabaseFunction``
