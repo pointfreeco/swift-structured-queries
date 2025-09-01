@@ -82,7 +82,7 @@ extension QueryBinding {
     case .uuid(let value):
       sqlite3_result_text(db, value.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
     case .invalid(let error):
-      sqlite3_result_error(db, error.localizedDescription, -1)
+      sqlite3_result_error(db, error.underlyingError.localizedDescription, -1)
     }
   }
 }
