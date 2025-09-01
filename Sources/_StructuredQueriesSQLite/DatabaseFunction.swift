@@ -10,16 +10,12 @@ extension ScalarDatabaseFunction {
       SQLITE_UTF8 | (isDeterministic ? SQLITE_DETERMINISTIC : 0),
       box,
       { context, argumentCount, arguments in
-        do {
-          let box = Unmanaged<ScalarDatabaseFunctionBox>
-            .fromOpaque(sqlite3_user_data(context))
-            .takeUnretainedValue()
-          let arguments = try [QueryBinding](argumentCount: argumentCount, arguments: arguments)
-          let output = box.function.invoke(arguments)
-          try output.result(db: context)
-        } catch {
-          sqlite3_result_error(context, error.localizedDescription, -1)
-        }
+        Unmanaged<ScalarDatabaseFunctionBox>
+          .fromOpaque(sqlite3_user_data(context))
+          .takeUnretainedValue()
+          .function
+          .invoke([QueryBinding](argumentCount: argumentCount, arguments: arguments))
+          .result(db: context)
       },
       nil,
       nil,
@@ -39,9 +35,9 @@ private final class ScalarDatabaseFunctionBox {
 }
 
 extension [QueryBinding] {
-  fileprivate init(argumentCount: Int32, arguments: UnsafeMutablePointer<OpaquePointer?>?) throws {
-    self = try (0..<argumentCount).map { idx in
-      let value = arguments?[Int(idx)]
+  fileprivate init(argumentCount: Int32, arguments: UnsafeMutablePointer<OpaquePointer?>?) {
+    self = (0..<argumentCount).map { offset in
+      let value = arguments?[Int(offset)]
       switch sqlite3_value_type(value) {
       case SQLITE_BLOB:
         if let blob = sqlite3_value_blob(value) {
@@ -60,7 +56,7 @@ extension [QueryBinding] {
       case SQLITE_TEXT:
         return .text(String(cString: UnsafePointer(sqlite3_value_text(value))))
       default:
-        throw UnknownType()
+        return .invalid(UnknownType())
       }
     }
   }
@@ -69,7 +65,7 @@ extension [QueryBinding] {
 }
 
 extension QueryBinding {
-  fileprivate func result(db: OpaquePointer?) throws {
+  fileprivate func result(db: OpaquePointer?) {
     switch self {
     case .blob(let value):
       sqlite3_result_blob(db, Array(value), Int32(value.count), SQLITE_TRANSIENT)
@@ -86,7 +82,7 @@ extension QueryBinding {
     case .uuid(let value):
       sqlite3_result_text(db, value.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
     case .invalid(let error):
-      throw error.underlyingError
+      sqlite3_result_error(db, error.localizedDescription, -1)
     }
   }
 }
