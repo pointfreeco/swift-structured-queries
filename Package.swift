@@ -90,7 +90,7 @@ let package = Package(
       name: "StructuredQueriesSQLiteCore",
       dependencies: [
         "StructuredQueriesCore",
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
     .macro(

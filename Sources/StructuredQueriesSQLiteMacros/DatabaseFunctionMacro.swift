@@ -1,9 +1,9 @@
 import SwiftBasicFormat
 import SwiftDiagnostics
+internal import SwiftParser
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-internal import SwiftParser
 
 public enum DatabaseFunctionMacro {}
 
@@ -149,12 +149,12 @@ extension DatabaseFunctionMacro: PeerMacro {
       """
     if declaration.signature.effectSpecifiers?.throwsClause != nil {
       invocationBody = """
-      do {
-      return try \(invocationBody)
-      } catch {
-      return .invalid(error)
-      }
-      """
+        do {
+        return try \(invocationBody)
+        } catch {
+        return .invalid(error)
+        }
+        """
     } else {
       invocationBody = "return \(invocationBody)"
     }
