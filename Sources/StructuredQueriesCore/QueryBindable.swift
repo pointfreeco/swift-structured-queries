@@ -10,6 +10,7 @@ public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryVa
   /// A value that can be bound to a parameter of a SQL statement.
   var queryBinding: QueryBinding { get }
 
+  /// Initializes a bindable type from a binding.
   init?(queryBinding: QueryBinding)
 }
 

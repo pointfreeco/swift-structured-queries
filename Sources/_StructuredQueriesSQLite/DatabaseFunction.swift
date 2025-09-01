@@ -90,38 +90,3 @@ extension QueryBinding {
     }
   }
 }
-
-private final class Stream<Element>: Sequence {
-  private let condition = NSCondition()
-  private var buffer: [Element] = []
-  private var isFinished = false
-
-  func send(_ element: Element) {
-    condition.withLock {
-      buffer.append(element)
-      condition.signal()
-    }
-  }
-
-  func finish() {
-    condition.withLock {
-      isFinished = true
-      condition.broadcast()
-    }
-  }
-
-  func makeIterator() -> Iterator { Iterator(base: self) }
-
-  struct Iterator: IteratorProtocol {
-    fileprivate let base: Stream
-    mutating func next() -> Element? {
-      base.condition.withLock {
-        while base.buffer.isEmpty && !base.isFinished {
-          base.condition.wait()
-        }
-        guard !base.buffer.isEmpty else { return nil }
-        return base.buffer.removeFirst()
-      }
-    }
-  }
-}
