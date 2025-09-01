@@ -76,6 +76,24 @@ extension SnapshotTests {
       }
     }
 
+    @Test func erasedConcat() {
+      @Dependency(\.defaultDatabase) var database
+      $concat.install(database.handle)
+      assertQuery(
+        Values($concat("foo", "bar"))
+      ) {
+        """
+        SELECT "concat"('foo', 'bar')
+        """
+      } results: {
+        """
+        ┌──────────┐
+        │ "foobar" │
+        └──────────┘
+        """
+      }
+    }
+
     @DatabaseFunction
     func throwing() throws -> String {
       struct Failure: LocalizedError {

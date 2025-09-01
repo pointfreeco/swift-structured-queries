@@ -24,6 +24,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Date
           public let name = "currentDate"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
@@ -70,6 +72,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Date
           public let name = "current_date"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
@@ -116,6 +120,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_8fortyTwofMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Int
           public let name = "fortyTwo"
           public let argumentCount: Int? = 0
           public let isDeterministic = true
@@ -162,6 +168,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = String
+          public typealias Output = Date?
           public let name = "currentDate"
           public let argumentCount: Int? = 1
           public let isDeterministic = false
@@ -208,6 +216,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = String
+          public typealias Output = Date?
           public let name = "currentDate"
           public let argumentCount: Int? = 1
           public let isDeterministic = false
@@ -254,6 +264,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = String
+          public typealias Output = Date?
           public let name = "currentDate"
           public let argumentCount: Int? = 1
           public let isDeterministic = false
@@ -300,6 +312,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = String
+          public typealias Output = Date?
           public let name = "currentDate"
           public let argumentCount: Int? = 1
           public let isDeterministic = false
@@ -346,6 +360,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_6concatfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = (String, String)
+          public typealias Output = String
           public let name = "concat"
           public let argumentCount: Int? = 2
           public let isDeterministic = false
@@ -409,6 +425,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = String?
+          public typealias Output = Date?
           public let name = "currentDate"
           public let argumentCount: Int? = 1
           public let isDeterministic = false
@@ -455,6 +473,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Date
           public let name = "currentDate"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
@@ -505,6 +525,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Date
           public let name = "currentDate"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
@@ -555,6 +577,8 @@ extension SnapshotTests {
         }
 
         public struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Date
           public let name = "currentDate"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
@@ -601,6 +625,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Date
           public let name = "currentDate"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
@@ -670,6 +696,8 @@ extension SnapshotTests {
         }
 
         @available(*, unavailable) struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Date
           public let name = "currentDate"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
@@ -716,6 +744,8 @@ extension SnapshotTests {
         }
 
         public struct __macro_local_7defaultfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Int
           public let name = "default"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
@@ -779,6 +809,8 @@ extension SnapshotTests {
         }
 
         public struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = <#QueryBindable#>
           public let name = "void"
           public let argumentCount: Int? = 0
           public let isDeterministic = false

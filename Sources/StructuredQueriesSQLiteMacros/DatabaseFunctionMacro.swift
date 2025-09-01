@@ -125,15 +125,19 @@ extension DatabaseFunctionMacro: PeerMacro {
       parameters.append("\(parameter.secondName ?? parameter.firstName)")
       argumentBindings.append("let n\(offset) = \(type)(queryBinding: arguments[\(offset)])")
     }
+    var inputType = bodyArguments.joined(separator: ", ")
     let bodyReturnClause: String
+    let outputType: TypeSyntax
     if let returnClause = signature.returnClause {
+      outputType = returnClause.type.trimmed
       signature.returnClause?.type = returnClause.type.asQueryExpression()
       bodyReturnClause = " \(returnClause.trimmedDescription)"
     } else {
+      outputType = "Void"
       bodyReturnClause = " -> Void"
     }
     let bodyType = """
-      (\(bodyArguments.joined(separator: ", ")))\
+      (\(inputType))\
       \(declaration.signature.effectSpecifiers?.trimmedDescription ?? "")\
       \(bodyReturnClause)
       """
@@ -174,6 +178,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         continue
       }
     }
+    inputType = bodyArguments.count == 1 ? inputType : "(\(inputType))"
 
     return [
       """
@@ -184,6 +189,8 @@ extension DatabaseFunctionMacro: PeerMacro {
       """
       \(attributes)\(access)struct \(functionTypeName): \
       StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+      public typealias Input = \(raw: inputType)
+      public typealias Output = \(outputType)
       public let name = \(databaseFunctionName)
       public let argumentCount: Int? = \(raw: argumentCount)
       public let isDeterministic = \(raw: isDeterministic)
