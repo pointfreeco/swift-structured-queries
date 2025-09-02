@@ -13,8 +13,8 @@ For example, an `exclaim` function can be defined like so:
 
 ```swift
 @DatabaseFunction
-func exclaim(_ x: String) -> String {
-  x.localizedUppercase + "!"
+func exclaim(_ string: String) -> String {
+  string.localizedUppercase + "!"
 }
 ```
 
