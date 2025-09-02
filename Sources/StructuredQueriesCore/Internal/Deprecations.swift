@@ -169,6 +169,14 @@ extension Date.ISO8601Representation: QueryBindable {
   public var queryBinding: QueryBinding {
     .text(queryOutput.iso8601String)
   }
+
+  public init?(queryBinding: QueryBinding) {
+    guard
+      case .text(let iso8601String) = queryBinding,
+      let queryOutput = try? Date(iso8601String: iso8601String)
+    else { return nil }
+    self.init(queryOutput: queryOutput)
+  }
 }
 
 @available(
@@ -225,6 +233,14 @@ extension UUID? {
 extension UUID.LowercasedRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .text(queryOutput.uuidString.lowercased())
+  }
+
+  public init?(queryBinding: QueryBinding) {
+    guard
+      case .text(let uuidString) = queryBinding,
+      let uuid = UUID(uuidString: uuidString)
+    else { return nil }
+    self.init(queryOutput: uuid)
   }
 }
 

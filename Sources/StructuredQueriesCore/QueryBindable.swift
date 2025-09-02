@@ -16,11 +16,6 @@ public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryVa
 
 extension QueryBindable {
   public var queryFragment: QueryFragment { "\(queryBinding)" }
-
-  public init?(queryBinding: QueryBinding) {
-    guard let queryValue = QueryValue(queryBinding: queryBinding) else { return nil }
-    self.init(queryBinding: queryValue.queryBinding)
-  }
 }
 
 extension [UInt8]: QueryBindable, QueryExpression {

@@ -44,7 +44,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -92,7 +95,61 @@ extension SnapshotTests {
             guard arguments.count == argumentCount else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: body()
+            )
+            .queryBinding
+          }
+          private struct InvalidInvocation: Error {
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func customRepresentation() {
+      assertMacro {
+        """
+        @DatabaseFunction(as: (([String].JSONRepresentation) -> [String].JSONRepresentation).self)
+        func jsonCapitalize(_ strings: [String]) -> [String] {
+          strings.map { $0.capitalized }
+        }
+        """
+      } expansion: {
+        #"""
+        func jsonCapitalize(_ strings: [String]) -> [String] {
+          strings.map { $0.capitalized }
+        }
+
+        var $jsonCapitalize: __macro_local_14jsonCapitalizefMu_ {
+          __macro_local_14jsonCapitalizefMu_(jsonCapitalize)
+        }
+
+        struct __macro_local_14jsonCapitalizefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = [String]
+          public typealias Output = [String]
+          public let name = "jsonCapitalize"
+          public let argumentCount: Int? = 1
+          public let isDeterministic = false
+          public let body: ([String]) -> [String]
+          public init(_ body: @escaping ([String]) -> [String]) {
+            self.body = body
+          }
+          public func callAsFunction(_ strings: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
+            StructuredQueriesCore.SQLQueryExpression(
+              "\(quote: name)(\(strings))"
+            )
+          }
+          public func invoke(
+            _ arguments: [StructuredQueriesCore.QueryBinding]
+          ) -> StructuredQueriesCore.QueryBinding {
+            guard arguments.count == argumentCount, let n0 = [String].JSONRepresentation(queryBinding: arguments[0]) else {
+              return .invalid(InvalidInvocation())
+            }
+            return [String].JSONRepresentation(
+              queryOutput: body(n0.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -140,7 +197,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Int(
+              queryOutput: body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -188,7 +248,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: body(n0.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -236,7 +299,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: body(n0.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -284,7 +350,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: body(n0.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -332,7 +401,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: body(n0.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -380,7 +452,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]), let n1 = String(queryBinding: arguments[1]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0, n1).queryBinding
+            return String(
+              queryOutput: body(n0.queryOutput, n1.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -445,7 +520,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount, let n0 = String?(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: body(n0.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -494,7 +572,10 @@ extension SnapshotTests {
               return .invalid(InvalidInvocation())
             }
             do {
-              return try body().queryBinding
+              return try Date(
+                queryOutput: body()
+              )
+              .queryBinding
             } catch {
               return .invalid(error)
             }
@@ -546,7 +627,10 @@ extension SnapshotTests {
               return .invalid(InvalidInvocation())
             }
             do {
-              return try body().queryBinding
+              return try Date(
+                queryOutput: body()
+              )
+              .queryBinding
             } catch {
               return .invalid(error)
             }
@@ -597,7 +681,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -645,7 +732,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -716,7 +806,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -764,7 +857,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Int(
+              queryOutput: body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -829,7 +925,10 @@ extension SnapshotTests {
             guard arguments.count == argumentCount else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return <#QueryBindable#>(
+              queryOutput: body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }

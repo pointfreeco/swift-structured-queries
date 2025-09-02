@@ -148,5 +148,65 @@ extension SnapshotTests {
         """
       }
     }
+
+    @DatabaseFunction(as: (([String].JSONRepresentation) -> [String].JSONRepresentation).self)
+    func jsonCapitalize(_ strings: [String]) -> [String] {
+      strings.map(\.capitalized)
+    }
+
+    @Test func customRepresentation() {
+      @Dependency(\.defaultDatabase) var database
+      $jsonCapitalize.install(database.handle)
+      assertQuery(
+        Values($jsonCapitalize(#bind(["hello", "world"])))
+      ) {
+        """
+        SELECT "jsonCapitalize"('[
+          "hello",
+          "world"
+        ]')
+        """
+      } results: {
+        """
+        ┌─────────────────┐
+        │ [               │
+        │   [0]: "Hello", │
+        │   [1]: "World"  │
+        │ ]               │
+        └─────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction(as: (([String].JSONRepresentation, Int) -> [String].JSONRepresentation).self)
+    func jsonDropFirst(_ strings: [String], _ k: Int = 1) -> [String] {
+      Array(strings.dropFirst(k))
+    }
+
+    @Test func customMixedRepresentation() {
+      @Dependency(\.defaultDatabase) var database
+      $jsonDropFirst.install(database.handle)
+      assertQuery(
+        Values($jsonDropFirst(#bind(["hello", "world", "goodnight", "moon"]), 2))
+      ) {
+        """
+        SELECT "jsonDropFirst"('[
+          "hello",
+          "world",
+          "goodnight",
+          "moon"
+        ]', 2)
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ [                   │
+        │   [0]: "goodnight", │
+        │   [1]: "moon"       │
+        │ ]                   │
+        └─────────────────────┘
+        """
+      }
+    }
   }
 }

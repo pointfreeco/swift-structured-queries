@@ -50,6 +50,7 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     let declarationName = declaration.name.trimmedDescription.trimmingBackticks()
     var functionName = declarationName
+    var functionRepresentation: FunctionTypeSyntax?
     var isDeterministic = false
     if case .argumentList(let arguments) = node.arguments {
       for argumentIndex in arguments.indices {
@@ -69,6 +70,34 @@ extension DatabaseFunctionMacro: PeerMacro {
             return []
           }
           functionName = string
+
+        case .some(let label) where label.text == "as":
+          guard
+            let functionType = (
+              argument
+              .expression.as(MemberAccessExprSyntax.self)?
+              .base?.as(TupleExprSyntax.self)?
+              .elements.only?
+              .trimmedDescription
+            )
+            .flatMap({
+              TypeSyntax(stringLiteral: $0).as(FunctionTypeSyntax.self)
+            }),
+            functionType.parameters.count == declaration.signature.parameterClause.parameters.count
+          else {
+            context.diagnose(
+              Diagnostic(
+                node: argument.expression,
+                message: MacroExpansionErrorMessage(
+                  """
+                  Argument must be a function type literal mapping to this function
+                  """
+                )
+              )
+            )
+            return []
+          }
+          functionRepresentation = functionType
 
         case .some(let label) where label.text == "isDeterministic":
           guard
@@ -100,6 +129,7 @@ extension DatabaseFunctionMacro: PeerMacro {
     var parameters: [String] = []
     var argumentBindings: [String] = []
     var offset = 0
+    var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
     for index in signature.parameterClause.parameters.indices {
       defer { offset += 1 }
       var parameter = signature.parameterClause.parameters[index]
@@ -112,9 +142,9 @@ extension DatabaseFunctionMacro: PeerMacro {
         )
         return []
       }
-      let type = parameter.type.trimmed
-      bodyArguments.append("\(type)")
-      parameter.type = parameter.type.asQueryExpression()
+      bodyArguments.append("\(parameter.type.trimmed)")
+      let type = (functionRepresentationIterator?.next()?.type ?? parameter.type).trimmed
+      parameter.type = type.asQueryExpression()
       if let defaultValue = parameter.defaultValue,
         defaultValue.value.is(NilLiteralExprSyntax.self)
       {
@@ -130,7 +160,8 @@ extension DatabaseFunctionMacro: PeerMacro {
     let outputType: TypeSyntax
     if let returnClause = signature.returnClause {
       outputType = returnClause.type.trimmed
-      signature.returnClause?.type = returnClause.type.asQueryExpression()
+      signature.returnClause?.type = (functionRepresentation?.returnClause ?? returnClause).type
+        .asQueryExpression()
       bodyReturnClause = " \(returnClause.trimmedDescription)"
     } else {
       outputType = "Void"
@@ -145,7 +176,12 @@ extension DatabaseFunctionMacro: PeerMacro {
     signature.effectSpecifiers?.throwsClause = nil
 
     var invocationBody = """
-      body(\(argumentBindings.indices.map { "n\($0)" }.joined(separator: ", "))).queryBinding
+      \(functionRepresentation?.returnClause.type ?? outputType)(
+      queryOutput: body(\
+      \(argumentBindings.indices.map { "n\($0).queryOutput" }.joined(separator: ", "))\
+      )
+      )
+      .queryBinding
       """
     if declaration.signature.effectSpecifiers?.throwsClause != nil {
       invocationBody = """
@@ -217,6 +253,13 @@ extension DatabaseFunctionMacro: PeerMacro {
       }
       """,
     ]
+  }
+}
+
+extension Collection {
+  fileprivate var only: Element? {
+    guard let first else { return nil }
+    return dropFirst().first == nil ? first : nil
   }
 }
 
