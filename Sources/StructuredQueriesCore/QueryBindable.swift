@@ -16,11 +16,6 @@ public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryVa
 
 extension QueryBindable {
   public var queryFragment: QueryFragment { "\(queryBinding)" }
-
-  public init?(queryBinding: QueryBinding) {
-    guard let queryValue = QueryValue(queryBinding: queryBinding) else { return nil }
-    self.init(queryBinding: queryValue.queryBinding)
-  }
 }
 
 extension [UInt8]: QueryBindable, QueryExpression {
@@ -53,22 +48,42 @@ extension Date: QueryBindable {
 
 extension Float: QueryBindable {
   public var queryBinding: QueryBinding { .double(Double(self)) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .double(let value) = queryBinding else { return nil }
+    self.init(value)
+  }
 }
 
 extension Int: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding else { return nil }
+    self.init(value)
+  }
 }
 
 extension Int8: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding else { return nil }
+    self.init(value)
+  }
 }
 
 extension Int16: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding else { return nil }
+    self.init(value)
+  }
 }
 
 extension Int32: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding else { return nil }
+    self.init(value)
+  }
 }
 
 extension Int64: QueryBindable {
@@ -89,14 +104,26 @@ extension String: QueryBindable {
 
 extension UInt8: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding else { return nil }
+    self.init(value)
+  }
 }
 
 extension UInt16: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding else { return nil }
+    self.init(value)
+  }
 }
 
 extension UInt32: QueryBindable {
   public var queryBinding: QueryBinding { .int(Int64(self)) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding else { return nil }
+    self.init(value)
+  }
 }
 
 extension UInt64: QueryBindable {
@@ -106,6 +133,10 @@ extension UInt64: QueryBindable {
     } else {
       return .int(Int64(self))
     }
+  }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding, value >= UInt64.min else { return nil }
+    self.init(value)
   }
 }
 
@@ -146,8 +177,16 @@ extension DefaultStringInterpolation {
 
 extension QueryBindable where Self: LosslessStringConvertible {
   public var queryBinding: QueryBinding { description.queryBinding }
+  public init?(queryBinding: QueryBinding) {
+    guard let description = String(queryBinding: queryBinding) else { return nil }
+    self.init(description)
+  }
 }
 
 extension QueryBindable where Self: RawRepresentable, RawValue: QueryBindable {
   public var queryBinding: QueryBinding { rawValue.queryBinding }
+  public init?(queryBinding: QueryBinding) {
+    guard let rawValue = RawValue(queryBinding: queryBinding) else { return nil }
+    self.init(rawValue: rawValue)
+  }
 }

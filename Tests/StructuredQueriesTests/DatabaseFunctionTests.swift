@@ -123,5 +123,131 @@ extension SnapshotTests {
     func `default`() -> Int {
       42
     }
+
+    enum Completion: Int, QueryBindable {
+      case incomplete, complete, completing
+    }
+    @DatabaseFunction
+    func toggle(_ completion: Completion) -> Completion {
+      completion == .incomplete ? .completing : .incomplete
+    }
+    @Test func customToggle() {
+      @Dependency(\.defaultDatabase) var database
+      $toggle.install(database.handle)
+      assertQuery(
+        Values($toggle(Completion.incomplete))
+      ) {
+        """
+        SELECT "toggle"(0)
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────────────┐
+        │ SnapshotTests.DatabaseFunctionTests.Completion.completing │
+        └───────────────────────────────────────────────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction(as: (([String].JSONRepresentation) -> [String].JSONRepresentation).self)
+    func jsonCapitalize(_ strings: [String]) -> [String] {
+      strings.map(\.capitalized)
+    }
+
+    @Test func customRepresentation() {
+      @Dependency(\.defaultDatabase) var database
+      $jsonCapitalize.install(database.handle)
+      assertQuery(
+        Values($jsonCapitalize(#bind(["hello", "world"])))
+      ) {
+        """
+        SELECT "jsonCapitalize"('[
+          "hello",
+          "world"
+        ]')
+        """
+      } results: {
+        """
+        ┌─────────────────┐
+        │ [               │
+        │   [0]: "Hello", │
+        │   [1]: "World"  │
+        │ ]               │
+        └─────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction(as: (([String].JSONRepresentation, Int) -> [String].JSONRepresentation).self)
+    func jsonDropFirst(_ strings: [String], _ k: Int = 1) -> [String] {
+      Array(strings.dropFirst(k))
+    }
+
+    @Test func customMixedRepresentation() {
+      @Dependency(\.defaultDatabase) var database
+      $jsonDropFirst.install(database.handle)
+      assertQuery(
+        Values($jsonDropFirst(#bind(["hello", "world", "goodnight", "moon"]), 2))
+      ) {
+        """
+        SELECT "jsonDropFirst"('[
+          "hello",
+          "world",
+          "goodnight",
+          "moon"
+        ]', 2)
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ [                   │
+        │   [0]: "goodnight", │
+        │   [1]: "moon"       │
+        │ ]                   │
+        └─────────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction(as: (([String]?.JSONRepresentation) -> Int).self)
+    func jsonCount(_ strings: [String]?) -> Int {
+      strings?.count ?? -1
+    }
+
+    @Test func customNilRepresentation() {
+      @Dependency(\.defaultDatabase) var database
+      $jsonCount.install(database.handle)
+      assertQuery(
+        Values($jsonCount(#bind(["hello", "world", "goodnight", "moon"])))
+      ) {
+        """
+        SELECT "jsonCount"('[
+          "hello",
+          "world",
+          "goodnight",
+          "moon"
+        ]')
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 4 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Values($jsonCount(#bind(nil)))
+      ) {
+        """
+        SELECT "jsonCount"(NULL)
+        """
+      } results: {
+        """
+        ┌────┐
+        │ -1 │
+        └────┘
+        """
+      }
+    }
   }
 }

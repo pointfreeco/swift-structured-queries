@@ -6,15 +6,6 @@ public struct _CodableJSONRepresentation<QueryOutput: Codable>: QueryRepresentab
   public init(queryOutput: QueryOutput) {
     self.queryOutput = queryOutput
   }
-
-  public init(decoder: inout some QueryDecoder) throws {
-    self.init(
-      queryOutput: try jsonDecoder.decode(
-        QueryOutput.self,
-        from: Data(String(decoder: &decoder).utf8)
-      )
-    )
-  }
 }
 
 extension Decodable where Self: Encodable {
@@ -45,6 +36,24 @@ extension _CodableJSONRepresentation: QueryBindable {
     } catch {
       return .invalid(error)
     }
+  }
+
+  public init?(queryBinding: QueryBinding) {
+    guard case .text(let value) = queryBinding else { return nil }
+    guard let queryOutput = try? jsonDecoder.decode(QueryOutput.self, from: Data(value.utf8))
+    else { return nil }
+    self.init(queryOutput: queryOutput)
+  }
+}
+
+extension _CodableJSONRepresentation: QueryDecodable {
+  public init(decoder: inout some QueryDecoder) throws {
+    self.init(
+      queryOutput: try jsonDecoder.decode(
+        QueryOutput.self,
+        from: Data(String(decoder: &decoder).utf8)
+      )
+    )
   }
 }
 

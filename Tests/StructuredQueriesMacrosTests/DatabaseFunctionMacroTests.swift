@@ -35,16 +35,19 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: self.body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -83,16 +86,70 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: self.body()
+            )
+            .queryBinding
+          }
+          private struct InvalidInvocation: Error {
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func customRepresentation() {
+      assertMacro {
+        """
+        @DatabaseFunction(as: (([String].JSONRepresentation) -> [String].JSONRepresentation).self)
+        func jsonCapitalize(_ strings: [String]) -> [String] {
+          strings.map { $0.capitalized }
+        }
+        """
+      } expansion: {
+        #"""
+        func jsonCapitalize(_ strings: [String]) -> [String] {
+          strings.map { $0.capitalized }
+        }
+
+        var $jsonCapitalize: __macro_local_14jsonCapitalizefMu_ {
+          __macro_local_14jsonCapitalizefMu_(jsonCapitalize)
+        }
+
+        struct __macro_local_14jsonCapitalizefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = [String]
+          public typealias Output = [String]
+          public let name = "jsonCapitalize"
+          public let argumentCount: Int? = 1
+          public let isDeterministic = false
+          public let body: ([String]) -> [String]
+          public init(_ body: @escaping ([String]) -> [String]) {
+            self.body = body
+          }
+          public func callAsFunction(_ strings: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
+            StructuredQueriesCore.SQLQueryExpression(
+              "\(quote: self.name)(\(strings))"
+            )
+          }
+          public func invoke(
+            _ arguments: [StructuredQueriesCore.QueryBinding]
+          ) -> StructuredQueriesCore.QueryBinding {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let strings = [String].JSONRepresentation(queryBinding: arguments[0]) else {
+              return .invalid(InvalidInvocation())
+            }
+            return [String].JSONRepresentation(
+              queryOutput: self.body(strings.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -131,16 +188,19 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Int> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Int(
+              queryOutput: self.body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -179,16 +239,19 @@ extension SnapshotTests {
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String>) -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)(\(format))"
+              "\(quote: self.name)(\(format))"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: self.body(format.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -227,16 +290,19 @@ extension SnapshotTests {
           }
           public func callAsFunction(format: some StructuredQueriesCore.QueryExpression<String>) -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)(\(format))"
+              "\(quote: self.name)(\(format))"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: self.body(format.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -275,16 +341,19 @@ extension SnapshotTests {
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)(\(format))"
+              "\(quote: self.name)(\(format))"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: self.body(format.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -323,16 +392,19 @@ extension SnapshotTests {
           }
           public func callAsFunction(format: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)(\(format))"
+              "\(quote: self.name)(\(format))"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: self.body(format.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -371,16 +443,19 @@ extension SnapshotTests {
           }
           public func callAsFunction(first: some StructuredQueriesCore.QueryExpression<String> = "", second: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<String> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)(\(first), \(second))"
+              "\(quote: self.name)(\(first), \(second))"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount, let n0 = String(queryBinding: arguments[0]), let n1 = String(queryBinding: arguments[1]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let first = String(queryBinding: arguments[0]), let second = String(queryBinding: arguments[1]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0, n1).queryBinding
+            return String(
+              queryOutput: self.body(first.queryOutput, second.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -436,16 +511,19 @@ extension SnapshotTests {
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String?> = String?.none) -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)(\(format))"
+              "\(quote: self.name)(\(format))"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount, let n0 = String?(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String?(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
-            return body(n0).queryBinding
+            return Date?(
+              queryOutput: self.body(format.queryOutput)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -484,17 +562,20 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
             do {
-              return try body().queryBinding
+              return try Date(
+                queryOutput: self.body()
+              )
+              .queryBinding
             } catch {
               return .invalid(error)
             }
@@ -536,17 +617,20 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
             do {
-              return try body().queryBinding
+              return try Date(
+                queryOutput: self.body()
+              )
+              .queryBinding
             } catch {
               return .invalid(error)
             }
@@ -588,16 +672,19 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: self.body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -636,16 +723,19 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: self.body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -707,16 +797,19 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Date(
+              queryOutput: self.body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -755,16 +848,19 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Int> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return Int(
+              queryOutput: self.body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }
@@ -820,16 +916,19 @@ extension SnapshotTests {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<<#QueryBindable#>> {
             StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: name)()"
+              "\(quote: self.name)()"
             )
           }
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard arguments.count == argumentCount else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return body().queryBinding
+            return <#QueryBindable#>(
+              queryOutput: self.body()
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }

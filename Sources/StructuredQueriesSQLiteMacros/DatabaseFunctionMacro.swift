@@ -33,14 +33,16 @@ extension DatabaseFunctionMacro: PeerMacro {
           message: MacroExpansionErrorMessage(
             "Missing required return type"
           ),
-          fixIt: .replaceChild(
+          fixIt: .replace(
             message: MacroExpansionFixItMessage("Insert '-> <#QueryBindable#>'"),
-            parent: declaration.signature,
-            replacingChildAt: \.returnClause,
-            with: ReturnClauseSyntax(
-              type: IdentifierTypeSyntax(name: "<#QueryBindable#>")
-                .with(\.leadingTrivia, .space)
-                .with(\.trailingTrivia, .space)
+            oldNode: declaration.signature,
+            newNode: declaration.signature.with(
+              \.returnClause,
+              ReturnClauseSyntax(
+                type: IdentifierTypeSyntax(name: "<#QueryBindable#>")
+                  .with(\.leadingTrivia, .space)
+                  .with(\.trailingTrivia, .space)
+              )
             )
           )
         )
@@ -50,6 +52,7 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     let declarationName = declaration.name.trimmedDescription.trimmingBackticks()
     var functionName = declarationName
+    var functionRepresentation: FunctionTypeSyntax?
     var isDeterministic = false
     if case .argumentList(let arguments) = node.arguments {
       for argumentIndex in arguments.indices {
@@ -69,6 +72,33 @@ extension DatabaseFunctionMacro: PeerMacro {
             return []
           }
           functionName = string
+
+        case .some(let label) where label.text == "as":
+          guard
+            let functionType =
+              (argument
+              .expression.as(MemberAccessExprSyntax.self)?
+              .base?.as(TupleExprSyntax.self)?
+              .elements.only?
+              .trimmedDescription)
+              .flatMap({
+                TypeSyntax(stringLiteral: $0).as(FunctionTypeSyntax.self)
+              }),
+            functionType.parameters.count == declaration.signature.parameterClause.parameters.count
+          else {
+            context.diagnose(
+              Diagnostic(
+                node: argument.expression,
+                message: MacroExpansionErrorMessage(
+                  """
+                  Argument must be a function type literal mapping to this function
+                  """
+                )
+              )
+            )
+            return []
+          }
+          functionRepresentation = functionType
 
         case .some(let label) where label.text == "isDeterministic":
           guard
@@ -98,8 +128,9 @@ extension DatabaseFunctionMacro: PeerMacro {
     var signature = declaration.signature
     var invocationArgumentTypes: [TypeSyntax] = []
     var parameters: [String] = []
-    var argumentBindings: [String] = []
+    var argumentBindings: [(String, String)] = []
     var offset = 0
+    var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
     for index in signature.parameterClause.parameters.indices {
       defer { offset += 1 }
       var parameter = signature.parameterClause.parameters[index]
@@ -112,9 +143,9 @@ extension DatabaseFunctionMacro: PeerMacro {
         )
         return []
       }
-      let type = parameter.type.trimmed
-      bodyArguments.append("\(type)")
-      parameter.type = parameter.type.asQueryExpression()
+      bodyArguments.append("\(parameter.type.trimmed)")
+      let type = (functionRepresentationIterator?.next()?.type ?? parameter.type).trimmed
+      parameter.type = type.asQueryExpression()
       if let defaultValue = parameter.defaultValue,
         defaultValue.value.is(NilLiteralExprSyntax.self)
       {
@@ -122,15 +153,17 @@ extension DatabaseFunctionMacro: PeerMacro {
       }
       signature.parameterClause.parameters[index] = parameter
       invocationArgumentTypes.append(type)
-      parameters.append("\(parameter.secondName ?? parameter.firstName)")
-      argumentBindings.append("let n\(offset) = \(type)(queryBinding: arguments[\(offset)])")
+      let parameterName = "\(parameter.secondName ?? parameter.firstName)"
+      parameters.append(parameterName)
+      argumentBindings.append((parameterName, "\(type)(queryBinding: arguments[\(offset)])"))
     }
     var inputType = bodyArguments.joined(separator: ", ")
     let bodyReturnClause: String
     let outputType: TypeSyntax
     if let returnClause = signature.returnClause {
       outputType = returnClause.type.trimmed
-      signature.returnClause?.type = returnClause.type.asQueryExpression()
+      signature.returnClause?.type = (functionRepresentation?.returnClause ?? returnClause).type
+        .asQueryExpression()
       bodyReturnClause = " \(returnClause.trimmedDescription)"
     } else {
       outputType = "Void"
@@ -145,7 +178,12 @@ extension DatabaseFunctionMacro: PeerMacro {
     signature.effectSpecifiers?.throwsClause = nil
 
     var invocationBody = """
-      body(\(argumentBindings.indices.map { "n\($0)" }.joined(separator: ", "))).queryBinding
+      \(functionRepresentation?.returnClause.type ?? outputType)(
+      queryOutput: self.body(\
+      \(argumentBindings.map { name, _ in "\(name).queryOutput" }.joined(separator: ", "))\
+      )
+      )
+      .queryBinding
       """
     if declaration.signature.effectSpecifiers?.throwsClause != nil {
       invocationBody = """
@@ -200,14 +238,14 @@ extension DatabaseFunctionMacro: PeerMacro {
       }
       public func callAsFunction\(signature.trimmed) {
       StructuredQueriesCore.SQLQueryExpression(
-      "\\(quote: name)(\(raw: parameters.map { "\\(\($0))" }.joined(separator: ", ")))"
+      "\\(quote: self.name)(\(raw: parameters.map { "\\(\($0))" }.joined(separator: ", ")))"
       )
       }
       public func invoke(
       _ arguments: [StructuredQueriesCore.QueryBinding]
       ) -> StructuredQueriesCore.QueryBinding {
-      guard arguments.count == argumentCount\
-      \(raw: argumentBindings.map { ", \($0)" }.joined()) \
+      guard self.argumentCount == nil || self.argumentCount == arguments.count\
+      \(raw: argumentBindings.map { ", let \($0) = \($1)" }.joined()) \
       else {
       return .invalid(InvalidInvocation())
       }
@@ -217,6 +255,13 @@ extension DatabaseFunctionMacro: PeerMacro {
       }
       """,
     ]
+  }
+}
+
+extension Collection {
+  fileprivate var only: Element? {
+    guard let first else { return nil }
+    return dropFirst().first == nil ? first : nil
   }
 }
 
