@@ -127,7 +127,7 @@ extension DatabaseFunctionMacro: PeerMacro {
     var signature = declaration.signature
     var invocationArgumentTypes: [TypeSyntax] = []
     var parameters: [String] = []
-    var argumentBindings: [String] = []
+    var argumentBindings: [(String, String)] = []
     var offset = 0
     var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
     for index in signature.parameterClause.parameters.indices {
@@ -152,8 +152,9 @@ extension DatabaseFunctionMacro: PeerMacro {
       }
       signature.parameterClause.parameters[index] = parameter
       invocationArgumentTypes.append(type)
-      parameters.append("\(parameter.secondName ?? parameter.firstName)")
-      argumentBindings.append("let n\(offset) = \(type)(queryBinding: arguments[\(offset)])")
+      let parameterName = "\(parameter.secondName ?? parameter.firstName)"
+      parameters.append(parameterName)
+      argumentBindings.append((parameterName, "\(type)(queryBinding: arguments[\(offset)])"))
     }
     var inputType = bodyArguments.joined(separator: ", ")
     let bodyReturnClause: String
@@ -178,7 +179,7 @@ extension DatabaseFunctionMacro: PeerMacro {
     var invocationBody = """
       \(functionRepresentation?.returnClause.type ?? outputType)(
       queryOutput: self.body(\
-      \(argumentBindings.indices.map { "n\($0).queryOutput" }.joined(separator: ", "))\
+      \(argumentBindings.map { name, _ in "\(name).queryOutput" }.joined(separator: ", "))\
       )
       )
       .queryBinding
@@ -243,7 +244,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       _ arguments: [StructuredQueriesCore.QueryBinding]
       ) -> StructuredQueriesCore.QueryBinding {
       guard self.argumentCount == nil || self.argumentCount == arguments.count\
-      \(raw: argumentBindings.map { ", \($0)" }.joined()) \
+      \(raw: argumentBindings.map { ", let \($0) = \($1)" }.joined()) \
       else {
       return .invalid(InvalidInvocation())
       }

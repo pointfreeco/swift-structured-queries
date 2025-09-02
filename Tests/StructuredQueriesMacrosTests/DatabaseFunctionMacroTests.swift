@@ -143,11 +143,11 @@ extension SnapshotTests {
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let n0 = [String].JSONRepresentation(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let strings = [String].JSONRepresentation(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
             return [String].JSONRepresentation(
-              queryOutput: self.body(n0.queryOutput)
+              queryOutput: self.body(strings.queryOutput)
             )
             .queryBinding
           }
@@ -245,11 +245,11 @@ extension SnapshotTests {
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let n0 = String(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
             return Date?(
-              queryOutput: self.body(n0.queryOutput)
+              queryOutput: self.body(format.queryOutput)
             )
             .queryBinding
           }
@@ -296,11 +296,11 @@ extension SnapshotTests {
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let n0 = String(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
             return Date?(
-              queryOutput: self.body(n0.queryOutput)
+              queryOutput: self.body(format.queryOutput)
             )
             .queryBinding
           }
@@ -347,11 +347,11 @@ extension SnapshotTests {
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let n0 = String(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
             return Date?(
-              queryOutput: self.body(n0.queryOutput)
+              queryOutput: self.body(format.queryOutput)
             )
             .queryBinding
           }
@@ -398,11 +398,11 @@ extension SnapshotTests {
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let n0 = String(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
             return Date?(
-              queryOutput: self.body(n0.queryOutput)
+              queryOutput: self.body(format.queryOutput)
             )
             .queryBinding
           }
@@ -449,11 +449,11 @@ extension SnapshotTests {
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let n0 = String(queryBinding: arguments[0]), let n1 = String(queryBinding: arguments[1]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let first = String(queryBinding: arguments[0]), let second = String(queryBinding: arguments[1]) else {
               return .invalid(InvalidInvocation())
             }
             return String(
-              queryOutput: self.body(n0.queryOutput, n1.queryOutput)
+              queryOutput: self.body(first.queryOutput, second.queryOutput)
             )
             .queryBinding
           }
@@ -517,11 +517,11 @@ extension SnapshotTests {
           public func invoke(
             _ arguments: [StructuredQueriesCore.QueryBinding]
           ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let n0 = String?(queryBinding: arguments[0]) else {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String?(queryBinding: arguments[0]) else {
               return .invalid(InvalidInvocation())
             }
             return Date?(
-              queryOutput: self.body(n0.queryOutput)
+              queryOutput: self.body(format.queryOutput)
             )
             .queryBinding
           }
