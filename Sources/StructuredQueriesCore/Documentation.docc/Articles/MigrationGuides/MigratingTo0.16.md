@@ -68,3 +68,16 @@ To power things, a new initializer, ``QueryBindable/init(queryBinding:)``, was a
 ``QueryBindable`` protocol. While most code should continue to compile, if you define your own
 query representations that conform to ``QueryRepresentable``, you will need to define this
 initializer upon upgrading.
+
+For example, `JSONRepresentation` added the following initializer:
+
+```swift
+public init?(queryBinding: QueryBinding) {
+  guard case .text(let json) = queryBinding else { return nil }
+  guard let queryOutput = try? jsonDecoder.decode(
+    QueryOutput.self, from: Data(json.utf8)
+  )
+  else { return nil }
+  self.init(queryOutput: queryOutput)
+}
+```
