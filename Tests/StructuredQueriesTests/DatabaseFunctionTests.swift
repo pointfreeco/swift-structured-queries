@@ -208,5 +208,46 @@ extension SnapshotTests {
         """
       }
     }
+
+    @DatabaseFunction(as: (([String]?.JSONRepresentation) -> Int).self)
+    func jsonCount(_ strings: [String]?) -> Int {
+      strings?.count ?? -1
+    }
+
+    @Test func customNilRepresentation() {
+      @Dependency(\.defaultDatabase) var database
+      $jsonCount.install(database.handle)
+      assertQuery(
+        Values($jsonCount(#bind(["hello", "world", "goodnight", "moon"])))
+      ) {
+        """
+        SELECT "jsonCount"('[
+          "hello",
+          "world",
+          "goodnight",
+          "moon"
+        ]')
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 4 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Values($jsonCount(#bind(nil)))
+      ) {
+        """
+        SELECT "jsonCount"(NULL)
+        """
+      } results: {
+        """
+        ┌────┐
+        │ -1 │
+        └────┘
+        """
+      }
+    }
   }
 }
