@@ -140,3 +140,7 @@ reading to learn more about building SQL with StructuredQueries.
 
 - <doc:FullTextSearch>
 - <doc:Integration>
+
+### Migration guides
+
+- <doc:MigrationGuides>
