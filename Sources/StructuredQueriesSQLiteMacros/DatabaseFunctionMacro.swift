@@ -177,7 +177,7 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     var invocationBody = """
       \(functionRepresentation?.returnClause.type ?? outputType)(
-      queryOutput: body(\
+      queryOutput: self.body(\
       \(argumentBindings.indices.map { "n\($0).queryOutput" }.joined(separator: ", "))\
       )
       )
@@ -236,13 +236,13 @@ extension DatabaseFunctionMacro: PeerMacro {
       }
       public func callAsFunction\(signature.trimmed) {
       StructuredQueriesCore.SQLQueryExpression(
-      "\\(quote: name)(\(raw: parameters.map { "\\(\($0))" }.joined(separator: ", ")))"
+      "\\(quote: self.name)(\(raw: parameters.map { "\\(\($0))" }.joined(separator: ", ")))"
       )
       }
       public func invoke(
       _ arguments: [StructuredQueriesCore.QueryBinding]
       ) -> StructuredQueriesCore.QueryBinding {
-      guard arguments.count == argumentCount\
+      guard self.argumentCount == nil || self.argumentCount == arguments.count\
       \(raw: argumentBindings.map { ", \($0)" }.joined()) \
       else {
       return .invalid(InvalidInvocation())
