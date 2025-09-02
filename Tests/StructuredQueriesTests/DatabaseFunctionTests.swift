@@ -123,5 +123,30 @@ extension SnapshotTests {
     func `default`() -> Int {
       42
     }
+
+    enum Completion: Int, QueryBindable {
+      case incomplete, complete, completing
+    }
+    @DatabaseFunction
+    func toggle(_ completion: Completion) -> Completion {
+      completion == .incomplete ? .completing : .incomplete
+    }
+    @Test func customToggle() {
+      @Dependency(\.defaultDatabase) var database
+      $toggle.install(database.handle)
+      assertQuery(
+        Values($toggle(Completion.incomplete))
+      ) {
+        """
+        SELECT "toggle"(0)
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────────────┐
+        │ SnapshotTests.DatabaseFunctionTests.Completion.completing │
+        └───────────────────────────────────────────────────────────┘
+        """
+      }
+    }
   }
 }
