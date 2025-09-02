@@ -1,13 +1,13 @@
-# Migrating to 0.16
+# User-defined SQL functions
 
-StructuredQueries 0.16 introduces powerful tools for user-defined SQLite functions, with some
-breaking changes for those defining custom query representations.
+StructuredQueries comes with lightweight tools for defining Swift functions that can be called to
+from SQLite.
 
 ## Overview
 
-StructuredQueries recently introduced a new module, StructuredQueriesSQLite, and with it a new macro
-for defining Swift functions that can be called from a query. It's called `@DatabaseFunction`, and
-can annotate any function that works with query-representable types.
+StructuredQueries defines a macro specifically for defining Swift functions that can be called from
+a query. It's called `@DatabaseFunction`, and can annotate any function that works with
+query-representable types.
 
 For example, an `exclaim` function can be defined like so:
 
@@ -62,22 +62,9 @@ func jsonArrayExclaim(_ strings: [String]) -> [String] {
 }
 ```
 
-### Breaking change: user-defined representations
+## Topics
 
-To power things, a new initializer, ``QueryBindable/init(queryBinding:)``, was added to the
-``QueryBindable`` protocol. While most code should continue to compile, if you define your own
-query representations that conform to ``QueryRepresentable``, you will need to define this
-initializer upon upgrading.
+### Custom functions
 
-For example, `JSONRepresentation` added the following initializer:
-
-```swift
-public init?(queryBinding: QueryBinding) {
-  guard case .text(let json) = queryBinding else { return nil }
-  guard let queryOutput = try? jsonDecoder.decode(
-    QueryOutput.self, from: Data(json.utf8)
-  )
-  else { return nil }
-  self.init(queryOutput: queryOutput)
-}
-```
+- ``DatabaseFunction``
+- ``ScalarDatabaseFunction``

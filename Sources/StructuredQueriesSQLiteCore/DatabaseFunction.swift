@@ -20,6 +20,10 @@ public protocol DatabaseFunction<Input, Output> {
   var isDeterministic: Bool { get }
 }
 
+/// A type representing a scalar database function.
+///
+/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
+/// a conformance.
 public protocol ScalarDatabaseFunction<Input, Output>: DatabaseFunction {
   /// The function body. Transforms an array of bindings handed to the function into a binding
   /// returned to the query.
