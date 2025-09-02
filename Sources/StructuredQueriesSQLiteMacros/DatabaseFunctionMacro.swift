@@ -33,14 +33,16 @@ extension DatabaseFunctionMacro: PeerMacro {
           message: MacroExpansionErrorMessage(
             "Missing required return type"
           ),
-          fixIt: .replaceChild(
+          fixIt: .replace(
             message: MacroExpansionFixItMessage("Insert '-> <#QueryBindable#>'"),
-            parent: declaration.signature,
-            replacingChildAt: \.returnClause,
-            with: ReturnClauseSyntax(
-              type: IdentifierTypeSyntax(name: "<#QueryBindable#>")
-                .with(\.leadingTrivia, .space)
-                .with(\.trailingTrivia, .space)
+            oldNode: declaration.signature,
+            newNode: declaration.signature.with(
+              \.returnClause,
+              ReturnClauseSyntax(
+                type: IdentifierTypeSyntax(name: "<#QueryBindable#>")
+                  .with(\.leadingTrivia, .space)
+                  .with(\.trailingTrivia, .space)
+              )
             )
           )
         )
@@ -73,16 +75,15 @@ extension DatabaseFunctionMacro: PeerMacro {
 
         case .some(let label) where label.text == "as":
           guard
-            let functionType = (
-              argument
+            let functionType =
+              (argument
               .expression.as(MemberAccessExprSyntax.self)?
               .base?.as(TupleExprSyntax.self)?
               .elements.only?
-              .trimmedDescription
-            )
-            .flatMap({
-              TypeSyntax(stringLiteral: $0).as(FunctionTypeSyntax.self)
-            }),
+              .trimmedDescription)
+              .flatMap({
+                TypeSyntax(stringLiteral: $0).as(FunctionTypeSyntax.self)
+              }),
             functionType.parameters.count == declaration.signature.parameterClause.parameters.count
           else {
             context.diagnose(
