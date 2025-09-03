@@ -10,12 +10,13 @@ import _StructuredQueriesSQLite
 
 extension SnapshotTests {
   @Suite struct DatabaseFunctionTests {
+    @Dependency(\.defaultDatabase) var database
+
     @DatabaseFunction
     func isEnabled() -> Bool {
       true
     }
     @Test func customIsEnabled() {
-      @Dependency(\.defaultDatabase) var database
       $isEnabled.install(database.handle)
       assertQuery(
         Values($isEnabled())
@@ -37,7 +38,6 @@ extension SnapshotTests {
       Date(timeIntervalSince1970: 0)
     }
     @Test func customDateTime() {
-      @Dependency(\.defaultDatabase) var database
       $dateTime.install(database.handle)
       assertQuery(
         Values($dateTime())
@@ -59,7 +59,6 @@ extension SnapshotTests {
       first + second
     }
     @Test func customConcat() {
-      @Dependency(\.defaultDatabase) var database
       $concat.install(database.handle)
       assertQuery(
         Values($concat(first: "foo", second: "bar"))
@@ -77,7 +76,6 @@ extension SnapshotTests {
     }
 
     @Test func erasedConcat() {
-      @Dependency(\.defaultDatabase) var database
       $concat.install(database.handle)
       assertQuery(
         Values($concat("foo", "bar"))
@@ -104,7 +102,6 @@ extension SnapshotTests {
       throw Failure()
     }
     @Test func customThrowing() {
-      @Dependency(\.defaultDatabase) var database
       $throwing.install(database.handle)
       assertQuery(
         Values($throwing())
@@ -132,7 +129,6 @@ extension SnapshotTests {
       completion == .incomplete ? .completing : .incomplete
     }
     @Test func customToggle() {
-      @Dependency(\.defaultDatabase) var database
       $toggle.install(database.handle)
       assertQuery(
         Values($toggle(Completion.incomplete))
@@ -155,7 +151,6 @@ extension SnapshotTests {
     }
 
     @Test func customRepresentation() {
-      @Dependency(\.defaultDatabase) var database
       $jsonCapitalize.install(database.handle)
       assertQuery(
         Values($jsonCapitalize(#bind(["hello", "world"])))
@@ -184,7 +179,6 @@ extension SnapshotTests {
     }
 
     @Test func customMixedRepresentation() {
-      @Dependency(\.defaultDatabase) var database
       $jsonDropFirst.install(database.handle)
       assertQuery(
         Values($jsonDropFirst(#bind(["hello", "world", "goodnight", "moon"]), 2))
@@ -215,7 +209,6 @@ extension SnapshotTests {
     }
 
     @Test func customNilRepresentation() {
-      @Dependency(\.defaultDatabase) var database
       $jsonCount.install(database.handle)
       assertQuery(
         Values($jsonCount(#bind(["hello", "world", "goodnight", "moon"])))
@@ -248,6 +241,35 @@ extension SnapshotTests {
         └────┘
         """
       }
+    }
+
+    final class Logger {
+      var messages: [String] = []
+
+      @DatabaseFunction
+      func log(_ message: String) {
+        messages.append(message)
+      }
+    }
+
+    @Test func voidState() {
+      let logger = Logger()
+      logger.$log.install(database.handle)
+
+      assertQuery(
+        Values(logger.$log("Hello, world!"))
+      ) {
+        """
+        SELECT "log"('Hello, world!')
+        """
+      } results: {
+        """
+        ┌──┐
+        └──┘
+        """
+      }
+
+      #expect(logger.messages == ["Hello, world!"])
     }
   }
 }
