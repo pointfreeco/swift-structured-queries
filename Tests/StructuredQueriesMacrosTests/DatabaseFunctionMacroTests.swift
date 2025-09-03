@@ -897,7 +897,7 @@ extension SnapshotTests {
           public init(_ body: @escaping () -> Swift.Void) {
             self.body = body
           }
-          public func callAsFunction() {
+          public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
             StructuredQueriesCore.SQLQueryExpression(
               "\(quote: self.name)()"
             )
@@ -943,7 +943,7 @@ extension SnapshotTests {
           public init(_ body: @escaping () throws -> Swift.Void) {
             self.body = body
           }
-          public func callAsFunction() {
+          public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
             StructuredQueriesCore.SQLQueryExpression(
               "\(quote: self.name)()"
             )

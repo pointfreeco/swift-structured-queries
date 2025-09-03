@@ -140,6 +140,7 @@ extension DatabaseFunctionMacro: PeerMacro {
     var inputType = bodyArguments.joined(separator: ", ")
     let isVoidReturning = signature.returnClause == nil
     let outputType = returnClause.type.trimmed
+    signature.returnClause = returnClause
     signature.returnClause?.type = (functionRepresentation?.returnClause ?? returnClause).type
       .asQueryExpression()
     let bodyReturnClause = " \(returnClause.trimmedDescription)"
