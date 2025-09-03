@@ -50,7 +50,7 @@ public macro DatabaseFunction<each T: QueryBindable>(
   as representableFunctionType: ((repeat each T) -> Void).Type,
   isDeterministic: Bool = false
 ) =
-#externalMacro(
-  module: "StructuredQueriesSQLiteMacros",
-  type: "DatabaseFunctionMacro"
-)
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "DatabaseFunctionMacro"
+  )
