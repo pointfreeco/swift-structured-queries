@@ -35,3 +35,14 @@ public macro DatabaseFunction<each T: QueryBindable, R: QueryBindable>(
     module: "StructuredQueriesSQLiteMacros",
     type: "DatabaseFunctionMacro"
   )
+
+@attached(peer, names: overloaded, prefixed(`$`))
+public macro DatabaseFunction<each T: QueryBindable>(
+  _ name: String = "",
+  as representableFunctionType: ((repeat each T) -> Void).Type,
+  isDeterministic: Bool = false
+) =
+#externalMacro(
+  module: "StructuredQueriesSQLiteMacros",
+  type: "DatabaseFunctionMacro"
+)
