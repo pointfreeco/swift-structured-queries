@@ -572,8 +572,8 @@ extension SnapshotTests {
               return .invalid(InvalidInvocation())
             }
             do {
-              return try Date(
-                queryOutput: self.body()
+              return Date(
+                queryOutput: try self.body()
               )
               .queryBinding
             } catch {
@@ -627,8 +627,8 @@ extension SnapshotTests {
               return .invalid(InvalidInvocation())
             }
             do {
-              return try Date(
-                queryOutput: self.body()
+              return Date(
+                queryOutput: try self.body()
               )
               .queryBinding
             } catch {
@@ -869,7 +869,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func returnTypeDiagnostic() {
+    @Test func voidReturnType() {
       assertMacro {
         """
         @DatabaseFunction
@@ -877,26 +877,9 @@ extension SnapshotTests {
           print("...")
         }
         """
-      } diagnostics: {
-        """
-        @DatabaseFunction
-        public func void() {
-                        ──┬
-                          ╰─ 🛑 Missing required return type
-                             ✏️ Insert '-> <#QueryBindable#>'
-          print("...")
-        }
-        """
-      } fixes: {
-        """
-        @DatabaseFunction
-        public func void() -> <#QueryBindable#> {
-          print("...")
-        }
-        """
       } expansion: {
         #"""
-        public func void() -> <#QueryBindable#> {
+        public func void() {
           print("...")
         }
 
@@ -906,15 +889,15 @@ extension SnapshotTests {
 
         public struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
-          public typealias Output = <#QueryBindable#>
+          public typealias Output = Swift.Void
           public let name = "void"
           public let argumentCount: Int? = 0
           public let isDeterministic = false
-          public let body: () -> <#QueryBindable#>
-          public init(_ body: @escaping () -> <#QueryBindable#>) {
+          public let body: () -> Swift.Void
+          public init(_ body: @escaping () -> Swift.Void) {
             self.body = body
           }
-          public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<<#QueryBindable#>> {
+          public func callAsFunction() {
             StructuredQueriesCore.SQLQueryExpression(
               "\(quote: self.name)()"
             )
@@ -925,10 +908,58 @@ extension SnapshotTests {
             guard self.argumentCount == nil || self.argumentCount == arguments.count else {
               return .invalid(InvalidInvocation())
             }
-            return <#QueryBindable#>(
-              queryOutput: self.body()
+            self.body()
+            return .null
+          }
+          private struct InvalidInvocation: Error {
+          }
+        }
+        """#
+      }
+      assertMacro {
+        """
+        @DatabaseFunction
+        public func void() throws {
+          throw Failure()
+        }
+        """
+      } expansion: {
+        #"""
+        public func void() throws {
+          throw Failure()
+        }
+
+        public var $void: __macro_local_4voidfMu_ {
+          __macro_local_4voidfMu_(void)
+        }
+
+        public struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Swift.Void
+          public let name = "void"
+          public let argumentCount: Int? = 0
+          public let isDeterministic = false
+          public let body: () throws -> Swift.Void
+          public init(_ body: @escaping () throws -> Swift.Void) {
+            self.body = body
+          }
+          public func callAsFunction() {
+            StructuredQueriesCore.SQLQueryExpression(
+              "\(quote: self.name)()"
             )
-            .queryBinding
+          }
+          public func invoke(
+            _ arguments: [StructuredQueriesCore.QueryBinding]
+          ) -> StructuredQueriesCore.QueryBinding {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
+              return .invalid(InvalidInvocation())
+            }
+            do {
+              try self.body()
+              return .null
+            } catch {
+              return .invalid(error)
+            }
           }
           private struct InvalidInvocation: Error {
           }

@@ -25,31 +25,11 @@ extension DatabaseFunctionMacro: PeerMacro {
       return []
     }
 
-//    guard declaration.signature.returnClause != nil else {
-//      context.diagnose(
-//        Diagnostic(
-//          node: declaration.signature,
-//          position: declaration.signature.endPositionBeforeTrailingTrivia,
-//          message: MacroExpansionErrorMessage(
-//            "Missing required return type"
-//          ),
-//          fixIt: .replace(
-//            message: MacroExpansionFixItMessage("Insert '-> <#QueryBindable#>'"),
-//            oldNode: declaration.signature,
-//            newNode: declaration.signature.with(
-//              \.returnClause,
-//              ReturnClauseSyntax(
-//                type: IdentifierTypeSyntax(name: "<#QueryBindable#>")
-//                  .with(\.leadingTrivia, .space)
-//                  .with(\.trailingTrivia, .space)
-//              )
-//            )
-//          )
-//        )
-//      )
-//      return []
-//    }
-
+    let returnClause =
+      declaration.signature.returnClause
+      ?? ReturnClauseSyntax(
+        type: "Swift.Void" as TypeSyntax
+      )
     let declarationName = declaration.name.trimmedDescription.trimmingBackticks()
     var functionName = declarationName
     var functionRepresentation: FunctionTypeSyntax?
@@ -158,40 +138,31 @@ extension DatabaseFunctionMacro: PeerMacro {
       argumentBindings.append((parameterName, "\(type)(queryBinding: arguments[\(offset)])"))
     }
     var inputType = bodyArguments.joined(separator: ", ")
-    let bodyReturnClause: String
-    let outputType: TypeSyntax
     let isVoidReturning = signature.returnClause == nil
-    if let returnClause = signature.returnClause {
-      outputType = returnClause.type.trimmed
-      signature.returnClause?.type = (functionRepresentation?.returnClause ?? returnClause).type
-        .asQueryExpression()
-      bodyReturnClause = " \(returnClause.trimmedDescription)"
-    } else {
-      outputType = "Swift.Void"
-      bodyReturnClause = " -> Swift.Void"
-      signature.returnClause = ReturnClauseSyntax(
-        type: "some StructuredQueriesCore.QueryExpression<Swift.Void>" as TypeSyntax
-      )
-    }
+    let outputType = returnClause.type.trimmed
+    signature.returnClause?.type = (functionRepresentation?.returnClause ?? returnClause).type
+      .asQueryExpression()
+    let bodyReturnClause = " \(returnClause.trimmedDescription)"
     let bodyType = """
       (\(inputType))\
       \(declaration.signature.effectSpecifiers?.trimmedDescription ?? "")\
       \(bodyReturnClause)
       """
     let bodyInvocation = """
-      self.body(\
+      \(declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")self.body(\
       \(argumentBindings.map { name, _ in "\(name).queryOutput" }.joined(separator: ", "))\
       )
       """
     // TODO: Diagnose 'asyncClause'?
     signature.effectSpecifiers?.throwsClause = nil
 
-    var invocationBody = isVoidReturning
-    ? """
-    \(bodyInvocation)
-    return .null
-    """
-    : """
+    var invocationBody =
+      isVoidReturning
+      ? """
+      \(bodyInvocation)
+      return .null
+      """
+      : """
       return \(functionRepresentation?.returnClause.type ?? outputType)(
       queryOutput: \(bodyInvocation)
       )
@@ -200,7 +171,7 @@ extension DatabaseFunctionMacro: PeerMacro {
     if declaration.signature.effectSpecifiers?.throwsClause != nil {
       invocationBody = """
         do {
-        return try { try \(invocationBody) }()
+        \(invocationBody)
         } catch {
         return .invalid(error)
         }
