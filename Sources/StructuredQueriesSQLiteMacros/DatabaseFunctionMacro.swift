@@ -201,7 +201,8 @@ extension DatabaseFunctionMacro: PeerMacro {
         continue
       }
     }
-    representableInputType = representableInputTypes.count == 1
+    representableInputType =
+      representableInputTypes.count == 1
       ? representableInputType
       : "(\(representableInputType))"
 
