@@ -105,6 +105,7 @@ extension DatabaseFunctionMacro: PeerMacro {
     let argumentCount = declaration.signature.parameterClause.parameters.count
 
     var bodyArguments: [String] = []
+    var representableInputTypes: [String] = []
     var signature = declaration.signature
     var invocationArgumentTypes: [TypeSyntax] = []
     var parameters: [String] = []
@@ -125,6 +126,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       }
       bodyArguments.append("\(parameter.type.trimmed)")
       let type = (functionRepresentationIterator?.next()?.type ?? parameter.type).trimmed
+      representableInputTypes.append(type.trimmedDescription)
       parameter.type = type.asQueryExpression()
       if let defaultValue = parameter.defaultValue,
         defaultValue.value.is(NilLiteralExprSyntax.self)
@@ -137,15 +139,16 @@ extension DatabaseFunctionMacro: PeerMacro {
       parameters.append(parameterName)
       argumentBindings.append((parameterName, "\(type)(queryBinding: arguments[\(offset)])"))
     }
-    var inputType = bodyArguments.joined(separator: ", ")
+    var representableInputType = representableInputTypes.joined(separator: ", ")
     let isVoidReturning = signature.returnClause == nil
     let outputType = returnClause.type.trimmed
     signature.returnClause = returnClause
-    signature.returnClause?.type = (functionRepresentation?.returnClause ?? returnClause).type
-      .asQueryExpression()
+    let representableOutputType = (functionRepresentation?.returnClause ?? returnClause).type
+      .trimmed
+    signature.returnClause?.type = representableOutputType.asQueryExpression()
     let bodyReturnClause = " \(returnClause.trimmedDescription)"
     let bodyType = """
-      (\(inputType))\
+      (\(bodyArguments.joined(separator: ", ")))\
       \(declaration.signature.effectSpecifiers?.trimmedDescription ?? "")\
       \(bodyReturnClause)
       """
@@ -198,7 +201,9 @@ extension DatabaseFunctionMacro: PeerMacro {
         continue
       }
     }
-    inputType = bodyArguments.count == 1 ? inputType : "(\(inputType))"
+    representableInputType = representableInputTypes.count == 1
+      ? representableInputType
+      : "(\(representableInputType))"
 
     return [
       """
@@ -209,8 +214,8 @@ extension DatabaseFunctionMacro: PeerMacro {
       """
       \(attributes)\(access)struct \(functionTypeName): \
       StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
-      public typealias Input = \(raw: inputType)
-      public typealias Output = \(outputType)
+      public typealias Input = \(raw: representableInputType)
+      public typealias Output = \(representableOutputType)
       public let name = \(databaseFunctionName)
       public let argumentCount: Int? = \(raw: argumentCount)
       public let isDeterministic = \(raw: isDeterministic)

@@ -38,6 +38,7 @@ extension ScalarDatabaseFunction {
   ///
   /// - Parameter input: Expressions representing the arguments of the function.
   /// - Returns: An expression representing the function call.
+  @_disfavoredOverload
   public func callAsFunction<each T: QueryExpression>(
     _ input: repeat each T
   ) -> some QueryExpression<Output>

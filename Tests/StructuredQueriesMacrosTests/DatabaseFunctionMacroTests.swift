@@ -126,8 +126,8 @@ extension SnapshotTests {
         }
 
         struct __macro_local_14jsonCapitalizefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
-          public typealias Input = [String]
-          public typealias Output = [String]
+          public typealias Input = [String].JSONRepresentation
+          public typealias Output = [String].JSONRepresentation
           public let name = "jsonCapitalize"
           public let argumentCount: Int? = 1
           public let isDeterministic = false
