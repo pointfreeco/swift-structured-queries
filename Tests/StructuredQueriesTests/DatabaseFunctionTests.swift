@@ -312,19 +312,18 @@ extension SnapshotTests {
       }
     }
 
-    @DatabaseFunction(as: ((Reminder.JSONRepresentation) -> Bool).self)
-    func isValid(_ reminder: Reminder) -> Bool {
-      !reminder.title.isEmpty
+    @DatabaseFunction(as: ((Reminder.JSONRepresentation, Bool) -> Bool).self)
+    func isValid(_ reminder: Reminder, _ override: Bool = false) -> Bool {
+      !reminder.title.isEmpty || override
     }
-
     @Test func jsonObject() {
       $isValid.install(database.handle)
 
       assertQuery(
-        Reminder.select { $isValid($0.jsonObject()) }.limit(1)
+        Reminder.select { $isValid($0.jsonObject(), true) }.limit(1)
       ) {
         """
-        SELECT "isValid"(json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")))
+        SELECT "isValid"(json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")), 1)
         FROM "reminders"
         LIMIT 1
         """
