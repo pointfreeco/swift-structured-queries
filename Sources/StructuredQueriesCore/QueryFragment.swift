@@ -19,6 +19,9 @@ public struct QueryFragment: Hashable, Sendable {
   /// An array of segments backing this query fragment.
   public internal(set) var segments: [Segment] = []
 
+  /// Initializes an empty query fragment.
+  public init() {}
+
   fileprivate init(segments: [Segment]) {
     self.segments = segments
   }

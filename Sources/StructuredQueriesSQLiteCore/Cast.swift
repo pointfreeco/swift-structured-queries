@@ -98,3 +98,9 @@ private struct Cast<QueryValue: SQLiteType, Base: QueryExpression>: QueryExpress
 extension RawRepresentable where RawValue: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity { RawValue.typeAffinity }
 }
+
+extension _CodableJSONRepresentation: SQLiteType {
+  public static var typeAffinity: SQLiteTypeAffinity {
+    String.typeAffinity
+  }
+}
