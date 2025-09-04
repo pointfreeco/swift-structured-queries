@@ -271,5 +271,69 @@ extension SnapshotTests {
 
       #expect(logger.messages == ["Hello, world!"])
     }
+
+    @DatabaseFunction(as: (([Tag].JSONRepresentation) -> String).self)
+    func joinTags(_ tags: [Tag]) -> String {
+      tags.map(\.title).joined(separator: ", ")
+    }
+
+    @Test func jsonArray() {
+      $joinTags.install(database.handle)
+
+      assertQuery(
+        Reminder
+          .group(by: \.id)
+          .leftJoin(ReminderTag.all) { $0.id.eq($1.reminderID) }
+          .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
+          .select { $joinTags($2.jsonGroupArray()) }
+      ) {
+        """
+        SELECT "joinTags"(json_group_array(CASE WHEN ("tags"."rowid" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id" IS NOT NULL)))
+        FROM "reminders"
+        LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
+        LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
+        GROUP BY "reminders"."id"
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ "someday, optional" │
+        │ "someday, optional" │
+        │ ""                  │
+        │ "car, kids"         │
+        │ ""                  │
+        │ ""                  │
+        │ ""                  │
+        │ ""                  │
+        │ ""                  │
+        │ ""                  │
+        └─────────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction(as: ((Reminder.JSONRepresentation, Bool) -> Bool).self)
+    func isValid(_ reminder: Reminder, _ override: Bool = false) -> Bool {
+      !reminder.title.isEmpty || override
+    }
+    @Test func jsonObject() {
+      $isValid.install(database.handle)
+
+      assertQuery(
+        Reminder.select { $isValid($0.jsonObject(), true) }.limit(1)
+      ) {
+        """
+        SELECT "isValid"(json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")), 1)
+        FROM "reminders"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+    }
   }
 }

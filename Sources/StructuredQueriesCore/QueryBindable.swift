@@ -28,6 +28,10 @@ extension [UInt8]: QueryBindable, QueryExpression {
 
 extension Bool: QueryBindable {
   public var queryBinding: QueryBinding { .int(self ? 1 : 0) }
+  public init?(queryBinding: QueryBinding) {
+    guard case .int(let value) = queryBinding else { return nil }
+    self = value != 0
+  }
 }
 
 extension Double: QueryBindable {
