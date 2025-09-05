@@ -38,7 +38,7 @@ extension SelectStatement {
   public func selectStar<each J: Table>() -> Select<
     (From, repeat each J), From, (repeat each J)
   > where Joins == (repeat each J) {
-    unsafeBitCast(asSelect(), to: Select<(From, repeat each J), From, (repeat each J)>.self)
+    Select<(From, repeat each J), From, (repeat each J)>(clauses: _selectClauses)
   }
 }
 
