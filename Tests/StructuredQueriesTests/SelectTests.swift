@@ -1437,6 +1437,111 @@ extension SnapshotTests {
       _ = base.count { r, _ in r.isCompleted }
       _ = base.map {}
     }
+
+    @Test func virtualTable() {
+      assertQuery(
+        PragmaTableInfo<Reminder>.all
+      ) {
+        """
+        SELECT "remindersTableInfo"."cid", "remindersTableInfo"."name", "remindersTableInfo"."type", "remindersTableInfo"."notnull", "remindersTableInfo"."dflt_value", "remindersTableInfo"."pk"
+        FROM pragma_table_info('reminders') AS "remindersTableInfo"
+        """
+      } results: {
+        #"""
+        ┌─────────────────────────────────────────┐
+        │ PragmaTableInfo(                        │
+        │   columnID: 0,                          │
+        │   name: "id",                           │
+        │   type: "INTEGER",                      │
+        │   isNotNull: true,                      │
+        │   defaultValue: nil,                    │
+        │   isPrimaryKey: true                    │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 1,                          │
+        │   name: "assignedUserID",               │
+        │   type: "INTEGER",                      │
+        │   isNotNull: false,                     │
+        │   defaultValue: nil,                    │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 2,                          │
+        │   name: "dueDate",                      │
+        │   type: "DATE",                         │
+        │   isNotNull: false,                     │
+        │   defaultValue: nil,                    │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 3,                          │
+        │   name: "isCompleted",                  │
+        │   type: "BOOLEAN",                      │
+        │   isNotNull: true,                      │
+        │   defaultValue: "0",                    │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 4,                          │
+        │   name: "isFlagged",                    │
+        │   type: "BOOLEAN",                      │
+        │   isNotNull: true,                      │
+        │   defaultValue: "0",                    │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 5,                          │
+        │   name: "remindersListID",              │
+        │   type: "INTEGER",                      │
+        │   isNotNull: true,                      │
+        │   defaultValue: nil,                    │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 6,                          │
+        │   name: "notes",                        │
+        │   type: "TEXT",                         │
+        │   isNotNull: true,                      │
+        │   defaultValue: "\'\'",                 │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 7,                          │
+        │   name: "priority",                     │
+        │   type: "INTEGER",                      │
+        │   isNotNull: false,                     │
+        │   defaultValue: nil,                    │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 8,                          │
+        │   name: "title",                        │
+        │   type: "TEXT",                         │
+        │   isNotNull: true,                      │
+        │   defaultValue: "\'\'",                 │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        ├─────────────────────────────────────────┤
+        │ PragmaTableInfo(                        │
+        │   columnID: 9,                          │
+        │   name: "updatedAt",                    │
+        │   type: "TEXT",                         │
+        │   isNotNull: true,                      │
+        │   defaultValue: "datetime(\'subsec\')", │
+        │   isPrimaryKey: false                   │
+        │ )                                       │
+        └─────────────────────────────────────────┘
+        """#
+      }
+    }
   }
 }
 
@@ -1444,4 +1549,21 @@ extension Reminder.TableColumns {
   var isHighPriority: some QueryExpression<Bool> {
     self.priority == Priority.high
   }
+}
+
+@Table
+struct PragmaTableInfo<Base: Table> {
+  static var tableAlias: String? { "\(Base.tableName)TableInfo" }
+  static var schemaName: String? { Base.schemaName }
+
+  static var tableFragment: QueryFragment {
+    "pragma_table_info(\(quote: Base.tableName, delimiter: .text))"
+  }
+
+  @Column("cid") let columnID: Int
+  let name: String
+  let type: String
+  @Column("notnull") let isNotNull: Bool
+  @Column("dflt_value") let defaultValue: String?
+  @Column("pk") let isPrimaryKey: Bool
 }

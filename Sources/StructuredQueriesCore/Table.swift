@@ -24,6 +24,9 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   /// The table schema's name.
   static var schemaName: String? { get }
 
+  /// A query fragment representing the table.
+  static var tableFragment: QueryFragment { get }
+
   /// A select statement for this table.
   ///
   /// The default implementation of this property returns a fully unscoped query for the table
@@ -93,6 +96,10 @@ extension Table {
 
   public static var schemaName: String? {
     nil
+  }
+
+  public static var tableFragment: QueryFragment {
+    QueryFragment(quote: tableName)
   }
 
   /// Returns a table column to the resulting value of a given key path.
