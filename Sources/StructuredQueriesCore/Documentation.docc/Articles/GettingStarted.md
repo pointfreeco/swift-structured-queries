@@ -305,7 +305,7 @@ capable of. See <doc:SelectStatements> for more examples of select statements, a
 The library provides the tools necessary to construct type-safe insert statements in SQL, including
 inserting an entire value into a table, inserting only a subset of rows, as well as what to do on
 conflicts. Using the `Reminder` data type from above, we can insert data for all of its rows using
-the  ``Table/insert(or:_:values:onConflict:where:doUpdate:where:)`` method:
+the  ``Table/insert(_:values:onConflict:where:doUpdate:where:)`` method:
 
 @Row {
   @Column {
@@ -339,7 +339,7 @@ and the number of columns and data type of each column must match what is specif
 trailing closure.
 
 You can provide a 3rd trailing closure to
-``Table/insert(or:_:values:onConflict:where:doUpdate:where:)`` to describe what to do in case there
+``Table/insert(_:values:onConflict:where:doUpdate:where:)`` to describe what to do in case there
 is a conflict while inserting data. For example, suppose we had a unique index on the "title" column
 of the reminders table. Then when inserting a value with a repeated title we could resolve the
 conflict by appending the string `" (Copy)"` to the title:
@@ -451,7 +451,7 @@ queries.
 
 The library provides tools for constructing type-safe update statements in SQL, including updating
 all rows in a table, a filtered set of rows, or rows with specific primary keys.
-``Table/update(or:set:)`` returns an update statement given a closure that describes the changes you
+``Table/update(set:)`` returns an update statement given a closure that describes the changes you
 want to make to the table by mutating an `inout` representation of the table's columns. You can
 assign new values or even call a selection of mutating methods and in-place operators.
 

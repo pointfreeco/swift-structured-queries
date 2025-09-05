@@ -2,7 +2,7 @@
 
 ## Topics
 
-- ``Table/update(or:set:)``
+- ``Table/update(set:)``
 
 ### Query building
 

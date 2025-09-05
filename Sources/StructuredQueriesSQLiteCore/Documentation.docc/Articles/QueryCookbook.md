@@ -58,8 +58,7 @@ this is doing work that SQL actually excels at. In fact, the condition inside th
 suspiciously like a join constraint, which should give us a hint that what we are doing is not
 quite right.
 
-Another way to do this is to use the `@Selection` macro described above
-(<doc:QueryCookbook#Custom-selections>), along with a ``Swift/Decodable/JSONRepresentation`` of the
+Another way to do this is to use the `@Selection` macro along with a `JSONRepresentation`` of the
 collection of reminders you want to load for each list:
 
 ```swift
@@ -71,13 +70,12 @@ struct Row {
 }
 ```
 
-> Note: `Reminder` must conform to `Codable` to be able to use
-> ``Swift/Decodable/JSONRepresentation``.
+> Note: `Reminder` must conform to `Codable` to be able to use `JSONRepresentation`.
 
 This allows the query to serialize the associated rows into JSON, which are then deserialized into
 a `Row` type. To construct such a query you can use the
-``PrimaryKeyedTableDefinition/jsonGroupArray(distinct:order:filter:)`` property that is defined on
-the columns of [primary keyed tables](<doc:PrimaryKeyedTables>):
+``StructuredQueriesCore/PrimaryKeyedTableDefinition/jsonGroupArray(distinct:order:filter:)``
+property that is defined on the columns of primary keyed tables:
 
 ```swift
 RemindersList
@@ -92,10 +90,10 @@ RemindersList
 
 > Note: There are 2 important things to note about this query:
 >
-> * Since not every reminders list will have a reminder associated with it, we are using a
->   ``Select/leftJoin(_:on:)``. That will make sure to select all lists no matter what.
-> * The left join introduces _optional_ reminders, but we are using a special overload of
->   `jsonGroupArray` on optionals that automatically filters out `nil` reminders and unwraps them.
+>   * Since not every reminders list will have a reminder associated with it, we are using a
+>     `leftJoin`. That will make sure to select all lists no matter what.
+>   * The left join introduces _optional_ reminders, but we are using a special overload of
+>     `jsonGroupArray` on optionals that automatically filters out `nil` reminders and unwraps them.
 
 This allows you to fetch all of the data in a single SQLite query and decode the data into a
 collection of `Row` values. There is an extra cost associated with decoding the JSON object,
@@ -150,4 +148,3 @@ RemindersList
 
 This will now load all reminders lists with all of their reminders and milestones in one single
 SQL query.
-

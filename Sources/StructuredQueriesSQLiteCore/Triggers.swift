@@ -130,7 +130,6 @@ extension Table {
   ///   - dateColumn: A key path to a datetime column.
   ///   - dateFunction: A database function that returns the current datetime, _e.g._,
   ///     `#sql("datetime('subsec'))"`.
-  ///   - expression: The expression used to generate the datetime.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.

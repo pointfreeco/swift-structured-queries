@@ -12,7 +12,8 @@ triggers in a type-safe and schema-safe fashion.
 
 One of the most common use cases for a trigger is refreshing an "updatedAt" timestamp on a row when
 it is updated in the database. One can create such a trigger SQL statement using the
-``Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)`` static method:
+``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
+static method:
 
 @Row {
   @Column {
@@ -44,7 +45,7 @@ refreshed with the current time immediately.
 
 This pattern of updating a timestamp when a row changes is so common that the library comes with
 a specialized tool just for that kind of trigger,
-``Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
+``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
 
 @Row {
   @Column {
@@ -71,7 +72,7 @@ a specialized tool just for that kind of trigger,
 
 And further, the pattern of specifically updating a _timestamp_ column is so common that the library
 comes with another specialized too just for that kind of trigger,
-``Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
+``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
 
 
 @Row {
@@ -185,10 +186,10 @@ reminder is inserted into the database with the  following trigger:
 
 ### Creating temporary triggers
 
-- ``Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
-- ``Table/createTemporaryTrigger(_:ifNotExists:before:fileID:line:column:)``
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:before:fileID:line:column:)``
 
 ### Touching records
 
-- ``Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:fileID:line:column:)``
-- ``Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:fileID:line:column:)``
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``

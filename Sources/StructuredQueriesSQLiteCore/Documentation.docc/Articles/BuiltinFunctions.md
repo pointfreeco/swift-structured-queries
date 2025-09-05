@@ -6,22 +6,22 @@ Apply SQLite functions to SQL expressions.
 
 ### Strings
 
-- ``QueryExpression/unicode()``
+- ``StructuredQueriesCore/QueryExpression/unicode()``
 
 ### Numeric
 
-- ``QueryExpression/randomblob()``
-- ``QueryExpression/zeroblob()``
+- ``StructuredQueriesCore/QueryExpression/randomblob()``
+- ``StructuredQueriesCore/QueryExpression/zeroblob()``
 
 ### Boolean Query optimization
 
-- ``QueryExpression/likelihood(_:)``
-- ``QueryExpression/likely()``
-- ``QueryExpression/unlikely()``
+- ``StructuredQueriesCore/QueryExpression/likelihood(_:)``
+- ``StructuredQueriesCore/QueryExpression/likely()``
+- ``StructuredQueriesCore/QueryExpression/unlikely()``
 
 ### JSON functions
 
-- ``jsonArrayLength()``
-- ``jsonGroupArray(distinct:order:filter:)``
-- ``TableDefinition/jsonObject()``
-- ``jsonPatch(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonArrayLength()``
+- ``StructuredQueriesCore/QueryExpression/jsonGroupArray(distinct:order:filter:)``
+- ``StructuredQueriesCore/TableDefinition/jsonObject()``
+- ``StructuredQueriesCore/QueryExpression/jsonPatch(_:)``
