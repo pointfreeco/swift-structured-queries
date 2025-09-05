@@ -9,7 +9,7 @@ custom database functions, and more.
 
 ## Topics
 
-### Custom functions
+### SQLite-specific functionality
 
-- ``DatabaseFunction``
-- ``ScalarDatabaseFunction``
+- <doc:ScalarFunctions>
+- <doc:CustomFunctions>
