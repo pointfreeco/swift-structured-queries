@@ -24,10 +24,4 @@
       self.init(rawValue: RawValue(queryOutput: queryOutput.rawValue))
     }
   }
-
-  extension Tagged: SQLiteType where RawValue: SQLiteType {
-    public static var typeAffinity: SQLiteTypeAffinity {
-      RawValue.typeAffinity
-    }
-  }
 #endif

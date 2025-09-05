@@ -130,9 +130,3 @@ Explore the full list of operators below.
 - ``PartialSelectStatement/exists()``
 - ``Swift/Array``
 - ``Swift/ClosedRange``
-
-### Casting
-
-- ``QueryExpression/cast(as:)``
-- ``SQLiteType``
-- ``SQLiteTypeAffinity``

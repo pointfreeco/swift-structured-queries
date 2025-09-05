@@ -10,8 +10,8 @@ import Foundation
 /// representations of a single Swift type. For example, in SQLite there are three distinct
 /// representations of date and time values, including ISO-8601-formatted strings, integer second
 /// offsets from the Unix epoch, or double Julian day numbers. This library defaults to ISO-8601
-/// text, but provides ``Foundation/Date/UnixTimeRepresentation`` to represent a date as an integer,
-/// and ``Foundation/Date/JulianDayRepresentation`` to represent a date as a floating point number.
+/// text, but provides `UnixTimeRepresentation` to represent a date as an integer, and
+/// `JulianDayRepresentation` to represent a date as a floating point number.
 public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
   /// The Swift type this value is ultimately decoded to.
   associatedtype QueryOutput

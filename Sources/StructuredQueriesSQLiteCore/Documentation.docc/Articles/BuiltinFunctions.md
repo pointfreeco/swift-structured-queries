@@ -1,4 +1,4 @@
-# Scalar functions
+# Built-in functions
 
 Apply SQLite functions to SQL expressions.
 
@@ -18,3 +18,10 @@ Apply SQLite functions to SQL expressions.
 - ``QueryExpression/likelihood(_:)``
 - ``QueryExpression/likely()``
 - ``QueryExpression/unlikely()``
+
+### JSON functions
+
+- ``jsonArrayLength()``
+- ``jsonGroupArray(distinct:order:filter:)``
+- ``TableDefinition/jsonObject()``
+- ``jsonPatch(_:)``

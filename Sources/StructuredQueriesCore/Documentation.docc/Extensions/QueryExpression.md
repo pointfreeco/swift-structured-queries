@@ -24,13 +24,6 @@
 - ``groupConcat(_:order:filter:)``
 - ``groupConcat(distinct:order:filter:)``
 
-### JSON functions
-
-- ``jsonArrayLength()``
-- ``jsonGroupArray(distinct:order:filter:)``
-- ``TableDefinition/jsonObject()``
-- ``jsonPatch(_:)``
-
 ### Optionality
 
 - ``map(_:)``
