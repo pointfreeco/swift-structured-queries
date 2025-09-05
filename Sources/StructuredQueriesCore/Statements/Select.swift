@@ -1796,7 +1796,7 @@ public struct _JoinClause: QueryExpression, Sendable {
   let `operator`: QueryFragment?
   let tableAlias: String?
   let tableColumns: QueryFragment
-  let tableName: String
+  let tableName: QueryFragment
 
   init(
     operator: Operator?,
@@ -1807,7 +1807,7 @@ public struct _JoinClause: QueryExpression, Sendable {
     self.operator = `operator`?.queryFragment
     tableAlias = table.tableAlias
     tableColumns = table.columns.queryFragment
-    tableName = table.tableName
+    tableName = table.tableFragment
   }
 
   public var queryFragment: QueryFragment {
@@ -1815,7 +1815,7 @@ public struct _JoinClause: QueryExpression, Sendable {
     if let `operator` {
       query.append("\(`operator`) ")
     }
-    query.append("JOIN \(quote: tableName) ")
+    query.append("JOIN \(tableName) ")
     if let tableAlias = tableAlias {
       query.append("AS \(quote: tableAlias) ")
     }

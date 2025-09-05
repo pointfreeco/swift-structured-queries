@@ -1541,6 +1541,32 @@ extension SnapshotTests {
         └─────────────────────────────────────────┘
         """#
       }
+
+      assertQuery(
+        PragmaForeignKeyList<Reminder>
+          .join(PragmaTableInfo<Reminder>.all) { $0.from.eq($1.name) }
+      ) {
+        """
+        SELECT "remindersForeignKeys"."id", "remindersForeignKeys"."seq", "remindersForeignKeys"."table", "remindersForeignKeys"."from", "remindersForeignKeys"."to", "remindersForeignKeys"."on_update", "remindersForeignKeys"."on_delete", "remindersForeignKeys"."match", "remindersTableInfo"."cid", "remindersTableInfo"."name", "remindersTableInfo"."type", "remindersTableInfo"."notnull", "remindersTableInfo"."dflt_value", "remindersTableInfo"."pk"
+        FROM pragma_foreign_key_list('reminders') AS "remindersForeignKeys"
+        JOIN pragma_table_info('reminders') AS "remindersTableInfo" ON ("remindersForeignKeys"."from" = "remindersTableInfo"."name")
+        """
+      } results: {
+        """
+        ┌────────────────────────────┬────────────────────────────┐
+        │ PragmaForeignKeyList(      │ PragmaTableInfo(           │
+        │   id: 0,                   │   columnID: 5,             │
+        │   sequence: 0,             │   name: "remindersListID", │
+        │   table: "remindersLists", │   type: "INTEGER",         │
+        │   from: "remindersListID", │   isNotNull: true,         │
+        │   to: "id",                │   defaultValue: nil,       │
+        │   onUpdate: .noAction,     │   isPrimaryKey: false      │
+        │   onDelete: .cascade,      │ )                          │
+        │   match: "NONE"            │                            │
+        │ )                          │                            │
+        └────────────────────────────┴────────────────────────────┘
+        """
+      }
     }
   }
 }
@@ -1566,4 +1592,29 @@ struct PragmaTableInfo<Base: Table> {
   @Column("notnull") let isNotNull: Bool
   @Column("dflt_value") let defaultValue: String?
   @Column("pk") let isPrimaryKey: Bool
+}
+
+@Table
+struct PragmaForeignKeyList<Base: Table> {
+  static var tableAlias: String? { "\(Base.tableName)ForeignKeys" }
+  static var tableFragment: QueryFragment {
+    "pragma_foreign_key_list(\(quote: Base.tableName, delimiter: .text))"
+  }
+
+  let id: Int
+  @Column("seq") let sequence: Int
+  let table: String
+  let from: String
+  let to: String
+  @Column("on_update") let onUpdate: ForeignKeyAction
+  @Column("on_delete") let onDelete: ForeignKeyAction
+  let match: String
+}
+
+enum ForeignKeyAction: String, QueryBindable {
+  case cascade = "CASCADE"
+  case restrict = "RESTRICT"
+  case setDefault = "SET DEFAULT"
+  case setNull = "SET NULL"
+  case noAction = "NO ACTION"
 }
