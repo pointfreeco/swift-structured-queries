@@ -17,10 +17,10 @@
 - ``order(by:)``
 - ``limit(_:offset:)``
 - ``count(filter:)``
-- ``insert(or:_:values:onConflict:where:doUpdate:where:)``
-- ``insert(or:_:select:onConflict:where:doUpdate:where:)``
-- ``insert(or:)``
-- ``update(or:set:)``
+- ``insert(_:values:onConflict:where:doUpdate:where:)``
+- ``insert(_:select:onConflict:where:doUpdate:where:)``
+- ``insert()``
+- ``update(set:)``
 - ``delete()``
 
 ### Schema definition
@@ -49,8 +49,8 @@
 
 ### Deprecations
 
-- ``insert(or:_:onConflict:)``
-- ``insert(or:_:select:onConflict:)``
-- ``insert(or:_:select:onConflictDoUpdate:where:)``
-- ``insert(or:_:values:onConflict:)``
-- ``insert(or:_:values:onConflictDoUpdate:where:)``
+- ``insert(_:onConflict:)``
+- ``insert(_:select:onConflict:)``
+- ``insert(_:select:onConflictDoUpdate:where:)``
+- ``insert(_:values:onConflict:)``
+- ``insert(_:values:onConflictDoUpdate:where:)``

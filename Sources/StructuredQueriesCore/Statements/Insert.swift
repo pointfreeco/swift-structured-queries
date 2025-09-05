@@ -47,7 +47,6 @@ extension Table {
   /// ```
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns to insert.
   ///   - values: A builder of row values for the given columns.
   ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
@@ -55,7 +54,6 @@ extension Table {
   ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
     @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
@@ -63,7 +61,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     _insert(
-      or: conflictResolution,
       columnNames: TableColumns.writableColumns.map(\.name),
       values: .values(values()),
       onConflict: { _ -> ()? in nil },
@@ -115,7 +112,6 @@ extension Table {
   /// ```
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns to insert.
   ///   - values: A builder of row values for the given columns.
   ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
@@ -123,7 +119,6 @@ extension Table {
   ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
     @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
@@ -131,7 +126,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     insert(
-      or: conflictResolution,
       columns,
       values: values,
       onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
@@ -142,7 +136,6 @@ extension Table {
   /// An upsert statement for one or more table rows.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns to insert.
   ///   - values: A builder of row values for the given columns.
   ///   - conflictTargets: Indexed columns to target for conflict resolution.
@@ -152,7 +145,6 @@ extension Table {
   ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert<T1, each T2>(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
     @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflict conflictTargets: (TableColumns) -> (
@@ -166,8 +158,7 @@ extension Table {
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
-        or: conflictResolution,
-        columnNames: TableColumns.writableColumns.map(\.name),
+          columnNames: TableColumns.writableColumns.map(\.name),
         values: .values(values()),
         onConflict: conflictTargets,
         where: targetFilter,
@@ -180,7 +171,6 @@ extension Table {
   /// An upsert statement for one or more table rows.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns to insert.
   ///   - values: A builder of row values for the given columns.
   ///   - conflictTargets: Indexed columns to target for conflict resolution.
@@ -190,7 +180,6 @@ extension Table {
   ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert<T1, each T2>(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> TableColumns = { $0 },
     @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
     onConflict conflictTargets: (TableColumns) -> (
@@ -203,7 +192,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     insert(
-      or: conflictResolution,
       columns,
       values: values,
       onConflict: conflictTargets,
@@ -261,7 +249,6 @@ extension Table {
   /// ```
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns to insert.
   ///   - values: A builder of row values for the given columns.
   ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
@@ -269,7 +256,6 @@ extension Table {
   ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert<V1, each V2>(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
     values: () -> [[QueryFragment]],
@@ -278,7 +264,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     _insert(
-      or: conflictResolution,
       columns,
       values: values,
       onConflict: { _ -> ()? in nil },
@@ -291,7 +276,6 @@ extension Table {
   /// An insert statement for one or more table rows.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns to insert.
   ///   - values: A builder of row values for the given columns.
   ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
@@ -299,7 +283,6 @@ extension Table {
   ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert<V1, each V2>(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
     values: () -> [[QueryFragment]],
@@ -308,7 +291,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     insert(
-      or: conflictResolution,
       columns,
       values: values,
       onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
@@ -319,7 +301,6 @@ extension Table {
   /// An upsert statement for one or more table rows.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns to insert.
   ///   - values: A builder of row values for the given columns.
   ///   - conflictTargets: Indexed columns to target for conflict resolution.
@@ -329,7 +310,6 @@ extension Table {
   ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert<V1, each V2, T1, each T2>(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
     values: () -> [[QueryFragment]],
@@ -344,8 +324,7 @@ extension Table {
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
-        or: conflictResolution,
-        columns,
+          columns,
         values: values,
         onConflict: conflictTargets,
         where: targetFilter,
@@ -358,7 +337,6 @@ extension Table {
   /// An upsert statement for one or more table rows.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns to insert.
   ///   - values: A builder of row values for the given columns.
   ///   - conflictTargets: Indexed columns to target for conflict resolution.
@@ -368,7 +346,6 @@ extension Table {
   ///   - updateFilter: A filter to apply to the update clause.
   /// - Returns: An insert statement.
   public static func insert<V1, each V2, T1, each T2>(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
     values: () -> [[QueryFragment]],
@@ -382,7 +359,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     insert(
-      or: conflictResolution,
       columns,
       values: values,
       onConflict: conflictTargets,
@@ -393,7 +369,6 @@ extension Table {
   }
 
   private static func _insert<each Value, each ConflictTarget>(
-    or conflictResolution: ConflictResolution?,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     @InsertValuesBuilder<(repeat each Value)>
     values: () -> [[QueryFragment]],
@@ -409,7 +384,6 @@ extension Table {
       columnNames.append(column.name)
     }
     return _insert(
-      or: conflictResolution,
       columnNames: columnNames,
       values: .values(values()),
       onConflict: conflictTargets,
@@ -425,7 +399,6 @@ extension Table {
   /// statement.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns values to be inserted.
   ///   - selection: A statement that selects the values to be inserted.
   ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
@@ -436,7 +409,6 @@ extension Table {
     V1,
     each V2
   >(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
     onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
@@ -444,7 +416,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     _insert(
-      or: conflictResolution,
       columns,
       select: selection,
       onConflict: { _ -> ()? in nil },
@@ -460,7 +431,6 @@ extension Table {
   /// statement.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns values to be inserted.
   ///   - selection: A statement that selects the values to be inserted.
   ///   - updates: Updates to perform in an upsert clause should the insert conflict with an
@@ -471,7 +441,6 @@ extension Table {
     V1,
     each V2
   >(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
     onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
@@ -479,7 +448,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     insert(
-      or: conflictResolution,
       columns,
       select: selection,
       onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
@@ -493,7 +461,6 @@ extension Table {
   /// statement.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns values to be inserted.
   ///   - selection: A statement that selects the values to be inserted.
   ///   - conflictTargets: Indexed columns to target for conflict resolution.
@@ -508,7 +475,6 @@ extension Table {
     T1,
     each T2
   >(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
     onConflict conflictTargets: (TableColumns) -> (
@@ -522,8 +488,7 @@ extension Table {
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
-        or: conflictResolution,
-        columns,
+          columns,
         select: selection,
         onConflict: conflictTargets,
         where: targetFilter,
@@ -539,7 +504,6 @@ extension Table {
   /// statement.
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - columns: Columns values to be inserted.
   ///   - selection: A statement that selects the values to be inserted.
   ///   - conflictTargets: Indexed columns to target for conflict resolution.
@@ -554,7 +518,6 @@ extension Table {
     T1,
     each T2
   >(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
     onConflict conflictTargets: (TableColumns) -> (
@@ -567,7 +530,6 @@ extension Table {
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
     insert(
-      or: conflictResolution,
       columns,
       select: selection,
       onConflict: conflictTargets,
@@ -581,7 +543,6 @@ extension Table {
     each Value,
     each ConflictTarget
   >(
-    or conflictResolution: ConflictResolution? = nil,
     _ columns: (TableColumns) -> (repeat TableColumn<Self, each Value>),
     select selection: () -> some PartialSelectStatement<(repeat each Value)>,
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
@@ -596,7 +557,6 @@ extension Table {
       columnNames.append(column.name)
     }
     return _insert(
-      or: conflictResolution,
       columnNames: columnNames,
       values: .select(selection().query),
       onConflict: conflictTargets,
@@ -615,13 +575,9 @@ extension Table {
   /// // INSERT INTO "reminders" DEFAULT VALUES
   /// ```
   ///
-  /// - Parameter conflictResolution: A conflict resolution algorithm.
   /// - Returns: An insert statement.
-  public static func insert(
-    or conflictResolution: ConflictResolution? = nil
-  ) -> InsertOf<Self> {
+  public static func insert() -> InsertOf<Self> {
     _insert(
-      or: conflictResolution,
       columnNames: [],
       values: .default,
       onConflict: { _ -> ()? in nil },
@@ -632,7 +588,6 @@ extension Table {
   }
 
   fileprivate static func _insert<each ConflictTarget>(
-    or conflictResolution: ConflictResolution?,
     columnNames: [String],
     values: InsertValues,
     onConflict conflictTargets: (TableColumns) -> (repeat TableColumn<Self, each ConflictTarget>)?,
@@ -649,7 +604,7 @@ extension Table {
       }
     }
     return Insert(
-      conflictResolution: conflictResolution,
+      conflictResolution: nil,
       columnNames: columnNames,
       conflictTargetColumnNames: conflictTargetColumnNames,
       conflictTargetFilter: targetFilter(Self.columns),
@@ -675,15 +630,12 @@ extension PrimaryKeyedTable {
   /// ```
   ///
   /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
   ///   - values: A builder of row values for the given columns.
   /// - Returns: An insert statement with an upsert clause.
   public static func upsert(
-    or conflictResolution: ConflictResolution? = nil,
     @InsertValuesBuilder<Self> values: () -> [[QueryFragment]]
   ) -> InsertOf<Self> {
     insert(
-      or: conflictResolution,
       values: values,
       onConflict: { $0.primaryKey },
       doUpdate: { updates, _ in
@@ -705,12 +657,12 @@ private enum InsertValues {
 /// An `INSERT` statement.
 ///
 /// This type of statement is returned from the
-/// `[Table.insert]<doc:Table/insert(or:_:values:onConflict:where:doUpdate:where:)>` family of
+/// `[Table.insert]<doc:Table/insert(_:values:onConflict:where:doUpdate:where:)>` family of
 /// functions.
 ///
 /// To learn more, see <doc:InsertStatements>.
 public struct Insert<Into: Table, Returning> {
-  var conflictResolution: ConflictResolution?
+  package var conflictResolution: QueryFragment?
   var columnNames: [String]
   var conflictTargetColumnNames: [String]
   var conflictTargetFilter: [QueryFragment]
@@ -720,7 +672,7 @@ public struct Insert<Into: Table, Returning> {
   var returning: [QueryFragment]
 
   fileprivate init(
-    conflictResolution: ConflictResolution?,
+    conflictResolution: QueryFragment?,
     columnNames: [String],
     conflictTargetColumnNames: [String],
     conflictTargetFilter: [QueryFragment],
@@ -874,7 +826,7 @@ public typealias InsertOf<Into: Table> = Insert<Into, ()>
 
 /// A builder of insert statement values.
 ///
-/// This result builder is used by ``Table/insert(or:_:values:onConflict:where:doUpdate:where:)`` to
+/// This result builder is used by ``Table/insert(_:values:onConflict:where:doUpdate:where:)`` to
 /// insert any number of rows into a table.
 @resultBuilder
 public enum InsertValuesBuilder<Value> {

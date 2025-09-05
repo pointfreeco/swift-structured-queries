@@ -63,8 +63,13 @@ public struct Where<From: Table>: Sendable {
     Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
   }
 
-  var predicates: [QueryFragment] = []
-  var scope = Scope.default
+  var predicates: [QueryFragment]
+  var scope: Scope
+
+  package init(predicates: [QueryFragment] = [], scope: Scope = .default) {
+    self.predicates = predicates
+    self.scope = scope
+  }
 
   #if compiler(>=6.1)
     public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
@@ -496,13 +501,9 @@ extension Where: SelectStatement {
   ///   - conflictResolution: A conflict resolution algorithm.
   ///   - updates: A closure describing column-wise updates to perform.
   /// - Returns: An update statement.
-  public func update(
-    or conflictResolution: ConflictResolution? = nil,
-    set updates: (inout Updates<From>) -> Void
-  ) -> UpdateOf<From> {
+  public func update(set updates: (inout Updates<From>) -> Void) -> UpdateOf<From> {
     Update(
       isEmpty: scope == .empty,
-      conflictResolution: conflictResolution,
       updates: Updates(updates),
       where: scope == .unscoped ? predicates : From.all._selectClauses.where + predicates
     )

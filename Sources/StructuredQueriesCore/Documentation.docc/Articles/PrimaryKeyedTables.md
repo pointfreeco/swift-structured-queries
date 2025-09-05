@@ -55,8 +55,8 @@ let draft = Reminder.Draft(title: "Get groceries")
 
 The `id` is not necessary to provide because it is optional. This allows you to insert rows into
 your database without specifying the id. The library comes with a special
-``PrimaryKeyedTable/insert(or:_:onConflict:)`` method that allows you to insert a row
-into the database by providing only a draft:
+``PrimaryKeyedTable/insert(_:onConflict:)`` method that allows you to insert a row into the database
+by providing only a draft:
 
 @Row {
   @Column {
@@ -188,8 +188,8 @@ The ``PrimaryKeyedTable/find(_:)`` method can be used for updates and deletions 
 }
 
 
-A special ``PrimaryKeyedTable/update(or:_:)`` method is also provided to update all the fields of a
-row with the corresponding primary key:
+A special ``PrimaryKeyedTable/update(_:)`` method is also provided to update all the fields of a row
+with the corresponding primary key:
 
 @Row {
   @Column {

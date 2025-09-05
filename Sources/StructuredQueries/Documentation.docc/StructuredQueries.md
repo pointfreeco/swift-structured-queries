@@ -11,6 +11,15 @@ This module also contains all of the macros that support the core functionality 
 
 See [`StructuredQueriesCore`](<doc:/StructuredQueriesCore>) for general library usage.
 
+StructuredQueries also ships SQLite-specific helpers:
+
+  - [`StructuredQueriesSQLiteCore`](<doc:/StructuredQueriesSQLiteCore>): Core, SQLite-specific
+    functionality, including full-text search, type-safe temporary triggers, full-text search, and
+    more.
+
+  - [`StructuredQueriesSQLite`](<doc:/StructuredQueriesSQLite>): Everything from
+    `StructuredQueriesSQLiteCore` and macros that support it, like `@DatabaseFunction.`
+
 ## Topics
 
 ### Macros

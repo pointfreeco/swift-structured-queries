@@ -53,8 +53,8 @@ let draft = Reminder.Draft(title: "Get groceries")
 
 The `id` is not necessary to provide because it is optional. This allows you to insert rows into
 your database without specifying the id. The library comes with a special
-``PrimaryKeyedTable/insert(or:_:onConflict:)`` method that allows you to insert a row
-into the database by providing only a draft:
+``PrimaryKeyedTable/insert(_:onConflict:)`` method that allows you to insert a row into the database
+by providing only a draft:
 
 ```swift
 Reminder.insert {
@@ -102,7 +102,7 @@ Reminder
 ### Updates and deletions
 
 Primary keyed tables are also given special APIs for updating and deleting existing rows in the
-table based on their primary key. For example, the ``PrimaryKeyedTable/update(or:_:)`` method
+table based on their primary key. For example, the ``PrimaryKeyedTable/update(_:)`` method
 allows one to update all the fields of a row with the corresponding primary key:
 
 ```swift
@@ -134,8 +134,8 @@ Reminder.delete(reminder)
 
 - ``Draft``
 - ``find(_:)``
-- ``update(or:_:)``
-- ``upsert(or:values:)``
+- ``update(_:)``
+- ``upsert(values:)``
 - ``delete(_:)``
 
 ### Schema definition
@@ -144,5 +144,5 @@ Reminder.delete(reminder)
 
 ### Deprecations
 
-- ``insert(or:_:onConflict:)``
+- ``insert(_:onConflict:)``
 - ``upsert(_:)``

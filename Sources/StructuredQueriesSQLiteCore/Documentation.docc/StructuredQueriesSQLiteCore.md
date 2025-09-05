@@ -9,7 +9,33 @@ custom database functions, and more.
 
 ## Topics
 
-### Custom functions
+### SQLite-specific functionality
 
-- ``DatabaseFunction``
-- ``ScalarDatabaseFunction``
+- <doc:DefiningYourSchema>
+- <doc:QueryCookbook>
+- <doc:BuiltinFunctions>
+- <doc:CustomFunctions>
+- <doc:Triggers>
+- <doc:FullTextSearch>
+
+### Query representations
+
+- ``Foundation/Date/JulianDayRepresentation``
+- ``Foundation/Date/UnixTimeRepresentation``
+- ``Foundation/UUID/BytesRepresentation``
+- ``Foundation/UUID/UppercasedRepresentation``
+
+### Custom collations
+
+- ``StructuredQueriesCore/Collation``
+
+### Casting
+
+- ``StructuredQueriesCore/QueryExpression/cast(as:)``
+- ``SQLiteType``
+- ``SQLiteTypeAffinity``
+
+### Deprecations
+
+- ``Foundation/Date/ISO8601Representation``
+- ``Foundation/UUID/LowercasedRepresentation``

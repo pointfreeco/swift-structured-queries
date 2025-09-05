@@ -57,12 +57,6 @@ extension _CodableJSONRepresentation: QueryDecodable {
   }
 }
 
-extension _CodableJSONRepresentation: SQLiteType {
-  public static var typeAffinity: SQLiteTypeAffinity {
-    String.typeAffinity
-  }
-}
-
 private let jsonDecoder: JSONDecoder = {
   var decoder = JSONDecoder()
   decoder.dateDecodingStrategy = .custom {

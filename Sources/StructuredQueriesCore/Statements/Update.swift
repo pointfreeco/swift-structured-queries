@@ -29,15 +29,12 @@ extension Table {
   /// The syntax `$0.title += "!"` is translated into the equivalent SQL of
   /// `"title" = "title" || 'Get haircut'`
   ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - updates: A closure describing column-wise updates to perform.
+  /// - Parameter updates: A closure describing column-wise updates to perform.
   /// - Returns: An update statement.
   public static func update(
-    or conflictResolution: ConflictResolution? = nil,
     set updates: (inout Updates<Self>) -> Void
   ) -> UpdateOf<Self> {
-    Where().update(or: conflictResolution, set: updates)
+    Where().update(set: updates)
   }
 }
 
@@ -59,15 +56,12 @@ extension PrimaryKeyedTable {
   /// // UPDATE "tags" SET "name" = 'home' WHERE "id" = 1
   /// ```
   ///
-  /// - Parameters:
-  ///   - conflictResolution: A conflict resolution algorithm.
-  ///   - row: A row to update.
+  /// - Parameter row: A row to update.
   /// - Returns: An update statement.
   public static func update(
-    or conflictResolution: ConflictResolution? = nil,
     _ row: Self
   ) -> UpdateOf<Self> {
-    update(or: conflictResolution) { updates in
+    update { updates in
       for column in TableColumns.writableColumns where column.name != columns.primaryKey.name {
         func open<Root, Value>(_ column: some WritableTableColumnExpression<Root, Value>) {
           updates.set(
@@ -86,16 +80,29 @@ extension PrimaryKeyedTable {
 
 /// An `UPDATE` statement.
 ///
-/// This type of statement is constructed from ``Table/update(or:set:)`` and
-/// ``Where/update(or:set:)``.
+/// This type of statement is constructed from ``Table/update(set:)`` and ``Where/update(set:)``.
 ///
 /// To learn more, see <doc:UpdateStatements>.
 public struct Update<From: Table, Returning> {
   var isEmpty: Bool
-  var conflictResolution: ConflictResolution?
+  package var conflictResolution: QueryFragment?
   var updates: Updates<From>
-  var `where`: [QueryFragment] = []
-  var returning: [QueryFragment] = []
+  var `where`: [QueryFragment]
+  var returning: [QueryFragment]
+
+  package init(
+    isEmpty: Bool,
+    conflictResolution: QueryFragment? = nil,
+    updates: Updates<From>,
+    where: [QueryFragment] = [],
+    returning: [QueryFragment] = []
+  ) {
+    self.isEmpty = isEmpty
+    self.conflictResolution = conflictResolution
+    self.updates = updates
+    self.where = `where`
+    self.returning = returning
+  }
 
   /// Adds a condition to an update statement.
   ///

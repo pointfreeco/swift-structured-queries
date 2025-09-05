@@ -216,7 +216,7 @@ public struct AggregateFunction<QueryValue>: QueryExpression, Sendable {
   var order: QueryFragment?
   var filter: QueryFragment?
 
-  init(
+  package init(
     _ name: QueryFragment,
     isDistinct: Bool = false,
     _ arguments: [QueryFragment] = [],

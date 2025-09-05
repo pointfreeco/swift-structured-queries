@@ -6,8 +6,8 @@ Learn how to build queries that update data in a database.
 
 ### Updating rows
 
-You can create an ``Update`` statement by invoking a table's ``Table/update(or:set:)`` function with
-a closure that is given a table definition that you are allowed to make a certain set of simple
+You can create an ``Update`` statement by invoking a table's ``Table/update(set:)`` function with a
+closure that is given a table definition that you are allowed to make a certain set of simple
 mutations to, which are translated to the equivalent SQL code. For example, you can assign values to
 certain columns:
 
@@ -57,7 +57,7 @@ Reminder.update {
 //   ("reminders"."id" = 42)
 ```
 
-> Tip: You can also create a ``Where`` clause and chain into its ``Where/update(or:set:)`` method to
+> Tip: You can also create a ``Where`` clause and chain into its ``Where/update(set:)`` method to
 > provide the filter up front.
 >
 > ```swift
@@ -86,9 +86,9 @@ Reminder.update(reminder)
 ```
 
 > Important: This function is convenient for certain flows, but is less precise than
-> ``Table/update(or:set:)``, which specifies each column update explicitly. If a record is loaded
-> from the database, mutated, and written back to the database at a later time, any writes that
-> happened to that record in the meantime will be reverted.
+> ``Table/update(set:)``, which specifies each column update explicitly. If a record is loaded from
+> the database, mutated, and written back to the database at a later time, any writes that happened
+> to that record in the meantime will be reverted.
 
 ### Returning
 
@@ -114,30 +114,12 @@ Reminder.update {
 
 > Tip: The ``Insert`` and ``Delete`` statements support `RETURNING` clauses, as well.
 
-### Conflict resolution
-
-Updates include an optional `or` parameter, which can be used to specify the `OR` clause for
-conflict resolution:
-
-```swift
-Tag.update(or: .ignore) {
-  $0.name = "home"
-}
-.where {
-  $0.id == 42
-}
-// UPDATE OR IGNORE "tags" SET
-//   "name" = 'home'
-// WHERE
-//   ("id" = 42)
-```
-
 ## Topics
 
 ### Updating values
 
-- ``Table/update(or:set:)``
-- ``PrimaryKeyedTable/update(or:_:)``
+- ``Table/update(set:)``
+- ``PrimaryKeyedTable/update(_:)``
 
 ### Updating drafts
 

@@ -28,16 +28,13 @@ Explore the full list of available functions below.
 - ``QueryExpression/rtrim(_:)``
 - ``QueryExpression/trim(_:)``
 - ``QueryExpression/unhex(_:)``
-- ``QueryExpression/unicode()``
 - ``QueryExpression/upper()``
 
 ### Numeric
 
 - ``QueryExpression/abs()``
-- ``QueryExpression/randomblob()``
 - ``QueryExpression/round(_:)``
 - ``QueryExpression/sign()``
-- ``QueryExpression/zeroblob()``
 
 ### Optionality
 
@@ -47,9 +44,3 @@ Explore the full list of available functions below.
 ### Bytes
 
 - ``QueryExpression/hex()``
-
-### Boolean Query optimization
-
-- ``QueryExpression/likelihood(_:)``
-- ``QueryExpression/likely()``
-- ``QueryExpression/unlikely()``

@@ -8,7 +8,7 @@ StructuredQueries models `WHERE` clauses as a distinct type, ``Where``, that can
 produce ``Select``, ``Update``, or ``Delete`` statements accordingly.
 
 Values of this type are returned from ``Table/where(_:)``, and only become another statement type
-when chaining into other builder methods, like ``Where/select(_:)``, ``Where/update(or:set:)``, and
+when chaining into other builder methods, like ``Where/select(_:)``, ``Where/update(set:)``, and
 ``Where/delete()``.
 
 By default, a ``Where`` statement is executed as a `SELECT`:

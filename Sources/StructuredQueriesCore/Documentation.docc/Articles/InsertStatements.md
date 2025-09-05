@@ -7,7 +7,7 @@ Learn how to build queries that insert data into a database.
 ### Inserting records
 
 The simplest way to insert table records into the database is the
- [`Table.insert`](<doc:Table/insert(or:_:values:onConflict:where:doUpdate:where:)>), which takes a
+ [`Table.insert`](<doc:Table/insert(_:values:onConflict:where:doUpdate:where:)>), which takes a
 trailing closure and the record(s) to be inserted:
 
 @Row {
@@ -191,7 +191,7 @@ As well as introduce conditional or looping logic:
 ### Inserting from a select statement
 
 To insert a row into a table with the results of a ``Select`` statement, use
-``Table/insert(or:_:select:onConflict:)``:
+``Table/insert(_:select:onConflict:)``:
 
 @Row {
   @Column {
@@ -219,7 +219,7 @@ statement's columns.
 ### Inserting default values
 
 To insert a row into a table where all values have database-provided defaults, use
-``Table/insert(or:)``:
+``Table/insert()``:
 
 @Row {
   @Column {
@@ -309,7 +309,7 @@ ReminderForm(
 ```
 
 When the draft is ready to be committed back to the database, you can use
-``PrimaryKeyedTable/upsert(or:values:)``, which generates an ``Insert`` with an "upsert" clause:
+``PrimaryKeyedTable/upsert(values:)``, which generates an ``Insert`` with an "upsert" clause:
 
 @Row {
   @Column {
@@ -333,30 +333,7 @@ When the draft is ready to be committed back to the database, you can use
 
 ### Conflict resolution and upserts
 
-Every insert function includes an optional `or` parameter, which can be used to specify the `OR`
-clause for conflict resolution:
-
-@Row {
-  @Column {
-    ```swift
-    Tag.insert(or: .ignore) {
-      $0.title
-    } values: {
-      "home"
-    }
-    ```
-  }
-  @Column {
-    ```sql
-    INSERT OR IGNORE INTO "tags"
-      ("title")
-    VALUES
-      ('home')
-    ```
-  }
-}
-
-And many include an optional upsert clause. You can unconditionally upsert using the
+Most insert functions include an optional upsert clause. You can unconditionally upsert using the
 `onConflictDoUpdate` trailing closure:
 
 @Row {
@@ -446,24 +423,24 @@ Upsert clauses have an additional, special argument for referring to a row that 
 `WHERE` conditions are also supported, on both the conflict and update clauses.
 
 > Tip: The `onConflictDoUpdate` and `doUpdate` closures work similarly to the closure parameter of
-> ``Table/update(or:set:)``. See <doc:UpdateStatements> for more information on building these
+> ``Table/update(set:)``. See <doc:UpdateStatements> for more information on building these
 > clauses.
 
 ## Topics
 
 ### Inserting values
 
-- ``Table/insert(or:_:values:onConflict:where:doUpdate:where:)``
-- ``Table/insert(or:_:values:onConflictDoUpdate:where:)``
-- ``Table/insert(or:)``
+- ``Table/insert(_:values:onConflict:where:doUpdate:where:)``
+- ``Table/insert(_:values:onConflictDoUpdate:where:)``
+- ``Table/insert()``
 
 ### Inserting drafts
 
-- ``PrimaryKeyedTable/upsert(or:values:)``
+- ``PrimaryKeyedTable/upsert(values:)``
 
 ### Inserting from a select
 
-- ``Table/insert(or:_:select:onConflict:where:doUpdate:where:)``
+- ``Table/insert(_:select:onConflict:where:doUpdate:where:)``
 
 ### Upserts
 
