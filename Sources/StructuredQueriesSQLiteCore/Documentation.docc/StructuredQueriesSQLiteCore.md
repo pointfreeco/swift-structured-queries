@@ -25,6 +25,10 @@ custom database functions, and more.
 - ``Foundation/UUID/BytesRepresentation``
 - ``Foundation/UUID/UppercasedRepresentation``
 
+### Custom collations
+
+- ``StructuredQueriesCore/Collation``
+
 ### Casting
 
 - ``StructuredQueriesCore/QueryExpression/cast(as:)``
