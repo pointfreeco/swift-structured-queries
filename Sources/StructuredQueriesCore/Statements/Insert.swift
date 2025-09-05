@@ -158,7 +158,7 @@ extension Table {
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
-          columnNames: TableColumns.writableColumns.map(\.name),
+        columnNames: TableColumns.writableColumns.map(\.name),
         values: .values(values()),
         onConflict: conflictTargets,
         where: targetFilter,
@@ -324,7 +324,7 @@ extension Table {
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
-          columns,
+        columns,
         values: values,
         onConflict: conflictTargets,
         where: targetFilter,
@@ -488,7 +488,7 @@ extension Table {
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
-          columns,
+        columns,
         select: selection,
         onConflict: conflictTargets,
         where: targetFilter,
