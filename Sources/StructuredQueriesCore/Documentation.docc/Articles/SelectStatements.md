@@ -139,8 +139,8 @@ handed the currently-selected columns:
 
     query.map { _, title, isCompleted in
       ReminderResult.Columns(
-        title: $0.title,
-        isCompleted: $0.isCompleted
+        title: title,
+        isCompleted: isCompleted
       )
     }
     // => ReminderResult
