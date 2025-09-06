@@ -86,8 +86,11 @@ extension PrimaryKeyedTable {
   @available(
     *, deprecated, message: "Use a trailing closure, instead: 'Table.upsert { draft }'"
   )
-  public static func upsert(_ row: Draft) -> InsertOf<Self> {
-    upsert { row }
+  public static func upsert(
+    or conflictResolution: ConflictResolution,
+    _ row: Draft
+  ) -> InsertOf<Self> {
+    upsert(or: conflictResolution) { row }
   }
 }
 
