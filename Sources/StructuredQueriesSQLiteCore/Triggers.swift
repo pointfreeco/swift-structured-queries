@@ -442,6 +442,8 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
             $0.append(hex)
           }
           $0.append("unhex(\(quote: hex, delimiter: .text))")
+        case .bool(let bool):
+          $0.append("\(raw: bool ? 1 : 0)")
         case .double(let double):
           $0.append("\(raw: double)")
         case .date(let date):

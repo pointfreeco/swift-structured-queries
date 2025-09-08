@@ -140,6 +140,8 @@ public struct Database {
         switch binding {
         case .blob(let blob):
           sqlite3_bind_blob(statement, index, Array(blob), Int32(blob.count), SQLITE_TRANSIENT)
+        case .bool(let bool):
+          sqlite3_bind_int64(statement, index, bool ? 1 : 0)
         case .date(let date):
           sqlite3_bind_text(statement, index, date.iso8601String, -1, SQLITE_TRANSIENT)
         case .double(let double):

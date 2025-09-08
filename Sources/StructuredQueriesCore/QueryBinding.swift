@@ -5,6 +5,9 @@ public enum QueryBinding: Hashable, Sendable {
   /// A value that should be bound to a statement as bytes.
   case blob([UInt8])
 
+  /// A value that should be bound to a statement as a Boolean.
+  case bool(Bool)
+
   /// A value that should be bound to a statement as a double.
   case double(Double)
 
@@ -51,6 +54,8 @@ extension QueryBinding: CustomDebugStringConvertible {
         .dropLast()
         .dropFirst()
         .quoted(.text)
+    case .bool(let bool):
+      return bool ? "1" : "0"
     case .date(let date):
       return date.iso8601String.quoted(.text)
     case .double(let value):
