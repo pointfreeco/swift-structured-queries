@@ -270,7 +270,7 @@ To enable the trait, specify it in the Package.swift file that depends on Struct
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.2.0",
+   from: "0.17.0",
 +  traits: ["StructuredQueriesTagged"]
  ),
 ```
@@ -302,6 +302,20 @@ to do. But now, such a comparison is a compile time error:
 ```swift
 RemindersList.leftJoin(Reminder.all) {
   $0.id == $1.id  // 🛑 Requires the types 'Reminder.ID' and 'RemindersList.ID' be equivalent
+}
+```
+
+Tagged works with any query-representable value. For example, if you want a Tagged UUID to use the
+`UUID.BytesRepresentation` from StructuredQueriesSQLite:
+
+```swift
+@Table
+struct RemindersList: Identifiable {
+  typealias ID = Tagged<Self, UUID>
+
+  @Column(as: Tagged<Self, UUID.BytesRepresentation>.self)
+  let id: ID
+  // ...
 }
 ```
 
