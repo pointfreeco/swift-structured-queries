@@ -442,6 +442,8 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
             $0.append(hex)
           }
           $0.append("unhex(\(quote: hex, delimiter: .text))")
+        case .bool(let bool):
+          $0.append("\(raw: bool ? 1 : 0)")
         case .double(let double):
           $0.append("\(raw: double)")
         case .date(let date):
@@ -464,6 +466,8 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
           $0.append("NULL")
         case .text(let string):
           $0.append("\(quote: string, delimiter: .text)")
+        case .uint(let uint):
+          $0.append("\(raw: uint)")
         case .uuid(let uuid):
           reportIssue(
             """

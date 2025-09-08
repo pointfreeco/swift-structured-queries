@@ -24,6 +24,12 @@ public protocol QueryDecoder {
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
+  mutating func decode(_ columnType: UInt64.Type) throws -> UInt64?
+
+  /// Decodes a single value of the given type from the current column.
+  ///
+  /// - Parameter columnType: The type to decode as.
+  /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
   mutating func decode(_ columnType: String.Type) throws -> String?
 
   /// Decodes a single value of the given type from the current column.
