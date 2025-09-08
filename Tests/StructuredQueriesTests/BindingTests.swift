@@ -66,7 +66,7 @@ extension SnapshotTests {
         """#
       } results: {
         """
-        The operation couldn’t be completed. (_StructuredQueriesSQLite.(unknown context at $10a41b6f8).Int64OverflowError error 1.)
+        The operation couldn’t be completed. (_StructuredQueriesSQLite.Int64OverflowError error 1.)
         """
       }
     }

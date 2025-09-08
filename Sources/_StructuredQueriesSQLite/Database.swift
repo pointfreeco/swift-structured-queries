@@ -196,7 +196,7 @@ public struct Database {
   }
 }
 
-private struct Int64OverflowError: Error { let unsignedInteger: UInt64 }
+struct Int64OverflowError: Error { let unsignedInteger: UInt64 }
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
