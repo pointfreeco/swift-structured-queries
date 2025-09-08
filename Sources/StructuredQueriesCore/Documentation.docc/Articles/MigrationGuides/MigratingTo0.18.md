@@ -16,3 +16,12 @@ helper module:
  import StructuredQueries
 +import StructuredQueriesSQLite
 ```
+
+If you are qualifying a SQLite-specific API, like the `FTS5` protocol, you must also update the
+qualification:
+
+```diff
+ @Table
+-struct ReminderText: StructuredQueries.FTS5 {
++struct ReminderText: StructuredQueries.FTS5 {
+```
