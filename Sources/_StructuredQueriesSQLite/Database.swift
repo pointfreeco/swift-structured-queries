@@ -152,6 +152,10 @@ public struct Database {
           sqlite3_bind_null(statement, index)
         case .text(let text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
+        case .uint(let uint) where uint <= UInt64(Int64.max):
+          sqlite3_bind_int64(statement, index, Int64(uint))
+        case .uint(let uint):
+          throw Int64OverflowError(unsignedInteger: uint)
         case .uuid(let uuid):
           sqlite3_bind_text(statement, index, uuid.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
         case .invalid(let error):
@@ -192,7 +196,7 @@ public struct Database {
   }
 }
 
-private struct InvalidBindingError: Error {}
+private struct Int64OverflowError: Error { let unsignedInteger: UInt64 }
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 

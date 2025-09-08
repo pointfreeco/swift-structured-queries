@@ -23,6 +23,9 @@ public enum QueryBinding: Hashable, Sendable {
   /// A value that should be bound to a statement as a string.
   case text(String)
 
+  /// A value that should be bound to a statement as an unsigned integer.
+  case uint(UInt64)
+
   /// A value that should be bound to a statement as a unique identifier.
   case uuid(UUID)
 
@@ -48,8 +51,8 @@ public struct QueryBindingError: Error, Hashable {
 extension QueryBinding: CustomDebugStringConvertible {
   public var debugDescription: String {
     switch self {
-    case .blob(let data):
-      return String(decoding: data, as: UTF8.self)
+    case .blob(let blob):
+      return String(decoding: blob, as: UTF8.self)
         .debugDescription
         .dropLast()
         .dropFirst()
@@ -58,14 +61,16 @@ extension QueryBinding: CustomDebugStringConvertible {
       return bool ? "1" : "0"
     case .date(let date):
       return date.iso8601String.quoted(.text)
-    case .double(let value):
-      return "\(value)"
-    case .int(let value):
-      return "\(value)"
+    case .double(let double):
+      return "\(double)"
+    case .int(let int):
+      return "\(int)"
     case .null:
       return "NULL"
-    case .text(let string):
-      return string.quoted(.text)
+    case .text(let text):
+      return text.quoted(.text)
+    case .uint(let uint):
+      return "\(uint)"
     case .uuid(let uuid):
       return uuid.uuidString.lowercased().quoted(.text)
     case .invalid(let error):

@@ -466,6 +466,8 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
           $0.append("NULL")
         case .text(let string):
           $0.append("\(quote: string, delimiter: .text)")
+        case .uint(let uint):
+          $0.append("\(raw: uint)")
         case .uuid(let uuid):
           reportIssue(
             """

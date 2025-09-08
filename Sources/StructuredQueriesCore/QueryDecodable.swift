@@ -109,17 +109,15 @@ extension Int32: QueryDecodable {
 extension UInt: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
-    let n = try Int64(decoder: &decoder)
-    guard n >= 0 else { throw OverflowError() }
-    self.init(n)
+    try self.init(UInt64(decoder: &decoder))
   }
 }
 
 extension UInt8: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
-    let n = try Int64(decoder: &decoder)
-    guard (Int64(UInt8.min)...Int64(UInt8.max)).contains(n) else { throw OverflowError() }
+    let n = try UInt64(decoder: &decoder)
+    guard (UInt64(UInt8.min)...UInt64(UInt8.max)).contains(n) else { throw OverflowError() }
     self.init(n)
   }
 }
@@ -127,8 +125,8 @@ extension UInt8: QueryDecodable {
 extension UInt16: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
-    let n = try Int64(decoder: &decoder)
-    guard (Int64(UInt16.min)...Int64(UInt16.max)).contains(n) else { throw OverflowError() }
+    let n = try UInt64(decoder: &decoder)
+    guard (UInt64(UInt16.min)...UInt64(UInt16.max)).contains(n) else { throw OverflowError() }
     self.init(n)
   }
 }
@@ -136,8 +134,8 @@ extension UInt16: QueryDecodable {
 extension UInt32: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
-    let n = try Int64(decoder: &decoder)
-    guard (Int64(UInt32.min)...Int64(UInt32.max)).contains(n) else { throw OverflowError() }
+    let n = try UInt64(decoder: &decoder)
+    guard (UInt64(UInt32.min)...UInt64(UInt32.max)).contains(n) else { throw OverflowError() }
     self.init(n)
   }
 }
@@ -145,7 +143,9 @@ extension UInt32: QueryDecodable {
 extension UInt64: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
-    try self.init(Int64(decoder: &decoder))
+    guard let result = try decoder.decode(UInt64.self)
+    else { throw QueryDecodingError.missingRequiredColumn }
+    self = result
   }
 }
 

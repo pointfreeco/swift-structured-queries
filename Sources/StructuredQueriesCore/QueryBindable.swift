@@ -132,14 +132,10 @@ extension UInt32: QueryBindable {
 
 extension UInt64: QueryBindable {
   public var queryBinding: QueryBinding {
-    if self > UInt64(Int64.max) {
-      return .invalid(OverflowError())
-    } else {
-      return .int(Int64(self))
-    }
+    return .uint(self)
   }
   public init?(queryBinding: QueryBinding) {
-    guard case .int(let value) = queryBinding, value >= UInt64.min else { return nil }
+    guard case .uint(let value) = queryBinding else { return nil }
     self.init(value)
   }
 }

@@ -81,6 +81,10 @@ extension QueryBinding {
       sqlite3_result_null(db)
     case .text(let text):
       sqlite3_result_text(db, text, -1, SQLITE_TRANSIENT)
+    case .uint(let uint) where uint <= UInt64(Int64.max):
+      sqlite3_result_int64(db, Int64(uint))
+    case .uint(let uint):
+      sqlite3_result_error(db, "Unsigned integer \(uint) overflows Int64.max", -1)
     case .uuid(let uuid):
       sqlite3_result_text(db, uuid.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
     case .invalid(let error):
