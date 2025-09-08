@@ -61,12 +61,12 @@ extension SnapshotTests {
         INSERT INTO "records"
         ("id", "name", "duration")
         VALUES
-        ('\u{07AD}��ޭ��ޭ��ޭ��', '', <invalid: The operation couldn’t be completed. (StructuredQueriesCore.OverflowError error 1.)>)
+        ('\u{07AD}��ޭ��ޭ��ޭ��', '', 18446744073709551615)
         RETURNING "id", "name", "duration"
         """#
       } results: {
         """
-        The operation couldn’t be completed. (StructuredQueriesCore.OverflowError error 1.)
+        The operation couldn’t be completed. (_StructuredQueriesSQLite.(unknown context at $10a41b6f8).Int64OverflowError error 1.)
         """
       }
     }
