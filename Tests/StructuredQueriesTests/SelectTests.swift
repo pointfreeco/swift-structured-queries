@@ -1247,92 +1247,94 @@ extension SnapshotTests {
       }
     }
 
-    @Test func reusableStaticHelperOnDraft() {
-      assertQuery(
-        Reminder.Draft.incomplete.select(\.id)
-      ) {
-        """
-        SELECT "reminders"."id"
-        FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
-        """
-      } results: {
-        """
-        ┌───┐
-        │ 1 │
-        │ 2 │
-        │ 3 │
-        │ 5 │
-        │ 6 │
-        │ 8 │
-        │ 9 │
-        └───┘
-        """
+    #if swift(>=6.1)
+      @Test func reusableStaticHelperOnDraft() {
+        assertQuery(
+          Reminder.Draft.incomplete.select(\.id)
+        ) {
+          """
+          SELECT "reminders"."id"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          │ 2 │
+          │ 3 │
+          │ 5 │
+          │ 6 │
+          │ 8 │
+          │ 9 │
+          └───┘
+          """
+        }
+        assertQuery(
+          Reminder.Draft.where { _ in true }.incomplete.select(\.id)
+        ) {
+          """
+          SELECT "reminders"."id"
+          FROM "reminders"
+          WHERE 1 AND NOT ("reminders"."isCompleted")
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          │ 2 │
+          │ 3 │
+          │ 5 │
+          │ 6 │
+          │ 8 │
+          │ 9 │
+          └───┘
+          """
+        }
+        assertQuery(
+          Reminder.Draft.select(\.id).incomplete
+        ) {
+          """
+          SELECT "reminders"."id"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          │ 2 │
+          │ 3 │
+          │ 5 │
+          │ 6 │
+          │ 8 │
+          │ 9 │
+          └───┘
+          """
+        }
+        assertQuery(
+          Reminder.Draft.all.incomplete.select(\.id)
+        ) {
+          """
+          SELECT "reminders"."id"
+          FROM "reminders"
+          WHERE NOT ("reminders"."isCompleted")
+          """
+        } results: {
+          """
+          ┌───┐
+          │ 1 │
+          │ 2 │
+          │ 3 │
+          │ 5 │
+          │ 6 │
+          │ 8 │
+          │ 9 │
+          └───┘
+          """
+        }
       }
-      assertQuery(
-        Reminder.Draft.where { _ in true }.incomplete.select(\.id)
-      ) {
-        """
-        SELECT "reminders"."id"
-        FROM "reminders"
-        WHERE 1 AND NOT ("reminders"."isCompleted")
-        """
-      } results: {
-        """
-        ┌───┐
-        │ 1 │
-        │ 2 │
-        │ 3 │
-        │ 5 │
-        │ 6 │
-        │ 8 │
-        │ 9 │
-        └───┘
-        """
-      }
-      assertQuery(
-        Reminder.Draft.select(\.id).incomplete
-      ) {
-        """
-        SELECT "reminders"."id"
-        FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
-        """
-      } results: {
-        """
-        ┌───┐
-        │ 1 │
-        │ 2 │
-        │ 3 │
-        │ 5 │
-        │ 6 │
-        │ 8 │
-        │ 9 │
-        └───┘
-        """
-      }
-      assertQuery(
-        Reminder.Draft.all.incomplete.select(\.id)
-      ) {
-        """
-        SELECT "reminders"."id"
-        FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
-        """
-      } results: {
-        """
-        ┌───┐
-        │ 1 │
-        │ 2 │
-        │ 3 │
-        │ 5 │
-        │ 6 │
-        │ 8 │
-        │ 9 │
-        └───┘
-        """
-      }
-    }
+    #endif
 
     @Test func reusableColumnHelperOnDraft() {
       assertQuery(
