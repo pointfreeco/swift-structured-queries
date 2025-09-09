@@ -23,5 +23,5 @@ qualification:
 ```diff
  @Table
 -struct ReminderText: StructuredQueries.FTS5 {
-+struct ReminderText: StructuredQueries.FTS5 {
++struct ReminderText: StructuredQueriesSQLite.FTS5 {
 ```
