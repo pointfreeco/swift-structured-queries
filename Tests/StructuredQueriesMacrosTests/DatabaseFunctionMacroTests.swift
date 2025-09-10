@@ -967,5 +967,118 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func formatting() {
+      assertMacro {
+        """
+        @DatabaseFunction
+        func min(
+          _ x: Int,
+          _ y: Int
+        ) {
+          Swift.min(x, y)
+        }
+        """
+      } expansion: {
+        #"""
+        func min(
+          _ x: Int,
+          _ y: Int
+        ) {
+          Swift.min(x, y)
+        }
+
+        var $min: __macro_local_3minfMu_ {
+          __macro_local_3minfMu_(min)
+        }
+
+        struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = (Int, Int)
+          public typealias Output = Swift.Void
+          public let name = "min"
+          public let argumentCount: Int? = 2
+          public let isDeterministic = false
+          public let body: (Int, Int) -> Swift.Void
+          public init(_ body: @escaping (Int, Int) -> Swift.Void) {
+            self.body = body
+          }
+          public func callAsFunction(
+            _ x: some StructuredQueriesCore.QueryExpression<Int>,
+            _ y: some StructuredQueriesCore.QueryExpression<Int>
+          ) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
+            StructuredQueriesCore.SQLQueryExpression(
+              "\(quote: self.name)(\(x), \(y))"
+            )
+          }
+          public func invoke(
+            _ arguments: [StructuredQueriesCore.QueryBinding]
+          ) -> StructuredQueriesCore.QueryBinding {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let x = Int(queryBinding: arguments[0]), let y = Int(queryBinding: arguments[1]) else {
+              return .invalid(InvalidInvocation())
+            }
+            self.body(x.queryOutput, y.queryOutput)
+            return .null
+          }
+          private struct InvalidInvocation: Error {
+          }
+        }
+        """#
+      }
+      assertMacro {
+        """
+        @DatabaseFunction
+        func min(
+          x: Int,
+          y: Int
+        ) {
+          Swift.min(x, y)
+        }
+        """
+      } expansion: {
+        #"""
+        func min(
+          x: Int,
+          y: Int
+        ) {
+          Swift.min(x, y)
+        }
+
+        var $min: __macro_local_3minfMu_ {
+          __macro_local_3minfMu_(min)
+        }
+
+        struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = (Int, Int)
+          public typealias Output = Swift.Void
+          public let name = "min"
+          public let argumentCount: Int? = 2
+          public let isDeterministic = false
+          public let body: (Int, Int) -> Swift.Void
+          public init(_ body: @escaping (Int, Int) -> Swift.Void) {
+            self.body = body
+          }
+          public func callAsFunction(
+            x: some StructuredQueriesCore.QueryExpression<Int>,
+            y: some StructuredQueriesCore.QueryExpression<Int>
+          ) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
+            StructuredQueriesCore.SQLQueryExpression(
+              "\(quote: self.name)(\(x), \(y))"
+            )
+          }
+          public func invoke(
+            _ arguments: [StructuredQueriesCore.QueryBinding]
+          ) -> StructuredQueriesCore.QueryBinding {
+            guard self.argumentCount == nil || self.argumentCount == arguments.count, let x = Int(queryBinding: arguments[0]), let y = Int(queryBinding: arguments[1]) else {
+              return .invalid(InvalidInvocation())
+            }
+            self.body(x.queryOutput, y.queryOutput)
+            return .null
+          }
+          private struct InvalidInvocation: Error {
+          }
+        }
+        """#
+      }
+    }
   }
 }
