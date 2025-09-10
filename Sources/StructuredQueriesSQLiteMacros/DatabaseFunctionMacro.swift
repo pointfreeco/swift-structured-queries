@@ -135,7 +135,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       }
       signature.parameterClause.parameters[index] = parameter
       invocationArgumentTypes.append(type)
-      let parameterName = "\(parameter.secondName ?? parameter.firstName)"
+      let parameterName = (parameter.secondName ?? parameter.firstName).trimmedDescription
       parameters.append(parameterName)
       argumentBindings.append((parameterName, "\(type)(queryBinding: arguments[\(offset)])"))
     }
