@@ -93,6 +93,36 @@ extension SnapshotTests {
       }
     }
 
+      @Test func useSelectionMacro() {
+        assertQuery(
+          With {
+              As("foo") {
+                  Reminder
+                      .where { !$0.isCompleted }
+                      .select { ReminderSelection.Columns(isFlagged: $0.isFlagged, title: $0.title) }
+              }
+          } query: {
+            IncompleteReminder
+              .where { $0.title.collate(.nocase).contains("groceries") }
+          }
+        ) {
+          """
+          WITH "foo" AS (
+            SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
+            FROM "reminders"
+            WHERE NOT ("reminders"."isCompleted")
+          )
+          SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title"
+          FROM "incompleteReminders"
+          WHERE (("incompleteReminders"."title" COLLATE "NOCASE") LIKE '%groceries%')
+          """
+        } results: {
+          """
+          no such table: incompleteReminders
+          """
+        }
+      }
+
     @Test func insert() {
       assertQuery(
         With {
@@ -534,6 +564,12 @@ private struct Fibonacci {
   let n: Int
   let prevFib: Int
   let fib: Int
+}
+
+@Selection
+private struct ReminderSelection {
+  let isFlagged: Bool
+  let title: String
 }
 
 @Table @Selection
