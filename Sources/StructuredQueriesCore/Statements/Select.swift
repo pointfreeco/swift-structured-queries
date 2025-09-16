@@ -723,7 +723,7 @@ extension Select {
   ) -> Select<(), From, (Joins, F)> where Joins: Table {
     let other = other.asSelect()
     let join = _JoinClause(
-      operator: .inner,
+      operator: nil,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
