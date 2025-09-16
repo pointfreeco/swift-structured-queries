@@ -140,5 +140,70 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func outerJoin() {
+      assertQuery(
+        Reminder
+          .leftJoin(ReminderText.all) { $0.rowid.eq($1.rowid) }
+          .select { $1.tags.highlight("**", "**") }
+          .order { $1.bm25() }
+      ) {
+        """
+        SELECT highlight("reminderTexts", (SELECT "cid" FROM pragma_table_info('reminderTexts') WHERE "name" = 'tags'),
+        '**', '**')
+        FROM "reminders"
+        LEFT JOIN "reminderTexts" ON ("reminders"."rowid" = "reminderTexts"."rowid")
+        ORDER BY bm25("reminderTexts")
+        """
+      } results: {
+        """
+        ┌────────────────────┐
+        │ "someday optional" │
+        │ "someday optional" │
+        │ ""                 │
+        │ "car kids"         │
+        │ ""                 │
+        │ ""                 │
+        │ ""                 │
+        │ ""                 │
+        │ ""                 │
+        │ ""                 │
+        └────────────────────┘
+        """
+      }
+    }
+
+    @Test func alias() {
+      enum RT: AliasName {}
+      assertQuery(
+        Reminder
+          .leftJoin(ReminderText.as(RT.self).all) { $0.rowid.eq($1.rowid) }
+          .select { $1.tags.highlight("**", "**") }
+          .order { $1.bm25() }
+      ) {
+        """
+        SELECT highlight("reminderTexts", (SELECT "cid" FROM pragma_table_info('reminderTexts') WHERE "name" = 'tags'),
+        '**', '**')
+        FROM "reminders"
+        LEFT JOIN "reminderTexts" AS "rTs" ON ("reminders"."rowid" = "rTs"."rowid")
+        ORDER BY bm25("reminderTexts")
+        """
+      } results: {
+        """
+        ┌────────────────────┐
+        │ "someday optional" │
+        │ "someday optional" │
+        │ ""                 │
+        │ "car kids"         │
+        │ ""                 │
+        │ ""                 │
+        │ ""                 │
+        │ ""                 │
+        │ ""                 │
+        │ ""                 │
+        └────────────────────┘
+        """
+      }
+    }
   }
 }
