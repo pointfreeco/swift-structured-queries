@@ -9,7 +9,8 @@ extension SnapshotTests {
   @Suite struct ViewsTests {
     @Test func basics() {
       let query = CompletedReminder.createTemporaryView(
-        as: Reminder
+        as:
+          Reminder
           .where(\.isCompleted)
           .select { CompletedReminder.Columns(reminderID: $0.id, title: $0.title) }
       )
