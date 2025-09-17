@@ -15,7 +15,7 @@ extension TableDefinition where QueryValue: FTS5 {
   public func bm25(
     _ rankings: KeyValuePairs<PartialKeyPath<Self>, Double> = [:]
   ) -> some QueryExpression<Double> {
-    var queryFragments: [QueryFragment] = ["\(QueryValue.self)"]
+    var queryFragments: [QueryFragment] = ["\(quote: QueryValue.tableName)"]
     if !rankings.isEmpty {
       var columnNameToRanking: QueryFragment = """
         CASE "name"
@@ -89,7 +89,12 @@ extension TableDefinition where QueryValue: FTS5 {
   }
 }
 
-extension TableColumnExpression where Root: FTS5 {
+extension TableColumnExpression
+where
+  Root: FTS5,
+  Value.QueryOutput: _OptionalPromotable,
+  Value.QueryOutput._Optionalized.Wrapped: StringProtocol
+{
   /// A string expression highlighting matches in this column using the given delimiters.
   ///
   /// - Parameters:
@@ -99,11 +104,11 @@ extension TableColumnExpression where Root: FTS5 {
   public func highlight(
     _ open: some StringProtocol,
     _ close: some StringProtocol
-  ) -> some QueryExpression<String> {
+  ) -> some QueryExpression<Value> {
     SQLQueryExpression(
       """
       highlight(\
-      \(Root.self), \
+      \(quote: Root.tableName), \
       (\(cid)),
       \(quote: "\(open)", delimiter: .text), \
       \(quote: "\(close)", delimiter: .text)\
@@ -139,11 +144,11 @@ extension TableColumnExpression where Root: FTS5 {
     _ close: some StringProtocol,
     _ ellipsis: some StringProtocol,
     _ tokens: Int
-  ) -> some QueryExpression<String> {
+  ) -> some QueryExpression<Value> {
     SQLQueryExpression(
       """
       snippet(\
-      \(Root.self), \
+      \(quote: Root.tableName), \
       (\(cid)),
       \(quote: "\(open)", delimiter: .text), \
       \(quote: "\(close)", delimiter: .text), \
@@ -165,3 +170,7 @@ extension TableColumnExpression {
     )
   }
 }
+
+extension Optional: FTS5 where Wrapped: FTS5 {}
+
+extension TableAlias: FTS5 where Base: FTS5 {}
