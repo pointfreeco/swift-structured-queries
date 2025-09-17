@@ -8,11 +8,11 @@ import _StructuredQueriesSQLite
 extension SnapshotTests {
   @Suite struct ViewsTests {
     @Test func basics() {
-      let query = CompletedReminder.createTemporaryView {
-        Reminder
+      let query = CompletedReminder.createTemporaryView(
+        as: Reminder
           .where(\.isCompleted)
           .select { CompletedReminder.Columns(reminderID: $0.id, title: $0.title) }
-      }
+      )
       assertQuery(
         query
       ) {
@@ -57,8 +57,7 @@ extension SnapshotTests {
         query.drop()
       ) {
         """
-        DROP VIEW
-        "completedReminders"
+        DROP VIEW "completedReminders"
         """
       }
     }

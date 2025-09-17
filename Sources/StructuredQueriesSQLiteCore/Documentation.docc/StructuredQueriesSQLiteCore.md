@@ -16,6 +16,7 @@ custom database functions, and more.
 - <doc:BuiltinFunctions>
 - <doc:CustomFunctions>
 - <doc:Triggers>
+- <doc:Views>
 - <doc:FullTextSearch>
 
 ### Query representations

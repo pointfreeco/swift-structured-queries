@@ -1,31 +1,27 @@
 extension Table where Self: _Selection {
-  /// A `CREATE TEMPORARY VIEW` statement that executes after a database event.
+  /// A `CREATE TEMPORARY VIEW` statement.
   ///
-  /// See <doc:Triggers> for more information.
-  ///
-  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
-  /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
+  /// See <doc:Views> for more information.
   ///
   /// - Parameters:
-  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
-  ///     operation, and source location.
-  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
-  ///   - operation: The trigger's operation.
-  ///   - fileID: The source `#fileID` associated with the trigger.
-  ///   - line: The source `#line` associated with the trigger.
-  ///   - column: The source `#column` associated with the trigger.
+  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE VIEW` statement.
+  ///   - select: A statement describing the contents of the view.
   /// - Returns: A temporary trigger.
   public static func createTemporaryView<Selection: SelectStatement>(
     ifNotExists: Bool = false,
-    select: () -> Selection
-  ) -> DatabaseView<Self, Selection>
+    as select: Selection
+  ) -> TemporaryView<Self, Selection>
   where Selection.QueryValue == Columns.QueryValue {
-    DatabaseView(ifNotExists: ifNotExists, select: select())
+    TemporaryView(ifNotExists: ifNotExists, select: select)
   }
 }
 
-public struct DatabaseView<View: Table & _Selection, Selection: SelectStatement>: Statement
+/// A `CREATE TEMPORARY VIEW` statement.
+///
+/// This type of statement is returned from ``Table/createTemporaryView(ifNotExists:as:)``.
+///
+/// To learn more, see <doc:Views>.
+public struct TemporaryView<View: Table & _Selection, Selection: SelectStatement>: Statement
 where Selection.QueryValue == View {
   public typealias QueryValue = ()
   public typealias From = Never
