@@ -205,7 +205,7 @@ extension SelectionMacro: MemberMacro {
       return []
     }
     let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
-    var allColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
+    var allColumns: [(name: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
     var decodingAssignments: [String] = []
@@ -278,7 +278,12 @@ extension SelectionMacro: MemberMacro {
           .text
       }
 
-      allColumns.append((identifier, columnQueryValueType))
+      let defaultValue: ExprSyntax? =
+        binding.initializer.map(\.value.trimmed)
+        // TODO: Revisit this with multi-column support.
+        // ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
+
+      allColumns.append((identifier, columnQueryValueType, defaultValue))
       let decodedType = columnQueryValueType?.asNonOptionalType()
       decodings.append(
         """
@@ -320,7 +325,13 @@ extension SelectionMacro: MemberMacro {
 
     let initArguments =
       allColumns
-      .map { "\($0): some \(moduleName).QueryExpression\($1.map { "<\($0)>" } ?? "")" }
+      .map {
+        """
+        \($0): some \(moduleName).QueryExpression\
+        \($1.map { "<\($0)>" } ?? "")\
+        \($2.map { "= #bind(\($0))" } ?? "")
+        """
+      }
       .joined(separator: ",\n")
     let initAssignment: [String] =
       allColumns
