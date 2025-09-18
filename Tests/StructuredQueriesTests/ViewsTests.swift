@@ -62,6 +62,34 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func ctes() {
+      assertQuery(
+        CompletedReminder.createTemporaryView(
+          as: With {
+            Reminder
+              .where(\.isCompleted)
+              .select { CompletedReminder.Columns(reminderID: $0.id, title: $0.title) }
+          } query: {
+            CompletedReminder.all
+          }
+        )
+      ) {
+        """
+        CREATE TEMPORARY VIEW
+        "completedReminders"
+        ("reminderID", "title")
+        AS
+        WITH "completedReminders" AS (
+          SELECT "reminders"."id" AS "reminderID", "reminders"."title" AS "title"
+          FROM "reminders"
+          WHERE "reminders"."isCompleted"
+        )
+        SELECT "completedReminders"."reminderID", "completedReminders"."title"
+        FROM "completedReminders"
+        """
+      }
+    }
   }
 }
 
@@ -69,8 +97,4 @@ extension SnapshotTests {
 private struct CompletedReminder {
   let reminderID: Reminder.ID
   let title: String
-}
-
-extension Table where Self: _Selection {
-  static func foo() {}
 }

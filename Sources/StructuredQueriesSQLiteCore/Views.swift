@@ -7,7 +7,7 @@ extension Table where Self: _Selection {
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE VIEW` statement.
   ///   - select: A statement describing the contents of the view.
   /// - Returns: A temporary trigger.
-  public static func createTemporaryView<Selection: SelectStatement>(
+  public static func createTemporaryView<Selection: PartialSelectStatement>(
     ifNotExists: Bool = false,
     as select: Selection
   ) -> TemporaryView<Self, Selection>
@@ -21,7 +21,7 @@ extension Table where Self: _Selection {
 /// This type of statement is returned from ``Table/createTemporaryView(ifNotExists:as:)``.
 ///
 /// To learn more, see <doc:Views>.
-public struct TemporaryView<View: Table & _Selection, Selection: SelectStatement>: Statement
+public struct TemporaryView<View: Table & _Selection, Selection: PartialSelectStatement>: Statement
 where Selection.QueryValue == View {
   public typealias QueryValue = ()
   public typealias From = Never
