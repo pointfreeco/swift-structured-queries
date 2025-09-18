@@ -151,20 +151,24 @@ last list was deleted:
 One can use triggers with a `SELECT` action to invoke Swift code when an event occurs in your
 database. For example, suppose you want to execute a Swift function a new reminder is inserted
 into the database. First you must register the function with SQLite and that depends on what
-SQLite driver you are using ([here][grdb-add-function] is how to do it in GRDB).
+SQLite driver you are using ([here][sqlite-data-add-function] is how to do it in SQLiteData).
 
 Suppose we registered a function called `didInsertReminder`, and further suppose it takes one
 argument of the ID of the newly inserted reminder. Then one can invoke this function whenever a
-reminder is inserted into the database with the  following trigger:
+reminder is inserted into the database with the following trigger:
 
-[grdb-add-function]: https://swiftpackageindex.com/groue/grdb.swift/v7.5.0/documentation/grdb/database/add(function:)
-
+[sqlite-data-add-function]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/database-52hin/add(function:)-1z12a
 @Row {
   @Column {
     ```swift
+    @DatabaseFunction
+    func didInsertReminder(_ id: Int) {
+      // ...
+    }
+
     Reminders.createTemporaryTrigger(
       after: .insert { new in
-        #sql("SELECT didInsertReminder(\(new.id))")
+        Values($didInsertReminder(new.id))
       }
     )
     ```
@@ -175,7 +179,7 @@ reminder is inserted into the database with the  following trigger:
     AFTER INSERT ON "reminders"
     FOR EACH ROW
     BEGIN
-      SELECT didInsertReminder("new"."id")
+      SELECT "didInsertReminder"("new"."id")
     END
     ```
   }

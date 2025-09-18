@@ -143,5 +143,50 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func defaults() {
+      assertMacro {
+        """
+        @Selection struct Row {
+          var title = ""
+          @Column(as: [String].JSONRepresentation.self)
+          var notes: [String] = []
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          var title = ""
+          var notes: [String] = []
+
+          public struct Columns: StructuredQueriesCore._SelectedColumns {
+            public typealias QueryValue = Row
+            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
+            public init(
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression(""),
+              notes: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> = StructuredQueriesCore.BindQueryExpression([])
+            ) {
+              self.selection = [("title", title.queryFragment), ("notes", notes.queryFragment)]
+            }
+          }
+        }
+
+        extension Row: StructuredQueriesCore._Selection {
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let title = try decoder.decode(Swift.String.self)
+            let notes = try decoder.decode([String].JSONRepresentation.self)
+            guard let title else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let notes else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.title = title
+            self.notes = notes
+          }
+        }
+        """
+      }
+    }
   }
 }
