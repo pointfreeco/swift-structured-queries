@@ -188,6 +188,7 @@ reminder is inserted into the database with the  following trigger:
 
 - ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
 - ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:before:fileID:line:column:)``
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:insteadOf:fileID:line:column:)``
 
 ### Touching records
 

@@ -55,6 +55,62 @@ extension SnapshotTests {
         """
       }
       assertQuery(
+        CompletedReminder.createTemporaryTrigger(
+          insteadOf: .insert { new in
+            Reminder.insert {
+              ($0.id, $0.title, $0.isCompleted, $0.remindersListID)
+            } values: {
+              (Reminder.select { ($0.id.max() ?? 0) + 1 }, new.title, true, 1)
+            }
+          }
+        )
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_insert_on_completedReminders@StructuredQueriesTests/ViewsTests.swift:58:49"
+        INSTEAD OF INSERT ON "completedReminders"
+        FOR EACH ROW BEGIN
+          INSERT INTO "reminders"
+          ("id", "title", "isCompleted", "remindersListID")
+          VALUES
+          ((
+            SELECT (coalesce(max("reminders"."id"), 0) + 1)
+            FROM "reminders"
+          ), "new"."title", 1, 1);
+        END
+        """
+      }
+      assertQuery(
+        CompletedReminder.insert(\.title) { "Already done" }
+      ) {
+        """
+        INSERT INTO "completedReminders"
+        ("title")
+        VALUES
+        ('Already done')
+        """
+      }
+      // NB: Can't use 'RETURNING' above due to a SQLite bug where 'reminderID' is 'NULL'.
+      assertQuery(
+        CompletedReminder.order { $0.reminderID.desc() }.limit(1)
+      ) {
+        """
+        SELECT "completedReminders"."reminderID", "completedReminders"."title"
+        FROM "completedReminders"
+        ORDER BY "completedReminders"."reminderID" DESC
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌─────────────────────────┐
+        │ CompletedReminder(      │
+        │   reminderID: 11,       │
+        │   title: "Already done" │
+        │ )                       │
+        └─────────────────────────┘
+        """
+      }
+      assertQuery(
         query.drop()
       ) {
         """
