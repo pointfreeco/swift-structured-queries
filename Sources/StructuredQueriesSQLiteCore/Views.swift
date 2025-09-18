@@ -22,7 +22,7 @@ extension Table where Self: _Selection {
 ///
 /// To learn more, see <doc:Views>.
 public struct TemporaryView<View: Table & _Selection, Selection: PartialSelectStatement>: Statement
-where Selection.QueryValue == View.Columns.QueryValue {
+where Selection.QueryValue == View {
   public typealias QueryValue = ()
   public typealias From = Never
 
