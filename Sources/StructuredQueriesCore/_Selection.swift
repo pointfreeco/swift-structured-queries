@@ -8,6 +8,15 @@ public protocol _SelectedColumns<QueryValue>: QueryExpression {
 
 extension _SelectedColumns {
   public var queryFragment: QueryFragment {
-    selection.map { "\($1) AS \(quote: $0)" as QueryFragment }.joined(separator: ", ")
+    selection.map {
+      // Avoid aliasing fragments comprising multiple
+      // columns
+      //
+      // Atomic unit of a fragment seems to comprise 3 segments
+      // (e.g. [.sql("table"), .sql("."), .sql("column")].
+      $1.segments.count <= 3
+        ? "\($1) AS \(quote: $0)" as QueryFragment
+        : $1
+    }.joined(separator: ", ")
   }
 }
