@@ -158,6 +158,7 @@ argument of the ID of the newly inserted reminder. Then one can invoke this func
 reminder is inserted into the database with the following trigger:
 
 [sqlite-data-add-function]: https://swiftpackageindex.com/pointfreeco/sqlite-data/main/documentation/sqlitedata/database-52hin/add(function:)-1z12a
+
 @Row {
   @Column {
     ```swift
