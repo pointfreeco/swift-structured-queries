@@ -58,9 +58,9 @@ extension SnapshotTests {
         CompletedReminder.createTemporaryTrigger(
           insteadOf: .insert { new in
             Reminder.insert {
-              ($0.id, $0.title, $0.isCompleted, $0.remindersListID)
+              ($0.title, $0.isCompleted, $0.remindersListID)
             } values: {
-              (Reminder.select { ($0.id.max() ?? 0) + 1 }, new.title, true, 1)
+              (new.title, true, 1)
             }
           }
         )
@@ -71,12 +71,9 @@ extension SnapshotTests {
         INSTEAD OF INSERT ON "completedReminders"
         FOR EACH ROW BEGIN
           INSERT INTO "reminders"
-          ("id", "title", "isCompleted", "remindersListID")
+          ("title", "isCompleted", "remindersListID")
           VALUES
-          ((
-            SELECT (coalesce(max("reminders"."id"), 0) + 1)
-            FROM "reminders"
-          ), "new"."title", 1, 1);
+          ("new"."title", 1, 1);
         END
         """
       }
