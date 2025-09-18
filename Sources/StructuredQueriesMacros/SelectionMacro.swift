@@ -280,8 +280,8 @@ extension SelectionMacro: MemberMacro {
 
       let defaultValue: ExprSyntax? =
         binding.initializer.map(\.value.trimmed)
-        // TODO: Revisit this with multi-column support.
-        // ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
+      // TODO: Revisit this with multi-column support.
+      // ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
 
       allColumns.append((identifier, columnQueryValueType, defaultValue))
       let decodedType = columnQueryValueType?.asNonOptionalType()
