@@ -74,6 +74,42 @@ extension Table {
     )
   }
 
+  /// A `CREATE TEMPORARY TRIGGER` statement that executes instead of a database view event.
+  ///
+  /// See <doc:Triggers> for more information.
+  ///
+  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
+  /// > provided. If you build your own trigger helper that call this function, then your helper
+  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
+  ///
+  /// - Parameters:
+  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
+  ///     operation, and source location.
+  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
+  ///   - operation: The trigger's operation.
+  ///   - fileID: The source `#fileID` associated with the trigger.
+  ///   - line: The source `#line` associated with the trigger.
+  ///   - column: The source `#column` associated with the trigger.
+  /// - Returns: A temporary trigger.
+  public static func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    insteadOf operation: TemporaryTrigger<Self>.Operation,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    TemporaryTrigger(
+      name: name,
+      ifNotExists: ifNotExists,
+      operation: operation,
+      when: .insteadOf,
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
   /// A `CREATE TEMPORARY TRIGGER` statement that applies additional updates to a row that has just
   /// been updated.
   ///
@@ -252,6 +288,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
   fileprivate enum When: QueryFragment {
     case before = "BEFORE"
     case after = "AFTER"
+    case insteadOf = "INSTEAD OF"
   }
 
   /// The database event used in a trigger.
