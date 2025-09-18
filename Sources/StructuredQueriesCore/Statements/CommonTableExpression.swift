@@ -1,6 +1,7 @@
 /// Creates a common table expression that can be used to factor subqueries, or create hierarchical
 /// or recursive queries of trees and graphs.
-public struct With<QueryValue>: Statement, Sendable {
+public struct With<Base: Statement>: Statement, Sendable {
+  public typealias QueryValue = Base.QueryValue
   public typealias From = Never
 
   var ctes: [CommonTableExpressionClause]
@@ -9,7 +10,7 @@ public struct With<QueryValue>: Statement, Sendable {
   @_disfavoredOverload
   public init(
     @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
-    query statement: () -> some Statement<QueryValue>
+    query statement: () -> Base
   ) {
     self.ctes = ctes()
     self.statement = statement().query
@@ -22,7 +23,21 @@ public struct With<QueryValue>: Statement, Sendable {
   where
     S.QueryValue == (),
     S.Joins == (repeat each J),
-    QueryValue == (S.From, repeat each J)
+    Base == Select<(S.From, repeat each J), S.From, (repeat each J)>
+  {
+    self.ctes = ctes()
+    self.statement = statement().query
+  }
+
+  @_disfavoredOverload
+  public init<S: SelectStatement>(
+    @CommonTableExpressionBuilder _ ctes: () -> [CommonTableExpressionClause],
+    query statement: () -> S
+  )
+  where
+    S.QueryValue == (),
+    S.Joins == (),
+    Base == Select<S.From, S.From, ()>
   {
     self.ctes = ctes()
     self.statement = statement().query
@@ -39,6 +54,8 @@ public struct With<QueryValue>: Statement, Sendable {
     return query
   }
 }
+
+extension With: PartialSelectStatement where Base: PartialSelectStatement {}
 
 extension QueryFragment {
   fileprivate var presence: Self? { isEmpty ? nil : self }
