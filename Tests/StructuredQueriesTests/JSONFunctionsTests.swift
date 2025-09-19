@@ -495,7 +495,7 @@ extension SnapshotTests {
 }
 
 @Selection
-private struct ReminderRow: Codable {
+private struct ReminderRow {
   let assignedUser: User?
   let reminder: Reminder
   @Column(as: [Tag].JSONRepresentation.self)

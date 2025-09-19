@@ -32,7 +32,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "title" = ("reminders"."title" || '!!!')
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id" IN (1))
         RETURNING "title"
         """
       } results: {
@@ -50,7 +50,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "title" = ("reminders"."title" || '???')
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id" IN (1))
         RETURNING "title"
         """
       } results: {
@@ -69,7 +69,7 @@ extension SnapshotTests {
       ) {
         """
         DELETE FROM "reminders"
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id" IN (1))
         RETURNING "reminders"."id"
         """
       } results: {
@@ -86,7 +86,7 @@ extension SnapshotTests {
       ) {
         """
         DELETE FROM "reminders"
-        WHERE ("reminders"."id" = 2)
+        WHERE ("reminders"."id" IN (2))
         RETURNING "reminders"."id"
         """
       } results: {
@@ -105,7 +105,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id" IN (1))
         """
       } results: {
         """
@@ -121,7 +121,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id" IN (1))
         """
       } results: {
         """
@@ -137,7 +137,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" = 2)
+        WHERE ("reminders"."id" IN (2))
         """
       } results: {
         """
@@ -148,12 +148,58 @@ extension SnapshotTests {
       }
 
       assertQuery(
+        Reminder.select { ($0.id, $0.title) }.find([2, 4, 6])
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" IN (2, 4, 6))
+        """
+      } results: {
+        """
+        ┌───┬────────────────────────────┐
+        │ 2 │ "Haircut"                  │
+        │ 4 │ "Take a walk"              │
+        │ 6 │ "Pick up kids from school" │
+        └───┴────────────────────────────┘
+        """
+      }
+
+      assertQuery(
+        Reminder.select { ($0.id, $0.title) }.find(Reminder.select(\.id))
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" IN ((
+          SELECT "reminders"."id"
+          FROM "reminders"
+        )))
+        """
+      } results: {
+        """
+        ┌────┬────────────────────────────┐
+        │ 1  │ "Groceries"                │
+        │ 2  │ "Haircut"                  │
+        │ 3  │ "Doctor appointment"       │
+        │ 4  │ "Take a walk"              │
+        │ 5  │ "Buy concert tickets"      │
+        │ 6  │ "Pick up kids from school" │
+        │ 7  │ "Get laundry"              │
+        │ 8  │ "Take out trash"           │
+        │ 9  │ "Call accountant"          │
+        │ 10 │ "Send weekly emails"       │
+        └────┴────────────────────────────┘
+        """
+      }
+
+      assertQuery(
         Reminder.Draft.select { ($0.id, $0.title) }.find(2)
       ) {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" = 2)
+        WHERE ("reminders"."id" IN (2))
         """
       } results: {
         """
@@ -175,7 +221,7 @@ extension SnapshotTests {
         SELECT "reminders"."title", "remindersLists"."title"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
-        WHERE ("reminders"."id" = 2)
+        WHERE ("reminders"."id" IN (2))
         """
       } results: {
         """
@@ -214,7 +260,7 @@ extension SnapshotTests {
         """
         SELECT "rows"."id", "rows"."isDeleted", "rows"."isNotDeleted"
         FROM "rows"
-        WHERE ("rows"."id" = '00000000-0000-0000-0000-000000000001')
+        WHERE ("rows"."id" IN ('00000000-0000-0000-0000-000000000001'))
         """
       } results: {
         """
