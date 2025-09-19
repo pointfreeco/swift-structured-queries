@@ -188,5 +188,176 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func primaryKey() {
+      assertMacro {
+        """
+        @Selection struct Row {
+          @Column(primaryKey: true)
+          let id: Int
+          var title = ""
+        }
+        """
+      } diagnostics: {
+        """
+        @Selection struct Row {
+          @Column(primaryKey: true)
+                  ┬─────────
+                  ╰─ 🛑 '@Selection' primary keys are not supported
+                     ✏️ Remove 'primaryKey: true'
+          let id: Int
+          var title = ""
+        }
+        """
+      } fixes: {
+        """
+        @Selection struct Row {
+          @Column()
+          let id: Int
+          var title = ""
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          let id: Int
+          var title = ""
+
+          public struct Columns: StructuredQueriesCore._SelectedColumns {
+            public typealias QueryValue = Row
+            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("")
+            ) {
+              self.selection = [("id", id.queryFragment), ("title", title.queryFragment)]
+            }
+          }
+        }
+
+        extension Row: StructuredQueriesCore._Selection {
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            let title = try decoder.decode(Swift.String.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let title else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.title = title
+          }
+        }
+        """
+      }
+    }
+
+    @Test func tableSelectionPrimaryKey() {
+      assertMacro {
+        """
+        @Table @Selection struct Row {
+          @Column(primaryKey: true)
+          let id: Int
+          var title = ""
+        }
+        """
+      } expansion: {
+        #"""
+        struct Row {
+          let id: Int
+          var title = ""
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Row
+            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [QueryValue.columns.id, QueryValue.columns.title]
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [QueryValue.columns.id, QueryValue.columns.title]
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id), \(self.title)"
+            }
+          }
+
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = Row
+            let id: Int?
+            var title = ""
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.title]
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                [QueryValue.columns.id, QueryValue.columns.title]
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.title)"
+              }
+            }
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var tableName: String {
+              Row.tableName
+            }
+
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(Int.self)
+              self.title = try decoder.decode(Swift.String.self) ?? ""
+            }
+
+            public nonisolated init(_ other: Row) {
+              self.id = other.id
+              self.title = other.title
+            }
+            public init(
+              id: Int? = nil,
+              title: Swift.String = ""
+            ) {
+              self.id = id
+              self.title = title
+            }
+          }
+        }
+
+        nonisolated extension Row: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var tableName: String {
+            "rows"
+          }
+        }
+
+        extension Row: StructuredQueriesCore._Selection {
+          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(Int.self)
+            let title = try decoder.decode(Swift.String.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let title else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.title = title
+          }
+        }
+        """#
+      }
+    }
   }
 }

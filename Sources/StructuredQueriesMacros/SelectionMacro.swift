@@ -98,6 +98,9 @@ extension SelectionMacro: ExtensionMacro {
             columnQueryValueType = "\(raw: base.trimmedDescription)"
 
           case .some(let label) where label.text == "primaryKey":
+            guard !declaration.hasMacroApplication("Table")
+            else { continue }
+            
             var newArguments = arguments
             newArguments.remove(at: argumentIndex)
             diagnostics.append(
@@ -257,6 +260,9 @@ extension SelectionMacro: MemberMacro {
             columnQueryValueType = "\(raw: base.trimmedDescription)"
 
           case .some(let label) where label.text == "primaryKey":
+            guard !declaration.hasMacroApplication("Table")
+            else { continue }
+            
             var newArguments = arguments
             newArguments.remove(at: argumentIndex)
             expansionFailed = true

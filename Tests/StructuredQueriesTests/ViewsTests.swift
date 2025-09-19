@@ -152,6 +152,7 @@ extension SnapshotTests {
             .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
             .select {
               ReminderWithList.Columns(
+                reminderID: $0.id,
                 reminderTitle: $0.title,
                 remindersListTitle: $1.title
               )
@@ -161,9 +162,9 @@ extension SnapshotTests {
         """
         CREATE TEMPORARY VIEW
         "reminderWithLists"
-        ("reminderTitle", "remindersListTitle")
+        ("id", "reminderTitle", "remindersListTitle")
         AS
-        SELECT "reminders"."title" AS "reminderTitle", "remindersLists"."title" AS "remindersListTitle"
+        SELECT "reminders"."id" AS "id", "reminders"."title" AS "reminderTitle", "remindersLists"."title" AS "remindersListTitle"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
@@ -187,7 +188,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_reminderWithLists@StructuredQueriesTests/ViewsTests.swift:173:48"
+          "after_insert_on_reminderWithLists@StructuredQueriesTests/ViewsTests.swift:174:48"
         INSTEAD OF INSERT ON "reminderWithLists"
         FOR EACH ROW BEGIN
           INSERT INTO "reminders"
@@ -204,14 +205,14 @@ extension SnapshotTests {
 
       assertQuery(
         ReminderWithList.insert {
-          ReminderWithList(reminderTitle: "Morning sync", remindersListTitle: "Business")
+          ReminderWithList.Draft(reminderTitle: "Morning sync", remindersListTitle: "Business")
         }
       ) {
         """
         INSERT INTO "reminderWithLists"
-        ("reminderTitle", "remindersListTitle")
+        ("id", "reminderTitle", "remindersListTitle")
         VALUES
-        ('Morning sync', 'Business')
+        (NULL, 'Morning sync', 'Business')
         """
       } results: {
         """
@@ -221,18 +222,36 @@ extension SnapshotTests {
 
       assertQuery(
         ReminderWithList.insert {
-          ReminderWithList(reminderTitle: "Morning sync", remindersListTitle: "Unknown List")
+          ReminderWithList.Draft(reminderTitle: "Morning sync", remindersListTitle: "Unknown List")
         }
       ) {
         """
         INSERT INTO "reminderWithLists"
-        ("reminderTitle", "remindersListTitle")
+        ("id", "reminderTitle", "remindersListTitle")
         VALUES
-        ('Morning sync', 'Unknown List')
+        (NULL, 'Morning sync', 'Unknown List')
         """
       } results: {
         """
         NOT NULL constraint failed: reminders.remindersListID
+        """
+      }
+
+      assertQuery(ReminderWithList.find(1)) {
+        """
+        SELECT "reminderWithLists"."id", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
+        FROM "reminderWithLists"
+        WHERE ("reminderWithLists"."id" = 1)
+        """
+      } results: {
+        """
+        ┌──────────────────────────────────┐
+        │ ReminderWithList(                │
+        │   id: 1,                         │
+        │   reminderTitle: "Groceries",    │
+        │   remindersListTitle: "Personal" │
+        │ )                                │
+        └──────────────────────────────────┘
         """
       }
 
@@ -242,7 +261,7 @@ extension SnapshotTests {
           .limit(3)
       ) {
         """
-        SELECT "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
+        SELECT "reminderWithLists"."id", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
         FROM "reminderWithLists"
         ORDER BY "reminderWithLists"."remindersListTitle", "reminderWithLists"."reminderTitle"
         LIMIT 3
@@ -251,16 +270,19 @@ extension SnapshotTests {
         """
         ┌────────────────────────────────────────┐
         │ ReminderWithList(                      │
+        │   id: 9,                               │
         │   reminderTitle: "Call accountant",    │
         │   remindersListTitle: "Business"       │
         │ )                                      │
         ├────────────────────────────────────────┤
         │ ReminderWithList(                      │
+        │   id: 11,                              │
         │   reminderTitle: "Morning sync",       │
         │   remindersListTitle: "Business"       │
         │ )                                      │
         ├────────────────────────────────────────┤
         │ ReminderWithList(                      │
+        │   id: 10,                              │
         │   reminderTitle: "Send weekly emails", │
         │   remindersListTitle: "Business"       │
         │ )                                      │
@@ -280,6 +302,8 @@ private struct CompletedReminder {
 
 @Table @Selection
 private struct ReminderWithList {
+  @Column(primaryKey: true)
+  let reminderID: Reminder.ID
   let reminderTitle: String
   let remindersListTitle: String
 }
