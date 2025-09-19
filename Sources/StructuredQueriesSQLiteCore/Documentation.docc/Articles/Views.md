@@ -113,7 +113,7 @@ ReminderWithList.createTemporaryTrigger(
     Reminder.insert {
       (
         $0.title, 
-        $0.remindersListID)
+        $0.remindersListID
       )
     } values: {
       (

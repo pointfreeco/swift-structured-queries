@@ -335,7 +335,7 @@ extension SelectionMacro: MemberMacro {
         """
         \($0): some \(moduleName).QueryExpression\
         \($1.map { "<\($0)>" } ?? "")\
-        \($2.map { "= #bind(\($0))" } ?? "")
+        \($2.map { "= BindQueryExpression(\($0))" } ?? "")
         """
       }
       .joined(separator: ",\n")

@@ -163,8 +163,8 @@ extension SnapshotTests {
             public typealias QueryValue = Row
             public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
             public init(
-              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression(""),
-              notes: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> = StructuredQueriesCore.BindQueryExpression([])
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = BindQueryExpression(""),
+              notes: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> = BindQueryExpression([])
             ) {
               self.selection = [("title", title.queryFragment), ("notes", notes.queryFragment)]
             }
@@ -228,7 +228,7 @@ extension SnapshotTests {
             public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("")
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = BindQueryExpression("")
             ) {
               self.selection = [("id", id.queryFragment), ("title", title.queryFragment)]
             }
@@ -335,7 +335,7 @@ extension SnapshotTests {
             public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("")
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = BindQueryExpression("")
             ) {
               self.selection = [("id", id.queryFragment), ("title", title.queryFragment)]
             }
