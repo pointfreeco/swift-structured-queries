@@ -162,9 +162,9 @@ extension SnapshotTests {
         """
         CREATE TEMPORARY VIEW
         "reminderWithLists"
-        ("id", "reminderTitle", "remindersListTitle")
+        ("reminderID", "reminderTitle", "remindersListTitle")
         AS
-        SELECT "reminders"."id" AS "id", "reminders"."title" AS "reminderTitle", "remindersLists"."title" AS "remindersListTitle"
+        SELECT "reminders"."id" AS "reminderID", "reminders"."title" AS "reminderTitle", "remindersLists"."title" AS "remindersListTitle"
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
         """
@@ -210,7 +210,7 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "reminderWithLists"
-        ("id", "reminderTitle", "remindersListTitle")
+        ("reminderID", "reminderTitle", "remindersListTitle")
         VALUES
         (NULL, 'Morning sync', 'Business')
         """
@@ -227,7 +227,7 @@ extension SnapshotTests {
       ) {
         """
         INSERT INTO "reminderWithLists"
-        ("id", "reminderTitle", "remindersListTitle")
+        ("reminderID", "reminderTitle", "remindersListTitle")
         VALUES
         (NULL, 'Morning sync', 'Unknown List')
         """
@@ -239,15 +239,15 @@ extension SnapshotTests {
 
       assertQuery(ReminderWithList.find(1)) {
         """
-        SELECT "reminderWithLists"."id", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
+        SELECT "reminderWithLists"."reminderID", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
         FROM "reminderWithLists"
-        WHERE ("reminderWithLists"."id" = 1)
+        WHERE ("reminderWithLists"."reminderID" = 1)
         """
       } results: {
         """
         ┌──────────────────────────────────┐
         │ ReminderWithList(                │
-        │   id: 1,                         │
+        │   reminderID: 1,                 │
         │   reminderTitle: "Groceries",    │
         │   remindersListTitle: "Personal" │
         │ )                                │
@@ -261,7 +261,7 @@ extension SnapshotTests {
           .limit(3)
       ) {
         """
-        SELECT "reminderWithLists"."id", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
+        SELECT "reminderWithLists"."reminderID", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
         FROM "reminderWithLists"
         ORDER BY "reminderWithLists"."remindersListTitle", "reminderWithLists"."reminderTitle"
         LIMIT 3
@@ -270,19 +270,19 @@ extension SnapshotTests {
         """
         ┌────────────────────────────────────────┐
         │ ReminderWithList(                      │
-        │   id: 9,                               │
+        │   reminderID: 9,                       │
         │   reminderTitle: "Call accountant",    │
         │   remindersListTitle: "Business"       │
         │ )                                      │
         ├────────────────────────────────────────┤
         │ ReminderWithList(                      │
-        │   id: 11,                              │
+        │   reminderID: 11,                      │
         │   reminderTitle: "Morning sync",       │
         │   remindersListTitle: "Business"       │
         │ )                                      │
         ├────────────────────────────────────────┤
         │ ReminderWithList(                      │
-        │   id: 10,                              │
+        │   reminderID: 10,                      │
         │   reminderTitle: "Send weekly emails", │
         │   remindersListTitle: "Business"       │
         │ )                                      │

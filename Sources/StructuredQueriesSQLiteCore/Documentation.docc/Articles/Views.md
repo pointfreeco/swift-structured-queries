@@ -25,8 +25,9 @@ private struct ReminderWithList {
 
 Note that we have applied both the [`@Table`](<doc:StructuredQueriesCore/Table(_:)>) macro and 
 [`@Selection`](<doc:StructuredQueriesCore/Selection()>) macro. This is similar to what
-one does with Common Table Expressions, and it allows one to represent a type that for intents
-and purposes seems like a regular SQLite table, but it's not actually persisted in the database.
+one does with [Common Table Expressions](<doc:StructuredQueriesCore/CommonTableExpressions>), 
+and it allows one to represent a type that for intents and purposes seems like a regular SQLite 
+table, but it's not actually persisted in the database.
 
 With that type defined we can use the 
 ``StructuredQueriesCore/Table/createTemporaryView(ifNotExists:as:)`` to create a SQL query that
