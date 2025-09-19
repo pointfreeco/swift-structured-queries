@@ -24,10 +24,10 @@ private struct ReminderWithList {
 ```
 
 Note that we have applied both the `@Table` macro and `@Selection` macro. This is similar to what
-one does with common table expressions, and it allows one to represent a type that for intents and 
+one does with common table expressions, and it allows one to represent a type that for intents and
 purposes seems like a regular SQLite table, but it's not actually persisted in the database.
 
-With that type defined we can use the 
+With that type defined we can use the
 ``StructuredQueriesCore/Table/createTemporaryView(ifNotExists:as:)`` to create a SQL query that
 creates a temporary view. You provide a select statement that selects all the data needed for the
 view:
@@ -46,27 +46,27 @@ ReminderWithList.createTemporaryView(
 ```
 
 Once that is executed in your database you are free to query from this table as if it is a regular
-table:  
+table:
 
 @Row {
   @Column {
     ```swift
     ReminderWithList
-      .order { 
-        ($0.remindersListTitle, 
-         $0.reminderTitle) 
+      .order {
+        ($0.remindersListTitle,
+         $0.reminderTitle)
       }
       .limit(3)
     ```
   }
   @Column {
     ```sql
-    SELECT 
-      "reminderWithLists"."reminderTitle", 
+    SELECT
+      "reminderWithLists"."reminderTitle",
       "reminderWithLists"."remindersListTitle"
     FROM "reminderWithLists"
-    ORDER BY 
-      "reminderWithLists"."remindersListTitle", 
+    ORDER BY
+      "reminderWithLists"."remindersListTitle",
       "reminderWithLists"."reminderTitle"
     LIMIT 3
     ```
@@ -85,12 +85,12 @@ example if you try to insert into `ReminderWithList` you will be met with a SQL 
 ```swift
 ReminderWithList.insert {
   ReminderWithList(
-    reminderTitle: "Morning sync", 
+    reminderTitle: "Morning sync",
     remindersListTitle: "Business"
   )
 }
 // 🛑 cannot modify reminderWithLists because it is a view
-``` 
+```
 
 However, it is possible to restore inserts if you can describe how inserting a `(String, String)`
 pair into the table ultimately re-routes to inserts into your actual, non-view tables. The logic
@@ -100,7 +100,7 @@ we could try first creating a new list with the title, and then use that new lis
 reminder with the title. Or, we could decide that we will not allow creating a new list, and
 instead we will just find an existing list with the title, and if we cannot then we fail the query.
 
-In order to demonstrate this technique, we will use the latter rerouting logic: when a 
+In order to demonstrate this technique, we will use the latter rerouting logic: when a
 `(String, String)` is inserted into `ReminderWithList` we will only create a new reminder with
 the title specified, and we will only find an existing reminders list (if one exists) for the title
 specified. And to implement this rerouting logic, one uses a [temporary trigger](<doc:Triggers>) on
@@ -112,7 +112,7 @@ ReminderWithList.createTemporaryTrigger(
   insteadOf: .insert { new in
     Reminder.insert {
       (
-        $0.title, 
+        $0.title,
         $0.remindersListID
       )
     } values: {
@@ -133,7 +133,7 @@ view:
 ```swift
 ReminderWithList.insert {
   ReminderWithList(
-    reminderTitle: "Morning sync", 
+    reminderTitle: "Morning sync",
     remindersListTitle: "Business"
   )
 }

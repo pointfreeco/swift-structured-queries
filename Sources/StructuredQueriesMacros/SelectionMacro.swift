@@ -100,7 +100,7 @@ extension SelectionMacro: ExtensionMacro {
           case .some(let label) where label.text == "primaryKey":
             guard !declaration.hasMacroApplication("Table")
             else { continue }
-            
+
             var newArguments = arguments
             newArguments.remove(at: argumentIndex)
             diagnostics.append(
@@ -262,7 +262,7 @@ extension SelectionMacro: MemberMacro {
           case .some(let label) where label.text == "primaryKey":
             guard !declaration.hasMacroApplication("Table")
             else { continue }
-            
+
             var newArguments = arguments
             newArguments.remove(at: argumentIndex)
             expansionFailed = true
