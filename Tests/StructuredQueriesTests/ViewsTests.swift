@@ -143,6 +143,154 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func reminderWithList() {
+      assertQuery(
+        ReminderWithList.createTemporaryView(
+          as:
+            Reminder
+            .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
+            .select {
+              ReminderWithList.Columns(
+                reminderID: $0.id,
+                reminderTitle: $0.title,
+                remindersListTitle: $1.title
+              )
+            }
+        )
+      ) {
+        """
+        CREATE TEMPORARY VIEW
+        "reminderWithLists"
+        ("reminderID", "reminderTitle", "remindersListTitle")
+        AS
+        SELECT "reminders"."id" AS "reminderID", "reminders"."title" AS "reminderTitle", "remindersLists"."title" AS "remindersListTitle"
+        FROM "reminders"
+        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        """
+      }
+
+      assertQuery(
+        ReminderWithList.createTemporaryTrigger(
+          insteadOf: .insert { new in
+            Reminder.insert {
+              ($0.title, $0.remindersListID)
+            } values: {
+              (
+                new.reminderTitle,
+                RemindersList
+                  .select(\.id)
+                  .where { $0.title.eq(new.remindersListTitle) }
+              )
+            }
+          }
+        )
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_insert_on_reminderWithLists@StructuredQueriesTests/ViewsTests.swift:174:48"
+        INSTEAD OF INSERT ON "reminderWithLists"
+        FOR EACH ROW BEGIN
+          INSERT INTO "reminders"
+          ("title", "remindersListID")
+          VALUES
+          ("new"."reminderTitle", (
+            SELECT "remindersLists"."id"
+            FROM "remindersLists"
+            WHERE ("remindersLists"."title" = "new"."remindersListTitle")
+          ));
+        END
+        """
+      }
+
+      assertQuery(
+        ReminderWithList.insert {
+          ReminderWithList.Draft(reminderTitle: "Morning sync", remindersListTitle: "Business")
+        }
+      ) {
+        """
+        INSERT INTO "reminderWithLists"
+        ("reminderID", "reminderTitle", "remindersListTitle")
+        VALUES
+        (NULL, 'Morning sync', 'Business')
+        """
+      } results: {
+        """
+
+        """
+      }
+
+      assertQuery(
+        ReminderWithList.insert {
+          ReminderWithList.Draft(reminderTitle: "Morning sync", remindersListTitle: "Unknown List")
+        }
+      ) {
+        """
+        INSERT INTO "reminderWithLists"
+        ("reminderID", "reminderTitle", "remindersListTitle")
+        VALUES
+        (NULL, 'Morning sync', 'Unknown List')
+        """
+      } results: {
+        """
+        NOT NULL constraint failed: reminders.remindersListID
+        """
+      }
+
+      assertQuery(ReminderWithList.find(1)) {
+        """
+        SELECT "reminderWithLists"."reminderID", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
+        FROM "reminderWithLists"
+        WHERE ("reminderWithLists"."reminderID" = 1)
+        """
+      } results: {
+        """
+        ┌──────────────────────────────────┐
+        │ ReminderWithList(                │
+        │   reminderID: 1,                 │
+        │   reminderTitle: "Groceries",    │
+        │   remindersListTitle: "Personal" │
+        │ )                                │
+        └──────────────────────────────────┘
+        """
+      }
+
+      assertQuery(
+        ReminderWithList
+          .order(by: { ($0.remindersListTitle, $0.reminderTitle) })
+          .limit(3)
+      ) {
+        """
+        SELECT "reminderWithLists"."reminderID", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
+        FROM "reminderWithLists"
+        ORDER BY "reminderWithLists"."remindersListTitle", "reminderWithLists"."reminderTitle"
+        LIMIT 3
+        """
+      } results: {
+        """
+        ┌────────────────────────────────────────┐
+        │ ReminderWithList(                      │
+        │   reminderID: 9,                       │
+        │   reminderTitle: "Call accountant",    │
+        │   remindersListTitle: "Business"       │
+        │ )                                      │
+        ├────────────────────────────────────────┤
+        │ ReminderWithList(                      │
+        │   reminderID: 11,                      │
+        │   reminderTitle: "Morning sync",       │
+        │   remindersListTitle: "Business"       │
+        │ )                                      │
+        ├────────────────────────────────────────┤
+        │ ReminderWithList(                      │
+        │   reminderID: 10,                      │
+        │   reminderTitle: "Send weekly emails", │
+        │   remindersListTitle: "Business"       │
+        │ )                                      │
+        └────────────────────────────────────────┘
+        """
+      }
+
+    }
   }
 }
 
@@ -150,4 +298,12 @@ extension SnapshotTests {
 private struct CompletedReminder {
   let reminderID: Reminder.ID
   let title: String
+}
+
+@Table @Selection
+private struct ReminderWithList {
+  @Column(primaryKey: true)
+  let reminderID: Reminder.ID
+  let reminderTitle: String
+  let remindersListTitle: String
 }
