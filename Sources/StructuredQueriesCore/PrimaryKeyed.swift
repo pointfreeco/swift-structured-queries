@@ -88,7 +88,17 @@ extension PrimaryKeyedTable {
   public static func find(
     _ primaryKey: some QueryExpression<TableColumns.PrimaryKey>
   ) -> Where<Self> {
-    Self.where { $0.primaryKey.in([primaryKey]) }
+    Self.find([primaryKey])
+  }
+
+  /// A where clause filtered by primary keys.
+  ///
+  /// - Parameter primaryKey: Primary keys identifying table rows.
+  /// - Returns: A `WHERE` clause.
+  public static func find(
+    _ primaryKeys: some Sequence<some QueryExpression<TableColumns.PrimaryKey>>
+  ) -> Where<Self> {
+    Self.where { $0.primaryKey.in(primaryKeys) }
   }
 
   public var primaryKey: PrimaryKey.QueryOutput {
@@ -125,12 +135,8 @@ extension Where where From: TableDraft {
   ///
   /// - Parameter primaryKey: A primary key.
   /// - Returns: A where clause with the added primary key.
-  public func find(_ primaryKey: From.PrimaryTable.TableColumns.PrimaryKey.QueryOutput) -> Self {
-    self.where { _ in
-      From.PrimaryTable.columns.primaryKey.in(
-        [From.PrimaryTable.TableColumns.PrimaryKey(queryOutput: primaryKey)]
-      )
-    }
+  public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>) -> Self {
+    self.where { $0.primaryKey.in([primaryKey]) }
   }
 }
 
@@ -171,12 +177,8 @@ extension Update where From: TableDraft {
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: An update statement filtered by the given key.
-  public func find(_ primaryKey: From.PrimaryTable.TableColumns.PrimaryKey.QueryOutput) -> Self {
-    self.where { _ in
-      From.PrimaryTable.columns.primaryKey.in(
-        [From.PrimaryTable.TableColumns.PrimaryKey(queryOutput: primaryKey)]
-      )
-    }
+  public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>) -> Self {
+    self.where { $0.primaryKey.in([primaryKey]) }
   }
 }
 
@@ -195,11 +197,7 @@ extension Delete where From: TableDraft {
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A delete statement filtered by the given key.
-  public func find(_ primaryKey: From.PrimaryTable.TableColumns.PrimaryKey.QueryOutput) -> Self {
-    self.where { _ in
-      From.PrimaryTable.columns.primaryKey.in(
-        [From.PrimaryTable.TableColumns.PrimaryKey(queryOutput: primaryKey)]
-      )
-    }
+  public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>) -> Self {
+    self.where { $0.primaryKey.in([primaryKey]) }
   }
 }
