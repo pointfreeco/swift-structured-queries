@@ -73,7 +73,7 @@ table:
   }
 }
 
-The best part of this is that the "JOIN" used in the view is completely hidden from us. For all
+The best part of this is that the `JOIN` used in the view is completely hidden from us. For all
 intents and purposes, `ReminderWithList` seems like a regular SQL table for which each row holds
 just two strings. We can simply query from the table to get that data in whatever way we want.
 
@@ -104,7 +104,7 @@ In order to demosntrate this technique, we will use the latter re-routing logic:
 `(String, String)` is inserted into `ReminderWithList` we will only create a new reminder with
 the title specified, and we will only find an existing reminders list (if one exists) for the title
 specified. And to implement this re-routing logic, one uses a [temporary trigger](<doc:Triggers>)
-on the view with an "INSTEAD OF" clause, which allows you to re-route any inserts on the view
+on the view with an `INSTEAD OF` clause, which allows you to re-route any inserts on the view
 into some other table:
 
 ```swift
