@@ -215,7 +215,7 @@ extension SnapshotTests {
         """
       } results: {
         """
-        cannot modify reminderWithLists because it is a view
+
         """
       }
 
@@ -232,7 +232,7 @@ extension SnapshotTests {
         """
       } results: {
         """
-        cannot modify reminderWithLists because it is a view
+        NOT NULL constraint failed: reminders.remindersListID
         """
       }
 
@@ -256,13 +256,13 @@ extension SnapshotTests {
         │ )                                      │
         ├────────────────────────────────────────┤
         │ ReminderWithList(                      │
-        │   reminderTitle: "Send weekly emails", │
+        │   reminderTitle: "Morning sync",       │
         │   remindersListTitle: "Business"       │
         │ )                                      │
         ├────────────────────────────────────────┤
         │ ReminderWithList(                      │
-        │   reminderTitle: "Get laundry",        │
-        │   remindersListTitle: "Family"         │
+        │   reminderTitle: "Send weekly emails", │
+        │   remindersListTitle: "Business"       │
         │ )                                      │
         └────────────────────────────────────────┘
         """
