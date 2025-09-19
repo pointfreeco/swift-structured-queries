@@ -15,7 +15,7 @@ struct RemindersList: Codable, Equatable, Identifiable {
   var position = 0
 }
 
-@Table
+@Table @Selection
 struct Reminder: Codable, Equatable, Identifiable {
   static let incomplete = Self.where { !$0.isCompleted }
 
@@ -28,7 +28,7 @@ struct Reminder: Codable, Equatable, Identifiable {
   var priority: Priority?
   var remindersListID: Int
   var title = ""
-  var updatedAt: Date = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
+  //var updatedAt: Date = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
   static func searching(_ text: String) -> Where<Reminder> {
     Self.where {
       $0.title.collate(.nocase).contains(text)

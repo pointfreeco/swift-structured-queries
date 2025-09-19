@@ -54,29 +54,40 @@ extension SnapshotTests {
         └────────────────────────┘
         """
       }
-      assertQuery(
-        CompletedReminder.createTemporaryTrigger(
-          insteadOf: .insert { new in
-            Reminder.insert {
-              ($0.title, $0.isCompleted, $0.remindersListID)
-            } values: {
-              (new.title, true, 1)
-            }
-          }
+assertQuery(
+  CompletedReminder.createTemporaryTrigger(
+    insteadOf: .insert { new in
+      Reminder.insert {
+        Reminder.Columns.init(
+          id: #bind(42),
+          assignedUserID: #bind(nil),
+          dueDate: #bind(Date()),
+          isCompleted: #bind(true),
+          isFlagged: #bind(false),
+          notes: #bind(""),
+          priority: #bind(nil),
+          remindersListID: #bind(1),
+          title: new.title,
         )
-      ) {
-        """
-        CREATE TEMPORARY TRIGGER
-          "after_insert_on_completedReminders@StructuredQueriesTests/ViewsTests.swift:58:49"
-        INSTEAD OF INSERT ON "completedReminders"
-        FOR EACH ROW BEGIN
-          INSERT INTO "reminders"
-          ("title", "isCompleted", "remindersListID")
-          VALUES
-          ("new"."title", 1, 1);
-        END
-        """
+//              ($0.title, $0.isCompleted, $0.remindersListID)
+//            } values: {
+//              (new.title, true, 1)
       }
+    }
+  )
+) {
+  """
+  CREATE TEMPORARY TRIGGER
+    "after_insert_on_completedReminders@StructuredQueriesTests/ViewsTests.swift:58:49"
+  INSTEAD OF INSERT ON "completedReminders"
+  FOR EACH ROW BEGIN
+    INSERT INTO "reminders"
+    ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+    VALUES
+    (42, NULL, '2025-09-19 13:44:27.888', 1, 0, '', NULL, 1, "new"."title");
+  END
+  """
+}
       assertQuery(
         CompletedReminder.insert(\.title) { "Already done" }
       ) {
@@ -101,7 +112,7 @@ extension SnapshotTests {
         """
         ┌─────────────────────────┐
         │ CompletedReminder(      │
-        │   reminderID: 11,       │
+        │   reminderID: 42,       │
         │   title: "Already done" │
         │ )                       │
         └─────────────────────────┘

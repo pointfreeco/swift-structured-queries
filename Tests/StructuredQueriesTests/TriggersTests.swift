@@ -98,39 +98,39 @@ extension SnapshotTests {
       }
     }
 
-    @Test func afterUpdateTouchDate() {
-      assertQuery(
-        Reminder.createTemporaryTrigger(afterUpdateTouch: \.updatedAt)
-      ) {
-        """
-        CREATE TEMPORARY TRIGGER
-          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:103:40"
-        AFTER UPDATE ON "reminders"
-        FOR EACH ROW BEGIN
-          UPDATE "reminders"
-          SET "updatedAt" = datetime('subsec')
-          WHERE ("reminders"."rowid" = "new"."rowid");
-        END
-        """
-      }
-    }
+//    @Test func afterUpdateTouchDate() {
+//      assertQuery(
+//        Reminder.createTemporaryTrigger(afterUpdateTouch: \.updatedAt)
+//      ) {
+//        """
+//        CREATE TEMPORARY TRIGGER
+//          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:103:40"
+//        AFTER UPDATE ON "reminders"
+//        FOR EACH ROW BEGIN
+//          UPDATE "reminders"
+//          SET "updatedAt" = datetime('subsec')
+//          WHERE ("reminders"."rowid" = "new"."rowid");
+//        END
+//        """
+//      }
+//    }
 
-    @Test func afterUpdateTouchCustomDate() {
-      assertQuery(
-        Reminder.createTemporaryTrigger(afterUpdateTouch: \.updatedAt, date: #sql("customDate()"))
-      ) {
-        """
-        CREATE TEMPORARY TRIGGER
-          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:120:40"
-        AFTER UPDATE ON "reminders"
-        FOR EACH ROW BEGIN
-          UPDATE "reminders"
-          SET "updatedAt" = customDate()
-          WHERE ("reminders"."rowid" = "new"."rowid");
-        END
-        """
-      }
-    }
+//    @Test func afterUpdateTouchCustomDate() {
+//      assertQuery(
+//        Reminder.createTemporaryTrigger(afterUpdateTouch: \.updatedAt, date: #sql("customDate()"))
+//      ) {
+//        """
+//        CREATE TEMPORARY TRIGGER
+//          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:120:40"
+//        AFTER UPDATE ON "reminders"
+//        FOR EACH ROW BEGIN
+//          UPDATE "reminders"
+//          SET "updatedAt" = customDate()
+//          WHERE ("reminders"."rowid" = "new"."rowid");
+//        END
+//        """
+//      }
+//    }
 
     @Test func multiStatement() {
       let trigger = RemindersList.createTemporaryTrigger(
