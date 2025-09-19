@@ -148,6 +148,24 @@ extension SnapshotTests {
       }
 
       assertQuery(
+        Reminder.select { ($0.id, $0.title) }.find([2, 4, 6])
+      ) {
+        """
+        SELECT "reminders"."id", "reminders"."title"
+        FROM "reminders"
+        WHERE ("reminders"."id" IN (2, 4, 6))
+        """
+      } results: {
+        """
+        ┌───┬────────────────────────────┐
+        │ 2 │ "Haircut"                  │
+        │ 4 │ "Take a walk"              │
+        │ 6 │ "Pick up kids from school" │
+        └───┴────────────────────────────┘
+        """
+      }
+
+      assertQuery(
         Reminder.select { ($0.id, $0.title) }.find(Reminder.select(\.id))
       ) {
         """

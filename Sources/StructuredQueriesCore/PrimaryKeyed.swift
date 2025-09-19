@@ -114,9 +114,17 @@ extension TableDraft {
   public static func find(
     _ primaryKey: some QueryExpression<PrimaryTable.TableColumns.PrimaryKey>
   ) -> Where<Self> {
-    Self.where { _ in
-      PrimaryTable.columns.primaryKey.in([primaryKey])
-    }
+    Self.find([primaryKey])
+  }
+
+  /// A where clause filtered by primary keys.
+  ///
+  /// - Parameter primaryKeys: Primary keys identifying table rows.
+  /// - Returns: A `WHERE` clause.
+  public static func find(
+    _ primaryKeys: some Sequence<some QueryExpression<PrimaryTable.TableColumns.PrimaryKey>>
+  ) -> Where<Self> {
+    Self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
 
@@ -126,7 +134,17 @@ extension Where where From: PrimaryKeyedTable {
   /// - Parameter primaryKey: A primary key.
   /// - Returns: A where clause with the added primary key.
   public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
-    self.where { $0.primaryKey.in([primaryKey]) }
+    self.find([primaryKey])
+  }
+
+  /// Adds a primary key condition to a where clause.
+  ///
+  /// - Parameter primaryKeys: A sequence of primary keys.
+  /// - Returns: A where clause with the added primary keys condition.
+  public func find(
+    _ primaryKeys: some Sequence<some QueryExpression<From.TableColumns.PrimaryKey>>
+  ) -> Self {
+    Self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
 
@@ -136,7 +154,17 @@ extension Where where From: TableDraft {
   /// - Parameter primaryKey: A primary key.
   /// - Returns: A where clause with the added primary key.
   public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>) -> Self {
-    self.where { $0.primaryKey.in([primaryKey]) }
+    self.find([primaryKey])
+  }
+
+  /// Adds a primary key condition to a where clause.
+  ///
+  /// - Parameter primaryKeys: A sequence of primary keys.
+  /// - Returns: A where clause with the added primary keys condition.
+  public func find(
+    _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>>
+  ) -> Self {
+    Self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
 
@@ -147,6 +175,16 @@ extension Select where From: PrimaryKeyedTable {
   /// - Returns: A select statement filtered by the given key.
   public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
     self.and(From.find(primaryKey))
+  }
+
+  /// A select statement filtered by a sequence of primary keys.
+  ///
+  /// - Parameter primaryKeys: A sequence of primary keys.
+  /// - Returns: A select statement filtered by the given keys.
+  public func find(
+    _ primaryKeys: some Sequence<some QueryExpression<From.TableColumns.PrimaryKey>>
+  ) -> Self {
+    self.and(From.find(primaryKeys))
   }
 }
 
@@ -160,6 +198,16 @@ extension Select where From: TableDraft {
   ) -> Self {
     self.and(From.find(primaryKey))
   }
+
+  /// A select statement filtered by a sequence of primary keys.
+  ///
+  /// - Parameter primaryKeys: A sequence of primary keys.
+  /// - Returns: A select statement filtered by the given keys.
+  public func find(
+    _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>>
+  ) -> Self {
+    self.and(From.find(primaryKeys))
+  }
 }
 
 extension Update where From: PrimaryKeyedTable {
@@ -168,7 +216,17 @@ extension Update where From: PrimaryKeyedTable {
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: An update statement filtered by the given key.
   public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
-    self.where { $0.primaryKey.in([primaryKey]) }
+    self.find([primaryKey])
+  }
+
+  /// An update statement filtered by a sequence of primary keys.
+  ///
+  /// - Parameter primaryKeys: A sequence of primary keys.
+  /// - Returns: An update statement filtered by the given keys.
+  public func find(
+    _ primaryKeys: some Sequence<some QueryExpression<From.TableColumns.PrimaryKey>>
+  ) -> Self {
+    self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
 
@@ -178,7 +236,17 @@ extension Update where From: TableDraft {
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: An update statement filtered by the given key.
   public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>) -> Self {
-    self.where { $0.primaryKey.in([primaryKey]) }
+    self.find([primaryKey])
+  }
+
+  /// An update statement filtered by a sequence of primary keys.
+  ///
+  /// - Parameter primaryKeys: A sequence of primary keys.
+  /// - Returns: An update statement filtered by the given keys.
+  public func find(
+    _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>>
+  ) -> Self {
+    self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
 
@@ -188,7 +256,17 @@ extension Delete where From: PrimaryKeyedTable {
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A delete statement filtered by the given key.
   public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
-    self.where { $0.primaryKey.in([primaryKey]) }
+    self.find([primaryKey])
+  }
+
+  /// A delete statement filtered by a sequence of primary keys.
+  ///
+  /// - Parameter primaryKeys: A sequence of primary keys.
+  /// - Returns: A delete statement filtered by the given keys.
+  public func find(
+    _ primaryKeys: some Sequence<some QueryExpression<From.TableColumns.PrimaryKey>>
+  ) -> Self {
+    self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
 
@@ -198,6 +276,16 @@ extension Delete where From: TableDraft {
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A delete statement filtered by the given key.
   public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>) -> Self {
-    self.where { $0.primaryKey.in([primaryKey]) }
+    self.find([primaryKey])
+  }
+
+  /// A delete statement filtered by a sequence of primary keys.
+  ///
+  /// - Parameter primaryKeys: A sequence of primary keys.
+  /// - Returns: A delete statement filtered by the given keys.
+  public func find(
+    _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>>
+  ) -> Self {
+    self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
