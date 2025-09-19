@@ -144,7 +144,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func foo() {
+    @Test func reminderWithList() {
       assertQuery(
         ReminderWithList.createTemporaryView(
           as:
