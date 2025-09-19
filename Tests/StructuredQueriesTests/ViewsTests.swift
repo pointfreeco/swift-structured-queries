@@ -58,20 +58,9 @@ extension SnapshotTests {
         CompletedReminder.createTemporaryTrigger(
           insteadOf: .insert { new in
             Reminder.insert {
-              Reminder.Columns.init(
-                id: #bind(42),
-                assignedUserID: #bind(nil),
-                dueDate: #bind(Date()),
-                isCompleted: #bind(true),
-                isFlagged: #bind(false),
-                notes: #bind(""),
-                priority: #bind(nil),
-                remindersListID: #bind(1),
-                title: new.title,
-              )
-              //              ($0.title, $0.isCompleted, $0.remindersListID)
-              //            } values: {
-              //              (new.title, true, 1)
+              ($0.title, $0.isCompleted, $0.remindersListID)
+            } values: {
+              (new.title, true, 1)
             }
           }
         )
@@ -82,9 +71,9 @@ extension SnapshotTests {
         INSTEAD OF INSERT ON "completedReminders"
         FOR EACH ROW BEGIN
           INSERT INTO "reminders"
-          ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+          ("title", "isCompleted", "remindersListID")
           VALUES
-          (42, NULL, '2025-09-19 13:44:27.888', 1, 0, '', NULL, 1, "new"."title");
+          ("new"."title", 1, 1);
         END
         """
       }
@@ -112,7 +101,7 @@ extension SnapshotTests {
         """
         ┌─────────────────────────┐
         │ CompletedReminder(      │
-        │   reminderID: 42,       │
+        │   reminderID: 11,       │
         │   title: "Already done" │
         │ )                       │
         └─────────────────────────┘
@@ -162,10 +151,123 @@ extension SnapshotTests {
             Reminder
             .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
             .select {
-              ReminderWithList.Columns(reminder: $0, remindersList: $1)
+              ReminderWithList.Columns(
+                reminderTitle: $0.title,
+                remindersListTitle: $1.title
+              )
             }
         )
-      )
+      ) {
+        """
+        CREATE TEMPORARY VIEW
+        "reminderWithLists"
+        ("reminderTitle", "remindersListTitle")
+        AS
+        SELECT "reminders"."title" AS "reminderTitle", "remindersLists"."title" AS "remindersListTitle"
+        FROM "reminders"
+        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        """
+      }
+
+      assertQuery(
+        ReminderWithList.createTemporaryTrigger(
+          insteadOf: .insert { new in
+            Reminder.insert {
+              ($0.title, $0.remindersListID)
+            } values: {
+              (
+                new.reminderTitle,
+                RemindersList
+                  .select(\.id)
+                  .where { $0.title.eq(new.remindersListTitle) }
+              )
+            }
+          }
+        )
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_insert_on_reminderWithLists@StructuredQueriesTests/ViewsTests.swift:173:48"
+        INSTEAD OF INSERT ON "reminderWithLists"
+        FOR EACH ROW BEGIN
+          INSERT INTO "reminders"
+          ("title", "remindersListID")
+          VALUES
+          ("new"."reminderTitle", (
+            SELECT "remindersLists"."id"
+            FROM "remindersLists"
+            WHERE ("remindersLists"."title" = "new"."remindersListTitle")
+          ));
+        END
+        """
+      }
+
+      assertQuery(
+        ReminderWithList.insert {
+          ReminderWithList(reminderTitle: "Morning sync", remindersListTitle: "Business")
+        }
+      ) {
+        """
+        INSERT INTO "reminderWithLists"
+        ("reminderTitle", "remindersListTitle")
+        VALUES
+        ('Morning sync', 'Business')
+        """
+      } results: {
+        """
+        cannot modify reminderWithLists because it is a view
+        """
+      }
+
+      assertQuery(
+        ReminderWithList.insert {
+          ReminderWithList(reminderTitle: "Morning sync", remindersListTitle: "Unknown List")
+        }
+      ) {
+        """
+        INSERT INTO "reminderWithLists"
+        ("reminderTitle", "remindersListTitle")
+        VALUES
+        ('Morning sync', 'Unknown List')
+        """
+      } results: {
+        """
+        cannot modify reminderWithLists because it is a view
+        """
+      }
+
+      assertQuery(
+        ReminderWithList
+          .order(by: { ($0.remindersListTitle, $0.reminderTitle) })
+          .limit(3)
+      ) {
+        """
+        SELECT "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
+        FROM "reminderWithLists"
+        ORDER BY "reminderWithLists"."remindersListTitle", "reminderWithLists"."reminderTitle"
+        LIMIT 3
+        """
+      } results: {
+        """
+        ┌────────────────────────────────────────┐
+        │ ReminderWithList(                      │
+        │   reminderTitle: "Call accountant",    │
+        │   remindersListTitle: "Business"       │
+        │ )                                      │
+        ├────────────────────────────────────────┤
+        │ ReminderWithList(                      │
+        │   reminderTitle: "Send weekly emails", │
+        │   remindersListTitle: "Business"       │
+        │ )                                      │
+        ├────────────────────────────────────────┤
+        │ ReminderWithList(                      │
+        │   reminderTitle: "Get laundry",        │
+        │   remindersListTitle: "Family"         │
+        │ )                                      │
+        └────────────────────────────────────────┘
+        """
+      }
+
     }
   }
 }
@@ -178,6 +280,6 @@ private struct CompletedReminder {
 
 @Table @Selection
 private struct ReminderWithList {
-  let reminder: Reminder
-  let remindersList: RemindersList
+  let reminderTitle: String
+  let remindersListTitle: String
 }
