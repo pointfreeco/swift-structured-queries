@@ -77,7 +77,7 @@ The best part of this is that the `JOIN` used in the view is completely hidden f
 intents and purposes, `ReminderWithList` seems like a regular SQL table for which each row holds
 just two strings. We can simply query from the table to get that data in whatever way we want.
 
-### Inserting, updating and delete rows from views
+### Inserting, updating, and delete rows from views
 
 The other querying tools of SQL do not immediately work because they are not real tables. For
 example if you try to insert into `ReminderWithList` you will be met with a SQL error:
@@ -94,18 +94,18 @@ ReminderWithList.insert {
 
 However, it is possible to restore inserts if you can describe how inserting a `(String, String)`
 pair into the table ultimately re-routes to inserts into your actual, non-view tables. The logic
-for re-routing inserts is highly specific to the situation at hand, and there can be multiple
+for rerouting inserts is highly specific to the situation at hand, and there can be multiple
 reasonable ways to do it for a particular view. For example, upon inserting into `ReminderWithList`
 we could try first creating a new list with the title, and then use that new list to insert a new
 reminder with the title. Or, we could decide that we will not allow creating a new list, and
 instead we will just find an existing list with the title, and if we cannot then we fail the query.
 
-In order to demosntrate this technique, we will use the latter re-routing logic: when a 
+In order to demonstrate this technique, we will use the latter rerouting logic: when a 
 `(String, String)` is inserted into `ReminderWithList` we will only create a new reminder with
 the title specified, and we will only find an existing reminders list (if one exists) for the title
-specified. And to implement this re-routing logic, one uses a [temporary trigger](<doc:Triggers>)
-on the view with an `INSTEAD OF` clause, which allows you to re-route any inserts on the view
-into some other table:
+specified. And to implement this rerouting logic, one uses a [temporary trigger](<doc:Triggers>) on
+the view with an `INSTEAD OF` clause, which allows you to reroute any inserts on the view into some
+other table:
 
 ```swift
 ReminderWithList.createTemporaryTrigger(
