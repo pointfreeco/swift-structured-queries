@@ -947,6 +947,13 @@ public enum InsertValuesBuilder<Value> {
     [expression.selection.map(\.expression)]
   }
 
+  public static func buildExpression(
+    _ expression: Value.Selection
+  ) -> [[QueryFragment]]
+  where Value: Table {
+    [expression.allColumns.map(\.queryFragment)]
+  }
+
   public static func buildArray(_ components: [[[QueryFragment]]]) -> [[QueryFragment]] {
     components.flatMap(\.self)
   }

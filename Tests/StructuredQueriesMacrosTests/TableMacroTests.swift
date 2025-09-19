@@ -31,9 +31,21 @@ extension SnapshotTests {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [bar]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -94,6 +106,18 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              email: some StructuredQueriesCore.QueryExpression<String?>,
+              age: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [id, email, age]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = User
             let id: /* TODO: UUID */ Int?
@@ -114,6 +138,21 @@ extension SnapshotTests {
                 "\(self.id), \(self.email), \(self.age)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                email: some StructuredQueriesCore.QueryExpression<String?>,
+                age: some StructuredQueriesCore.QueryExpression<Int>
+              ) {
+                self.allColumns = [id, email, age]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -149,7 +188,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -200,9 +241,21 @@ extension SnapshotTests {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [bar]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -287,9 +340,21 @@ extension SnapshotTests {
               "\(self.baz)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Bar
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              baz: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [baz]
+            }
+          }
         }
 
-        nonisolated extension Bar: StructuredQueriesCore.Table {
+        nonisolated extension Bar: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -384,9 +449,24 @@ extension SnapshotTests {
               "\(self.c1), \(self.c2), \(self.c3), \(self.c4)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              c1: some StructuredQueriesCore.QueryExpression<Swift.Bool> = StructuredQueriesCore.BindQueryExpression(true, as: Swift.Bool.self),
+              c2: some StructuredQueriesCore.QueryExpression<Swift.Int> = StructuredQueriesCore.BindQueryExpression(1, as: Swift.Int.self),
+              c3: some StructuredQueriesCore.QueryExpression<Swift.Double> = StructuredQueriesCore.BindQueryExpression(1.2, as: Swift.Double.self),
+              c4: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+            ) {
+              self.allColumns = [c1, c2, c3, c4]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -431,9 +511,21 @@ extension SnapshotTests {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [bar]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -523,9 +615,21 @@ extension SnapshotTests {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
+            ) {
+              self.allColumns = [bar]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -575,9 +679,22 @@ extension SnapshotTests {
               "\(self.name), \(self.generated)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              name: some StructuredQueriesCore.QueryExpression<String>,
+              generated: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              self.allColumns = [name, generated]
+            }
+          }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -651,9 +768,22 @@ extension SnapshotTests {
               "\(self.name), \(self.generated)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              name: some StructuredQueriesCore.QueryExpression<String>,
+              generated: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              self.allColumns = [name, generated]
+            }
+          }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -715,6 +845,18 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              name: some StructuredQueriesCore.QueryExpression<String>,
+              generated: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [id, name, generated]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = User
             let id: Int?
@@ -733,6 +875,20 @@ extension SnapshotTests {
                 "\(self.id), \(self.name)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                name: some StructuredQueriesCore.QueryExpression<String>
+              ) {
+                self.allColumns = [id, name]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -764,7 +920,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -821,9 +979,21 @@ extension SnapshotTests {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [bar]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -870,9 +1040,21 @@ extension SnapshotTests {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [bar]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -917,9 +1099,21 @@ extension SnapshotTests {
               "\(self.`bar`)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              `bar`: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [`bar`]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -964,9 +1158,21 @@ extension SnapshotTests {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<ID<Foo>>
+            ) {
+              self.allColumns = [bar]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1011,9 +1217,21 @@ extension SnapshotTests {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression
+            ) {
+              self.allColumns = [bar]
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1063,6 +1281,17 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>>,
+              referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?>
+            ) {
+              self.allColumns = [id, referrerID]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = User
             let id: ID<User, UUID>?
@@ -1081,6 +1310,20 @@ extension SnapshotTests {
                 "\(self.id), \(self.referrerID)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?>,
+                referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?>
+              ) {
+                self.allColumns = [id, referrerID]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -1108,7 +1351,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1156,9 +1401,21 @@ extension SnapshotTests {
               "\(self.name)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = SyncUp
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              name: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              self.allColumns = [name]
+            }
+          }
         }
 
-        nonisolated extension SyncUp: StructuredQueriesCore.Table {
+        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1212,6 +1469,17 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = SyncUp
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              name: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              self.allColumns = [id, name]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = SyncUp
             let id: Int?
@@ -1230,6 +1498,20 @@ extension SnapshotTests {
                 "\(self.id), \(self.name)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                name: some StructuredQueriesCore.QueryExpression<String>
+              ) {
+                self.allColumns = [id, name]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -1261,7 +1543,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1334,6 +1618,17 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = SyncUp
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = StructuredQueriesCore.BindQueryExpression(60 * 5, as: <#Type#>.self)
+            ) {
+              self.allColumns = [id, seconds]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = SyncUp
             let id: Int?
@@ -1352,6 +1647,20 @@ extension SnapshotTests {
                 "\(self.id), \(self.seconds)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = StructuredQueriesCore.BindQueryExpression(60 * 5, as: <#Type#>.self)
+              ) {
+                self.allColumns = [id, seconds]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -1379,7 +1688,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1436,6 +1747,18 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = RemindersList
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = StructuredQueriesCore.BindQueryExpression(Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255), as: Color.HexRepresentation.self),
+              name: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+            ) {
+              self.allColumns = [id, color, name]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = RemindersList
             var id: Int?
@@ -1456,6 +1779,21 @@ extension SnapshotTests {
                 "\(self.id), \(self.color), \(self.name)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = StructuredQueriesCore.BindQueryExpression(Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255), as: Color.HexRepresentation.self),
+                name: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+              ) {
+                self.allColumns = [id, color, name]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -1487,7 +1825,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1557,9 +1897,21 @@ extension SnapshotTests {
             "\(self.name)"
           }
         }
+
+        public struct Selection: StructuredQueriesCore.TableExpression {
+          public typealias QueryValue = Foo
+          public let allColumns: [any StructuredQueriesCore.QueryExpression]
+          public init(
+            name: some StructuredQueriesCore.QueryExpression<String>
+          ) {
+            self.allColumns = [name]
+          }
+        }
       }
 
-      nonisolated extension Foo: StructuredQueriesCore.Table {
+      nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+        public typealias QueryValue = Self
+        public typealias From = Swift.Never
         public nonisolated static var columns: TableColumns {
           TableColumns()
         }
@@ -1610,6 +1962,16 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [id]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Foo
             let id: Int?
@@ -1626,6 +1988,19 @@ extension SnapshotTests {
                 "\(self.id)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>
+              ) {
+                self.allColumns = [id]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -1649,7 +2024,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1724,6 +2101,16 @@ extension SnapshotTests {
                 "\(self.id)"
               }
             }
+
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int>
+              ) {
+                self.allColumns = [id]
+              }
+            }
           }
           public static let columns = Columns()
           public static let tableName = "foos"
@@ -1732,7 +2119,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Foo.Draft: StructuredQueriesCore.Table {
+        nonisolated extension Foo.Draft: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1795,6 +2184,17 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              name: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              self.allColumns = [id, name]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Foo
             var id: Int?
@@ -1813,6 +2213,20 @@ extension SnapshotTests {
                 "\(self.id), \(self.name)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                name: some StructuredQueriesCore.QueryExpression<String>
+              ) {
+                self.allColumns = [id, name]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -1844,7 +2258,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -1908,6 +2324,19 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Reminder
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self),
+              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?>,
+              priority: some StructuredQueriesCore.QueryExpression<Priority?>
+            ) {
+              self.allColumns = [id, title, date, priority]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Reminder
             let id: Int?
@@ -1930,6 +2359,22 @@ extension SnapshotTests {
                 "\(self.id), \(self.title), \(self.date), \(self.priority)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self),
+                date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?>,
+                priority: some StructuredQueriesCore.QueryExpression<Priority?>
+              ) {
+                self.allColumns = [id, title, date, priority]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -1965,7 +2410,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -2018,6 +2465,16 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Reminder
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation>
+            ) {
+              self.allColumns = [id]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Reminder
             let id: UUID?
@@ -2034,6 +2491,19 @@ extension SnapshotTests {
                 "\(self.id)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation?>
+              ) {
+                self.allColumns = [id]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -2057,7 +2527,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -2103,9 +2575,21 @@ extension SnapshotTests {
               "\(self.id)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Reminder
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [id]
+            }
+          }
         }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table {
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
@@ -2157,6 +2641,17 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Reminder
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int?>,
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+            ) {
+              self.allColumns = [id, title]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Reminder
             let id: Int?  // TODO: Migrate to UUID
@@ -2175,6 +2670,20 @@ extension SnapshotTests {
                 "\(self.id), \(self.title)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+              ) {
+                self.allColumns = [id, title]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }
@@ -2202,7 +2711,9 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }

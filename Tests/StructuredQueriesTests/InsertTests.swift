@@ -695,7 +695,7 @@ extension SnapshotTests {
   }
 }
 
-@Table @Selection private struct Item {
+@Table private struct Item {
   var title = ""
   var quantity = 0
   @Column(as: [String].JSONRepresentation.self)

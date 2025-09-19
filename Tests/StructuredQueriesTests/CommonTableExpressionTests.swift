@@ -529,20 +529,20 @@ extension SnapshotTests {
   }
 }
 
-@Table @Selection
+@Table
 private struct Fibonacci {
   let n: Int
   let prevFib: Int
   let fib: Int
 }
 
-@Table @Selection
+@Table
 private struct IncompleteReminder {
   let isFlagged: Bool
   let title: String
 }
 
-@Table @Selection
+@Table
 private struct Count {
   let value: Int
 }
@@ -564,14 +564,14 @@ struct Employee {
   var height = 100
 }
 
-@Table @Selection
+@Table
 struct EmployeeReport {
   let id: Int
   let height: Int
   let name: String
 }
 
-@Table @Selection
+@Table
 struct ReminderCount {
   let count: Int
   var queryOutput: Int {
@@ -582,7 +582,7 @@ struct ReminderCount {
   }
 }
 
-@Table @Selection
+@Table
 struct RemindersListCount {
   let count: Int
   var queryOutput: Int {

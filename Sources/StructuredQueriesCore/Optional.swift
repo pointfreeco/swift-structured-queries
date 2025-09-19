@@ -70,7 +70,7 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   }
 }
 
-extension Optional: Table where Wrapped: Table {
+extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {
   public static var tableName: String {
     Wrapped.tableName
   }
@@ -125,6 +125,8 @@ extension Optional: Table where Wrapped: Table {
       Wrapped.columns[keyPath: keyPath]
     }
   }
+
+  public typealias Selection = Wrapped.Selection?
 }
 
 extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
@@ -144,6 +146,14 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
 
   public var primaryKey: TableColumn<Optional, Wrapped.TableColumns.PrimaryKey.QueryValue?> {
     self[dynamicMember: \.primaryKey]
+  }
+}
+
+extension Optional: TableExpression where Wrapped: TableExpression {
+  public var allColumns: [any QueryExpression] {
+    // TODO: Should this coalesce to the following?
+    //       'Array(repeating: nil, count: Wrapped.TableColumns.allColumns.count)'?
+    self?.allColumns ?? []
   }
 }
 

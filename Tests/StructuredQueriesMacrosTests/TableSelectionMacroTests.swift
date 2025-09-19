@@ -35,6 +35,17 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = ReminderListWithCount
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              reminderList: some StructuredQueriesCore.QueryExpression<ReminderList>,
+              remindersCount: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              self.allColumns = [reminderList, remindersCount]
+            }
+          }
+
           public struct Columns: StructuredQueriesCore._SelectedColumns {
             public typealias QueryValue = ReminderListWithCount
             public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]

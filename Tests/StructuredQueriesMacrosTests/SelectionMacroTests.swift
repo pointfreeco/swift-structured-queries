@@ -286,6 +286,17 @@ extension SnapshotTests {
             }
           }
 
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Row
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+            ) {
+              self.allColumns = [id, title]
+            }
+          }
+
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Row
             let id: Int?
@@ -304,6 +315,20 @@ extension SnapshotTests {
                 "\(self.id), \(self.title)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+              ) {
+                self.allColumns = [id, title]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
             }

@@ -294,13 +294,13 @@ extension SnapshotTests {
   }
 }
 
-@Table @Selection
+@Table
 private struct CompletedReminder {
   let reminderID: Reminder.ID
   let title: String
 }
 
-@Table @Selection
+@Table
 private struct ReminderWithList {
   @Column(primaryKey: true)
   let reminderID: Reminder.ID

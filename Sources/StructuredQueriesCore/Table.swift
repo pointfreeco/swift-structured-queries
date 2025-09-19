@@ -3,9 +3,16 @@
 /// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
 /// generate a conformance.
 @dynamicMemberLookup
-public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self {
+public protocol Table: QueryRepresentable, PartialSelectStatement {
+  associatedtype QueryValue = Self
+
+  associatedtype From = Never
+
   /// A type that describes this table's columns.
-  associatedtype TableColumns: TableDefinition
+  associatedtype TableColumns: TableDefinition<Self>
+
+  /// A type that describes this table as a query expression.
+  associatedtype Selection: TableExpression<Self>
 
   /// A type that describes the default results of requesting all rows from the table.
   associatedtype DefaultScope: SelectStatement<(), Self, ()>
@@ -115,6 +122,19 @@ extension Table {
     dynamicMember keyPath: KeyPath<TableColumns, TableColumn<Self, Member>>
   ) -> TableColumn<Self, Member> {
     columns[keyPath: keyPath]
+  }
+
+  public var query: QueryFragment {
+    "SELECT \(queryFragment)"
+  }
+
+  public var queryFragment: QueryFragment {
+    func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+      let root = self as! Root
+      let value = Value(queryOutput: root[keyPath: column.keyPath])
+      return "\(value) AS \(quote: column.name)"
+    }
+    return TableColumns.allColumns.map { open($0) }.joined(separator: ", ")
   }
 }
 
