@@ -329,6 +329,17 @@ extension SnapshotTests {
               self.title = title
             }
           }
+
+          public struct Columns: StructuredQueriesCore._SelectedColumns {
+            public typealias QueryValue = Row
+            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("")
+            ) {
+              self.selection = [("id", id.queryFragment), ("title", title.queryFragment)]
+            }
+          }
         }
 
         nonisolated extension Row: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
