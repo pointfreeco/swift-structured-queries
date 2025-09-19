@@ -54,40 +54,40 @@ extension SnapshotTests {
         └────────────────────────┘
         """
       }
-assertQuery(
-  CompletedReminder.createTemporaryTrigger(
-    insteadOf: .insert { new in
-      Reminder.insert {
-        Reminder.Columns.init(
-          id: #bind(42),
-          assignedUserID: #bind(nil),
-          dueDate: #bind(Date()),
-          isCompleted: #bind(true),
-          isFlagged: #bind(false),
-          notes: #bind(""),
-          priority: #bind(nil),
-          remindersListID: #bind(1),
-          title: new.title,
+      assertQuery(
+        CompletedReminder.createTemporaryTrigger(
+          insteadOf: .insert { new in
+            Reminder.insert {
+              Reminder.Columns.init(
+                id: #bind(42),
+                assignedUserID: #bind(nil),
+                dueDate: #bind(Date()),
+                isCompleted: #bind(true),
+                isFlagged: #bind(false),
+                notes: #bind(""),
+                priority: #bind(nil),
+                remindersListID: #bind(1),
+                title: new.title,
+              )
+              //              ($0.title, $0.isCompleted, $0.remindersListID)
+              //            } values: {
+              //              (new.title, true, 1)
+            }
+          }
         )
-//              ($0.title, $0.isCompleted, $0.remindersListID)
-//            } values: {
-//              (new.title, true, 1)
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_insert_on_completedReminders@StructuredQueriesTests/ViewsTests.swift:58:49"
+        INSTEAD OF INSERT ON "completedReminders"
+        FOR EACH ROW BEGIN
+          INSERT INTO "reminders"
+          ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
+          VALUES
+          (42, NULL, '2025-09-19 13:44:27.888', 1, 0, '', NULL, 1, "new"."title");
+        END
+        """
       }
-    }
-  )
-) {
-  """
-  CREATE TEMPORARY TRIGGER
-    "after_insert_on_completedReminders@StructuredQueriesTests/ViewsTests.swift:58:49"
-  INSTEAD OF INSERT ON "completedReminders"
-  FOR EACH ROW BEGIN
-    INSERT INTO "reminders"
-    ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title")
-    VALUES
-    (42, NULL, '2025-09-19 13:44:27.888', 1, 0, '', NULL, 1, "new"."title");
-  END
-  """
-}
       assertQuery(
         CompletedReminder.insert(\.title) { "Already done" }
       ) {
@@ -154,6 +154,19 @@ assertQuery(
         """
       }
     }
+
+    @Test func foo() {
+      assertQuery(
+        ReminderWithList.createTemporaryView(
+          as:
+            Reminder
+            .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
+            .select {
+              ReminderWithList.Columns(reminder: $0, remindersList: $1)
+            }
+        )
+      )
+    }
   }
 }
 
@@ -161,4 +174,10 @@ assertQuery(
 private struct CompletedReminder {
   let reminderID: Reminder.ID
   let title: String
+}
+
+@Table @Selection
+private struct ReminderWithList {
+  let reminder: Reminder
+  let remindersList: RemindersList
 }

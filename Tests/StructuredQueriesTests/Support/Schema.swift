@@ -15,7 +15,7 @@ struct RemindersList: Codable, Equatable, Identifiable {
   var position = 0
 }
 
-@Table @Selection
+@Table
 struct Reminder: Codable, Equatable, Identifiable {
   static let incomplete = Self.where { !$0.isCompleted }
 
