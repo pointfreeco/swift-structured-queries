@@ -125,16 +125,18 @@ extension Table {
   }
 
   public var query: QueryFragment {
-    "SELECT \(queryFragment)"
+    func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+      let value = Value(queryOutput: (self as! Root)[keyPath: column.keyPath])
+      return "\(value) AS \(quote: column.name)"
+    }
+    return "SELECT \(TableColumns.allColumns.map { open($0) }.joined(separator: ", "))"
   }
 
   public var queryFragment: QueryFragment {
     func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
-      let root = self as! Root
-      let value = Value(queryOutput: root[keyPath: column.keyPath])
-      return "\(value) AS \(quote: column.name)"
+      Value(queryOutput: (self as! Root)[keyPath: column.keyPath]).queryFragment
     }
-    return TableColumns.allColumns.map { open($0) }.joined(separator: ", ")
+    return "(\(TableColumns.allColumns.map { open($0) }.joined(separator: ", ")))"
   }
 }
 
