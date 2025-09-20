@@ -25,10 +25,10 @@ extension SnapshotTests {
             public let reminderList = StructuredQueriesCore.TableColumn<QueryValue, ReminderList>("reminderList", keyPath: \QueryValue.reminderList)
             public let remindersCount = StructuredQueriesCore.TableColumn<QueryValue, Int>("remindersCount", keyPath: \QueryValue.remindersCount)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.reminderList, QueryValue.columns.remindersCount]
+              [[QueryValue.columns.reminderList], [QueryValue.columns.remindersCount]].flatMap(\.self)
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.reminderList, QueryValue.columns.remindersCount]
+              [[QueryValue.columns.reminderList], [QueryValue.columns.remindersCount]].flatMap(\.self)
             }
             public var queryFragment: QueryFragment {
               "\(self.reminderList), \(self.remindersCount)"

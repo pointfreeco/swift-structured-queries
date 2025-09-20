@@ -119,6 +119,7 @@ extension TableMacro: ExtensionMacro {
         .map { $0.rewritten(selfRewriter) }
       var columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
+      var isColumnGroup = false
       var isEphemeral = false
       var isGenerated = false
 
@@ -127,9 +128,10 @@ extension TableMacro: ExtensionMacro {
           let attribute = attribute.as(AttributeSyntax.self),
           let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
         else { continue }
+        isColumnGroup = isColumnGroup || attributeName == "Columns"
         isEphemeral = isEphemeral || attributeName == "Ephemeral"
         guard
-          attributeName == "Column" || isEphemeral,
+          attributeName == "Column" || isEphemeral || isColumnGroup,
           case .argumentList(let arguments) = attribute.arguments
         else { continue }
 
@@ -271,7 +273,18 @@ extension TableMacro: ExtensionMacro {
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
-      if isGenerated {
+      if isColumnGroup {
+        columnsProperties.append(
+          """
+          public let \(identifier) = \(moduleName).ColumnGroup<\
+          QueryValue, \
+          \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
+          >(\
+          keyPath: \\QueryValue.\(identifier)\
+          )
+          """
+        )
+      } else if isGenerated {
         columnsProperties.append(
           """
           public var \(identifier): \(moduleName).GeneratedColumn<\
@@ -624,8 +637,8 @@ extension TableMacro: MemberMacro {
     }
     let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
     var allColumns: [(name: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] = []
-    var allColumnNames: [TokenSyntax] = []
-    var writableColumns: [TokenSyntax] = []
+    var allColumnNames: [Column] = []
+    var writableColumns: [Column] = []
     var selectedColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
     var decodings: [String] = []
@@ -661,11 +674,12 @@ extension TableMacro: MemberMacro {
         StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
       )
       var columnQueryValueType =
-        (binding.typeAnnotation?.type.trimmed
-        ?? binding.initializer?.value.literalType)
-        .map { $0.rewritten(selfRewriter) }
+      (binding.typeAnnotation?.type.trimmed
+       ?? binding.initializer?.value.literalType)
+      .map { $0.rewritten(selfRewriter) }
       var columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
+      var isColumnGroup = false
       var isEphemeral = false
       var isGenerated = false
 
@@ -674,9 +688,10 @@ extension TableMacro: MemberMacro {
           let attribute = attribute.as(AttributeSyntax.self),
           let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
         else { continue }
+        isColumnGroup = isColumnGroup || attributeName == "Columns"
         isEphemeral = isEphemeral || attributeName == "Ephemeral"
         guard
-          attributeName == "Column" || isEphemeral,
+          attributeName == "Column" || isEphemeral || isColumnGroup,
           case .argumentList(let arguments) = attribute.arguments
         else { continue }
 
@@ -768,7 +783,21 @@ extension TableMacro: MemberMacro {
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
-      if isGenerated {
+      if isColumnGroup {
+        columnsProperties.append(
+          """
+          public let \(identifier) = \(moduleName).ColumnGroup<\
+          QueryValue, \
+          \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
+          >(\
+          keyPath: \\QueryValue.\(identifier)\
+          )
+          """
+        )
+        allColumns.append((identifier, columnQueryValueType, defaultValue))
+        allColumnNames.append(.group(identifier))
+        writableColumns.append(.group(identifier))
+      } else if isGenerated {
         columnsProperties.append(
           """
           public var \(identifier): \(moduleName).GeneratedColumn<\
@@ -786,7 +815,7 @@ extension TableMacro: MemberMacro {
           """
         )
         allColumns.append((identifier, columnQueryValueType, defaultValue))
-        allColumnNames.append(identifier)
+        allColumnNames.append(.single(identifier))
       } else {
         columnsProperties.append(
           """
@@ -800,8 +829,8 @@ extension TableMacro: MemberMacro {
           """
         )
         allColumns.append((identifier, columnQueryValueType, defaultValue))
-        allColumnNames.append(identifier)
-        writableColumns.append(identifier)
+        allColumnNames.append(.single(identifier))
+        writableColumns.append(.single(identifier))
       }
       let decodedType = columnQueryValueType?.asNonOptionalType()
       if let defaultValue {
@@ -1049,10 +1078,10 @@ extension TableMacro: MemberMacro {
       public typealias QueryValue = \(type.trimmed)
       \(columnsProperties, separator: "\n")
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
-      [\(allColumnNames.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
+      [\(allColumnNames.map { $0.columns(.all) }, separator: ", ")].flatMap(\\.self)
       }
       public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] { \
-      [\(writableColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
+      [\(writableColumns.map { $0.columns(.writable) }, separator: ", ")].flatMap(\\.self)
       }
       public var queryFragment: QueryFragment {
       "\(raw: selectedColumns.map { #"\(self.\#($0))"# }.joined(separator: ", "))"
@@ -1066,7 +1095,7 @@ extension TableMacro: MemberMacro {
       public init(
       \(raw: selectionInitArguments)
       ) {
-      self.allColumns = [\(allColumnNames, separator: ", ")]
+      self.allColumns = [\(selectedColumns, separator: ", ")]
       }
       }
       """,
@@ -1129,5 +1158,25 @@ extension TableMacro: MemberAttributeMacro {
       @Column("\(raw: identifier)"\(raw: identifier == "id" ? ", primaryKey: true" : ""))
       """
     ]
+  }
+
+  fileprivate enum Column {
+    case single(TokenSyntax)
+    case group(TokenSyntax)
+
+    enum Kind: String {
+      case all
+      case writable
+    }
+
+    func columns(_ kind: Kind) -> ExprSyntax {
+      switch self {
+      case .single(let column):
+        return "[QueryValue.columns.\(column)]"
+
+      case .group(let columns):
+        return #"\#(moduleName).ColumnGroup.\#(raw: kind)Columns(keyPath: \QueryValue.\#(columns))"#
+      }
+    }
   }
 }

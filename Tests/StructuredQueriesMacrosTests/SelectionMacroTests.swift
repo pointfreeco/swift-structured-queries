@@ -276,10 +276,10 @@ extension SnapshotTests {
               self.id
             }
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.title]
+              [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.title]
+              [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.title)"
@@ -306,10 +306,10 @@ extension SnapshotTests {
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
               public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.title]
+                [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.title]
+                [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.title)"

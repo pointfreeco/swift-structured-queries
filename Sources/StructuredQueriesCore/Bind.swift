@@ -2,7 +2,7 @@
 ///
 /// It is not common to interact with this type directly. A value of this type is returned from the
 /// `#bind` macro.
-public struct BindQueryExpression<QueryValue: QueryBindable>: QueryExpression {
+public struct BindQueryExpression<QueryValue: QueryRepresentable & QueryExpression>: QueryExpression {
   public let base: QueryValue
 
   public init(
