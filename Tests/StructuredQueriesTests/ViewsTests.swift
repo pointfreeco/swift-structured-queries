@@ -166,7 +166,7 @@ extension SnapshotTests {
         AS
         SELECT "reminders"."id" AS "reminderID", "reminders"."title" AS "reminderTitle", "remindersLists"."title" AS "remindersListTitle"
         FROM "reminders"
-        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        JOIN "remindersLists" ON ("reminders"."remindersListID") = ("remindersLists"."id")
         """
       }
 
@@ -197,7 +197,7 @@ extension SnapshotTests {
           ("new"."reminderTitle", (
             SELECT "remindersLists"."id"
             FROM "remindersLists"
-            WHERE ("remindersLists"."title" = "new"."remindersListTitle")
+            WHERE ("remindersLists"."title") = ("new"."remindersListTitle")
           ));
         END
         """
@@ -241,7 +241,7 @@ extension SnapshotTests {
         """
         SELECT "reminderWithLists"."reminderID", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
         FROM "reminderWithLists"
-        WHERE ("reminderWithLists"."reminderID" IN (1))
+        WHERE ("reminderWithLists"."reminderID") IN (1)
         """
       } results: {
         """

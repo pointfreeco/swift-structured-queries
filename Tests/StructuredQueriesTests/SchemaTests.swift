@@ -40,7 +40,7 @@ extension SnapshotTests {
         """
         UPDATE "main"."reminders"
         SET "remindersListID" = 2
-        WHERE ("main"."reminders"."remindersListID" = 1)
+        WHERE ("main"."reminders"."remindersListID") = (1)
         """
       }
     }
@@ -49,7 +49,7 @@ extension SnapshotTests {
       assertQuery(Reminder.where { $0.remindersListID.eq(1) }.delete()) {
         """
         DELETE FROM "main"."reminders"
-        WHERE ("main"."reminders"."remindersListID" = 1)
+        WHERE ("main"."reminders"."remindersListID") = (1)
         """
       }
     }

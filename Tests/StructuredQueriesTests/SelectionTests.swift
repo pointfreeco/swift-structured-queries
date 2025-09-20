@@ -21,7 +21,7 @@ extension SnapshotTests {
         """
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
-        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         LIMIT 2
         """
@@ -58,7 +58,7 @@ extension SnapshotTests {
         """
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
-        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         LIMIT 2
         """
@@ -104,7 +104,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title" AS "reminderTitle", "users"."name" AS "assignedUserName"
         FROM "reminders"
-        LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        LEFT JOIN "users" ON ("reminders"."assignedUserID") = ("users"."id")
         LIMIT 2
         """
       } results: {

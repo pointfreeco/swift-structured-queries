@@ -152,7 +152,7 @@ extension SnapshotTests {
         SELECT highlight("reminderTexts", (SELECT "cid" FROM pragma_table_info('reminderTexts') WHERE "name" = 'tags'),
         '**', '**')
         FROM "reminders"
-        LEFT JOIN "reminderTexts" ON ("reminders"."rowid" = "reminderTexts"."rowid")
+        LEFT JOIN "reminderTexts" ON ("reminders"."rowid") = ("reminderTexts"."rowid")
         ORDER BY bm25("reminderTexts")
         """
       } results: {
@@ -185,7 +185,7 @@ extension SnapshotTests {
         SELECT highlight("reminderTexts", (SELECT "cid" FROM pragma_table_info('reminderTexts') WHERE "name" = 'tags'),
         '**', '**')
         FROM "reminders"
-        LEFT JOIN "reminderTexts" AS "rTs" ON ("reminders"."rowid" = "rTs"."rowid")
+        LEFT JOIN "reminderTexts" AS "rTs" ON ("reminders"."rowid") = ("rTs"."rowid")
         ORDER BY bm25("reminderTexts")
         """
       } results: {

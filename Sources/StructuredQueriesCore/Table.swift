@@ -136,7 +136,7 @@ extension Table {
     func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
       Value(queryOutput: (self as! Root)[keyPath: column.keyPath]).queryFragment
     }
-    return "(\(TableColumns.allColumns.map { open($0) }.joined(separator: ", ")))"
+    return TableColumns.allColumns.map { open($0) }.joined(separator: ", ")
   }
 }
 

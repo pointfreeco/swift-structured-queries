@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: _OptionalPromotable {
   /// A predicate expression indicating whether two query expressions are equal.
   ///
   /// ```swift
@@ -241,7 +241,7 @@ public func != <QueryValue: QueryBindable>(
   SQLQueryExpression(lhs).isNot(rhs)
 }
 
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: _OptionalPromotable {
   /// Returns a predicate expression indicating whether the value of the first expression is less
   /// than that of the second expression.
   ///
@@ -697,7 +697,7 @@ extension QueryExpression where QueryValue == String {
   /// - Parameter collation: A collating sequence name.
   /// - Returns: An expression that is compared using the given collating sequence.
   public func collate(_ collation: Collation) -> some QueryExpression<QueryValue> {
-    BinaryOperator(lhs: self, operator: "COLLATE", rhs: collation)
+    SQLQueryExpression("\(self) COLLATE \(collation)")
   }
 
   /// A predicate expression from this string expression matched against another _via_ the `GLOB`
@@ -850,11 +850,7 @@ extension QueryExpression where QueryValue: QueryBindable {
     _ lowerBound: some QueryExpression<QueryValue>,
     and upperBound: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(
-      lhs: self,
-      operator: "BETWEEN",
-      rhs: SQLQueryExpression("\(lowerBound) AND \(upperBound)")
-    )
+    SQLQueryExpression("\(self) BETWEEN \(lowerBound) AND \(upperBound)")
   }
 }
 
@@ -952,7 +948,7 @@ struct BinaryOperator<QueryValue>: QueryExpression {
   }
 
   var queryFragment: QueryFragment {
-    "(\(lhs) \(`operator`) \(rhs))"
+    "(\(lhs)) \(`operator`) (\(rhs))"
   }
 }
 
@@ -985,6 +981,6 @@ where S.Element: QueryExpression, S.Element.QueryValue: QueryBindable {
   typealias QueryValue = S
   let queryFragment: QueryFragment
   init(elements: S) {
-    queryFragment = "(\(elements.map(\.queryFragment).joined(separator: ", ")))"
+    queryFragment = "\(elements.map(\.queryFragment).joined(separator: ", "))"
   }
 }

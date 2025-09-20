@@ -24,7 +24,7 @@ extension SnapshotTests {
         ("remindersListID", "title", "isCompleted", "dueDate", "priority")
         VALUES
         (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1), (3, 'Schedule doctor appointment', 0, NULL, 2)
-        ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy')
+        ON CONFLICT DO UPDATE SET "title" = ("reminders"."title") || (' Copy')
         RETURNING "id"
         """
       } results: {
@@ -301,7 +301,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id") = (1)
         """
       } results: {
         """

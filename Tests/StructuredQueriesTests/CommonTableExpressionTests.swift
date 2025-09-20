@@ -79,7 +79,7 @@ extension SnapshotTests {
         )
         SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title"
         FROM "incompleteReminders"
-        WHERE (("incompleteReminders"."title" COLLATE "NOCASE") LIKE '%groceries%')
+        WHERE ("incompleteReminders"."title" COLLATE "NOCASE" LIKE '%groceries%')
         """
       } results: {
         """
@@ -121,7 +121,7 @@ extension SnapshotTests {
         ("remindersListID", "title", "isFlagged", "isCompleted")
         SELECT "reminders"."remindersListID", "incompleteReminders"."title", NOT ("incompleteReminders"."isFlagged"), 1
         FROM "incompleteReminders"
-        JOIN "reminders" ON ("incompleteReminders"."title" = "reminders"."title")
+        JOIN "reminders" ON ("incompleteReminders"."title") = ("reminders"."title")
         LIMIT 1
         RETURNING "id", "title"
         """
@@ -155,7 +155,7 @@ extension SnapshotTests {
         )
         UPDATE "reminders"
         SET "title" = upper("reminders"."title")
-        WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title"
+        WHERE ("reminders"."title") IN ((SELECT "incompleteReminders"."title"
         FROM "incompleteReminders"))
         RETURNING "title"
         """
@@ -194,7 +194,7 @@ extension SnapshotTests {
           WHERE NOT ("reminders"."isCompleted")
         )
         DELETE FROM "reminders"
-        WHERE ("reminders"."title" IN (SELECT "incompleteReminders"."title"
+        WHERE ("reminders"."title") IN ((SELECT "incompleteReminders"."title"
         FROM "incompleteReminders"))
         RETURNING "reminders"."title"
         """
@@ -309,7 +309,7 @@ extension SnapshotTests {
         WITH "counts" AS (
           SELECT 1 AS "value"
             UNION
-          SELECT ("counts"."value" + 1) AS "value"
+          SELECT ("counts"."value") + (1) AS "value"
           FROM "counts"
         )
         SELECT "counts"."value"
@@ -348,7 +348,7 @@ extension SnapshotTests {
         )
         SELECT "incompleteReminders"."isFlagged"
         FROM "incompleteReminders"
-        WHERE (("incompleteReminders"."title" COLLATE "NOCASE") LIKE '%groceries%')
+        WHERE ("incompleteReminders"."title" COLLATE "NOCASE" LIKE '%groceries%')
         """
       } results: {
         """
@@ -397,7 +397,7 @@ extension SnapshotTests {
             UNION ALL
           SELECT "employees"."id" AS "id", "employees"."height" AS "height", "employees"."name" AS "name"
           FROM "employees"
-          JOIN "employeeReports" ON ("employees"."bossID" = "employeeReports"."id")
+          JOIN "employeeReports" ON ("employees"."bossID") = ("employeeReports"."id")
         )
         SELECT avg("employeeReports"."height")
         FROM "employeeReports"
@@ -466,7 +466,7 @@ extension SnapshotTests {
         WITH "fibonaccis" AS (
           SELECT 1 AS "n", 0 AS "prevFib", 1 AS "fib"
             UNION
-          SELECT ("fibonaccis"."n" + 1) AS "n", "fibonaccis"."fib" AS "prevFib", ("fibonaccis"."prevFib" + "fibonaccis"."fib") AS "fib"
+          SELECT ("fibonaccis"."n") + (1) AS "n", "fibonaccis"."fib" AS "prevFib", ("fibonaccis"."prevFib") + ("fibonaccis"."fib") AS "fib"
           FROM "fibonaccis"
         )
         SELECT "fibonaccis"."fib"
@@ -511,10 +511,10 @@ extension SnapshotTests {
         WITH "fibonaccis" AS (
           SELECT 1 AS "n", 0 AS "prevFib", 1 AS "fib"
             UNION
-          SELECT ("fibonaccis"."n" + 1) AS "n", "fibonaccis"."fib" AS "prevFib", ("fibonaccis"."prevFib" + "fibonaccis"."fib") AS "fib"
+          SELECT ("fibonaccis"."n") + (1) AS "n", "fibonaccis"."fib" AS "prevFib", ("fibonaccis"."prevFib") + ("fibonaccis"."fib") AS "fib"
           FROM "fibonaccis"
         )
-        SELECT (CAST("fibonaccis"."fib" AS REAL) / CAST("fibonaccis"."prevFib" AS REAL))
+        SELECT (CAST("fibonaccis"."fib" AS REAL)) / (CAST("fibonaccis"."prevFib" AS REAL))
         FROM "fibonaccis"
         LIMIT 1 OFFSET 30
         """
