@@ -1152,7 +1152,7 @@ extension SnapshotTests {
       }
     }
 
-    @Table @Selection
+    @Table
     struct VecExample {
       let rowid: Int
       let distance: Double

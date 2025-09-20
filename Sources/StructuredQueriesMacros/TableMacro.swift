@@ -574,19 +574,18 @@ extension TableMacro: ExtensionMacro {
         public \(nonisolated)static let schemaName: Swift.String? = \(schemaName)
         """
     }
-    var initDecoder: DeclSyntax?
-    if declaration.hasMacroApplication("Selection") {
-      conformances.append("\(moduleName).PartialSelectStatement")
-      statics.append(contentsOf: [
-        """
+    conformances.append("\(moduleName).PartialSelectStatement")
+    statics.append(contentsOf: [
+      """
 
-        public typealias QueryValue = Self
-        """,
-        """
-        public typealias From = Swift.Never
-        """,
-      ])
-    } else {
+      public typealias QueryValue = Self
+      """,
+      """
+      public typealias From = Swift.Never
+      """,
+    ])
+    var initDecoder: DeclSyntax?
+    if !declaration.hasMacroApplication("Selection") {
       initDecoder = """
 
         public \(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws {
@@ -624,7 +623,8 @@ extension TableMacro: MemberMacro {
       return []
     }
     let type = IdentifierTypeSyntax(name: declaration.name.trimmed)
-    var allColumns: [TokenSyntax] = []
+    var allColumns: [(name: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] = []
+    var allColumnNames: [TokenSyntax] = []
     var writableColumns: [TokenSyntax] = []
     var selectedColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
@@ -785,7 +785,8 @@ extension TableMacro: MemberMacro {
           }
           """
         )
-        allColumns.append(identifier)
+        allColumns.append((identifier, columnQueryValueType, defaultValue))
+        allColumnNames.append(identifier)
       } else {
         columnsProperties.append(
           """
@@ -798,7 +799,8 @@ extension TableMacro: MemberMacro {
           )
           """
         )
-        allColumns.append(identifier)
+        allColumns.append((identifier, columnQueryValueType, defaultValue))
+        allColumnNames.append(identifier)
         writableColumns.append(identifier)
       }
       let decodedType = columnQueryValueType?.asNonOptionalType()
@@ -1027,19 +1029,44 @@ extension TableMacro: MemberMacro {
       ])
     }
 
+    let selectionInitArguments =
+      allColumns
+      .map { name, type, `default` in
+        var query = "\(name): some \(moduleName).QueryExpression"
+        if let type {
+          query.append("<\(type)>")
+          if let `default` {
+            query.append(" = \(moduleName).BindQueryExpression(\(`default`), as: \(type).self)")
+          }
+        }
+        return query
+      }
+      .joined(separator: ",\n")
+
     return [
       """
       public \(nonisolated)struct TableColumns: \(schemaConformances, separator: ", ") {
       public typealias QueryValue = \(type.trimmed)
       \(columnsProperties, separator: "\n")
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
-      [\(allColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
+      [\(allColumnNames.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
       }
       public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] { \
       [\(writableColumns.map { "QueryValue.columns.\($0)" as ExprSyntax }, separator: ", ")]
       }
       public var queryFragment: QueryFragment {
       "\(raw: selectedColumns.map { #"\(self.\#($0))"# }.joined(separator: ", "))"
+      }
+      }
+      """,
+      """
+      public struct Selection: \(moduleName).TableExpression {
+      public typealias QueryValue = \(type.trimmed)
+      public let allColumns: [any \(moduleName).QueryExpression]
+      public init(
+      \(raw: selectionInitArguments)
+      ) {
+      self.allColumns = [\(allColumnNames, separator: ", ")]
       }
       }
       """,

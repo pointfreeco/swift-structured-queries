@@ -185,7 +185,7 @@ extension SnapshotTests {
   }
 }
 
-@Table @Selection
+@Table
 private struct Name {
   let type: String
   let value: String

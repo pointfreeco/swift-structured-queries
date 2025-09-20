@@ -17,7 +17,7 @@ import StructuredQueriesCore
   named(schemaName),
   named(tableName)
 )
-@attached(member, names: named(Draft), named(TableColumns))
+@attached(member, names: named(Draft), named(Selection), named(TableColumns))
 @attached(memberAttribute)
 public macro Table(
   _ name: String = "",

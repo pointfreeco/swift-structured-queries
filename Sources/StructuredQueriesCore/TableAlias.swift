@@ -113,6 +113,8 @@ public struct TableAlias<
 
   @dynamicMemberLookup
   public struct TableColumns: Sendable, TableDefinition {
+    public typealias QueryValue = TableAlias
+
     public static var allColumns: [any TableColumnExpression] {
       #if compiler(>=6.1)
         return Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
@@ -137,8 +139,6 @@ public struct TableAlias<
       #endif
     }
 
-    public typealias QueryValue = TableAlias
-
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Member>>
     ) -> TableColumn<TableAlias, Member> {
@@ -157,6 +157,20 @@ public struct TableAlias<
         column.name,
         keyPath: \.[member: \Member.self, column: column._keyPath]
       )
+    }
+  }
+
+  public struct Selection: TableExpression {
+    public typealias QueryValue = TableAlias
+
+    fileprivate var base: Base.Selection
+
+    public init(_ base: Base.Selection) {
+      self.base = base
+    }
+
+    public var allColumns: [any QueryExpression] {
+      base.allColumns
     }
   }
 }

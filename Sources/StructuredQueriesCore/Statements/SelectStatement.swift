@@ -1,18 +1,5 @@
 public protocol PartialSelectStatement<QueryValue>: Statement {}
 
-extension PartialSelectStatement where Self: Table, QueryValue == Self {
-  public var query: QueryFragment {
-    var query: QueryFragment = "SELECT "
-    func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
-      let root = self as! Root
-      let value = Value(queryOutput: root[keyPath: column.keyPath])
-      return "\(value) AS \(quote: column.name)"
-    }
-    query.append(Self.TableColumns.allColumns.map { open($0) }.joined(separator: ", "))
-    return query
-  }
-}
-
 /// A type representing a `SELECT` statement.
 public protocol SelectStatement<QueryValue, From, Joins>: PartialSelectStatement {
   /// Creates a ``Select`` statement from this statement.
