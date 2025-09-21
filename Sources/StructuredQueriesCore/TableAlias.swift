@@ -179,7 +179,7 @@ public struct TableAlias<
 extension TableAlias: PrimaryKeyedTable
 where
   Base: PrimaryKeyedTable,
-  Base.TableColumns.PrimaryKeyColumn == TableColumn<Base, Base.PrimaryKey>
+  Base.TableColumns.PrimaryColumn == TableColumn<Base, Base.PrimaryKey>
 {
   public typealias Draft = TableAlias<Base.Draft, Name>
 }
@@ -188,7 +188,7 @@ where
 extension TableAlias: TableDraft
 where
   Base: TableDraft,
-  Base.PrimaryTable.TableColumns.PrimaryKeyColumn == TableColumn<
+  Base.PrimaryTable.TableColumns.PrimaryColumn == TableColumn<
     Base.PrimaryTable, Base.PrimaryTable.PrimaryKey
   >
 {
@@ -202,7 +202,7 @@ where
 extension TableAlias.TableColumns: PrimaryKeyedTableDefinition
 where
   Base.TableColumns: PrimaryKeyedTableDefinition,
-  Base.TableColumns.PrimaryKeyColumn == TableColumn<Base, Base.PrimaryKey>
+  Base.TableColumns.PrimaryColumn == TableColumn<Base, Base.PrimaryKey>
 {
   public typealias PrimaryKey = Base.TableColumns.PrimaryKey
 

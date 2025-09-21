@@ -140,6 +140,16 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
       )
     }
 
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, GeneratedColumn<Wrapped, Member>>
+    ) -> GeneratedColumn<Optional, Member?> {
+      let column = Wrapped.columns[keyPath: keyPath]
+      return GeneratedColumn<Optional, Member?>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column.keyPath]
+      )
+    }
+
     public subscript<Member: QueryExpression>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, Member>
     ) -> some QueryExpression<Member.QueryValue?> {
@@ -161,7 +171,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
 extension Optional: PrimaryKeyedTable
 where
   Wrapped: PrimaryKeyedTable,
-  Wrapped.TableColumns.PrimaryKeyColumn == TableColumn<Wrapped, Wrapped.PrimaryKey>
+  Wrapped.TableColumns.PrimaryColumn == TableColumn<Wrapped, Wrapped.PrimaryKey>
 {
   public typealias Draft = Wrapped.Draft?
 }
@@ -170,7 +180,7 @@ where
 extension Optional: TableDraft
 where
   Wrapped: TableDraft,
-  Wrapped.PrimaryTable.TableColumns.PrimaryKeyColumn == TableColumn<
+  Wrapped.PrimaryTable.TableColumns.PrimaryColumn == TableColumn<
     Wrapped.PrimaryTable, Wrapped.PrimaryTable.PrimaryKey
   >
 {
@@ -184,7 +194,7 @@ where
 extension Optional.TableColumns: PrimaryKeyedTableDefinition
 where
   Wrapped.TableColumns: PrimaryKeyedTableDefinition,
-  Wrapped.TableColumns.PrimaryKeyColumn == TableColumn<Wrapped, Wrapped.PrimaryKey>
+  Wrapped.TableColumns.PrimaryColumn == TableColumn<Wrapped, Wrapped.PrimaryKey>
 {
   public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
 

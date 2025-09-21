@@ -52,6 +52,28 @@ extension SnapshotTests {
         """
       }
       assertQuery(
+        Item.insert {
+          $0.status.isOutOfStock
+        } values: {
+          true
+        }
+      ) {
+        """
+        INSERT INTO "items"
+        ("isOutOfStock")
+        VALUES
+        (1)
+        """
+      }
+      // TODO: Make work?
+      // assertQuery(
+      //   Item.insert {
+      //     $0.status
+      //   } values: {
+      //     Status(isOutOfStock: true, isOnBackOrder: false)
+      //   }
+      // )
+      assertQuery(
         Item.all
       ) {
         """
@@ -66,6 +88,15 @@ extension SnapshotTests {
         │   quantity: 1,           │
         │   status: Status(        │
         │     isOutOfStock: false, │
+        │     isOnBackOrder: false │
+        │   )                      │
+        │ )                        │
+        ├──────────────────────────┤
+        │ Item(                    │
+        │   title: "",             │
+        │   quantity: 0,           │
+        │   status: Status(        │
+        │     isOutOfStock: true,  │
         │     isOnBackOrder: false │
         │   )                      │
         │ )                        │
@@ -110,7 +141,7 @@ extension SnapshotTests {
         SET "isOutOfStock" = 1, "isOnBackOrder" = 1
         """
       }
-      // FIXME: This should decode 'nil' but because all its fields have defaults it coalesces.
+      // FIXME: These should decode 'nil' but because all its fields have defaults it coalesces.
       assertQuery(
         DefaultItem?(nil)
       ) {
@@ -360,7 +391,7 @@ private struct Timestamps {
   var createdAt: Date
   var updatedAt: Date
   var deletedAt: Date?
-  @Column(generated: .stored)
+  @Column(generated: .virtual)
   let isDeleted: Bool
 }
 

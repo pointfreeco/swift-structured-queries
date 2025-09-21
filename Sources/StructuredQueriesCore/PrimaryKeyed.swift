@@ -52,10 +52,10 @@ where QueryValue: PrimaryKeyedTable {
   associatedtype PrimaryKey: QueryRepresentable & QueryExpression
   where PrimaryKey.QueryValue == PrimaryKey
 
-  associatedtype PrimaryKeyColumn: _TableColumnExpression<QueryValue, PrimaryKey>
+  associatedtype PrimaryColumn: _TableColumnExpression<QueryValue, PrimaryKey>
 
   /// The column representing this table's primary key.
-  var primaryKey: PrimaryKeyColumn { get }
+  var primaryKey: PrimaryColumn { get }
 }
 
 extension TableDefinition where QueryValue: TableDraft {
@@ -66,7 +66,7 @@ extension TableDefinition where QueryValue: TableDraft {
   }
 }
 
-extension PrimaryKeyedTableDefinition where PrimaryKeyColumn: TableColumnExpression {
+extension PrimaryKeyedTableDefinition where PrimaryColumn: TableColumnExpression {
   /// A query expression representing the number of rows in this table.
   ///
   /// - Parameters:

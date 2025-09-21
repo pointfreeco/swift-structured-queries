@@ -113,7 +113,7 @@ extension PrimaryKeyedTable {
 }
 
 // TODO: Support composite keys.
-extension PrimaryKeyedTable where TableColumns.PrimaryKeyColumn == TableColumn<Self, PrimaryKey> {
+extension PrimaryKeyedTable where TableColumns.PrimaryColumn == TableColumn<Self, PrimaryKey> {
   @available(
     *, deprecated, message: "Use a trailing closure, instead: 'Table.upsert { draft }'"
   )
