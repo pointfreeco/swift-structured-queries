@@ -365,7 +365,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "dueDate" = CASE WHEN ("reminders"."dueDate") IS (NULL) THEN '2018-01-29 00:08:00.000' END
-        WHERE ("reminders"."id") IN (1)
+        WHERE ("reminders"."id") IN ((1))
         RETURNING "dueDate"
         """
       } results: {
@@ -383,7 +383,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "dueDate" = CASE WHEN ("reminders"."dueDate") IS (NULL) THEN '2018-01-29 00:08:00.000' END
-        WHERE ("reminders"."id") IN (1)
+        WHERE ("reminders"."id") IN ((1))
         RETURNING "dueDate"
         """
       } results: {

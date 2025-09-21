@@ -241,7 +241,7 @@ extension SnapshotTests {
         """
         SELECT "reminderWithLists"."reminderID", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
         FROM "reminderWithLists"
-        WHERE ("reminderWithLists"."reminderID") IN (1)
+        WHERE ("reminderWithLists"."reminderID") IN ((1))
         """
       } results: {
         """

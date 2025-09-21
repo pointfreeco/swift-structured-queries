@@ -270,6 +270,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Row
+            public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
             public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {

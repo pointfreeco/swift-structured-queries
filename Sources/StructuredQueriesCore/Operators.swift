@@ -816,7 +816,7 @@ extension SQLQueryExpression<String> {
   }
 }
 
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: QueryExpression {
   /// Returns a predicate expression indicating whether the expression is in a sequence.
   ///
   /// - Parameter expression: A sequence of expressions.
@@ -972,15 +972,15 @@ private struct LikeOperator<
   }
 }
 
-extension Sequence where Element: QueryExpression, Element.QueryValue: QueryBindable {
+extension Sequence where Element: QueryExpression, Element.QueryValue: QueryExpression {
   fileprivate typealias Expression = _SequenceExpression<Self>
 }
 
 private struct _SequenceExpression<S: Sequence>: QueryExpression
-where S.Element: QueryExpression, S.Element.QueryValue: QueryBindable {
+where S.Element: QueryExpression, S.Element.QueryValue: QueryExpression {
   typealias QueryValue = S
   let queryFragment: QueryFragment
   init(elements: S) {
-    queryFragment = "\(elements.map(\.queryFragment).joined(separator: ", "))"
+    queryFragment = elements.map { "(\($0.queryFragment))" }.joined(separator: ", ")
   }
 }

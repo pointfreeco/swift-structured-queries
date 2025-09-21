@@ -374,7 +374,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c") IN (1, 2, 3)
+        ("rows"."c") IN ((1), (2), (3))
         """
       }
       assertInlineSnapshot(
@@ -391,7 +391,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c") IN (1, 2, 3)
+        ("rows"."c") IN ((1), (2), (3))
         """
       }
       assertInlineSnapshot(
@@ -540,7 +540,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id"
         FROM "reminders"
-        WHERE ("reminders"."id") IN (1, 2)
+        WHERE ("reminders"."id") IN ((1), (2))
         """
       } results: {
         """

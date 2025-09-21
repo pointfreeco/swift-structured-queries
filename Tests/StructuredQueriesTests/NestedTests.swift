@@ -302,10 +302,26 @@ extension SnapshotTests {
         └───────────────────────────────────────────────────────────┘
         """
       }
-      // TODO: Make work.
-      // assertQuery(
-      //   Metadata.find(MetadataID(recordID: UUID(0), recordType: "reminders"))
-      // )
+      assertQuery(
+        Metadata.find(MetadataID(recordID: UUID(0), recordType: "reminders"))
+      ) {
+        """
+        SELECT "metadatas"."recordID", "metadatas"."recordType"
+        FROM "metadatas"
+        WHERE ("metadatas"."recordID", "metadatas"."recordType") IN (('00000000-0000-0000-0000-000000000000', 'reminders'))
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────────────┐
+        │ Metadata(                                                 │
+        │   id: MetadataID(                                         │
+        │     recordID: UUID(00000000-0000-0000-0000-000000000000), │
+        │     recordType: "reminders"                               │
+        │   )                                                       │
+        │ )                                                         │
+        └───────────────────────────────────────────────────────────┘
+        """
+      }
     }
   }
 }
