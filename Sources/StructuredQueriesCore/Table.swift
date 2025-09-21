@@ -93,6 +93,7 @@ extension Table {
     Where(scope: .unscoped)
   }
 
+  @_disfavoredOverload
   public static var none: Where<Self> {
     Where(scope: .empty)
   }

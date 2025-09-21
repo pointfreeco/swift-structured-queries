@@ -24,19 +24,31 @@ extension SnapshotTests {
         )
       )
       assertQuery(
-        Item.insert {
-          Item(title: "Phone", quantity: 1, status: Status())
-        }
+        Item
+          .insert {
+            Item(title: "Phone", quantity: 1, status: Status())
+          }
+          .returning(\.self)
       ) {
         """
         INSERT INTO "items"
         ("title", "quantity", "isOutOfStock", "isOnBackOrder")
         VALUES
         ('Phone', 1, 0, 0)
+        RETURNING "title", "quantity", "isOutOfStock", "isOnBackOrder"
         """
       } results: {
         """
-
+        ┌──────────────────────────┐
+        │ Item(                    │
+        │   title: "Phone",        │
+        │   quantity: 1,           │
+        │   status: Status(        │
+        │     isOutOfStock: false, │
+        │     isOnBackOrder: false │
+        │   )                      │
+        │ )                        │
+        └──────────────────────────┘
         """
       }
       assertQuery(
@@ -61,19 +73,56 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Item.where { $0.status.eq(Status()) }
+        Item.where { $0.status.eq(Status()) }.select(\.status)
       ) {
         """
-        SELECT "items"."title", "items"."quantity", "items"."isOutOfStock", "items"."isOnBackOrder"
+        SELECT "items"."isOutOfStock", "items"."isOnBackOrder"
         FROM "items"
         WHERE ("items"."isOutOfStock", "items"."isOnBackOrder") = (0, 0)
         """
       } results: {
         """
+        ┌────────────────────────┐
+        │ Status(                │
+        │   isOutOfStock: false, │
+        │   isOnBackOrder: false │
+        │ )                      │
+        └────────────────────────┘
+        """
+      }
+      // FIXME: This should decode 'nil' but because all its fields have defaults it coalesces.
+      assertQuery(
+        DefaultItem?(nil)
+      ) {
+        """
+        SELECT NULL AS "title", NULL AS "quantity", NULL AS "isOutOfStock", NULL AS "isOnBackOrder"
+        """
+      } results: {
+        """
         ┌──────────────────────────┐
-        │ Item(                    │
-        │   title: "Phone",        │
-        │   quantity: 1,           │
+        │ DefaultItem(             │
+        │   title: "",             │
+        │   quantity: 0,           │
+        │   status: Status(        │
+        │     isOutOfStock: false, │
+        │     isOnBackOrder: false │
+        │   )                      │
+        │ )                        │
+        └──────────────────────────┘
+        """
+      }
+      assertQuery(
+        DefaultItem?.none
+      ) {
+        """
+        SELECT NULL AS "title", NULL AS "quantity", NULL AS "isOutOfStock", NULL AS "isOnBackOrder"
+        """
+      } results: {
+        """
+        ┌──────────────────────────┐
+        │ DefaultItem(             │
+        │   title: "",             │
+        │   quantity: 0,           │
         │   status: Status(        │
         │     isOutOfStock: false, │
         │     isOnBackOrder: false │
@@ -108,6 +157,22 @@ extension SnapshotTests {
         ("title", "quantity", "isOutOfStock", "isOnBackOrder", "timestamp")
         VALUES
         (NULL, NULL, NULL, NULL, '2001-01-01 00:00:00.000')
+        """
+      }
+      assertQuery(
+        ItemWithTimestamp(item: nil, timestamp: Date(timeIntervalSinceReferenceDate: 0))
+      ) {
+        """
+        SELECT NULL AS "title", NULL AS "quantity", NULL AS "isOutOfStock", NULL AS "isOnBackOrder", '2001-01-01 00:00:00.000' AS "timestamp"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┐
+        │ ItemWithTimestamp(                          │
+        │   item: nil,                                │
+        │   timestamp: Date(2001-01-01T00:00:00.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
         """
       }
       assertQuery(
@@ -181,6 +246,14 @@ extension SnapshotTests {
 
 @Table
 private struct Item {
+  var title: String
+  var quantity = 0
+  @Columns
+  var status: Status = Status()
+}
+
+@Table("items")
+private struct DefaultItem {
   var title = ""
   var quantity = 0
   @Columns
