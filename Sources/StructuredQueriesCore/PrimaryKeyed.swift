@@ -118,7 +118,7 @@ extension TableDraft where PrimaryTable.PrimaryKey: QueryBindable {
   public static func find(
     _ primaryKey: some QueryExpression<PrimaryTable.TableColumns.PrimaryKey>
   ) -> Where<Self> {
-    Self.find([primaryKey])
+    find([primaryKey])
   }
 
   /// A where clause filtered by primary keys.
@@ -139,7 +139,7 @@ extension Where where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   /// - Parameter primaryKey: A primary key.
   /// - Returns: A where clause with the added primary key.
   public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
-    self.find([primaryKey])
+    find([primaryKey])
   }
 
   /// Adds a primary key condition to a where clause.
@@ -162,7 +162,7 @@ extension Where where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBinda
   public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>)
     -> Self
   {
-    self.find([primaryKey])
+    find([primaryKey])
   }
 
   /// Adds a primary key condition to a where clause.
@@ -183,7 +183,7 @@ extension Select where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A select statement filtered by the given key.
   public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
-    self.and(From.find(primaryKey))
+    and(From.find(primaryKey))
   }
 
   /// A select statement filtered by a sequence of primary keys.
@@ -193,7 +193,7 @@ extension Select where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   public func find(
     _ primaryKeys: some Sequence<some QueryExpression<From.TableColumns.PrimaryKey>>
   ) -> Self {
-    self.and(From.find(primaryKeys))
+    and(From.find(primaryKeys))
   }
 }
 
@@ -206,7 +206,7 @@ extension Select where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBind
   public func find(
     _ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>
   ) -> Self {
-    self.and(From.find(primaryKey))
+    and(From.find(primaryKey))
   }
 
   /// A select statement filtered by a sequence of primary keys.
@@ -216,7 +216,7 @@ extension Select where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBind
   public func find(
     _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>>
   ) -> Self {
-    self.and(From.find(primaryKeys))
+    and(From.find(primaryKeys))
   }
 }
 
@@ -227,7 +227,7 @@ extension Update where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: An update statement filtered by the given key.
   public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
-    self.find([primaryKey])
+    find([primaryKey])
   }
 
   /// An update statement filtered by a sequence of primary keys.
@@ -250,7 +250,7 @@ extension Update where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBind
   public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>)
     -> Self
   {
-    self.find([primaryKey])
+    find([primaryKey])
   }
 
   /// An update statement filtered by a sequence of primary keys.
@@ -271,7 +271,7 @@ extension Delete where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A delete statement filtered by the given key.
   public func find(_ primaryKey: some QueryExpression<From.TableColumns.PrimaryKey>) -> Self {
-    self.find([primaryKey])
+    find([primaryKey])
   }
 
   /// A delete statement filtered by a sequence of primary keys.
@@ -294,7 +294,7 @@ extension Delete where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBind
   public func find(_ primaryKey: some QueryExpression<From.PrimaryTable.TableColumns.PrimaryKey>)
     -> Self
   {
-    self.find([primaryKey])
+    find([primaryKey])
   }
 
   /// A delete statement filtered by a sequence of primary keys.
