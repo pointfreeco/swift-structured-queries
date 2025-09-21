@@ -157,19 +157,35 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
   public typealias Selection = Wrapped.Selection?
 }
 
-extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
+// TODO: Support composite keys.
+extension Optional: PrimaryKeyedTable
+where
+  Wrapped: PrimaryKeyedTable,
+  Wrapped.TableColumns.PrimaryKeyColumn == TableColumn<Wrapped, Wrapped.PrimaryKey>
+{
   public typealias Draft = Wrapped.Draft?
 }
 
-extension Optional: TableDraft where Wrapped: TableDraft {
+// TODO: Support composite keys.
+extension Optional: TableDraft
+where
+  Wrapped: TableDraft,
+  Wrapped.PrimaryTable.TableColumns.PrimaryKeyColumn == TableColumn<
+    Wrapped.PrimaryTable, Wrapped.PrimaryTable.PrimaryKey
+  >
+{
   public typealias PrimaryTable = Wrapped.PrimaryTable?
   public init(_ primaryTable: Wrapped.PrimaryTable?) {
     self = primaryTable.map(Wrapped.init)
   }
 }
 
+// TODO: Support composite keys.
 extension Optional.TableColumns: PrimaryKeyedTableDefinition
-where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
+where
+  Wrapped.TableColumns: PrimaryKeyedTableDefinition,
+  Wrapped.TableColumns.PrimaryKeyColumn == TableColumn<Wrapped, Wrapped.PrimaryKey>
+{
   public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
 
   public var primaryKey: TableColumn<Optional, Wrapped.TableColumns.PrimaryKey.QueryValue?> {

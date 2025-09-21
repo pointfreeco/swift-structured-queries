@@ -1,5 +1,10 @@
 @dynamicMemberLookup
-public struct ColumnGroup<Root: Table, Values: Table>: QueryExpression {
+public struct ColumnGroup<Root: Table, Values: Table>: _TableColumnExpression
+where Values.QueryOutput == Values {
+  public typealias Value = Values
+
+  public var name: String { Values.tableName }
+
   public typealias QueryValue = Values
 
   public static func allColumns(keyPath: KeyPath<Root, Values>) -> [any TableColumnExpression] {
@@ -40,7 +45,7 @@ public struct ColumnGroup<Root: Table, Values: Table>: QueryExpression {
     }
   }
 
-  let keyPath: KeyPath<Root, Values>
+  public let keyPath: KeyPath<Root, Values>
 
   public init(keyPath: KeyPath<Root, Values>) {
     self.keyPath = keyPath

@@ -44,7 +44,8 @@ extension TableMacro: ExtensionMacro {
         identifier: TokenSyntax,
         label: TokenSyntax?,
         queryOutputType: TypeSyntax?,
-        queryValueType: TypeSyntax?
+        queryValueType: TypeSyntax?,
+        isColumnGroup: Bool
       )?
     let selfRewriter = SelfRewriter(
       selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
@@ -206,7 +207,8 @@ extension TableMacro: ExtensionMacro {
               identifier: identifier,
               label: label,
               queryOutputType: columnQueryOutputType,
-              queryValueType: columnQueryValueType
+              queryValueType: columnQueryValueType,
+              isColumnGroup: isColumnGroup
             )
 
           case .some(let label) where label.text == "generated":
@@ -251,7 +253,8 @@ extension TableMacro: ExtensionMacro {
           identifier: identifier,
           label: nil,
           queryOutputType: columnQueryOutputType,
-          queryValueType: columnQueryValueType
+          queryValueType: columnQueryValueType,
+          isColumnGroup: isColumnGroup
         )
       }
 
@@ -438,8 +441,9 @@ extension TableMacro: ExtensionMacro {
     } else if let primaryKey {
       columnsProperties.append(
         """
-        public var primaryKey: \(moduleName).TableColumn<QueryValue, \(primaryKey.queryValueType)> \
-        { self.\(primaryKey.identifier) }
+        public var primaryKey: \(moduleName).\
+        \(raw: primaryKey.isColumnGroup ? "ColumnGroup" : "TableColumn")\
+        <QueryValue, \(primaryKey.queryValueType)> { self.\(primaryKey.identifier) }
         """
       )
       draft = """
@@ -659,7 +663,8 @@ extension TableMacro: MemberMacro {
         identifier: TokenSyntax,
         label: TokenSyntax?,
         queryOutputType: TypeSyntax?,
-        queryValueType: TypeSyntax?
+        queryValueType: TypeSyntax?,
+        isColumnGroup: Bool
       )?
     let selfRewriter = SelfRewriter(selfEquivalent: type.name)
     for member in declaration.memberBlock.members {
@@ -737,7 +742,8 @@ extension TableMacro: MemberMacro {
               identifier: identifier,
               label: label,
               queryOutputType: columnQueryOutputType,
-              queryValueType: columnQueryValueType
+              queryValueType: columnQueryValueType,
+              isColumnGroup: isColumnGroup
             )
 
           case .some(let label) where label.text == "generated":
@@ -761,7 +767,8 @@ extension TableMacro: MemberMacro {
           identifier: identifier,
           label: nil,
           queryOutputType: columnQueryOutputType,
-          queryValueType: columnQueryValueType
+          queryValueType: columnQueryValueType,
+          isColumnGroup: isColumnGroup
         )
       }
 
@@ -950,8 +957,9 @@ extension TableMacro: MemberMacro {
     if let primaryKey {
       columnsProperties.append(
         """
-        public var primaryKey: \(moduleName).TableColumn<QueryValue, \(primaryKey.queryValueType)> \
-        { self.\(primaryKey.identifier) }
+        public var primaryKey: \(moduleName).\
+        \(raw: primaryKey.isColumnGroup ? "ColumnGroup" : "TableColumn")\
+        <QueryValue, \(primaryKey.queryValueType)> { self.\(primaryKey.identifier) }
         """
       )
       draft = """
@@ -1075,10 +1083,17 @@ extension TableMacro: MemberMacro {
       }
       .joined(separator: ",\n")
 
+    let primaryKeyTypealias: DeclSyntax? = primaryKey.map {
+      """
+
+      public typealias PrimaryKey = \($0.queryValueType)
+      """
+    }
+
     return [
       """
       public \(nonisolated)struct TableColumns: \(schemaConformances, separator: ", ") {
-      public typealias QueryValue = \(type.trimmed)
+      public typealias QueryValue = \(type.trimmed)\(primaryKeyTypealias)
       \(columnsProperties, separator: "\n")
       public static var allColumns: [any \(moduleName).TableColumnExpression] { \
       [\(allColumnNames.map { $0.columns(.all) }, separator: ", ")].flatMap(\\.self)

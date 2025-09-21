@@ -4,7 +4,8 @@ where TableColumns: PrimaryKeyedTableDefinition<PrimaryKey> {
   /// A type representing this table's primary key.
   ///
   /// For auto-incrementing tables, this is typically `Int`.
-  associatedtype PrimaryKey: QueryBindable where PrimaryKey.QueryValue == PrimaryKey
+  associatedtype PrimaryKey: QueryRepresentable & QueryExpression
+  where PrimaryKey.QueryValue == PrimaryKey
 
   /// A type that represents this type, but with an optional primary key.
   ///
@@ -48,10 +49,13 @@ where QueryValue: PrimaryKeyedTable {
   /// A type representing this table's primary key.
   ///
   /// For auto-incrementing tables, this is typically `Int`.
-  associatedtype PrimaryKey: QueryBindable where PrimaryKey.QueryValue == PrimaryKey
+  associatedtype PrimaryKey: QueryRepresentable & QueryExpression
+  where PrimaryKey.QueryValue == PrimaryKey
+
+  associatedtype PrimaryKeyColumn: _TableColumnExpression<QueryValue, PrimaryKey>
 
   /// The column representing this table's primary key.
-  var primaryKey: TableColumn<QueryValue, PrimaryKey> { get }
+  var primaryKey: PrimaryKeyColumn { get }
 }
 
 extension TableDefinition where QueryValue: TableDraft {
@@ -62,7 +66,7 @@ extension TableDefinition where QueryValue: TableDraft {
   }
 }
 
-extension PrimaryKeyedTableDefinition {
+extension PrimaryKeyedTableDefinition where PrimaryKeyColumn: TableColumnExpression {
   /// A query expression representing the number of rows in this table.
   ///
   /// - Parameters:
@@ -78,7 +82,8 @@ extension PrimaryKeyedTableDefinition {
   }
 }
 
-extension PrimaryKeyedTable {
+// TODO: Support composite keys.
+extension PrimaryKeyedTable where PrimaryKey: QueryBindable {
   /// A where clause filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
@@ -86,7 +91,7 @@ extension PrimaryKeyedTable {
   public static func find(
     _ primaryKey: some QueryExpression<TableColumns.PrimaryKey>
   ) -> Where<Self> {
-    Self.find([primaryKey])
+    find([primaryKey])
   }
 
   /// A where clause filtered by primary keys.
@@ -104,7 +109,8 @@ extension PrimaryKeyedTable {
   }
 }
 
-extension TableDraft {
+// TODO: Support composite keys.
+extension TableDraft where PrimaryTable.PrimaryKey: QueryBindable {
   /// A where clause filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
@@ -126,7 +132,8 @@ extension TableDraft {
   }
 }
 
-extension Where where From: PrimaryKeyedTable {
+// TODO: Support composite keys.
+extension Where where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   /// Adds a primary key condition to a where clause.
   ///
   /// - Parameter primaryKey: A primary key.
@@ -146,7 +153,8 @@ extension Where where From: PrimaryKeyedTable {
   }
 }
 
-extension Where where From: TableDraft {
+// TODO: Support composite keys.
+extension Where where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBindable {
   /// Adds a primary key condition to a where clause.
   ///
   /// - Parameter primaryKey: A primary key.
@@ -168,7 +176,8 @@ extension Where where From: TableDraft {
   }
 }
 
-extension Select where From: PrimaryKeyedTable {
+// TODO: Support composite keys.
+extension Select where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   /// A select statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
@@ -188,7 +197,8 @@ extension Select where From: PrimaryKeyedTable {
   }
 }
 
-extension Select where From: TableDraft {
+// TODO: Support composite keys.
+extension Select where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBindable {
   /// A select statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
@@ -210,7 +220,8 @@ extension Select where From: TableDraft {
   }
 }
 
-extension Update where From: PrimaryKeyedTable {
+// TODO: Support composite keys.
+extension Update where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   /// An update statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
@@ -230,7 +241,8 @@ extension Update where From: PrimaryKeyedTable {
   }
 }
 
-extension Update where From: TableDraft {
+// TODO: Support composite keys.
+extension Update where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBindable {
   /// An update statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
@@ -252,7 +264,8 @@ extension Update where From: TableDraft {
   }
 }
 
-extension Delete where From: PrimaryKeyedTable {
+// TODO: Support composite keys.
+extension Delete where From: PrimaryKeyedTable, From.PrimaryKey: QueryBindable {
   /// A delete statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
@@ -272,7 +285,8 @@ extension Delete where From: PrimaryKeyedTable {
   }
 }
 
-extension Delete where From: TableDraft {
+// TODO: Support composite keys.
+extension Delete where From: TableDraft, From.PrimaryTable.PrimaryKey: QueryBindable {
   /// A delete statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.

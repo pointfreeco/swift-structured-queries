@@ -90,6 +90,26 @@ extension SnapshotTests {
         └────────────────────────┘
         """
       }
+      assertQuery(
+        Item.update {
+          $0.status.isOutOfStock = true
+        }
+      ) {
+        """
+        UPDATE "items"
+        SET "isOutOfStock" = 1
+        """
+      }
+      assertQuery(
+        Item.update {
+          $0.status = Status(isOutOfStock: true, isOnBackOrder: true)
+        }
+      ) {
+        """
+        UPDATE "items"
+        SET "isOutOfStock" = 1, "isOnBackOrder" = 1
+        """
+      }
       // FIXME: This should decode 'nil' but because all its fields have defaults it coalesces.
       assertQuery(
         DefaultItem?(nil)
@@ -111,6 +131,7 @@ extension SnapshotTests {
         └──────────────────────────┘
         """
       }
+      // NB: This tests that 'Optional.none' is favored over 'Table.none'.
       assertQuery(
         DefaultItem?.none
       ) {
@@ -241,6 +262,51 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func primaryKey() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "metadatas" (
+            "recordID" TEXT NOT NULL ON CONFLICT REPLACE DEFAULT
+              '00000000-0000-0000-0000-000000000000',
+            "recordType" TEXT NOT NULL ON CONFLICT REPLACE DEFAULT 'reminders',
+            PRIMARY KEY ("recordID", "recordType")
+          )
+          """
+        )
+      )
+      assertQuery(
+        Metadata
+          .insert {
+            Metadata.Draft()
+          }
+          .returning(\.self)
+      ) {
+        """
+        INSERT INTO "metadatas"
+        ("recordID", "recordType")
+        VALUES
+        (NULL, NULL)
+        RETURNING "recordID", "recordType"
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────────────┐
+        │ Metadata(                                                 │
+        │   id: MetadataID(                                         │
+        │     recordID: UUID(00000000-0000-0000-0000-000000000000), │
+        │     recordType: "reminders"                               │
+        │   )                                                       │
+        │ )                                                         │
+        └───────────────────────────────────────────────────────────┘
+        """
+      }
+      // TODO: Make work.
+      // assertQuery(
+      //   Metadata.find(MetadataID(recordID: UUID(0), recordType: "reminders"))
+      // )
+    }
   }
 }
 
@@ -287,4 +353,16 @@ private struct Row {
   let id: UUID
   @Columns
   var timestamps: Timestamps
+}
+
+@Table
+private struct Metadata: Identifiable {
+  @Columns/*(primaryKey: true)*/
+  let id: MetadataID
+}
+
+@Table
+private struct MetadataID: Hashable {
+  let recordID: UUID
+  let recordType: String
 }

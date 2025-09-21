@@ -1,19 +1,25 @@
+public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
+  associatedtype Root: Table
+  associatedtype Value: QueryRepresentable
+
+  /// The name of the table column.
+  var name: String { get }
+
+  /// The table model key path associated with this table column.
+  var keyPath: KeyPath<Root, Value.QueryOutput> { get }
+}
+
 /// A type representing a table column.
 ///
 /// This protocol has two concrete conformances, ``TableColumn`` and ``GeneratedColumn``, and
 /// provides type erasure over a table's columns. You should not conform to this protocol directly.
-public protocol TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
-  associatedtype Root: Table
-  associatedtype Value: QueryRepresentable & QueryBindable
-
+public protocol TableColumnExpression<Root, Value>: _TableColumnExpression
+where Value: QueryBindable {
   /// The name of the table column.
   var name: String { get }
 
   /// The default value of the table column.
   var defaultValue: Value.QueryOutput? { get }
-
-  /// The table model key path associated with this table column.
-  var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 
   func _aliased<Name: AliasName>(
     _ alias: Name.Type

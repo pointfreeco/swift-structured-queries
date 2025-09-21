@@ -175,19 +175,35 @@ public struct TableAlias<
   }
 }
 
-extension TableAlias: PrimaryKeyedTable where Base: PrimaryKeyedTable {
+// TODO: Support composite keys.
+extension TableAlias: PrimaryKeyedTable
+where
+  Base: PrimaryKeyedTable,
+  Base.TableColumns.PrimaryKeyColumn == TableColumn<Base, Base.PrimaryKey>
+{
   public typealias Draft = TableAlias<Base.Draft, Name>
 }
 
-extension TableAlias: TableDraft where Base: TableDraft {
+// TODO: Support composite keys.
+extension TableAlias: TableDraft
+where
+  Base: TableDraft,
+  Base.PrimaryTable.TableColumns.PrimaryKeyColumn == TableColumn<
+    Base.PrimaryTable, Base.PrimaryTable.PrimaryKey
+  >
+{
   public typealias PrimaryTable = TableAlias<Base.PrimaryTable, Name>
   public init(_ primaryTable: TableAlias<Base.PrimaryTable, Name>) {
     self.init(base: Base(primaryTable.base))
   }
 }
 
+// TODO: Support composite keys.
 extension TableAlias.TableColumns: PrimaryKeyedTableDefinition
-where Base.TableColumns: PrimaryKeyedTableDefinition {
+where
+  Base.TableColumns: PrimaryKeyedTableDefinition,
+  Base.TableColumns.PrimaryKeyColumn == TableColumn<Base, Base.PrimaryKey>
+{
   public typealias PrimaryKey = Base.TableColumns.PrimaryKey
 
   public var primaryKey: TableColumn<TableAlias, Base.TableColumns.PrimaryKey.QueryValue> {
@@ -261,7 +277,8 @@ extension TableAlias: Encodable where Base: Encodable {
 
 extension QueryFragment {
   fileprivate func replacingOccurrences<T: Table, A: AliasName>(
-    of _: T.Type, with _: A.Type
+    of _: T.Type,
+    with _: A.Type
   ) -> QueryFragment {
     var query = self
     for index in query.segments.indices {

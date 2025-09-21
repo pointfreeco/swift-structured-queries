@@ -52,7 +52,7 @@ public macro Column(
 @attached(peer)
 public macro Columns(
   // as representableType: (any QueryRepresentable.Type)? = nil,
-  // primaryKey: Bool = false
+  primaryKey: Bool = false
 ) =
   #externalMacro(
     module: "StructuredQueriesMacros",
