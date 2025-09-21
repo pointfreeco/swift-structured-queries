@@ -145,7 +145,7 @@ public struct TableAlias<
       let column = Base.columns[keyPath: keyPath]
       return TableColumn<TableAlias, Member>(
         column.name,
-        keyPath: \.[member: \Member.self, column: column._keyPath]
+        keyPath: \.[member: \Member.self, column: column.keyPath]
       )
     }
 
@@ -155,7 +155,7 @@ public struct TableAlias<
       let column = Base.columns[keyPath: keyPath]
       return GeneratedColumn<TableAlias, Member>(
         column.name,
-        keyPath: \.[member: \Member.self, column: column._keyPath]
+        keyPath: \.[member: \Member.self, column: column.keyPath]
       )
     }
   }

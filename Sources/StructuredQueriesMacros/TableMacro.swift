@@ -284,6 +284,7 @@ extension TableMacro: ExtensionMacro {
           )
           """
         )
+        allColumns.append(identifier)
       } else if isGenerated {
         columnsProperties.append(
           """
@@ -300,6 +301,7 @@ extension TableMacro: ExtensionMacro {
           }
           """
         )
+        allColumns.append(identifier)
       } else {
         columnsProperties.append(
           """
@@ -934,6 +936,7 @@ extension TableMacro: MemberMacro {
           draftProperties.append(
             DeclSyntax(
               property.trimmed
+                .with(\.attributes.trailingTrivia, .space)
                 .with(\.bindingSpecifier.leadingTrivia, "")
                 .removingAccessors()
                 .rewritten(selfRewriter)

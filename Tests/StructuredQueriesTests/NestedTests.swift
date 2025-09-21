@@ -83,6 +83,99 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func optionalDoubleNested() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "itemWithTimestamps" (
+            "title" TEXT,
+            "quantity" INTEGER,
+            "isOutOfStock" INTEGER,
+            "isOnBackOrder" INTEGER,
+            "timestamp" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      assertQuery(
+        ItemWithTimestamp.insert {
+          ItemWithTimestamp(item: nil, timestamp: Date(timeIntervalSinceReferenceDate: 0))
+        }
+      ) {
+        """
+        INSERT INTO "itemWithTimestamps"
+        ("title", "quantity", "isOutOfStock", "isOnBackOrder", "timestamp")
+        VALUES
+        (NULL, NULL, NULL, NULL, '2001-01-01 00:00:00.000')
+        """
+      }
+      assertQuery(
+        ItemWithTimestamp.insert {
+          ItemWithTimestamp(
+            item: Item(
+              title: "Pencil",
+              quantity: 0,
+              status: Status(isOutOfStock: true, isOnBackOrder: true)
+            ),
+            timestamp: Date(timeIntervalSinceReferenceDate: 0)
+          )
+        }
+      ) {
+        """
+        INSERT INTO "itemWithTimestamps"
+        ("title", "quantity", "isOutOfStock", "isOnBackOrder", "timestamp")
+        VALUES
+        ('Pencil', 0, 1, 1, '2001-01-01 00:00:00.000')
+        """
+      }
+    }
+
+    @Test func nestedGenerated() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "rows" (
+            "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT '00000000-0000-0000-0000-000000000000',
+            "createdAt" TEXT NOT NULL,
+            "updatedAt" TEXT NOT NULL,
+            "deletedAt" TEXT,
+            "isDeleted" INTEGER AS ("deletedAt" IS NOT NULL)
+          )
+          """
+        )
+      )
+      let now = Date(timeIntervalSinceReferenceDate: 0)
+      assertQuery(
+        Row
+          .insert {
+            Row.Draft(timestamps: Timestamps(createdAt: now, updatedAt: now, isDeleted: false))
+          }
+          .returning(\.self)
+      ) {
+        """
+        INSERT INTO "rows"
+        ("id", "createdAt", "updatedAt", "deletedAt")
+        VALUES
+        (NULL, '2001-01-01 00:00:00.000', '2001-01-01 00:00:00.000', NULL)
+        RETURNING "id", "createdAt", "updatedAt", "deletedAt", "isDeleted"
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────┐
+        │ Row(                                              │
+        │   id: UUID(00000000-0000-0000-0000-000000000000), │
+        │   timestamps: Timestamps(                         │
+        │     createdAt: Date(2001-01-01T00:00:00.000Z),    │
+        │     updatedAt: Date(2001-01-01T00:00:00.000Z),    │
+        │     deletedAt: nil,                               │
+        │     isDeleted: false                              │
+        │   )                                               │
+        │ )                                                 │
+        └───────────────────────────────────────────────────┘
+        """
+      }
+    }
   }
 }
 
@@ -98,4 +191,27 @@ private struct Item {
 private struct Status {
   var isOutOfStock = false
   var isOnBackOrder = false
+}
+
+@Table
+private struct ItemWithTimestamp {
+  @Columns
+  var item: Item?
+  var timestamp: Date
+}
+
+@Table
+private struct Timestamps {
+  var createdAt: Date
+  var updatedAt: Date
+  var deletedAt: Date?
+  @Column(generated: .stored)
+  let isDeleted: Bool
+}
+
+@Table
+private struct Row {
+  let id: UUID
+  @Columns
+  var timestamps: Timestamps
 }

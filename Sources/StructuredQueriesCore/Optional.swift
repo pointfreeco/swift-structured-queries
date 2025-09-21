@@ -95,11 +95,39 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
     public typealias QueryValue = Optional
 
     public static var allColumns: [any TableColumnExpression] {
-      Wrapped.TableColumns.allColumns
+      func open<Root, Value>(
+        _ column: some TableColumnExpression<Root, Value>
+      ) -> any TableColumnExpression {
+        guard let column = column as? TableColumn<Wrapped, Value>
+        else {
+          let column = column as! GeneratedColumn<Wrapped, Value>
+          return GeneratedColumn<Optional, Value?>(
+            column.name,
+            keyPath: \.[member: \Value.self, column: column.keyPath],
+            default: column.defaultValue
+          )
+        }
+        return TableColumn<Optional, Value?>(
+          column.name,
+          keyPath: \.[member: \Value.self, column: column.keyPath],
+          default: column.defaultValue
+        )
+      }
+      return Wrapped.TableColumns.allColumns.map { open($0) }
     }
 
     public static var writableColumns: [any WritableTableColumnExpression] {
-      Wrapped.TableColumns.writableColumns
+      func open<Root, Value>(
+        _ column: some WritableTableColumnExpression<Root, Value>
+      ) -> any WritableTableColumnExpression {
+        let column = column as! TableColumn<Wrapped, Value>
+        return TableColumn<Optional, Value?>(
+          column.name,
+          keyPath: \.[member: \Value.self, column: column.keyPath],
+          default: column.defaultValue
+        )
+      }
+      return Wrapped.TableColumns.writableColumns.map { open($0) }
     }
 
     public subscript<Member>(
@@ -108,7 +136,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
       let column = Wrapped.columns[keyPath: keyPath]
       return TableColumn<Optional, Member?>(
         column.name,
-        keyPath: \.[member: \Member.self, column: column._keyPath]
+        keyPath: \.[member: \Member.self, column: column.keyPath]
       )
     }
 

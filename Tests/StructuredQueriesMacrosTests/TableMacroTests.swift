@@ -2728,5 +2728,140 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func nested() {
+      assertMacro {
+        """
+        @Table
+        private struct Row {
+          let id: UUID
+          @Columns
+          var timestamps: Timestamps
+        }
+        """
+      } expansion: {
+        #"""
+        private struct Row {
+          let id: UUID
+          @Columns
+          var timestamps: Timestamps
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Row
+            public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID>("id", keyPath: \QueryValue.id)
+            public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
+            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, UUID> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [[QueryValue.columns.id], StructuredQueriesCore.ColumnGroup.allColumns(keyPath: \QueryValue.timestamps)].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [[QueryValue.columns.id], StructuredQueriesCore.ColumnGroup.writableColumns(keyPath: \QueryValue.timestamps)].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id), \(self.timestamps)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Row
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<UUID>,
+              timestamps: some StructuredQueriesCore.QueryExpression<Timestamps>
+            ) {
+              self.allColumns = [id, timestamps]
+            }
+          }
+
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = Row
+            let id: UUID?
+            @Columns var timestamps: Timestamps
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID?>("id", keyPath: \QueryValue.id)
+              public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                [[QueryValue.columns.id], StructuredQueriesCore.ColumnGroup.allColumns(keyPath: \QueryValue.timestamps)].flatMap(\.self)
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                [[QueryValue.columns.id], StructuredQueriesCore.ColumnGroup.writableColumns(keyPath: \QueryValue.timestamps)].flatMap(\.self)
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.timestamps)"
+              }
+            }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<UUID?>,
+                timestamps: some StructuredQueriesCore.QueryExpression<Timestamps>
+              ) {
+                self.allColumns = [id, timestamps]
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var tableName: String {
+              Row.tableName
+            }
+
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(UUID.self)
+              let timestamps = try decoder.decode(Timestamps.self)
+              guard let timestamps else {
+                throw QueryDecodingError.missingRequiredColumn
+              }
+              self.timestamps = timestamps
+            }
+
+            public nonisolated init(_ other: Row) {
+              self.id = other.id
+              self.timestamps = other.timestamps
+            }
+            public init(
+              id: UUID? = nil,
+              timestamps: Timestamps
+            ) {
+              self.id = id
+              self.timestamps = timestamps
+            }
+          }
+        }
+
+        nonisolated extension Row: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var tableName: String {
+            "rows"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(UUID.self)
+            let timestamps = try decoder.decode(Timestamps.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            guard let timestamps else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.timestamps = timestamps
+          }
+        }
+        """#
+      }
+    }
   }
 }

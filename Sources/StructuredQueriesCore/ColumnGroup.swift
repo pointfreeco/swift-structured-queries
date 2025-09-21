@@ -51,13 +51,33 @@ public struct ColumnGroup<Root: Table, Values: Table>: QueryExpression {
   }
 
   public subscript<Member>(
-    dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values, Member>> & Sendable
+    dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values, Member>>
   ) -> TableColumn<Root, Member> {
     let column = Values.columns[keyPath: keyPath]
     return TableColumn<Root, Member>(
       column.name,
       keyPath: self.keyPath.appending(path: column.keyPath),
       default: column.defaultValue
+    )
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, GeneratedColumn<Values, Member>>
+  ) -> GeneratedColumn<Root, Member> {
+    let column = Values.columns[keyPath: keyPath]
+    return GeneratedColumn<Root, Member>(
+      column.name,
+      keyPath: self.keyPath.appending(path: column.keyPath),
+      default: column.defaultValue
+    )
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, ColumnGroup<Values, Member>>
+  ) -> ColumnGroup<Root, Member> {
+    let column = Values.columns[keyPath: keyPath]
+    return ColumnGroup<Root, Member>(
+      keyPath: self.keyPath.appending(path: column.keyPath)
     )
   }
 }
