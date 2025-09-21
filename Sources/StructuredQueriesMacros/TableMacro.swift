@@ -1121,6 +1121,7 @@ extension TableMacro: MemberAttributeMacro {
       !property.isStatic,
       !property.isComputed,
       !property.hasMacroApplication("Column"),
+      !property.hasMacroApplication("Columns"),
       !property.hasMacroApplication("Ephemeral"),
       property.bindings.count == 1,
       let binding = property.bindings.first,
