@@ -10,8 +10,8 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
 
 /// A type representing a table column.
 ///
-/// This protocol has two concrete conformances, ``TableColumn`` and ``GeneratedColumn``, and
-/// provides type erasure over a table's columns. You should not conform to this protocol directly.
+/// This protocol provides type erasure over a table's columns. You should not conform to this
+/// protocol directly.
 public protocol TableColumnExpression<Root, Value>: _TableColumnExpression
 where Value: QueryBindable {
   /// The name of the table column.

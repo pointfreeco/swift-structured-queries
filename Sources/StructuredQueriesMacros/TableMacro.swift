@@ -681,9 +681,9 @@ extension TableMacro: MemberMacro {
         StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
       )
       var columnQueryValueType =
-      (binding.typeAnnotation?.type.trimmed
-       ?? binding.initializer?.value.literalType)
-      .map { $0.rewritten(selfRewriter) }
+        (binding.typeAnnotation?.type.trimmed
+        ?? binding.initializer?.value.literalType)
+        .map { $0.rewritten(selfRewriter) }
       var columnQueryOutputType = columnQueryValueType
       var isPrimaryKey = primaryKey == nil && identifier.text == "id"
       var isColumnGroup = false

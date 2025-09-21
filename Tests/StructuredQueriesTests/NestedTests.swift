@@ -65,7 +65,7 @@ extension SnapshotTests {
         (1)
         """
       }
-      // TODO: Make work?
+      // TODO: Support composite columns?
       // assertQuery(
       //   Item.insert {
       //     $0.status
