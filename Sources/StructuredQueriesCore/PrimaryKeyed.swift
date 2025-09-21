@@ -4,8 +4,7 @@ where TableColumns: PrimaryKeyedTableDefinition<PrimaryKey> {
   /// A type representing this table's primary key.
   ///
   /// For auto-incrementing tables, this is typically `Int`.
-  associatedtype PrimaryKey: QueryBindable
-  where PrimaryKey.QueryValue == PrimaryKey, PrimaryKey.QueryValue.QueryOutput: Sendable
+  associatedtype PrimaryKey: QueryBindable where PrimaryKey.QueryValue == PrimaryKey
 
   /// A type that represents this type, but with an optional primary key.
   ///
@@ -49,8 +48,7 @@ where QueryValue: PrimaryKeyedTable {
   /// A type representing this table's primary key.
   ///
   /// For auto-incrementing tables, this is typically `Int`.
-  associatedtype PrimaryKey: QueryBindable
-  where PrimaryKey.QueryValue == PrimaryKey, PrimaryKey.QueryValue.QueryOutput: Sendable
+  associatedtype PrimaryKey: QueryBindable where PrimaryKey.QueryValue == PrimaryKey
 
   /// The column representing this table's primary key.
   var primaryKey: TableColumn<QueryValue, PrimaryKey> { get }
