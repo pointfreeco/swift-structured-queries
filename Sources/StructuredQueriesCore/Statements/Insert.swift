@@ -616,8 +616,7 @@ extension Table {
   }
 }
 
-// TODO: Support composite keys.
-extension PrimaryKeyedTable where TableColumns.PrimaryColumn == TableColumn<Self, PrimaryKey> {
+extension PrimaryKeyedTable {
   /// An upsert statement for given drafts.
   ///
   /// Generates an insert statement with an upsert clause. Useful for building forms that can both
@@ -636,15 +635,20 @@ extension PrimaryKeyedTable where TableColumns.PrimaryColumn == TableColumn<Self
   public static func upsert(
     @InsertValuesBuilder<Self> values: () -> [[QueryFragment]]
   ) -> InsertOf<Self> {
-    insert(
-      values: values,
-      onConflict: { $0.primaryKey },
-      doUpdate: { updates, _ in
+    Insert(
+      conflictResolution: nil,
+      columnNames: TableColumns.writableColumns.map(\.name),
+      conflictTargetColumnNames: columns.primaryKey._names,
+      conflictTargetFilter: [],
+      values: .values(values()),
+      updates: Updates { updates in
         for (column, excluded) in zip(Draft.TableColumns.writableColumns, Excluded.writableColumns)
-        where column.name != columns.primaryKey.name {
+        where !columns.primaryKey._names.contains(column.name) {
           updates.set(column, excluded.queryFragment)
         }
-      }
+      },
+      updateFilter: [],
+      returning: []
     )
   }
 }

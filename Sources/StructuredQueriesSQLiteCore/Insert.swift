@@ -450,8 +450,7 @@ extension Table {
   }
 }
 
-// TODO: Support composite keys.
-extension PrimaryKeyedTable where TableColumns.PrimaryColumn == TableColumn<Self, PrimaryKey> {
+extension PrimaryKeyedTable {
   /// An upsert statement for given drafts.
   ///
   /// - Parameters:

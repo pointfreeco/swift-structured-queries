@@ -3,7 +3,7 @@ public struct ColumnGroup<Root: Table, Values: Table>: _TableColumnExpression
 where Values.QueryOutput == Values {
   public typealias Value = Values
 
-  public var name: String { Values.tableName }
+  public var _names: [String] { Values.TableColumns.allColumns.map(\.name) }
 
   public typealias QueryValue = Values
 

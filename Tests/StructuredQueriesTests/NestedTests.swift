@@ -353,6 +353,22 @@ extension SnapshotTests {
         └───────────────────────────────────────────────────────────┘
         """
       }
+      assertQuery(
+        Metadata.upsert {
+          Metadata(
+            id: MetadataID(recordID: UUID(0), recordType: "reminders")
+          )
+        }
+      ) {
+        """
+        INSERT INTO "metadatas"
+        ("recordID", "recordType")
+        VALUES
+        ('00000000-0000-0000-0000-000000000000', 'reminders')
+        ON CONFLICT ("recordID", "recordType")
+        DO NOTHING
+        """
+      }
     }
   }
 }

@@ -2,8 +2,7 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
   associatedtype Root: Table
   associatedtype Value: QueryRepresentable
 
-  /// The name of the table column.
-  var name: String { get }
+  var _names: [String] { get }
 
   /// The table model key path associated with this table column.
   var keyPath: KeyPath<Root, Value.QueryOutput> { get }
@@ -24,6 +23,10 @@ where Value: QueryBindable {
   func _aliased<Name: AliasName>(
     _ alias: Name.Type
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
+}
+
+extension TableColumnExpression {
+  public var _names: [String] { [name] }
 }
 
 /// A type representing a _writable_ table column, _i.e._ not a generated column.

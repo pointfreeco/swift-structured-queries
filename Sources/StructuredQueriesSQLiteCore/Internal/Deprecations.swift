@@ -82,10 +82,7 @@ extension PrimaryKeyedTable {
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, values: { rows }, onConflictDoUpdate: updates)
   }
-}
 
-// TODO: Support composite keys.
-extension PrimaryKeyedTable where TableColumns.PrimaryColumn == TableColumn<Self, PrimaryKey> {
   @available(
     *, deprecated, message: "Use a trailing closure, instead: 'Table.upsert { draft }'"
   )

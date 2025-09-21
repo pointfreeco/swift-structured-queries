@@ -62,7 +62,8 @@ extension PrimaryKeyedTable {
     _ row: Self
   ) -> UpdateOf<Self> {
     update { updates in
-      for column in TableColumns.writableColumns where column.name != columns.primaryKey.name {
+      for column in TableColumns.writableColumns
+      where !columns.primaryKey._names.contains(column.name) {
         func open<Root, Value>(_ column: some WritableTableColumnExpression<Root, Value>) {
           updates.set(
             column,
