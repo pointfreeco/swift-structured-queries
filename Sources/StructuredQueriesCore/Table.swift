@@ -93,6 +93,7 @@ extension Table {
     Where(scope: .unscoped)
   }
 
+  /// A select statement that does not execute and always returns no results.
   @_disfavoredOverload
   public static var none: Where<Self> {
     Where(scope: .empty)
