@@ -302,24 +302,26 @@ extension SnapshotTests {
             "recordID" TEXT NOT NULL ON CONFLICT REPLACE DEFAULT
               '00000000-0000-0000-0000-000000000000',
             "recordType" TEXT NOT NULL ON CONFLICT REPLACE DEFAULT 'reminders',
+            "userModificationDate" TEXT NOT NULL,
             PRIMARY KEY ("recordID", "recordType")
           )
           """
         )
       )
+      let now = Date(timeIntervalSinceReferenceDate: 0)
       assertQuery(
         Metadata
           .insert {
-            Metadata.Draft()
+            Metadata.Draft(userModificationDate: now)
           }
           .returning(\.self)
       ) {
         """
         INSERT INTO "metadatas"
-        ("recordID", "recordType")
+        ("recordID", "recordType", "userModificationDate")
         VALUES
-        (NULL, NULL)
-        RETURNING "recordID", "recordType"
+        (NULL, NULL, '2001-01-01 00:00:00.000')
+        RETURNING "recordID", "recordType", "userModificationDate"
         """
       } results: {
         """
@@ -328,7 +330,8 @@ extension SnapshotTests {
         │   id: MetadataID(                                         │
         │     recordID: UUID(00000000-0000-0000-0000-000000000000), │
         │     recordType: "reminders"                               │
-        │   )                                                       │
+        │   ),                                                      │
+        │   userModificationDate: Date(2001-01-01T00:00:00.000Z)    │
         │ )                                                         │
         └───────────────────────────────────────────────────────────┘
         """
@@ -337,7 +340,7 @@ extension SnapshotTests {
         Metadata.find(MetadataID(recordID: UUID(0), recordType: "reminders"))
       ) {
         """
-        SELECT "metadatas"."recordID", "metadatas"."recordType"
+        SELECT "metadatas"."recordID", "metadatas"."recordType", "metadatas"."userModificationDate"
         FROM "metadatas"
         WHERE ("metadatas"."recordID", "metadatas"."recordType") IN (('00000000-0000-0000-0000-000000000000', 'reminders'))
         """
@@ -348,7 +351,8 @@ extension SnapshotTests {
         │   id: MetadataID(                                         │
         │     recordID: UUID(00000000-0000-0000-0000-000000000000), │
         │     recordType: "reminders"                               │
-        │   )                                                       │
+        │   ),                                                      │
+        │   userModificationDate: Date(2001-01-01T00:00:00.000Z)    │
         │ )                                                         │
         └───────────────────────────────────────────────────────────┘
         """
@@ -356,17 +360,32 @@ extension SnapshotTests {
       assertQuery(
         Metadata.upsert {
           Metadata(
-            id: MetadataID(recordID: UUID(0), recordType: "reminders")
+            id: MetadataID(recordID: UUID(0), recordType: "reminders"),
+            userModificationDate: now.addingTimeInterval(1)
           )
         }
+        .returning(\.self)
       ) {
         """
         INSERT INTO "metadatas"
-        ("recordID", "recordType")
+        ("recordID", "recordType", "userModificationDate")
         VALUES
-        ('00000000-0000-0000-0000-000000000000', 'reminders')
+        ('00000000-0000-0000-0000-000000000000', 'reminders', '2001-01-01 00:00:01.000')
         ON CONFLICT ("recordID", "recordType")
-        DO NOTHING
+        DO UPDATE SET "userModificationDate" = "excluded"."userModificationDate"
+        RETURNING "recordID", "recordType", "userModificationDate"
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────────────┐
+        │ Metadata(                                                 │
+        │   id: MetadataID(                                         │
+        │     recordID: UUID(00000000-0000-0000-0000-000000000000), │
+        │     recordType: "reminders"                               │
+        │   ),                                                      │
+        │   userModificationDate: Date(2001-01-01T00:00:01.000Z)    │
+        │ )                                                         │
+        └───────────────────────────────────────────────────────────┘
         """
       }
     }
@@ -420,8 +439,9 @@ private struct Row {
 
 @Table
 private struct Metadata: Identifiable {
-  @Columns/*(primaryKey: true)*/
+  @Columns /*(primaryKey: true)*/
   let id: MetadataID
+  var userModificationDate: Date
 }
 
 @Table
