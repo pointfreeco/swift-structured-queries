@@ -195,31 +195,34 @@ where Base.TableColumns: PrimaryKeyedTableDefinition {
 
     public typealias Value = Base.PrimaryKey
 
-    public var queryFragment: QueryFragment
-
-    let base: Base.TableColumns.PrimaryColumn
     public var _names: [String] {
-      base._names
+      Base.columns.primaryKey._names
     }
 
     public var keyPath: KeyPath<TableAlias, Base.PrimaryKey.QueryOutput> {
-      \.base.primaryKey
+      \.[member: \Base.PrimaryKey.self, column: Base.columns.primaryKey.keyPath]
+    }
+
+    public var queryFragment: QueryFragment {
+      Base.columns.primaryKey._names
+        .map { "\(quote: Name.aliasName).\(quote: $0)" }
+        .joined(separator: ", ")
     }
   }
 
   public var primaryKey: PrimaryColumn {
-    self[dynamicMember: \.primaryKey]
+    PrimaryColumn()
   }
 }
 
 extension TableAlias.TableColumns.PrimaryColumn: TableColumnExpression
 where Base.TableColumns.PrimaryColumn: TableColumnExpression {
   public var name: String {
-    base.name
+    Base.columns.primaryKey.name
   }
 
   public var defaultValue: Base.PrimaryKey.QueryOutput? {
-    base.defaultValue
+    Base.columns.primaryKey.defaultValue
   }
 
   public func _aliased<N: AliasName>(

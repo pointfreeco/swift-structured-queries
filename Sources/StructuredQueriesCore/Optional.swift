@@ -183,8 +183,6 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
   public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
 
   public struct PrimaryColumn: _TableColumnExpression {
-    public var queryFragment: QueryFragment
-
     public typealias Root = Optional
 
     public typealias Value = Wrapped.PrimaryKey?
@@ -195,6 +193,10 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
 
     public var keyPath: KeyPath<Optional<Wrapped>, Wrapped.PrimaryKey.QueryOutput?> {
       \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
+    }
+
+    public var queryFragment: QueryFragment {
+      Wrapped.columns.primaryKey.queryFragment
     }
   }
 

@@ -120,9 +120,9 @@ extension Table {
   /// #sql("SELECT \(Reminder.id) FROM \(Reminder.self)", as: Int.self)
   /// // SELECT "reminders"."id" FROM "reminders
   /// ```
-  public static subscript<Member>(
-    dynamicMember keyPath: KeyPath<TableColumns, TableColumn<Self, Member>>
-  ) -> TableColumn<Self, Member> {
+  public static subscript<Member: _TableColumnExpression>(
+    dynamicMember keyPath: KeyPath<TableColumns, Member>
+  ) -> Member {
     columns[keyPath: keyPath]
   }
 
