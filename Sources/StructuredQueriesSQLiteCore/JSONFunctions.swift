@@ -62,12 +62,13 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
   /// useful for loading many associated values in a single query. For example, to query for every
   /// reminders list, along with the array of reminders it is associated with, one can define a
-  /// custom `@Selection` for that data and query as follows:
+  /// custom data type for that data and query as follows:
   ///
   /// @Row {
   ///   @Column {
   ///     ```swift
-  ///     @Selection struct Row {
+  ///     @Table struct Row {
+  ///       @Columns
   ///       let remindersList: RemindersList
   ///       @Column(as: [Reminder].JSONRepresentation.self)
   ///       let reminders: [Reminder]
@@ -133,12 +134,13 @@ where
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
   /// useful for loading many associated values in a single query. For example, to query for every
   /// reminders list, along with the array of reminders it is associated with, one can define a
-  /// custom `@Selection` for that data and query as follows:
+  /// custom data type for that data and query as follows:
   ///
   /// @Row {
   ///   @Column {
   ///     ```swift
-  ///     @Selection struct Row {
+  ///     @Table struct Row {
+  ///       @Columns
   ///       let remindersList: RemindersList
   ///       @Column(as: [Reminder].JSONRepresentation.self)
   ///       let reminders: [Reminder]

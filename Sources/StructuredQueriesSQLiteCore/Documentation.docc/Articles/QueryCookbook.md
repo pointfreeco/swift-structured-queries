@@ -58,17 +58,20 @@ this is doing work that SQL actually excels at. In fact, the condition inside th
 suspiciously like a join constraint, which should give us a hint that what we are doing is not
 quite right.
 
-Another way to do this is to use the `@Selection` macro along with a `JSONRepresentation`` of the
-collection of reminders you want to load for each list:
+Another way to do this is to use the `@Table` and `@Column` macros along with a
+`JSONRepresentation`` of the collection of reminders you want to load for each list:
 
 ```swift
-@Selection
+@Table
 struct Row {
+  @Columns
   let remindersList: RemindersList
   @Column(as: [Reminder].JSONRepresentation.self)
   let reminders: [Reminder]
 }
 ```
+
+> Tip: Use the `@Columns` macro to specify a data-type that is decoded over many columns.
 
 > Note: `Reminder` must conform to `Codable` to be able to use `JSONRepresentation`.
 
@@ -117,8 +120,9 @@ And suppose you would like to fetch all `RemindersList`s along with the collecti
 and reminders associated with the list:
 
 ```struct
-@Selection
+@Table
 struct Row {
+  @Columns
   let remindersList: RemindersList
   @Column(as: [Milestone].JSONRepresentation.self)
   let milestones: [Milestone]

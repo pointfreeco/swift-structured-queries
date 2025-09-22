@@ -120,7 +120,6 @@ extension Table {
   /// #sql("SELECT \(Reminder.id) FROM \(Reminder.self)", as: Int.self)
   /// // SELECT "reminders"."id" FROM "reminders
   /// ```
-  @_disfavoredOverload
   public static subscript<Member>(
     dynamicMember keyPath: KeyPath<TableColumns, TableColumn<Self, Member>>
   ) -> TableColumn<Self, Member> {

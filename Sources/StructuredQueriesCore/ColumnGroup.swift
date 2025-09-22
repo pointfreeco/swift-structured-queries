@@ -1,3 +1,7 @@
+/// A group of table columns.
+///
+/// Don't create instances of this value directly. Instead, use the `@Table` and `@Columns` macros
+/// to generate values of this type.
 @dynamicMemberLookup
 public struct ColumnGroup<Root: Table, Values: Table>: _TableColumnExpression
 where Values.QueryOutput == Values {
