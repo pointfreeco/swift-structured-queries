@@ -65,14 +65,20 @@ extension SnapshotTests {
         (1)
         """
       }
-      // TODO: Support composite columns?
-      // assertQuery(
-      //   Item.insert {
-      //     $0.status
-      //   } values: {
-      //     Status(isOutOfStock: true, isOnBackOrder: false)
-      //   }
-      // )
+      assertQuery(
+        Item.insert {
+          $0.status
+        } values: {
+          Status(isOutOfStock: true, isOnBackOrder: true)
+        }
+      ) {
+        """
+        INSERT INTO "items"
+        ("isOutOfStock", "isOnBackOrder")
+        VALUES
+        (1, 1)
+        """
+      }
       assertQuery(
         Item.all
       ) {
@@ -98,6 +104,15 @@ extension SnapshotTests {
         │   status: Status(        │
         │     isOutOfStock: true,  │
         │     isOnBackOrder: false │
+        │   )                      │
+        │ )                        │
+        ├──────────────────────────┤
+        │ Item(                    │
+        │   title: "",             │
+        │   quantity: 0,           │
+        │   status: Status(        │
+        │     isOutOfStock: true,  │
+        │     isOnBackOrder: true  │
         │   )                      │
         │ )                        │
         └──────────────────────────┘

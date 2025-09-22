@@ -223,6 +223,93 @@ extension SnapshotTests {
         └─────────────────────┘
         """
       }
+
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          // NB: 'WHERE 1' is required to avoid a SQL syntax error.
+          RemindersList.where { _ in true }.select { $0.title.lower() }
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title = $1.title + "-copy"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT lower("remindersLists"."title")
+        FROM "remindersLists"
+        WHERE 1
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("excluded"."title") || ('-copy')
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌──────────────────────────┐
+        │ Tag(                     │
+        │   id: 5,                 │
+        │   title: "business-copy" │
+        │ )                        │
+        ├──────────────────────────┤
+        │ Tag(                     │
+        │   id: 6,                 │
+        │   title: "family-copy"   │
+        │ )                        │
+        ├──────────────────────────┤
+        │ Tag(                     │
+        │   id: 7,                 │
+        │   title: "personal-copy" │
+        │ )                        │
+        └──────────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          // NB: 'WHERE 1' is required to avoid a SQL syntax error.
+          RemindersList.where { _ in true }.select { $0.title.lower() + "-copy" }
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title += "-2"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT (lower("remindersLists"."title")) || ('-copy')
+        FROM "remindersLists"
+        WHERE 1
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("tags"."title") || ('-2')
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌────────────────────────────┐
+        │ Tag(                       │
+        │   id: 5,                   │
+        │   title: "business-copy-2" │
+        │ )                          │
+        ├────────────────────────────┤
+        │ Tag(                       │
+        │   id: 6,                   │
+        │   title: "family-copy-2"   │
+        │ )                          │
+        ├────────────────────────────┤
+        │ Tag(                       │
+        │   id: 7,                   │
+        │   title: "personal-copy-2" │
+        │ )                          │
+        └────────────────────────────┘
+        """
+      }
     }
 
     @Test func draft() {
