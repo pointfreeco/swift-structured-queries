@@ -345,15 +345,15 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `AFTER UPDATE` trigger operation.
-    public static func update<each Column>(
-      of columns: (On.TableColumns) -> (repeat TableColumn<On, each Column>),
+    public static func update<each Column: _TableColumnExpression>(
+      of columns: (On.TableColumns) -> (repeat each Column),
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ old: Old, _ new: New) -> [QueryFragment],
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       var columnNames: [String] = []
       for column in repeat each columns(On.columns) {
-        columnNames.append(column.name)
+        columnNames.append(contentsOf: column._names)
       }
       return Self(
         kind: .update(

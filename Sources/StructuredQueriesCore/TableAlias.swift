@@ -175,39 +175,66 @@ public struct TableAlias<
   }
 }
 
-// TODO: Support composite keys.
-extension TableAlias: PrimaryKeyedTable
-where
-  Base: PrimaryKeyedTable,
-  Base.TableColumns.PrimaryColumn == TableColumn<Base, Base.PrimaryKey>
-{
+extension TableAlias: PrimaryKeyedTable where Base: PrimaryKeyedTable {
   public typealias Draft = TableAlias<Base.Draft, Name>
 }
 
-// TODO: Support composite keys.
-extension TableAlias: TableDraft
-where
-  Base: TableDraft,
-  Base.PrimaryTable.TableColumns.PrimaryColumn == TableColumn<
-    Base.PrimaryTable, Base.PrimaryTable.PrimaryKey
-  >
-{
+extension TableAlias: TableDraft where Base: TableDraft {
   public typealias PrimaryTable = TableAlias<Base.PrimaryTable, Name>
   public init(_ primaryTable: TableAlias<Base.PrimaryTable, Name>) {
     self.init(base: Base(primaryTable.base))
   }
 }
 
-// TODO: Support composite keys.
 extension TableAlias.TableColumns: PrimaryKeyedTableDefinition
-where
-  Base.TableColumns: PrimaryKeyedTableDefinition,
-  Base.TableColumns.PrimaryColumn == TableColumn<Base, Base.PrimaryKey>
-{
+where Base.TableColumns: PrimaryKeyedTableDefinition {
   public typealias PrimaryKey = Base.TableColumns.PrimaryKey
 
-  public var primaryKey: TableColumn<TableAlias, Base.TableColumns.PrimaryKey.QueryValue> {
+  public struct PrimaryColumn: _TableColumnExpression {
+    public typealias Root = TableAlias
+
+    public typealias Value = Base.PrimaryKey
+
+    public var queryFragment: QueryFragment
+
+    let base: Base.TableColumns.PrimaryColumn
+    public var _names: [String] {
+      base._names
+    }
+
+    public var keyPath: KeyPath<TableAlias, Base.PrimaryKey.QueryOutput> {
+      \.base.primaryKey
+    }
+  }
+
+  public var primaryKey: PrimaryColumn {
     self[dynamicMember: \.primaryKey]
+  }
+}
+
+extension TableAlias.TableColumns.PrimaryColumn: TableColumnExpression
+where Base.TableColumns.PrimaryColumn: TableColumnExpression {
+  public var name: String {
+    base.name
+  }
+
+  public var defaultValue: Base.PrimaryKey.QueryOutput? {
+    base.defaultValue
+  }
+
+  public func _aliased<N: AliasName>(
+    _ alias: N.Type
+  ) -> any TableColumnExpression<TableAlias<TableAlias, N>, Base.PrimaryKey> {
+    GeneratedColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
+  }
+}
+
+extension TableAlias.TableColumns.PrimaryColumn: WritableTableColumnExpression
+where Base.TableColumns.PrimaryColumn: WritableTableColumnExpression {
+  public func _aliased<N: AliasName>(
+    _ alias: N.Type
+  ) -> any WritableTableColumnExpression<TableAlias<TableAlias, N>, Base.PrimaryKey> {
+    TableColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
   }
 }
 

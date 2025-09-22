@@ -167,39 +167,65 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
   public typealias Selection = Wrapped.Selection?
 }
 
-// TODO: Support composite keys.
-extension Optional: PrimaryKeyedTable
-where
-  Wrapped: PrimaryKeyedTable,
-  Wrapped.TableColumns.PrimaryColumn == TableColumn<Wrapped, Wrapped.PrimaryKey>
-{
+extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
   public typealias Draft = Wrapped.Draft?
 }
 
-// TODO: Support composite keys.
-extension Optional: TableDraft
-where
-  Wrapped: TableDraft,
-  Wrapped.PrimaryTable.TableColumns.PrimaryColumn == TableColumn<
-    Wrapped.PrimaryTable, Wrapped.PrimaryTable.PrimaryKey
-  >
-{
+extension Optional: TableDraft where Wrapped: TableDraft {
   public typealias PrimaryTable = Wrapped.PrimaryTable?
   public init(_ primaryTable: Wrapped.PrimaryTable?) {
     self = primaryTable.map(Wrapped.init)
   }
 }
 
-// TODO: Support composite keys.
 extension Optional.TableColumns: PrimaryKeyedTableDefinition
-where
-  Wrapped.TableColumns: PrimaryKeyedTableDefinition,
-  Wrapped.TableColumns.PrimaryColumn == TableColumn<Wrapped, Wrapped.PrimaryKey>
-{
+where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
   public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
 
-  public var primaryKey: TableColumn<Optional, Wrapped.TableColumns.PrimaryKey.QueryValue?> {
+  public struct PrimaryColumn: _TableColumnExpression {
+    public var queryFragment: QueryFragment
+
+    public typealias Root = Optional
+
+    public typealias Value = Wrapped.PrimaryKey?
+
+    public var _names: [String] {
+      Wrapped.columns.primaryKey._names
+    }
+
+    public var keyPath: KeyPath<Optional<Wrapped>, Wrapped.PrimaryKey.QueryOutput?> {
+      \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
+    }
+  }
+
+  public var primaryKey: PrimaryColumn {
     self[dynamicMember: \.primaryKey]
+  }
+}
+
+extension Optional.TableColumns.PrimaryColumn: TableColumnExpression
+where Wrapped.TableColumns.PrimaryColumn: TableColumnExpression {
+  public var name: String {
+    Wrapped.columns.primaryKey.name
+  }
+
+  public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
+    Wrapped.columns.primaryKey.defaultValue
+  }
+
+  public func _aliased<Name: AliasName>(
+    _ alias: Name.Type
+  ) -> any TableColumnExpression<TableAlias<Optional, Name>, Wrapped.PrimaryKey?> {
+    GeneratedColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
+  }
+}
+
+extension Optional.TableColumns.PrimaryColumn: WritableTableColumnExpression
+where Wrapped.TableColumns.PrimaryColumn: WritableTableColumnExpression {
+  public func _aliased<Name: AliasName>(
+    _ alias: Name.Type
+  ) -> any WritableTableColumnExpression<TableAlias<Optional, Name>, Wrapped.PrimaryKey?> {
+    TableColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
   }
 }
 
