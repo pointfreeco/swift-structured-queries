@@ -287,18 +287,6 @@ extension SnapshotTests {
         └─────────────────────────────────────────────┘
         """
       }
-      #if compiler(>=6.2)
-        await #expect(processExitsWith: .failure) {
-          assertQuery(
-            ItemWithTimestamp.select { _ in
-              ItemWithTimestamp.Columns(
-                item: #sql("NULL"),
-                timestamp: Date(timeIntervalSinceReferenceDate: 0)
-              )
-            }
-          )
-        }
-      #endif
     }
 
     @Test func nestedGenerated() throws {

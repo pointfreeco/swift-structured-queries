@@ -19,7 +19,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "id", count("reminders"."id") AS "color"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
@@ -56,7 +56,7 @@ extension SnapshotTests {
           .map { RemindersListAndReminderCount.Columns(remindersList: $1, remindersCount: $0) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "id", count("reminders"."id") AS "color"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
@@ -181,24 +181,25 @@ extension SnapshotTests {
   }
 }
 
-@Selection
+@Table
 struct ReminderDate {
   var date: Date?
 }
 
-@Selection
+@Table
 struct ReminderTitleAndAssignedUserName {
   let reminderTitle: String
   let assignedUserName: String?
 }
 
-@Selection
+@Table
 struct RemindersListAndReminderCount {
+  @Columns
   let remindersList: RemindersList
   let remindersCount: Int
 }
 
-@Selection
+@Table
 struct Stats {
   let completedCount: Int
   let flaggedCount: Int

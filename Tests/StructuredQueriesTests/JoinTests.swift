@@ -88,7 +88,7 @@ extension SnapshotTests {
   }
 }
 
-@Selection
+@Table
 private struct PriorityRow {
   let value: Priority?
 }

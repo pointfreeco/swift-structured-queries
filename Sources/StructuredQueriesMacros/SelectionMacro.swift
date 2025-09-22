@@ -25,11 +25,51 @@ extension SelectionMacro: ExtensionMacro {
       )
       return []
     }
+
     var allColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
     var decodingAssignments: [String] = []
     var diagnostics: [Diagnostic] = []
+
+    if declaration.hasMacroApplication("Table") {
+      context.diagnose(
+        Diagnostic(
+          node: node,
+          message: MacroExpansionWarningMessage(
+            """
+            '@Table' already contains the functionality provided by '@Selection'
+            """
+          ),
+          fixIt: .replace(
+            message: MacroExpansionFixItMessage("Remove '@Selection'"),
+            oldNode: node,
+            newNode: TokenSyntax("")
+          )
+        )
+      )
+    } else {
+      context.diagnose(
+        Diagnostic(
+          node: node,
+          message: MacroExpansionWarningMessage(
+            """
+            '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+            """
+          ),
+          fixIt: .replace(
+            message: MacroExpansionFixItMessage("Use '@Table' instead"),
+            oldNode: node,
+            newNode: node.with(
+              \.attributeName,
+              TypeSyntax(
+                node.attributeName.cast(IdentifierTypeSyntax.self).with(\.name, "Table")
+              )
+            )
+          )
+        )
+      )
+    }
 
     let selfRewriter = SelfRewriter(
       selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
@@ -333,7 +373,7 @@ extension SelectionMacro: MemberMacro {
         """
         \($0): some \(moduleName).QueryExpression\
         \($1.map { "<\($0)>" } ?? "")\
-        \($2.map { "= \(moduleName).BindQueryExpression(\($0))" } ?? "")
+        \($2.map { " = \(moduleName).BindQueryExpression(\($0))" } ?? "")
         """
       }
       .joined(separator: ",\n")

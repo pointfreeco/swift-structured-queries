@@ -10,14 +10,33 @@ extension SnapshotTests {
         """
         @Table @Selection
         struct ReminderListWithCount {
-          let reminderList: ReminderList 
+          let reminderList: ReminderList
+          let remindersCount: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table @Selection
+               ┬─────────
+               ╰─ ⚠️ '@Table' already contains the functionality provided by '@Selection'
+                  ✏️ Remove '@Selection'
+        struct ReminderListWithCount {
+          let reminderList: ReminderList
+          let remindersCount: Int
+        }
+        """
+      } fixes: {
+        """
+        @Table 
+        struct ReminderListWithCount {
+          let reminderList: ReminderList
           let remindersCount: Int
         }
         """
       } expansion: {
         #"""
         struct ReminderListWithCount {
-          let reminderList: ReminderList 
+          let reminderList: ReminderList
           let remindersCount: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -45,17 +64,6 @@ extension SnapshotTests {
               self.allColumns = [reminderList._allColumns, remindersCount._allColumns].flatMap(\.self)
             }
           }
-
-          public struct Columns: StructuredQueriesCore._SelectedColumns {
-            public typealias QueryValue = ReminderListWithCount
-            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
-            public init(
-              reminderList: some StructuredQueriesCore.QueryExpression<ReminderList>,
-              remindersCount: some StructuredQueriesCore.QueryExpression<Int>
-            ) {
-              self.selection = [("reminderList", reminderList.queryFragment), ("remindersCount", remindersCount.queryFragment)]
-            }
-          }
         }
 
         nonisolated extension ReminderListWithCount: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
@@ -67,10 +75,7 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "reminderListWithCounts"
           }
-        }
-
-        extension ReminderListWithCount: StructuredQueriesCore._Selection {
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderList = try decoder.decode(ReminderList.self)
             let remindersCount = try decoder.decode(Int.self)
             guard let reminderList else {

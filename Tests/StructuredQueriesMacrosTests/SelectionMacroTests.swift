@@ -13,26 +13,68 @@ extension SnapshotTests {
           let team: Team
         }
         """
-      } expansion: {
+      } diagnostics: {
         """
+        @Selection
+        ┬─────────
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+           ✏️ Use '@Table' instead
+        struct PlayerAndTeam {
+          let player: Player
+          let team: Team
+        }
+        """
+      } fixes: {
+        """
+        @Table
+        struct PlayerAndTeam {
+          let player: Player
+          let team: Team
+        }
+        """
+      } expansion: {
+        #"""
         struct PlayerAndTeam {
           let player: Player
           let team: Team
 
-          public struct Columns: StructuredQueriesCore._SelectedColumns {
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = PlayerAndTeam
-            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
+            public let player = StructuredQueriesCore.TableColumn<QueryValue, Player>("player", keyPath: \QueryValue.player)
+            public let team = StructuredQueriesCore.TableColumn<QueryValue, Team>("team", keyPath: \QueryValue.team)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [[QueryValue.columns.player], [QueryValue.columns.team]].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [[QueryValue.columns.player], [QueryValue.columns.team]].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.player), \(self.team)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = PlayerAndTeam
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               player: some StructuredQueriesCore.QueryExpression<Player>,
               team: some StructuredQueriesCore.QueryExpression<Team>
             ) {
-              self.selection = [("player", player.queryFragment), ("team", team.queryFragment)]
+              self.allColumns = [player._allColumns, team._allColumns].flatMap(\.self)
             }
           }
         }
 
-        extension PlayerAndTeam: StructuredQueriesCore._Selection {
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+        nonisolated extension PlayerAndTeam: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var tableName: String {
+            "playerAndTeams"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let player = try decoder.decode(Player.self)
             let team = try decoder.decode(Team.self)
             guard let player else {
@@ -45,7 +87,7 @@ extension SnapshotTests {
             self.team = team
           }
         }
-        """
+        """#
       }
     }
 
@@ -74,36 +116,77 @@ extension SnapshotTests {
           var listTitle: String?
         }
         """
-      } expansion: {
+      } diagnostics: {
         """
+        @Selection 
+        ┬─────────
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+           ✏️ Use '@Table' instead
+        struct ReminderTitleAndListTitle {
+          var reminderTitle: String 
+          var listTitle: String?
+        }
+        """
+      } fixes: {
+        """
+        @Table
+        struct ReminderTitleAndListTitle {
+          var reminderTitle: String 
+          var listTitle: String?
+        }
+        """
+      } expansion: {
+        #"""
         struct ReminderTitleAndListTitle {
           var reminderTitle: String 
           var listTitle: String?
 
-          public struct Columns: StructuredQueriesCore._SelectedColumns {
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = ReminderTitleAndListTitle
-            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
+            public let reminderTitle = StructuredQueriesCore.TableColumn<QueryValue, String>("reminderTitle", keyPath: \QueryValue.reminderTitle)
+            public let listTitle = StructuredQueriesCore.TableColumn<QueryValue, String?>("listTitle", keyPath: \QueryValue.listTitle, default: nil)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [[QueryValue.columns.reminderTitle], [QueryValue.columns.listTitle]].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [[QueryValue.columns.reminderTitle], [QueryValue.columns.listTitle]].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.reminderTitle), \(self.listTitle)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = ReminderTitleAndListTitle
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               reminderTitle: some StructuredQueriesCore.QueryExpression<String>,
-              listTitle: some StructuredQueriesCore.QueryExpression<String?>
+              listTitle: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil)
             ) {
-              self.selection = [("reminderTitle", reminderTitle.queryFragment), ("listTitle", listTitle.queryFragment)]
+              self.allColumns = [reminderTitle._allColumns, listTitle._allColumns].flatMap(\.self)
             }
           }
         }
 
-        extension ReminderTitleAndListTitle: StructuredQueriesCore._Selection {
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+        nonisolated extension ReminderTitleAndListTitle: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var tableName: String {
+            "reminderTitleAndListTitles"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderTitle = try decoder.decode(String.self)
-            let listTitle = try decoder.decode(String.self)
+            self.listTitle = try decoder.decode(String.self) ?? nil
             guard let reminderTitle else {
               throw QueryDecodingError.missingRequiredColumn
             }
             self.reminderTitle = reminderTitle
-            self.listTitle = listTitle
           }
         }
-        """
+        """#
       }
     }
 
@@ -115,30 +198,27 @@ extension SnapshotTests {
           var date: Date
         }
         """
+      } diagnostics: {
+        """
+        @Selection struct ReminderDate {
+        ┬─────────
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+           ✏️ Use '@Table' instead
+          @Column(as: Date.UnixTimeRepresentation.self)
+          var date: Date
+        }
+        """
+      } fixes: {
+        """
+        @Tablestruct ReminderDate {
+          @Column(as: Date.UnixTimeRepresentation.self)
+          var date: Date
+        }
+        """
       } expansion: {
         """
-        struct ReminderDate {
+        @Tablestruct ReminderDate {
           var date: Date
-
-          public struct Columns: StructuredQueriesCore._SelectedColumns {
-            public typealias QueryValue = ReminderDate
-            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
-            public init(
-              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
-            ) {
-              self.selection = [("date", date.queryFragment)]
-            }
-          }
-        }
-
-        extension ReminderDate: StructuredQueriesCore._Selection {
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let date = try decoder.decode(Date.UnixTimeRepresentation.self)
-            guard let date else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.date = date
-          }
         }
         """
       }
@@ -153,37 +233,30 @@ extension SnapshotTests {
           var notes: [String] = []
         }
         """
+      } diagnostics: {
+        """
+        @Selection struct Row {
+        ┬─────────
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+           ✏️ Use '@Table' instead
+          var title = ""
+          @Column(as: [String].JSONRepresentation.self)
+          var notes: [String] = []
+        }
+        """
+      } fixes: {
+        """
+        @Tablestruct Row {
+          var title = ""
+          @Column(as: [String].JSONRepresentation.self)
+          var notes: [String] = []
+        }
+        """
       } expansion: {
         """
-        struct Row {
+        @Tablestruct Row {
           var title = ""
           var notes: [String] = []
-
-          public struct Columns: StructuredQueriesCore._SelectedColumns {
-            public typealias QueryValue = Row
-            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
-            public init(
-              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression(""),
-              notes: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> = StructuredQueriesCore.BindQueryExpression([])
-            ) {
-              self.selection = [("title", title.queryFragment), ("notes", notes.queryFragment)]
-            }
-          }
-        }
-
-        extension Row: StructuredQueriesCore._Selection {
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let title = try decoder.decode(Swift.String.self)
-            let notes = try decoder.decode([String].JSONRepresentation.self)
-            guard let title else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            guard let notes else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.title = title
-            self.notes = notes
-          }
         }
         """
       }
@@ -201,6 +274,9 @@ extension SnapshotTests {
       } diagnostics: {
         """
         @Selection struct Row {
+        ┬─────────
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+           ✏️ Use '@Table' instead
           @Column(primaryKey: true)
                   ┬─────────
                   ╰─ 🛑 '@Selection' primary keys are not supported
@@ -211,7 +287,7 @@ extension SnapshotTests {
         """
       } fixes: {
         """
-        @Selection struct Row {
+        @Tablestruct Row {
           @Column()
           let id: Int
           var title = ""
@@ -219,35 +295,9 @@ extension SnapshotTests {
         """
       } expansion: {
         """
-        struct Row {
+        @Tablestruct Row {
           let id: Int
           var title = ""
-
-          public struct Columns: StructuredQueriesCore._SelectedColumns {
-            public typealias QueryValue = Row
-            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
-            public init(
-              id: some StructuredQueriesCore.QueryExpression<Int>,
-              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("")
-            ) {
-              self.selection = [("id", id.queryFragment), ("title", title.queryFragment)]
-            }
-          }
-        }
-
-        extension Row: StructuredQueriesCore._Selection {
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let id = try decoder.decode(Int.self)
-            let title = try decoder.decode(Swift.String.self)
-            guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            guard let title else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
-            self.id = id
-            self.title = title
-          }
         }
         """
       }
@@ -257,6 +307,25 @@ extension SnapshotTests {
       assertMacro {
         """
         @Table @Selection struct Row {
+          @Column(primaryKey: true)
+          let id: Int
+          var title = ""
+        }
+        """
+      } diagnostics: {
+        """
+        @Table @Selection struct Row {
+               ┬─────────
+               ╰─ ⚠️ '@Table' already contains the functionality provided by '@Selection'
+                  ✏️ Remove '@Selection'
+          @Column(primaryKey: true)
+          let id: Int
+          var title = ""
+        }
+        """
+      } fixes: {
+        """
+        @Table struct Row {
           @Column(primaryKey: true)
           let id: Int
           var title = ""
@@ -355,17 +424,6 @@ extension SnapshotTests {
               self.title = title
             }
           }
-
-          public struct Columns: StructuredQueriesCore._SelectedColumns {
-            public typealias QueryValue = Row
-            public let selection: [(aliasName: String, expression: StructuredQueriesCore.QueryFragment)]
-            public init(
-              id: some StructuredQueriesCore.QueryExpression<Int>,
-              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("")
-            ) {
-              self.selection = [("id", id.queryFragment), ("title", title.queryFragment)]
-            }
-          }
         }
 
         nonisolated extension Row: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
@@ -377,20 +435,13 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "rows"
           }
-        }
-
-        extension Row: StructuredQueriesCore._Selection {
-          public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
-            let title = try decoder.decode(Swift.String.self)
+            self.title = try decoder.decode(Swift.String.self) ?? ""
             guard let id else {
               throw QueryDecodingError.missingRequiredColumn
             }
-            guard let title else {
-              throw QueryDecodingError.missingRequiredColumn
-            }
             self.id = id
-            self.title = title
           }
         }
         """#

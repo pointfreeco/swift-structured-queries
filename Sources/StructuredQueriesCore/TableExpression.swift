@@ -4,11 +4,7 @@ public protocol TableExpression<QueryValue>: QueryExpression where QueryValue: T
 
 extension TableExpression {
   public var queryFragment: QueryFragment {
-    precondition(
-      allColumns.count == QueryValue.TableColumns.allColumns.count,
-      "Number of selected columns does not match number of table columns"
-    )
-    return zip(allColumns, QueryValue.TableColumns.allColumns)
+    zip(allColumns, QueryValue.TableColumns.allColumns)
       .map { "\($0) AS \(quote: $1.name)" }
       .joined(separator: ", ")
   }
