@@ -276,6 +276,7 @@ extension TableMacro: ExtensionMacro {
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
+        ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
       if isColumnGroup {
         columnsProperties.append(
           """
@@ -792,6 +793,7 @@ extension TableMacro: MemberMacro {
       }
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
+        ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
       if isColumnGroup {
         columnsProperties.append(
           """
@@ -1076,7 +1078,7 @@ extension TableMacro: MemberMacro {
         if let type {
           query.append("<\(type)>")
           if let `default` {
-            query.append(" = \(moduleName).BindQueryExpression(\(`default`), as: \(type).self)")
+            query.append(" = \(type)(queryOutput: \(`default`))")
           }
         }
         return query
@@ -1113,7 +1115,9 @@ extension TableMacro: MemberMacro {
       public init(
       \(raw: selectionInitArguments)
       ) {
-      self.allColumns = [\(selectedColumns, separator: ", ")]
+      self.allColumns = \
+      [\(selectedColumns.map { "\($0)._allColumns" as ExprSyntax }, separator: ", ")]\
+      .flatMap(\\.self)
       }
       }
       """,

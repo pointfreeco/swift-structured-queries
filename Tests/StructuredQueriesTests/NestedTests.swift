@@ -200,7 +200,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func optionalDoubleNested() throws {
+    @Test func optionalDoubleNested() async throws {
       try db.execute(
         #sql(
           """
@@ -261,6 +261,44 @@ extension SnapshotTests {
         ('Pencil', 0, 1, 1, '2001-01-01 00:00:00.000')
         """
       }
+      assertQuery(
+        ItemWithTimestamp.select { _ in
+          ItemWithTimestamp.Columns(
+            timestamp: Date(timeIntervalSinceReferenceDate: 0)
+          )
+        }
+      ) {
+        """
+        SELECT NULL AS "title", NULL AS "quantity", NULL AS "isOutOfStock", NULL AS "isOnBackOrder", '2001-01-01 00:00:00.000' AS "timestamp"
+        FROM "itemWithTimestamps"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┐
+        │ ItemWithTimestamp(                          │
+        │   item: nil,                                │
+        │   timestamp: Date(2001-01-01T00:00:00.000Z) │
+        │ )                                           │
+        ├─────────────────────────────────────────────┤
+        │ ItemWithTimestamp(                          │
+        │   item: nil,                                │
+        │   timestamp: Date(2001-01-01T00:00:00.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
+        """
+      }
+      #if compiler(>=6.2)
+        await #expect(processExitsWith: .failure) {
+          assertQuery(
+            ItemWithTimestamp.select { _ in
+              ItemWithTimestamp.Columns(
+                item: #sql("NULL"),
+                timestamp: Date(timeIntervalSinceReferenceDate: 0)
+              )
+            }
+          )
+        }
+      #endif
     }
 
     @Test func nestedGenerated() throws {

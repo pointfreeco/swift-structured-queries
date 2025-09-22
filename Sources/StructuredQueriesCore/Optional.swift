@@ -205,9 +205,10 @@ where
 
 extension Optional: TableExpression where Wrapped: TableExpression {
   public var allColumns: [any QueryExpression] {
-    // TODO: Should this coalesce to the following?
-    //       'Array(repeating: nil, count: Wrapped.TableColumns.allColumns.count)'?
-    self?.allColumns ?? []
+    self?.allColumns
+      ?? Wrapped.QueryValue.TableColumns.allColumns.map {
+        SQLQueryExpression("NULL AS \(quote: $0.name)")
+      }
   }
 }
 

@@ -38,7 +38,7 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar]
+              self.allColumns = [bar._allColumns].flatMap(\.self)
             }
           }
         }
@@ -91,7 +91,7 @@ extension SnapshotTests {
             public typealias QueryValue = User
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
+            public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email, default: nil)
             public let age = StructuredQueriesCore.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
             public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
               self.id
@@ -112,10 +112,10 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              email: some StructuredQueriesCore.QueryExpression<String?>,
+              email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil),
               age: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [id, email, age]
+              self.allColumns = [id._allColumns, email._allColumns, age._allColumns].flatMap(\.self)
             }
           }
 
@@ -126,8 +126,8 @@ extension SnapshotTests {
             var age: Int
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
+              public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email, default: nil)
               public let age = StructuredQueriesCore.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], [QueryValue.columns.email], [QueryValue.columns.age]].flatMap(\.self)
@@ -143,11 +143,11 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>,
-                email: some StructuredQueriesCore.QueryExpression<String?>,
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil),
                 age: some StructuredQueriesCore.QueryExpression<Int>
               ) {
-                self.allColumns = [id, email, age]
+                self.allColumns = [id._allColumns, email._allColumns, age._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -163,8 +163,8 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
-              self.email = try decoder.decode(String.self)
+              self.id = try decoder.decode(Int.self) ?? nil
+              self.email = try decoder.decode(String.self) ?? nil
               let age = try decoder.decode(Int.self)
               guard let age else {
                 throw QueryDecodingError.missingRequiredColumn
@@ -200,7 +200,7 @@ extension SnapshotTests {
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
-            self.email = try decoder.decode(String.self)
+            self.email = try decoder.decode(String.self) ?? nil
             let age = try decoder.decode(Int.self)
             guard let id else {
               throw QueryDecodingError.missingRequiredColumn
@@ -249,7 +249,7 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar]
+              self.allColumns = [bar._allColumns].flatMap(\.self)
             }
           }
         }
@@ -348,7 +348,7 @@ extension SnapshotTests {
             public init(
               baz: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [baz]
+              self.allColumns = [baz._allColumns].flatMap(\.self)
             }
           }
         }
@@ -455,12 +455,12 @@ extension SnapshotTests {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
-              c1: some StructuredQueriesCore.QueryExpression<Swift.Bool> = StructuredQueriesCore.BindQueryExpression(true, as: Swift.Bool.self),
-              c2: some StructuredQueriesCore.QueryExpression<Swift.Int> = StructuredQueriesCore.BindQueryExpression(1, as: Swift.Int.self),
-              c3: some StructuredQueriesCore.QueryExpression<Swift.Double> = StructuredQueriesCore.BindQueryExpression(1.2, as: Swift.Double.self),
-              c4: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+              c1: some StructuredQueriesCore.QueryExpression<Swift.Bool> = Swift.Bool(queryOutput: true),
+              c2: some StructuredQueriesCore.QueryExpression<Swift.Int> = Swift.Int(queryOutput: 1),
+              c3: some StructuredQueriesCore.QueryExpression<Swift.Double> = Swift.Double(queryOutput: 1.2),
+              c4: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
             ) {
-              self.allColumns = [c1, c2, c3, c4]
+              self.allColumns = [c1._allColumns, c2._allColumns, c3._allColumns, c4._allColumns].flatMap(\.self)
             }
           }
         }
@@ -519,7 +519,7 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar]
+              self.allColumns = [bar._allColumns].flatMap(\.self)
             }
           }
         }
@@ -623,7 +623,7 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
             ) {
-              self.allColumns = [bar]
+              self.allColumns = [bar._allColumns].flatMap(\.self)
             }
           }
         }
@@ -688,7 +688,7 @@ extension SnapshotTests {
               name: some StructuredQueriesCore.QueryExpression<String>,
               generated: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [name, generated]
+              self.allColumns = [name._allColumns, generated._allColumns].flatMap(\.self)
             }
           }
         }
@@ -777,7 +777,7 @@ extension SnapshotTests {
               name: some StructuredQueriesCore.QueryExpression<String>,
               generated: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [name, generated]
+              self.allColumns = [name._allColumns, generated._allColumns].flatMap(\.self)
             }
           }
         }
@@ -855,7 +855,7 @@ extension SnapshotTests {
               name: some StructuredQueriesCore.QueryExpression<String>,
               generated: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [id, name, generated]
+              self.allColumns = [id._allColumns, name._allColumns, generated._allColumns].flatMap(\.self)
             }
           }
 
@@ -865,7 +865,7 @@ extension SnapshotTests {
             var name: String
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
               public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], [QueryValue.columns.name]].flatMap(\.self)
@@ -881,10 +881,10 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 name: some StructuredQueriesCore.QueryExpression<String>
               ) {
-                self.allColumns = [id, name]
+                self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -900,7 +900,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
                 throw QueryDecodingError.missingRequiredColumn
@@ -988,7 +988,7 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar]
+              self.allColumns = [bar._allColumns].flatMap(\.self)
             }
           }
         }
@@ -1049,7 +1049,7 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar]
+              self.allColumns = [bar._allColumns].flatMap(\.self)
             }
           }
         }
@@ -1108,7 +1108,7 @@ extension SnapshotTests {
             public init(
               `bar`: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [`bar`]
+              self.allColumns = [`bar`._allColumns].flatMap(\.self)
             }
           }
         }
@@ -1167,7 +1167,7 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<ID<Foo>>
             ) {
-              self.allColumns = [bar]
+              self.allColumns = [bar._allColumns].flatMap(\.self)
             }
           }
         }
@@ -1226,7 +1226,7 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression
             ) {
-              self.allColumns = [bar]
+              self.allColumns = [bar._allColumns].flatMap(\.self)
             }
           }
         }
@@ -1269,7 +1269,7 @@ extension SnapshotTests {
             public typealias QueryValue = User
             public typealias PrimaryKey = ID<User, UUID.BytesRepresentation>
             public let id = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>>("id", keyPath: \QueryValue.id)
-            public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID)
+            public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID, default: nil)
             public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>> {
               self.id
             }
@@ -1289,9 +1289,9 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>>,
-              referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?>
+              referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil)
             ) {
-              self.allColumns = [id, referrerID]
+              self.allColumns = [id._allColumns, referrerID._allColumns].flatMap(\.self)
             }
           }
 
@@ -1301,8 +1301,8 @@ extension SnapshotTests {
             var referrerID: ID<User, UUID>?
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("id", keyPath: \QueryValue.id)
-              public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("id", keyPath: \QueryValue.id, default: nil)
+              public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID, default: nil)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], [QueryValue.columns.referrerID]].flatMap(\.self)
               }
@@ -1317,10 +1317,10 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?>,
-                referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?>
+                id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil),
+                referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil)
               ) {
-                self.allColumns = [id, referrerID]
+                self.allColumns = [id._allColumns, referrerID._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -1336,8 +1336,8 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
-              self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
+              self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
+              self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
             }
 
             public nonisolated init(_ other: User) {
@@ -1365,7 +1365,7 @@ extension SnapshotTests {
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
-            self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
+            self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
             guard let id else {
               throw QueryDecodingError.missingRequiredColumn
             }
@@ -1411,7 +1411,7 @@ extension SnapshotTests {
             public init(
               name: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [name]
+              self.allColumns = [name._allColumns].flatMap(\.self)
             }
           }
         }
@@ -1480,7 +1480,7 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<Int>,
               name: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [id, name]
+              self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
             }
           }
 
@@ -1490,7 +1490,7 @@ extension SnapshotTests {
             var name: String
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
               public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], [QueryValue.columns.name]].flatMap(\.self)
@@ -1506,10 +1506,10 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 name: some StructuredQueriesCore.QueryExpression<String>
               ) {
-                self.allColumns = [id, name]
+                self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -1525,7 +1525,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
                 throw QueryDecodingError.missingRequiredColumn
@@ -1628,9 +1628,9 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = StructuredQueriesCore.BindQueryExpression(60 * 5, as: <#Type#>.self)
+              seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = <#Type#>(queryOutput: 60 * 5)
             ) {
-              self.allColumns = [id, seconds]
+              self.allColumns = [id._allColumns, seconds._allColumns].flatMap(\.self)
             }
           }
 
@@ -1640,7 +1640,7 @@ extension SnapshotTests {
             var seconds: <#Type#> = 60 * 5
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
               public let seconds = StructuredQueriesCore.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], [QueryValue.columns.seconds]].flatMap(\.self)
@@ -1656,10 +1656,10 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>,
-                seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = StructuredQueriesCore.BindQueryExpression(60 * 5, as: <#Type#>.self)
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = <#Type#>(queryOutput: 60 * 5)
               ) {
-                self.allColumns = [id, seconds]
+                self.allColumns = [id._allColumns, seconds._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -1675,7 +1675,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 5
             }
 
@@ -1758,10 +1758,10 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = StructuredQueriesCore.BindQueryExpression(Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255), as: Color.HexRepresentation.self),
-              name: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+              color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = Color.HexRepresentation(queryOutput: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)),
+              name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
             ) {
-              self.allColumns = [id, color, name]
+              self.allColumns = [id._allColumns, color._allColumns, name._allColumns].flatMap(\.self)
             }
           }
 
@@ -1772,7 +1772,7 @@ extension SnapshotTests {
             var name = ""
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
               public let color = StructuredQueriesCore.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
               public let name = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
@@ -1789,11 +1789,11 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>,
-                color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = StructuredQueriesCore.BindQueryExpression(Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255), as: Color.HexRepresentation.self),
-                name: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = Color.HexRepresentation(queryOutput: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)),
+                name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
               ) {
-                self.allColumns = [id, color, name]
+                self.allColumns = [id._allColumns, color._allColumns, name._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -1809,7 +1809,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
               self.name = try decoder.decode(Swift.String.self) ?? ""
             }
@@ -1910,7 +1910,7 @@ extension SnapshotTests {
           public init(
             name: some StructuredQueriesCore.QueryExpression<String>
           ) {
-            self.allColumns = [name]
+            self.allColumns = [name._allColumns].flatMap(\.self)
           }
         }
       }
@@ -1975,7 +1975,7 @@ extension SnapshotTests {
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [id]
+              self.allColumns = [id._allColumns].flatMap(\.self)
             }
           }
 
@@ -1984,7 +1984,7 @@ extension SnapshotTests {
             let id: Int?
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id]].flatMap(\.self)
               }
@@ -1999,9 +1999,9 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil)
               ) {
-                self.allColumns = [id]
+                self.allColumns = [id._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -2017,7 +2017,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
             }
 
             public nonisolated init(_ other: Foo) {
@@ -2115,7 +2115,7 @@ extension SnapshotTests {
               public init(
                 id: some StructuredQueriesCore.QueryExpression<Int>
               ) {
-                self.allColumns = [id]
+                self.allColumns = [id._allColumns].flatMap(\.self)
               }
             }
           }
@@ -2199,7 +2199,7 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<Int>,
               name: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [id, name]
+              self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
             }
           }
 
@@ -2209,7 +2209,7 @@ extension SnapshotTests {
             var name: String
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
               public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], [QueryValue.columns.name]].flatMap(\.self)
@@ -2225,10 +2225,10 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>,
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 name: some StructuredQueriesCore.QueryExpression<String>
               ) {
-                self.allColumns = [id, name]
+                self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -2244,7 +2244,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
                 throw QueryDecodingError.missingRequiredColumn
@@ -2317,8 +2317,8 @@ extension SnapshotTests {
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
-            public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
-            public let priority = StructuredQueriesCore.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority)
+            public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date, default: nil)
+            public let priority = StructuredQueriesCore.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority, default: nil)
             public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
               self.id
             }
@@ -2338,11 +2338,11 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self),
-              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?>,
-              priority: some StructuredQueriesCore.QueryExpression<Priority?>
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
+              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Date.UnixTimeRepresentation?(queryOutput: nil),
+              priority: some StructuredQueriesCore.QueryExpression<Priority?> = Priority?(queryOutput: nil)
             ) {
-              self.allColumns = [id, title, date, priority]
+              self.allColumns = [id._allColumns, title._allColumns, date._allColumns, priority._allColumns].flatMap(\.self)
             }
           }
 
@@ -2354,10 +2354,10 @@ extension SnapshotTests {
             var priority: Priority?
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
               public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
-              public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
-              public let priority = StructuredQueriesCore.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority)
+              public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date, default: nil)
+              public let priority = StructuredQueriesCore.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority, default: nil)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], [QueryValue.columns.title], [QueryValue.columns.date], [QueryValue.columns.priority]].flatMap(\.self)
               }
@@ -2372,12 +2372,12 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>,
-                title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self),
-                date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?>,
-                priority: some StructuredQueriesCore.QueryExpression<Priority?>
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
+                date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Date.UnixTimeRepresentation?(queryOutput: nil),
+                priority: some StructuredQueriesCore.QueryExpression<Priority?> = Priority?(queryOutput: nil)
               ) {
-                self.allColumns = [id, title, date, priority]
+                self.allColumns = [id._allColumns, title._allColumns, date._allColumns, priority._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -2393,10 +2393,10 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.title = try decoder.decode(Swift.String.self) ?? ""
-              self.date = try decoder.decode(Date.UnixTimeRepresentation.self)
-              self.priority = try decoder.decode(Priority.self)
+              self.date = try decoder.decode(Date.UnixTimeRepresentation.self) ?? nil
+              self.priority = try decoder.decode(Priority.self) ?? nil
             }
 
             public nonisolated init(_ other: Reminder) {
@@ -2431,8 +2431,8 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             self.title = try decoder.decode(Swift.String.self) ?? ""
-            self.date = try decoder.decode(Date.UnixTimeRepresentation.self)
-            self.priority = try decoder.decode(Priority.self)
+            self.date = try decoder.decode(Date.UnixTimeRepresentation.self) ?? nil
+            self.priority = try decoder.decode(Priority.self) ?? nil
             guard let id else {
               throw QueryDecodingError.missingRequiredColumn
             }
@@ -2481,7 +2481,7 @@ extension SnapshotTests {
             public init(
               id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation>
             ) {
-              self.allColumns = [id]
+              self.allColumns = [id._allColumns].flatMap(\.self)
             }
           }
 
@@ -2490,7 +2490,7 @@ extension SnapshotTests {
             let id: UUID?
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation?>("id", keyPath: \QueryValue.id, default: nil)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id]].flatMap(\.self)
               }
@@ -2505,9 +2505,9 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation?>
+                id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation?> = UUID.BytesRepresentation?(queryOutput: nil)
               ) {
-                self.allColumns = [id]
+                self.allColumns = [id._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -2523,7 +2523,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(UUID.BytesRepresentation.self)
+              self.id = try decoder.decode(UUID.BytesRepresentation.self) ?? nil
             }
 
             public nonisolated init(_ other: Reminder) {
@@ -2592,7 +2592,7 @@ extension SnapshotTests {
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [id]
+              self.allColumns = [id._allColumns].flatMap(\.self)
             }
           }
         }
@@ -2636,7 +2636,7 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
             public typealias PrimaryKey = Int?
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
             public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
             public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int?> {
               self.id
@@ -2656,10 +2656,10 @@ extension SnapshotTests {
             public typealias QueryValue = Reminder
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
-              id: some StructuredQueriesCore.QueryExpression<Int?>,
-              title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+              id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
             ) {
-              self.allColumns = [id, title]
+              self.allColumns = [id._allColumns, title._allColumns].flatMap(\.self)
             }
           }
 
@@ -2669,7 +2669,7 @@ extension SnapshotTests {
             var title = ""
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
               public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
@@ -2685,10 +2685,10 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?>,
-                title: some StructuredQueriesCore.QueryExpression<Swift.String> = StructuredQueriesCore.BindQueryExpression("", as: Swift.String.self)
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
               ) {
-                self.allColumns = [id, title]
+                self.allColumns = [id._allColumns, title._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -2704,7 +2704,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.title = try decoder.decode(Swift.String.self) ?? ""
             }
 
@@ -2732,7 +2732,7 @@ extension SnapshotTests {
             "reminders"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Int.self)
+            self.id = try decoder.decode(Int.self) ?? nil
             self.title = try decoder.decode(Swift.String.self) ?? ""
           }
         }
@@ -2783,7 +2783,7 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<UUID>,
               timestamps: some StructuredQueriesCore.QueryExpression<Timestamps>
             ) {
-              self.allColumns = [id, timestamps]
+              self.allColumns = [id._allColumns, timestamps._allColumns].flatMap(\.self)
             }
           }
 
@@ -2793,7 +2793,7 @@ extension SnapshotTests {
             @Columns var timestamps: Timestamps
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID?>("id", keyPath: \QueryValue.id, default: nil)
               public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [[QueryValue.columns.id], StructuredQueriesCore.ColumnGroup.allColumns(keyPath: \QueryValue.timestamps)].flatMap(\.self)
@@ -2809,10 +2809,10 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<UUID?>,
+                id: some StructuredQueriesCore.QueryExpression<UUID?> = UUID?(queryOutput: nil),
                 timestamps: some StructuredQueriesCore.QueryExpression<Timestamps>
               ) {
-                self.allColumns = [id, timestamps]
+                self.allColumns = [id._allColumns, timestamps._allColumns].flatMap(\.self)
               }
             }
             public typealias QueryValue = Self
@@ -2828,7 +2828,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(UUID.self)
+              self.id = try decoder.decode(UUID.self) ?? nil
               let timestamps = try decoder.decode(Timestamps.self)
               guard let timestamps else {
                 throw QueryDecodingError.missingRequiredColumn

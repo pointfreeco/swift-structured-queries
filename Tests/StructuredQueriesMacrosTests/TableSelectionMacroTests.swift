@@ -42,7 +42,7 @@ extension SnapshotTests {
               reminderList: some StructuredQueriesCore.QueryExpression<ReminderList>,
               remindersCount: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [reminderList, remindersCount]
+              self.allColumns = [reminderList._allColumns, remindersCount._allColumns].flatMap(\.self)
             }
           }
 
