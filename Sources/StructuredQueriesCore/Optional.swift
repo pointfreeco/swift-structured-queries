@@ -180,7 +180,7 @@ extension Optional: TableDraft where Wrapped: TableDraft {
 
 extension Optional.TableColumns: PrimaryKeyedTableDefinition
 where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
-  public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
+  public typealias PrimaryKey = Wrapped.PrimaryKey?
 
   public struct PrimaryColumn: _TableColumnExpression {
     public typealias Root = Optional

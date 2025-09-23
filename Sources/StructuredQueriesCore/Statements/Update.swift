@@ -74,7 +74,7 @@ extension PrimaryKeyedTable {
       }
     }
     .where {
-      $0.primaryKey.eq(TableColumns.PrimaryKey(queryOutput: row[keyPath: $0.primaryKey.keyPath]))
+      $0.primaryKey.eq(PrimaryKey(queryOutput: row[keyPath: $0.primaryKey.keyPath]))
     }
   }
 }

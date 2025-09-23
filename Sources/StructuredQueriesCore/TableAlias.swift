@@ -188,7 +188,7 @@ extension TableAlias: TableDraft where Base: TableDraft {
 
 extension TableAlias.TableColumns: PrimaryKeyedTableDefinition
 where Base.TableColumns: PrimaryKeyedTableDefinition {
-  public typealias PrimaryKey = Base.TableColumns.PrimaryKey
+  public typealias PrimaryKey = Base.PrimaryKey
 
   public struct PrimaryColumn: _TableColumnExpression {
     public typealias Root = TableAlias
