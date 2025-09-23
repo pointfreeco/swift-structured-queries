@@ -36,9 +36,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -86,9 +88,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -136,9 +140,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction(_ strings: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(strings))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(strings))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -190,9 +196,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Int> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -240,9 +248,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String>) -> some StructuredQueriesCore.QueryExpression<Date?> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(format))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(format))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -294,9 +304,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction(format: some StructuredQueriesCore.QueryExpression<String>) -> some StructuredQueriesCore.QueryExpression<Date?> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(format))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(format))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -348,9 +360,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<Date?> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(format))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(format))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -402,9 +416,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction(format: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<Date?> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(format))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(format))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -456,9 +472,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction(first: some StructuredQueriesCore.QueryExpression<String> = "", second: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<String> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(first), \(second))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(first), \(second))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -531,9 +549,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String?> = String?.none) -> some StructuredQueriesCore.QueryExpression<Date?> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(format))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(format))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -585,9 +605,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -639,9 +661,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -693,9 +717,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -743,9 +769,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -816,9 +844,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -866,9 +896,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Int> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -916,9 +948,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -961,9 +995,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)()"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -1022,9 +1058,11 @@ extension SnapshotTests {
             _ x: some StructuredQueriesCore.QueryExpression<Int>,
             _ y: some StructuredQueriesCore.QueryExpression<Int>
           ) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(x), \(y))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(x), \(y))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -1084,9 +1122,11 @@ extension SnapshotTests {
             x: some StructuredQueriesCore.QueryExpression<Int>,
             y: some StructuredQueriesCore.QueryExpression<Int>
           ) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(x), \(y))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(x), \(y))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder
@@ -1140,9 +1180,11 @@ extension SnapshotTests {
             self.body = body
           }
           public func callAsFunction(_ reminder: some StructuredQueriesCore.QueryExpression<Reminder>, _ override: some StructuredQueriesCore.QueryExpression<Bool> = false) -> some StructuredQueriesCore.QueryExpression<Bool> {
-            StructuredQueriesCore.SQLQueryExpression(
-              "\(quote: self.name)(\(reminder), \(override))"
-            )
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)(\(reminder), \(override))"
+              )
+            }
           }
           public func invoke(
             _ decoder: inout some QueryDecoder

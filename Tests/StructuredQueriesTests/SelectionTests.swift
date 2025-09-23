@@ -56,7 +56,7 @@ extension SnapshotTests {
           .map { RemindersListAndReminderCount.Columns(remindersList: $1, remindersCount: $0) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "id", count("reminders"."id") AS "color"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", count("reminders"."id")
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
