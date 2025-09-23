@@ -127,7 +127,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
 extension PrimaryKeyedTableDefinition
 where
   QueryValue: _OptionalProtocol & Codable,
-  PrimaryColumn == TableColumn<QueryValue, PrimaryKey>
+  PrimaryColumn: TableColumnExpression<QueryValue, PrimaryKey>
 {
   /// A JSON array representation of the aggregation of a table's columns.
   ///

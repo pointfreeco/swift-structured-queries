@@ -201,7 +201,7 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
   }
 
   public var primaryKey: PrimaryColumn {
-    self[dynamicMember: \.primaryKey]
+    PrimaryColumn()
   }
 }
 

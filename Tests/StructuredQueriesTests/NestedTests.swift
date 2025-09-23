@@ -480,7 +480,7 @@ private struct Row {
 
 @Table
 private struct Metadata: Identifiable {
-  @Columns /*(primaryKey: true)*/
+  @Columns
   let id: MetadataID
   var userModificationDate: Date
 }

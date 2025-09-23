@@ -2754,7 +2754,6 @@ extension SnapshotTests {
         #"""
         private struct Row {
           let id: UUID
-          @Columns
           var timestamps: Timestamps
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -2790,7 +2789,7 @@ extension SnapshotTests {
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = Row
             let id: UUID?
-            @Columns var timestamps: Timestamps
+            var timestamps: Timestamps
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID?>("id", keyPath: \QueryValue.id, default: nil)
@@ -2870,6 +2869,121 @@ extension SnapshotTests {
             }
             self.id = id
             self.timestamps = timestamps
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func nestedLet() {
+      assertMacro {
+        """
+        @Table("remindersTags")
+        struct ReminderTag: Identifiable {
+          @Columns
+          let id: ReminderTagID
+        }
+        """
+      } expansion: {
+        #"""
+        struct ReminderTag: Identifiable {
+          let id: ReminderTagID
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = ReminderTag
+            public typealias PrimaryKey = ReminderTagID
+            public let id = StructuredQueriesCore.ColumnGroup<QueryValue, ReminderTagID>(keyPath: \QueryValue.id)
+            public var primaryKey: StructuredQueriesCore.ColumnGroup<QueryValue, ReminderTagID> {
+              self.id
+            }
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [StructuredQueriesCore.ColumnGroup.allColumns(keyPath: \QueryValue.id)].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [StructuredQueriesCore.ColumnGroup.writableColumns(keyPath: \QueryValue.id)].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = ReminderTag
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<ReminderTagID>
+            ) {
+              self.allColumns = [id._allColumns].flatMap(\.self)
+            }
+          }
+
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = ReminderTag
+            let id: ReminderTagID?
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore.ColumnGroup<QueryValue, ReminderTagID?>(keyPath: \QueryValue.id)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                [StructuredQueriesCore.ColumnGroup.allColumns(keyPath: \QueryValue.id)].flatMap(\.self)
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                [StructuredQueriesCore.ColumnGroup.writableColumns(keyPath: \QueryValue.id)].flatMap(\.self)
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id)"
+              }
+            }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<ReminderTagID?> = ReminderTagID?(queryOutput: nil)
+              ) {
+                self.allColumns = [id._allColumns].flatMap(\.self)
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var tableName: String {
+              ReminderTag.tableName
+            }
+
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(ReminderTagID.self) ?? nil
+            }
+
+            public nonisolated init(_ other: ReminderTag) {
+              self.id = other.id
+            }
+            public init(
+              id: ReminderTagID? = nil
+            ) {
+              self.id = id
+            }
+          }
+        }
+
+        nonisolated extension ReminderTag: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var tableName: String {
+            "remindersTags"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(ReminderTagID.self)
+            guard let id else {
+              throw QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
           }
         }
         """#

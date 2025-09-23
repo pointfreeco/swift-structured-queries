@@ -358,13 +358,14 @@ extension TableMacro: ExtensionMacro {
           var property = property
           for attributeIndex in property.attributes.indices {
             guard
-              var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
+              var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self)?.trimmed,
               let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
-              attributeName == "Column",
-              case .argumentList(var arguments) = attribute.arguments
+              ["Column", "Columns"].contains(attributeName)
             else { continue }
             hasColumnAttribute = true
             var hasPrimaryKeyArgument = false
+            var arguments: LabeledExprListSyntax = []
+            if case .argumentList(let list) = attribute.arguments { arguments = list }
             for argumentIndex in arguments.indices {
               var argument = arguments[argumentIndex]
               defer { arguments[argumentIndex] = argument }
@@ -384,9 +385,11 @@ extension TableMacro: ExtensionMacro {
               }
             }
             if !hasPrimaryKeyArgument {
-              arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
-                trailingTrivia: .space
-              )
+              if !arguments.isEmpty {
+                arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
+                  trailingTrivia: .space
+                )
+              }
               arguments.append(
                 LabeledExprSyntax(
                   label: "primaryKey",
@@ -394,8 +397,12 @@ extension TableMacro: ExtensionMacro {
                 )
               )
             }
-            attribute.arguments = .argumentList(arguments)
-            property.attributes[attributeIndex] = .attribute(attribute)
+            if !arguments.isEmpty {
+              attribute.leftParen = TokenSyntax.leftParenToken()
+              attribute.arguments = .argumentList(arguments)
+              attribute.rightParen = TokenSyntax.rightParenToken()
+              property.attributes[attributeIndex] = .attribute(attribute)
+            }
           }
           if !hasColumnAttribute {
             let attribute = "@Column(primaryKey: false)\n"
@@ -881,13 +888,14 @@ extension TableMacro: MemberMacro {
           var property = property
           for attributeIndex in property.attributes.indices {
             guard
-              var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self),
+              var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self)?.trimmed,
               let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
-              attributeName == "Column",
-              case .argumentList(var arguments) = attribute.arguments
+              ["Column", "Columns"].contains(attributeName)
             else { continue }
             hasColumnAttribute = true
             var hasPrimaryKeyArgument = false
+            var arguments: LabeledExprListSyntax = []
+            if case .argumentList(let list) = attribute.arguments { arguments = list }
             for argumentIndex in arguments.indices {
               var argument = arguments[argumentIndex]
               defer { arguments[argumentIndex] = argument }
@@ -907,9 +915,11 @@ extension TableMacro: MemberMacro {
               }
             }
             if !hasPrimaryKeyArgument {
-              arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
-                trailingTrivia: .space
-              )
+              if !arguments.isEmpty {
+                arguments[arguments.index(before: arguments.endIndex)].trailingComma = .commaToken(
+                  trailingTrivia: .space
+                )
+              }
               arguments.append(
                 LabeledExprSyntax(
                   label: "primaryKey",
@@ -917,8 +927,12 @@ extension TableMacro: MemberMacro {
                 )
               )
             }
-            attribute.arguments = .argumentList(arguments)
-            property.attributes[attributeIndex] = .attribute(attribute)
+            if !arguments.isEmpty {
+              attribute.leftParen = TokenSyntax.leftParenToken()
+              attribute.arguments = .argumentList(arguments)
+              attribute.rightParen = TokenSyntax.rightParenToken()
+              property.attributes[attributeIndex] = .attribute(attribute)
+            }
           }
           property = property.trimmed
           if !hasColumnAttribute {
