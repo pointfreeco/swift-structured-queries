@@ -11,6 +11,7 @@ import StructuredQueriesCore
   PrimaryKeyedTable,
   names: named(From),
   named(columns),
+  named(columnWidth),
   named(init(_:)),
   named(init(decoder:)),
   named(QueryValue),

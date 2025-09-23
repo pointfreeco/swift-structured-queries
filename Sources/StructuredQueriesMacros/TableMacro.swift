@@ -27,6 +27,7 @@ extension TableMacro: ExtensionMacro {
     }
     var allColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
+    var columnWidths: [ExprSyntax] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
     var decodingAssignments: [String] = []
@@ -274,6 +275,8 @@ extension TableMacro: ExtensionMacro {
           .baseName
           .text
       }
+
+      columnWidths.append("\(columnQueryValueType).columnWidth")
 
       let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
         ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
@@ -620,6 +623,7 @@ extension TableMacro: ExtensionMacro {
         }
         """
     }
+    let columnWidth: ExprSyntax = "[\(columnWidths, separator: ", ")].reduce(0, +)"
 
     return [
       DeclSyntax(
@@ -628,7 +632,9 @@ extension TableMacro: ExtensionMacro {
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
         \(statics, separator: "\n")
         public \(nonisolated)static var columns: TableColumns { TableColumns() }
-        public \(nonisolated)static var tableName: String { \(tableName) }\(letSchemaName)\(initDecoder)\(initFromOther)
+        public \(nonisolated)static var columnWidth: Int { \(columnWidth) }\
+        public \(nonisolated)static var tableName: String { \(tableName) }
+        \(letSchemaName)\(initDecoder)\(initFromOther)
         }
         """
       )

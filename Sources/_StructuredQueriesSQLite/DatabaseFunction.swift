@@ -10,12 +10,17 @@ extension ScalarDatabaseFunction {
       SQLITE_UTF8 | (isDeterministic ? SQLITE_DETERMINISTIC : 0),
       box,
       { context, argumentCount, arguments in
-        Unmanaged<ScalarDatabaseFunctionBox>
-          .fromOpaque(sqlite3_user_data(context))
-          .takeUnretainedValue()
-          .function
-          .invoke([QueryBinding](argumentCount: argumentCount, arguments: arguments))
-          .result(db: context)
+        do {
+          var decoder = SQLiteFunctionDecoder(argumentCount: argumentCount, arguments: arguments)
+          try Unmanaged<ScalarDatabaseFunctionBox>
+            .fromOpaque(sqlite3_user_data(context))
+            .takeUnretainedValue()
+            .function
+            .invoke(&decoder)
+            .result(db: context)
+        } catch {
+          QueryBinding.invalid(error).result(db: context)
+        }
       },
       nil,
       nil,
@@ -32,36 +37,6 @@ private final class ScalarDatabaseFunctionBox {
   init(_ function: some ScalarDatabaseFunction) {
     self.function = function
   }
-}
-
-extension [QueryBinding] {
-  fileprivate init(argumentCount: Int32, arguments: UnsafeMutablePointer<OpaquePointer?>?) {
-    self = (0..<argumentCount).map { offset in
-      let value = arguments?[Int(offset)]
-      switch sqlite3_value_type(value) {
-      case SQLITE_BLOB:
-        if let blob = sqlite3_value_blob(value) {
-          let count = Int(sqlite3_value_bytes(value))
-          let buffer = UnsafeRawBufferPointer(start: blob, count: count)
-          return .blob([UInt8](buffer))
-        } else {
-          return .blob([])
-        }
-      case SQLITE_FLOAT:
-        return .double(sqlite3_value_double(value))
-      case SQLITE_INTEGER:
-        return .int(sqlite3_value_int64(value))
-      case SQLITE_NULL:
-        return .null
-      case SQLITE_TEXT:
-        return .text(String(cString: UnsafePointer(sqlite3_value_text(value))))
-      default:
-        return .invalid(UnknownType())
-      }
-    }
-  }
-
-  private struct UnknownType: Error {}
 }
 
 extension QueryBinding {

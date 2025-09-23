@@ -27,7 +27,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () -> Date
           public init(_ body: @escaping () -> Date) {
@@ -39,11 +41,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
             )
@@ -78,7 +77,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "current_date"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () -> Date
           public init(_ body: @escaping () -> Date) {
@@ -90,11 +91,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
             )
@@ -129,7 +127,9 @@ extension SnapshotTests {
           public typealias Input = [String].JSONRepresentation
           public typealias Output = [String].JSONRepresentation
           public let name = "jsonCapitalize"
-          public let argumentCount: Int? = 1
+          public var argumentCount: Int? {
+            [[String].JSONRepresentation.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: ([String]) -> [String]
           public init(_ body: @escaping ([String]) -> [String]) {
@@ -141,13 +141,14 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let strings = [String].JSONRepresentation(queryBinding: arguments[0]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let strings = try decoder.decode([String].JSONRepresentation.self)
+            guard let strings else {
+              throw InvalidInvocation()
             }
             return [String].JSONRepresentation(
-              queryOutput: self.body(strings.queryOutput)
+              queryOutput: self.body(strings)
             )
             .queryBinding
           }
@@ -180,7 +181,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Int
           public let name = "fortyTwo"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = true
           public let body: () -> Int
           public init(_ body: @escaping () -> Int) {
@@ -192,11 +195,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             return Int(
               queryOutput: self.body()
             )
@@ -231,7 +231,9 @@ extension SnapshotTests {
           public typealias Input = String
           public typealias Output = Date?
           public let name = "currentDate"
-          public let argumentCount: Int? = 1
+          public var argumentCount: Int? {
+            [String.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: (String) -> Date?
           public init(_ body: @escaping (String) -> Date?) {
@@ -243,13 +245,14 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let format = try decoder.decode(String.self)
+            guard let format else {
+              throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format.queryOutput)
+              queryOutput: self.body(format)
             )
             .queryBinding
           }
@@ -282,7 +285,9 @@ extension SnapshotTests {
           public typealias Input = String
           public typealias Output = Date?
           public let name = "currentDate"
-          public let argumentCount: Int? = 1
+          public var argumentCount: Int? {
+            [String.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: (String) -> Date?
           public init(_ body: @escaping (String) -> Date?) {
@@ -294,13 +299,14 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let format = try decoder.decode(String.self)
+            guard let format else {
+              throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format.queryOutput)
+              queryOutput: self.body(format)
             )
             .queryBinding
           }
@@ -333,7 +339,9 @@ extension SnapshotTests {
           public typealias Input = String
           public typealias Output = Date?
           public let name = "currentDate"
-          public let argumentCount: Int? = 1
+          public var argumentCount: Int? {
+            [String.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: (String) -> Date?
           public init(_ body: @escaping (String) -> Date?) {
@@ -345,13 +353,14 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let format = try decoder.decode(String.self)
+            guard let format else {
+              throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format.queryOutput)
+              queryOutput: self.body(format)
             )
             .queryBinding
           }
@@ -384,7 +393,9 @@ extension SnapshotTests {
           public typealias Input = String
           public typealias Output = Date?
           public let name = "currentDate"
-          public let argumentCount: Int? = 1
+          public var argumentCount: Int? {
+            [String.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: (String) -> Date?
           public init(_ body: @escaping (String) -> Date?) {
@@ -396,13 +407,14 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String(queryBinding: arguments[0]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let format = try decoder.decode(String.self)
+            guard let format else {
+              throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format.queryOutput)
+              queryOutput: self.body(format)
             )
             .queryBinding
           }
@@ -435,7 +447,9 @@ extension SnapshotTests {
           public typealias Input = (String, String)
           public typealias Output = String
           public let name = "concat"
-          public let argumentCount: Int? = 2
+          public var argumentCount: Int? {
+            [String.columnWidth, String.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: (String, String) -> String
           public init(_ body: @escaping (String, String) -> String) {
@@ -447,13 +461,18 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let first = String(queryBinding: arguments[0]), let second = String(queryBinding: arguments[1]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let first = try decoder.decode(String.self)
+            let second = try decoder.decode(String.self)
+            guard let first else {
+              throw InvalidInvocation()
+            }
+            guard let second else {
+              throw InvalidInvocation()
             }
             return String(
-              queryOutput: self.body(first.queryOutput, second.queryOutput)
+              queryOutput: self.body(first, second)
             )
             .queryBinding
           }
@@ -503,7 +522,9 @@ extension SnapshotTests {
           public typealias Input = String?
           public typealias Output = Date?
           public let name = "currentDate"
-          public let argumentCount: Int? = 1
+          public var argumentCount: Int? {
+            [String?.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: (String?) -> Date?
           public init(_ body: @escaping (String?) -> Date?) {
@@ -515,13 +536,14 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let format = String?(queryBinding: arguments[0]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let format = try decoder.decode(String?.self)
+            guard let format else {
+              throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format.queryOutput)
+              queryOutput: self.body(format)
             )
             .queryBinding
           }
@@ -554,7 +576,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () throws -> Date
           public init(_ body: @escaping () throws -> Date) {
@@ -566,11 +590,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             do {
               return Date(
                 queryOutput: try self.body()
@@ -609,7 +630,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () throws(MyError) -> Date
           public init(_ body: @escaping () throws(MyError) -> Date) {
@@ -621,11 +644,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             do {
               return Date(
                 queryOutput: try self.body()
@@ -664,7 +684,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () -> Date
           public init(_ body: @escaping () -> Date) {
@@ -676,11 +698,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
             )
@@ -715,7 +734,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () -> Date
           public init(_ body: @escaping () -> Date) {
@@ -727,11 +748,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
             )
@@ -789,7 +807,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () -> Date
           public init(_ body: @escaping () -> Date) {
@@ -801,11 +821,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
             )
@@ -840,7 +857,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Int
           public let name = "default"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () -> Int
           public init(_ body: @escaping () -> Int) {
@@ -852,11 +871,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             return Int(
               queryOutput: self.body()
             )
@@ -891,7 +907,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Swift.Void
           public let name = "void"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () -> Swift.Void
           public init(_ body: @escaping () -> Swift.Void) {
@@ -903,11 +921,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             self.body()
             return .null
           }
@@ -937,7 +952,9 @@ extension SnapshotTests {
           public typealias Input = ()
           public typealias Output = Swift.Void
           public let name = "void"
-          public let argumentCount: Int? = 0
+          public var argumentCount: Int? {
+            [].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: () throws -> Swift.Void
           public init(_ body: @escaping () throws -> Swift.Void) {
@@ -949,11 +966,8 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count else {
-              return .invalid(InvalidInvocation())
-            }
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
             do {
               try self.body()
               return .null
@@ -996,7 +1010,9 @@ extension SnapshotTests {
           public typealias Input = (Int, Int)
           public typealias Output = Swift.Void
           public let name = "min"
-          public let argumentCount: Int? = 2
+          public var argumentCount: Int? {
+            [Int.columnWidth, Int.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: (Int, Int) -> Swift.Void
           public init(_ body: @escaping (Int, Int) -> Swift.Void) {
@@ -1011,12 +1027,17 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let x = Int(queryBinding: arguments[0]), let y = Int(queryBinding: arguments[1]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let x = try decoder.decode(Int.self)
+            let y = try decoder.decode(Int.self)
+            guard let x else {
+              throw InvalidInvocation()
             }
-            self.body(x.queryOutput, y.queryOutput)
+            guard let y else {
+              throw InvalidInvocation()
+            }
+            self.body(x, y)
             return .null
           }
           private struct InvalidInvocation: Error {
@@ -1051,7 +1072,9 @@ extension SnapshotTests {
           public typealias Input = (Int, Int)
           public typealias Output = Swift.Void
           public let name = "min"
-          public let argumentCount: Int? = 2
+          public var argumentCount: Int? {
+            [Int.columnWidth, Int.columnWidth].reduce(0, +)
+          }
           public let isDeterministic = false
           public let body: (Int, Int) -> Swift.Void
           public init(_ body: @escaping (Int, Int) -> Swift.Void) {
@@ -1066,13 +1089,76 @@ extension SnapshotTests {
             )
           }
           public func invoke(
-            _ arguments: [StructuredQueriesCore.QueryBinding]
-          ) -> StructuredQueriesCore.QueryBinding {
-            guard self.argumentCount == nil || self.argumentCount == arguments.count, let x = Int(queryBinding: arguments[0]), let y = Int(queryBinding: arguments[1]) else {
-              return .invalid(InvalidInvocation())
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let x = try decoder.decode(Int.self)
+            let y = try decoder.decode(Int.self)
+            guard let x else {
+              throw InvalidInvocation()
             }
-            self.body(x.queryOutput, y.queryOutput)
+            guard let y else {
+              throw InvalidInvocation()
+            }
+            self.body(x, y)
             return .null
+          }
+          private struct InvalidInvocation: Error {
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func argumentCount() {
+      assertMacro {
+        """
+        @DatabaseFunction
+        func isValid(_ reminder: Reminder, _ override: Bool = false) -> Bool {
+          !reminder.title.isEmpty || override
+        }
+        """
+      } expansion: {
+        #"""
+        func isValid(_ reminder: Reminder, _ override: Bool = false) -> Bool {
+          !reminder.title.isEmpty || override
+        }
+
+        var $isValid: __macro_local_7isValidfMu_ {
+          __macro_local_7isValidfMu_(isValid)
+        }
+
+        struct __macro_local_7isValidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = (Reminder, Bool)
+          public typealias Output = Bool
+          public let name = "isValid"
+          public var argumentCount: Int? {
+            [Reminder.columnWidth, Bool.columnWidth].reduce(0, +)
+          }
+          public let isDeterministic = false
+          public let body: (Reminder, Bool) -> Bool
+          public init(_ body: @escaping (Reminder, Bool) -> Bool) {
+            self.body = body
+          }
+          public func callAsFunction(_ reminder: some StructuredQueriesCore.QueryExpression<Reminder>, _ override: some StructuredQueriesCore.QueryExpression<Bool> = false) -> some StructuredQueriesCore.QueryExpression<Bool> {
+            StructuredQueriesCore.SQLQueryExpression(
+              "\(quote: self.name)(\(reminder), \(override))"
+            )
+          }
+          public func invoke(
+            _ decoder: inout some QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            let reminder = try decoder.decode(Reminder.self)
+            let override = try decoder.decode(Bool.self)
+            guard let reminder else {
+              throw InvalidInvocation()
+            }
+            guard let override else {
+              throw InvalidInvocation()
+            }
+            return Bool(
+              queryOutput: self.body(reminder, override)
+            )
+            .queryBinding
           }
           private struct InvalidInvocation: Error {
           }

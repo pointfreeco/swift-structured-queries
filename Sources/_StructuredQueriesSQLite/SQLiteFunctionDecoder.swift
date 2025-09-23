@@ -1,16 +1,20 @@
 import Foundation
 
 @usableFromInline
-struct SQLiteQueryDecoder: QueryDecoder {
+struct SQLiteFunctionDecoder: QueryDecoder {
   @usableFromInline
-  let statement: OpaquePointer
+  let argumentCount: Int32
+
+  @usableFromInline
+  let arguments: UnsafeMutablePointer<OpaquePointer?>?
 
   @usableFromInline
   var currentIndex: Int32 = 0
 
   @usableFromInline
-  init(statement: OpaquePointer) {
-    self.statement = statement
+  init(argumentCount: Int32, arguments: UnsafeMutablePointer<OpaquePointer?>?) {
+    self.argumentCount = argumentCount
+    self.arguments = arguments
   }
 
   @inlinable
@@ -21,14 +25,16 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
     defer { currentIndex += 1 }
-    precondition(sqlite3_column_count(statement) > currentIndex)
-    guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
-    return [UInt8](
-      UnsafeRawBufferPointer(
-        start: sqlite3_column_blob(statement, currentIndex),
-        count: Int(sqlite3_column_bytes(statement, currentIndex))
-      )
-    )
+    precondition(argumentCount > currentIndex)
+    let value = arguments?[Int(currentIndex)]
+    guard sqlite3_value_type(value) != SQLITE_NULL else { return nil }
+    if let blob = sqlite3_value_blob(value) {
+      let count = Int(sqlite3_value_bytes(value))
+      let buffer = UnsafeRawBufferPointer(start: blob, count: count)
+      return [UInt8](buffer)
+    } else {
+      return []
+    }
   }
 
   @inlinable
@@ -45,9 +51,10 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func decode(_ columnType: Double.Type) throws -> Double? {
     defer { currentIndex += 1 }
-    precondition(sqlite3_column_count(statement) > currentIndex)
-    guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
-    return sqlite3_column_double(statement, currentIndex)
+    precondition(argumentCount > currentIndex)
+    let value = arguments?[Int(currentIndex)]
+    guard sqlite3_value_type(value) != SQLITE_NULL else { return nil }
+    return sqlite3_value_double(value)
   }
 
   @inlinable
@@ -58,17 +65,19 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @inlinable
   mutating func decode(_ columnType: Int64.Type) throws -> Int64? {
     defer { currentIndex += 1 }
-    precondition(sqlite3_column_count(statement) > currentIndex)
-    guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
-    return sqlite3_column_int64(statement, currentIndex)
+    precondition(argumentCount > currentIndex)
+    let value = arguments?[Int(currentIndex)]
+    guard sqlite3_value_type(value) != SQLITE_NULL else { return nil }
+    return sqlite3_value_int64(value)
   }
 
   @inlinable
   mutating func decode(_ columnType: String.Type) throws -> String? {
     defer { currentIndex += 1 }
-    precondition(sqlite3_column_count(statement) > currentIndex)
-    guard sqlite3_column_type(statement, currentIndex) != SQLITE_NULL else { return nil }
-    return String(cString: sqlite3_column_text(statement, currentIndex))
+    precondition(argumentCount > currentIndex)
+    let value = arguments?[Int(currentIndex)]
+    guard sqlite3_value_type(value) != SQLITE_NULL else { return nil }
+    return String(cString: sqlite3_value_text(value))
   }
 
   @inlinable
