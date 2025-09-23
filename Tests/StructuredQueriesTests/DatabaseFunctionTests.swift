@@ -427,5 +427,29 @@ extension SnapshotTests {
         """
       }
     }
+
+    @DatabaseFunction
+    func isValidDraft(_ tag: Tag.Draft) -> Bool {
+      !tag.title.isEmpty
+    }
+    @Test func tableDraft() {
+      $isValidDraft.install(database.handle)
+
+      assertQuery(
+        Tag.Draft.select { $isValidDraft($0) }.limit(1)
+      ) {
+        """
+        SELECT "isValidDraft"("tags"."id", "tags"."title")
+        FROM "tags"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+    }
   }
 }
