@@ -28,9 +28,9 @@ one does with common table expressions, and it allows one to represent a type th
 purposes seems like a regular SQLite table, but it's not actually persisted in the database.
 
 With that type defined we can use the
-``StructuredQueriesCore/Table/createTemporaryView(ifNotExists:as:)`` to create a SQL query that
-creates a temporary view. You provide a select statement that selects all the data needed for the
-view:
+``StructuredQueriesCore/Table/createTemporaryView(ifNotExists:as:)`` function to create a SQL query
+that creates a temporary view. You provide a select statement that selects all the data needed for
+the view:
 
 ```swift
 ReminderWithList.createTemporaryView(
