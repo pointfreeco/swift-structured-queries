@@ -412,6 +412,26 @@ extension SnapshotTests {
           """)
         """#
       }
+      assertMacro {
+        #"""
+        #sql(
+          """
+          SELECT (  -- TODO: ;-)
+            1 = 1
+          )
+          """
+        )
+        """#
+      } expansion: {
+        #"""
+        StructuredQueriesCore.SQLQueryExpression(
+          """
+          SELECT (  -- TODO: ;-)
+            1 = 1
+          )
+          """)
+        """#
+      }
     }
   }
 }
