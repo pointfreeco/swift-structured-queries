@@ -235,9 +235,11 @@ extension DatabaseFunctionMacro: PeerMacro {
       self.body = body
       }
       public func callAsFunction\(signature.trimmed) {
+      StructuredQueriesCore.$_isSelecting.withValue(false) {
       StructuredQueriesCore.SQLQueryExpression(
       "\\(quote: self.name)(\(raw: parameters.map { "\\(\($0))" }.joined(separator: ", ")))"
       )
+      }
       }
       public func invoke(
       _ decoder: inout some QueryDecoder

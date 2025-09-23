@@ -358,6 +358,74 @@ extension SnapshotTests {
         └──────┘
         """
       }
+      assertQuery(
+        Reminder
+          .select { _ in
+            $isValid(Reminder.Columns(id: 1, remindersListID: 1), true)
+          }
+          .limit(1)
+      ) {
+        """
+        SELECT "isValid"(1, NULL, NULL, 0, 0, '', NULL, 1, '', '2040-02-14 23:31:30.000', 1)
+        FROM "reminders"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    func isNotNull(_ tag: Tag?) -> Bool {
+      tag != nil
+    }
+    @Test func optionalTable() {
+      $isNotNull.install(database.handle)
+
+      assertQuery(
+        Tag?.select { $isNotNull($0) }.limit(1)
+      ) {
+        """
+        SELECT "isNotNull"("tags"."id", "tags"."title")
+        FROM "tags"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+    }
+
+    enum T: AliasName {}
+    @DatabaseFunction(as: ((TableAlias<Tag, T>) -> Bool).self)
+    func isValidAlias(_ tag: Tag) -> Bool {
+      !tag.title.isEmpty
+    }
+    @Test func tableAlias() {
+      $isValidAlias.install(database.handle)
+
+      assertQuery(
+        Tag.as(T.self).select { $isValidAlias($0) }.limit(1)
+      ) {
+        """
+        SELECT "isValidAlias"("ts"."id", "ts"."title")
+        FROM "tags" AS "ts"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
     }
   }
 }

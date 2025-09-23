@@ -8,9 +8,13 @@ public protocol TableExpression<QueryValue>: QueryExpression where QueryValue: T
 
 extension TableExpression {
   public var queryFragment: QueryFragment {
-    zip(allColumns, QueryValue.TableColumns.allColumns)
-      .map { "\($0) AS \(quote: $1.name)" }
-      .joined(separator: ", ")
+    if _isSelecting {
+      return zip(allColumns, QueryValue.TableColumns.allColumns)
+        .map { "\($0) AS \(quote: $1.name)" }
+        .joined(separator: ", ")
+    } else {
+      return allColumns.map(\.queryFragment).joined(separator: ", ")
+    }
   }
 }
 

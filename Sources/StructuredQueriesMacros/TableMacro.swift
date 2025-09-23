@@ -278,7 +278,8 @@ extension TableMacro: ExtensionMacro {
 
       columnWidths.append("\(columnQueryValueType).columnWidth")
 
-      let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
+      let defaultValue =
+        binding.initializer?.value.rewritten(selfRewriter)
         ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
       if isColumnGroup {
         columnsProperties.append(
@@ -805,7 +806,8 @@ extension TableMacro: MemberMacro {
           .text
       }
 
-      let defaultValue = binding.initializer?.value.rewritten(selfRewriter)
+      let defaultValue =
+        binding.initializer?.value.rewritten(selfRewriter)
         ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
       if isColumnGroup {
         columnsProperties.append(

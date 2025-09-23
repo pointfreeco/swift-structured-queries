@@ -47,6 +47,10 @@ extension Optional: QueryDecodable where Wrapped: QueryDecodable {
 extension Optional: QueryExpression where Wrapped: QueryExpression {
   public typealias QueryValue = Wrapped.QueryValue?
 
+  public static var columnWidth: Int {
+    Wrapped.columnWidth
+  }
+
   public var queryFragment: QueryFragment {
     self?.queryFragment ?? "NULL"
   }
@@ -199,7 +203,7 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
       Wrapped.columns.primaryKey._names
     }
 
-    public var keyPath: KeyPath<Optional<Wrapped>, Wrapped.PrimaryKey.QueryOutput?> {
+    public var keyPath: KeyPath<Wrapped?, Wrapped.PrimaryKey.QueryOutput?> {
       \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
     }
 

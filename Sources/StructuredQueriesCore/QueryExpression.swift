@@ -15,22 +15,7 @@ public protocol QueryExpression<QueryValue> {
 }
 
 extension QueryExpression {
-  public static var columnWidth: Int { 1 }
+  public static var columnWidth: Int {
+    1
+  }
 }
-
-extension QueryExpression where QueryValue: Table {
-  public static var columnWidth: Int { QueryValue.columnWidth }
-}
-
-// TODO: Are any of these necessary?
-// extension QueryExpression where QueryValue: QueryRepresentable, QueryValue.QueryOutput: Table {
-//   public static var columnWidth: Int { QueryValue.columnWidth }
-// }
-//
-// extension QueryExpression where QueryValue: TableDefinition {
-//   public static var columnWidth: Int { QueryValue.QueryValue.columnWidth }
-// }
-//
-// extension QueryExpression where QueryValue: TableExpression {
-//   public static var columnWidth: Int { QueryValue.QueryValue.columnWidth }
-// }

@@ -43,8 +43,10 @@ extension ScalarDatabaseFunction {
     _ input: repeat each T
   ) -> some QueryExpression<Output>
   where Input == (repeat (each T).QueryValue) {
-    SQLQueryExpression(
-      "\(quote: name)(\(Array(repeat each input).joined(separator: ", ")))"
-    )
+    $_isSelecting.withValue(false) {
+      SQLQueryExpression(
+        "\(quote: name)(\(Array(repeat each input).joined(separator: ", ")))"
+      )
+    }
   }
 }
