@@ -150,6 +150,14 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
       )
     }
 
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, ColumnGroup<Wrapped, Member>>
+    ) -> ColumnGroup<Optional, Member?> {
+      ColumnGroup<Optional, Member?>(
+        keyPath: \.[member: \Member.self, column: Wrapped.columns[keyPath: keyPath].keyPath]
+      )
+    }
+
     public subscript<Member: QueryExpression>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, Member>
     ) -> some QueryExpression<Member.QueryValue?> {

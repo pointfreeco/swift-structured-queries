@@ -158,6 +158,14 @@ public struct TableAlias<
         keyPath: \.[member: \Member.self, column: column.keyPath]
       )
     }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Member>>
+    ) -> ColumnGroup<TableAlias, Member> {
+      ColumnGroup<TableAlias, Member>(
+        keyPath: \.[member: \Member.self, column: Base.columns[keyPath: keyPath].keyPath]
+      )
+    }
   }
 
   public struct Selection: TableExpression {
