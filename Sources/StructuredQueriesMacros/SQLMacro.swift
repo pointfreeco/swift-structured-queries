@@ -24,6 +24,7 @@ public enum SQLMacro: ExpressionMacro {
     var unexpectedBind: (segment: StringSegmentSyntax, offset: Int)?
     var unexpectedClose: (delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)?
     var invalidBind = false
+    var isInComment = false
     if let string = argument.as(StringLiteralExprSyntax.self) {
       for segment in string.segments {
         guard let segment = segment.as(StringSegmentSyntax.self)
@@ -75,6 +76,12 @@ public enum SQLMacro: ExpressionMacro {
         while offset < segment.content.syntaxTextBytes.endIndex {
           defer { offset += 1 }
           let byte = segment.content.syntaxTextBytes[offset]
+          if isInComment {
+            if byte == UInt8(ascii: "\n") {
+              isInComment = false
+            }
+            continue
+          }
           if let delimiter = currentDelimiter ?? parenStack.last {
             if byte == delimiters[delimiter.delimiter] {
               if currentDelimiter == nil {
@@ -104,6 +111,12 @@ public enum SQLMacro: ExpressionMacro {
               unexpectedClose = (byte, segment, offset)
             } else if binds.contains(byte) {
               unexpectedBind = (segment, offset)
+            } else if byte == UInt8(ascii: "-"),
+              segment.content.syntaxTextBytes.indices.contains(offset + 1),
+              segment.content.syntaxTextBytes[offset + 1] == byte
+            {
+              offset += 1
+              isInComment = true
             }
           }
         }
