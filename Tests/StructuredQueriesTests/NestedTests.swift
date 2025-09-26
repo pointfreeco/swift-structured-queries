@@ -1,3 +1,4 @@
+import CasePaths
 import Dependencies
 import Foundation
 import InlineSnapshotTesting
@@ -430,6 +431,63 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func `enum`() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "posts" (
+            "url" TEXT,
+            "note" TEXT
+          )
+          """
+        )
+      )
+      assertQuery(
+        Post.insert {
+          Post.note("Hello world")
+          Post.photo(Photo(url: URL(fileURLWithPath: "/tmp/poster.png")))
+        }
+      ) {
+        """
+        INSERT INTO "posts"
+        ("url", "note")
+        VALUES
+        (NULL, 'Hello world'), ('file:///tmp/poster.png', NULL)
+        """
+      }
+      assertQuery(
+        Post.all
+      ) {
+        """
+        SELECT "posts"."url", "posts"."note"
+        FROM "posts"
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────┐
+        │ Post.note("Hello world")                  │
+        ├───────────────────────────────────────────┤
+        │ Post.photo(                               │
+        │   Photo(url: URL(file:///tmp/poster.png)) │
+        │ )                                         │
+        └───────────────────────────────────────────┘
+        """
+      }
+      assertQuery(
+        Values(Post.Selection.note("Goodnight moon"))
+      ) {
+        """
+        SELECT NULL, 'Goodnight moon'
+        """
+      } results: {
+        """
+        ┌─────────────────────────────┐
+        │ Post.note("Goodnight moon") │
+        └─────────────────────────────┘
+        """
+      }
+    }
   }
 }
 
@@ -489,4 +547,96 @@ private struct Metadata: Identifiable {
 private struct MetadataID: Hashable {
   let recordID: UUID
   let recordType: String
+}
+
+@Table
+private struct Photo {
+  let url: URL
+}
+
+@Table
+private struct Note {
+  let body: String
+}
+
+// TODO: Diagnose 'enum' tables: require at most 1 associated value; ignore labels?
+
+@CasePathable
+private enum Post {
+  // @Columns
+  case photo(Photo)
+  case note(String = "")
+
+  // Generated:
+  public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+    public typealias QueryValue = Post
+    public let photo = StructuredQueriesCore.ColumnGroup<QueryValue, Photo?>(
+      keyPath: \QueryValue.photo
+    )
+    public let note = StructuredQueriesCore.TableColumn<QueryValue, String?>(
+      "note",
+      keyPath: \QueryValue.note,
+      default: ""
+    )
+    public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+      [
+        StructuredQueriesCore.ColumnGroup.allColumns(keyPath: \QueryValue.photo),
+        [QueryValue.columns.note],
+      ].flatMap(\.self)
+    }
+    public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+      [
+        StructuredQueriesCore.ColumnGroup.writableColumns(keyPath: \QueryValue.photo),
+        [QueryValue.columns.note],
+      ].flatMap(\.self)
+    }
+    public var queryFragment: QueryFragment {
+      "\(self.photo), \(self.note)"
+    }
+  }
+
+  public struct Selection: StructuredQueriesCore.TableExpression {
+    public typealias QueryValue = Post
+    public let allColumns: [any StructuredQueriesCore.QueryExpression]
+    // TODO: Generated
+    public static func photo(_ photo: some StructuredQueriesCore.QueryExpression<Photo>) -> Self {
+      Self(
+        allColumns: [photo._allColumns, String?(queryOutput: nil)._allColumns]
+          .flatMap(\.self)
+      )
+    }
+    public static func note(_ note: some StructuredQueriesCore.QueryExpression<String>) -> Self {
+      Self(
+        allColumns: [Photo?(queryOutput: nil)._allColumns, note._allColumns]
+          .flatMap(\.self)
+      )
+    }
+  }
+}
+
+nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore
+    .PartialSelectStatement
+{
+  public typealias QueryValue = Self
+  public typealias From = Swift.Never
+  public nonisolated static var columns: TableColumns {
+    TableColumns()
+  }
+  public nonisolated static var columnWidth: Int {
+    [Photo?.columnWidth, Note?.columnWidth].reduce(0, +)
+  }
+  public nonisolated static var tableName: String {
+    "posts"
+  }
+
+  // TODO:
+  public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+    if let photo = try decoder.decode(Photo.self) {
+      self = .photo(photo)
+    } else if let note = try decoder.decode(String.self) {
+      self = .note(note)
+    } else {
+      throw QueryDecodingError.missingRequiredColumn
+    }
+  }
 }
