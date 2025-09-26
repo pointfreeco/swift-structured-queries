@@ -9,6 +9,8 @@ public protocol DatabaseFunction<Input, Output> {
   /// A type representing the function's return value.
   associatedtype Output
 
+  associatedtype SwiftFunction
+
   /// The name of the function.
   var name: String { get }
 
@@ -18,6 +20,8 @@ public protocol DatabaseFunction<Input, Output> {
   /// Whether or not the function is deterministic (or "pure" or "referentially transparent"),
   /// _i.e._ given an input it will always return the same output.
   var isDeterministic: Bool { get }
+
+  var body: SwiftFunction { get }
 }
 
 /// A type representing a scalar database function.
@@ -46,5 +50,9 @@ extension ScalarDatabaseFunction {
     SQLQueryExpression(
       "\(quote: name)(\(Array(repeat each input).joined(separator: ", ")))"
     )
+  }
+
+  public var wrappedValue: SwiftFunction {
+    body
   }
 }

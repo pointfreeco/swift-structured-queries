@@ -31,6 +31,7 @@ extension SnapshotTests {
         └──────┘
         """
       }
+      #expect($isEnabled.wrappedValue())
     }
 
     @DatabaseFunction
