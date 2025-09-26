@@ -52,7 +52,7 @@ configuration.prepareDatabase { db in
 
 To define a type that works with a custom representation, i.e. anytime you use `@Column(as:)` in
 your data type, you can use the `as` parameter of the macro to specify those types. For example,
-if your model holds onto a date and you want to store that date as a 
+if your model holds onto a date and you want to store that date as a
 [unix timestamp](<doc:Foundation/Date/UnixTimeRepresentation-struct>) (i.e. double),
 then you can do so like this:
 
