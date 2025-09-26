@@ -374,5 +374,64 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func sqlComments() {
+      assertMacro {
+        """
+        #sql("SELECT 1 -- TODO: Implement logic")
+        """
+      } expansion: {
+        """
+        StructuredQueriesCore.SQLQueryExpression("SELECT 1 -- TODO: Implement logic")
+        """
+      }
+      assertMacro {
+        """
+        #sql("SELECT '1 -- TODO: Implement logic'")
+        """
+      } expansion: {
+        """
+        StructuredQueriesCore.SQLQueryExpression("SELECT '1 -- TODO: Implement logic'")
+        """
+      }
+      assertMacro {
+        #"""
+        #sql(
+          """
+          SELECT * FROM reminders  -- TODO: We should write columns out by hand
+          WHERE isCompleted        -- TODO: Double-check this logic
+          """
+        )
+        """#
+      } expansion: {
+        #"""
+        StructuredQueriesCore.SQLQueryExpression(
+          """
+          SELECT * FROM reminders  -- TODO: We should write columns out by hand
+          WHERE isCompleted        -- TODO: Double-check this logic
+          """)
+        """#
+      }
+      assertMacro {
+        #"""
+        #sql(
+          """
+          SELECT (  -- TODO: ;-)
+            1 = 1
+          )
+          """
+        )
+        """#
+      } expansion: {
+        #"""
+        StructuredQueriesCore.SQLQueryExpression(
+          """
+          SELECT (  -- TODO: ;-)
+            1 = 1
+          )
+          """)
+        """#
+      }
+    }
   }
 }

@@ -1,7 +1,7 @@
 import Foundation
 
 extension UUID {
-  /// A query expression representing a UUID as a lowercased string.
+  /// A query expression representing a UUID as an uppercased string.
   ///
   /// ```swift
   /// @Table
