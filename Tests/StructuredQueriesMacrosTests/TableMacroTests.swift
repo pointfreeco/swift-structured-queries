@@ -55,7 +55,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
@@ -165,10 +164,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, String?.columnWidth, Int.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               User.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -209,7 +208,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "users"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             self.email = try decoder.decode(String.self) ?? nil
@@ -278,7 +276,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foo"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
@@ -381,7 +378,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "bar"
           }
-
           public nonisolated static let schemaName: Swift.String? = "foo"
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let baz = try decoder.decode(Int.self)
@@ -497,7 +493,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.c1 = try decoder.decode(Swift.Bool.self) ?? true
             self.c2 = try decoder.decode(Swift.Int.self) ?? 1
@@ -560,7 +555,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
@@ -668,7 +662,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let bar else {
@@ -737,7 +730,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "users"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(String.self)
             let generated = try decoder.decode(String.self)
@@ -830,7 +822,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "users"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(String.self)
             let generated = try decoder.decode(String.self)
@@ -938,10 +929,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, String.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               User.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -978,7 +969,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "users"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             let name = try decoder.decode(String.self)
@@ -1053,7 +1043,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
@@ -1118,7 +1107,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
@@ -1181,7 +1169,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let `bar` = try decoder.decode(Int.self)
             guard let `bar` else {
@@ -1244,7 +1231,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(ID<Foo>.self)
             guard let bar else {
@@ -1307,7 +1293,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.bar = try decoder.decode() ?? ID<Foo>()
           }
@@ -1402,10 +1387,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [ID<User, UUID.BytesRepresentation>?.columnWidth, ID<User, UUID.BytesRepresentation>?.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               User.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
@@ -1438,7 +1423,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "users"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
             self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
@@ -1504,7 +1488,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "syncUps"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(String.self)
             guard let name else {
@@ -1603,10 +1586,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, String.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               SyncUp.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -1643,7 +1626,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "syncUps"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             let name = try decoder.decode(String.self)
@@ -1761,10 +1743,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, <#Type#>.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               SyncUp.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -1797,7 +1779,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "syncUps"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 5
@@ -1903,10 +1884,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, Color.HexRepresentation.columnWidth, Swift.String.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               RemindersList.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -1943,7 +1924,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "remindersLists"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
@@ -2031,7 +2011,6 @@ extension SnapshotTests {
         public nonisolated static var tableName: String {
           "foos"
         }
-
         public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
           let name = try decoder.decode(String.self)
           guard let name else {
@@ -2109,7 +2088,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "posts"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             if let photo = try decoder.decode(Photo.self) {
               self = .photo(photo)
@@ -2206,7 +2184,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "posts"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             if let photo = try decoder.decode(Photo.self) {
               self = .photo(photo)
@@ -2284,7 +2261,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "posts"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             if let photo = try decoder.decode(Photo.self) {
               self = .photo(photo)
@@ -2353,7 +2329,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "posts"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             if let note = try decoder.decode(String.self) {
               self = .note(note)
@@ -2420,7 +2395,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "posts"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             if let timestamp = try decoder.decode(Date.UnixTimeRepresentation.self) {
               self = .timestamp(timestamp)
@@ -2513,10 +2487,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               Foo.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -2545,7 +2519,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
@@ -2644,7 +2617,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             Foo.tableName
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
@@ -2752,10 +2724,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, String.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               Foo.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -2792,7 +2764,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "foos"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             let name = try decoder.decode(String.self)
@@ -2909,10 +2880,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, Swift.String.columnWidth, Date.UnixTimeRepresentation?.columnWidth, Priority?.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               Reminder.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -2953,7 +2924,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "reminders"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             self.title = try decoder.decode(Swift.String.self) ?? ""
@@ -3047,10 +3017,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [UUID.BytesRepresentation?.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               Reminder.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(UUID.BytesRepresentation.self) ?? nil
@@ -3079,7 +3049,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "reminders"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(UUID.BytesRepresentation.self)
             guard let id else {
@@ -3143,7 +3112,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "reminders"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
@@ -3240,10 +3208,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, Swift.String.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               Reminder.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -3276,7 +3244,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "reminders"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Int.self) ?? nil
             self.title = try decoder.decode(Swift.String.self) ?? ""
@@ -3371,10 +3338,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [UUID?.columnWidth, Timestamps.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               Row.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(UUID.self) ?? nil
@@ -3411,7 +3378,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "rows"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(UUID.self)
             let timestamps = try decoder.decode(Timestamps.self)
@@ -3507,10 +3473,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [ReminderTagID?.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               ReminderTag.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(ReminderTagID.self) ?? nil
@@ -3539,7 +3505,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "remindersTags"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(ReminderTagID.self)
             guard let id else {

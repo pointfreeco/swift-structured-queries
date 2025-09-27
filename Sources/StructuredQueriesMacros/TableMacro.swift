@@ -519,17 +519,31 @@ extension TableMacro: ExtensionMacro {
         )
         var columnQueryValueType = parameter.type.trimmed.rewritten(selfRewriter)
         var isColumnGroup = false
-        var isEphemeral = false
 
         for attribute in caseDecl.attributes {
           guard
             let attribute = attribute.as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
           else { continue }
-          isColumnGroup = isColumnGroup || attributeName == "Columns"
-          isEphemeral = isEphemeral || attributeName == "Ephemeral"
           guard
-            attributeName == "Column" || isEphemeral || isColumnGroup,
+            attributeName != "Ephemeral"
+          else {
+            diagnostics.append(
+              Diagnostic(
+                node: attribute,
+                message: MacroExpansionErrorMessage("Table case cannot be ephemeral"),
+                fixIt: .replace(
+                  message: MacroExpansionFixItMessage("Remove '@Ephemeral'"),
+                  oldNode: attribute,
+                  newNode: TokenSyntax("")
+                )
+              )
+            )
+            continue
+          }
+          isColumnGroup = isColumnGroup || attributeName == "Columns"
+          guard
+            attributeName == "Column" || isColumnGroup,
             case .argumentList(let arguments) = attribute.arguments
           else { continue }
 
@@ -580,8 +594,6 @@ extension TableMacro: ExtensionMacro {
             }
           }
         }
-        guard !isEphemeral
-        else { continue }
 
         columnWidths.append("\(columnQueryValueType).columnWidth")
 
@@ -698,32 +710,25 @@ extension TableMacro: ExtensionMacro {
                 memberwise initializer
                 """
               ),
-              fixIts: [
-                FixIt(
-                  message: MacroExpansionFixItMessage(
-                    """
-                    Insert ': <#Type#>'
-                    """
-                  ),
-                  changes: [
-                    .replace(
-                      oldNode: Syntax(binding),
-                      newNode: Syntax(
-                        binding
-                          .with(\.pattern.trailingTrivia, "")
-                          .with(
-                            \.typeAnnotation,
-                            TypeAnnotationSyntax(
-                              colon: .colonToken(trailingTrivia: .space),
-                              type: IdentifierTypeSyntax(name: "<#Type#>"),
-                              trailingTrivia: .space
-                            )
-                          )
-                      )
+              fixIt: .replace(
+                message: MacroExpansionFixItMessage(
+                  """
+                  Insert ': <#Type#>'
+                  """
+                ),
+                oldNode: binding,
+                newNode:
+                  binding
+                  .with(\.pattern.trailingTrivia, "")
+                  .with(
+                    \.typeAnnotation,
+                    TypeAnnotationSyntax(
+                      colon: .colonToken(trailingTrivia: .space),
+                      type: IdentifierTypeSyntax(name: "<#Type#>"),
+                      trailingTrivia: .space
                     )
-                  ]
-                )
-              ]
+                  )
+              )
             )
           )
           continue
@@ -818,8 +823,8 @@ extension TableMacro: ExtensionMacro {
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
         \(statics, separator: "\n")
         public \(nonisolated)static var columns: TableColumns { TableColumns() }
-        public \(nonisolated)static var columnWidth: Int { \(columnWidth) }\
-        public \(nonisolated)static var tableName: String { \(tableName) }
+        public \(nonisolated)static var columnWidth: Int { \(columnWidth) }
+        public \(nonisolated)static var tableName: String { \(tableName) }\
         \(letSchemaName)\(initDecoder)\(initFromOther)
         }
         """
@@ -843,9 +848,8 @@ extension TableMacro: MemberMacro {
       return []
     }
     let type = IdentifierTypeSyntax(name: declarationName.trimmed)
-    var allColumns: [
-      (name: TokenSyntax, firstName: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)
-    ] = []
+    var allColumns:
+      [(name: TokenSyntax, firstName: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] = []
     var allColumnNames: [Column] = []
     var writableColumns: [Column] = []
     var selectedColumns: [TokenSyntax] = []

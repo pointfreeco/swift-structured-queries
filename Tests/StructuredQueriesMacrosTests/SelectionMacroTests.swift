@@ -77,7 +77,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "playerAndTeams"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let player = try decoder.decode(Player.self)
             let team = try decoder.decode(Team.self)
@@ -184,7 +183,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "reminderTitleAndListTitles"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderTitle = try decoder.decode(String.self)
             self.listTitle = try decoder.decode(String.self) ?? nil
@@ -414,10 +412,10 @@ extension SnapshotTests {
             public nonisolated static var columnWidth: Int {
               [Int?.columnWidth, Swift.String.columnWidth].reduce(0, +)
             }
+
             public nonisolated static var tableName: String {
               Row.tableName
             }
-
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
@@ -450,7 +448,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "rows"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             self.title = try decoder.decode(Swift.String.self) ?? ""

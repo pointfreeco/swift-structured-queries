@@ -102,8 +102,6 @@ extension SelectionMacro: ExtensionMacro {
 
           switch argument.label {
           case nil:
-            var newArguments = arguments
-            newArguments.remove(at: argumentIndex)
             diagnostics.append(
               Diagnostic(
                 node: argument,
@@ -111,11 +109,9 @@ extension SelectionMacro: ExtensionMacro {
                   "'@Selection' column names are not supported"
                 ),
                 fixIt: .replace(
-                  message: MacroExpansionFixItMessage(
-                    "Remove '\(argument.trimmed)'"
-                  ),
-                  oldNode: Syntax(attribute),
-                  newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                  message: MacroExpansionFixItMessage("Remove '\(argument.trimmed)'"),
+                  oldNode: argument,
+                  newNode: TokenSyntax("")
                 )
               )
             )
@@ -150,11 +146,9 @@ extension SelectionMacro: ExtensionMacro {
                   "'@Selection' primary keys are not supported"
                 ),
                 fixIt: .replace(
-                  message: MacroExpansionFixItMessage(
-                    "Remove '\(argument.trimmed)'"
-                  ),
-                  oldNode: Syntax(attribute),
-                  newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                  message: MacroExpansionFixItMessage("Remove '\(argument.trimmed)'"),
+                  oldNode: attribute,
+                  newNode: attribute.with(\.arguments, .argumentList(newArguments))
                 )
               )
             )

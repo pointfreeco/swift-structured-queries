@@ -78,7 +78,6 @@ extension SnapshotTests {
           public nonisolated static var tableName: String {
             "reminderListWithCounts"
           }
-
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let reminderList = try decoder.decode(ReminderList.self)
             let remindersCount = try decoder.decode(Int.self)

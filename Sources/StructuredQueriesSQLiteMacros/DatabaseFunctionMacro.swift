@@ -129,9 +129,10 @@ extension DatabaseFunctionMacro: PeerMacro {
         return []
       }
       bodyArguments.append("\(parameter.type.trimmed)")
-      let type = (functionRepresentationIterator?.next()?.type ?? parameter.type).trimmed
-      representableInputTypes.append(type.trimmedDescription)
+      var type = (functionRepresentationIterator?.next()?.type ?? parameter.type)
       parameter.type = type.asQueryExpression()
+      type = type.trimmed
+      representableInputTypes.append(type.description)
       if let defaultValue = parameter.defaultValue,
         defaultValue.value.is(NilLiteralExprSyntax.self)
       {
@@ -244,7 +245,8 @@ extension DatabaseFunctionMacro: PeerMacro {
       public func invoke(
       _ decoder: inout some QueryDecoder
       ) throws -> StructuredQueriesCore.QueryBinding {
-        \(raw: (decodings + decodingUnwrappings).joined(separator: "\n"))\(raw: invocationBody)
+      \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
+      \(raw: invocationBody)
       }
       private struct InvalidInvocation: Error {}
       }
