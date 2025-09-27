@@ -24,7 +24,7 @@ extension SnapshotTests {
         ("remindersListID", "title", "isCompleted", "dueDate", "priority")
         VALUES
         (1, 'Groceries', 1, '2001-01-01 00:00:00.000', 3), (2, 'Haircut', 0, '1970-01-01 00:00:00.000', 1), (3, 'Schedule doctor appointment', 0, NULL, 2)
-        ON CONFLICT DO UPDATE SET "title" = ("reminders"."title" || ' Copy')
+        ON CONFLICT DO UPDATE SET "title" = ("reminders"."title") || (' Copy')
         RETURNING "id"
         """
       } results: {
@@ -223,6 +223,93 @@ extension SnapshotTests {
         └─────────────────────┘
         """
       }
+
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          // NB: 'WHERE 1' is required to avoid a SQL syntax error.
+          RemindersList.where { _ in true }.select { $0.title.lower() }
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title = $1.title + "-copy"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT lower("remindersLists"."title")
+        FROM "remindersLists"
+        WHERE 1
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("excluded"."title") || ('-copy')
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌──────────────────────────┐
+        │ Tag(                     │
+        │   id: 5,                 │
+        │   title: "business-copy" │
+        │ )                        │
+        ├──────────────────────────┤
+        │ Tag(                     │
+        │   id: 6,                 │
+        │   title: "family-copy"   │
+        │ )                        │
+        ├──────────────────────────┤
+        │ Tag(                     │
+        │   id: 7,                 │
+        │   title: "personal-copy" │
+        │ )                        │
+        └──────────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          // NB: 'WHERE 1' is required to avoid a SQL syntax error.
+          RemindersList.where { _ in true }.select { $0.title.lower() + "-copy" }
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title += "-2"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT (lower("remindersLists"."title")) || ('-copy')
+        FROM "remindersLists"
+        WHERE 1
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("tags"."title") || ('-2')
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌────────────────────────────┐
+        │ Tag(                       │
+        │   id: 5,                   │
+        │   title: "business-copy-2" │
+        │ )                          │
+        ├────────────────────────────┤
+        │ Tag(                       │
+        │   id: 6,                   │
+        │   title: "family-copy-2"   │
+        │ )                          │
+        ├────────────────────────────┤
+        │ Tag(                       │
+        │   id: 7,                   │
+        │   title: "personal-copy-2" │
+        │ )                          │
+        └────────────────────────────┘
+        """
+      }
     }
 
     @Test func draft() {
@@ -301,7 +388,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id") = (1)
         """
       } results: {
         """
@@ -695,7 +782,7 @@ extension SnapshotTests {
   }
 }
 
-@Table @Selection private struct Item {
+@Table private struct Item {
   var title = ""
   var quantity = 0
   @Column(as: [String].JSONRepresentation.self)

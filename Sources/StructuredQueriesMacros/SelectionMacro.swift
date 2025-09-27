@@ -25,11 +25,51 @@ extension SelectionMacro: ExtensionMacro {
       )
       return []
     }
+
     var allColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
     var decodingAssignments: [String] = []
     var diagnostics: [Diagnostic] = []
+
+    if declaration.hasMacroApplication("Table") {
+      context.diagnose(
+        Diagnostic(
+          node: node,
+          message: MacroExpansionWarningMessage(
+            """
+            '@Table' already contains the functionality provided by '@Selection'
+            """
+          ),
+          fixIt: .replace(
+            message: MacroExpansionFixItMessage("Remove '@Selection'"),
+            oldNode: node,
+            newNode: TokenSyntax("")
+          )
+        )
+      )
+    } else {
+      context.diagnose(
+        Diagnostic(
+          node: node,
+          message: MacroExpansionWarningMessage(
+            """
+            '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+            """
+          ),
+          fixIt: .replace(
+            message: MacroExpansionFixItMessage("Use '@Table' instead"),
+            oldNode: node,
+            newNode: node.with(
+              \.attributeName,
+              TypeSyntax(
+                node.attributeName.cast(IdentifierTypeSyntax.self).with(\.name, "Table")
+              )
+            )
+          )
+        )
+      )
+    }
 
     let selfRewriter = SelfRewriter(
       selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
@@ -62,8 +102,6 @@ extension SelectionMacro: ExtensionMacro {
 
           switch argument.label {
           case nil:
-            var newArguments = arguments
-            newArguments.remove(at: argumentIndex)
             diagnostics.append(
               Diagnostic(
                 node: argument,
@@ -71,11 +109,9 @@ extension SelectionMacro: ExtensionMacro {
                   "'@Selection' column names are not supported"
                 ),
                 fixIt: .replace(
-                  message: MacroExpansionFixItMessage(
-                    "Remove '\(argument.trimmed)'"
-                  ),
-                  oldNode: Syntax(attribute),
-                  newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                  message: MacroExpansionFixItMessage("Remove '\(argument.trimmed)'"),
+                  oldNode: argument,
+                  newNode: TokenSyntax("")
                 )
               )
             )
@@ -110,11 +146,9 @@ extension SelectionMacro: ExtensionMacro {
                   "'@Selection' primary keys are not supported"
                 ),
                 fixIt: .replace(
-                  message: MacroExpansionFixItMessage(
-                    "Remove '\(argument.trimmed)'"
-                  ),
-                  oldNode: Syntax(attribute),
-                  newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                  message: MacroExpansionFixItMessage("Remove '\(argument.trimmed)'"),
+                  oldNode: attribute,
+                  newNode: attribute.with(\.arguments, .argumentList(newArguments))
                 )
               )
             )
@@ -286,8 +320,6 @@ extension SelectionMacro: MemberMacro {
 
       let defaultValue: ExprSyntax? =
         binding.initializer.map(\.value.trimmed)
-      // TODO: Revisit this with multi-column support.
-      // ?? (columnQueryValueType?.isOptionalType == true ? ExprSyntax(NilLiteralExprSyntax()) : nil)
 
       allColumns.append((identifier, columnQueryValueType, defaultValue))
       let decodedType = columnQueryValueType?.asNonOptionalType()
@@ -335,7 +367,7 @@ extension SelectionMacro: MemberMacro {
         """
         \($0): some \(moduleName).QueryExpression\
         \($1.map { "<\($0)>" } ?? "")\
-        \($2.map { "= \(moduleName).BindQueryExpression(\($0))" } ?? "")
+        \($2.map { " = \(moduleName).BindQueryExpression(\($0))" } ?? "")
         """
       }
       .joined(separator: ",\n")

@@ -1,4 +1,4 @@
-extension Table where Self: _Selection {
+extension Table {
   /// A `CREATE TEMPORARY VIEW` statement.
   ///
   /// See <doc:Views> for more information.
@@ -21,7 +21,7 @@ extension Table where Self: _Selection {
 /// This type of statement is returned from ``Table/createTemporaryView(ifNotExists:as:)``.
 ///
 /// To learn more, see <doc:Views>.
-public struct TemporaryView<View: Table & _Selection, Selection: PartialSelectStatement>: Statement
+public struct TemporaryView<View: Table, Selection: PartialSelectStatement>: Statement
 where Selection.QueryValue == View {
   public typealias QueryValue = ()
   public typealias From = Never

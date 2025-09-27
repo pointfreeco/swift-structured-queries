@@ -53,6 +53,33 @@ public struct Updates<Base: Table> {
       )
     }
   }
+
+  public subscript<Value: QueryExpression>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Value>>
+  ) -> Updates<Value> {
+    get { Updates<Value> { _ in } }
+    set { updates.append(contentsOf: newValue.updates) }
+  }
+
+  @_disfavoredOverload
+  public subscript<Value: QueryExpression>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Value>>
+  ) -> Value.QueryOutput {
+    @available(*, unavailable)
+    get { fatalError() }
+    set {
+      func open<Root, V>(
+        _ column: some WritableTableColumnExpression<Root, V>
+      ) -> QueryFragment {
+        Value(queryOutput: newValue)[keyPath: column.keyPath as! KeyPath<Value, V>].queryFragment
+      }
+      updates.append(
+        contentsOf: Value.TableColumns.writableColumns.map { column in
+          (column.name, open(column))
+        }
+      )
+    }
+  }
 }
 
 extension Updates: QueryExpression {

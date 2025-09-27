@@ -224,8 +224,8 @@ extension SnapshotTests {
         """
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "remindersLists"
-        LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
-        WHERE ("remindersLists"."id" IN (4)) AND "reminders"."isCompleted"
+        LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
+        WHERE ("remindersLists"."id") IN ((4)) AND "reminders"."isCompleted"
         """
       } results: {
         """

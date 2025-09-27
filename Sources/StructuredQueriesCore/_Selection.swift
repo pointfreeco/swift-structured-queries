@@ -8,6 +8,10 @@ public protocol _SelectedColumns<QueryValue>: QueryExpression {
 
 extension _SelectedColumns {
   public var queryFragment: QueryFragment {
-    selection.map { "\($1) AS \(quote: $0)" as QueryFragment }.joined(separator: ", ")
+    if _isSelecting {
+      return selection.map { "\($1) AS \(quote: $0)" }.joined(separator: ", ")
+    } else {
+      return selection.map { $1 }.joined(separator: ", ")
+    }
   }
 }

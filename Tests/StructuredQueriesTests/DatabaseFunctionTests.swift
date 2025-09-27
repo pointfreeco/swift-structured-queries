@@ -288,10 +288,10 @@ extension SnapshotTests {
           .select { $joinTags($2.jsonGroupArray()) }
       ) {
         """
-        SELECT "joinTags"(json_group_array(CASE WHEN ("tags"."rowid" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id" IS NOT NULL)))
+        SELECT "joinTags"(json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id") IS NOT (NULL)))
         FROM "reminders"
-        LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
-        LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
+        LEFT JOIN "remindersTags" ON ("reminders"."id") = ("remindersTags"."reminderID")
+        LEFT JOIN "tags" ON ("remindersTags"."tagID") = ("tags"."id")
         GROUP BY "reminders"."id"
         """
       } results: {
@@ -313,18 +313,134 @@ extension SnapshotTests {
     }
 
     @DatabaseFunction(as: ((Reminder.JSONRepresentation, Bool) -> Bool).self)
-    func isValid(_ reminder: Reminder, _ override: Bool = false) -> Bool {
+    func isJSONValid(_ reminder: Reminder, _ override: Bool = false) -> Bool {
       !reminder.title.isEmpty || override
     }
     @Test func jsonObject() {
+      $isJSONValid.install(database.handle)
+
+      assertQuery(
+        Reminder.select { $isJSONValid($0.jsonObject(), true) }.limit(1)
+      ) {
+        """
+        SELECT "isJSONValid"(json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")), 1)
+        FROM "reminders"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    func isValid(_ reminder: Reminder, _ override: Bool = false) -> Bool {
+      !reminder.title.isEmpty || override
+    }
+    @Test func table() {
       $isValid.install(database.handle)
 
       assertQuery(
-        Reminder.select { $isValid($0.jsonObject(), true) }.limit(1)
+        Reminder.select { $isValid($0, true) }.limit(1)
       ) {
         """
-        SELECT "isValid"(json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")), 1)
+        SELECT "isValid"("reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", 1)
         FROM "reminders"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+      assertQuery(
+        Reminder
+          .select { _ in
+            $isValid(Reminder.Columns(id: 1, remindersListID: 1), true)
+          }
+          .limit(1)
+      ) {
+        """
+        SELECT "isValid"(1, NULL, NULL, 0, 0, '', NULL, 1, '', '2040-02-14 23:31:30.000', 1)
+        FROM "reminders"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    func isNotNull(_ tag: Tag?) -> Bool {
+      tag != nil
+    }
+    @Test func optionalTable() {
+      $isNotNull.install(database.handle)
+
+      assertQuery(
+        Tag?.select { $isNotNull($0) }.limit(1)
+      ) {
+        """
+        SELECT "isNotNull"("tags"."id", "tags"."title")
+        FROM "tags"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+    }
+
+    enum T: AliasName {}
+    @DatabaseFunction(as: ((TableAlias<Tag, T>) -> Bool).self)
+    func isValidAlias(_ tag: Tag) -> Bool {
+      !tag.title.isEmpty
+    }
+    @Test func tableAlias() {
+      $isValidAlias.install(database.handle)
+
+      assertQuery(
+        Tag.as(T.self).select { $isValidAlias($0) }.limit(1)
+      ) {
+        """
+        SELECT "isValidAlias"("ts"."id", "ts"."title")
+        FROM "tags" AS "ts"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        └──────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    func isValidDraft(_ tag: Tag.Draft) -> Bool {
+      !tag.title.isEmpty
+    }
+    @Test func tableDraft() {
+      $isValidDraft.install(database.handle)
+
+      assertQuery(
+        Tag.Draft.select { $isValidDraft($0) }.limit(1)
+      ) {
+        """
+        SELECT "isValidDraft"("tags"."id", "tags"."title")
+        FROM "tags"
         LIMIT 1
         """
       } results: {

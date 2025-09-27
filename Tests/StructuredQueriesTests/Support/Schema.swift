@@ -111,7 +111,7 @@ extension Database {
     try execute(
       """
       CREATE TABLE "reminders" (
-        "id" INTEGER NOT NULL  PRIMARY KEY AUTOINCREMENT,
+        "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         "assignedUserID" INTEGER,
         "dueDate" DATE,
         "isCompleted" BOOLEAN NOT NULL DEFAULT 0,

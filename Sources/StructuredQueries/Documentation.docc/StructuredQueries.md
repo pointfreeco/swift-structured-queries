@@ -26,6 +26,7 @@ StructuredQueries also ships SQLite-specific helpers:
 
 - ``Table(_:)``
 - ``Column(_:as:primaryKey:)``
+- ``Columns(primaryKey:)``
 - ``Ephemeral()``
 - ``Selection()``
 - ``sql(_:as:)``

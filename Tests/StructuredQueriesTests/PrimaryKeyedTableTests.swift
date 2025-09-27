@@ -31,8 +31,8 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "reminders"
-        SET "title" = ("reminders"."title" || '!!!')
-        WHERE ("reminders"."id" IN (1))
+        SET "title" = ("reminders"."title") || ('!!!')
+        WHERE ("reminders"."id") IN ((1))
         RETURNING "title"
         """
       } results: {
@@ -49,8 +49,8 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "reminders"
-        SET "title" = ("reminders"."title" || '???')
-        WHERE ("reminders"."id" IN (1))
+        SET "title" = ("reminders"."title") || ('???')
+        WHERE ("reminders"."id") IN ((1))
         RETURNING "title"
         """
       } results: {
@@ -69,7 +69,7 @@ extension SnapshotTests {
       ) {
         """
         DELETE FROM "reminders"
-        WHERE ("reminders"."id" IN (1))
+        WHERE ("reminders"."id") IN ((1))
         RETURNING "reminders"."id"
         """
       } results: {
@@ -86,7 +86,7 @@ extension SnapshotTests {
       ) {
         """
         DELETE FROM "reminders"
-        WHERE ("reminders"."id" IN (2))
+        WHERE ("reminders"."id") IN ((2))
         RETURNING "reminders"."id"
         """
       } results: {
@@ -105,7 +105,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" IN (1))
+        WHERE ("reminders"."id") IN ((1))
         """
       } results: {
         """
@@ -121,7 +121,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" IN (1))
+        WHERE ("reminders"."id") IN ((1))
         """
       } results: {
         """
@@ -137,7 +137,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" IN (2))
+        WHERE ("reminders"."id") IN ((2))
         """
       } results: {
         """
@@ -153,7 +153,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" IN (2, 4, 6))
+        WHERE ("reminders"."id") IN ((2), (4), (6))
         """
       } results: {
         """
@@ -171,7 +171,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" IN ((
+        WHERE ("reminders"."id") IN (((
           SELECT "reminders"."id"
           FROM "reminders"
         )))
@@ -199,7 +199,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."title"
         FROM "reminders"
-        WHERE ("reminders"."id" IN (2))
+        WHERE ("reminders"."id") IN ((2))
         """
       } results: {
         """
@@ -220,8 +220,8 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title", "remindersLists"."title"
         FROM "reminders"
-        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
-        WHERE ("reminders"."id" IN (2))
+        JOIN "remindersLists" ON ("reminders"."remindersListID") = ("remindersLists"."id")
+        WHERE ("reminders"."id") IN ((2))
         """
       } results: {
         """
@@ -260,7 +260,7 @@ extension SnapshotTests {
         """
         SELECT "rows"."id", "rows"."isDeleted", "rows"."isNotDeleted"
         FROM "rows"
-        WHERE ("rows"."id" IN ('00000000-0000-0000-0000-000000000001'))
+        WHERE ("rows"."id") IN (('00000000-0000-0000-0000-000000000001'))
         """
       } results: {
         """
@@ -306,7 +306,7 @@ extension SnapshotTests {
         """
         UPDATE "rows"
         SET "isDeleted" = 1
-        WHERE ("rows"."id" = '00000000-0000-0000-0000-000000000002')
+        WHERE ("rows"."id") = ('00000000-0000-0000-0000-000000000002')
         RETURNING "id", "isDeleted", "isNotDeleted"
         """
       } results: {

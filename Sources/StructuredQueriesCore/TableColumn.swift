@@ -1,23 +1,32 @@
+public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
+  associatedtype Root: Table
+  associatedtype Value: QueryRepresentable
+
+  var _names: [String] { get }
+
+  /// The table model key path associated with this table column.
+  var keyPath: KeyPath<Root, Value.QueryOutput> { get }
+}
+
 /// A type representing a table column.
 ///
-/// This protocol has a single conformance, ``TableColumn``, and simply provides type erasure over
-/// a table's columns. You should not conform to this protocol directly.
-public protocol TableColumnExpression<Root, Value>: QueryExpression where Value == QueryValue {
-  associatedtype Root: Table
-  associatedtype Value: QueryRepresentable & QueryBindable
-
+/// This protocol provides type erasure over a table's columns. You should not conform to this
+/// protocol directly.
+public protocol TableColumnExpression<Root, Value>: _TableColumnExpression
+where Value: QueryBindable {
   /// The name of the table column.
   var name: String { get }
 
   /// The default value of the table column.
   var defaultValue: Value.QueryOutput? { get }
 
-  /// The table model key path associated with this table column.
-  var keyPath: KeyPath<Root, Value.QueryOutput> { get }
-
   func _aliased<Name: AliasName>(
     _ alias: Name.Type
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
+}
+
+extension TableColumnExpression {
+  public var _names: [String] { [name] }
 }
 
 /// A type representing a _writable_ table column, _i.e._ not a generated column.
@@ -48,11 +57,7 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 
   public let defaultValue: Value.QueryOutput?
 
-  let _keyPath: KeyPath<Root, Value.QueryOutput>
-
-  public var keyPath: KeyPath<Root, Value.QueryOutput> {
-    _keyPath
-  }
+  public let keyPath: KeyPath<Root, Value.QueryOutput>
 
   public init(
     _ name: String,
@@ -61,7 +66,7 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
   ) {
     self.name = name
     self.defaultValue = defaultValue
-    self._keyPath = keyPath
+    self.keyPath = keyPath
   }
 
   public init(
@@ -71,7 +76,7 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
   ) where Value == Value.QueryOutput {
     self.name = name
     self.defaultValue = defaultValue
-    self._keyPath = keyPath
+    self.keyPath = keyPath
   }
 
   public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
@@ -87,7 +92,7 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
   ) -> any WritableTableColumnExpression<TableAlias<Root, Name>, Value> {
     TableColumn<TableAlias<Root, Name>, Value>(
       name,
-      keyPath: \.[member: \Value.self, column: _keyPath]
+      keyPath: \.[member: \Value.self, column: keyPath]
     )
   }
 }
@@ -117,11 +122,7 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
 
   public let defaultValue: Value.QueryOutput?
 
-  let _keyPath: KeyPath<Root, Value.QueryOutput>
-
-  public var keyPath: KeyPath<Root, Value.QueryOutput> {
-    _keyPath
-  }
+  public let keyPath: KeyPath<Root, Value.QueryOutput>
 
   public init(
     _ name: String,
@@ -130,7 +131,7 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
   ) {
     self.name = name
     self.defaultValue = defaultValue
-    self._keyPath = keyPath
+    self.keyPath = keyPath
   }
 
   public init(
@@ -140,7 +141,7 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
   ) where Value == Value.QueryOutput {
     self.name = name
     self.defaultValue = defaultValue
-    self._keyPath = keyPath
+    self.keyPath = keyPath
   }
 
   public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
@@ -156,7 +157,7 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value> {
     TableColumn<TableAlias<Root, Name>, Value>(
       name,
-      keyPath: \.[member: \Value.self, column: _keyPath]
+      keyPath: \.[member: \Value.self, column: keyPath]
     )
   }
 }

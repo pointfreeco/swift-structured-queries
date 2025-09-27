@@ -168,7 +168,7 @@ extension SnapshotTests {
         )
         FROM "reminders"
         WHERE ("reminders"."priority" < (SELECT avg(CAST("reminders"."priority" AS INTEGER))
-        FROM "reminders") OR ("reminders"."priority" IS NULL))
+        FROM "reminders")) OR (("reminders"."priority") IS (NULL))
         ORDER BY "reminders"."priority" DESC
         """
       } results: {
@@ -196,7 +196,7 @@ extension SnapshotTests {
         """
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", count("reminders"."id")
         FROM "remindersLists"
-        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         """
       } results: {
@@ -238,8 +238,8 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", group_concat("tags"."title")
         FROM "reminders"
-        JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
-        JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
+        JOIN "remindersTags" ON ("reminders"."id") = ("remindersTags"."reminderID")
+        JOIN "tags" ON ("remindersTags"."tagID") = ("tags"."id")
         GROUP BY "reminders"."id"
         """
       } results: {

@@ -1,8 +1,9 @@
 import StructuredQueries
 
 // NB: This is a compile-time test for a 'select' overload.
-@Selection
+@Table
 private struct ReminderRow {
+  @Columns
   let reminder: Reminder
   let isPastDue: Bool
   @Column(as: [String].JSONRepresentation.self)

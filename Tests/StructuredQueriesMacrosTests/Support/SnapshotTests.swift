@@ -12,6 +12,7 @@ import Testing
       "_Draft": TableMacro.self,
       "bind": BindMacro.self,
       "Column": ColumnMacro.self,
+      "Columns": ColumnsMacro.self,
       "DatabaseFunction": DatabaseFunctionMacro.self,
       "Ephemeral": EphemeralMacro.self,
       "Selection": SelectionMacro.self,

@@ -31,7 +31,9 @@
 - ``TableColumns``
 - ``TableColumn``
 - ``TableColumnExpression``
+- ``ColumnGroup``
 - ``TableDefinition``
+- ``TableExpression``
 
 ### Scoping
 

@@ -25,10 +25,10 @@ extension SnapshotTests {
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
           SET "position" = (
-            SELECT (coalesce(max("remindersLists"."position"), -1) + 1)
+            SELECT (coalesce(max("remindersLists"."position"), -1)) + (1)
             FROM "remindersLists"
           )
-          WHERE ("remindersLists"."id" = "new"."id");
+          WHERE ("remindersLists"."id") = ("new"."id");
         END
         """
       }
@@ -57,7 +57,7 @@ extension SnapshotTests {
           FOR EACH ROW BEGIN
             UPDATE "reminders"
             SET "dueDate" = '2001-01-01 00:00:00.000'
-            WHERE ("reminders"."id" = "new"."id");
+            WHERE ("reminders"."id") = ("new"."id");
           END
           """
         }
@@ -91,8 +91,8 @@ extension SnapshotTests {
         AFTER UPDATE ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
-          SET "position" = ("remindersLists"."position" + 1)
-          WHERE ("remindersLists"."rowid" = "new"."rowid");
+          SET "position" = ("remindersLists"."position") + (1)
+          WHERE ("remindersLists"."rowid") = ("new"."rowid");
         END
         """
       }
@@ -109,7 +109,7 @@ extension SnapshotTests {
         FOR EACH ROW BEGIN
           UPDATE "reminders"
           SET "updatedAt" = datetime('subsec')
-          WHERE ("reminders"."rowid" = "new"."rowid");
+          WHERE ("reminders"."rowid") = ("new"."rowid");
         END
         """
       }
@@ -126,7 +126,7 @@ extension SnapshotTests {
         FOR EACH ROW BEGIN
           UPDATE "reminders"
           SET "updatedAt" = customDate()
-          WHERE ("reminders"."rowid" = "new"."rowid");
+          WHERE ("reminders"."rowid") = ("new"."rowid");
         END
         """
       }
@@ -155,12 +155,12 @@ extension SnapshotTests {
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
           SET "position" = (
-            SELECT (coalesce(max("remindersLists"."position"), -1) + 1)
+            SELECT (coalesce(max("remindersLists"."position"), -1)) + (1)
             FROM "remindersLists"
           )
-          WHERE ("remindersLists"."id" = "new"."id");
+          WHERE ("remindersLists"."id") = ("new"."id");
           DELETE FROM "remindersLists"
-          WHERE ("remindersLists"."position" = 0);
+          WHERE ("remindersLists"."position") = (0);
           SELECT "remindersLists"."position"
           FROM "remindersLists";
         END
