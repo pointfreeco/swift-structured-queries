@@ -1,4 +1,3 @@
-import CasePaths
 import Dependencies
 import Foundation
 import InlineSnapshotTesting
@@ -6,6 +5,10 @@ import StructuredQueries
 import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite
+
+#if StructuredQueriesCasePaths
+  import CasePaths
+#endif
 
 extension SnapshotTests {
   @Suite struct NestedTests {
