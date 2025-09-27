@@ -432,107 +432,109 @@ extension SnapshotTests {
       }
     }
 
-    @Test func `enum`() throws {
-      try db.execute(
-        #sql(
-          """
-          CREATE TABLE "posts" (
-            "url" TEXT,
-            "note" TEXT
+    #if StructuredQueriesCasePaths
+      @Test func `enum`() throws {
+        try db.execute(
+          #sql(
+            """
+            CREATE TABLE "posts" (
+              "url" TEXT,
+              "note" TEXT
+            )
+            """
           )
-          """
         )
-      )
-      assertQuery(
-        Post.insert {
-          Post.note("Hello world")
-          Post.photo(Photo(url: URL(fileURLWithPath: "/tmp/poster.png")))
+        assertQuery(
+          Post.insert {
+            Post.note("Hello world")
+            Post.photo(Photo(url: URL(fileURLWithPath: "/tmp/poster.png")))
+          }
+        ) {
+          """
+          INSERT INTO "posts"
+          ("url", "note")
+          VALUES
+          (NULL, 'Hello world'), ('file:///tmp/poster.png', NULL)
+          """
         }
-      ) {
-        """
-        INSERT INTO "posts"
-        ("url", "note")
-        VALUES
-        (NULL, 'Hello world'), ('file:///tmp/poster.png', NULL)
-        """
+        assertQuery(
+          Post.all
+        ) {
+          """
+          SELECT "posts"."url", "posts"."note"
+          FROM "posts"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────┐
+          │ Post.note("Hello world")                  │
+          ├───────────────────────────────────────────┤
+          │ Post.photo(                               │
+          │   Photo(url: URL(file:///tmp/poster.png)) │
+          │ )                                         │
+          └───────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Values(Post.Selection.note("Goodnight moon"))
+        ) {
+          """
+          SELECT NULL, 'Goodnight moon'
+          """
+        } results: {
+          """
+          ┌─────────────────────────────┐
+          │ Post.note("Goodnight moon") │
+          └─────────────────────────────┘
+          """
+        }
       }
-      assertQuery(
-        Post.all
-      ) {
-        """
-        SELECT "posts"."url", "posts"."note"
-        FROM "posts"
-        """
-      } results: {
-        """
-        ┌───────────────────────────────────────────┐
-        │ Post.note("Hello world")                  │
-        ├───────────────────────────────────────────┤
-        │ Post.photo(                               │
-        │   Photo(url: URL(file:///tmp/poster.png)) │
-        │ )                                         │
-        └───────────────────────────────────────────┘
-        """
-      }
-      assertQuery(
-        Values(Post.Selection.note("Goodnight moon"))
-      ) {
-        """
-        SELECT NULL, 'Goodnight moon'
-        """
-      } results: {
-        """
-        ┌─────────────────────────────┐
-        │ Post.note("Goodnight moon") │
-        └─────────────────────────────┘
-        """
-      }
-    }
 
-    @Test func enumRepresentation() throws {
-      assertQuery(
-        Notes.list(["Blob", "Jr"])
-      ) {
-        """
-        SELECT '[
-          "Blob",
-          "Jr"
-        ]' AS "list"
-        """
-      } results: {
-        """
-        ┌──────────────────┐
-        │ Notes.list(      │
-        │   [              │
-        │     [0]: "Blob", │
-        │     [1]: "Jr"    │
-        │   ]              │
-        │ )                │
-        └──────────────────┘
-        """
+      @Test func enumRepresentation() throws {
+        assertQuery(
+          Notes.list(["Blob", "Jr"])
+        ) {
+          """
+          SELECT '[
+            "Blob",
+            "Jr"
+          ]' AS "list"
+          """
+        } results: {
+          """
+          ┌──────────────────┐
+          │ Notes.list(      │
+          │   [              │
+          │     [0]: "Blob", │
+          │     [1]: "Jr"    │
+          │   ]              │
+          │ )                │
+          └──────────────────┘
+          """
+        }
+        assertQuery(
+          Values(Notes.Columns.list(#bind(["Blob", "Jr"])))
+        ) {
+          """
+          SELECT '[
+            "Blob",
+            "Jr"
+          ]'
+          """
+        } results: {
+          """
+          ┌──────────────────┐
+          │ Notes.list(      │
+          │   [              │
+          │     [0]: "Blob", │
+          │     [1]: "Jr"    │
+          │   ]              │
+          │ )                │
+          └──────────────────┘
+          """
+        }
       }
-      assertQuery(
-        Values(Notes.Columns.list(#bind(["Blob", "Jr"])))
-      ) {
-        """
-        SELECT '[
-          "Blob",
-          "Jr"
-        ]'
-        """
-      } results: {
-        """
-        ┌──────────────────┐
-        │ Notes.list(      │
-        │   [              │
-        │     [0]: "Blob", │
-        │     [1]: "Jr"    │
-        │   ]              │
-        │ )                │
-        └──────────────────┘
-        """
-      }
-    }
+    #endif
   }
 }
 
@@ -604,15 +606,17 @@ private struct Note {
   let body: String
 }
 
-@CasePathable @Table
-private enum Post {
-  @Columns
-  case photo(Photo)
-  case note(String = "")
-}
+#if StructuredQueriesCasePaths
+  @CasePathable @Table
+  private enum Post {
+    @Columns
+    case photo(Photo)
+    case note(String = "")
+  }
 
-@CasePathable @Table
-private enum Notes {
-  @Column(as: [String].JSONRepresentation.self)
-  case list([String])
-}
+  @CasePathable @Table
+  private enum Notes {
+    @Column(as: [String].JSONRepresentation.self)
+    case list([String])
+  }
+#endif
