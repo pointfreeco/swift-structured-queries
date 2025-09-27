@@ -153,13 +153,26 @@ extension TableMacro: ExtensionMacro {
         guard
           let property = member.decl.as(VariableDeclSyntax.self),
           !property.isStatic,
-          !property.isComputed,
+          !property.isComputed
+        else { continue }
+        guard
           // TODO: Support multi-binding variables where '@Column{,s}' macro is omitted?
-          // TODO: Or diagnose?
           property.bindings.count == 1,
           let binding = property.bindings.first,
           let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed
-        else { continue }
+        else {
+          diagnostics.append(
+            Diagnostic(
+              node: property,
+              message: MacroExpansionErrorMessage(
+                """
+                Table property must contain a single value representing one or more columns
+                """
+              ),
+            )
+          )
+          continue
+        }
 
         var columnName = ExprSyntax(
           StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
@@ -499,19 +512,30 @@ extension TableMacro: ExtensionMacro {
     } else if declaration.is(EnumDeclSyntax.self) {
       var decodings: [String] = []
       for member in declaration.memberBlock.members {
+        guard let caseDecl = member.decl.as(EnumCaseDeclSyntax.self) else { continue }
         guard
-          let caseDecl = member.decl.as(EnumCaseDeclSyntax.self),
           // TODO: Support multi-element cases where '@Column{,s}' macro is omitted?
-          // TODO: Or diagnose?
           caseDecl.elements.count == 1,
           let caseElement = caseDecl.elements.first,
           let parameters = caseElement.parameterClause?.parameters,
           // TODO: Support enum cases with multiple associated values?
-          // TODO: Or diagnose?
           // TODO: Support enum case with no associated value?
           parameters.count == 1,
           let parameter = parameters.first
-        else { continue }
+        else {
+          diagnostics.append(
+            Diagnostic(
+              node: caseDecl,
+              message: MacroExpansionErrorMessage(
+                """
+                Table case must contain a single associated value representing one or more \
+                optional columns
+                """
+              ),
+            )
+          )
+          continue
+        }
 
         let identifier = caseElement.name
         var columnName = ExprSyntax(
