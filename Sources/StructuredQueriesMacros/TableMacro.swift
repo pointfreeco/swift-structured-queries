@@ -606,11 +606,25 @@ extension TableMacro: ExtensionMacro {
               columnQueryValueType = "\(raw: base.rewritten(selfRewriter).trimmedDescription)"
 
             case .some(let label) where label.text == "primaryKey":
-              // TODO: Add diagnostic: primary key cases are not supported
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage(
+                    "Argument 'primaryKey' is not supported on enum table columns"
+                  )
+                )
+              )
               continue
 
             case .some(let label) where label.text == "generated":
-              // TODO: Add diagnostic: generated cases are not supported
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage(
+                    "Argument 'generated' is not supported on enum table columns"
+                  )
+                )
+              )
               continue
 
             case let argument?:
