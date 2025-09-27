@@ -3,6 +3,12 @@
 import CompilerPluginSupport
 import PackageDescription
 
+#if canImport(FoundationEssentials)
+  import FoundationEssentials
+#else
+  import Foundation
+#endif
+
 let package = Package(
   name: "swift-structured-queries",
   platforms: [
@@ -35,12 +41,16 @@ let package = Package(
   ],
   traits: [
     .trait(
+      name: "StructuredQueriesCasePaths",
+      description: "Introduce enum table support to StructuredQueries."
+    ),
+    .trait(
       name: "StructuredQueriesTagged",
-      description: "Introduce StructuredQueries conformances to the swift-tagged package.",
-      enabledTraits: []
-    )
+      description: "Introduce StructuredQueries conformances to the swift-tagged package."
+    ),
   ],
   dependencies: [
+    .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
     .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.1"),
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
@@ -61,6 +71,11 @@ let package = Package(
       name: "StructuredQueriesCore",
       dependencies: [
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+        .product(
+          name: "CasePaths",
+          package: "swift-case-paths",
+          condition: .when(traits: ["StructuredQueriesCasePaths"])
+        ),
         .product(
           name: "Tagged",
           package: "swift-tagged",
@@ -128,6 +143,7 @@ let package = Package(
         .product(name: "CustomDump", package: "swift-custom-dump"),
         .product(name: "Dependencies", package: "swift-dependencies"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+        .product(name: "Tagged", package: "swift-tagged"),
       ]
     ),
 
@@ -140,6 +156,19 @@ let package = Package(
   ],
   swiftLanguageModes: [.v6]
 )
+
+// NB: For local testing in Xcode:
+// if true {
+if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil {
+  package.traits.insert(
+    .default(
+      enabledTraits: [
+        "StructuredQueriesCasePaths",
+        "StructuredQueriesTagged",
+      ]
+    )
+  )
+}
 
 let swiftSettings: [SwiftSetting] = [
   .enableUpcomingFeature("MemberImportVisibility")

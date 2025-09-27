@@ -82,10 +82,10 @@ extension SnapshotTests {
             let player = try decoder.decode(Player.self)
             let team = try decoder.decode(Team.self)
             guard let player else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let team else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.player = player
             self.team = team
@@ -189,7 +189,7 @@ extension SnapshotTests {
             let reminderTitle = try decoder.decode(String.self)
             self.listTitle = try decoder.decode(String.self) ?? nil
             guard let reminderTitle else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.reminderTitle = reminderTitle
           }
@@ -455,7 +455,7 @@ extension SnapshotTests {
             let id = try decoder.decode(Int.self)
             self.title = try decoder.decode(Swift.String.self) ?? ""
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }

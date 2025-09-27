@@ -59,7 +59,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -175,7 +175,7 @@ extension SnapshotTests {
               self.email = try decoder.decode(String.self) ?? nil
               let age = try decoder.decode(Int.self)
               guard let age else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.age = age
             }
@@ -215,10 +215,10 @@ extension SnapshotTests {
             self.email = try decoder.decode(String.self) ?? nil
             let age = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let age else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.age = age
@@ -282,7 +282,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -386,7 +386,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let baz = try decoder.decode(Int.self)
             guard let baz else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.baz = baz
           }
@@ -564,7 +564,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -672,7 +672,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -742,10 +742,10 @@ extension SnapshotTests {
             let name = try decoder.decode(String.self)
             let generated = try decoder.decode(String.self)
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let generated else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.name = name
             self.generated = generated
@@ -835,10 +835,10 @@ extension SnapshotTests {
             let name = try decoder.decode(String.self)
             let generated = try decoder.decode(String.self)
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let generated else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.name = name
             self.generated = generated
@@ -947,7 +947,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.name = name
             }
@@ -984,13 +984,13 @@ extension SnapshotTests {
             let name = try decoder.decode(String.self)
             let generated = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let generated else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.name = name
@@ -1057,7 +1057,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -1122,7 +1122,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -1185,7 +1185,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let `bar` = try decoder.decode(Int.self)
             guard let `bar` else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.`bar` = `bar`
           }
@@ -1248,7 +1248,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(ID<Foo>.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -1443,7 +1443,7 @@ extension SnapshotTests {
             let id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
             self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -1508,7 +1508,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(String.self)
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.name = name
           }
@@ -1612,7 +1612,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.name = name
             }
@@ -1648,10 +1648,10 @@ extension SnapshotTests {
             let id = try decoder.decode(Int.self)
             let name = try decoder.decode(String.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.name = name
@@ -1802,7 +1802,7 @@ extension SnapshotTests {
             let id = try decoder.decode(Int.self)
             self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 5
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -1949,7 +1949,7 @@ extension SnapshotTests {
             self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
             self.name = try decoder.decode(Swift.String.self) ?? ""
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2035,7 +2035,7 @@ extension SnapshotTests {
         public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
           let name = try decoder.decode(String.self)
           guard let name else {
-            throw QueryDecodingError.missingRequiredColumn
+            throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
           }
           self.name = name
         }
@@ -2043,6 +2043,396 @@ extension SnapshotTests {
       """#
     }
   }
+
+  #if StructuredQueriesCasePaths
+    @Test func enumBasics() {
+      assertMacro {
+        """
+        @CasePathable @Table
+        enum Post {
+          @Columns
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let photo = StructuredQueriesCore.ColumnGroup<QueryValue, Photo?>(keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore.TableColumn<QueryValue, String?>("note", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [StructuredQueriesCore.ColumnGroup.allColumns(keyPath: \QueryValue.photo), [QueryValue.columns.note]].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [StructuredQueriesCore.ColumnGroup.writableColumns(keyPath: \QueryValue.photo), [QueryValue.columns.note]].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.photo), \(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func photo(
+              _ photo: some StructuredQueriesCore.QueryExpression<Photo>
+            ) -> Self {
+              Self(
+                allColumns: [photo._allColumns, Photo?(queryOutput: nil)._allColumns].flatMap(\.self)
+              )
+            }
+            public static func note(
+              _ note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              Self(
+                allColumns: [String?(queryOutput: nil)._allColumns, note._allColumns].flatMap(\.self)
+              )
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var columnWidth: Int {
+            [Photo.columnWidth, String.columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let photo = try decoder.decode(Photo.self) {
+              self = .photo(photo)
+            } else if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumDiagnostic() {
+      assertMacro {
+        """
+        @Table
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        ┬─────
+        ╰─ 🛑 '@Table' enum type missing required '@CasePathable' macro application
+           ✏️ Insert '@CasePathable'
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } fixes: {
+        """
+        @Table @CasePathable
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let photo = StructuredQueriesCore.TableColumn<QueryValue, Photo?>("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore.TableColumn<QueryValue, String?>("note", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [[QueryValue.columns.photo], [QueryValue.columns.note]].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [[QueryValue.columns.photo], [QueryValue.columns.note]].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.photo), \(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func photo(
+              _ photo: some StructuredQueriesCore.QueryExpression<Photo>
+            ) -> Self {
+              Self(
+                allColumns: [photo._allColumns, Photo?(queryOutput: nil)._allColumns].flatMap(\.self)
+              )
+            }
+            public static func note(
+              _ note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              Self(
+                allColumns: [String?(queryOutput: nil)._allColumns, note._allColumns].flatMap(\.self)
+              )
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var columnWidth: Int {
+            [Photo.columnWidth, String.columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let photo = try decoder.decode(Photo.self) {
+              self = .photo(photo)
+            } else if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumFirstNames() {
+      assertMacro {
+        """
+        @CasePathable @Table
+        enum Post {
+          case photo(Photo)
+          case note(text: String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case photo(Photo)
+          case note(text: String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let photo = StructuredQueriesCore.TableColumn<QueryValue, Photo?>("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore.TableColumn<QueryValue, String?>("note", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [[QueryValue.columns.photo], [QueryValue.columns.note]].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [[QueryValue.columns.photo], [QueryValue.columns.note]].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.photo), \(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func photo(
+              _ photo: some StructuredQueriesCore.QueryExpression<Photo>
+            ) -> Self {
+              Self(
+                allColumns: [photo._allColumns, Photo?(queryOutput: nil)._allColumns].flatMap(\.self)
+              )
+            }
+            public static func note(
+              text note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              Self(
+                allColumns: [String?(queryOutput: nil)._allColumns, note._allColumns].flatMap(\.self)
+              )
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var columnWidth: Int {
+            [Photo.columnWidth, String.columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let photo = try decoder.decode(Photo.self) {
+              self = .photo(photo)
+            } else if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumCustomColumn() {
+      assertMacro {
+        """
+        @CasePathable @Table
+        enum Post {
+          @Column("note_text")
+          case note(text: String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case note(text: String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let note = StructuredQueriesCore.TableColumn<QueryValue, String?>("note_text", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [[QueryValue.columns.note]].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [[QueryValue.columns.note]].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func note(
+              text note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              Self(
+                allColumns: [note._allColumns].flatMap(\.self)
+              )
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var columnWidth: Int {
+            [String.columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumCustomRepresentation() {
+      assertMacro {
+        """
+        @CasePathable @Table
+        enum Post {
+          @Column(as: Date.UnixTimeRepresentation.self)
+          case timestamp(Date)
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case timestamp(Date)
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let timestamp = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("timestamp", keyPath: \QueryValue.timestamp)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              [[QueryValue.columns.timestamp]].flatMap(\.self)
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              [[QueryValue.columns.timestamp]].flatMap(\.self)
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.timestamp)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func timestamp(
+              _ timestamp: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
+            ) -> Self {
+              Self(
+                allColumns: [timestamp._allColumns].flatMap(\.self)
+              )
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var columnWidth: Int {
+            [Date.UnixTimeRepresentation.columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let timestamp = try decoder.decode(Date.UnixTimeRepresentation.self) {
+              self = .timestamp(timestamp)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+  #endif
 
   @MainActor
   @Suite struct PrimaryKeyTests {
@@ -2159,7 +2549,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2258,7 +2648,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2371,7 +2761,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.name = name
             }
@@ -2407,10 +2797,10 @@ extension SnapshotTests {
             let id = try decoder.decode(Int.self)
             let name = try decoder.decode(String.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.name = name
@@ -2570,7 +2960,7 @@ extension SnapshotTests {
             self.date = try decoder.decode(Date.UnixTimeRepresentation.self) ?? nil
             self.priority = try decoder.decode(Priority.self) ?? nil
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2693,7 +3083,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(UUID.BytesRepresentation.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2757,7 +3147,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2990,7 +3380,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(UUID.self) ?? nil
               let timestamps = try decoder.decode(Timestamps.self)
               guard let timestamps else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.timestamps = timestamps
             }
@@ -3026,10 +3416,10 @@ extension SnapshotTests {
             let id = try decoder.decode(UUID.self)
             let timestamps = try decoder.decode(Timestamps.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let timestamps else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.timestamps = timestamps
@@ -3153,7 +3543,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(ReminderTagID.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }

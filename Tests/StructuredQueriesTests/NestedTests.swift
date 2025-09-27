@@ -488,6 +488,51 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func enumRepresentation() throws {
+      assertQuery(
+        Notes.list(["Blob", "Jr"])
+      ) {
+        """
+        SELECT '[
+          "Blob",
+          "Jr"
+        ]' AS "list"
+        """
+      } results: {
+        """
+        ┌──────────────────┐
+        │ Notes.list(      │
+        │   [              │
+        │     [0]: "Blob", │
+        │     [1]: "Jr"    │
+        │   ]              │
+        │ )                │
+        └──────────────────┘
+        """
+      }
+      assertQuery(
+        Values(Notes.Columns.list(#bind(["Blob", "Jr"])))
+      ) {
+        """
+        SELECT '[
+          "Blob",
+          "Jr"
+        ]'
+        """
+      } results: {
+        """
+        ┌──────────────────┐
+        │ Notes.list(      │
+        │   [              │
+        │     [0]: "Blob", │
+        │     [1]: "Jr"    │
+        │   ]              │
+        │ )                │
+        └──────────────────┘
+        """
+      }
+    }
   }
 }
 
@@ -559,84 +604,15 @@ private struct Note {
   let body: String
 }
 
-// TODO: Diagnose 'enum' tables: require at most 1 associated value; ignore labels?
-
-@CasePathable
+@CasePathable @Table
 private enum Post {
-  // @Columns
+  @Columns
   case photo(Photo)
   case note(String = "")
-
-  // Generated:
-  public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
-    public typealias QueryValue = Post
-    public let photo = StructuredQueriesCore.ColumnGroup<QueryValue, Photo?>(
-      keyPath: \QueryValue.photo
-    )
-    public let note = StructuredQueriesCore.TableColumn<QueryValue, String?>(
-      "note",
-      keyPath: \QueryValue.note,
-      default: ""
-    )
-    public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-      [
-        StructuredQueriesCore.ColumnGroup.allColumns(keyPath: \QueryValue.photo),
-        [QueryValue.columns.note],
-      ].flatMap(\.self)
-    }
-    public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-      [
-        StructuredQueriesCore.ColumnGroup.writableColumns(keyPath: \QueryValue.photo),
-        [QueryValue.columns.note],
-      ].flatMap(\.self)
-    }
-    public var queryFragment: QueryFragment {
-      "\(self.photo), \(self.note)"
-    }
-  }
-
-  public struct Selection: StructuredQueriesCore.TableExpression {
-    public typealias QueryValue = Post
-    public let allColumns: [any StructuredQueriesCore.QueryExpression]
-    // TODO: Generated
-    public static func photo(_ photo: some StructuredQueriesCore.QueryExpression<Photo>) -> Self {
-      Self(
-        allColumns: [photo._allColumns, String?(queryOutput: nil)._allColumns]
-          .flatMap(\.self)
-      )
-    }
-    public static func note(_ note: some StructuredQueriesCore.QueryExpression<String>) -> Self {
-      Self(
-        allColumns: [Photo?(queryOutput: nil)._allColumns, note._allColumns]
-          .flatMap(\.self)
-      )
-    }
-  }
 }
 
-nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore
-    .PartialSelectStatement
-{
-  public typealias QueryValue = Self
-  public typealias From = Swift.Never
-  public nonisolated static var columns: TableColumns {
-    TableColumns()
-  }
-  public nonisolated static var columnWidth: Int {
-    [Photo?.columnWidth, Note?.columnWidth].reduce(0, +)
-  }
-  public nonisolated static var tableName: String {
-    "posts"
-  }
-
-  // TODO:
-  public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-    if let photo = try decoder.decode(Photo.self) {
-      self = .photo(photo)
-    } else if let note = try decoder.decode(String.self) {
-      self = .note(note)
-    } else {
-      throw QueryDecodingError.missingRequiredColumn
-    }
-  }
+@CasePathable @Table
+private enum Notes {
+  @Column(as: [String].JSONRepresentation.self)
+  case list([String])
 }

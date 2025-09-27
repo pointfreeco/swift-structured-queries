@@ -83,10 +83,10 @@ extension SnapshotTests {
             let reminderList = try decoder.decode(ReminderList.self)
             let remindersCount = try decoder.decode(Int.self)
             guard let reminderList else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let remindersCount else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.reminderList = reminderList
             self.remindersCount = remindersCount
