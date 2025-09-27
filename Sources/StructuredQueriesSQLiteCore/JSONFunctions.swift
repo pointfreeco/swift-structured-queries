@@ -123,11 +123,10 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   }
 }
 
-// TODO: Support composite keys.
 extension PrimaryKeyedTableDefinition
 where
   QueryValue: _OptionalProtocol & Codable,
-  PrimaryColumn: TableColumnExpression<QueryValue, PrimaryKey>
+  PrimaryColumn: _TableColumnExpression<QueryValue, PrimaryKey>
 {
   /// A JSON array representation of the aggregation of a table's columns.
   ///
@@ -186,11 +185,22 @@ where
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[Wrapped].JSONRepresentation>
   where QueryValue == Wrapped? {
+    let primaryKeyColumns: QueryFragment = self.primaryKey._names
+      .map { "\(QueryValue.self).\(quote: $0)" }
+      .joined(separator: ", ")
+    let primaryKeyNulls: QueryFragment = Array(
+      repeating: QueryFragment("NULL"), count: self.primaryKey._names.count
+    )
+    .joined(separator: ", ")
+    let primaryKeyFilter = SQLQueryExpression(
+      "(\(primaryKeyColumns)) IS NOT (\(primaryKeyNulls))",
+      as: Bool.self
+    )
     let filterQueryFragment =
       if let filter {
-        self.primaryKey.isNot(nil).and(filter).queryFragment
+        primaryKeyFilter.and(filter).queryFragment
       } else {
-        self.primaryKey.isNot(nil).queryFragment
+        primaryKeyFilter.queryFragment
       }
     return AggregateFunction(
       "json_group_array",
