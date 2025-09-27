@@ -1173,7 +1173,6 @@ extension TableMacro: MemberMacro {
         )
         var columnQueryValueType = parameter.type.trimmed.rewritten(selfRewriter)
         var isColumnGroup = false
-        var isEphemeral = false
 
         for attribute in caseDecl.attributes {
           guard
@@ -1181,9 +1180,8 @@ extension TableMacro: MemberMacro {
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
           else { continue }
           isColumnGroup = isColumnGroup || attributeName == "Columns"
-          isEphemeral = isEphemeral || attributeName == "Ephemeral"
           guard
-            attributeName == "Column" || isEphemeral || isColumnGroup,
+            attributeName == "Column" || isColumnGroup,
             case .argumentList(let arguments) = attribute.arguments
           else { continue }
 
@@ -1220,8 +1218,6 @@ extension TableMacro: MemberMacro {
             }
           }
         }
-        guard !isEphemeral
-        else { continue }
 
         selectedColumns.append(identifier)
 
