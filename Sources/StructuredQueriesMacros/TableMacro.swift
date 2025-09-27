@@ -168,7 +168,7 @@ extension TableMacro: ExtensionMacro {
                 """
                 Table property must contain a single value representing one or more columns
                 """
-              ),
+              )
             )
           )
           continue
@@ -531,7 +531,7 @@ extension TableMacro: ExtensionMacro {
                 Table case must contain a single associated value representing one or more \
                 optional columns
                 """
-              ),
+              )
             )
           )
           continue
