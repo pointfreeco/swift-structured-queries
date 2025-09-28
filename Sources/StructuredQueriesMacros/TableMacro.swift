@@ -1325,15 +1325,17 @@ extension TableMacro: MemberMacro {
         let staticColumns = selectedColumns.map {
           $0 == identifier ? "\($0)" : "\(valueType)?(queryOutput: nil)" as ExprSyntax
         }
+        let staticInitialization = staticColumns
+          .map { "allColumns.append(contentsOf: \($0)._allColumns)\n" }
+          .joined()
+
         selectionInitializers.append(
           """
           public static func \(identifier)(
           \(firstName) \(identifier): some \(moduleName).QueryExpression<\(valueType)>
           ) -> Self {
-          Self(
-          allColumns: [\(staticColumns.map { "\($0)._allColumns" as ExprSyntax }, separator: ", ")]\
-          .flatMap(\\.self)
-          )
+          var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+          \(raw: staticInitialization)return Self(allColumns: allColumns)
           }
           """
         )

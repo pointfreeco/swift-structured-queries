@@ -2293,16 +2293,18 @@ extension SnapshotTests {
             public static func photo(
               _ photo: some StructuredQueriesCore.QueryExpression<Photo>
             ) -> Self {
-              Self(
-                allColumns: [photo._allColumns, Photo?(queryOutput: nil)._allColumns].flatMap(\.self)
-              )
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: photo._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              return Self(allColumns: allColumns)
             }
             public static func note(
               _ note: some StructuredQueriesCore.QueryExpression<String>
             ) -> Self {
-              Self(
-                allColumns: [String?(queryOutput: nil)._allColumns, note._allColumns].flatMap(\.self)
-              )
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
             }
           }
         }
@@ -2395,16 +2397,18 @@ extension SnapshotTests {
             public static func photo(
               _ photo: some StructuredQueriesCore.QueryExpression<Photo>
             ) -> Self {
-              Self(
-                allColumns: [photo._allColumns, Photo?(queryOutput: nil)._allColumns].flatMap(\.self)
-              )
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: photo._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              return Self(allColumns: allColumns)
             }
             public static func note(
               _ note: some StructuredQueriesCore.QueryExpression<String>
             ) -> Self {
-              Self(
-                allColumns: [String?(queryOutput: nil)._allColumns, note._allColumns].flatMap(\.self)
-              )
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
             }
           }
         }
@@ -2478,16 +2482,18 @@ extension SnapshotTests {
             public static func photo(
               _ photo: some StructuredQueriesCore.QueryExpression<Photo>
             ) -> Self {
-              Self(
-                allColumns: [photo._allColumns, Photo?(queryOutput: nil)._allColumns].flatMap(\.self)
-              )
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: photo._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              return Self(allColumns: allColumns)
             }
             public static func note(
               text note: some StructuredQueriesCore.QueryExpression<String>
             ) -> Self {
-              Self(
-                allColumns: [String?(queryOutput: nil)._allColumns, note._allColumns].flatMap(\.self)
-              )
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
             }
           }
         }
@@ -2557,9 +2563,9 @@ extension SnapshotTests {
             public static func note(
               text note: some StructuredQueriesCore.QueryExpression<String>
             ) -> Self {
-              Self(
-                allColumns: [note._allColumns].flatMap(\.self)
-              )
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
             }
           }
         }
@@ -2627,9 +2633,9 @@ extension SnapshotTests {
             public static func timestamp(
               _ timestamp: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
             ) -> Self {
-              Self(
-                allColumns: [timestamp._allColumns].flatMap(\.self)
-              )
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: timestamp._allColumns)
+              return Self(allColumns: allColumns)
             }
           }
         }
