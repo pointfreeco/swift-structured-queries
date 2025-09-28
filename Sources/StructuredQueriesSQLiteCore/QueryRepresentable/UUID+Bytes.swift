@@ -30,16 +30,6 @@ extension UUID.BytesRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .blob(withUnsafeBytes(of: queryOutput.uuid, [UInt8].init))
   }
-
-  public init?(queryBinding: QueryBinding) {
-    guard case .blob(let bytes) = queryBinding else { return nil }
-    guard bytes.count == 16 else { return nil }
-    self.init(
-      queryOutput: bytes.withUnsafeBytes {
-        UUID(uuid: $0.load(as: uuid_t.self))
-      }
-    )
-  }
 }
 
 extension UUID.BytesRepresentation: QueryDecodable {

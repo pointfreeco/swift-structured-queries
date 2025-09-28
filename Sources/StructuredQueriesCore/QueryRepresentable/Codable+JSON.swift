@@ -37,13 +37,6 @@ extension _CodableJSONRepresentation: QueryBindable {
       return .invalid(error)
     }
   }
-
-  public init?(queryBinding: QueryBinding) {
-    guard case .text(let value) = queryBinding else { return nil }
-    guard let queryOutput = try? jsonDecoder.decode(QueryOutput.self, from: Data(value.utf8))
-    else { return nil }
-    self.init(queryOutput: queryOutput)
-  }
 }
 
 extension _CodableJSONRepresentation: QueryDecodable {

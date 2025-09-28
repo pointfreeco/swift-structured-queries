@@ -30,11 +30,6 @@ extension Date.JulianDayRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .double(2440587.5 + queryOutput.timeIntervalSince1970 / 86400)
   }
-
-  public init?(queryBinding: QueryBinding) {
-    guard case .double(let value) = queryBinding else { return nil }
-    self.init(queryOutput: Date(timeIntervalSince1970: (value - 2440587.5) * 86400))
-  }
 }
 
 extension Date.JulianDayRepresentation: QueryDecodable {

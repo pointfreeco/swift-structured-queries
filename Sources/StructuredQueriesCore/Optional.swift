@@ -27,10 +27,6 @@ extension Optional: QueryBindable where Wrapped: QueryBindable {
   public var queryBinding: QueryBinding {
     self?.queryBinding ?? .null
   }
-
-  public init?(queryBinding: QueryBinding) {
-    self = Wrapped(queryBinding: queryBinding)
-  }
 }
 
 extension Optional: QueryDecodable where Wrapped: QueryDecodable {

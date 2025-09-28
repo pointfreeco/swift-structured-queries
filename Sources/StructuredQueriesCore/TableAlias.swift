@@ -265,11 +265,6 @@ extension TableAlias: QueryBindable where Base: QueryBindable {
   public var queryBinding: QueryBinding {
     base.queryBinding
   }
-
-  public init?(queryBinding: QueryBinding) {
-    guard let base = Base(queryBinding: queryBinding) else { return nil }
-    self.init(base: base)
-  }
 }
 
 extension TableAlias: QueryDecodable where Base: QueryDecodable {

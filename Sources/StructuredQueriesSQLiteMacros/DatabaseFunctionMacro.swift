@@ -109,7 +109,7 @@ extension DatabaseFunctionMacro: PeerMacro {
     var signature = declaration.signature
     var invocationArgumentTypes: [TypeSyntax] = []
     var parameters: [String] = []
-    var argumentBindings: [(String, String)] = []
+    var argumentBindings: [String] = []
     var offset = 0
     var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
 
@@ -142,7 +142,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       invocationArgumentTypes.append(type)
       let parameterName = (parameter.secondName ?? parameter.firstName).trimmedDescription
       parameters.append(parameterName)
-      argumentBindings.append((parameterName, "\(type)(queryBinding: arguments[\(offset)])"))
+      argumentBindings.append(parameterName)
 
       argumentCount.append("\(type)")
       decodings.append("let \(parameterName) = try decoder.decode(\(type).self)")
@@ -163,7 +163,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       """
     let bodyInvocation = """
       \(declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")self.body(\
-      \(argumentBindings.map { name, _ in name }.joined(separator: ", "))\
+      \(argumentBindings.joined(separator: ", "))\
       )
       """
     // TODO: Diagnose 'asyncClause'?

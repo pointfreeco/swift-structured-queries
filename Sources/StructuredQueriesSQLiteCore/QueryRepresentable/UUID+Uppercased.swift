@@ -27,14 +27,6 @@ extension UUID? {
 }
 
 extension UUID.UppercasedRepresentation: QueryBindable {
-  public init?(queryBinding: QueryBinding) {
-    guard
-      case .text(let uuidString) = queryBinding,
-      let uuid = UUID(uuidString: uuidString)
-    else { return nil }
-    self.init(queryOutput: uuid)
-  }
-
   public var queryBinding: QueryBinding {
     .text(queryOutput.uuidString)
   }
