@@ -42,7 +42,7 @@ public struct Seeds: Sequence {
   /// ```
   ///
   /// And then you can iterate over each insert statement and execute it given a database
-  /// connection. For example, using the [SharingGRDB][] driver:
+  /// connection. For example, using the [SQLiteData] driver:
   ///
   /// ```swift
   /// try database.write { db in
@@ -55,8 +55,8 @@ public struct Seeds: Sequence {
   /// }
   /// ```
   ///
-  /// > Tip: [SharingGRDB][] extends GRDB's `Database` connection with a `seed` method that can
-  /// > build and insert records in a single step:
+  /// > Tip: [SQLiteData] extends GRDB's `Database` connection with a `seed` method that can build
+  /// > and insert records in a single step:
   /// >
   /// > ```swift
   /// > try db.seed {
@@ -64,7 +64,7 @@ public struct Seeds: Sequence {
   /// > }
   /// > ```
   ///
-  /// [SharingGRDB]: https://github.com/pointfreeco/sharing-grdb
+  /// [SQLiteData]: https://github.com/pointfreeco/sqlite-data
   ///
   /// - Parameter build: A result builder closure that prepares statements to insert every built row.
   public init(@SeedsBuilder _ build: () -> [any Table]) {
