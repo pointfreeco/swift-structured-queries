@@ -182,8 +182,6 @@ extension SnapshotTests {
 
 @Table
 private struct ReminderWithList {
-  @Columns
   let reminder: Reminder
-  @Columns
   let list: RemindersList
 }

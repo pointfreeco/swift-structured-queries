@@ -194,7 +194,6 @@ struct ReminderTitleAndAssignedUserName {
 
 @Table
 struct RemindersListAndReminderCount {
-  @Columns
   let remindersList: RemindersList
   let remindersCount: Int
 }

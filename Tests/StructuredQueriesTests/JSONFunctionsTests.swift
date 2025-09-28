@@ -496,9 +496,7 @@ extension SnapshotTests {
 
 @Table
 private struct ReminderRow {
-  @Columns
   let assignedUser: User?
-  @Columns
   let reminder: Reminder
   @Column(as: [Tag].JSONRepresentation.self)
   let tags: [Tag]
@@ -506,7 +504,6 @@ private struct ReminderRow {
 
 @Table
 private struct RemindersListRow {
-  @Columns
   let remindersList: RemindersList
   @Column(as: [Milestone].JSONRepresentation.self)
   let milestones: [Milestone]

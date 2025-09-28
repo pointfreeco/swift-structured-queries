@@ -17,7 +17,7 @@ extension SnapshotTests {
         """
         @Selection
         ┬─────────
-        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' macro, instead
            ✏️ Use '@Table' instead
         struct PlayerAndTeam {
           let player: Player
@@ -40,13 +40,19 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = PlayerAndTeam
-            public let player = StructuredQueriesCore.TableColumn<QueryValue, Player>("player", keyPath: \QueryValue.player)
-            public let team = StructuredQueriesCore.TableColumn<QueryValue, Team>("team", keyPath: \QueryValue.team)
+            public let player = StructuredQueriesCore._TableColumn<QueryValue, Player>.for("player", keyPath: \QueryValue.player)
+            public let team = StructuredQueriesCore._TableColumn<QueryValue, Team>.for("team", keyPath: \QueryValue.team)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [[QueryValue.columns.player], [QueryValue.columns.team]].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.player._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.team._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [[QueryValue.columns.player], [QueryValue.columns.team]].flatMap(\.self)
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.player._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.team._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.player), \(self.team)"
@@ -123,7 +129,7 @@ extension SnapshotTests {
         """
         @Selection 
         ┬─────────
-        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' macro, instead
            ✏️ Use '@Table' instead
         struct ReminderTitleAndListTitle {
           var reminderTitle: String 
@@ -146,13 +152,19 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = ReminderTitleAndListTitle
-            public let reminderTitle = StructuredQueriesCore.TableColumn<QueryValue, String>("reminderTitle", keyPath: \QueryValue.reminderTitle)
-            public let listTitle = StructuredQueriesCore.TableColumn<QueryValue, String?>("listTitle", keyPath: \QueryValue.listTitle, default: nil)
+            public let reminderTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("reminderTitle", keyPath: \QueryValue.reminderTitle)
+            public let listTitle = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("listTitle", keyPath: \QueryValue.listTitle, default: nil)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [[QueryValue.columns.reminderTitle], [QueryValue.columns.listTitle]].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.reminderTitle._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.listTitle._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [[QueryValue.columns.reminderTitle], [QueryValue.columns.listTitle]].flatMap(\.self)
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.reminderTitle._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.listTitle._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.reminderTitle), \(self.listTitle)"
@@ -208,7 +220,7 @@ extension SnapshotTests {
         """
         @Selection struct ReminderDate {
         ┬─────────
-        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' macro, instead
            ✏️ Use '@Table' instead
           @Column(as: Date.UnixTimeRepresentation.self)
           var date: Date
@@ -243,7 +255,7 @@ extension SnapshotTests {
         """
         @Selection struct Row {
         ┬─────────
-        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' macro, instead
            ✏️ Use '@Table' instead
           var title = ""
           @Column(as: [String].JSONRepresentation.self)
@@ -281,7 +293,7 @@ extension SnapshotTests {
         """
         @Selection struct Row {
         ┬─────────
-        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+        ╰─ ⚠️ '@Selection' is deprecated: apply the '@Table' macro, instead
            ✏️ Use '@Table' instead
           @Column(primaryKey: true)
                   ┬─────────
@@ -347,15 +359,21 @@ extension SnapshotTests {
             public typealias QueryValue = Row
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+            public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
             public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
               self.id
             }
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.title)"
@@ -380,12 +398,18 @@ extension SnapshotTests {
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id, default: nil)
-              public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+              public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [[QueryValue.columns.id], [QueryValue.columns.title]].flatMap(\.self)
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.title)"

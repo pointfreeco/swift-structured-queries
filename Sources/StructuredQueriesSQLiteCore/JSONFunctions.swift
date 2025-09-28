@@ -68,7 +68,6 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   ///   @Column {
   ///     ```swift
   ///     @Table struct Row {
-  ///       @Columns
   ///       let remindersList: RemindersList
   ///       @Column(as: [Reminder].JSONRepresentation.self)
   ///       let reminders: [Reminder]
@@ -139,7 +138,6 @@ where
   ///   @Column {
   ///     ```swift
   ///     @Table struct Row {
-  ///       @Columns
   ///       let remindersList: RemindersList
   ///       @Column(as: [Reminder].JSONRepresentation.self)
   ///       let reminders: [Reminder]

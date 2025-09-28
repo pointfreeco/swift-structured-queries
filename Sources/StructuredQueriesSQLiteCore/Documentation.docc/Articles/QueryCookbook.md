@@ -64,14 +64,11 @@ Another way to do this is to use the `@Table` and `@Column` macros along with a
 ```swift
 @Table
 struct Row {
-  @Columns
   let remindersList: RemindersList
   @Column(as: [Reminder].JSONRepresentation.self)
   let reminders: [Reminder]
 }
 ```
-
-> Tip: Use the `@Columns` macro to specify a data-type that is decoded over many columns.
 
 > Note: `Reminder` must conform to `Codable` to be able to use `JSONRepresentation`.
 

@@ -545,7 +545,6 @@ extension SnapshotTests {
 private struct Item {
   var title: String
   var quantity = 0
-  @Columns
   var status: Status = Status()
 }
 
@@ -553,7 +552,6 @@ private struct Item {
 private struct DefaultItem {
   var title = ""
   var quantity = 0
-  @Columns
   var status: Status = Status()
 }
 
@@ -565,7 +563,6 @@ private struct Status {
 
 @Table
 private struct ItemWithTimestamp {
-  @Columns
   var item: Item?
   var timestamp: Date
 }
@@ -582,7 +579,6 @@ private struct Timestamps {
 @Table
 private struct Row {
   let id: UUID
-  @Columns
   var timestamps: Timestamps
 }
 
@@ -612,7 +608,6 @@ private struct Note {
 #if StructuredQueriesCasePaths
   @CasePathable @Table
   private enum Post {
-    @Columns
     case photo(Photo)
     case note(String = "")
   }

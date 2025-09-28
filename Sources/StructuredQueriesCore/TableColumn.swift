@@ -71,7 +71,7 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput>,
+    keyPath: KeyPath<Root, Value>,
     default defaultValue: Value? = nil
   ) where Value == Value.QueryOutput {
     self.name = name
@@ -94,6 +94,39 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
       name,
       keyPath: \.[member: \Value.self, column: keyPath]
     )
+  }
+
+  public var _allColumns: [any TableColumnExpression] { [self] }
+
+  public var _writableColumns: [any WritableTableColumnExpression] { [self] }
+}
+
+public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
+  public static func `for`(
+    _ name: String,
+    keyPath: KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: Value.QueryOutput? = nil
+  ) -> TableColumn<Root, Value>
+  where Value: QueryBindable {
+    TableColumn(name, keyPath: keyPath, default: defaultValue)
+  }
+
+  public static func `for`(
+    _ name: String,
+    keyPath: KeyPath<Root, Value>,
+    default defaultValue: Value? = nil
+  ) -> TableColumn<Root, Value>
+  where Value: QueryBindable, Value == Value.QueryOutput {
+    TableColumn(name, keyPath: keyPath, default: defaultValue)
+  }
+
+  public static func `for`(
+    _: String,
+    keyPath: KeyPath<Root, Value>,
+    default _: Value? = nil
+  ) -> ColumnGroup<Root, Value>
+  where Value: Table, Value == Value.QueryOutput {
+    ColumnGroup(keyPath: keyPath)
   }
 }
 
@@ -160,4 +193,6 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
       keyPath: \.[member: \Value.self, column: keyPath]
     )
   }
+
+  public var _allColumns: [any TableColumnExpression] { [self] }
 }

@@ -41,13 +41,19 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = ReminderListWithCount
-            public let reminderList = StructuredQueriesCore.TableColumn<QueryValue, ReminderList>("reminderList", keyPath: \QueryValue.reminderList)
-            public let remindersCount = StructuredQueriesCore.TableColumn<QueryValue, Int>("remindersCount", keyPath: \QueryValue.remindersCount)
+            public let reminderList = StructuredQueriesCore._TableColumn<QueryValue, ReminderList>.for("reminderList", keyPath: \QueryValue.reminderList)
+            public let remindersCount = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("remindersCount", keyPath: \QueryValue.remindersCount)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [[QueryValue.columns.reminderList], [QueryValue.columns.remindersCount]].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.reminderList._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.remindersCount._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [[QueryValue.columns.reminderList], [QueryValue.columns.remindersCount]].flatMap(\.self)
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.reminderList._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.remindersCount._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.reminderList), \(self.remindersCount)"

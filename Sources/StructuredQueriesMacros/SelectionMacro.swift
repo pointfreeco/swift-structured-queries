@@ -54,7 +54,7 @@ extension SelectionMacro: ExtensionMacro {
           node: node,
           message: MacroExpansionWarningMessage(
             """
-            '@Selection' is deprecated: apply the '@Table' and '@Columns' macros, instead
+            '@Selection' is deprecated: apply the '@Table' macro, instead
             """
           ),
           fixIt: .replace(
