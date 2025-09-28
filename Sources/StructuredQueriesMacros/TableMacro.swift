@@ -1196,14 +1196,17 @@ extension TableMacro: MemberMacro {
         }
         .joined(separator: ",\n")
 
+      let selectionAssignment = selectedColumns
+        .map { "allColumns.append(contentsOf: \($0)._allColumns)\n" }
+        .joined()
+
       selectionInitializers.append(
         """
         public init(
         \(raw: selectionInitArguments)
         ) {
-        self.allColumns = \
-        [\(selectedColumns.map { "\($0)._allColumns" as ExprSyntax }, separator: ", ")]\
-        .flatMap(\\.self)
+        var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+        \(raw: selectionAssignment)self.allColumns = allColumns
         }
         """
       )

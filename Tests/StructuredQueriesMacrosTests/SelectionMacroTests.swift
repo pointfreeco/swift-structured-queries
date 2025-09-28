@@ -66,7 +66,10 @@ extension SnapshotTests {
               player: some StructuredQueriesCore.QueryExpression<Player>,
               team: some StructuredQueriesCore.QueryExpression<Team>
             ) {
-              self.allColumns = [player._allColumns, team._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: player._allColumns)
+              allColumns.append(contentsOf: team._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -178,7 +181,10 @@ extension SnapshotTests {
               reminderTitle: some StructuredQueriesCore.QueryExpression<String>,
               listTitle: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil)
             ) {
-              self.allColumns = [reminderTitle._allColumns, listTitle._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: reminderTitle._allColumns)
+              allColumns.append(contentsOf: listTitle._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -387,7 +393,10 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<Int>,
               title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
             ) {
-              self.allColumns = [id._allColumns, title._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: title._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -422,7 +431,10 @@ extension SnapshotTests {
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
               ) {
-                self.allColumns = [id._allColumns, title._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: title._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self

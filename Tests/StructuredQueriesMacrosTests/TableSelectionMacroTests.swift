@@ -67,7 +67,10 @@ extension SnapshotTests {
               reminderList: some StructuredQueriesCore.QueryExpression<ReminderList>,
               remindersCount: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [reminderList._allColumns, remindersCount._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: reminderList._allColumns)
+              allColumns.append(contentsOf: remindersCount._allColumns)
+              self.allColumns = allColumns
             }
           }
         }

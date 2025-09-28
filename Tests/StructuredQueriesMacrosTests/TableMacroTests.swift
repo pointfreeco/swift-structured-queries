@@ -42,7 +42,9 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -130,7 +132,11 @@ extension SnapshotTests {
               email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil),
               age: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [id._allColumns, email._allColumns, age._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: email._allColumns)
+              allColumns.append(contentsOf: age._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -170,7 +176,11 @@ extension SnapshotTests {
                 email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil),
                 age: some StructuredQueriesCore.QueryExpression<Int>
               ) {
-                self.allColumns = [id._allColumns, email._allColumns, age._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: email._allColumns)
+                allColumns.append(contentsOf: age._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -283,7 +293,9 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -389,7 +401,9 @@ extension SnapshotTests {
             public init(
               baz: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [baz._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: baz._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -514,7 +528,12 @@ extension SnapshotTests {
               c3: some StructuredQueriesCore.QueryExpression<Swift.Double> = Swift.Double(queryOutput: 1.2),
               c4: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
             ) {
-              self.allColumns = [c1._allColumns, c2._allColumns, c3._allColumns, c4._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: c1._allColumns)
+              allColumns.append(contentsOf: c2._allColumns)
+              allColumns.append(contentsOf: c3._allColumns)
+              allColumns.append(contentsOf: c4._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -580,7 +599,9 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -691,7 +712,9 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
             ) {
-              self.allColumns = [bar._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -764,7 +787,10 @@ extension SnapshotTests {
               name: some StructuredQueriesCore.QueryExpression<String>,
               generated: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [name._allColumns, generated._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: name._allColumns)
+              allColumns.append(contentsOf: generated._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -861,7 +887,10 @@ extension SnapshotTests {
               name: some StructuredQueriesCore.QueryExpression<String>,
               generated: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [name._allColumns, generated._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: name._allColumns)
+              allColumns.append(contentsOf: generated._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -949,7 +978,11 @@ extension SnapshotTests {
               name: some StructuredQueriesCore.QueryExpression<String>,
               generated: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [id._allColumns, name._allColumns, generated._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              allColumns.append(contentsOf: generated._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -984,7 +1017,10 @@ extension SnapshotTests {
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 name: some StructuredQueriesCore.QueryExpression<String>
               ) {
-                self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -1099,7 +1135,9 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -1167,7 +1205,9 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [bar._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -1233,7 +1273,9 @@ extension SnapshotTests {
             public init(
               `bar`: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [`bar`._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: `bar`._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -1299,7 +1341,9 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression<ID<Foo>>
             ) {
-              self.allColumns = [bar._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -1365,7 +1409,9 @@ extension SnapshotTests {
             public init(
               bar: some StructuredQueriesCore.QueryExpression
             ) {
-              self.allColumns = [bar._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -1439,7 +1485,10 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>>,
               referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil)
             ) {
-              self.allColumns = [id._allColumns, referrerID._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: referrerID._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1474,7 +1523,10 @@ extension SnapshotTests {
                 id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil),
                 referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil)
               ) {
-                self.allColumns = [id._allColumns, referrerID._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: referrerID._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -1576,7 +1628,9 @@ extension SnapshotTests {
             public init(
               name: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [name._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -1654,7 +1708,10 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<Int>,
               name: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1689,7 +1746,10 @@ extension SnapshotTests {
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 name: some StructuredQueriesCore.QueryExpression<String>
               ) {
-                self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -1823,7 +1883,10 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<Int>,
               seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = <#Type#>(queryOutput: 60 * 5)
             ) {
-              self.allColumns = [id._allColumns, seconds._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: seconds._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1858,7 +1921,10 @@ extension SnapshotTests {
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = <#Type#>(queryOutput: 60 * 5)
               ) {
-                self.allColumns = [id._allColumns, seconds._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: seconds._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -1975,7 +2041,11 @@ extension SnapshotTests {
               color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = Color.HexRepresentation(queryOutput: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)),
               name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
             ) {
-              self.allColumns = [id._allColumns, color._allColumns, name._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: color._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -2015,7 +2085,11 @@ extension SnapshotTests {
                 color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = Color.HexRepresentation(queryOutput: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)),
                 name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
               ) {
-                self.allColumns = [id._allColumns, color._allColumns, name._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: color._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -2143,7 +2217,9 @@ extension SnapshotTests {
           public init(
             name: some StructuredQueriesCore.QueryExpression<String>
           ) {
-            self.allColumns = [name._allColumns].flatMap(\.self)
+            var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+            allColumns.append(contentsOf: name._allColumns)
+            self.allColumns = allColumns
           }
         }
       }
@@ -2626,7 +2702,9 @@ extension SnapshotTests {
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [id._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -2656,7 +2734,9 @@ extension SnapshotTests {
               public init(
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil)
               ) {
-                self.allColumns = [id._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -2781,7 +2861,9 @@ extension SnapshotTests {
               public init(
                 id: some StructuredQueriesCore.QueryExpression<Int>
               ) {
-                self.allColumns = [id._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                self.allColumns = allColumns
               }
             }
           }
@@ -2874,7 +2956,10 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<Int>,
               name: some StructuredQueriesCore.QueryExpression<String>
             ) {
-              self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -2909,7 +2994,10 @@ extension SnapshotTests {
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 name: some StructuredQueriesCore.QueryExpression<String>
               ) {
-                self.allColumns = [id._allColumns, name._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -3040,7 +3128,12 @@ extension SnapshotTests {
               date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Date.UnixTimeRepresentation?(queryOutput: nil),
               priority: some StructuredQueriesCore.QueryExpression<Priority?> = Priority?(queryOutput: nil)
             ) {
-              self.allColumns = [id._allColumns, title._allColumns, date._allColumns, priority._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: title._allColumns)
+              allColumns.append(contentsOf: date._allColumns)
+              allColumns.append(contentsOf: priority._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -3085,7 +3178,12 @@ extension SnapshotTests {
                 date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Date.UnixTimeRepresentation?(queryOutput: nil),
                 priority: some StructuredQueriesCore.QueryExpression<Priority?> = Priority?(queryOutput: nil)
               ) {
-                self.allColumns = [id._allColumns, title._allColumns, date._allColumns, priority._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: title._allColumns)
+                allColumns.append(contentsOf: date._allColumns)
+                allColumns.append(contentsOf: priority._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -3200,7 +3298,9 @@ extension SnapshotTests {
             public init(
               id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation>
             ) {
-              self.allColumns = [id._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -3230,7 +3330,9 @@ extension SnapshotTests {
               public init(
                 id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation?> = UUID.BytesRepresentation?(queryOutput: nil)
               ) {
-                self.allColumns = [id._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -3326,7 +3428,9 @@ extension SnapshotTests {
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>
             ) {
-              self.allColumns = [id._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              self.allColumns = allColumns
             }
           }
         }
@@ -3402,7 +3506,10 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
               title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
             ) {
-              self.allColumns = [id._allColumns, title._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: title._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -3437,7 +3544,10 @@ extension SnapshotTests {
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
                 title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
               ) {
-                self.allColumns = [id._allColumns, title._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: title._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -3544,7 +3654,10 @@ extension SnapshotTests {
               id: some StructuredQueriesCore.QueryExpression<UUID>,
               timestamps: some StructuredQueriesCore.QueryExpression<Timestamps>
             ) {
-              self.allColumns = [id._allColumns, timestamps._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: timestamps._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -3579,7 +3692,10 @@ extension SnapshotTests {
                 id: some StructuredQueriesCore.QueryExpression<UUID?> = UUID?(queryOutput: nil),
                 timestamps: some StructuredQueriesCore.QueryExpression<Timestamps>
               ) {
-                self.allColumns = [id._allColumns, timestamps._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: timestamps._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
@@ -3692,7 +3808,9 @@ extension SnapshotTests {
             public init(
               id: some StructuredQueriesCore.QueryExpression<ReminderTagID>
             ) {
-              self.allColumns = [id._allColumns].flatMap(\.self)
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -3722,7 +3840,9 @@ extension SnapshotTests {
               public init(
                 id: some StructuredQueriesCore.QueryExpression<ReminderTagID?> = ReminderTagID?(queryOutput: nil)
               ) {
-                self.allColumns = [id._allColumns].flatMap(\.self)
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                self.allColumns = allColumns
               }
             }
             public typealias QueryValue = Self
