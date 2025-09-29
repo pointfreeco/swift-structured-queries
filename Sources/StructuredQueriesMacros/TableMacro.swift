@@ -303,6 +303,7 @@ extension TableMacro: ExtensionMacro {
                   )
                 )
               }
+              isPrimaryKey = true
               primaryKey = (
                 identifier: identifier,
                 label: label,
@@ -372,51 +373,35 @@ extension TableMacro: ExtensionMacro {
           binding.initializer?.value.rewritten(selfRewriter)
           ?? (columnQueryValueType?.isOptionalType == true
             ? ExprSyntax(NilLiteralExprSyntax()) : nil)
-        if isColumnGroup {
+        let tableColumnType =
+          isGenerated
+          ? "GeneratedColumn"
+          : isColumnGroup
+            ? "ColumnGroup"
+            : isExplicitColumn
+              ? "TableColumn"
+              : "_TableColumn"
+        let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            public let \(identifier) = \(moduleName).ColumnGroup<\
+            public let \(primaryKey ? "primaryKey" : identifier) = \
+            \(moduleName).\(raw: tableColumnType)<\
             QueryValue, \
             \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
-            >(\
-            keyPath: \\QueryValue.\(identifier)\
-            )
-            """
-          )
-          allColumns.append(identifier)
-        } else if isGenerated {
-          columnsProperties.append(
-            """
-            public var \(identifier): \(moduleName).GeneratedColumn<\
-            QueryValue, \
-            \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
-            > {
-            \(moduleName).GeneratedColumn<\
-            QueryValue, \
-            \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
-            >(\
-            \(columnName), \
-            keyPath: \\QueryValue.\(identifier))
-            }
-            """
-          )
-          allColumns.append(identifier)
-        } else {
-          let tableColumnInitializer = isExplicitColumn ? "" : ".for"
-          let tableColumnType = isExplicitColumn ? "TableColumn" : "_TableColumn"
-          columnsProperties.append(
-            """
-            public let \(identifier) = \(moduleName).\(raw: tableColumnType)<\
-            QueryValue, \
-            \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
             >\(raw: tableColumnInitializer)(\
-            \(columnName), \
-            keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+            \(raw: isColumnGroup ? "" : "\(columnName), ")\
+            keyPath: \\QueryValue.\(identifier)\
+            \(isColumnGroup ? "" : defaultValue.map { ", default: \($0)" } ?? "")\
             )
             """
           )
-          allColumns.append(identifier)
         }
+        appendColumnProperty()
+        if isPrimaryKey {
+          appendColumnProperty(primaryKey: true)
+        }
+        allColumns.append(identifier)
         let decodedType = columnQueryValueType?.asNonOptionalType()
         if let defaultValue {
           decodings.append(
@@ -505,13 +490,6 @@ extension TableMacro: ExtensionMacro {
                 attribute.rightParen = TokenSyntax.rightParenToken()
                 property.attributes[attributeIndex] = .attribute(attribute)
               }
-            }
-            if !hasColumnAttribute {
-              let attribute = "@Column(primaryKey: false)\n"
-              property.attributes.insert(
-                AttributeListSyntax.Element("\(raw: attribute)"),
-                at: property.attributes.startIndex
-              )
             }
             var binding = binding
             if let type = binding.typeAnnotation?.type.asOptionalType() {
@@ -673,34 +651,30 @@ extension TableMacro: ExtensionMacro {
         columnWidths.append("\(columnQueryValueType).columnWidth")
 
         let defaultValue = parameter.defaultValue?.value.rewritten(selfRewriter)
-        if isColumnGroup {
+        let tableColumnType =
+          isColumnGroup
+          ? "ColumnGroup"
+          : isExplicitColumn
+            ? "TableColumn"
+            : "_TableColumn"
+        let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            public let \(identifier) = \(moduleName).ColumnGroup<\
+            public let \(primaryKey ? "primaryKey" : identifier) = \
+            \(moduleName).\(raw: tableColumnType)<\
             QueryValue, \
             \(raw: columnQueryValueType.trimmedDescription)?\
-            >(\
-            keyPath: \\QueryValue.\(identifier)\
-            )
-            """
-          )
-          allColumns.append(identifier)
-        } else {
-          let tableColumnInitializer = isExplicitColumn ? "" : ".for"
-          let tableColumnType = isExplicitColumn ? "TableColumn" : "_TableColumn"
-          columnsProperties.append(
-            """
-            public let \(identifier) = \(moduleName).\(raw: tableColumnType)<\
-            QueryValue, \
-            \(columnQueryValueType.rewritten(selfRewriter))?\
             >\(raw: tableColumnInitializer)(\
-            \(columnName), \
-            keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+            \(raw: isColumnGroup ? "" : "\(columnName), ")\
+            keyPath: \\QueryValue.\(identifier)\
+            \(isColumnGroup ? "" : defaultValue.map { ", default: \($0)" } ?? "")\
             )
             """
           )
-          allColumns.append(identifier)
         }
+        appendColumnProperty()
+        allColumns.append(identifier)
         let decodedType = columnQueryValueType.asNonOptionalType()
         decodings.append(
           """
@@ -729,14 +703,7 @@ extension TableMacro: ExtensionMacro {
         \(allColumns.map { "self.\($0) = other.\($0)" as ExprSyntax }, separator: "\n")
         }
         """
-    } else if let primaryKey {
-      columnsProperties.append(
-        """
-        public var primaryKey: \(moduleName).\
-        \(raw: primaryKey.isColumnGroup ? "ColumnGroup" : "TableColumn")\
-        <QueryValue, \(primaryKey.queryValueType)> { self.\(primaryKey.identifier) }
-        """
-      )
+    } else if primaryKey != nil {
       draft = """
 
         @_Draft(\(type).self)
@@ -974,7 +941,9 @@ extension TableMacro: MemberMacro {
           ?? binding.initializer?.value.literalType)
           .map { $0.rewritten(selfRewriter) }
         var columnQueryOutputType = columnQueryValueType
-        var isPrimaryKey = primaryKey == nil && identifier.text == "id"
+        var isPrimaryKey = primaryKey == nil
+          && identifier.text == "id"
+          && node.attributeName.identifier != "_Draft"
         var isColumnGroup = false
         var isEphemeral = false
         var isExplicitColumn = false
@@ -1024,6 +993,7 @@ extension TableMacro: MemberMacro {
                 isPrimaryKey = false
                 break
               }
+              isPrimaryKey = true
               if primaryKey != nil {
                 var newArguments = arguments
                 newArguments.remove(at: argumentIndex)
@@ -1077,59 +1047,38 @@ extension TableMacro: MemberMacro {
           binding.initializer?.value.rewritten(selfRewriter)
           ?? (columnQueryValueType?.isOptionalType == true
             ? ExprSyntax(NilLiteralExprSyntax()) : nil)
-        if isColumnGroup {
+        let tableColumnType =
+          isGenerated
+          ? "GeneratedColumn"
+          : isColumnGroup
+            ? "ColumnGroup"
+            : isExplicitColumn
+              ? "TableColumn"
+              : "_TableColumn"
+        let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            public let \(identifier) = \(moduleName).ColumnGroup<\
+            public let \(primaryKey ? "primaryKey" : identifier) = \
+            \(moduleName).\(raw: tableColumnType)<\
             QueryValue, \
             \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
-            >(\
-            keyPath: \\QueryValue.\(identifier)\
-            )
-            """
-          )
-          allColumns.append((identifier, "_", columnQueryValueType, defaultValue))
-          allColumnNames.append(identifier)
-          writableColumns.append(identifier)
-        } else if isGenerated {
-          columnsProperties.append(
-            """
-            public var \(identifier): \(moduleName).GeneratedColumn<\
-            QueryValue, \
-            \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
-            > { \
-            \(moduleName).GeneratedColumn<\
-            QueryValue, \
-            \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
-            >(\
-            \(columnName), \
-            keyPath: \\QueryValue.\(identifier)\
-            )
-            }
-            """
-          )
-          allColumns.append((identifier, "_", columnQueryValueType, defaultValue))
-          allColumnNames.append(identifier)
-        } else {
-          let tableColumnInitializer = isExplicitColumn ? "" : ".for"
-          let tableColumnType = isExplicitColumn ? "TableColumn" : "_TableColumn"
-          columnsProperties.append(
-            """
-            public let \(identifier) = \(moduleName).\(raw: tableColumnType)<\
-            QueryValue, \
-            \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
             >\(raw: tableColumnInitializer)(\
-            \(columnName), \
-            keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+            \(raw: isColumnGroup ? "" : "\(columnName), ")\
+            keyPath: \\QueryValue.\(identifier)\
+            \(isColumnGroup ? "" : defaultValue.map { ", default: \($0)" } ?? "")\
             )
             """
           )
-          allColumns.append((identifier, "_", columnQueryValueType, defaultValue))
-          allColumnNames.append(identifier)
-          writableColumns.append(identifier)
         }
-
+        appendColumnProperty()
+        if isPrimaryKey {
+          appendColumnProperty(primaryKey: true)
+        }
+        allColumns.append((identifier, "_", columnQueryValueType, defaultValue))
+        allColumnNames.append(identifier)
         if !isGenerated {
+          writableColumns.append(identifier)
           if let primaryKey, primaryKey.identifier == identifier {
             var hasColumnAttribute = false
             var property = property
@@ -1185,13 +1134,6 @@ extension TableMacro: MemberMacro {
               }
             }
             property = property.trimmed
-            if !hasColumnAttribute {
-              let attribute = "@Column(primaryKey: false)\n"
-              property.attributes.insert(
-                AttributeListSyntax.Element("\(raw: attribute)"),
-                at: property.attributes.startIndex
-              )
-            }
             var binding = binding
             if let type = binding.typeAnnotation?.type.asOptionalType() {
               binding.typeAnnotation?.type = type
@@ -1315,42 +1257,34 @@ extension TableMacro: MemberMacro {
         selectedColumns.append(identifier)
 
         let defaultValue = parameter.defaultValue?.value.rewritten(selfRewriter)
-        if isColumnGroup {
+        let tableColumnType =
+          isColumnGroup
+          ? "ColumnGroup"
+          : isExplicitColumn
+            ? "TableColumn"
+            : "_TableColumn"
+        let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            public let \(identifier) = \(moduleName).ColumnGroup<\
+            public let \(primaryKey ? "primaryKey" : identifier) = \
+            \(moduleName).\(raw: tableColumnType)<\
             QueryValue, \
-            \(raw: columnQueryValueType)?\
-            >(\
-            keyPath: \\QueryValue.\(identifier)\
-            )
-            """
-          )
-          allColumns.append(
-            (identifier, parameter.firstName ?? "_", columnQueryValueType, defaultValue)
-          )
-          allColumnNames.append(identifier)
-          writableColumns.append(identifier)
-        } else {
-          let tableColumnInitializer = isExplicitColumn ? "" : ".for"
-          let tableColumnType = isExplicitColumn ? "TableColumn" : "_TableColumn"
-          columnsProperties.append(
-            """
-            public let \(identifier) = \(moduleName).\(raw: tableColumnType)<\
-            QueryValue, \
-            \(columnQueryValueType.rewritten(selfRewriter))?\
+            \(raw: columnQueryValueType.trimmedDescription)?\
             >\(raw: tableColumnInitializer)(\
-            \(columnName), \
-            keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+            \(raw: isColumnGroup ? "" : "\(columnName), ")\
+            keyPath: \\QueryValue.\(identifier)\
+            \(isColumnGroup ? "" : defaultValue.map { ", default: \($0)" } ?? "")\
             )
             """
           )
-          allColumns.append(
-            (identifier, parameter.firstName ?? "_", columnQueryValueType, defaultValue)
-          )
-          allColumnNames.append(identifier)
-          writableColumns.append(identifier)
         }
+        appendColumnProperty()
+        allColumns.append(
+          (identifier, parameter.firstName ?? "_", columnQueryValueType, defaultValue)
+        )
+        allColumnNames.append(identifier)
+        writableColumns.append(identifier)
       }
       for (identifier, firstName, valueType, defaultValue) in allColumns {
         var argument = """
@@ -1381,14 +1315,7 @@ extension TableMacro: MemberMacro {
     }
 
     var draft: DeclSyntax?
-    if let primaryKey {
-      columnsProperties.append(
-        """
-        public var primaryKey: \(moduleName).\
-        \(raw: primaryKey.isColumnGroup ? "ColumnGroup" : "TableColumn")\
-        <QueryValue, \(primaryKey.queryValueType)> { self.\(primaryKey.identifier) }
-        """
-      )
+    if primaryKey != nil {
       draft = """
 
         @_Draft(\(type).self)

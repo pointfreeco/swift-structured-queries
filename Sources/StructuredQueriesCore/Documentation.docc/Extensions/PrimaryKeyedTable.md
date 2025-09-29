@@ -51,7 +51,7 @@ struct Enrollment {
     var studentID: StudentID
   }
 
-  @Columns  // Automatically inferred as '@Columns(primaryKey: True)
+  // Automatically inferred as '@Columns(primaryKey: True)
   let id: ID
   // ...
 }
