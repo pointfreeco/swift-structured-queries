@@ -766,11 +766,11 @@ struct ReminderResult: QueryRepresentable {
 )
 ```
 
-There is also a way to streamline providing the ``QueryRepresentable`` conformance. You can use the
-`@Table` to describe the datatype you want to decode:
+There is also a way to streamline providing the ``QueryRepresentable`` conformance. You can use
+`@Selection` to describe the datatype you want to decode:
 
 ```swift
-@Table
+@Selection
 struct ReminderResult {
   let title: String
   let isCompleted: Bool
@@ -783,8 +783,5 @@ struct ReminderResult {
   as: ReminderResult.self
 )
 ```
-
-The `@Table` macro can be used to describe any table-like entity. This includes virtual tables,
-database views, common table expressions, and even groups of columns that you'd like to decode.
 
 See <doc:SafeSQLStrings> for more information about the `#sql` macro.

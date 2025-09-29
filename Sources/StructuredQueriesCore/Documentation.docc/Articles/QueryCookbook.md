@@ -262,19 +262,15 @@ you can use the ``Table/unscoped`` property:
 It will often be the case that you want to select very specific data from your database and then
 decode that data into a custom Swift data type. For example, if you are displaying a list of
 reminders and only need their titles for the list, it would be wasteful to decode an array of all
-reminder data. The `@Table` macro allows you to define a custom data type of only the fields you
+reminder data. The `@Selection` macro allows you to define a custom data type of only the fields you
 want to decode:
 
 ```swift
-@Table
+@Selection
 struct ReminderTitle {
   let title: String
 }
 ```
-
-> Note: The `@Table` macro can be used to describe not only database tables, but a number of
-> table-like things, including virtual tables, database views, common table expressions, and even
-> simply groups of columns you'd like to decode together.
 
 Then when selecting the columns for your query you can use this data type:
 
@@ -304,7 +300,7 @@ As another example, consider the query that selects all reminders lists with the
 in each list. A data type can be defined like so:
 
 ```swift
-@Table
+@Selection
 struct RemindersListWithCount {
   let remindersCount: Int
   let remindersList: RemindersList

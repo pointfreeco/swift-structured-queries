@@ -44,8 +44,8 @@ extension TableDraft {
 
 /// A type representing a database table's columns.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
-/// generate a conformance.
+/// Don't conform to this protocol directly. Instead, use the `@Table`, `@Column`, and `@Columns`
+/// macros to generate a conformance.
 public protocol PrimaryKeyedTableDefinition<PrimaryKey>: TableDefinition
 where QueryValue: PrimaryKeyedTable {
   /// A type representing this table's primary key.

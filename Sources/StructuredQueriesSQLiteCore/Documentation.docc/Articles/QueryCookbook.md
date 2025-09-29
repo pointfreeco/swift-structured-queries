@@ -58,11 +58,11 @@ this is doing work that SQL actually excels at. In fact, the condition inside th
 suspiciously like a join constraint, which should give us a hint that what we are doing is not
 quite right.
 
-Another way to do this is to use the `@Table` and `@Column` macros along with a
+Another way to do this is to use the `@Selection` and `@Column` macros along with a
 `JSONRepresentation`` of the collection of reminders you want to load for each list:
 
 ```swift
-@Table
+@Selection
 struct Row {
   let remindersList: RemindersList
   @Column(as: [Reminder].JSONRepresentation.self)
@@ -117,9 +117,8 @@ And suppose you would like to fetch all `RemindersList`s along with the collecti
 and reminders associated with the list:
 
 ```struct
-@Table
+@Selection
 struct Row {
-  @Columns
   let remindersList: RemindersList
   @Column(as: [Milestone].JSONRepresentation.self)
   let milestones: [Milestone]

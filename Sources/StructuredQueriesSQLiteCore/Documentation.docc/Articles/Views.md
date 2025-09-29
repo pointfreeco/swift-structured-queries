@@ -25,9 +25,8 @@ private struct ReminderWithList {
 
 Note that we have applied the `@Table` macro, even though we are interacting with a database view,
 _not_ a database table. This is because `@Table` can be used to describe any table-like entity,
-which includes database views, virtual tables, common table expressions, and even groups of columns
-that should be decoded together. It allows one to represent a type that for intents and purposes
-seems like a regular SQLite table, but it's not actually persisted in the database.
+which includes database views and virtual tables. It allows one to represent a type that for intents
+and purposes seems like a regular SQLite table, but it's not actually persisted in the database.
 
 With that type defined we can use the
 ``StructuredQueriesCore/Table/createTemporaryView(ifNotExists:as:)`` function to create a SQL query

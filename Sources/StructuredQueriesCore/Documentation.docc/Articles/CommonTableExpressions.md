@@ -6,9 +6,9 @@ or recursive queries of trees and graphs.
 ## Overview
 
 One can build [common table expressions][] (commonly referred to as CTEs) by using the ``With``
-statement, along with the `@Table` macro. CTEs allow you to refactor complex queries into smaller
-pieces, and they allow you to execute recursive queries that can traverse tree-like and graph-like
-tables.
+statement, along with the `@Selection` macro. CTEs allow you to refactor complex queries into
+smaller pieces, and they allow you to execute recursive queries that can traverse tree-like and
+graph-like tables.
 
 [common table expressions]: https://sqlite.org/lang_with.html
 
@@ -47,10 +47,10 @@ selecting only lists whose average priority of reminders is greater than 1.5 int
 that can then be used in another query.
 
 One can define a new type that represents the data you want to pre-compute as a CTE, and you
-annotate the type with the `@Table`:
+annotate the type with `@Selection`:
 
 ```swift
-@Table
+@Selection
 struct HighPriorityRemindersList {
   let id: RemindersList.ID
 }
@@ -173,7 +173,7 @@ As a simple example let's construct a query that selects the numbers from 1 to 1
 by defining a CTE data type that holds the data we want to compute:
 
 ```swift
-@Table
+@Selection
 struct Counts {
   let value: Int
 }
@@ -271,7 +271,7 @@ Fibonacci number, as well as the previous Fibonacci number:
 [recurrence relation]: https://en.wikipedia.org/wiki/Recurrence_relation
 
 ```swift
-@Table
+@Selection
 private struct Fibonacci {
   let n: Int
   let prevFib: Int

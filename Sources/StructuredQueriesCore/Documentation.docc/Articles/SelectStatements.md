@@ -108,10 +108,10 @@ To add (or remove) a `DISTINCT` clause from a selection, use ``Select/distinct(_
 }
 
 To bundle selected columns up into a custom data type, you can annotate a struct of decoded results
-with the `@Table` macro:
+with the `@Selection` macro:
 
 ```swift
-@Table
+@Selection
 struct ReminderResult {
   let title: String
   let isCompleted: Bool

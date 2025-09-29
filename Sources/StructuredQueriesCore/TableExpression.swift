@@ -1,7 +1,7 @@
 /// An expression of table columns.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@Table` macro to generate a
-/// conformance.
+/// Don't conform to this protocol directly. Instead, use the `@Table` and `@Selection` macros to
+/// generate a conformance.
 public protocol TableExpression<QueryValue>: QueryExpression where QueryValue: Table {
   var allColumns: [any QueryExpression] { get }
 }

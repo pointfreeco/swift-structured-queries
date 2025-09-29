@@ -67,7 +67,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   /// @Row {
   ///   @Column {
   ///     ```swift
-  ///     @Table struct Row {
+  ///     @Selection struct Row {
   ///       let remindersList: RemindersList
   ///       @Column(as: [Reminder].JSONRepresentation.self)
   ///       let reminders: [Reminder]
@@ -137,7 +137,7 @@ where
   /// @Row {
   ///   @Column {
   ///     ```swift
-  ///     @Table struct Row {
+  ///     @Selection struct Row {
   ///       let remindersList: RemindersList
   ///       @Column(as: [Reminder].JSONRepresentation.self)
   ///       let reminders: [Reminder]

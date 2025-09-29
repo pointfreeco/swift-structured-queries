@@ -6,8 +6,8 @@ Typically such columns are also initialized by the database so that when inserti
 table you do not need to specify the primary key. The library provides extra tools that make it
 easier to insert, update, and delete records that have a primary key.
 
-> Note: Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
-> generate a conformance.
+> Note: Don't conform to this protocol directly. Instead, use the `@Table`, `@Column`, and
+> `@Columns` macros to generate a conformance.
 
 ### Specifying a primary key
 
@@ -39,7 +39,23 @@ struct Reminder {
 }
 ```
 
-> Note: At most one column can be designated as a primary key.
+To define a composite primary key, group them together into a `@Selection` type and annotate the
+field with the `@Columns` macro:
+
+```swift
+@Table
+struct Enrollment {
+  @Selection
+  struct ID {
+    var courseID: CourseID
+    var studentID: StudentID
+  }
+
+  @Columns  // Automatically inferred as '@Columns(primaryKey: True)
+  let id: ID
+  // ...
+}
+```
 
 ### Drafts
 
