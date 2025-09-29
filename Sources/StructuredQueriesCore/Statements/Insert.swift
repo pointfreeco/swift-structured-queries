@@ -1014,13 +1014,6 @@ public enum InsertValuesBuilder<Value> {
   }
 
   public static func buildExpression(
-    _ expression: Value.Columns
-  ) -> [[QueryFragment]]
-  where Value: _Selection {
-    [expression.selection.map(\.expression)]
-  }
-
-  public static func buildExpression(
     _ expression: Value.Selection
   ) -> [[QueryFragment]]
   where Value: Table {

@@ -14,17 +14,21 @@ extension DeclGroupSyntax {
       ?? self.as(EnumDeclSyntax.self)?.name
   }
 
-  func hasMacroApplication(_ name: String) -> Bool {
+  func macroApplication(for name: String) -> AttributeSyntax? {
     for attribute in attributes {
       switch attribute {
       case .attribute(let attr):
         if attr.attributeName.tokens(viewMode: .all).map({ $0.tokenKind }) == [.identifier(name)] {
-          return true
+          return attr
         }
       default:
         break
       }
     }
-    return false
+    return nil
+  }
+
+  func hasMacroApplication(_ name: String) -> Bool {
+    macroApplication(for: name) != nil
   }
 }

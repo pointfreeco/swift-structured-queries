@@ -14,6 +14,38 @@ extension TableMacro: ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: C
   ) throws -> [ExtensionDeclSyntax] {
+    if node.attributeName.identifier == "Selection",
+      let tableNode = declaration.macroApplication(for: "Table")
+    {
+      context.diagnose(
+        Diagnostic(
+          node: node,
+          message: MacroExpansionWarningMessage(
+            """
+            '@Table' and '@Selection' should not be applied together
+
+            Apply '@Table' to types representing stored tables, virtual tables, and database views.
+
+            Apply '@Selection' to types representing multiple columns that can be selected from a \
+            table or query, and types that represent common table expressions.
+            """
+          ),
+          fixIts: [
+            .replace(
+              message: MacroExpansionFixItMessage("Remove '@Selection'"),
+              oldNode: node,
+              newNode: TokenSyntax("")
+            ),
+            .replace(
+              message: MacroExpansionFixItMessage("Remove '@Table'"),
+              oldNode: tableNode,
+              newNode: TokenSyntax("")
+            ),
+          ]
+        )
+      )
+      return []
+    }
     guard
       declaration.isTableMacroSupported,
       let declarationName = declaration.declarationName
@@ -506,14 +538,12 @@ extension TableMacro: ExtensionMacro {
           }
         }
       }
-      if !declaration.hasMacroApplication("Selection") {
-        initDecoder = """
+      initDecoder = """
 
-          public \(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws {
-          \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
-          }
-          """
-      }
+        public \(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws {
+        \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
+        }
+        """
     } else if declaration.is(EnumDeclSyntax.self) {
       var decodings: [String] = []
       for member in declaration.memberBlock.members {
@@ -805,10 +835,13 @@ extension TableMacro: ExtensionMacro {
     }
 
     var conformances: [TypeSyntax] = []
-    let protocolNames: [TokenSyntax] =
+    var protocolNames: [TokenSyntax] =
       primaryKey != nil
       ? ["Table", "PrimaryKeyedTable"]
       : ["Table"]
+    if node.attributeName.identifier == "Selection" {
+      protocolNames.append("_Selection")
+    }
     if let inheritanceClause = declaration.inheritanceClause {
       for type in protocolNames {
         if !inheritanceClause.inheritedTypes.contains(where: {
@@ -888,6 +921,9 @@ extension TableMacro: MemberMacro {
     conformingTo protocols: [TypeSyntax],
     in context: C
   ) throws -> [DeclSyntax] {
+    if node.attributeName.identifier == "Selection", declaration.hasMacroApplication("Table") {
+      return []
+    }
     guard
       declaration.isTableMacroSupported,
       let declarationName = declaration.declarationName
@@ -1196,7 +1232,8 @@ extension TableMacro: MemberMacro {
         }
         .joined(separator: ",\n")
 
-      let selectionAssignment = selectedColumns
+      let selectionAssignment =
+        selectedColumns
         .map { "allColumns.append(contentsOf: \($0)._allColumns)\n" }
         .joined()
 
@@ -1325,7 +1362,8 @@ extension TableMacro: MemberMacro {
         let staticColumns = selectedColumns.map {
           $0 == identifier ? "\($0)" : "\(valueType)?(queryOutput: nil)" as ExprSyntax
         }
-        let staticInitialization = staticColumns
+        let staticInitialization =
+          staticColumns
           .map { "allColumns.append(contentsOf: \($0)._allColumns)\n" }
           .joined()
 
@@ -1445,18 +1483,16 @@ extension TableMacro: MemberMacro {
     }
 
     var typeAliases: [DeclSyntax] = []
-    if declaration.hasMacroApplication("Selection") {
-      conformances.append("\(moduleName).PartialSelectStatement")
-      typeAliases.append(contentsOf: [
-        """
+    conformances.append("\(moduleName).PartialSelectStatement")
+    typeAliases.append(contentsOf: [
+      """
 
-        public typealias QueryValue = Self
-        """,
-        """
-        public typealias From = Swift.Never
-        """,
-      ])
-    }
+      public typealias QueryValue = Self
+      """,
+      """
+      public typealias From = Swift.Never
+      """,
+    ])
 
     let primaryKeyTypealias: DeclSyntax? = primaryKey.map {
       """
@@ -1465,10 +1501,12 @@ extension TableMacro: MemberMacro {
       """
     }
 
-    let allColumnsAssignment = allColumnNames
+    let allColumnsAssignment =
+      allColumnNames
       .map { "allColumns.append(contentsOf: QueryValue.columns.\($0)._allColumns)\n" }
       .joined()
-    let writableColumnsAssignment = writableColumns
+    let writableColumnsAssignment =
+      writableColumns
       .map { "writableColumns.append(contentsOf: QueryValue.columns.\($0)._writableColumns)\n" }
       .joined()
 
@@ -1510,6 +1548,9 @@ extension TableMacro: MemberAttributeMacro {
     providingAttributesFor member: T,
     in context: C
   ) throws -> [AttributeSyntax] {
+    if node.attributeName.identifier == "Selection", declaration.hasMacroApplication("Table") {
+      return []
+    }
     guard
       declaration.is(StructDeclSyntax.self),
       let property = member.as(VariableDeclSyntax.self),

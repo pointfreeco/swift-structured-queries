@@ -73,6 +73,112 @@ extension SnapshotTests {
       }
     }
 
+    @Test func selection() {
+      assertMacro {
+        """
+        @Selection
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo {
+          var bar: Int
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Foo
+            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.bar)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore._Selection, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var columnWidth: Int {
+            [Int.columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "foos"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let bar = try decoder.decode(Int.self)
+            guard let bar else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func tableSelection() {
+      assertMacro {
+        """
+        @Table @Selection
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table @Selection
+               ┬─────────
+               ╰─ ⚠️ '@Table' and '@Selection' should not be applied together
+
+        Apply '@Table' to types representing stored tables, virtual tables, and database views.
+
+        Apply '@Selection' to types representing data returned from a query, common table expressions, and to bundle multiple table columns together.
+                  ✏️ Remove '@Selection'
+                  ✏️ Remove '@Table'
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } fixes: {
+        """
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } expansion: {
+        """
+        struct Foo {
+          var bar: Int
+        }
+        """
+      }
+    }
+
     @Test func comment() {
       assertMacro {
         """

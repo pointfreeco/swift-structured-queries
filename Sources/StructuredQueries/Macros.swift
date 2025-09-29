@@ -2,8 +2,10 @@ import StructuredQueriesCore
 
 /// Defines and implements a conformance to the ``/StructuredQueriesCore/Table`` protocol.
 ///
-/// - Parameter name: The table's name. Defaults to a lower-camel-case pluralization of the type,
-///   _e.g._ `RemindersList` becomes `"remindersLists"`.
+/// - Parameters
+///   - name: The table's name. Defaults to a lower-camel-case pluralization of the type,
+///     _e.g._ `RemindersList` becomes `"remindersLists"`.
+///   - schemaName: The table's schema name.
 @attached(
   extension,
   conformances: Table,
@@ -23,6 +25,63 @@ import StructuredQueriesCore
 public macro Table(
   _ name: String = "",
   schema schemaName: String = ""
+) =
+  #externalMacro(
+    module: "StructuredQueriesMacros",
+    type: "TableMacro"
+  )
+
+/// Defines a "selection" of columns that can be decoded from a query.
+///
+/// When selecting tables and fields from a query, this data is bundled up into a tuple:
+///
+/// ```swift
+/// RemindersList
+///   .group(by: \.id)
+///   .join(Reminder.all) { $0.id == $0.remindersListID }
+///   .select { ($0, $1.count()) }
+/// // [(RemindersList, Int)]
+/// ```
+///
+/// The `@Selection` macro allows you to bundle this data up into a dedicated type, instead:
+///
+/// ```swift
+/// @Selection
+/// struct ListWithCount {
+///   let list: RemindersList
+///   let count: Int
+/// }
+///
+/// RemindersList
+///   .group(by: \.id)
+///   .join(Reminder.all) { $0.id == $0.remindersListID }
+///   .select { ListWithCount.Columns(list: $0, count: $1.count()) }
+/// // [RemindersListWithReminderCount]
+/// ```
+///
+/// > Tip: `@Selection`s can also be used to build up common table expressions.
+///
+/// - Parameter name: The selection's name, _i.e._ for a common table expression. Defaults to a
+///   lower-camel-case pluralization of the type, _e.g._ `RemindersList` becomes `"remindersLists"`.
+@attached(
+  extension,
+  conformances: _Selection,
+  Table,
+  PartialSelectStatement,
+  PrimaryKeyedTable,
+  names: named(From),
+  named(columns),
+  named(columnWidth),
+  named(init(_:)),
+  named(init(decoder:)),
+  named(QueryValue),
+  named(schemaName),
+  named(tableName)
+)
+@attached(member, names: named(Draft), named(Selection), named(TableColumns))
+@attached(memberAttribute)
+public macro Selection(
+  _ name: String = ""
 ) =
   #externalMacro(
     module: "StructuredQueriesMacros",
@@ -71,53 +130,6 @@ public macro Ephemeral() =
   #externalMacro(
     module: "StructuredQueriesMacros",
     type: "EphemeralMacro"
-  )
-
-/// Defines the ability for a type to be selected from a query.
-///
-/// When selecting tables and fields from a query, this data is bundled up into a tuple:
-///
-/// ```swift
-/// RemindersList
-///   .group(by: \.id)
-///   .join(Reminder.all) { $0.id == $0.remindersListID }
-///   .select { ($0, $1.count()) }
-/// // [(RemindersList, Int)]
-/// ```
-///
-/// The `@Selection` macro allows you to bundle this data up into a dedicated type, instead:
-///
-/// ```swift
-/// @Selection
-/// struct ListWithCount {
-///   let list: RemindersList
-///   let count: Int
-/// }
-///
-/// RemindersList
-///   .group(by: \.id)
-///   .join(Reminder.all) { $0.id == $0.remindersListID }
-///   .select { ListWithCount.Columns(list: $0, count: $1.count()) }
-/// // [RemindersListWithReminderCount]
-/// ```
-///
-/// The ``Table(_:)`` and `@Selection` macros can be composed together to describe a virtual table
-/// or common table expression.
-@attached(
-  extension,
-  conformances: _Selection,
-  names: named(Columns),
-  named(init(decoder:))
-)
-@attached(member, names: named(Columns))
-@available(iOS, deprecated: 9999, renamed: "Table")
-@available(macOS, deprecated: 9999, renamed: "Table")
-@available(tvOS, deprecated: 9999, renamed: "Table")
-@available(watchOS, deprecated: 9999, renamed: "Table")
-public macro Selection() =
-  #externalMacro(
-    module: "StructuredQueriesMacros",
-    type: "SelectionMacro"
   )
 
 /// Explicitly bind a value to a query.

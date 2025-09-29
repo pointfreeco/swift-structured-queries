@@ -15,7 +15,7 @@ import Testing
       "Columns": ColumnsMacro.self,
       "DatabaseFunction": DatabaseFunctionMacro.self,
       "Ephemeral": EphemeralMacro.self,
-      "Selection": SelectionMacro.self,
+      "Selection": TableMacro.self,
       "sql": SQLMacro.self,
       "Table": TableMacro.self,
     ],

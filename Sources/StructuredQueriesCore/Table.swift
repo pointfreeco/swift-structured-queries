@@ -59,6 +59,9 @@ public protocol Table: QueryRepresentable, PartialSelectStatement {
   static var all: DefaultScope { get }
 }
 
+// NB: Distinguishes `@Selection` from `@Table`.
+public protocol _Selection: Table {}
+
 extension Table {
   /// A select statement on the table with no constraints.
   ///

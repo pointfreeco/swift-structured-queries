@@ -567,7 +567,7 @@ private struct ItemWithTimestamp {
   var timestamp: Date
 }
 
-@Table
+@Selection
 private struct Timestamps {
   var createdAt: Date
   var updatedAt: Date
@@ -589,18 +589,18 @@ private struct Metadata: Identifiable {
   var userModificationDate: Date
 }
 
-@Table
+@Selection
 private struct MetadataID: Hashable {
   let recordID: UUID
   let recordType: String
 }
 
-@Table
+@Selection
 private struct Photo {
   let url: URL
 }
 
-@Table
+@Selection
 private struct Note {
   let body: String
 }
