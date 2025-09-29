@@ -157,7 +157,7 @@ extension SnapshotTests {
 
         Apply '@Table' to types representing stored tables, virtual tables, and database views.
 
-        Apply '@Selection' to types representing data returned from a query, common table expressions, and to bundle multiple table columns together.
+        Apply '@Selection' to types representing multiple columns that can be selected from a table or query, and types that represent common table expressions.
                   ✏️ Remove '@Selection'
                   ✏️ Remove '@Table'
         struct Foo {
