@@ -438,7 +438,6 @@ extension TableMacro: ExtensionMacro {
 
         if !isGenerated {
           if let primaryKey, primaryKey.identifier == identifier {
-            var hasColumnAttribute = false
             var property = property
             for attributeIndex in property.attributes.indices {
               guard
@@ -448,7 +447,6 @@ extension TableMacro: ExtensionMacro {
                   .text,
                 ["Column", "Columns"].contains(attributeName)
               else { continue }
-              hasColumnAttribute = true
               var hasPrimaryKeyArgument = false
               var arguments: LabeledExprListSyntax = []
               if case .argumentList(let list) = attribute.arguments { arguments = list }
@@ -1080,7 +1078,6 @@ extension TableMacro: MemberMacro {
         if !isGenerated {
           writableColumns.append(identifier)
           if let primaryKey, primaryKey.identifier == identifier {
-            var hasColumnAttribute = false
             var property = property
             for attributeIndex in property.attributes.indices {
               guard
@@ -1090,7 +1087,6 @@ extension TableMacro: MemberMacro {
                   .text,
                 ["Column", "Columns"].contains(attributeName)
               else { continue }
-              hasColumnAttribute = true
               var hasPrimaryKeyArgument = false
               var arguments: LabeledExprListSyntax = []
               if case .argumentList(let list) = attribute.arguments { arguments = list }
