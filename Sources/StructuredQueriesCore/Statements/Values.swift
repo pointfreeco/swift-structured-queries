@@ -13,10 +13,10 @@
 public struct Values<QueryValue>: PartialSelectStatement {
   public typealias From = Never
 
-  let values: [QueryFragment]
+  let values: [any QueryExpression]
 
   public init(_ value: QueryValue) where QueryValue: QueryExpression {
-    self.values = [value.queryFragment]
+    self.values = [value]
   }
 
   public init<each Value: QueryExpression>(
@@ -26,6 +26,8 @@ public struct Values<QueryValue>: PartialSelectStatement {
   }
 
   public var query: QueryFragment {
-    "SELECT \(values.joined(separator: ", "))"
+    $_isSelecting.withValue(true) {
+      "SELECT \(values.map(\.queryFragment).joined(separator: ", "))"
+    }
   }
 }

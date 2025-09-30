@@ -7,15 +7,20 @@ public protocol QueryExpression<QueryValue> {
   /// This type is used to introduce type-safety at the query builder level.
   associatedtype QueryValue
 
-  /// The number of columns associated with this expression.
-  static var columnWidth: Int { get }
-
   /// The query fragment associated with this expression.
   var queryFragment: QueryFragment { get }
+
+  static var _columnWidth: Int { get }
+
+  var _allColumns: [any QueryExpression] { get }
 }
 
 extension QueryExpression {
-  public static var columnWidth: Int {
+  public static var _columnWidth: Int {
     1
+  }
+
+  public var _allColumns: [any QueryExpression] {
+    [self]
   }
 }

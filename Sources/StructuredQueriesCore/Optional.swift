@@ -43,12 +43,19 @@ extension Optional: QueryDecodable where Wrapped: QueryDecodable {
 extension Optional: QueryExpression where Wrapped: QueryExpression {
   public typealias QueryValue = Wrapped.QueryValue?
 
-  public static var columnWidth: Int {
-    Wrapped.columnWidth
-  }
-
   public var queryFragment: QueryFragment {
     self?.queryFragment ?? "NULL"
+  }
+
+  public static var _columnWidth: Int {
+    Wrapped._columnWidth
+  }
+
+  public var _allColumns: [any QueryExpression] {
+    self?._allColumns ?? Array(
+      repeating: SQLQueryExpression("NULL") as any QueryExpression,
+      count: Self._columnWidth
+    )
   }
 }
 

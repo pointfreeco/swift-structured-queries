@@ -16,27 +16,16 @@ extension TableExpression {
       return allColumns.map(\.queryFragment).joined(separator: ", ")
     }
   }
+
+  public static var _columnWidth: Int {
+    QueryValue._columnWidth
+  }
+
+  public var _allColumns: [any QueryExpression] {
+    allColumns
+  }
 }
 
 extension Table {
   public typealias Columns = Selection
-}
-
-extension QueryExpression {
-  public var _allColumns: [any QueryExpression] {
-    [self]
-  }
-}
-
-extension QueryExpression where QueryValue: _OptionalProtocol, QueryValue.Wrapped: Table {
-  public var _allColumns: [any QueryExpression] {
-    guard let queryValue = self as? QueryValue else {
-      return [self]
-    }
-    return queryValue._wrapped?._allColumns
-      ?? Array(
-        repeating: SQLQueryExpression("NULL") as any QueryExpression,
-        count: QueryValue.Wrapped.TableColumns.allColumns.count
-      )
-  }
 }

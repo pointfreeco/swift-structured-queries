@@ -367,7 +367,7 @@ extension TableMacro: ExtensionMacro {
           // NB: End of workaround
         }
 
-        columnWidths.append("\(columnQueryValueType).columnWidth")
+        columnWidths.append("\(columnQueryValueType)._columnWidth")
 
         let defaultValue =
           binding.initializer?.value.rewritten(selfRewriter)
@@ -646,7 +646,7 @@ extension TableMacro: ExtensionMacro {
           }
         }
 
-        columnWidths.append("\(columnQueryValueType).columnWidth")
+        columnWidths.append("\(columnQueryValueType)._columnWidth")
 
         let defaultValue = parameter.defaultValue?.value.rewritten(selfRewriter)
         let tableColumnType =
@@ -868,7 +868,7 @@ extension TableMacro: ExtensionMacro {
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
         \(statics, separator: "\n")
         public \(nonisolated)static var columns: TableColumns { TableColumns() }
-        public \(nonisolated)static var columnWidth: Int { \(columnWidth) }
+        public \(nonisolated)static var _columnWidth: Int { \(columnWidth) }
         public \(nonisolated)static var tableName: String { \(tableName) }\
         \(letSchemaName)\(initDecoder)\(initFromOther)
         }

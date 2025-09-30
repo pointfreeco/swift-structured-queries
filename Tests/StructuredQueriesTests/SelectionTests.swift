@@ -19,7 +19,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "id", count("reminders"."id") AS "color"
+        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"

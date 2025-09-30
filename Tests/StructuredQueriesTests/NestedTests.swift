@@ -435,6 +435,82 @@ extension SnapshotTests {
       }
     }
 
+    @Test func doubleNested() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "as" ("d" INTEGER NOT NULL)
+          """
+        )
+      )
+      assertQuery(
+        A.select { _ in A.Columns(b: B.Columns(c: C.Columns(d: 42))) }
+      ) {
+        """
+        SELECT 42 AS "d"
+        FROM "as"
+        """
+      }
+      assertQuery(
+        Values(A.Columns(b: B.Columns(c: C.Columns(d: 42))))
+      ) {
+        """
+        SELECT 42 AS "d"
+        """
+      } results: {
+        """
+        ┌─────────────────┐
+        │ A(              │
+        │   b: B(         │
+        │     c: C(d: 42) │
+        │   )             │
+        │ )               │
+        └─────────────────┘
+        """
+      }
+    }
+
+    @Test func reminderListAndReminderCountPayload() {
+      let baseQuery =
+        RemindersList
+        .where { _ in #sql("color > 0") } 
+        .join(Reminder.all) { $0.id.eq($1.remindersListID) }
+      assertQuery(
+        baseQuery
+          .select {
+            RemindersListAndReminderCountPayload.Columns(
+              payload: RemindersListAndReminderCount.Columns(
+                remindersList: $0,
+                remindersCount: $1.id.count()
+              )
+            )
+          }
+      ) {
+        """
+        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", count("reminders"."id") AS "remindersCount"
+        FROM "remindersLists"
+        JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
+        WHERE color > 0
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────┐
+        │ RemindersListAndReminderCountPayload(     │
+        │   payload: RemindersListAndReminderCount( │
+        │     remindersList: RemindersList(         │
+        │       id: 1,                              │
+        │       color: 4889071,                     │
+        │       title: "Personal",                  │
+        │       position: 0                         │
+        │     ),                                    │
+        │     remindersCount: 10                    │
+        │   )                                       │
+        │ )                                         │
+        └───────────────────────────────────────────┘
+        """
+      }
+    }
+
     #if StructuredQueriesCasePaths
       @Test func `enum`() throws {
         try db.execute(
@@ -555,7 +631,7 @@ private struct DefaultItem {
   var status: Status = Status()
 }
 
-@Table
+@Selection
 private struct Status {
   var isOutOfStock = false
   var isOnBackOrder = false
@@ -592,6 +668,23 @@ private struct Metadata: Identifiable {
 private struct MetadataID: Hashable {
   let recordID: UUID
   let recordType: String
+}
+
+@Selection
+struct RemindersListAndReminderCountPayload {
+  let payload: RemindersListAndReminderCount
+}
+
+@Selection struct C {
+  var d: Int
+}
+
+@Selection struct B {
+  var c: C
+}
+
+@Table struct A {
+  var b: B
 }
 
 @Selection

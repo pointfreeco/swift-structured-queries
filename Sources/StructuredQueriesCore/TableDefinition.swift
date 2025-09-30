@@ -26,4 +26,12 @@ extension TableDefinition {
   ) -> Member {
     self[keyPath: keyPath]
   }
+
+  public static var _columnWidth: Int {
+    QueryValue._columnWidth
+  }
+
+  public var _allColumns: [any QueryExpression] {
+    Self.allColumns
+  }
 }

@@ -132,7 +132,7 @@ extension SnapshotTests {
           public typealias Output = [String].JSONRepresentation
           public let name = "jsonCapitalize"
           public var argumentCount: Int? {
-            [[String].JSONRepresentation.columnWidth].reduce(0, +)
+            [[String].JSONRepresentation._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: ([String]) -> [String]
@@ -240,7 +240,7 @@ extension SnapshotTests {
           public typealias Output = Date?
           public let name = "currentDate"
           public var argumentCount: Int? {
-            [String.columnWidth].reduce(0, +)
+            [String._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (String) -> Date?
@@ -296,7 +296,7 @@ extension SnapshotTests {
           public typealias Output = Date?
           public let name = "currentDate"
           public var argumentCount: Int? {
-            [String.columnWidth].reduce(0, +)
+            [String._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (String) -> Date?
@@ -352,7 +352,7 @@ extension SnapshotTests {
           public typealias Output = Date?
           public let name = "currentDate"
           public var argumentCount: Int? {
-            [String.columnWidth].reduce(0, +)
+            [String._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (String) -> Date?
@@ -408,7 +408,7 @@ extension SnapshotTests {
           public typealias Output = Date?
           public let name = "currentDate"
           public var argumentCount: Int? {
-            [String.columnWidth].reduce(0, +)
+            [String._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (String) -> Date?
@@ -464,7 +464,7 @@ extension SnapshotTests {
           public typealias Output = String
           public let name = "concat"
           public var argumentCount: Int? {
-            [String.columnWidth, String.columnWidth].reduce(0, +)
+            [String._columnWidth, String._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (String, String) -> String
@@ -541,7 +541,7 @@ extension SnapshotTests {
           public typealias Output = Date?
           public let name = "currentDate"
           public var argumentCount: Int? {
-            [String?.columnWidth].reduce(0, +)
+            [String?._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (String?) -> Date?
@@ -1047,7 +1047,7 @@ extension SnapshotTests {
           public typealias Output = Swift.Void
           public let name = "min"
           public var argumentCount: Int? {
-            [Int.columnWidth, Int.columnWidth].reduce(0, +)
+            [Int._columnWidth, Int._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (Int, Int) -> Swift.Void
@@ -1111,7 +1111,7 @@ extension SnapshotTests {
           public typealias Output = Swift.Void
           public let name = "min"
           public var argumentCount: Int? {
-            [Int.columnWidth, Int.columnWidth].reduce(0, +)
+            [Int._columnWidth, Int._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (Int, Int) -> Swift.Void
@@ -1172,7 +1172,7 @@ extension SnapshotTests {
           public typealias Output = Bool
           public let name = "isValid"
           public var argumentCount: Int? {
-            [Reminder.columnWidth, Bool.columnWidth].reduce(0, +)
+            [Reminder._columnWidth, Bool._columnWidth].reduce(0, +)
           }
           public let isDeterministic = false
           public let body: (Reminder, Bool) -> Bool

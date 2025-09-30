@@ -252,12 +252,16 @@ where Base.TableColumns.PrimaryColumn: WritableTableColumnExpression {
 extension TableAlias: QueryExpression where Base: QueryExpression {
   public typealias QueryValue = Base.QueryValue
 
-  public static var columnWidth: Int {
-    Base.columnWidth
-  }
-
   public var queryFragment: QueryFragment {
     base.queryFragment
+  }
+
+  public static var _columnWidth: Int {
+    Base._columnWidth
+  }
+
+  public var _allColumns: [any QueryExpression] {
+    base._allColumns
   }
 }
 
