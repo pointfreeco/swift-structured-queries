@@ -58,9 +58,9 @@ extension SnapshotTests {
         @Table
         struct User {
           /// The user's identifier.
-          let id: /* TODO: UUID */Int
+          let id: /* TODO: UUID */Int // Primary key
           /// The user's email.
-          var email: String?  // TODO: Should this be non-optional?
+          var email: String? = ""  // TODO: Should this be non-optional?
           /// The user's age.
           var age: Int
         }
@@ -69,16 +69,16 @@ extension SnapshotTests {
         #"""
         struct User {
           /// The user's identifier.
-          let id: /* TODO: UUID */Int
+          let id: /* TODO: UUID */Int // Primary key
           /// The user's email.
-          var email: String?  // TODO: Should this be non-optional?
+          var email: String? = ""  // TODO: Should this be non-optional?
           /// The user's age.
           var age: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = User
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
+            public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email, default: "")
             public let age = StructuredQueriesCore.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
             public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
               self.id
@@ -96,13 +96,13 @@ extension SnapshotTests {
 
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = User
-            let id: /* TODO: UUID */ Int?
-            var email: String?
+            let id: /* TODO: UUID */ Int? // Primary key
+            var email: String? = ""
             var age: Int
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email)
+              public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email, default: "")
               public let age = StructuredQueriesCore.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
@@ -124,7 +124,7 @@ extension SnapshotTests {
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self)
-              self.email = try decoder.decode(String.self)
+              self.email = try decoder.decode(String.self) ?? ""
               let age = try decoder.decode(Int.self)
               guard let age else {
                 throw QueryDecodingError.missingRequiredColumn
@@ -139,7 +139,7 @@ extension SnapshotTests {
             }
             public init(
               id: /* TODO: UUID */ Int? = nil,
-              email: String? = nil,
+              email: String? = "",
               age: Int
             ) {
               self.id = id
@@ -158,7 +158,7 @@ extension SnapshotTests {
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
-            self.email = try decoder.decode(String.self)
+            self.email = try decoder.decode(String.self) ?? ""  // TODO: Should this be non-optional?
             let age = try decoder.decode(Int.self)
             guard let id else {
               throw QueryDecodingError.missingRequiredColumn

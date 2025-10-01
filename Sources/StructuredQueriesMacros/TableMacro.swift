@@ -295,7 +295,7 @@ extension TableMacro: ExtensionMacro {
           \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
           >(\
           \(columnName), \
-          keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+          keyPath: \\QueryValue.\(identifier)\((defaultValue?.trimmedDescription).map { ", default: \($0)" } ?? "")\
           )
           """
         )
@@ -794,7 +794,7 @@ extension TableMacro: MemberMacro {
           \(columnQueryValueType?.rewritten(selfRewriter) ?? "_")\
           >(\
           \(columnName), \
-          keyPath: \\QueryValue.\(identifier)\(defaultValue.map { ", default: \($0)" } ?? "")\
+          keyPath: \\QueryValue.\(identifier)\((defaultValue?.trimmedDescription).map { ", default: \($0)" } ?? "")\
           )
           """
         )
