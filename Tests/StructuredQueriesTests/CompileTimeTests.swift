@@ -37,3 +37,13 @@ func dynamicMemberLookup() {
       b.baz.is(nil)
     }
 }
+
+@Table
+struct TableWithComments {
+  /// The user's identifier.
+  let id: /* TODO: UUID */ Int  // Primary key
+  /// The user's email.
+  var email: String? = ""  // TODO: Should this be non-optional?
+  /// The user's age.
+  var age: Int
+}
