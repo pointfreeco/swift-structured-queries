@@ -155,7 +155,7 @@ comfortable with the library:
 
   * [Getting started](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/gettingstarted)
   * [Defining your schema](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/definingyourschema)
-  * [Primary keyed tables](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/primarykeyedtables)
+  * [Primary-keyed tables](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/primarykeyedtables)
   * [Safe SQL strings](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/safesqlstrings)
   * [Query cookbook](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/querycookbook)
 
@@ -174,19 +174,19 @@ As well as more comprehensive example usage:
 ## Demos
 
 There are a number of sample applications that demonstrate how to use StructuredQueries in the
-[SharingGRDB](https://github.com/pointfreeco/sharing-grdb) repo. Check out
-[this](https://github.com/pointfreeco/sharing-grdb/tree/main/Examples) directory to see them all,
+[SQLiteData](https://github.com/pointfreeco/sqlite-data) repo. Check out
+[this](https://github.com/pointfreeco/sqlite-data/tree/main/Examples) directory to see them all,
 including:
 
-  * [Case Studies](https://github.com/pointfreeco/sharing-grdb/tree/main/Examples/CaseStudies):
+  * [Case Studies](https://github.com/pointfreeco/sqlite-data/tree/main/Examples/CaseStudies):
     A number of case studies demonstrating the built-in features of the library.
 
-  * [Reminders](https://github.com/pointfreeco/sharing-grdb/tree/main/Examples/Reminders): A rebuild
+  * [Reminders](https://github.com/pointfreeco/sqlite-data/tree/main/Examples/Reminders): A rebuild
     of Apple's [Reminders][reminders-app-store] app that uses a SQLite database to model the
     reminders, lists and tags. It features many advanced queries, such as searching, and stats
     aggregation.
 
-  * [SyncUps](https://github.com/pointfreeco/sharing-grdb/tree/main/Examples/SyncUps): We also
+  * [SyncUps](https://github.com/pointfreeco/sqlite-data/tree/main/Examples/SyncUps): We also
     rebuilt Apple's [Scrumdinger][scrumdinger] demo application using modern, best practices for
     SwiftUI development, including using this library to query and persist state using SQLite.
 
@@ -198,8 +198,8 @@ including:
 StructuredQueries is built with the goal of supporting any SQL database (SQLite, MySQL, Postgres,
 _etc._), but is currently tuned to work with SQLite. It currently has one official driver:
 
-  * [SharingGRDB](https://github.com/pointfreeco/sharing-grdb): A lightweight replacement for
-    SwiftData and the `@Query` macro. SharingGRDB includes `StructuredQueriesGRDB`, a library that
+  * [SQLiteData](https://github.com/pointfreeco/sqlite-data): A lightweight replacement for
+    SwiftData and the `@Query` macro. SQLiteData includes `StructuredQueriesGRDB`, a library that
     integrates this one with the popular [GRDB](https://github.com/groue/GRDB.swift) SQLite library.
 
 If you are interested in building a StructuredQueries integration for another database library,
@@ -220,7 +220,7 @@ it's as simple as adding it to your `Package.swift`:
 
 ``` swift
 dependencies: [
-  .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.17.0"),
+  .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.22.0"),
 ]
 ```
 
@@ -231,16 +231,21 @@ And then adding the product to any target that needs access to the library:
 ```
 
 If you are on Swift 6.1 or greater, you can enable package traits that extend the library with
-support for other libraries. For example, you can introduce type-safe identifiers to your tables
-_via_ [Tagged](https://github.com/pointfreeco/swift-tagged) by enabling the
-`StructuredQueriesTagged` trait:
+support for other libraries:
+
+  * `StructuredQueriesCasePaths`: Adds support for single-table inheritance _via_ "enum" tables by
+    leveraging the [CasePaths](https://github.com/pointfreeco/swift-case-paths) library.
+
+  * `StructuredQueriesTagged`: Adds support for type-safe identifiers _via_
+    the [Tagged](https://github.com/pointfreeco/swift-tagged) library.
 
 ```diff
  dependencies: [
    .package(
      url: "https://github.com/pointfreeco/swift-structured-queries",
-     from: "0.17.0",
+     from: "0.22.0",
 +    traits: [
++      "StructuredQueriesCasePaths",
 +      "StructuredQueriesTagged",
 +    ]
    ),

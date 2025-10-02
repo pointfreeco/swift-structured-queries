@@ -180,7 +180,7 @@ extension SnapshotTests {
   }
 }
 
-@Selection
+@Table
 private struct ReminderWithList {
   let reminder: Reminder
   let list: RemindersList

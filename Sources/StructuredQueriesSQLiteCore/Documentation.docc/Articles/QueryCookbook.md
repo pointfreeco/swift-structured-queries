@@ -58,8 +58,8 @@ this is doing work that SQL actually excels at. In fact, the condition inside th
 suspiciously like a join constraint, which should give us a hint that what we are doing is not
 quite right.
 
-Another way to do this is to use the `@Selection` macro along with a `JSONRepresentation`` of the
-collection of reminders you want to load for each list:
+Another way to do this is to use the `@Selection` and `@Column` macros along with a
+`JSONRepresentation`` of the collection of reminders you want to load for each list:
 
 ```swift
 @Selection
@@ -75,7 +75,7 @@ struct Row {
 This allows the query to serialize the associated rows into JSON, which are then deserialized into
 a `Row` type. To construct such a query you can use the
 ``StructuredQueriesCore/PrimaryKeyedTableDefinition/jsonGroupArray(distinct:order:filter:)``
-property that is defined on the columns of primary keyed tables:
+property that is defined on the columns of primary-keyed tables:
 
 ```swift
 RemindersList

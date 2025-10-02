@@ -144,7 +144,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "remindersLists"."id"
         FROM "reminders"
-        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        JOIN "remindersLists" ON ("reminders"."remindersListID") = ("remindersLists"."id")
         """
       } results: {
         """
@@ -172,7 +172,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position"
         FROM "reminders"
-        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        JOIN "remindersLists" ON ("reminders"."remindersListID") = ("remindersLists"."id")
         """
       } results: {
         #"""
@@ -322,7 +322,7 @@ extension SnapshotTests {
         """
         SELECT "remindersLists"."title", "reminders"."title"
         FROM "remindersLists"
-        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         """
       } results: {
         """
@@ -350,7 +350,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title", "users"."name"
         FROM "reminders"
-        LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        LEFT JOIN "users" ON ("reminders"."assignedUserID") = ("users"."id")
         LIMIT 2
         """
       } results: {
@@ -370,7 +370,7 @@ extension SnapshotTests {
         """
         SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "users"
-        RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
+        RIGHT JOIN "reminders" ON ("users"."id") IS ("reminders"."assignedUserID")
         LIMIT 2
         """
       } results: {
@@ -414,7 +414,7 @@ extension SnapshotTests {
         """
         SELECT "users"."id", "users"."name", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "users"
-        RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
+        RIGHT JOIN "reminders" ON ("users"."id") IS ("reminders"."assignedUserID")
         LIMIT 2
         """
       } results: {
@@ -458,7 +458,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title", "users"."name"
         FROM "users"
-        RIGHT JOIN "reminders" ON ("users"."id" IS "reminders"."assignedUserID")
+        RIGHT JOIN "reminders" ON ("users"."id") IS ("reminders"."assignedUserID")
         LIMIT 2
         """
       } results: {
@@ -472,14 +472,14 @@ extension SnapshotTests {
 
       assertQuery(
         Reminder.all
-          .fullJoin(User.all) { $0.assignedUserID.eq($1.id) }
+          .fullJoin(User.all) { $0.assignedUserID.is($1.id) }
           .select { ($0.title, $1.name) }
           .limit(2)
       ) {
         """
         SELECT "reminders"."title", "users"."name"
         FROM "reminders"
-        FULL JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        FULL JOIN "users" ON ("reminders"."assignedUserID") IS ("users"."id")
         LIMIT 2
         """
       } results: {
@@ -692,7 +692,7 @@ extension SnapshotTests {
         SELECT "reminders"."isCompleted", count("reminders"."id")
         FROM "reminders"
         GROUP BY "reminders"."isCompleted"
-        HAVING (count("reminders"."id") > 3)
+        HAVING (count("reminders"."id")) > (3)
         """
       } results: {
         """
@@ -719,7 +719,7 @@ extension SnapshotTests {
         SELECT "reminders"."isCompleted", count("reminders"."id")
         FROM "reminders"
         GROUP BY "reminders"."isCompleted"
-        HAVING (count("reminders"."id") > 3)
+        HAVING (count("reminders"."id")) > (3)
         """
       } results: {
         """
@@ -826,7 +826,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."priority", "reminders"."dueDate"
         FROM "reminders"
-        ORDER BY "reminders"."priority" ASC NULLS LAST, "reminders"."dueDate" DESC NULLS FIRST, ("reminders"."title" COLLATE "NOCASE") DESC
+        ORDER BY "reminders"."priority" ASC NULLS LAST, "reminders"."dueDate" DESC NULLS FIRST, "reminders"."title" COLLATE "NOCASE" DESC
         """
       } results: {
         """
@@ -989,7 +989,7 @@ extension SnapshotTests {
           """
           SELECT "remindersLists"."title", count("reminders"."id")
           FROM "remindersLists"
-          JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+          JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
           GROUP BY "remindersLists"."id"
           LIMIT 1
           """
@@ -1014,7 +1014,7 @@ extension SnapshotTests {
         """
         SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", "r2s"."id", "r2s"."assignedUserID", "r2s"."dueDate", "r2s"."isCompleted", "r2s"."isFlagged", "r2s"."notes", "r2s"."priority", "r2s"."remindersListID", "r2s"."title", "r2s"."updatedAt"
         FROM "reminders" AS "r1s"
-        JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
+        JOIN "reminders" AS "r2s" ON ("r1s"."id") = ("r2s"."id")
         LIMIT 1
         """
       } results: {
@@ -1049,7 +1049,7 @@ extension SnapshotTests {
         """
         SELECT "r1s"."id", "r2s"."id"
         FROM "reminders" AS "r1s"
-        LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
+        LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id") = ("r2s"."id")
         LIMIT 1
         """
       } results: {
@@ -1068,9 +1068,9 @@ extension SnapshotTests {
           .select { ($0, $1.jsonGroupArray()) }
       ) {
         """
-        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid" IS NOT NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."id" IS NOT NULL))
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."id") IS NOT (NULL))
         FROM "reminders" AS "r1s"
-        LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id" = "r2s"."id")
+        LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id") = ("r2s"."id")
         GROUP BY "r1s"."id"
         LIMIT 1
         """
@@ -1106,9 +1106,9 @@ extension SnapshotTests {
           .select { ($0, $1.jsonGroupArray()) }
       ) {
         """
-        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid" IS NOT NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."id" IS NOT NULL))
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."id") IS NOT (NULL))
         FROM "reminders" AS "r1s"
-        LEFT JOIN "reminders" AS "r2s" ON (("r1s"."id" = "r2s"."id") AND ("r1s"."id" = 42))
+        LEFT JOIN "reminders" AS "r2s" ON (("r1s"."id") = ("r2s"."id")) AND (("r1s"."id") = (42))
         GROUP BY "r1s"."id"
         LIMIT 1
         """
@@ -1152,7 +1152,7 @@ extension SnapshotTests {
       }
     }
 
-    @Table @Selection
+    @Table
     struct VecExample {
       let rowid: Int
       let distance: Double
@@ -1198,8 +1198,8 @@ extension SnapshotTests {
         """
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "remindersLists"
-        LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
-        WHERE ifnull(("reminders"."priority" IS 3), 0)
+        LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
+        WHERE ifnull(("reminders"."priority") IS (3), 0)
         """
       } results: {
         """
@@ -1341,7 +1341,7 @@ extension SnapshotTests {
         Reminder.Draft.select(\.isHighPriority)
       ) {
         """
-        SELECT ("reminders"."priority" IS 3)
+        SELECT ("reminders"."priority") IS (3)
         FROM "reminders"
         """
       } results: {
@@ -1369,7 +1369,7 @@ extension SnapshotTests {
         }
         assertQuery(query) {
           """
-          SELECT ("reminders"."priority" < 3)
+          SELECT ("reminders"."priority") < (3)
           FROM "reminders"
           """
         } results: {
@@ -1551,7 +1551,7 @@ extension SnapshotTests {
         """
         SELECT "remindersForeignKeys"."id", "remindersForeignKeys"."seq", "remindersForeignKeys"."table", "remindersForeignKeys"."from", "remindersForeignKeys"."to", "remindersForeignKeys"."on_update", "remindersForeignKeys"."on_delete", "remindersForeignKeys"."match", "remindersTableInfo"."cid", "remindersTableInfo"."name", "remindersTableInfo"."type", "remindersTableInfo"."notnull", "remindersTableInfo"."dflt_value", "remindersTableInfo"."pk"
         FROM pragma_foreign_key_list('reminders') AS "remindersForeignKeys"
-        JOIN pragma_table_info('reminders') AS "remindersTableInfo" ON ("remindersForeignKeys"."from" = "remindersTableInfo"."name")
+        JOIN pragma_table_info('reminders') AS "remindersTableInfo" ON ("remindersForeignKeys"."from") = ("remindersTableInfo"."name")
         """
       } results: {
         """
@@ -1567,6 +1567,59 @@ extension SnapshotTests {
         │   match: "NONE"            │                            │
         │ )                          │                            │
         └────────────────────────────┴────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func tuples() {
+      assertQuery(
+        Tag.where {
+          $0.eq(Tag(id: 1, title: "car"))
+        }
+      ) {
+        """
+        SELECT "tags"."id", "tags"."title"
+        FROM "tags"
+        WHERE ("tags"."id", "tags"."title") = (1, 'car')
+        """
+      } results: {
+        """
+        ┌────────────────┐
+        │ Tag(           │
+        │   id: 1,       │
+        │   title: "car" │
+        │ )              │
+        └────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.where {
+          $0 > Tag(id: 1, title: "car")
+        }
+      ) {
+        """
+        SELECT "tags"."id", "tags"."title"
+        FROM "tags"
+        WHERE ("tags"."id", "tags"."title") > (1, 'car')
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ Tag(                │
+        │   id: 2,            │
+        │   title: "kids"     │
+        │ )                   │
+        ├─────────────────────┤
+        │ Tag(                │
+        │   id: 3,            │
+        │   title: "someday"  │
+        │ )                   │
+        ├─────────────────────┤
+        │ Tag(                │
+        │   id: 4,            │
+        │   title: "optional" │
+        │ )                   │
+        └─────────────────────┘
         """
       }
     }

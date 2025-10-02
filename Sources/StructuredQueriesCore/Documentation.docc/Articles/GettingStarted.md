@@ -766,8 +766,8 @@ struct ReminderResult: QueryRepresentable {
 )
 ```
 
-There is also a way to streamline providing the ``QueryRepresentable`` conformance. You can apply the
-`@Selection` macro to your type to generate that conformance for you automatically:
+There is also a way to streamline providing the ``QueryRepresentable`` conformance. You can use
+`@Selection` to describe the datatype you want to decode:
 
 ```swift
 @Selection

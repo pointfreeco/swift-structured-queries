@@ -20,22 +20,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
+            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.bar]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -43,12 +64,118 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
         }
         """#
+      }
+    }
+
+    @Test func selection() {
+      assertMacro {
+        """
+        @Selection
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo {
+          var bar: Int
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Foo
+            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.bar)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore._Selection, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "foos"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let bar = try decoder.decode(Int.self)
+            guard let bar else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.bar = bar
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func tableSelection() {
+      assertMacro {
+        """
+        @Table @Selection
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } diagnostics: {
+        """
+        @Table @Selection
+               ┬─────────
+               ╰─ ⚠️ '@Table' and '@Selection' should not be applied together
+
+        Apply '@Table' to types representing stored tables, virtual tables, and database views.
+
+        Apply '@Selection' to types representing multiple columns that can be selected from a table or query, and types that represent common table expressions.
+                  ✏️ Remove '@Selection'
+                  ✏️ Remove '@Table'
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } fixes: {
+        """
+        struct Foo {
+          var bar: Int
+        }
+        """
+      } expansion: {
+        """
+        struct Foo {
+          var bar: Int
+        }
+        """
       }
     }
 
@@ -77,20 +204,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = User
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email, default: "")
-            public let age = StructuredQueriesCore.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
-              self.id
-            }
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let email = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("email", keyPath: \QueryValue.email, default: "")
+            public let age = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("age", keyPath: \QueryValue.age)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.email._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.age._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.email._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.age._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.email), \(self.age)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: ""),
+              age: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: email._allColumns)
+              allColumns.append(contentsOf: age._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -101,21 +251,52 @@ extension SnapshotTests {
             var age: Int
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let email = StructuredQueriesCore.TableColumn<QueryValue, String?>("email", keyPath: \QueryValue.email, default: "")
-              public let age = StructuredQueriesCore.TableColumn<QueryValue, Int>("age", keyPath: \QueryValue.age)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let email = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("email", keyPath: \QueryValue.email, default: "")
+              public let age = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("age", keyPath: \QueryValue.age)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.email._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.age._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.email, QueryValue.columns.age]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.email._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.age._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.email), \(self.age)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: ""),
+                age: some StructuredQueriesCore.QueryExpression<Int>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: email._allColumns)
+                allColumns.append(contentsOf: age._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth, String?._columnWidth, Int._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -123,11 +304,11 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.email = try decoder.decode(String.self) ?? ""
               let age = try decoder.decode(Int.self)
               guard let age else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.age = age
             }
@@ -149,9 +330,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth, String?._columnWidth, Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "users"
@@ -161,10 +347,10 @@ extension SnapshotTests {
             self.email = try decoder.decode(String.self) ?? ""  // TODO: Should this be non-optional?
             let age = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let age else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.age = age
@@ -189,22 +375,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
+            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.bar]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foo"
@@ -212,7 +419,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -276,22 +483,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Bar
-            public let baz = StructuredQueriesCore.TableColumn<QueryValue, Int>("baz", keyPath: \QueryValue.baz)
+            public let baz = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("baz", keyPath: \QueryValue.baz)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.baz]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.baz._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.baz]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.baz._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.baz)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Bar
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              baz: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: baz._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Bar: StructuredQueriesCore.Table {
+        nonisolated extension Bar: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "bar"
@@ -300,7 +528,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let baz = try decoder.decode(Int.self)
             guard let baz else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.baz = baz
           }
@@ -370,25 +598,58 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let c1 = StructuredQueriesCore.TableColumn<QueryValue, Swift.Bool>("c1", keyPath: \QueryValue.c1, default: true)
-            public let c2 = StructuredQueriesCore.TableColumn<QueryValue, Swift.Int>("c2", keyPath: \QueryValue.c2, default: 1)
-            public let c3 = StructuredQueriesCore.TableColumn<QueryValue, Swift.Double>("c3", keyPath: \QueryValue.c3, default: 1.2)
-            public let c4 = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("c4", keyPath: \QueryValue.c4, default: "")
+            public let c1 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Bool>.for("c1", keyPath: \QueryValue.c1, default: true)
+            public let c2 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Int>.for("c2", keyPath: \QueryValue.c2, default: 1)
+            public let c3 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Double>.for("c3", keyPath: \QueryValue.c3, default: 1.2)
+            public let c4 = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("c4", keyPath: \QueryValue.c4, default: "")
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.c1, QueryValue.columns.c2, QueryValue.columns.c3, QueryValue.columns.c4]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.c1._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.c2._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.c3._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.c4._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.c1, QueryValue.columns.c2, QueryValue.columns.c3, QueryValue.columns.c4]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.c1._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.c2._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.c3._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.c4._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.c1), \(self.c2), \(self.c3), \(self.c4)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              c1: some StructuredQueriesCore.QueryExpression<Swift.Bool> = Swift.Bool(queryOutput: true),
+              c2: some StructuredQueriesCore.QueryExpression<Swift.Int> = Swift.Int(queryOutput: 1),
+              c3: some StructuredQueriesCore.QueryExpression<Swift.Double> = Swift.Double(queryOutput: 1.2),
+              c4: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: c1._allColumns)
+              allColumns.append(contentsOf: c2._allColumns)
+              allColumns.append(contentsOf: c3._allColumns)
+              allColumns.append(contentsOf: c4._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Swift.Bool._columnWidth, Swift.Int._columnWidth, Swift.Double._columnWidth, Swift.String._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -422,20 +683,41 @@ extension SnapshotTests {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("Bar", keyPath: \QueryValue.bar)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.bar]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -443,7 +725,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -514,20 +796,41 @@ extension SnapshotTests {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation>("bar", keyPath: \QueryValue.bar)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.bar]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Date.UnixTimeRepresentation._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -535,7 +838,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -561,25 +864,47 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = User
-            public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
-            public var generated: StructuredQueriesCore.GeneratedColumn<QueryValue, String> {
-              StructuredQueriesCore.GeneratedColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
-            }
+            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+            public let generated = StructuredQueriesCore.GeneratedColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.name, QueryValue.columns.generated]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.generated._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.name]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.name), \(self.generated)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              name: some StructuredQueriesCore.QueryExpression<String>,
+              generated: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: name._allColumns)
+              allColumns.append(contentsOf: generated._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [String._columnWidth, String._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "users"
@@ -588,10 +913,10 @@ extension SnapshotTests {
             let name = try decoder.decode(String.self)
             let generated = try decoder.decode(String.self)
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let generated else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.name = name
             self.generated = generated
@@ -637,25 +962,47 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = User
-            public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
-            public var generated: StructuredQueriesCore.GeneratedColumn<QueryValue, String> {
-              StructuredQueriesCore.GeneratedColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
-            }
+            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+            public let generated = StructuredQueriesCore.GeneratedColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.name, QueryValue.columns.generated]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.generated._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.name]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.name), \(self.generated)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              name: some StructuredQueriesCore.QueryExpression<String>,
+              generated: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: name._allColumns)
+              allColumns.append(contentsOf: generated._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [String._columnWidth, String._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "users"
@@ -664,10 +1011,10 @@ extension SnapshotTests {
             let name = try decoder.decode(String.self)
             let generated = try decoder.decode(String.self)
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let generated else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.name = name
             self.generated = generated
@@ -696,22 +1043,42 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = User
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
-            public var generated: StructuredQueriesCore.GeneratedColumn<QueryValue, Int> {
-              StructuredQueriesCore.GeneratedColumn<QueryValue, Int>("generated", keyPath: \QueryValue.generated)
-            }
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
-              self.id
-            }
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+            public let generated = StructuredQueriesCore.GeneratedColumn<QueryValue, Int>("generated", keyPath: \QueryValue.generated)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.name, QueryValue.columns.generated]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.generated._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.name]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.name), \(self.generated)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              name: some StructuredQueriesCore.QueryExpression<String>,
+              generated: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              allColumns.append(contentsOf: generated._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -721,20 +1088,47 @@ extension SnapshotTests {
             var name: String
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.name]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.name]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.name)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                name: some StructuredQueriesCore.QueryExpression<String>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth, String._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -742,10 +1136,10 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.name = name
             }
@@ -764,9 +1158,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth, String._columnWidth, Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "users"
@@ -776,13 +1175,13 @@ extension SnapshotTests {
             let name = try decoder.decode(String.self)
             let generated = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let generated else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.name = name
@@ -810,22 +1209,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
+            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.bar]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -833,7 +1253,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -859,22 +1279,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.bar)
+            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.bar]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -882,7 +1323,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Int.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -906,22 +1347,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let `bar` = StructuredQueriesCore.TableColumn<QueryValue, Int>("bar", keyPath: \QueryValue.`bar`)
+            public let `bar` = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.`bar`)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.`bar`]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.`bar`._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.`bar`]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.`bar`._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.`bar`)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              `bar`: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: `bar`._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -929,7 +1391,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let `bar` = try decoder.decode(Int.self)
             guard let `bar` else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.`bar` = `bar`
           }
@@ -953,22 +1415,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, ID<Foo>>("bar", keyPath: \QueryValue.bar)
+            public let bar = StructuredQueriesCore._TableColumn<QueryValue, ID<Foo>>.for("bar", keyPath: \QueryValue.bar)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.bar]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression<ID<Foo>>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [ID<Foo>._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -976,7 +1459,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(ID<Foo>.self)
             guard let bar else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
           }
@@ -1000,22 +1483,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore.TableColumn<QueryValue, _>("bar", keyPath: \QueryValue.bar, default: ID<Foo>())
+            public let bar = StructuredQueriesCore._TableColumn<QueryValue, _>.for("bar", keyPath: \QueryValue.bar, default: ID<Foo>())
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.bar]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.bar]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.bar)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              bar: some StructuredQueriesCore.QueryExpression
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: bar._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -1047,19 +1551,38 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = User
+            public typealias PrimaryKey = ID<User, UUID.BytesRepresentation>
             public let id = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>>("id", keyPath: \QueryValue.id)
-            public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID)
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>> {
-              self.id
-            }
+            public let primaryKey = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>>("id", keyPath: \QueryValue.id)
+            public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID, default: nil)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.referrerID]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.referrerID._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.referrerID]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.referrerID._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.referrerID)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = User
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>>,
+              referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil)
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: referrerID._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1069,20 +1592,47 @@ extension SnapshotTests {
             var referrerID: ID<User, UUID>?
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("id", keyPath: \QueryValue.id)
-              public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("id", keyPath: \QueryValue.id, default: nil)
+              public let referrerID = StructuredQueriesCore.TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>("referrerID", keyPath: \QueryValue.referrerID, default: nil)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.referrerID]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.referrerID._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.referrerID]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.referrerID._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.referrerID)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil),
+                referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: referrerID._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [ID<User, UUID.BytesRepresentation>?._columnWidth, ID<User, UUID.BytesRepresentation>?._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -1090,8 +1640,8 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
-              self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
+              self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
+              self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
             }
 
             public nonisolated init(_ other: User) {
@@ -1108,18 +1658,23 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [ID<User, UUID.BytesRepresentation>._columnWidth, ID<User, UUID.BytesRepresentation>?._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "users"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
-            self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
+            self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -1145,22 +1700,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = SyncUp
-            public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.name]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.name]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.name)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = SyncUp
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              name: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension SyncUp: StructuredQueriesCore.Table {
+        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [String._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "syncUps"
@@ -1168,7 +1744,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(String.self)
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.name = name
           }
@@ -1196,19 +1772,38 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = SyncUp
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
-              self.id
-            }
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.name]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.name]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.name)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = SyncUp
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              name: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1218,20 +1813,47 @@ extension SnapshotTests {
             var name: String
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.name]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.name]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.name)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                name: some StructuredQueriesCore.QueryExpression<String>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth, String._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -1239,10 +1861,10 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.name = name
             }
@@ -1261,9 +1883,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth, String._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "syncUps"
@@ -1272,10 +1899,10 @@ extension SnapshotTests {
             let id = try decoder.decode(Int.self)
             let name = try decoder.decode(String.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.name = name
@@ -1318,19 +1945,38 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = SyncUp
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let seconds = StructuredQueriesCore.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
-              self.id
-            }
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let seconds = StructuredQueriesCore._TableColumn<QueryValue, <#Type#>>.for("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.seconds]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.seconds._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.seconds]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.seconds._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.seconds)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = SyncUp
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = <#Type#>(queryOutput: 60 * 5)
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: seconds._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1340,20 +1986,47 @@ extension SnapshotTests {
             var seconds: <#Type#> = 60 * 5
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let seconds = StructuredQueriesCore.TableColumn<QueryValue, <#Type#>>("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let seconds = StructuredQueriesCore._TableColumn<QueryValue, <#Type#>>.for("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.seconds]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.seconds._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.seconds]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.seconds._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.seconds)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                seconds: some StructuredQueriesCore.QueryExpression<<#Type#>> = <#Type#>(queryOutput: 60 * 5)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: seconds._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth, <#Type#>._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -1361,7 +2034,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 5
             }
 
@@ -1379,9 +2052,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth, <#Type#>._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "syncUps"
@@ -1390,7 +2068,7 @@ extension SnapshotTests {
             let id = try decoder.decode(Int.self)
             self.seconds = try decoder.decode(<#Type#>.self) ?? 60 * 5
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -1419,20 +2097,43 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = RemindersList
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             public let color = StructuredQueriesCore.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
-            public let name = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
-              self.id
-            }
+            public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.color._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.color._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.color), \(self.name)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = RemindersList
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = Color.HexRepresentation(queryOutput: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)),
+              name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: color._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1443,21 +2144,52 @@ extension SnapshotTests {
             var name = ""
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
               public let color = StructuredQueriesCore.TableColumn<QueryValue, Color.HexRepresentation>("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
-              public let name = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("name", keyPath: \QueryValue.name, default: "")
+              public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.color._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.color, QueryValue.columns.name]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.color._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.color), \(self.name)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = Color.HexRepresentation(queryOutput: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)),
+                name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: color._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth, Color.HexRepresentation._columnWidth, Swift.String._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -1465,7 +2197,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
               self.name = try decoder.decode(Swift.String.self) ?? ""
             }
@@ -1487,9 +2219,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth, Color.HexRepresentation._columnWidth, Swift.String._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "remindersLists"
@@ -1499,7 +2236,7 @@ extension SnapshotTests {
             self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
             self.name = try decoder.decode(Swift.String.self) ?? ""
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -1546,22 +2283,43 @@ extension SnapshotTests {
 
         public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
           public typealias QueryValue = Foo
-          public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+          public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
           public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-            [QueryValue.columns.name]
+            var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+            return allColumns
           }
           public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-            [QueryValue.columns.name]
+            var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+            return writableColumns
           }
           public var queryFragment: QueryFragment {
             "\(self.name)"
           }
         }
+
+        public struct Selection: StructuredQueriesCore.TableExpression {
+          public typealias QueryValue = Foo
+          public let allColumns: [any StructuredQueriesCore.QueryExpression]
+          public init(
+            name: some StructuredQueriesCore.QueryExpression<String>
+          ) {
+            var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+            allColumns.append(contentsOf: name._allColumns)
+            self.allColumns = allColumns
+          }
+        }
       }
 
-      nonisolated extension Foo: StructuredQueriesCore.Table {
+      nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+        public typealias QueryValue = Self
+        public typealias From = Swift.Never
         public nonisolated static var columns: TableColumns {
           TableColumns()
+        }
+        public nonisolated static var _columnWidth: Int {
+          [String._columnWidth].reduce(0, +)
         }
         public nonisolated static var tableName: String {
           "foos"
@@ -1569,7 +2327,7 @@ extension SnapshotTests {
         public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
           let name = try decoder.decode(String.self)
           guard let name else {
-            throw QueryDecodingError.missingRequiredColumn
+            throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
           }
           self.name = name
         }
@@ -1577,6 +2335,523 @@ extension SnapshotTests {
       """#
     }
   }
+
+  #if StructuredQueriesCasePaths
+    @Test func enumBasics() {
+      assertMacro {
+        """
+        @CasePathable @Table
+        enum Post {
+          @Columns
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let photo = StructuredQueriesCore.ColumnGroup<QueryValue, Photo?>(keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.photo), \(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func photo(
+              _ photo: some StructuredQueriesCore.QueryExpression<Photo>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: photo._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              return Self(allColumns: allColumns)
+            }
+            public static func note(
+              _ note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let photo = try decoder.decode(Photo.self) {
+              self = .photo(photo)
+            } else if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumDiagnostic() {
+      assertMacro {
+        """
+        @Table
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        ┬─────
+        ╰─ 🛑 '@Table' enum type missing required '@CasePathable' macro application
+           ✏️ Insert '@CasePathable'
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } fixes: {
+        """
+        @CasePathable @Table
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case photo(Photo)
+          case note(String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let photo = StructuredQueriesCore._TableColumn<QueryValue, Photo?>.for("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.photo), \(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func photo(
+              _ photo: some StructuredQueriesCore.QueryExpression<Photo>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: photo._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              return Self(allColumns: allColumns)
+            }
+            public static func note(
+              _ note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let photo = try decoder.decode(Photo.self) {
+              self = .photo(photo)
+            } else if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumDiagnostic_SingleLine() {
+      assertMacro {
+        """
+        @Table enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } diagnostics: {
+        """
+        @Table enum Post {
+        ┬─────
+        ╰─ 🛑 '@Table' enum type missing required '@CasePathable' macro application
+           ✏️ Insert '@CasePathable'
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } fixes: {
+        """
+        @CasePathable @Table enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable enum Post {
+          case photo(Photo)
+          case note(String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let photo = StructuredQueriesCore._TableColumn<QueryValue, Photo?>.for("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.photo), \(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func photo(
+              _ photo: some StructuredQueriesCore.QueryExpression<Photo>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: photo._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              return Self(allColumns: allColumns)
+            }
+            public static func note(
+              _ note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let photo = try decoder.decode(Photo.self) {
+              self = .photo(photo)
+            } else if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumFirstNames() {
+      assertMacro {
+        """
+        @CasePathable @Table
+        enum Post {
+          case photo(Photo)
+          case note(text: String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case photo(Photo)
+          case note(text: String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let photo = StructuredQueriesCore._TableColumn<QueryValue, Photo?>.for("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.photo), \(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func photo(
+              _ photo: some StructuredQueriesCore.QueryExpression<Photo>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: photo._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              return Self(allColumns: allColumns)
+            }
+            public static func note(
+              text note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let photo = try decoder.decode(Photo.self) {
+              self = .photo(photo)
+            } else if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumCustomColumn() {
+      assertMacro {
+        """
+        @CasePathable @Table
+        enum Post {
+          @Column("note_text")
+          case note(text: String = "")
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case note(text: String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let note = StructuredQueriesCore.TableColumn<QueryValue, String?>("note_text", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func note(
+              text note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [String._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func enumCustomRepresentation() {
+      assertMacro {
+        """
+        @CasePathable @Table
+        enum Post {
+          @Column(as: Date.UnixTimeRepresentation.self)
+          case timestamp(Date)
+        }
+        """
+      } expansion: {
+        #"""
+        @CasePathable
+        enum Post {
+          case timestamp(Date)
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let timestamp = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("timestamp", keyPath: \QueryValue.timestamp)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.timestamp._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.timestamp._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.timestamp)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func timestamp(
+              _ timestamp: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: timestamp._allColumns)
+              return Self(allColumns: allColumns)
+            }
+          }
+        }
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Date.UnixTimeRepresentation._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let timestamp = try decoder.decode(Date.UnixTimeRepresentation.self) {
+              self = .timestamp(timestamp)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
+      }
+    }
+  #endif
 
   @MainActor
   @Suite struct PrimaryKeyTests {
@@ -1595,18 +2870,33 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Foo
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
-              self.id
-            }
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1615,19 +2905,42 @@ extension SnapshotTests {
             let id: Int?
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -1635,7 +2948,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
             }
 
             public nonisolated init(_ other: Foo) {
@@ -1649,9 +2962,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -1659,7 +2977,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -1715,13 +3033,29 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id)"
+              }
+            }
+
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                self.allColumns = allColumns
               }
             }
           }
@@ -1732,9 +3066,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Foo.Draft: StructuredQueriesCore.Table {
+        nonisolated extension Foo.Draft: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             Foo.tableName
@@ -1742,7 +3081,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -1779,19 +3118,38 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Foo
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
-              self.id
-            }
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.name]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.name]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.name)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              name: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1801,20 +3159,47 @@ extension SnapshotTests {
             var name: String
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let name = StructuredQueriesCore.TableColumn<QueryValue, String>("name", keyPath: \QueryValue.name)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.name]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.name]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.name)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                name: some StructuredQueriesCore.QueryExpression<String>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth, String._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -1822,10 +3207,10 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               let name = try decoder.decode(String.self)
               guard let name else {
-                throw QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               self.name = name
             }
@@ -1844,9 +3229,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth, String._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -1855,10 +3245,10 @@ extension SnapshotTests {
             let id = try decoder.decode(Int.self)
             let name = try decoder.decode(String.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             guard let name else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
             self.name = name
@@ -1890,21 +3280,48 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
-            public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
-            public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
-            public let priority = StructuredQueriesCore.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority)
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int> {
-              self.id
-            }
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
+            public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date, default: nil)
+            public let priority = StructuredQueriesCore._TableColumn<QueryValue, Priority?>.for("priority", keyPath: \QueryValue.priority, default: nil)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.title, QueryValue.columns.date, QueryValue.columns.priority]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.date._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.priority._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.title, QueryValue.columns.date, QueryValue.columns.priority]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.date._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.priority._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.title), \(self.date), \(self.priority)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Reminder
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
+              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Date.UnixTimeRepresentation?(queryOutput: nil),
+              priority: some StructuredQueriesCore.QueryExpression<Priority?> = Priority?(queryOutput: nil)
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: title._allColumns)
+              allColumns.append(contentsOf: date._allColumns)
+              allColumns.append(contentsOf: priority._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -1916,22 +3333,57 @@ extension SnapshotTests {
             var priority: Priority?
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
-              public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date)
-              public let priority = StructuredQueriesCore.TableColumn<QueryValue, Priority?>("priority", keyPath: \QueryValue.priority)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
+              public let date = StructuredQueriesCore.TableColumn<QueryValue, Date.UnixTimeRepresentation?>("date", keyPath: \QueryValue.date, default: nil)
+              public let priority = StructuredQueriesCore._TableColumn<QueryValue, Priority?>.for("priority", keyPath: \QueryValue.priority, default: nil)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.title, QueryValue.columns.date, QueryValue.columns.priority]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.date._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.priority._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.title, QueryValue.columns.date, QueryValue.columns.priority]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.date._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.priority._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.title), \(self.date), \(self.priority)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
+                date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Date.UnixTimeRepresentation?(queryOutput: nil),
+                priority: some StructuredQueriesCore.QueryExpression<Priority?> = Priority?(queryOutput: nil)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: title._allColumns)
+                allColumns.append(contentsOf: date._allColumns)
+                allColumns.append(contentsOf: priority._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth, Swift.String._columnWidth, Date.UnixTimeRepresentation?._columnWidth, Priority?._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -1939,10 +3391,10 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.title = try decoder.decode(Swift.String.self) ?? ""
-              self.date = try decoder.decode(Date.UnixTimeRepresentation.self)
-              self.priority = try decoder.decode(Priority.self)
+              self.date = try decoder.decode(Date.UnixTimeRepresentation.self) ?? nil
+              self.priority = try decoder.decode(Priority.self) ?? nil
             }
 
             public nonisolated init(_ other: Reminder) {
@@ -1965,9 +3417,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth, Swift.String._columnWidth, Date.UnixTimeRepresentation?._columnWidth, Priority?._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "reminders"
@@ -1975,10 +3432,10 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             self.title = try decoder.decode(Swift.String.self) ?? ""
-            self.date = try decoder.decode(Date.UnixTimeRepresentation.self)
-            self.priority = try decoder.decode(Priority.self)
+            self.date = try decoder.decode(Date.UnixTimeRepresentation.self) ?? nil
+            self.priority = try decoder.decode(Priority.self) ?? nil
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2003,18 +3460,33 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
+            public typealias PrimaryKey = UUID.BytesRepresentation
             public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation>("id", keyPath: \QueryValue.id)
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation> {
-              self.id
-            }
+            public let primaryKey = StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation>("id", keyPath: \QueryValue.id)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Reminder
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -2023,19 +3495,42 @@ extension SnapshotTests {
             let id: UUID?
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation?>("id", keyPath: \QueryValue.id)
+              public let id = StructuredQueriesCore.TableColumn<QueryValue, UUID.BytesRepresentation?>("id", keyPath: \QueryValue.id, default: nil)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation?> = UUID.BytesRepresentation?(queryOutput: nil)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [UUID.BytesRepresentation?._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -2043,7 +3538,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(UUID.BytesRepresentation.self)
+              self.id = try decoder.decode(UUID.BytesRepresentation.self) ?? nil
             }
 
             public nonisolated init(_ other: Reminder) {
@@ -2057,9 +3552,14 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [UUID.BytesRepresentation._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "reminders"
@@ -2067,7 +3567,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(UUID.BytesRepresentation.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2094,20 +3594,41 @@ extension SnapshotTests {
             public typealias QueryValue = Reminder
             public let id = StructuredQueriesCore.TableColumn<QueryValue, Int>("id", keyPath: \QueryValue.id)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id)"
             }
           }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Reminder
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              self.allColumns = allColumns
+            }
+          }
         }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table {
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "reminders"
@@ -2115,7 +3636,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
             guard let id else {
-              throw QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
           }
@@ -2141,19 +3662,38 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
-            public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-            public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
-            public var primaryKey: StructuredQueriesCore.TableColumn<QueryValue, Int?> {
-              self.id
-            }
+            public typealias PrimaryKey = Int?
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+            public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.title]
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
+              return allColumns
             }
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              [QueryValue.columns.id, QueryValue.columns.title]
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
+              return writableColumns
             }
             public var queryFragment: QueryFragment {
               "\(self.id), \(self.title)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Reminder
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+              title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: title._allColumns)
+              self.allColumns = allColumns
             }
           }
 
@@ -2163,20 +3703,47 @@ extension SnapshotTests {
             var title = ""
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore.TableColumn<QueryValue, Int?>("id", keyPath: \QueryValue.id)
-              public let title = StructuredQueriesCore.TableColumn<QueryValue, Swift.String>("title", keyPath: \QueryValue.title, default: "")
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.title]
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
+                return allColumns
               }
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                [QueryValue.columns.id, QueryValue.columns.title]
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
+                return writableColumns
               }
               public var queryFragment: QueryFragment {
                 "\(self.id), \(self.title)"
               }
             }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: title._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
             public nonisolated static var columns: TableColumns {
               TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Int?._columnWidth, Swift.String._columnWidth].reduce(0, +)
             }
 
             public nonisolated static var tableName: String {
@@ -2184,7 +3751,7 @@ extension SnapshotTests {
             }
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Int.self)
+              self.id = try decoder.decode(Int.self) ?? nil
               self.title = try decoder.decode(Swift.String.self) ?? ""
             }
 
@@ -2202,16 +3769,652 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable {
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
             TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Int?._columnWidth, Swift.String._columnWidth].reduce(0, +)
           }
           public nonisolated static var tableName: String {
             "reminders"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Int.self)
+            self.id = try decoder.decode(Int.self) ?? nil
             self.title = try decoder.decode(Swift.String.self) ?? ""
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func nested() {
+      assertMacro {
+        """
+        @Table
+        private struct Row {
+          let id: UUID
+          @Columns
+          var timestamps: Timestamps
+        }
+        """
+      } expansion: {
+        #"""
+        private struct Row {
+          let id: UUID
+          var timestamps: Timestamps
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Row
+            public typealias PrimaryKey = UUID
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, UUID>.for("id", keyPath: \QueryValue.id)
+            public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.timestamps._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.timestamps._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id), \(self.timestamps)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Row
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<UUID>,
+              timestamps: some StructuredQueriesCore.QueryExpression<Timestamps>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: timestamps._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = Row
+            let id: UUID?
+            var timestamps: Timestamps
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.timestamps._allColumns)
+                return allColumns
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.timestamps._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.timestamps)"
+              }
+            }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<UUID?> = UUID?(queryOutput: nil),
+                timestamps: some StructuredQueriesCore.QueryExpression<Timestamps>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: timestamps._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [UUID?._columnWidth, Timestamps._columnWidth].reduce(0, +)
+            }
+
+            public nonisolated static var tableName: String {
+              Row.tableName
+            }
+
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(UUID.self) ?? nil
+              let timestamps = try decoder.decode(Timestamps.self)
+              guard let timestamps else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              self.timestamps = timestamps
+            }
+
+            public nonisolated init(_ other: Row) {
+              self.id = other.id
+              self.timestamps = other.timestamps
+            }
+            public init(
+              id: UUID? = nil,
+              timestamps: Timestamps
+            ) {
+              self.id = id
+              self.timestamps = timestamps
+            }
+          }
+        }
+
+        nonisolated extension Row: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [UUID._columnWidth, Timestamps._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "rows"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(UUID.self)
+            let timestamps = try decoder.decode(Timestamps.self)
+            guard let id else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let timestamps else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.timestamps = timestamps
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func nestedLet() {
+      assertMacro {
+        """
+        @Table("remindersTags")
+        struct ReminderTag: Identifiable {
+          @Columns
+          let id: ReminderTagID
+        }
+        """
+      } expansion: {
+        #"""
+        struct ReminderTag: Identifiable {
+          let id: ReminderTagID
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = ReminderTag
+            public typealias PrimaryKey = ReminderTagID
+            public let id = StructuredQueriesCore.ColumnGroup<QueryValue, ReminderTagID>(keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore.ColumnGroup<QueryValue, ReminderTagID>(keyPath: \QueryValue.id)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = ReminderTag
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<ReminderTagID>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = ReminderTag
+            let id: ReminderTagID?
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore.ColumnGroup<QueryValue, ReminderTagID?>(keyPath: \QueryValue.id)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                return allColumns
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id)"
+              }
+            }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<ReminderTagID?> = ReminderTagID?(queryOutput: nil)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [ReminderTagID?._columnWidth].reduce(0, +)
+            }
+
+            public nonisolated static var tableName: String {
+              ReminderTag.tableName
+            }
+
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(ReminderTagID.self) ?? nil
+            }
+
+            public nonisolated init(_ other: ReminderTag) {
+              self.id = other.id
+            }
+            public init(
+              id: ReminderTagID? = nil
+            ) {
+              self.id = id
+            }
+          }
+        }
+
+        nonisolated extension ReminderTag: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [ReminderTagID._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "remindersTags"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(ReminderTagID.self)
+            guard let id else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func customPrimaryKey() {
+      assertMacro {
+        """
+        @Table
+        private struct ReminderWithList {
+          @Column(primaryKey: true)
+          let reminderID: Reminder.ID
+          let reminderTitle: String
+          let remindersListTitle: String
+        }
+        """
+      } expansion: {
+        #"""
+        private struct ReminderWithList {
+          let reminderID: Reminder.ID
+          let reminderTitle: String
+          let remindersListTitle: String
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = ReminderWithList
+            public typealias PrimaryKey = Reminder.ID
+            public let reminderID = StructuredQueriesCore.TableColumn<QueryValue, Reminder.ID>("reminderID", keyPath: \QueryValue.reminderID)
+            public let primaryKey = StructuredQueriesCore.TableColumn<QueryValue, Reminder.ID>("reminderID", keyPath: \QueryValue.reminderID)
+            public let reminderTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("reminderTitle", keyPath: \QueryValue.reminderTitle)
+            public let remindersListTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("remindersListTitle", keyPath: \QueryValue.remindersListTitle)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.reminderID._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.reminderTitle._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.remindersListTitle._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.reminderID._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.reminderTitle._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.remindersListTitle._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.reminderID), \(self.reminderTitle), \(self.remindersListTitle)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = ReminderWithList
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              reminderID: some StructuredQueriesCore.QueryExpression<Reminder.ID>,
+              reminderTitle: some StructuredQueriesCore.QueryExpression<String>,
+              remindersListTitle: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: reminderID._allColumns)
+              allColumns.append(contentsOf: reminderTitle._allColumns)
+              allColumns.append(contentsOf: remindersListTitle._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = ReminderWithList
+            let reminderID: Reminder.ID?
+            let reminderTitle: String
+            let remindersListTitle: String
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let reminderID = StructuredQueriesCore.TableColumn<QueryValue, Reminder.ID?>("reminderID", keyPath: \QueryValue.reminderID, default: nil)
+              public let reminderTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("reminderTitle", keyPath: \QueryValue.reminderTitle)
+              public let remindersListTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("remindersListTitle", keyPath: \QueryValue.remindersListTitle)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.reminderID._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.reminderTitle._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.remindersListTitle._allColumns)
+                return allColumns
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.reminderID._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.reminderTitle._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.remindersListTitle._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.reminderID), \(self.reminderTitle), \(self.remindersListTitle)"
+              }
+            }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                reminderID: some StructuredQueriesCore.QueryExpression<Reminder.ID?> = Reminder.ID?(queryOutput: nil),
+                reminderTitle: some StructuredQueriesCore.QueryExpression<String>,
+                remindersListTitle: some StructuredQueriesCore.QueryExpression<String>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: reminderID._allColumns)
+                allColumns.append(contentsOf: reminderTitle._allColumns)
+                allColumns.append(contentsOf: remindersListTitle._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [Reminder.ID?._columnWidth, String._columnWidth, String._columnWidth].reduce(0, +)
+            }
+
+            public nonisolated static var tableName: String {
+              ReminderWithList.tableName
+            }
+
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.reminderID = try decoder.decode(Reminder.ID.self) ?? nil
+              let reminderTitle = try decoder.decode(String.self)
+              let remindersListTitle = try decoder.decode(String.self)
+              guard let reminderTitle else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              guard let remindersListTitle else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              self.reminderTitle = reminderTitle
+              self.remindersListTitle = remindersListTitle
+            }
+
+            public nonisolated init(_ other: ReminderWithList) {
+              self.reminderID = other.reminderID
+              self.reminderTitle = other.reminderTitle
+              self.remindersListTitle = other.remindersListTitle
+            }
+            public init(
+              reminderID: Reminder.ID? = nil,
+              reminderTitle: String,
+              remindersListTitle: String
+            ) {
+              self.reminderID = reminderID
+              self.reminderTitle = reminderTitle
+              self.remindersListTitle = remindersListTitle
+            }
+          }
+        }
+
+        nonisolated extension ReminderWithList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Reminder.ID._columnWidth, String._columnWidth, String._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "reminderWithLists"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let reminderID = try decoder.decode(Reminder.ID.self)
+            let reminderTitle = try decoder.decode(String.self)
+            let remindersListTitle = try decoder.decode(String.self)
+            guard let reminderID else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let reminderTitle else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let remindersListTitle else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.reminderID = reminderID
+            self.reminderTitle = reminderTitle
+            self.remindersListTitle = remindersListTitle
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func composite() {
+      assertMacro {
+        """
+        @Table
+        private struct Metadata: Identifiable {
+          let id: MetadataID
+          var userModificationDate: Date
+        }
+        """
+      } expansion: {
+        #"""
+        private struct Metadata: Identifiable {
+          let id: MetadataID
+          var userModificationDate: Date
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Metadata
+            public typealias PrimaryKey = MetadataID
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, MetadataID>.for("id", keyPath: \QueryValue.id)
+            public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, MetadataID>.for("id", keyPath: \QueryValue.id)
+            public let userModificationDate = StructuredQueriesCore._TableColumn<QueryValue, Date>.for("userModificationDate", keyPath: \QueryValue.userModificationDate)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.userModificationDate._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.userModificationDate._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id), \(self.userModificationDate)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Metadata
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<MetadataID>,
+              userModificationDate: some StructuredQueriesCore.QueryExpression<Date>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: userModificationDate._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+
+          public struct Draft: StructuredQueriesCore.TableDraft {
+            public typealias PrimaryTable = Metadata
+            let id: MetadataID?
+            var userModificationDate: Date
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, MetadataID?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let userModificationDate = StructuredQueriesCore._TableColumn<QueryValue, Date>.for("userModificationDate", keyPath: \QueryValue.userModificationDate)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.userModificationDate._allColumns)
+                return allColumns
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.userModificationDate._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.userModificationDate)"
+              }
+            }
+            public struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<MetadataID?> = MetadataID?(queryOutput: nil),
+                userModificationDate: some StructuredQueriesCore.QueryExpression<Date>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: userModificationDate._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Int {
+              [MetadataID?._columnWidth, Date._columnWidth].reduce(0, +)
+            }
+
+            public nonisolated static var tableName: String {
+              Metadata.tableName
+            }
+
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode(MetadataID.self) ?? nil
+              let userModificationDate = try decoder.decode(Date.self)
+              guard let userModificationDate else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              self.userModificationDate = userModificationDate
+            }
+
+            public nonisolated init(_ other: Metadata) {
+              self.id = other.id
+              self.userModificationDate = other.userModificationDate
+            }
+            public init(
+              id: MetadataID? = nil,
+              userModificationDate: Date
+            ) {
+              self.id = id
+              self.userModificationDate = userModificationDate
+            }
+          }
+        }
+
+        nonisolated extension Metadata: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [MetadataID._columnWidth, Date._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "metadatas"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(MetadataID.self)
+            let userModificationDate = try decoder.decode(Date.self)
+            guard let id else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let userModificationDate else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.userModificationDate = userModificationDate
           }
         }
         """#

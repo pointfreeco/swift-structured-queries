@@ -569,7 +569,10 @@ extension Select {
     Select<(repeat each C1, repeat (each C2).QueryValue), From, (repeat each J)>(
       isEmpty: isEmpty,
       distinct: distinct,
-      columns: columns + Array(repeat each selection((From.columns, repeat (each J).columns))),
+      columns: columns
+        + $_isSelecting.withValue(true) {
+          Array(repeat each selection((From.columns, repeat (each J).columns)))
+        },
       joins: joins,
       where: `where`,
       group: group,
@@ -1729,6 +1732,8 @@ public func + <
     limit: rhs.limit ?? lhs.limit
   )
 }
+
+@TaskLocal public var _isSelecting = false
 
 extension Select: SelectStatement {
   public typealias QueryValue = Columns

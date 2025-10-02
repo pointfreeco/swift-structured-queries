@@ -142,11 +142,11 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "users"."id", "users"."name" AS "assignedUser", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt" AS "reminder", json_group_array(CASE WHEN ("tags"."rowid" IS NOT NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id" IS NOT NULL)) AS "tags"
+        SELECT "users"."id" AS "id", "users"."name" AS "name", "reminders"."id" AS "id", "reminders"."assignedUserID" AS "assignedUserID", "reminders"."dueDate" AS "dueDate", "reminders"."isCompleted" AS "isCompleted", "reminders"."isFlagged" AS "isFlagged", "reminders"."notes" AS "notes", "reminders"."priority" AS "priority", "reminders"."remindersListID" AS "remindersListID", "reminders"."title" AS "title", "reminders"."updatedAt" AS "updatedAt", json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id") IS NOT (NULL)) AS "tags"
         FROM "reminders"
-        LEFT JOIN "remindersTags" ON ("reminders"."id" = "remindersTags"."reminderID")
-        LEFT JOIN "tags" ON ("remindersTags"."tagID" = "tags"."id")
-        LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        LEFT JOIN "remindersTags" ON ("reminders"."id") = ("remindersTags"."reminderID")
+        LEFT JOIN "tags" ON ("remindersTags"."tagID") = ("tags"."id")
+        LEFT JOIN "users" ON ("reminders"."assignedUserID") = ("users"."id")
         GROUP BY "reminders"."id"
         LIMIT 2
         """
@@ -228,10 +228,10 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", json_group_array(DISTINCT CASE WHEN ("milestones"."rowid" IS NOT NULL) THEN json_object('id', json_quote("milestones"."id"), 'remindersListID', json_quote("milestones"."remindersListID"), 'title', json_quote("milestones"."title")) END) FILTER (WHERE ("milestones"."id" IS NOT NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."rowid" IS NOT NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")) END) FILTER (WHERE ("reminders"."id" IS NOT NULL)) AS "reminders"
+        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", json_group_array(DISTINCT CASE WHEN ("milestones"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("milestones"."id"), 'remindersListID', json_quote("milestones"."remindersListID"), 'title', json_quote("milestones"."title")) END) FILTER (WHERE ("milestones"."id") IS NOT (NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")) END) FILTER (WHERE ("reminders"."id") IS NOT (NULL)) AS "reminders"
         FROM "remindersLists"
-        LEFT JOIN "milestones" ON ("remindersLists"."id" = "milestones"."remindersListID")
-        LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        LEFT JOIN "milestones" ON ("remindersLists"."id") = ("milestones"."remindersListID")
+        LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         WHERE NOT ("reminders"."isCompleted")
         GROUP BY "remindersLists"."id"
         LIMIT 1
@@ -349,7 +349,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", json_object('id', json_quote("remindersLists"."id"), 'color', json_quote("remindersLists"."color"), 'title', json_quote("remindersLists"."title"), 'position', json_quote("remindersLists"."position"))
         FROM "reminders"
-        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        JOIN "remindersLists" ON ("reminders"."remindersListID") = ("remindersLists"."id")
         """
       } results: {
         #"""
@@ -494,7 +494,7 @@ extension SnapshotTests {
   }
 }
 
-@Selection
+@Table
 private struct ReminderRow {
   let assignedUser: User?
   let reminder: Reminder
@@ -502,7 +502,7 @@ private struct ReminderRow {
   let tags: [Tag]
 }
 
-@Selection
+@Table
 private struct RemindersListRow {
   let remindersList: RemindersList
   @Column(as: [Milestone].JSONRepresentation.self)

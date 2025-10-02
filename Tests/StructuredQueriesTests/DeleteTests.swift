@@ -46,7 +46,7 @@ extension SnapshotTests {
       assertQuery(Reminder.delete().where { $0.id == 1 }.returning(\.self)) {
         """
         DELETE FROM "reminders"
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id") = (1)
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt"
         """
       } results: {
@@ -85,7 +85,7 @@ extension SnapshotTests {
       assertQuery(Reminder.delete(Reminder(id: 1, remindersListID: 1))) {
         """
         DELETE FROM "reminders"
-        WHERE ("reminders"."id" = 1)
+        WHERE ("reminders"."id") = (1)
         """
       }
       assertQuery(Reminder.count()) {
@@ -135,7 +135,7 @@ extension SnapshotTests {
       ) {
         """
         DELETE FROM "remindersLists" AS "rs"
-        WHERE ("rs"."id" = 1)
+        WHERE ("rs"."id") = (1)
         RETURNING "id", "color", "title", "position"
         """
       } results: {

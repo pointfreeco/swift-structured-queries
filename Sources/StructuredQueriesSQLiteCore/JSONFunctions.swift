@@ -62,7 +62,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
   /// useful for loading many associated values in a single query. For example, to query for every
   /// reminders list, along with the array of reminders it is associated with, one can define a
-  /// custom `@Selection` for that data and query as follows:
+  /// custom data type for that data and query as follows:
   ///
   /// @Row {
   ///   @Column {
@@ -122,13 +122,17 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   }
 }
 
-extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Codable {
+extension PrimaryKeyedTableDefinition
+where
+  QueryValue: _OptionalProtocol & Codable,
+  PrimaryColumn: _TableColumnExpression<QueryValue, PrimaryKey>
+{
   /// A JSON array representation of the aggregation of a table's columns.
   ///
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
   /// useful for loading many associated values in a single query. For example, to query for every
   /// reminders list, along with the array of reminders it is associated with, one can define a
-  /// custom `@Selection` for that data and query as follows:
+  /// custom data type for that data and query as follows:
   ///
   /// @Row {
   ///   @Column {
@@ -179,11 +183,22 @@ extension PrimaryKeyedTableDefinition where QueryValue: _OptionalProtocol & Coda
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[Wrapped].JSONRepresentation>
   where QueryValue == Wrapped? {
+    let primaryKeyColumns: QueryFragment = self.primaryKey._names
+      .map { "\(QueryValue.self).\(quote: $0)" }
+      .joined(separator: ", ")
+    let primaryKeyNulls: QueryFragment = Array(
+      repeating: QueryFragment("NULL"), count: self.primaryKey._names.count
+    )
+    .joined(separator: ", ")
+    let primaryKeyFilter = SQLQueryExpression(
+      "(\(primaryKeyColumns)) IS NOT (\(primaryKeyNulls))",
+      as: Bool.self
+    )
     let filterQueryFragment =
       if let filter {
-        self.primaryKey.isNot(nil).and(filter).queryFragment
+        primaryKeyFilter.and(filter).queryFragment
       } else {
-        self.primaryKey.isNot(nil).queryFragment
+        primaryKeyFilter.queryFragment
       }
     return AggregateFunction(
       "json_group_array",

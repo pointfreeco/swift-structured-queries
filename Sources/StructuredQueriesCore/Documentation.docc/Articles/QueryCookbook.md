@@ -261,9 +261,9 @@ you can use the ``Table/unscoped`` property:
 
 It will often be the case that you want to select very specific data from your database and then
 decode that data into a custom Swift data type. For example, if you are displaying a list of
-reminders and only need their titles for the list, it would be wasteful to decode an array of
-all reminder data. The `@Selection` macro allows you to define a custom data type of only the
-fields you want to decode:
+reminders and only need their titles for the list, it would be wasteful to decode an array of all
+reminder data. The `@Selection` macro allows you to define a custom data type of only the fields you
+want to decode:
 
 ```swift
 @Selection
@@ -297,7 +297,7 @@ Then when selecting the columns for your query you can use this data type:
 }
 
 As another example, consider the query that selects all reminders lists with the count of reminders
-in each list. A selection data type can be defined like so:
+in each list. A data type can be defined like so:
 
 ```swift
 @Selection

@@ -15,7 +15,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title", "remindersLists"."title"
         FROM "reminders"
-        JOIN "remindersLists" ON ("reminders"."remindersListID" = "remindersLists"."id")
+        JOIN "remindersLists" ON ("reminders"."remindersListID") = ("remindersLists"."id")
         ORDER BY "reminders"."dueDate" DESC
         """
       } results: {
@@ -47,7 +47,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."priority" AS "value"
         FROM "remindersLists"
-        LEFT JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         """
       } results: {
         """
@@ -88,7 +88,7 @@ extension SnapshotTests {
   }
 }
 
-@Selection
+@Table
 private struct PriorityRow {
   let value: Priority?
 }

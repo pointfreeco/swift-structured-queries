@@ -113,6 +113,8 @@ public struct TableAlias<
 
   @dynamicMemberLookup
   public struct TableColumns: Sendable, TableDefinition {
+    public typealias QueryValue = TableAlias
+
     public static var allColumns: [any TableColumnExpression] {
       #if compiler(>=6.1)
         return Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
@@ -137,15 +139,13 @@ public struct TableAlias<
       #endif
     }
 
-    public typealias QueryValue = TableAlias
-
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Member>>
     ) -> TableColumn<TableAlias, Member> {
       let column = Base.columns[keyPath: keyPath]
       return TableColumn<TableAlias, Member>(
         column.name,
-        keyPath: \.[member: \Member.self, column: column._keyPath]
+        keyPath: \.[member: \Member.self, column: column.keyPath]
       )
     }
 
@@ -155,8 +155,30 @@ public struct TableAlias<
       let column = Base.columns[keyPath: keyPath]
       return GeneratedColumn<TableAlias, Member>(
         column.name,
-        keyPath: \.[member: \Member.self, column: column._keyPath]
+        keyPath: \.[member: \Member.self, column: column.keyPath]
       )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Member>>
+    ) -> ColumnGroup<TableAlias, Member> {
+      ColumnGroup<TableAlias, Member>(
+        keyPath: \.[member: \Member.self, column: Base.columns[keyPath: keyPath].keyPath]
+      )
+    }
+  }
+
+  public struct Selection: TableExpression {
+    public typealias QueryValue = TableAlias
+
+    fileprivate var base: Base.Selection
+
+    public init(_ base: Base.Selection) {
+      self.base = base
+    }
+
+    public var allColumns: [any QueryExpression] {
+      base.allColumns
     }
   }
 }
@@ -174,10 +196,56 @@ extension TableAlias: TableDraft where Base: TableDraft {
 
 extension TableAlias.TableColumns: PrimaryKeyedTableDefinition
 where Base.TableColumns: PrimaryKeyedTableDefinition {
-  public typealias PrimaryKey = Base.TableColumns.PrimaryKey
+  public typealias PrimaryKey = Base.PrimaryKey
 
-  public var primaryKey: TableColumn<TableAlias, Base.TableColumns.PrimaryKey.QueryValue> {
-    self[dynamicMember: \.primaryKey]
+  public struct PrimaryColumn: _TableColumnExpression {
+    public typealias Root = TableAlias
+
+    public typealias Value = Base.PrimaryKey
+
+    public var _names: [String] {
+      Base.columns.primaryKey._names
+    }
+
+    public var keyPath: KeyPath<TableAlias, Base.PrimaryKey.QueryOutput> {
+      \.[member: \Base.PrimaryKey.self, column: Base.columns.primaryKey.keyPath]
+    }
+
+    public var queryFragment: QueryFragment {
+      Base.columns.primaryKey._names
+        .map { "\(quote: Name.aliasName).\(quote: $0)" }
+        .joined(separator: ", ")
+    }
+  }
+
+  public var primaryKey: PrimaryColumn {
+    PrimaryColumn()
+  }
+}
+
+extension TableAlias.TableColumns.PrimaryColumn: TableColumnExpression
+where Base.TableColumns.PrimaryColumn: TableColumnExpression {
+  public var name: String {
+    Base.columns.primaryKey.name
+  }
+
+  public var defaultValue: Base.PrimaryKey.QueryOutput? {
+    Base.columns.primaryKey.defaultValue
+  }
+
+  public func _aliased<N: AliasName>(
+    _ alias: N.Type
+  ) -> any TableColumnExpression<TableAlias<TableAlias, N>, Base.PrimaryKey> {
+    GeneratedColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
+  }
+}
+
+extension TableAlias.TableColumns.PrimaryColumn: WritableTableColumnExpression
+where Base.TableColumns.PrimaryColumn: WritableTableColumnExpression {
+  public func _aliased<N: AliasName>(
+    _ alias: N.Type
+  ) -> any WritableTableColumnExpression<TableAlias<TableAlias, N>, Base.PrimaryKey> {
+    TableColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
   }
 }
 
@@ -187,16 +255,19 @@ extension TableAlias: QueryExpression where Base: QueryExpression {
   public var queryFragment: QueryFragment {
     base.queryFragment
   }
+
+  public static var _columnWidth: Int {
+    Base._columnWidth
+  }
+
+  public var _allColumns: [any QueryExpression] {
+    base._allColumns
+  }
 }
 
 extension TableAlias: QueryBindable where Base: QueryBindable {
   public var queryBinding: QueryBinding {
     base.queryBinding
-  }
-
-  public init?(queryBinding: QueryBinding) {
-    guard let base = Base(queryBinding: queryBinding) else { return nil }
-    self.init(base: base)
   }
 }
 
@@ -247,7 +318,8 @@ extension TableAlias: Encodable where Base: Encodable {
 
 extension QueryFragment {
   fileprivate func replacingOccurrences<T: Table, A: AliasName>(
-    of _: T.Type, with _: A.Type
+    of _: T.Type,
+    with _: A.Type
   ) -> QueryFragment {
     var query = self
     for index in query.segments.indices {

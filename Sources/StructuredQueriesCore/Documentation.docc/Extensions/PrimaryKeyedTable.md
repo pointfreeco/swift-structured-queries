@@ -1,6 +1,6 @@
 # ``StructuredQueriesCore/PrimaryKeyedTable``
 
-A primary keyed table is one that has a column whose value is unique for the entire table. The most
+A primary-keyed table is one that has a column whose value is unique for the entire table. The most
 common example is an "id" column that holds an integer, UUID, or some other kind of identifier.
 Typically such columns are also initialized by the database so that when inserting rows into the
 table you do not need to specify the primary key. The library provides extra tools that make it
@@ -25,7 +25,7 @@ struct Book {
 
 > Note: Using `primaryKey: true` does not create any kind of constraints on your table
 > automatically. It is up to you to actually create this table and designate the column as the
-> primary key.
+> primary key in its table definition.
 
 The `@Table` macro will also automatically infer a field named `id` as a primary key, and so it is
 not necessary to use the `@Column` macro in that case:
@@ -39,7 +39,23 @@ struct Reminder {
 }
 ```
 
-> Note: At most one column can be designated as a primary key.
+To define a composite primary key, group them together into a `@Selection` type and annotate the
+field with the `@Columns` macro:
+
+```swift
+@Table
+struct Enrollment {
+  @Selection
+  struct ID {
+    var courseID: CourseID
+    var studentID: StudentID
+  }
+
+  // Automatically inferred as '@Columns(primaryKey: True)
+  let id: ID
+  // ...
+}
+```
 
 ### Drafts
 
@@ -101,7 +117,7 @@ Reminder
 
 ### Updates and deletions
 
-Primary keyed tables are also given special APIs for updating and deleting existing rows in the
+Primary-keyed tables are also given special APIs for updating and deleting existing rows in the
 table based on their primary key. For example, the ``PrimaryKeyedTable/update(_:)`` method
 allows one to update all the fields of a row with the corresponding primary key:
 

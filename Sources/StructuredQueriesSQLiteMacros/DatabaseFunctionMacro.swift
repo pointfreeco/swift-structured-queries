@@ -102,16 +102,20 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     let functionTypeName = context.makeUniqueName(declarationName)
     let databaseFunctionName = StringLiteralExprSyntax(content: functionName)
-    let argumentCount = declaration.signature.parameterClause.parameters.count
+    var argumentCount: [ExprSyntax] = []
 
     var bodyArguments: [String] = []
     var representableInputTypes: [String] = []
     var signature = declaration.signature
     var invocationArgumentTypes: [TypeSyntax] = []
     var parameters: [String] = []
-    var argumentBindings: [(String, String)] = []
+    var argumentBindings: [String] = []
     var offset = 0
     var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
+
+    var decodings: [String] = []
+    var decodingUnwrappings: [String] = []
+
     for index in signature.parameterClause.parameters.indices {
       defer { offset += 1 }
       var parameter = signature.parameterClause.parameters[index]
@@ -125,9 +129,10 @@ extension DatabaseFunctionMacro: PeerMacro {
         return []
       }
       bodyArguments.append("\(parameter.type.trimmed)")
-      let type = (functionRepresentationIterator?.next()?.type ?? parameter.type).trimmed
-      representableInputTypes.append(type.trimmedDescription)
+      var type = (functionRepresentationIterator?.next()?.type ?? parameter.type)
       parameter.type = type.asQueryExpression()
+      type = type.trimmed
+      representableInputTypes.append(type.description)
       if let defaultValue = parameter.defaultValue,
         defaultValue.value.is(NilLiteralExprSyntax.self)
       {
@@ -137,7 +142,11 @@ extension DatabaseFunctionMacro: PeerMacro {
       invocationArgumentTypes.append(type)
       let parameterName = (parameter.secondName ?? parameter.firstName).trimmedDescription
       parameters.append(parameterName)
-      argumentBindings.append((parameterName, "\(type)(queryBinding: arguments[\(offset)])"))
+      argumentBindings.append(parameterName)
+
+      argumentCount.append("\(type)")
+      decodings.append("let \(parameterName) = try decoder.decode(\(type).self)")
+      decodingUnwrappings.append("guard let \(parameterName) else { throw InvalidInvocation() }")
     }
     var representableInputType = representableInputTypes.joined(separator: ", ")
     let isVoidReturning = signature.returnClause == nil
@@ -154,7 +163,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       """
     let bodyInvocation = """
       \(declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")self.body(\
-      \(argumentBindings.map { name, _ in "\(name).queryOutput" }.joined(separator: ", "))\
+      \(argumentBindings.joined(separator: ", "))\
       )
       """
     // TODO: Diagnose 'asyncClause'?
@@ -218,25 +227,25 @@ extension DatabaseFunctionMacro: PeerMacro {
       public typealias Input = \(raw: representableInputType)
       public typealias Output = \(representableOutputType)
       public let name = \(databaseFunctionName)
-      public let argumentCount: Int? = \(raw: argumentCount)
+      public var argumentCount: Int? { \
+      [\(raw: argumentCount.map { "\($0)._columnWidth" }.joined(separator: ", "))].reduce(0, +) \
+      }
       public let isDeterministic = \(raw: isDeterministic)
       public let body: \(raw: bodyType)
       public init(_ body: @escaping \(raw: bodyType)) {
       self.body = body
       }
       public func callAsFunction\(signature.trimmed) {
+      StructuredQueriesCore.$_isSelecting.withValue(false) {
       StructuredQueriesCore.SQLQueryExpression(
       "\\(quote: self.name)(\(raw: parameters.map { "\\(\($0))" }.joined(separator: ", ")))"
       )
       }
-      public func invoke(
-      _ arguments: [StructuredQueriesCore.QueryBinding]
-      ) -> StructuredQueriesCore.QueryBinding {
-      guard self.argumentCount == nil || self.argumentCount == arguments.count\
-      \(raw: argumentBindings.map { ", let \($0) = \($1)" }.joined()) \
-      else {
-      return .invalid(InvalidInvocation())
       }
+      public func invoke(
+      _ decoder: inout some QueryDecoder
+      ) throws -> StructuredQueriesCore.QueryBinding {
+      \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
       \(raw: invocationBody)
       }
       private struct InvalidInvocation: Error {}

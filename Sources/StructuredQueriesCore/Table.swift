@@ -1,11 +1,18 @@
-/// A type representing a database table.
+/// A type representing columns in a database.
 ///
 /// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
-/// generate a conformance.
+/// generate a conformance. See <doc:DefiningYourSchema> for more information.
 @dynamicMemberLookup
-public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self {
+public protocol Table: QueryRepresentable, PartialSelectStatement {
+  associatedtype QueryValue = Self
+
+  associatedtype From = Never
+
   /// A type that describes this table's columns.
-  associatedtype TableColumns: TableDefinition
+  associatedtype TableColumns: TableDefinition<Self>
+
+  /// A type that describes this table as a query expression.
+  associatedtype Selection: TableExpression<Self>
 
   /// A type that describes the default results of requesting all rows from the table.
   associatedtype DefaultScope: SelectStatement<(), Self, ()>
@@ -52,6 +59,9 @@ public protocol Table: QueryRepresentable where TableColumns.QueryValue == Self 
   static var all: DefaultScope { get }
 }
 
+// NB: Distinguishes `@Selection` from `@Table`.
+public protocol _Selection: Table {}
+
 extension Table {
   /// A select statement on the table with no constraints.
   ///
@@ -86,6 +96,8 @@ extension Table {
     Where(scope: .unscoped)
   }
 
+  /// A select statement that does not execute and always returns no results.
+  @_disfavoredOverload
   public static var none: Where<Self> {
     Where(scope: .empty)
   }
@@ -111,10 +123,25 @@ extension Table {
   /// #sql("SELECT \(Reminder.id) FROM \(Reminder.self)", as: Int.self)
   /// // SELECT "reminders"."id" FROM "reminders
   /// ```
-  public static subscript<Member>(
-    dynamicMember keyPath: KeyPath<TableColumns, TableColumn<Self, Member>>
-  ) -> TableColumn<Self, Member> {
+  public static subscript<Member: _TableColumnExpression>(
+    dynamicMember keyPath: KeyPath<TableColumns, Member>
+  ) -> Member {
     columns[keyPath: keyPath]
+  }
+
+  public var query: QueryFragment {
+    func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+      let value = Value(queryOutput: (self as! Root)[keyPath: column.keyPath])
+      return "\(value) AS \(quote: column.name)"
+    }
+    return "SELECT \(TableColumns.allColumns.map { open($0) }.joined(separator: ", "))"
+  }
+
+  public var queryFragment: QueryFragment {
+    func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> QueryFragment {
+      Value(queryOutput: (self as! Root)[keyPath: column.keyPath]).queryFragment
+    }
+    return TableColumns.allColumns.map { open($0) }.joined(separator: ", ")
   }
 }
 

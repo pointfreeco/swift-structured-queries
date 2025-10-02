@@ -19,9 +19,9 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
-        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         LIMIT 2
         """
@@ -56,9 +56,9 @@ extension SnapshotTests {
           .map { RemindersListAndReminderCount.Columns(remindersList: $1, remindersCount: $0) }
       ) {
         """
-        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position" AS "remindersList", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", count("reminders"."id")
         FROM "remindersLists"
-        JOIN "reminders" ON ("remindersLists"."id" = "reminders"."remindersListID")
+        JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
         LIMIT 2
         """
@@ -87,13 +87,69 @@ extension SnapshotTests {
         └─────────────────────────────────┘
         """
       }
+      let remindersListAndRemindersCount = RemindersListAndReminderCount.Columns(
+        remindersList: RemindersList.columns,
+        remindersCount: Reminder.columns.count()
+      )
+      assertQuery(
+        #sql(
+          """
+          SELECT \(remindersListAndRemindersCount)
+          FROM \(RemindersList.self)
+          JOIN \(Reminder.self) ON \(RemindersList.id) = \(Reminder.remindersListID)
+          GROUP BY \(RemindersList.id)
+          """,
+          as: RemindersListAndReminderCount.self
+        )
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", count("reminders"."id")
+        FROM "remindersLists"
+        JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+        GROUP BY "remindersLists"."id"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────┐
+        │ RemindersListAndReminderCount(  │
+        │   remindersList: RemindersList( │
+        │     id: 1,                      │
+        │     color: 4889071,             │
+        │     title: "Personal",          │
+        │     position: 0                 │
+        │   ),                            │
+        │   remindersCount: 5             │
+        │ )                               │
+        ├─────────────────────────────────┤
+        │ RemindersListAndReminderCount(  │
+        │   remindersList: RemindersList( │
+        │     id: 2,                      │
+        │     color: 15567157,            │
+        │     title: "Family",            │
+        │     position: 0                 │
+        │   ),                            │
+        │   remindersCount: 3             │
+        │ )                               │
+        ├─────────────────────────────────┤
+        │ RemindersListAndReminderCount(  │
+        │   remindersList: RemindersList( │
+        │     id: 3,                      │
+        │     color: 11689427,            │
+        │     title: "Business",          │
+        │     position: 0                 │
+        │   ),                            │
+        │   remindersCount: 2             │
+        │ )                               │
+        └─────────────────────────────────┘
+        """
+      }
     }
 
     @Test func outerJoin() {
       assertQuery(
         Reminder
           .limit(2)
-          .leftJoin(User.all) { $0.assignedUserID.eq($1.id) }
+          .leftJoin(User.all) { $0.assignedUserID.is($1.id) }
           .select {
             ReminderTitleAndAssignedUserName.Columns(
               reminderTitle: $0.title,
@@ -104,7 +160,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title" AS "reminderTitle", "users"."name" AS "assignedUserName"
         FROM "reminders"
-        LEFT JOIN "users" ON ("reminders"."assignedUserID" = "users"."id")
+        LEFT JOIN "users" ON ("reminders"."assignedUserID") IS ("users"."id")
         LIMIT 2
         """
       } results: {

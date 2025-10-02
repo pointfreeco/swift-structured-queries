@@ -26,10 +26,10 @@ Reminder.select { $exclaim($0.title) }
 ```
 
 For the query to successfully execute, you must also add the function to your SQLite database
-connection. This can be done in [SharingGRDB] (0.7.0+) using the `Database.add(function:)` method,
-_e.g._ when you first configure things:
+connection. This can be done in [SQLiteData] using the `Database.add(function:)` method, _e.g._ when
+you first configure things:
 
-[SharingGRDB]: https://github.com/pointfreeco/sharing-grdb
+[SQLiteData]: https://github.com/pointfreeco/sqlite-data
 
 ```swift
 var configuration = Configuration()

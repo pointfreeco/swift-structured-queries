@@ -10,82 +10,82 @@ extension SnapshotTests {
     @Test func equality() {
       assertInlineSnapshot(of: Row.columns.c == Row.columns.c, as: .sql) {
         """
-        ("rows"."c" = "rows"."c")
+        ("rows"."c") = ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c == Row.columns.a, as: .sql) {
         """
-        ("rows"."c" = "rows"."a")
+        ("rows"."c") = ("rows"."a")
         """
       }
       assertInlineSnapshot(of: Row.columns.c == nil as Int?, as: .sql) {
         """
-        ("rows"."c" IS NULL)
+        ("rows"."c") IS (NULL)
         """
       }
       assertInlineSnapshot(of: Row.columns.a == Row.columns.c, as: .sql) {
         """
-        ("rows"."a" IS "rows"."c")
+        ("rows"."a") IS ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.a == Row.columns.a, as: .sql) {
         """
-        ("rows"."a" IS "rows"."a")
+        ("rows"."a") IS ("rows"."a")
         """
       }
       assertInlineSnapshot(of: Row.columns.a == nil as Int?, as: .sql) {
         """
-        ("rows"."a" IS NULL)
+        ("rows"."a") IS (NULL)
         """
       }
       assertInlineSnapshot(of: nil as Int? == Row.columns.c, as: .sql) {
         """
-        (NULL IS "rows"."c")
+        (NULL) IS ("rows"."c")
         """
       }
       assertInlineSnapshot(of: nil as Int? == Row.columns.a, as: .sql) {
         """
-        (NULL IS "rows"."a")
+        (NULL) IS ("rows"."a")
         """
       }
       assertInlineSnapshot(of: Row.columns.c != Row.columns.c, as: .sql) {
         """
-        ("rows"."c" <> "rows"."c")
+        ("rows"."c") <> ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c != Row.columns.a, as: .sql) {
         """
-        ("rows"."c" <> "rows"."a")
+        ("rows"."c") <> ("rows"."a")
         """
       }
       assertInlineSnapshot(of: Row.columns.c != nil as Int?, as: .sql) {
         """
-        ("rows"."c" IS NOT NULL)
+        ("rows"."c") IS NOT (NULL)
         """
       }
       assertInlineSnapshot(of: Row.columns.a != Row.columns.c, as: .sql) {
         """
-        ("rows"."a" IS NOT "rows"."c")
+        ("rows"."a") IS NOT ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.a != Row.columns.a, as: .sql) {
         """
-        ("rows"."a" IS NOT "rows"."a")
+        ("rows"."a") IS NOT ("rows"."a")
         """
       }
       assertInlineSnapshot(of: Row.columns.a != nil as Int?, as: .sql) {
         """
-        ("rows"."a" IS NOT NULL)
+        ("rows"."a") IS NOT (NULL)
         """
       }
       assertInlineSnapshot(of: nil as Int? != Row.columns.c, as: .sql) {
         """
-        (NULL IS NOT "rows"."c")
+        (NULL) IS NOT ("rows"."c")
         """
       }
       assertInlineSnapshot(of: nil as Int? != Row.columns.a, as: .sql) {
         """
-        (NULL IS NOT "rows"."a")
+        (NULL) IS NOT ("rows"."a")
         """
       }
     }
@@ -94,12 +94,12 @@ extension SnapshotTests {
     @Test func deprecatedEquality() {
       assertInlineSnapshot(of: Row.columns.c == nil, as: .sql) {
         """
-        ("rows"."c" IS NULL)
+        ("rows"."c") IS (NULL)
         """
       }
       assertInlineSnapshot(of: Row.columns.c != nil, as: .sql) {
         """
-        ("rows"."c" IS NOT NULL)
+        ("rows"."c") IS NOT (NULL)
         """
       }
     }
@@ -107,27 +107,27 @@ extension SnapshotTests {
     @Test func comparison() {
       assertInlineSnapshot(of: Row.columns.c < Row.columns.c, as: .sql) {
         """
-        ("rows"."c" < "rows"."c")
+        ("rows"."c") < ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c > Row.columns.c, as: .sql) {
         """
-        ("rows"."c" > "rows"."c")
+        ("rows"."c") > ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c <= Row.columns.c, as: .sql) {
         """
-        ("rows"."c" <= "rows"."c")
+        ("rows"."c") <= ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c >= Row.columns.c, as: .sql) {
         """
-        ("rows"."c" >= "rows"."c")
+        ("rows"."c") >= ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.bool < Row.columns.bool, as: .sql) {
         """
-        ("rows"."bool" < "rows"."bool")
+        ("rows"."bool") < ("rows"."bool")
         """
       }
     }
@@ -135,12 +135,12 @@ extension SnapshotTests {
     @Test func logic() {
       assertInlineSnapshot(of: Row.columns.bool && Row.columns.bool, as: .sql) {
         """
-        ("rows"."bool" AND "rows"."bool")
+        ("rows"."bool") AND ("rows"."bool")
         """
       }
       assertInlineSnapshot(of: Row.columns.bool || Row.columns.bool, as: .sql) {
         """
-        ("rows"."bool" OR "rows"."bool")
+        ("rows"."bool") OR ("rows"."bool")
         """
       }
       assertInlineSnapshot(of: !Row.columns.bool, as: .sql) {
@@ -159,22 +159,22 @@ extension SnapshotTests {
     @Test func arithmetic() {
       assertInlineSnapshot(of: Row.columns.c + Row.columns.c, as: .sql) {
         """
-        ("rows"."c" + "rows"."c")
+        ("rows"."c") + ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c - Row.columns.c, as: .sql) {
         """
-        ("rows"."c" - "rows"."c")
+        ("rows"."c") - ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c * Row.columns.c, as: .sql) {
         """
-        ("rows"."c" * "rows"."c")
+        ("rows"."c") * ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c / Row.columns.c, as: .sql) {
         """
-        ("rows"."c" / "rows"."c")
+        ("rows"."c") / ("rows"."c")
         """
       }
       assertInlineSnapshot(of: -Row.columns.c, as: .sql) {
@@ -190,25 +190,25 @@ extension SnapshotTests {
       assertInlineSnapshot(of: Row.update { $0.c += 1 }, as: .sql) {
         """
         UPDATE "rows"
-        SET "c" = ("rows"."c" + 1)
+        SET "c" = ("rows"."c") + (1)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c -= 2 }, as: .sql) {
         """
         UPDATE "rows"
-        SET "c" = ("rows"."c" - 2)
+        SET "c" = ("rows"."c") - (2)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c *= 3 }, as: .sql) {
         """
         UPDATE "rows"
-        SET "c" = ("rows"."c" * 3)
+        SET "c" = ("rows"."c") * (3)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c /= 4 }, as: .sql) {
         """
         UPDATE "rows"
-        SET "c" = ("rows"."c" / 4)
+        SET "c" = ("rows"."c") / (4)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c = -$0.c }, as: .sql) {
@@ -234,27 +234,27 @@ extension SnapshotTests {
     @Test func bitwise() {
       assertInlineSnapshot(of: Row.columns.c % Row.columns.c, as: .sql) {
         """
-        ("rows"."c" % "rows"."c")
+        ("rows"."c") % ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c & Row.columns.c, as: .sql) {
         """
-        ("rows"."c" & "rows"."c")
+        ("rows"."c") & ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c | Row.columns.c, as: .sql) {
         """
-        ("rows"."c" | "rows"."c")
+        ("rows"."c") | ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c << Row.columns.c, as: .sql) {
         """
-        ("rows"."c" << "rows"."c")
+        ("rows"."c") << ("rows"."c")
         """
       }
       assertInlineSnapshot(of: Row.columns.c >> Row.columns.c, as: .sql) {
         """
-        ("rows"."c" >> "rows"."c")
+        ("rows"."c") >> ("rows"."c")
         """
       }
       assertInlineSnapshot(of: ~Row.columns.c, as: .sql) {
@@ -265,25 +265,25 @@ extension SnapshotTests {
       assertInlineSnapshot(of: Row.update { $0.c &= 2 }, as: .sql) {
         """
         UPDATE "rows"
-        SET "c" = ("rows"."c" & 2)
+        SET "c" = ("rows"."c") & (2)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c |= 3 }, as: .sql) {
         """
         UPDATE "rows"
-        SET "c" = ("rows"."c" | 3)
+        SET "c" = ("rows"."c") | (3)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c <<= 4 }, as: .sql) {
         """
         UPDATE "rows"
-        SET "c" = ("rows"."c" << 4)
+        SET "c" = ("rows"."c") << (4)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c >>= 5 }, as: .sql) {
         """
         UPDATE "rows"
-        SET "c" = ("rows"."c" >> 5)
+        SET "c" = ("rows"."c") >> (5)
         """
       }
       assertInlineSnapshot(of: Row.update { $0.c = ~$0.c }, as: .sql) {
@@ -305,17 +305,17 @@ extension SnapshotTests {
     @Test func strings() {
       assertInlineSnapshot(of: Row.columns.string + Row.columns.string, as: .sql) {
         """
-        ("rows"."string" || "rows"."string")
+        ("rows"."string") || ("rows"."string")
         """
       }
       assertInlineSnapshot(of: Row.columns.string.collate(.nocase), as: .sql) {
         """
-        ("rows"."string" COLLATE "NOCASE")
+        "rows"."string" COLLATE "NOCASE"
         """
       }
       assertInlineSnapshot(of: Row.columns.string.glob("a*"), as: .sql) {
         """
-        ("rows"."string" GLOB 'a*')
+        ("rows"."string") GLOB ('a*')
         """
       }
       assertInlineSnapshot(of: Row.columns.string.like("a%"), as: .sql) {
@@ -351,19 +351,19 @@ extension SnapshotTests {
       assertInlineSnapshot(of: Row.update { $0.string += "!" }, as: .sql) {
         """
         UPDATE "rows"
-        SET "string" = ("rows"."string" || '!')
+        SET "string" = ("rows"."string") || ('!')
         """
       }
       assertInlineSnapshot(of: Row.update { $0.string.append("!") }, as: .sql) {
         """
         UPDATE "rows"
-        SET "string" = ("rows"."string" || '!')
+        SET "string" = ("rows"."string") || ('!')
         """
       }
       assertInlineSnapshot(of: Row.update { $0.string.append(contentsOf: "!") }, as: .sql) {
         """
         UPDATE "rows"
-        SET "string" = ("rows"."string" || '!')
+        SET "string" = ("rows"."string") || ('!')
         """
       }
     }
@@ -374,7 +374,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN (1, 2, 3))
+        ("rows"."c") IN ((1), (2), (3))
         """
       }
       assertInlineSnapshot(
@@ -382,7 +382,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN (SELECT "rows"."c"
+        ("rows"."c") IN ((SELECT "rows"."c"
         FROM "rows"))
         """
       }
@@ -391,7 +391,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN (1, 2, 3))
+        ("rows"."c") IN ((1), (2), (3))
         """
       }
       assertInlineSnapshot(
@@ -399,7 +399,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" IN (SELECT "rows"."c"
+        ("rows"."c") IN ((SELECT "rows"."c"
         FROM "rows"))
         """
       }
@@ -411,7 +411,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" BETWEEN 0 AND 10)
+        "rows"."c" BETWEEN 0 AND 10
         """
       }
       assertInlineSnapshot(
@@ -419,7 +419,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c" BETWEEN 0 AND 10)
+        "rows"."c" BETWEEN 0 AND 10
         """
       }
       assertQuery(
@@ -433,13 +433,13 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
-        WHERE ("reminders"."id" BETWEEN coalesce((
+        WHERE "reminders"."id" BETWEEN coalesce((
           SELECT min("reminders"."id")
           FROM "reminders"
         ), 0) AND (coalesce((
           SELECT max("reminders"."id")
           FROM "reminders"
-        ), 0) / 3))
+        ), 0)) / (3)
         """
       } results: {
         """
@@ -512,7 +512,7 @@ extension SnapshotTests {
         """
         SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string"
         FROM "rows"
-        WHERE ("rows"."c" IN (SELECT CAST("rows"."bool" AS INTEGER)
+        WHERE ("rows"."c") IN ((SELECT CAST("rows"."bool" AS INTEGER)
         FROM "rows"))
         """
       }
@@ -525,10 +525,10 @@ extension SnapshotTests {
         """
         SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string"
         FROM "rows"
-        WHERE ((CAST("rows"."c" AS REAL) >= (
+        WHERE ((CAST("rows"."c" AS REAL)) >= ((
           SELECT coalesce(avg("rows"."c"), 0.0)
           FROM "rows"
-        )) AND (CAST("rows"."c" AS REAL) > 1.0))
+        ))) AND ((CAST("rows"."c" AS REAL)) > (1.0))
         """
       }
     }
@@ -540,7 +540,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id"
         FROM "reminders"
-        WHERE ("reminders"."id" IN (1, 2))
+        WHERE ("reminders"."id") IN ((1), (2))
         """
       } results: {
         """
@@ -555,7 +555,7 @@ extension SnapshotTests {
     @Test func moduloZero() {
       assertQuery(Reminder.select { $0.id % 0 }) {
         """
-        SELECT ("reminders"."id" % 0)
+        SELECT ("reminders"."id") % (0)
         FROM "reminders"
         """
       } results: {
@@ -596,7 +596,7 @@ extension SnapshotTests {
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
           FROM "reminders"
-          WHERE ("reminders"."id" = 1)
+          WHERE ("reminders"."id") = (1)
         )
         """
       } results: {
@@ -611,7 +611,7 @@ extension SnapshotTests {
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
           FROM "reminders"
-          WHERE ("reminders"."id" = 100)
+          WHERE ("reminders"."id") = (100)
         )
         """
       } results: {

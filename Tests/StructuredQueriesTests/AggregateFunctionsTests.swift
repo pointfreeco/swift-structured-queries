@@ -269,7 +269,7 @@ extension SnapshotTests {
           .order(by: \.title)
       ) {
         """
-        SELECT group_concat(iif((length("tags"."title") > 5), "tags"."title", NULL))
+        SELECT group_concat(iif((length("tags"."title")) > (5), "tags"."title", NULL))
         FROM "tags"
         ORDER BY "tags"."title"
         """
@@ -290,7 +290,7 @@ extension SnapshotTests {
           .order(by: \.title)
       ) {
         """
-        SELECT group_concat(CASE WHEN (length("tags"."title") > 5) THEN "tags"."title" END)
+        SELECT group_concat(CASE WHEN (length("tags"."title")) > (5) THEN "tags"."title" END)
         FROM "tags"
         ORDER BY "tags"."title"
         """
@@ -334,7 +334,7 @@ extension SnapshotTests {
 
       assertInlineSnapshot(of: (User.columns.name + "!").groupConcat(", "), as: .sql) {
         """
-        group_concat(("users"."name" || '!'), ', ')
+        group_concat(("users"."name") || ('!'), ', ')
         """
       }
 
@@ -352,7 +352,7 @@ extension SnapshotTests {
       }
       assertQuery(Tag.select { ($0.title + "!").groupConcat(", ") }) {
         """
-        SELECT group_concat(("tags"."title" || '!'), ', ')
+        SELECT group_concat(("tags"."title") || ('!'), ', ')
         FROM "tags"
         """
       } results: {

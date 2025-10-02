@@ -30,11 +30,6 @@ extension Date.UnixTimeRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     .int(Int64(queryOutput.timeIntervalSince1970))
   }
-
-  public init?(queryBinding: QueryBinding) {
-    guard case .int(let timeIntervalSince1970) = queryBinding else { return nil }
-    self.init(queryOutput: Date(timeIntervalSince1970: Double(timeIntervalSince1970)))
-  }
 }
 
 extension Date.UnixTimeRepresentation: QueryDecodable {

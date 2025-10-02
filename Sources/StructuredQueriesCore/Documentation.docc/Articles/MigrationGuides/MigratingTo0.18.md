@@ -8,7 +8,7 @@ StructuredQueries recently introduced a new module, StructuredQueriesSQLite, to 
 SQLite-specific helpers, and in 0.18 it has migrated many of its existing SQLite helpers into this
 module.
 
-If you are using SharingGRDB this migration should be mostly transparent, but if you are using
+If you are using SQLiteData this migration should be mostly transparent, but if you are using
 StructuredQueries directly and need access to these helpers, you must now explicitly import this
 helper module:
 

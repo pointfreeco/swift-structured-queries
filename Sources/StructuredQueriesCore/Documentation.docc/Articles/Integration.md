@@ -9,15 +9,15 @@ Since this library focuses only on the building of type-safe queries, it does no
 actually execute the query in a particular database. The library is built with the goal of being
 able to support any database (SQLite, MySQL, Postgres, _etc._), but currently is primarily tuned to
 work with SQLite. And further, it only comes with one official driver for SQLite, which is the
-[SharingGRDB][sharing-grdb-gh] library that uses the popular [GRDB][grdb-gh] library under the hood
-for interacting with SQLite.
+[SQLiteData] library that uses the popular [GRDB] library under the hood for interacting with
+SQLite.
 
 If you are interested in building an integration of StructuredQueries with another database
 library, please [start a discussion][sq-discussions] and let us know of any challenges you
 encounter.
 
-[sharing-grdb-gh]: http://github.com/pointfreeco/sharing-grdb
-[grdb-gh]: http://github.com/groue/GRDB.swift
+[SQLiteData]: http://github.com/pointfreeco/sqlite-data
+[GRDB]: http://github.com/groue/GRDB.swift
 [sq-discussions]: http://github.com/pointfreeco/swift-structured-queries/discussions/new/choose
 
 ### Case Study: SQLite
@@ -37,14 +37,14 @@ even integrate StructuredQueries into a 3rd party SQLite library.
 ### Case Study: GRDB
 
 We provide one first-party library that integrates StructuredQueries into SQLite, and that is in
-our [SharingGRDB][sharing-grdb-gh] library, which is a lightweight replacement for SwiftData and
+our [SQLiteData] library, which is a lightweight replacement for SwiftData and
 the `@Query` macro. It brings a suite of tools allow you to fetch and observe data from a database
 in your feature code, and views automatically update when data in the database changes.
 
-The integration of StructuredQueries into SharingGRDB works in the manner outlined above, in
-<doc:Integration#Case-Study-SQLite>. The code can be found [here][sq-sharing-grdb], where you will
+The integration of StructuredQueries into SQLiteData works in the manner outlined above, in
+<doc:Integration#Case-Study-SQLite>. The code can be found [here][sq-sqlite-data], where you will
 find a ``QueryDecoder`` conformance, as well as some helper methods for fetching data using
 StructuredQueries and GRDB.
 
-[sharing-grdb-gh]: http://github.com/pointfreeco/sharing-grdb
-[sq-sharing-grdb]: https://github.com/pointfreeco/sharing-grdb/tree/main/Sources/StructuredQueriesGRDBCore
+[SQLiteData: http://github.com/pointfreeco/sqlite-data
+[sq-sqlite-data]: https://github.com/pointfreeco/sqlite-data/tree/main/Sources/StructuredQueriesGRDBCore

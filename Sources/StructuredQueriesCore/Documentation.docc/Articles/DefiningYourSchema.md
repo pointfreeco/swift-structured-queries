@@ -22,9 +22,11 @@ that represent those database definitions.
     * [RawRepresentable](#RawRepresentable)
     * [JSON](#JSON)
     * [Tagged identifiers](#Tagged-identifiers)
-* [Primary keyed tables](#Primary-keyed-tables)
+* [Primary-keyed tables](#Primary-keyed-tables)
+* [Grouped columns](#Grouped-columns)
 * [Ephemeral columns](#Ephemeral-columns)
 * [Generated columns](#Generated-columns)
+* [Enum tables](#Enum-tables)
 * [Table definition tools](#Table-definition-tools)
 
 ### Defining a table
@@ -270,7 +272,7 @@ To enable the trait, specify it in the Package.swift file that depends on Struct
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.17.0",
+   from: "0.22.0",
 +  traits: ["StructuredQueriesTagged"]
  ),
 ```
@@ -319,15 +321,16 @@ struct RemindersList: Identifiable {
 }
 ```
 
-### Primary keyed tables
+### Primary-keyed tables
 
-It is possible to let the `@Table` macro know which property of your data type is the primary
+It is possible to let the `@Table` macro know which field of your data type is the primary
 key for the table in the database, and doing so unlocks new APIs for inserting, updating, and
 deleting records. By default the `@Table` macro will assume any property named `id` is the
 primary key, or you can explicitly specify it with the `primaryKey:` argument of the `@Column`
 macro:
 
 ```swift
+@Table
 struct Book {
   @Column(primaryKey: true)
   let isbn: String
@@ -345,6 +348,95 @@ var id: String
 
 See <doc:PrimaryKeyedTable> for more information on tables with primary keys.
 
+### Grouped columns
+
+It is possible to group many related columns into a single data type, which helps with organization
+and reusing little bits of schema amongst many tables. For example, suppose many tables in your
+database schema have `createdAt: Date` and `updatedAt: Date?` timestamps. You can choose to group
+those columns into a dedicate data type, annotated with the `@Selection` macro:
+
+```swift
+@Selection
+struct Timestamps {
+  let createdAt: Date
+  let updatedAt: Date?
+}
+```
+
+And then you can use `Timestamps` in tables as if it was just a single column:
+
+```swift
+@Table
+struct RemindersList {
+  let id: Int
+  var name = ""
+  let timestamps: Timestamps
+}
+
+@Table
+struct Reminder {
+  let id: Int
+  var name = ""
+  var isCompleted = false
+  let timestamps: Timestamps
+}
+```
+
+> Important: Since SQLite has no concept of grouped columns you must remember to flatten all
+> groupings into a single list when defining your table's schema. For example, the "CREATE TABLE"
+> statement for the `RemindersList` above would look like this:
+>
+> ```sql
+> CREATE TABLE "remindersLists" (
+>   "id" INTEGER PRIMARY KEY,
+>   "name" TEXT NOT NULL,
+>   "isCompleted" INTEGER NOT NULL,
+>   "createdAt" TEXT NOT NULL,
+>   "updatedAt" TEXT
+> ) STRICT
+> ```
+
+You can construct queries that access fields inside column groups using regular dot-syntax:
+
+@Row {
+  @Column {
+    ```swift
+    RemindersList
+      .where { $0.timestamps.createdAt <= date }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT "id", "title", "createdAt", "updatedAt"
+    FROM "remindersLists"
+    WHERE "createdAt" <= ?
+    ```
+  }
+}
+
+You can even compare the `timestamps` field directly and its columns will be flattened into a
+tuple in SQL:
+
+@Row {
+  @Column {
+    ```swift
+    RemindersList
+      .where {
+        $0.timestamps <= Timestamps(createdAt: date1, updatedAt: date2)
+      }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT "id", "title", "createdAt", "updatedAt"
+    FROM "remindersLists"
+    WHERE ("createdAt", "updatedAt") <= (?, ?)
+    ```
+  }
+}
+
+That allows you to query against all columns of a grouping at once.
+
 ### Ephemeral columns
 
 It is possible to store properties in a Swift data type that has no corresponding column in your SQL
@@ -352,6 +444,7 @@ database. Such properties must have a default value, and can be specified using 
 macro:
 
 ```swift
+@Table
 struct Book {
   @Column(primaryKey: true)
   let isbn: String
@@ -385,6 +478,228 @@ struct Event {
   var endAt: Date
 }
 ```
+
+### Enum tables
+
+It is possible to use enums as a domain modeling tool for your table schema, which can help you 
+emulate "inheritance" for your tables without having the burden of using reference types. 
+
+As an example, suppose you have a table that represents attachments that can be associated with
+other tables, and an attachment can either be a link, a note or an image. One way to model this
+is a struct to represent the attachment that holds onto an enum for the different kinds of
+attachments supported, annotated with the `@Selection` macro:
+
+```swift
+@Table struct Attachment {
+  let id: Int
+  let kind: Kind
+
+  @CasePathable @Selection
+  enum Kind {
+    case link(URL)
+    case note(String)
+    case image(URL)
+  }
+}
+```
+
+> Important: It is required to apply the `@CasePathable` macro in order to define columns from an
+> enum. This macro comes from our [Case Paths] library and is automatically included with the
+> library when the `StructuredQueriesCasePaths` trait is enabled.
+
+[Case Paths]: http://github.com/pointfreeco/swift-case-paths
+
+To create a SQL table that represents this data type you simply flatten all of the fields into
+a single list of columns where each column is nullable:
+
+```sql
+CREATE TABLE "attachments" (
+  "id" INTEGER PRIMARY KEY,
+  "link" TEXT,
+  "note" TEXT,
+  "image" TEXT
+) STRICT
+```
+
+With that defined you can query the table much like a regular table. For example, a simple
+`Attachment.all` selects all columns, and when decoding the data from the database it will
+be decided which case of the `Kind` enum is chosen:
+
+@Row {
+  @Column {
+    ```swift
+    Attachment.all
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT
+      "attachments"."id",
+      "attachments"."link",
+      "attachments"."note",
+      "attachments"."image"
+    FROM "attachments"
+    ```
+  }
+}
+
+You can also use `where` clauses to filter attachments by their kind, such as selecting images
+only:
+
+@Row {
+  @Column {
+    ```swift
+    Attachment.where { $0.kind.image.isNot(nil) }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT
+      "attachments"."id",
+      "attachments"."link",
+      "attachments"."note",
+      "attachments"."image"
+    FROM "attachments"
+    WHERE "attachments"."image" IS NOT NULL
+    ```
+  }
+}
+
+You can insert attachments into the database in the usual way:
+
+@Row {
+  @Column {
+    ```swift
+    Attachment.insert {
+      Attachment.Draft(kind: .note("Hello world!"))
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    INSERT INTO "attachments"
+    ("id", "link", "note", "image")
+    VALUES
+    (NULL, NULL, 'Hello world!', NULL)
+    ```
+  }
+}
+
+Notice that `NULL` is inserted for `link` and `image` since we are inserting an attachment
+with the `note` case.
+
+And further, you can update attachments in the database in the usual way:
+
+@Row {
+  @Column {
+    ```swift
+    Attachment.update {
+      $0.kind = .note("Goodbye world!")
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    UPDATE "attachments"
+    SET
+      "link" = NULL,
+      "note" = 'Goodbye world!',
+      "image" = NULL
+    ```
+  }
+}
+
+Note that `link` and `image` are explicitly set to `NULL` since we are setting the kind of
+the attachment to `note`.
+
+It is also possible to group many columns together for a case of an enum. For example, suppose
+the image not only had a URL but also had a caption. Then a dedicated `@Selection` type
+can be defined for that data and used in the `image` case:
+
+```swift
+@Table struct Attachment {
+  let id: Int
+  let kind: Kind
+
+  @CasePathable @Selection
+  enum Kind {
+    case link(URL)
+    case note(String)
+    case image(Attachment.Image)
+  }
+  @Selection
+  struct Image {
+    var caption = ""
+    var url: URL
+  }
+}
+```
+
+> Note: Due to how macros expand it is necessary to fully qualify nested types, e.g.
+> `case image(Attachment.Image)`.
+
+To create a SQL table that represents this data type you again must flatten all columns into a
+single list of nullable columns:
+
+```sql
+CREATE TABLE "attachments" (
+  "id" INTEGER PRIMARY KEY,
+  "link" TEXT,
+  "note" TEXT,
+  "caption" TEXT,
+  "url" TEXT
+) STRICT
+```
+These tools allow you to emulate what is known as "single table inheritance", where you model
+a class inheritance heirarchy of models as a single wide table that has columns for each
+model. This allows you to share bits of data and logic amongst many models in a way that still
+plays nicely with SQLite.
+
+SwiftData supports this kind of data modeling, but they force you to use reference
+types instead of value types, you lose exhaustivity for the types of models supported, and
+it's a lot more verbose:
+
+```swift
+@available(iOS 26, *)
+@Model class Attachment {
+  var isActive: Bool
+  init(isActive: Bool = false) { self.isActive = isActive }
+}
+
+@available(iOS 26, *)
+@Model class Link: Attachment {
+  var url: URL
+  init(url: URL, isActive: Bool = false) {
+    self.url = url
+    super.init(isActive: isActive)
+  }
+}
+
+@available(iOS 26, *)
+@Model class Note: Attachment {
+  var note: String
+  init(note: String, isActive: Bool = false) {
+    self.note = note
+    super.init(isActive: isActive)
+  }
+}
+
+@available(iOS 26, *)
+@Model class Image: Attachment {
+  var url: URL
+  init(url: URL, isActive: Bool = false) {
+    self.url = url
+    super.init(isActive: isActive)
+  }
+}
+```
+
+> Note: The `@available(iOS 26, *)` attributes are required even if targeting iOS 26+, and
+> the explicit initializers are required and must accept all arguments from all parent
+> classes and pass that to `super.init`.
+
+Enums provide an alternative to this approach that embraces value types, is more concise, and
+more powerful.
 
 ### Table definition tools
 

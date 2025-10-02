@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: QueryRepresentable {
   /// A predicate expression indicating whether two query expressions are equal.
   ///
   /// ```swift
@@ -77,9 +77,10 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// - Parameter other: An expression to compare this one to.
   /// - Returns: A predicate expression.
-  public func `is`(
-    _ other: some QueryExpression<QueryValue._Optionalized>
-  ) -> some QueryExpression<Bool> {
+  public func `is`<Other: QueryRepresentable>(
+    _ other: some QueryExpression<Other>
+  ) -> some QueryExpression<Bool>
+  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
     BinaryOperator(lhs: self, operator: "IS", rhs: other)
   }
 
@@ -93,9 +94,10 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// - Parameter other: An expression to compare this one to.
   /// - Returns: A predicate expression.
-  public func isNot(
+  public func isNot<Other: QueryRepresentable>(
     _ other: some QueryExpression<QueryValue._Optionalized>
-  ) -> some QueryExpression<Bool> {
+  ) -> some QueryExpression<Bool>
+  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
     BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
   }
 }
@@ -104,7 +106,35 @@ private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
   (expression as? any _OptionalProtocol).map { $0._wrapped == nil } ?? false
 }
 
-extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
+extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression {
+  @_documentation(visibility: private)
+  public func `is`(
+    _ other: _Null<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS", rhs: other)
+  }
+
+  @_documentation(visibility: private)
+  public func isNot(
+    _ other: _Null<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
+  }
+}
+
+public struct _Null<Wrapped: QueryExpression>: QueryExpression {
+  public typealias QueryValue = Wrapped?
+  public var queryFragment: QueryFragment {
+    Wrapped?.none.queryFragment
+  }
+}
+
+extension _Null: ExpressibleByNilLiteral {
+  public init(nilLiteral: ()) {}
+}
+
+// TODO: Remove this when we correctly unwrap `TableColumns` in `join` conditions.
+extension QueryExpression where QueryValue: QueryRepresentable & _OptionalProtocol {
   @_documentation(visibility: private)
   public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "=", rhs: other)
@@ -138,31 +168,6 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
   }
-}
-
-extension QueryExpression where QueryValue: QueryBindable {
-  @_documentation(visibility: private)
-  public func `is`(
-    _ other: _Null<QueryValue>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "IS", rhs: other)
-  }
-
-  @_documentation(visibility: private)
-  public func isNot(
-    _ other: _Null<QueryValue>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
-  }
-}
-
-public struct _Null<Wrapped>: QueryExpression {
-  public typealias QueryValue = Wrapped?
-  public var queryFragment: QueryFragment { "NULL" }
-}
-
-extension _Null: ExpressibleByNilLiteral {
-  public init(nilLiteral: ()) {}
 }
 
 // NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
@@ -241,7 +246,7 @@ public func != <QueryValue: QueryBindable>(
   SQLQueryExpression(lhs).isNot(rhs)
 }
 
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: _OptionalPromotable {
   /// Returns a predicate expression indicating whether the value of the first expression is less
   /// than that of the second expression.
   ///
@@ -697,7 +702,7 @@ extension QueryExpression where QueryValue == String {
   /// - Parameter collation: A collating sequence name.
   /// - Returns: An expression that is compared using the given collating sequence.
   public func collate(_ collation: Collation) -> some QueryExpression<QueryValue> {
-    BinaryOperator(lhs: self, operator: "COLLATE", rhs: collation)
+    SQLQueryExpression("\(self) COLLATE \(collation)")
   }
 
   /// A predicate expression from this string expression matched against another _via_ the `GLOB`
@@ -816,7 +821,7 @@ extension SQLQueryExpression<String> {
   }
 }
 
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: QueryExpression {
   /// Returns a predicate expression indicating whether the expression is in a sequence.
   ///
   /// - Parameter expression: A sequence of expressions.
@@ -850,11 +855,7 @@ extension QueryExpression where QueryValue: QueryBindable {
     _ lowerBound: some QueryExpression<QueryValue>,
     and upperBound: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
-    BinaryOperator(
-      lhs: self,
-      operator: "BETWEEN",
-      rhs: SQLQueryExpression("\(lowerBound) AND \(upperBound)")
-    )
+    SQLQueryExpression("\(self) BETWEEN \(lowerBound) AND \(upperBound)")
   }
 }
 
@@ -952,7 +953,7 @@ struct BinaryOperator<QueryValue>: QueryExpression {
   }
 
   var queryFragment: QueryFragment {
-    "(\(lhs) \(`operator`) \(rhs))"
+    "(\(lhs)) \(`operator`) (\(rhs))"
   }
 }
 
@@ -976,15 +977,15 @@ private struct LikeOperator<
   }
 }
 
-extension Sequence where Element: QueryExpression, Element.QueryValue: QueryBindable {
+extension Sequence where Element: QueryExpression, Element.QueryValue: QueryExpression {
   fileprivate typealias Expression = _SequenceExpression<Self>
 }
 
 private struct _SequenceExpression<S: Sequence>: QueryExpression
-where S.Element: QueryExpression, S.Element.QueryValue: QueryBindable {
+where S.Element: QueryExpression, S.Element.QueryValue: QueryExpression {
   typealias QueryValue = S
   let queryFragment: QueryFragment
   init(elements: S) {
-    queryFragment = "(\(elements.map(\.queryFragment).joined(separator: ", ")))"
+    queryFragment = elements.map { "(\($0.queryFragment))" }.joined(separator: ", ")
   }
 }

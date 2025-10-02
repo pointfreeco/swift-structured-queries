@@ -7,6 +7,8 @@ import _StructuredQueriesSQLite
 
 extension SnapshotTests {
   @Suite struct TriggersTests {
+    @Dependency(\.defaultDatabase) var db
+
     @Test func basics() {
       let trigger = RemindersList.createTemporaryTrigger(
         after: .insert { new in
@@ -20,21 +22,21 @@ extension SnapshotTests {
       assertQuery(trigger) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:11:57"
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:13:57"
         AFTER INSERT ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
           SET "position" = (
-            SELECT (coalesce(max("remindersLists"."position"), -1) + 1)
+            SELECT (coalesce(max("remindersLists"."position"), -1)) + (1)
             FROM "remindersLists"
           )
-          WHERE ("remindersLists"."id" = "new"."id");
+          WHERE ("remindersLists"."id") = ("new"."id");
         END
         """
       }
       assertQuery(trigger.drop()) {
         """
-        DROP TRIGGER "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:11:57"
+        DROP TRIGGER "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:13:57"
         """
       }
     }
@@ -52,12 +54,12 @@ extension SnapshotTests {
         ) {
           """
           CREATE TEMPORARY TRIGGER
-            "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:45:42"
+            "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:47:42"
           AFTER UPDATE ON "reminders"
           FOR EACH ROW BEGIN
             UPDATE "reminders"
             SET "dueDate" = '2001-01-01 00:00:00.000'
-            WHERE ("reminders"."id" = "new"."id");
+            WHERE ("reminders"."id") = ("new"."id");
           END
           """
         }
@@ -87,12 +89,12 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:82:45"
+          "after_update_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:84:45"
         AFTER UPDATE ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
-          SET "position" = ("remindersLists"."position" + 1)
-          WHERE ("remindersLists"."rowid" = "new"."rowid");
+          SET "position" = ("remindersLists"."position") + (1)
+          WHERE ("remindersLists"."rowid") = ("new"."rowid");
         END
         """
       }
@@ -104,12 +106,37 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:103:40"
+          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:105:40"
         AFTER UPDATE ON "reminders"
         FOR EACH ROW BEGIN
           UPDATE "reminders"
           SET "updatedAt" = datetime('subsec')
-          WHERE ("reminders"."rowid" = "new"."rowid");
+          WHERE ("reminders"."rowid") = ("new"."rowid");
+        END
+        """
+      }
+    }
+
+    @Test func afterUpdateTouchDate_NestedTimestamps() throws {
+      try db.execute(
+        """
+        CREATE TABLE "episodes" (
+          "id" INTEGER PRIMARY KEY,
+          "createdAt" TEXT NOT NULL,
+          "updatedAt" TEXT
+        ) STRICT
+        """)
+      assertQuery(
+        Episode.createTemporaryTrigger(afterUpdateTouch: \.timestamps.updatedAt)
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_update_on_episodes@StructuredQueriesTests/TriggersTests.swift:129:39"
+        AFTER UPDATE ON "episodes"
+        FOR EACH ROW BEGIN
+          UPDATE "episodes"
+          SET "updatedAt" = datetime('subsec')
+          WHERE ("episodes"."rowid") = ("new"."rowid");
         END
         """
       }
@@ -121,12 +148,12 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:120:40"
+          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:146:40"
         AFTER UPDATE ON "reminders"
         FOR EACH ROW BEGIN
           UPDATE "reminders"
           SET "updatedAt" = customDate()
-          WHERE ("reminders"."rowid" = "new"."rowid");
+          WHERE ("reminders"."rowid") = ("new"."rowid");
         END
         """
       }
@@ -150,17 +177,17 @@ extension SnapshotTests {
       assertQuery(trigger) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:136:57"
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:162:57"
         AFTER INSERT ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
           SET "position" = (
-            SELECT (coalesce(max("remindersLists"."position"), -1) + 1)
+            SELECT (coalesce(max("remindersLists"."position"), -1)) + (1)
             FROM "remindersLists"
           )
-          WHERE ("remindersLists"."id" = "new"."id");
+          WHERE ("remindersLists"."id") = ("new"."id");
           DELETE FROM "remindersLists"
-          WHERE ("remindersLists"."position" = 0);
+          WHERE ("remindersLists"."position") = (0);
           SELECT "remindersLists"."position"
           FROM "remindersLists";
         END
@@ -168,4 +195,13 @@ extension SnapshotTests {
       }
     }
   }
+}
+
+@Table private struct Episode {
+  let id: Int
+  let timestamps: Timestamps
+}
+@Selection private struct Timestamps {
+  let createdAt: Date
+  let updatedAt: Date?
 }

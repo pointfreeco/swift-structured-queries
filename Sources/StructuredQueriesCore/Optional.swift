@@ -27,10 +27,6 @@ extension Optional: QueryBindable where Wrapped: QueryBindable {
   public var queryBinding: QueryBinding {
     self?.queryBinding ?? .null
   }
-
-  public init?(queryBinding: QueryBinding) {
-    self = Wrapped(queryBinding: queryBinding)
-  }
 }
 
 extension Optional: QueryDecodable where Wrapped: QueryDecodable {
@@ -48,7 +44,19 @@ extension Optional: QueryExpression where Wrapped: QueryExpression {
   public typealias QueryValue = Wrapped.QueryValue?
 
   public var queryFragment: QueryFragment {
-    self?.queryFragment ?? "NULL"
+    self._allColumns.map(\.queryFragment).joined(separator: ", ")
+  }
+
+  public static var _columnWidth: Int {
+    Wrapped._columnWidth
+  }
+
+  public var _allColumns: [any QueryExpression] {
+    self?._allColumns
+      ?? Array(
+        repeating: SQLQueryExpression("NULL") as any QueryExpression,
+        count: Self._columnWidth
+      )
   }
 }
 
@@ -70,7 +78,7 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   }
 }
 
-extension Optional: Table where Wrapped: Table {
+extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {
   public static var tableName: String {
     Wrapped.tableName
   }
@@ -95,11 +103,39 @@ extension Optional: Table where Wrapped: Table {
     public typealias QueryValue = Optional
 
     public static var allColumns: [any TableColumnExpression] {
-      Wrapped.TableColumns.allColumns
+      func open<Root, Value>(
+        _ column: some TableColumnExpression<Root, Value>
+      ) -> any TableColumnExpression {
+        guard let column = column as? TableColumn<Wrapped, Value>
+        else {
+          let column = column as! GeneratedColumn<Wrapped, Value>
+          return GeneratedColumn<Optional, Value?>(
+            column.name,
+            keyPath: \.[member: \Value.self, column: column.keyPath],
+            default: column.defaultValue
+          )
+        }
+        return TableColumn<Optional, Value?>(
+          column.name,
+          keyPath: \.[member: \Value.self, column: column.keyPath],
+          default: column.defaultValue
+        )
+      }
+      return Wrapped.TableColumns.allColumns.map { open($0) }
     }
 
     public static var writableColumns: [any WritableTableColumnExpression] {
-      Wrapped.TableColumns.writableColumns
+      func open<Root, Value>(
+        _ column: some WritableTableColumnExpression<Root, Value>
+      ) -> any WritableTableColumnExpression {
+        let column = column as! TableColumn<Wrapped, Value>
+        return TableColumn<Optional, Value?>(
+          column.name,
+          keyPath: \.[member: \Value.self, column: column.keyPath],
+          default: column.defaultValue
+        )
+      }
+      return Wrapped.TableColumns.writableColumns.map { open($0) }
     }
 
     public subscript<Member>(
@@ -108,7 +144,25 @@ extension Optional: Table where Wrapped: Table {
       let column = Wrapped.columns[keyPath: keyPath]
       return TableColumn<Optional, Member?>(
         column.name,
-        keyPath: \.[member: \Member.self, column: column._keyPath]
+        keyPath: \.[member: \Member.self, column: column.keyPath]
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, GeneratedColumn<Wrapped, Member>>
+    ) -> GeneratedColumn<Optional, Member?> {
+      let column = Wrapped.columns[keyPath: keyPath]
+      return GeneratedColumn<Optional, Member?>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column.keyPath]
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, ColumnGroup<Wrapped, Member>>
+    ) -> ColumnGroup<Optional, Member?> {
+      ColumnGroup<Optional, Member?>(
+        keyPath: \.[member: \Member.self, column: Wrapped.columns[keyPath: keyPath].keyPath]
       )
     }
 
@@ -125,6 +179,8 @@ extension Optional: Table where Wrapped: Table {
       Wrapped.columns[keyPath: keyPath]
     }
   }
+
+  public typealias Selection = Wrapped.Selection?
 }
 
 extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
@@ -140,10 +196,63 @@ extension Optional: TableDraft where Wrapped: TableDraft {
 
 extension Optional.TableColumns: PrimaryKeyedTableDefinition
 where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
-  public typealias PrimaryKey = Wrapped.TableColumns.PrimaryKey?
+  public typealias PrimaryKey = Wrapped.PrimaryKey?
 
-  public var primaryKey: TableColumn<Optional, Wrapped.TableColumns.PrimaryKey.QueryValue?> {
-    self[dynamicMember: \.primaryKey]
+  public struct PrimaryColumn: _TableColumnExpression {
+    public typealias Root = Optional
+
+    public typealias Value = Wrapped.PrimaryKey?
+
+    public var _names: [String] {
+      Wrapped.columns.primaryKey._names
+    }
+
+    public var keyPath: KeyPath<Wrapped?, Wrapped.PrimaryKey.QueryOutput?> {
+      \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
+    }
+
+    public var queryFragment: QueryFragment {
+      Wrapped.columns.primaryKey.queryFragment
+    }
+  }
+
+  public var primaryKey: PrimaryColumn {
+    PrimaryColumn()
+  }
+}
+
+extension Optional.TableColumns.PrimaryColumn: TableColumnExpression
+where Wrapped.TableColumns.PrimaryColumn: TableColumnExpression {
+  public var name: String {
+    Wrapped.columns.primaryKey.name
+  }
+
+  public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
+    Wrapped.columns.primaryKey.defaultValue
+  }
+
+  public func _aliased<Name: AliasName>(
+    _ alias: Name.Type
+  ) -> any TableColumnExpression<TableAlias<Optional, Name>, Wrapped.PrimaryKey?> {
+    GeneratedColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
+  }
+}
+
+extension Optional.TableColumns.PrimaryColumn: WritableTableColumnExpression
+where Wrapped.TableColumns.PrimaryColumn: WritableTableColumnExpression {
+  public func _aliased<Name: AliasName>(
+    _ alias: Name.Type
+  ) -> any WritableTableColumnExpression<TableAlias<Optional, Name>, Wrapped.PrimaryKey?> {
+    TableColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
+  }
+}
+
+extension Optional: TableExpression where Wrapped: TableExpression {
+  public var allColumns: [any QueryExpression] {
+    self?.allColumns
+      ?? Wrapped.QueryValue.TableColumns.allColumns.map {
+        SQLQueryExpression("NULL AS \(quote: $0.name)")
+      }
   }
 }
 

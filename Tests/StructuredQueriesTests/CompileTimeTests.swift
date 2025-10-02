@@ -1,7 +1,7 @@
 import StructuredQueries
 
 // NB: This is a compile-time test for a 'select' overload.
-@Selection
+@Table
 private struct ReminderRow {
   let reminder: Reminder
   let isPastDue: Bool

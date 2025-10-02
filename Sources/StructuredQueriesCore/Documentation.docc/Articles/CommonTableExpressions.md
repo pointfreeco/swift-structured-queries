@@ -6,9 +6,9 @@ or recursive queries of trees and graphs.
 ## Overview
 
 One can build [common table expressions][] (commonly referred to as CTEs) by using the ``With``
-statement, along with the `@Table` and `@Selection` macros. CTEs allow you to refactor complex
-queries into smaller pieces, and they allow you to execute recursive queries that can traverse
-tree-like and graph-like tables.
+statement, along with the `@Selection` macro. CTEs allow you to refactor complex queries into
+smaller pieces, and they allow you to execute recursive queries that can traverse tree-like and
+graph-like tables.
 
 [common table expressions]: https://sqlite.org/lang_with.html
 
@@ -47,14 +47,16 @@ selecting only lists whose average priority of reminders is greater than 1.5 int
 that can then be used in another query.
 
 One can define a new type that represents the data you want to pre-compute as a CTE, and you
-annotate the type with both `@Table` and `@Selection`:
+annotate the type with `@Selection`:
 
 ```swift
-@Table @Selection
+@Selection
 struct HighPriorityRemindersList {
   let id: RemindersList.ID
 }
 ```
+
+You can think of this as a "virtual table" of sorts, rather than an actual database table.
 
 Then you can select into this table in the first trailing closure of ``With``:
 
@@ -171,7 +173,7 @@ As a simple example let's construct a query that selects the numbers from 1 to 1
 by defining a CTE data type that holds the data we want to compute:
 
 ```swift
-@Table @Selection
+@Selection
 struct Counts {
   let value: Int
 }
@@ -263,13 +265,13 @@ This constructs the CTE table from which we can select and limit to the first 10
 The previous query was a simple example of what is known as a "[recurrence relation][]."
 Another example of a recurrence relation is the Fibonacci sequence, where each term in
 the sequence is the sum of the previous two terms. We can construct a query to compute the
-first 10 Fibonacci numbers by first defining a table selection data type that holds an index
-and its corresponding Fibonacci number, as well as the previous Fibonacci number:
+first 10 Fibonacci numbers by first defining a data type that holds an index and its corresponding
+Fibonacci number, as well as the previous Fibonacci number:
 
 [recurrence relation]: https://en.wikipedia.org/wiki/Recurrence_relation
 
 ```swift
-@Table @Selection
+@Selection
 private struct Fibonacci {
   let n: Int
   let prevFib: Int
