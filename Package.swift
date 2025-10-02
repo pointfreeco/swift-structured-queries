@@ -157,8 +157,8 @@ let package = Package(
 )
 
 // NB: For local testing in Xcode:
- if true {
-//if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil {
+// if true {
+if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil {
   package.traits.insert(
     .default(
       enabledTraits: [

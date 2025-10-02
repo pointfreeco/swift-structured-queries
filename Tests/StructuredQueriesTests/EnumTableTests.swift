@@ -178,7 +178,25 @@
 
       @Test func whereClause() {
         assertQuery(
-          Attachment.where { $0.kind.note.is(Optional("Today was a good day")) }
+          Attachment.where { $0.kind.is(Attachment.Kind.note("Today was a good day")) }
+        ) {
+          """
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          FROM "attachments"
+          WHERE ("attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL") IS (NULL, 'Today was a good day', NULL, NULL, NULL, NULL)
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────┐
+          │ Attachment(                           │
+          │   id: 2,                              │
+          │   kind: .note("Today was a good day") │
+          │ )                                     │
+          └───────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Attachment.where { $0.kind.note.is("Today was a good day") }
         ) {
           """
           SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
