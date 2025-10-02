@@ -104,7 +104,7 @@ private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
   (expression as? any _OptionalProtocol).map { $0._wrapped == nil } ?? false
 }
 
-extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
+extension QueryExpression where QueryValue: QueryRepresentable & _OptionalProtocol {
   @_documentation(visibility: private)
   public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "=", rhs: other)
@@ -140,7 +140,7 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalProtocol {
   }
 }
 
-extension QueryExpression where QueryValue: QueryBindable {
+extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression {
   @_documentation(visibility: private)
   public func `is`(
     _ other: _Null<QueryValue>
@@ -156,9 +156,11 @@ extension QueryExpression where QueryValue: QueryBindable {
   }
 }
 
-public struct _Null<Wrapped>: QueryExpression {
+public struct _Null<Wrapped: QueryExpression>: QueryExpression {
   public typealias QueryValue = Wrapped?
-  public var queryFragment: QueryFragment { "NULL" }
+  public var queryFragment: QueryFragment {
+    Wrapped?.none.queryFragment
+  }
 }
 
 extension _Null: ExpressibleByNilLiteral {

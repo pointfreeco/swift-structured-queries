@@ -558,7 +558,7 @@ extension SnapshotTests {
           Values(Post.Selection.note("Goodnight moon"))
         ) {
           """
-          SELECT NULL, 'Goodnight moon'
+          SELECT NULL AS "url", 'Goodnight moon' AS "note"
           """
         } results: {
           """
@@ -598,7 +598,7 @@ extension SnapshotTests {
           SELECT '[
             "Blob",
             "Jr"
-          ]'
+          ]' AS "list"
           """
         } results: {
           """

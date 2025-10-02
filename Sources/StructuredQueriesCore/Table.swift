@@ -1,7 +1,7 @@
 /// A type representing columns in a database.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@Table`, `@Column`, and `@Columns`
-/// macros to generate a conformance.
+/// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
+/// generate a conformance. See <doc:DefiningYourSchema> for more information.
 @dynamicMemberLookup
 public protocol Table: QueryRepresentable, PartialSelectStatement {
   associatedtype QueryValue = Self

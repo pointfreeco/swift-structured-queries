@@ -7,6 +7,8 @@ import _StructuredQueriesSQLite
 
 extension SnapshotTests {
   @Suite struct TriggersTests {
+    @Dependency(\.defaultDatabase) var db
+
     @Test func basics() {
       let trigger = RemindersList.createTemporaryTrigger(
         after: .insert { new in
@@ -20,7 +22,7 @@ extension SnapshotTests {
       assertQuery(trigger) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:11:57"
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:13:57"
         AFTER INSERT ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
@@ -34,7 +36,7 @@ extension SnapshotTests {
       }
       assertQuery(trigger.drop()) {
         """
-        DROP TRIGGER "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:11:57"
+        DROP TRIGGER "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:13:57"
         """
       }
     }
@@ -52,7 +54,7 @@ extension SnapshotTests {
         ) {
           """
           CREATE TEMPORARY TRIGGER
-            "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:45:42"
+            "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:47:42"
           AFTER UPDATE ON "reminders"
           FOR EACH ROW BEGIN
             UPDATE "reminders"
@@ -87,7 +89,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:82:45"
+          "after_update_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:84:45"
         AFTER UPDATE ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
@@ -104,12 +106,36 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:103:40"
+          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:105:40"
         AFTER UPDATE ON "reminders"
         FOR EACH ROW BEGIN
           UPDATE "reminders"
           SET "updatedAt" = datetime('subsec')
           WHERE ("reminders"."rowid") = ("new"."rowid");
+        END
+        """
+      }
+    }
+
+    @Test func afterUpdateTouchDate_NestedTimestamps() throws {
+      try db.execute("""
+        CREATE TABLE "episodes" (
+          "id" INTEGER PRIMARY KEY,
+          "createdAt" TEXT NOT NULL,
+          "updatedAt" TEXT
+        ) STRICT
+        """)
+      assertQuery(
+        Episode.createTemporaryTrigger(afterUpdateTouch: \.timestamps.updatedAt)
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_update_on_episodes@StructuredQueriesTests/TriggersTests.swift:129:39"
+        AFTER UPDATE ON "episodes"
+        FOR EACH ROW BEGIN
+          UPDATE "episodes"
+          SET "updatedAt" = datetime('subsec')
+          WHERE ("episodes"."rowid") = ("new"."rowid");
         END
         """
       }
@@ -121,7 +147,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:120:40"
+          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:146:40"
         AFTER UPDATE ON "reminders"
         FOR EACH ROW BEGIN
           UPDATE "reminders"
@@ -150,7 +176,7 @@ extension SnapshotTests {
       assertQuery(trigger) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:136:57"
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:162:57"
         AFTER INSERT ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
@@ -168,4 +194,13 @@ extension SnapshotTests {
       }
     }
   }
+}
+
+@Table private struct Episode {
+  let id: Int
+  let timestamps: Timestamps
+}
+@Selection private struct Timestamps {
+  let createdAt: Date
+  let updatedAt: Date?
 }

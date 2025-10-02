@@ -2527,6 +2527,41 @@ extension SnapshotTests {
       }
     }
 
+    @Test func enumDiagnostic_SingleLine() {
+      assertMacro {
+        """
+        @Table enum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } diagnostics: {
+        """
+        @Table enum Post {
+        ┬─────
+        ╰─ 🛑 '@Table' enum type missing required '@CasePathable' macro application
+           ✏️ Insert '@CasePathable'
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } fixes: {
+        """
+        @Table  @CasePathableenum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      } expansion: {
+        """
+        @Table  @CasePathableenum Post {
+          case photo(Photo)
+          case note(String = "")
+        }
+        """
+      }
+    }
+
     @Test func enumFirstNames() {
       assertMacro {
         """

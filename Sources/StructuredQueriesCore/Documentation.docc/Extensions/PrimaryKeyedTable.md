@@ -6,8 +6,8 @@ Typically such columns are also initialized by the database so that when inserti
 table you do not need to specify the primary key. The library provides extra tools that make it
 easier to insert, update, and delete records that have a primary key.
 
-> Note: Don't conform to this protocol directly. Instead, use the `@Table`, `@Column`, and
-> `@Columns` macros to generate a conformance.
+> Note: Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
+> generate a conformance.
 
 ### Specifying a primary key
 
@@ -25,7 +25,7 @@ struct Book {
 
 > Note: Using `primaryKey: true` does not create any kind of constraints on your table
 > automatically. It is up to you to actually create this table and designate the column as the
-> primary key.
+> primary key in its table definition.
 
 The `@Table` macro will also automatically infer a field named `id` as a primary key, and so it is
 not necessary to use the `@Column` macro in that case:

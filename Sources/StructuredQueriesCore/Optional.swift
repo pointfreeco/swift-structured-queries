@@ -44,7 +44,7 @@ extension Optional: QueryExpression where Wrapped: QueryExpression {
   public typealias QueryValue = Wrapped.QueryValue?
 
   public var queryFragment: QueryFragment {
-    self?.queryFragment ?? "NULL"
+    self._allColumns.map(\.queryFragment).joined(separator: ", ")
   }
 
   public static var _columnWidth: Int {

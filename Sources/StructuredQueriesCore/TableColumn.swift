@@ -46,8 +46,8 @@ extension WritableTableColumnExpression {
 
 /// A type representing a table column.
 ///
-/// Don't create instances of this value directly. Instead, use the `@Table`, `@Column`, and
-/// `@Columns` macros to generate values of this type.
+/// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros
+/// to generate values of this type.
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
   WritableTableColumnExpression
 {
@@ -144,8 +144,8 @@ public enum GeneratedColumnStorage {
 
 /// A type representing a generated column.
 ///
-/// Don't create instances of this value directly. Instead, use the `@Table`, `@Column`, and
-/// `@Columns` macros to generate values of this type.
+/// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros
+/// to generate values of this type.
 public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
   TableColumnExpression
 {
