@@ -181,24 +181,24 @@ extension SnapshotTests {
   }
 }
 
-@Table
+@Selection
 struct ReminderDate {
   var date: Date?
 }
 
-@Table
+@Selection
 struct ReminderTitleAndAssignedUserName {
   let reminderTitle: String
   let assignedUserName: String?
 }
 
-@Table
+@Selection
 struct RemindersListAndReminderCount {
   let remindersList: RemindersList
   let remindersCount: Int
 }
 
-@Table
+@Selection
 struct Stats {
   let completedCount: Int
   let flaggedCount: Int
