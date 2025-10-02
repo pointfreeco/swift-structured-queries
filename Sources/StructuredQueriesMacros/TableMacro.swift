@@ -70,14 +70,15 @@ extension TableMacro: ExtensionMacro {
     }
     if declaration.is(EnumDeclSyntax.self), !declaration.hasMacroApplication("CasePathable") {
       var newAttributes: AttributeListSyntax = declaration.attributes
-      newAttributes.append(
+      newAttributes.insert(
         .attribute(
           AttributeSyntax(
-            leadingTrivia: Trivia.space,
             atSign: .atSignToken(),
-            attributeName: IdentifierTypeSyntax(name: "CasePathable")
+            attributeName: IdentifierTypeSyntax(name: "CasePathable"),
+            trailingTrivia: .space
           )
-        )
+        ),
+        at: newAttributes.startIndex
       )
       context.diagnose(
         Diagnostic(

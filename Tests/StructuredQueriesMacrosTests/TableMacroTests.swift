@@ -2445,7 +2445,7 @@ extension SnapshotTests {
         """
       } fixes: {
         """
-        @Table @CasePathable
+        @CasePathable @Table
         enum Post {
           case photo(Photo)
           case note(String = "")
@@ -2547,18 +2547,83 @@ extension SnapshotTests {
         """
       } fixes: {
         """
-        @Table  @CasePathableenum Post {
+        @CasePathable @Table enum Post {
           case photo(Photo)
           case note(String = "")
         }
         """
       } expansion: {
-        """
-        @Table  @CasePathableenum Post {
+        #"""
+        @CasePathable enum Post {
           case photo(Photo)
           case note(String = "")
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Post
+            public let photo = StructuredQueriesCore._TableColumn<QueryValue, Photo?>.for("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.photo), \(self.note)"
+            }
+          }
+
+          public struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Post
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public static func photo(
+              _ photo: some StructuredQueriesCore.QueryExpression<Photo>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: photo._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              return Self(allColumns: allColumns)
+            }
+            public static func note(
+              _ note: some StructuredQueriesCore.QueryExpression<String>
+            ) -> Self {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: note._allColumns)
+              return Self(allColumns: allColumns)
+            }
+          }
         }
-        """
+
+        nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+          }
+          public nonisolated static var tableName: String {
+            "posts"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            if let photo = try decoder.decode(Photo.self) {
+              self = .photo(photo)
+            } else if let note = try decoder.decode(String.self) {
+              self = .note(note)
+            } else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+          }
+        }
+        """#
       }
     }
 
