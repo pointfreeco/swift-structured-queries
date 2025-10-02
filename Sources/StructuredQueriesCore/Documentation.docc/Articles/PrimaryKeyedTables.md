@@ -1,11 +1,11 @@
-# Primary keyed tables
+# Primary-keyed tables
 
 Learn how tables with a primary key get extra tools when it comes to inserting, updating, and
 deleting records.
 
 ## Overview
 
-A primary keyed table is one that has a column whose value is unique for the entire table. The most
+A primary-keyed table is one that has a column whose value is unique for the entire table. The most
 common example is an "id" column that holds an integer, UUID, or some other kind of identifier.
 Typically such columns are also initialized by the database so that when inserting rows into the
 table you do not need to specify the primary key. The library provides extra tools that make it
@@ -126,7 +126,7 @@ Or even get back the entire newly inserted row:
 }
 
 At times your application may want to provide the same business logic for creating a new record and
-editing an existing one. Your primary keyed table's `Draft` type can be used for these kinds of
+editing an existing one. Your primary-keyed table's `Draft` type can be used for these kinds of
 flows, and it is possible to create a draft from an existing value using ``TableDraft/init(_:)``:
 
 ```swift
@@ -141,10 +141,10 @@ ReminderForm(
 )
 ```
 
-### Selects, updates, upserts and deletions
+### Selects, updates, upserts, and deletions
 
-Primary keyed tables are also given special APIs for selecting, updating and deleting existing rows
-in the table based on their primary key. For example, every primary keyed table is given a special
+Primary-keyed tables are also given special APIs for selecting, updating and deleting existing rows
+in the table based on their primary key. For example, every primary-keyed table is given a special
 ``PrimaryKeyedTable/find(_:)`` static method for fetching a record by its primary key:
 
 @Row {

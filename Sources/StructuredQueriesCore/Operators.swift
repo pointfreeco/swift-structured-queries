@@ -1,4 +1,4 @@
-extension QueryExpression where QueryValue: _OptionalPromotable {
+extension QueryExpression where QueryValue: QueryRepresentable {
   /// A predicate expression indicating whether two query expressions are equal.
   ///
   /// ```swift
@@ -77,9 +77,10 @@ extension QueryExpression where QueryValue: _OptionalPromotable {
   ///
   /// - Parameter other: An expression to compare this one to.
   /// - Returns: A predicate expression.
-  public func `is`(
-    _ other: some QueryExpression<QueryValue._Optionalized>
-  ) -> some QueryExpression<Bool> {
+  public func `is`<Other: QueryRepresentable>(
+    _ other: some QueryExpression<Other>
+  ) -> some QueryExpression<Bool>
+  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
     BinaryOperator(lhs: self, operator: "IS", rhs: other)
   }
 
@@ -93,9 +94,10 @@ extension QueryExpression where QueryValue: _OptionalPromotable {
   ///
   /// - Parameter other: An expression to compare this one to.
   /// - Returns: A predicate expression.
-  public func isNot(
+  public func isNot<Other: QueryRepresentable>(
     _ other: some QueryExpression<QueryValue._Optionalized>
-  ) -> some QueryExpression<Bool> {
+  ) -> some QueryExpression<Bool>
+  where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
     BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
   }
 }
@@ -104,6 +106,34 @@ private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
   (expression as? any _OptionalProtocol).map { $0._wrapped == nil } ?? false
 }
 
+extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression {
+  @_documentation(visibility: private)
+  public func `is`(
+    _ other: _Null<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS", rhs: other)
+  }
+
+  @_documentation(visibility: private)
+  public func isNot(
+    _ other: _Null<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
+  }
+}
+
+public struct _Null<Wrapped: QueryExpression>: QueryExpression {
+  public typealias QueryValue = Wrapped?
+  public var queryFragment: QueryFragment {
+    Wrapped?.none.queryFragment
+  }
+}
+
+extension _Null: ExpressibleByNilLiteral {
+  public init(nilLiteral: ()) {}
+}
+
+// TODO: Remove this when we correctly unwrap `TableColumns` in `join` conditions.
 extension QueryExpression where QueryValue: QueryRepresentable & _OptionalProtocol {
   @_documentation(visibility: private)
   public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
@@ -138,33 +168,6 @@ extension QueryExpression where QueryValue: QueryRepresentable & _OptionalProtoc
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
   }
-}
-
-extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression {
-  @_documentation(visibility: private)
-  public func `is`(
-    _ other: _Null<QueryValue>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "IS", rhs: other)
-  }
-
-  @_documentation(visibility: private)
-  public func isNot(
-    _ other: _Null<QueryValue>
-  ) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
-  }
-}
-
-public struct _Null<Wrapped: QueryExpression>: QueryExpression {
-  public typealias QueryValue = Wrapped?
-  public var queryFragment: QueryFragment {
-    Wrapped?.none.queryFragment
-  }
-}
-
-extension _Null: ExpressibleByNilLiteral {
-  public init(nilLiteral: ()) {}
 }
 
 // NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.

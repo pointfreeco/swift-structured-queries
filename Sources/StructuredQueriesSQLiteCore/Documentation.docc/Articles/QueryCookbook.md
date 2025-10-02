@@ -75,7 +75,7 @@ struct Row {
 This allows the query to serialize the associated rows into JSON, which are then deserialized into
 a `Row` type. To construct such a query you can use the
 ``StructuredQueriesCore/PrimaryKeyedTableDefinition/jsonGroupArray(distinct:order:filter:)``
-property that is defined on the columns of primary keyed tables:
+property that is defined on the columns of primary-keyed tables:
 
 ```swift
 RemindersList

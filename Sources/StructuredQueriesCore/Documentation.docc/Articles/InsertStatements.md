@@ -293,7 +293,7 @@ Or you can populate an entire record from the freshly-inserted database:
 ### Upserting drafts
 
 At times your application may want to provide the same business logic for creating a new record and
-editing an existing one. Your primary keyed table's `Draft` type can be used for these kinds of
+editing an existing one. Your primary-keyed table's `Draft` type can be used for these kinds of
 flows, and it is possible to create a draft from an existing value using ``TableDraft/init(_:)``:
 
 ```swift

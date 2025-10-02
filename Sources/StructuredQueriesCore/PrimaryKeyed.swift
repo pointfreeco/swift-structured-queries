@@ -20,7 +20,7 @@ public protocol TableDraft: Table {
 
   typealias PrimaryKey = PrimaryTable.PrimaryKey
 
-  /// Creates a draft from a primary keyed table.
+  /// Creates a draft from a primary-keyed table.
   init(_ primaryTable: PrimaryTable)
 }
 

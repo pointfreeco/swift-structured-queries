@@ -22,7 +22,7 @@ that represent those database definitions.
     * [RawRepresentable](#RawRepresentable)
     * [JSON](#JSON)
     * [Tagged identifiers](#Tagged-identifiers)
-* [Primary keyed tables](#Primary-keyed-tables)
+* [Primary-keyed tables](#Primary-keyed-tables)
 * [Grouped columns](#Grouped-columns)
 * [Ephemeral columns](#Ephemeral-columns)
 * [Generated columns](#Generated-columns)
@@ -321,7 +321,7 @@ struct RemindersList: Identifiable {
 }
 ```
 
-### Primary keyed tables
+### Primary-keyed tables
 
 It is possible to let the `@Table` macro know which field of your data type is the primary
 key for the table in the database, and doing so unlocks new APIs for inserting, updating, and
@@ -330,6 +330,7 @@ primary key, or you can explicitly specify it with the `primaryKey:` argument of
 macro:
 
 ```swift
+@Table
 struct Book {
   @Column(primaryKey: true)
   let isbn: String
@@ -443,6 +444,7 @@ database. Such properties must have a default value, and can be specified using 
 macro:
 
 ```swift
+@Table
 struct Book {
   @Column(primaryKey: true)
   let isbn: String

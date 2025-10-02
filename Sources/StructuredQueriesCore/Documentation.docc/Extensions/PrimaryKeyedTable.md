@@ -1,6 +1,6 @@
 # ``StructuredQueriesCore/PrimaryKeyedTable``
 
-A primary keyed table is one that has a column whose value is unique for the entire table. The most
+A primary-keyed table is one that has a column whose value is unique for the entire table. The most
 common example is an "id" column that holds an integer, UUID, or some other kind of identifier.
 Typically such columns are also initialized by the database so that when inserting rows into the
 table you do not need to specify the primary key. The library provides extra tools that make it
@@ -117,7 +117,7 @@ Reminder
 
 ### Updates and deletions
 
-Primary keyed tables are also given special APIs for updating and deleting existing rows in the
+Primary-keyed tables are also given special APIs for updating and deleting existing rows in the
 table based on their primary key. For example, the ``PrimaryKeyedTable/update(_:)`` method
 allows one to update all the fields of a row with the corresponding primary key:
 

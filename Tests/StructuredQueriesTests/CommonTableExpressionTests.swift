@@ -384,7 +384,7 @@ extension SnapshotTests {
               all: true,
               Employee
                 .select { EmployeeReport.Columns(id: $0.id, height: $0.height, name: $0.name) }
-                .join(EmployeeReport.all) { $0.bossID.eq($1.id) }
+                .join(EmployeeReport.all) { $0.bossID.is($1.id) }
             )
         } query: {
           EmployeeReport
@@ -397,7 +397,7 @@ extension SnapshotTests {
             UNION ALL
           SELECT "employees"."id" AS "id", "employees"."height" AS "height", "employees"."name" AS "name"
           FROM "employees"
-          JOIN "employeeReports" ON ("employees"."bossID") = ("employeeReports"."id")
+          JOIN "employeeReports" ON ("employees"."bossID") IS ("employeeReports"."id")
         )
         SELECT avg("employeeReports"."height")
         FROM "employeeReports"

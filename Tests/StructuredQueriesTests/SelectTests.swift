@@ -472,14 +472,14 @@ extension SnapshotTests {
 
       assertQuery(
         Reminder.all
-          .fullJoin(User.all) { $0.assignedUserID.eq($1.id) }
+          .fullJoin(User.all) { $0.assignedUserID.is($1.id) }
           .select { ($0.title, $1.name) }
           .limit(2)
       ) {
         """
         SELECT "reminders"."title", "users"."name"
         FROM "reminders"
-        FULL JOIN "users" ON ("reminders"."assignedUserID") = ("users"."id")
+        FULL JOIN "users" ON ("reminders"."assignedUserID") IS ("users"."id")
         LIMIT 2
         """
       } results: {

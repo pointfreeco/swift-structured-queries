@@ -7,7 +7,7 @@ extension SnapshotTests {
   @Suite struct SelectionTests {
     @Test func remindersListAndReminderCount() {
       let baseQuery =
-        RemindersList
+      RemindersList
         .group(by: \.id)
         .limit(2)
         .join(Reminder.all) { $0.id.eq($1.remindersListID) }
@@ -87,13 +87,69 @@ extension SnapshotTests {
         └─────────────────────────────────┘
         """
       }
+      let remindersListAndRemindersCount = RemindersListAndReminderCount.Columns(
+        remindersList: RemindersList.columns,
+        remindersCount: Reminder.columns.count()
+      )
+      assertQuery(
+        #sql(
+          """
+          SELECT \(remindersListAndRemindersCount)
+          FROM \(RemindersList.self)
+          JOIN \(Reminder.self) ON \(RemindersList.id) = \(Reminder.remindersListID)
+          GROUP BY \(RemindersList.id)
+          """,
+          as: RemindersListAndReminderCount.self
+        )
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", count("reminders"."id")
+        FROM "remindersLists"
+        JOIN "reminders" ON "remindersLists"."id" = "reminders"."remindersListID"
+        GROUP BY "remindersLists"."id"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────┐
+        │ RemindersListAndReminderCount(  │
+        │   remindersList: RemindersList( │
+        │     id: 1,                      │
+        │     color: 4889071,             │
+        │     title: "Personal",          │
+        │     position: 0                 │
+        │   ),                            │
+        │   remindersCount: 5             │
+        │ )                               │
+        ├─────────────────────────────────┤
+        │ RemindersListAndReminderCount(  │
+        │   remindersList: RemindersList( │
+        │     id: 2,                      │
+        │     color: 15567157,            │
+        │     title: "Family",            │
+        │     position: 0                 │
+        │   ),                            │
+        │   remindersCount: 3             │
+        │ )                               │
+        ├─────────────────────────────────┤
+        │ RemindersListAndReminderCount(  │
+        │   remindersList: RemindersList( │
+        │     id: 3,                      │
+        │     color: 11689427,            │
+        │     title: "Business",          │
+        │     position: 0                 │
+        │   ),                            │
+        │   remindersCount: 2             │
+        │ )                               │
+        └─────────────────────────────────┘
+        """
+      }
     }
 
     @Test func outerJoin() {
       assertQuery(
         Reminder
           .limit(2)
-          .leftJoin(User.all) { $0.assignedUserID.eq($1.id) }
+          .leftJoin(User.all) { $0.assignedUserID.is($1.id) }
           .select {
             ReminderTitleAndAssignedUserName.Columns(
               reminderTitle: $0.title,
@@ -104,7 +160,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."title" AS "reminderTitle", "users"."name" AS "assignedUserName"
         FROM "reminders"
-        LEFT JOIN "users" ON ("reminders"."assignedUserID") = ("users"."id")
+        LEFT JOIN "users" ON ("reminders"."assignedUserID") IS ("users"."id")
         LIMIT 2
         """
       } results: {
