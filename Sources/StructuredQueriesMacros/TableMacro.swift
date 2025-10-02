@@ -383,6 +383,9 @@ extension TableMacro: ExtensionMacro {
               ? "TableColumn"
               : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        let defaultParameter = isColumnGroup
+          ? ""
+          : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
@@ -393,7 +396,7 @@ extension TableMacro: ExtensionMacro {
             >\(raw: tableColumnInitializer)(\
             \(raw: isColumnGroup ? "" : "\(columnName), ")\
             keyPath: \\QueryValue.\(identifier)\
-            \(isColumnGroup ? "" : defaultValue.map { ", default: \($0)" } ?? "")\
+            \(raw: defaultParameter)\
             )
             """
           )
@@ -657,6 +660,9 @@ extension TableMacro: ExtensionMacro {
             ? "TableColumn"
             : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        let defaultParameter = isColumnGroup
+          ? ""
+          : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
@@ -667,7 +673,7 @@ extension TableMacro: ExtensionMacro {
             >\(raw: tableColumnInitializer)(\
             \(raw: isColumnGroup ? "" : "\(columnName), ")\
             keyPath: \\QueryValue.\(identifier)\
-            \(isColumnGroup ? "" : defaultValue.map { ", default: \($0)" } ?? "")\
+            \(raw: defaultParameter)\
             )
             """
           )
@@ -1055,6 +1061,9 @@ extension TableMacro: MemberMacro {
               ? "TableColumn"
               : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        let defaultParameter = isColumnGroup
+          ? ""
+          : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
@@ -1065,7 +1074,7 @@ extension TableMacro: MemberMacro {
             >\(raw: tableColumnInitializer)(\
             \(raw: isColumnGroup ? "" : "\(columnName), ")\
             keyPath: \\QueryValue.\(identifier)\
-            \(isColumnGroup ? "" : defaultValue.map { ", default: \($0)" } ?? "")\
+            \(raw: defaultParameter)\
             )
             """
           )
@@ -1074,7 +1083,7 @@ extension TableMacro: MemberMacro {
         if isPrimaryKey {
           appendColumnProperty(primaryKey: true)
         }
-        allColumns.append((identifier, "_", columnQueryValueType, defaultValue))
+        allColumns.append((identifier, "_", columnQueryValueType, defaultValue?.trimmed))
         allColumnNames.append(identifier)
         if !isGenerated {
           writableColumns.append(identifier)
@@ -1261,6 +1270,9 @@ extension TableMacro: MemberMacro {
             ? "TableColumn"
             : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        let defaultParameter = isColumnGroup
+          ? ""
+          : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
@@ -1271,14 +1283,14 @@ extension TableMacro: MemberMacro {
             >\(raw: tableColumnInitializer)(\
             \(raw: isColumnGroup ? "" : "\(columnName), ")\
             keyPath: \\QueryValue.\(identifier)\
-            \(isColumnGroup ? "" : defaultValue.map { ", default: \($0)" } ?? "")\
+            \(raw: defaultParameter)\
             )
             """
           )
         }
         appendColumnProperty()
         allColumns.append(
-          (identifier, parameter.firstName ?? "_", columnQueryValueType, defaultValue)
+          (identifier, parameter.firstName ?? "_", columnQueryValueType, defaultValue?.trimmed)
         )
         allColumnNames.append(identifier)
         writableColumns.append(identifier)

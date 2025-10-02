@@ -185,9 +185,9 @@ extension SnapshotTests {
         @Table
         struct User {
           /// The user's identifier.
-          let id: /* TODO: UUID */Int
+          let id: /* TODO: UUID */Int // Primary key
           /// The user's email.
-          var email: String?  // TODO: Should this be non-optional?
+          var email: String? = ""  // TODO: Should this be non-optional?
           /// The user's age.
           var age: Int
         }
@@ -196,9 +196,9 @@ extension SnapshotTests {
         #"""
         struct User {
           /// The user's identifier.
-          let id: /* TODO: UUID */Int
+          let id: /* TODO: UUID */Int // Primary key
           /// The user's email.
-          var email: String?  // TODO: Should this be non-optional?
+          var email: String? = ""  // TODO: Should this be non-optional?
           /// The user's age.
           var age: Int
 
@@ -207,7 +207,7 @@ extension SnapshotTests {
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             public let primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let email = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("email", keyPath: \QueryValue.email, default: nil)
+            public let email = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("email", keyPath: \QueryValue.email, default: "")
             public let age = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("age", keyPath: \QueryValue.age)
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
@@ -233,7 +233,7 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil),
+              email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: ""),
               age: some StructuredQueriesCore.QueryExpression<Int>
             ) {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
@@ -246,13 +246,13 @@ extension SnapshotTests {
 
           public struct Draft: StructuredQueriesCore.TableDraft {
             public typealias PrimaryTable = User
-            let id: /* TODO: UUID */ Int?
-            var email: String?
+            let id: /* TODO: UUID */ Int? // Primary key
+            var email: String? = ""
             var age: Int
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let email = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("email", keyPath: \QueryValue.email, default: nil)
+              public let email = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("email", keyPath: \QueryValue.email, default: "")
               public let age = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("age", keyPath: \QueryValue.age)
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
@@ -277,7 +277,7 @@ extension SnapshotTests {
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
-                email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil),
+                email: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: ""),
                 age: some StructuredQueriesCore.QueryExpression<Int>
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
@@ -305,7 +305,7 @@ extension SnapshotTests {
 
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Int.self) ?? nil
-              self.email = try decoder.decode(String.self) ?? nil
+              self.email = try decoder.decode(String.self) ?? ""
               let age = try decoder.decode(Int.self)
               guard let age else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -320,7 +320,7 @@ extension SnapshotTests {
             }
             public init(
               id: /* TODO: UUID */ Int? = nil,
-              email: String? = nil,
+              email: String? = "",
               age: Int
             ) {
               self.id = id
@@ -344,7 +344,7 @@ extension SnapshotTests {
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Int.self)
-            self.email = try decoder.decode(String.self) ?? nil
+            self.email = try decoder.decode(String.self) ?? ""  // TODO: Should this be non-optional?
             let age = try decoder.decode(Int.self)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
