@@ -482,7 +482,7 @@ struct Event {
 ### Enum tables
 
 It is possible to use enums as a domain modeling tool for your table schema, which can help you 
-emulate "inheritance" for you tables without having the burden of using reference types. 
+emulate "inheritance" for your tables without having the burden of using reference types. 
 
 As an example, suppose you have a table that represents attachments that can be associated with 
 other tables, and an attachment can either be a link, a note or an image. One way to model this
