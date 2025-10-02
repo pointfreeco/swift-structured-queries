@@ -52,10 +52,11 @@ extension Optional: QueryExpression where Wrapped: QueryExpression {
   }
 
   public var _allColumns: [any QueryExpression] {
-    self?._allColumns ?? Array(
-      repeating: SQLQueryExpression("NULL") as any QueryExpression,
-      count: Self._columnWidth
-    )
+    self?._allColumns
+      ?? Array(
+        repeating: SQLQueryExpression("NULL") as any QueryExpression,
+        count: Self._columnWidth
+      )
   }
 }
 

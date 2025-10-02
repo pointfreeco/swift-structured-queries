@@ -118,7 +118,8 @@ extension SnapshotTests {
     }
 
     @Test func afterUpdateTouchDate_NestedTimestamps() throws {
-      try db.execute("""
+      try db.execute(
+        """
         CREATE TABLE "episodes" (
           "id" INTEGER PRIMARY KEY,
           "createdAt" TEXT NOT NULL,

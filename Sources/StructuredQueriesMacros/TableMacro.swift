@@ -383,7 +383,8 @@ extension TableMacro: ExtensionMacro {
               ? "TableColumn"
               : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
-        let defaultParameter = isColumnGroup
+        let defaultParameter =
+          isColumnGroup
           ? ""
           : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
@@ -660,7 +661,8 @@ extension TableMacro: ExtensionMacro {
             ? "TableColumn"
             : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
-        let defaultParameter = isColumnGroup
+        let defaultParameter =
+          isColumnGroup
           ? ""
           : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
@@ -946,7 +948,8 @@ extension TableMacro: MemberMacro {
           ?? binding.initializer?.value.literalType)
           .map { $0.rewritten(selfRewriter) }
         var columnQueryOutputType = columnQueryValueType
-        var isPrimaryKey = primaryKey == nil
+        var isPrimaryKey =
+          primaryKey == nil
           && identifier.text == "id"
           && node.attributeName.identifier != "_Draft"
         var isColumnGroup = false
@@ -1061,7 +1064,8 @@ extension TableMacro: MemberMacro {
               ? "TableColumn"
               : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
-        let defaultParameter = isColumnGroup
+        let defaultParameter =
+          isColumnGroup
           ? ""
           : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
@@ -1270,7 +1274,8 @@ extension TableMacro: MemberMacro {
             ? "TableColumn"
             : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
-        let defaultParameter = isColumnGroup
+        let defaultParameter =
+          isColumnGroup
           ? ""
           : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {

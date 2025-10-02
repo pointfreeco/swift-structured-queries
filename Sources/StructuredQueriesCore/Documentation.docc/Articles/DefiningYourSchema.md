@@ -272,7 +272,7 @@ To enable the trait, specify it in the Package.swift file that depends on Struct
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.17.0",
+   from: "0.22.0",
 +  traits: ["StructuredQueriesTagged"]
  ),
 ```
@@ -385,7 +385,7 @@ struct Reminder {
 > Important: Since SQLite has no concept of grouped columns you must remember to flatten all
 > groupings into a single list when defining your table's schema. For example, the "CREATE TABLE"
 > statement for the `RemindersList` above would look like this:
-> 
+>
 > ```sql
 > CREATE TABLE "remindersLists" (
 >   "id" INTEGER PRIMARY KEY,
@@ -414,15 +414,15 @@ You can construct queries that access fields inside column groups using regular 
   }
 }
 
-You can even compare the `timestamps` field directly and its columns will be flattened into a 
+You can even compare the `timestamps` field directly and its columns will be flattened into a
 tuple in SQL:
 
 @Row {
   @Column {
     ```swift
     RemindersList
-      .where { 
-        $0.timestamps <= Timestamps(createdAt: date1, updatedAt: date2) 
+      .where {
+        $0.timestamps <= Timestamps(createdAt: date1, updatedAt: date2)
       }
     ```
   }
@@ -484,9 +484,9 @@ struct Event {
 It is possible to use enums as a domain modeling tool for your table schema, which can help you 
 emulate "inheritance" for your tables without having the burden of using reference types. 
 
-As an example, suppose you have a table that represents attachments that can be associated with 
+As an example, suppose you have a table that represents attachments that can be associated with
 other tables, and an attachment can either be a link, a note or an image. One way to model this
-is a struct to represent the attachment that holds onto an enum for the different kinds of 
+is a struct to represent the attachment that holds onto an enum for the different kinds of
 attachments supported, annotated with the `@Selection` macro:
 
 ```swift
@@ -533,10 +533,10 @@ be decided which case of the `Kind` enum is chosen:
   }
   @Column {
     ```sql
-    SELECT 
-      "attachments"."id", 
-      "attachments"."link", 
-      "attachments"."note", 
+    SELECT
+      "attachments"."id",
+      "attachments"."link",
+      "attachments"."note",
       "attachments"."image"
     FROM "attachments"
     ```
@@ -554,13 +554,13 @@ only:
   }
   @Column {
     ```sql
-    SELECT 
-      "attachments"."id", 
-      "attachments"."link", 
-      "attachments"."note", 
+    SELECT
+      "attachments"."id",
+      "attachments"."link",
+      "attachments"."note",
       "attachments"."image"
     FROM "attachments"
-    WHERE "attachments"."image" IS NOT NULL 
+    WHERE "attachments"."image" IS NOT NULL
     ```
   }
 }
@@ -601,9 +601,9 @@ And further, you can update attachments in the database in the usual way:
   @Column {
     ```sql
     UPDATE "attachments"
-    SET 
-      "link" = NULL, 
-      "note" = 'Goodbye world!', 
+    SET
+      "link" = NULL,
+      "note" = 'Goodbye world!',
       "image" = NULL
     ```
   }
@@ -627,7 +627,7 @@ can be defined for that data and used in the `image` case:
     case note(String)
     case image(Attachment.Image)
   }
-  @Selection 
+  @Selection
   struct Image {
     var caption = ""
     var url: URL
@@ -638,7 +638,7 @@ can be defined for that data and used in the `image` case:
 > Note: Due to how macros expand it is necessary to fully qualify nested types, e.g.
 > `case image(Attachment.Image)`.
 
-To create a SQL table that represents this data type you again must flatten all columns into a 
+To create a SQL table that represents this data type you again must flatten all columns into a
 single list of nullable columns:
 
 ```sql
@@ -694,8 +694,8 @@ it's a lot more verbose:
 }
 ```
 
-> Note: The `@available(iOS 26, *)` attributes are required even if targeting iOS 26+, and 
-> the explicit initializers are required and must accept all arguments from all parent 
+> Note: The `@available(iOS 26, *)` attributes are required even if targeting iOS 26+, and
+> the explicit initializers are required and must accept all arguments from all parent
 > classes and pass that to `super.init`.
 
 Enums provide an alternative to this approach that embraces value types, is more concise, and

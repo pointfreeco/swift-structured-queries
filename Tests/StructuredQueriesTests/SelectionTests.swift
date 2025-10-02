@@ -7,7 +7,7 @@ extension SnapshotTests {
   @Suite struct SelectionTests {
     @Test func remindersListAndReminderCount() {
       let baseQuery =
-      RemindersList
+        RemindersList
         .group(by: \.id)
         .limit(2)
         .join(Reminder.all) { $0.id.eq($1.remindersListID) }

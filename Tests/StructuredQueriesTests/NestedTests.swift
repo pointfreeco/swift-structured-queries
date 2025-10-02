@@ -473,7 +473,7 @@ extension SnapshotTests {
     @Test func reminderListAndReminderCountPayload() {
       let baseQuery =
         RemindersList
-        .where { _ in #sql("color > 0") } 
+        .where { _ in #sql("color > 0") }
         .join(Reminder.all) { $0.id.eq($1.remindersListID) }
       assertQuery(
         baseQuery
