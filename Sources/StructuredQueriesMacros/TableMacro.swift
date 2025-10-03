@@ -870,7 +870,7 @@ extension TableMacro: ExtensionMacro {
     ])
     let columnWidth: ExprSyntax = """
       var columnWidth = 0
-      columnWidth += \(columnWidths, separator: "; columnWidth += ")
+      columnWidth += \(columnWidths, separator: "\ncolumnWidth += ")
       return columnWidth
       """
 

@@ -28,9 +28,7 @@ extension SnapshotTests {
           public typealias Output = Date
           public let name = "currentDate"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () -> Date
@@ -82,9 +80,7 @@ extension SnapshotTests {
           public typealias Output = Date
           public let name = "current_date"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () -> Date
@@ -194,9 +190,7 @@ extension SnapshotTests {
           public typealias Output = Int
           public let name = "fortyTwo"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = true
           public let body: () -> Int
@@ -481,7 +475,7 @@ extension SnapshotTests {
           public let name = "concat"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += String._columnWidth;
+            argumentCount += String._columnWidth
             argumentCount += String._columnWidth
             return argumentCount
           }
@@ -618,9 +612,7 @@ extension SnapshotTests {
           public typealias Output = Date
           public let name = "currentDate"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () throws -> Date
@@ -676,9 +668,7 @@ extension SnapshotTests {
           public typealias Output = Date
           public let name = "currentDate"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () throws(MyError) -> Date
@@ -734,9 +724,7 @@ extension SnapshotTests {
           public typealias Output = Date
           public let name = "currentDate"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () -> Date
@@ -788,9 +776,7 @@ extension SnapshotTests {
           public typealias Output = Date
           public let name = "currentDate"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () -> Date
@@ -865,9 +851,7 @@ extension SnapshotTests {
           public typealias Output = Date
           public let name = "currentDate"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () -> Date
@@ -919,9 +903,7 @@ extension SnapshotTests {
           public typealias Output = Int
           public let name = "default"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () -> Int
@@ -973,9 +955,7 @@ extension SnapshotTests {
           public typealias Output = Swift.Void
           public let name = "void"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () -> Swift.Void
@@ -1022,9 +1002,7 @@ extension SnapshotTests {
           public typealias Output = Swift.Void
           public let name = "void"
           public var argumentCount: Int? {
-            var argumentCount = 0
-            argumentCount += 0
-            return argumentCount
+            0
           }
           public let isDeterministic = false
           public let body: () throws -> Swift.Void
@@ -1085,7 +1063,7 @@ extension SnapshotTests {
           public let name = "min"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += Int._columnWidth;
+            argumentCount += Int._columnWidth
             argumentCount += Int._columnWidth
             return argumentCount
           }
@@ -1152,7 +1130,7 @@ extension SnapshotTests {
           public let name = "min"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += Int._columnWidth;
+            argumentCount += Int._columnWidth
             argumentCount += Int._columnWidth
             return argumentCount
           }
@@ -1216,7 +1194,7 @@ extension SnapshotTests {
           public let name = "isValid"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += Reminder._columnWidth;
+            argumentCount += Reminder._columnWidth
             argumentCount += Bool._columnWidth
             return argumentCount
           }

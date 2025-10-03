@@ -301,8 +301,8 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth;
-              columnWidth += String?._columnWidth;
+              columnWidth += Int?._columnWidth
+              columnWidth += String?._columnWidth
               columnWidth += Int._columnWidth
               return columnWidth
             }
@@ -346,8 +346,8 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Int._columnWidth;
-            columnWidth += String?._columnWidth;
+            columnWidth += Int._columnWidth
+            columnWidth += String?._columnWidth
             columnWidth += Int._columnWidth
             return columnWidth
           }
@@ -666,9 +666,9 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Swift.Bool._columnWidth;
-            columnWidth += Swift.Int._columnWidth;
-            columnWidth += Swift.Double._columnWidth;
+            columnWidth += Swift.Bool._columnWidth
+            columnWidth += Swift.Int._columnWidth
+            columnWidth += Swift.Double._columnWidth
             columnWidth += Swift.String._columnWidth
             return columnWidth
           }
@@ -930,7 +930,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += String._columnWidth;
+            columnWidth += String._columnWidth
             columnWidth += String._columnWidth
             return columnWidth
           }
@@ -1031,7 +1031,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += String._columnWidth;
+            columnWidth += String._columnWidth
             columnWidth += String._columnWidth
             return columnWidth
           }
@@ -1160,7 +1160,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth;
+              columnWidth += Int?._columnWidth
               columnWidth += String._columnWidth
               return columnWidth
             }
@@ -1200,8 +1200,8 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Int._columnWidth;
-            columnWidth += String._columnWidth;
+            columnWidth += Int._columnWidth
+            columnWidth += String._columnWidth
             columnWidth += Int._columnWidth
             return columnWidth
           }
@@ -1681,7 +1681,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth;
+              columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
               columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
               return columnWidth
             }
@@ -1717,7 +1717,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += ID<User, UUID.BytesRepresentation>._columnWidth;
+            columnWidth += ID<User, UUID.BytesRepresentation>._columnWidth
             columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
             return columnWidth
           }
@@ -1910,7 +1910,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth;
+              columnWidth += Int?._columnWidth
               columnWidth += String._columnWidth
               return columnWidth
             }
@@ -1950,7 +1950,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Int._columnWidth;
+            columnWidth += Int._columnWidth
             columnWidth += String._columnWidth
             return columnWidth
           }
@@ -2089,7 +2089,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth;
+              columnWidth += Int?._columnWidth
               columnWidth += <#Type#>._columnWidth
               return columnWidth
             }
@@ -2125,7 +2125,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Int._columnWidth;
+            columnWidth += Int._columnWidth
             columnWidth += <#Type#>._columnWidth
             return columnWidth
           }
@@ -2258,8 +2258,8 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth;
-              columnWidth += Color.HexRepresentation._columnWidth;
+              columnWidth += Int?._columnWidth
+              columnWidth += Color.HexRepresentation._columnWidth
               columnWidth += Swift.String._columnWidth
               return columnWidth
             }
@@ -2299,8 +2299,8 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Int._columnWidth;
-            columnWidth += Color.HexRepresentation._columnWidth;
+            columnWidth += Int._columnWidth
+            columnWidth += Color.HexRepresentation._columnWidth
             columnWidth += Swift.String._columnWidth
             return columnWidth
           }
@@ -3284,7 +3284,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth;
+              columnWidth += Int?._columnWidth
               columnWidth += String._columnWidth
               return columnWidth
             }
@@ -3324,7 +3324,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Int._columnWidth;
+            columnWidth += Int._columnWidth
             columnWidth += String._columnWidth
             return columnWidth
           }
@@ -3474,9 +3474,9 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth;
-              columnWidth += Swift.String._columnWidth;
-              columnWidth += Date.UnixTimeRepresentation?._columnWidth;
+              columnWidth += Int?._columnWidth
+              columnWidth += Swift.String._columnWidth
+              columnWidth += Date.UnixTimeRepresentation?._columnWidth
               columnWidth += Priority?._columnWidth
               return columnWidth
             }
@@ -3520,9 +3520,9 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Int._columnWidth;
-            columnWidth += Swift.String._columnWidth;
-            columnWidth += Date.UnixTimeRepresentation?._columnWidth;
+            columnWidth += Int._columnWidth
+            columnWidth += Swift.String._columnWidth
+            columnWidth += Date.UnixTimeRepresentation?._columnWidth
             columnWidth += Priority?._columnWidth
             return columnWidth
           }
@@ -3850,7 +3850,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth;
+              columnWidth += Int?._columnWidth
               columnWidth += Swift.String._columnWidth
               return columnWidth
             }
@@ -3886,7 +3886,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Int?._columnWidth;
+            columnWidth += Int?._columnWidth
             columnWidth += Swift.String._columnWidth
             return columnWidth
           }
@@ -4002,7 +4002,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += UUID?._columnWidth;
+              columnWidth += UUID?._columnWidth
               columnWidth += Timestamps._columnWidth
               return columnWidth
             }
@@ -4042,7 +4042,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += UUID._columnWidth;
+            columnWidth += UUID._columnWidth
             columnWidth += Timestamps._columnWidth
             return columnWidth
           }
@@ -4315,8 +4315,8 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += Reminder.ID?._columnWidth;
-              columnWidth += String._columnWidth;
+              columnWidth += Reminder.ID?._columnWidth
+              columnWidth += String._columnWidth
               columnWidth += String._columnWidth
               return columnWidth
             }
@@ -4364,8 +4364,8 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += Reminder.ID._columnWidth;
-            columnWidth += String._columnWidth;
+            columnWidth += Reminder.ID._columnWidth
+            columnWidth += String._columnWidth
             columnWidth += String._columnWidth
             return columnWidth
           }
@@ -4493,7 +4493,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Int {
               var columnWidth = 0
-              columnWidth += MetadataID?._columnWidth;
+              columnWidth += MetadataID?._columnWidth
               columnWidth += Date._columnWidth
               return columnWidth
             }
@@ -4533,7 +4533,7 @@ extension SnapshotTests {
           }
           public nonisolated static var _columnWidth: Int {
             var columnWidth = 0
-            columnWidth += MetadataID._columnWidth;
+            columnWidth += MetadataID._columnWidth
             columnWidth += Date._columnWidth
             return columnWidth
           }
