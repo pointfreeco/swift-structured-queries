@@ -228,7 +228,9 @@ extension DatabaseFunctionMacro: PeerMacro {
       public typealias Output = \(representableOutputType)
       public let name = \(databaseFunctionName)
       public var argumentCount: Int? { \
-      [\(raw: argumentCount.map { "\($0)._columnWidth" }.joined(separator: ", "))].reduce(0, +) \
+      var argumentCount = 0
+      argumentCount += \(raw: argumentCount.isEmpty ? "0" : argumentCount.map { "\($0)._columnWidth" }.joined(separator: "; argumentCount += "))
+      return argumentCount
       }
       public let isDeterministic = \(raw: isDeterministic)
       public let body: \(raw: bodyType)

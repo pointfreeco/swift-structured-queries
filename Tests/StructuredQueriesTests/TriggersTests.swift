@@ -131,7 +131,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_episodes@StructuredQueriesTests/TriggersTests.swift:129:39"
+          "after_update_on_episodes@StructuredQueriesTests/TriggersTests.swift:130:39"
         AFTER UPDATE ON "episodes"
         FOR EACH ROW BEGIN
           UPDATE "episodes"
@@ -148,7 +148,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:146:40"
+          "after_update_on_reminders@StructuredQueriesTests/TriggersTests.swift:147:40"
         AFTER UPDATE ON "reminders"
         FOR EACH ROW BEGIN
           UPDATE "reminders"
@@ -177,7 +177,7 @@ extension SnapshotTests {
       assertQuery(trigger) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:162:57"
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggersTests.swift:163:57"
         AFTER INSERT ON "remindersLists"
         FOR EACH ROW BEGIN
           UPDATE "remindersLists"
