@@ -102,7 +102,7 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     let functionTypeName = context.makeUniqueName(declarationName)
     let databaseFunctionName = StringLiteralExprSyntax(content: functionName)
-    var argumentCount: [ExprSyntax] = []
+    var argumentCounts: [ExprSyntax] = []
 
     var bodyArguments: [String] = []
     var representableInputTypes: [String] = []
@@ -144,7 +144,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       parameters.append(parameterName)
       argumentBindings.append(parameterName)
 
-      argumentCount.append("\(type)")
+      argumentCounts.append("\(type)")
       decodings.append("let \(parameterName) = try decoder.decode(\(type).self)")
       decodingUnwrappings.append("guard let \(parameterName) else { throw InvalidInvocation() }")
     }
@@ -215,6 +215,15 @@ extension DatabaseFunctionMacro: PeerMacro {
       ? representableInputType
       : "(\(representableInputType))"
 
+    let argumentCount =
+      argumentCounts.isEmpty
+      ? "0"
+      : """
+      var argumentCount = 0
+      \(argumentCounts.map { "argumentCount += \($0)._columnWidth\n" }.joined())\
+      return argumentCount
+      """
+
     return [
       """
       \(attributes)\(access)\(`static`)var $\(raw: declarationName): \(functionTypeName) {
@@ -227,8 +236,8 @@ extension DatabaseFunctionMacro: PeerMacro {
       public typealias Input = \(raw: representableInputType)
       public typealias Output = \(representableOutputType)
       public let name = \(databaseFunctionName)
-      public var argumentCount: Int? { \
-      [\(raw: argumentCount.map { "\($0)._columnWidth" }.joined(separator: ", "))].reduce(0, +) \
+      public var argumentCount: Int? {
+      \(raw: argumentCount)
       }
       public let isDeterministic = \(raw: isDeterministic)
       public let body: \(raw: bodyType)

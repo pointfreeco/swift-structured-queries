@@ -868,7 +868,11 @@ extension TableMacro: ExtensionMacro {
       public typealias From = Swift.Never
       """,
     ])
-    let columnWidth: ExprSyntax = "[\(columnWidths, separator: ", ")].reduce(0, +)"
+    let columnWidth: ExprSyntax = """
+      var columnWidth = 0
+      columnWidth += \(columnWidths, separator: "\ncolumnWidth += ")
+      return columnWidth
+      """
 
     return [
       DeclSyntax(

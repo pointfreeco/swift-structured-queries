@@ -56,7 +56,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -124,7 +126,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -296,7 +300,11 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth, String?._columnWidth, Int._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += String?._columnWidth
+              columnWidth += Int._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -337,7 +345,11 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth, String?._columnWidth, Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += String?._columnWidth
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "users"
@@ -411,7 +423,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foo"
@@ -519,7 +533,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "bar"
@@ -649,7 +665,12 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Swift.Bool._columnWidth, Swift.Int._columnWidth, Swift.Double._columnWidth, Swift.String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Swift.Bool._columnWidth
+            columnWidth += Swift.Int._columnWidth
+            columnWidth += Swift.Double._columnWidth
+            columnWidth += Swift.String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -717,7 +738,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -830,7 +853,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Date.UnixTimeRepresentation._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Date.UnixTimeRepresentation._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -904,7 +929,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [String._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += String._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "users"
@@ -1002,7 +1030,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [String._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += String._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "users"
@@ -1128,7 +1159,10 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth, String._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += String._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -1165,7 +1199,11 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth, String._columnWidth, Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += String._columnWidth
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "users"
@@ -1245,7 +1283,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -1315,7 +1355,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -1383,7 +1425,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -1451,7 +1495,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [ID<Foo>._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += ID<Foo>._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -1519,7 +1565,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += ._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -1632,7 +1680,10 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [ID<User, UUID.BytesRepresentation>?._columnWidth, ID<User, UUID.BytesRepresentation>?._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
+              columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -1665,7 +1716,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [ID<User, UUID.BytesRepresentation>._columnWidth, ID<User, UUID.BytesRepresentation>?._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += ID<User, UUID.BytesRepresentation>._columnWidth
+            columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "users"
@@ -1736,7 +1790,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "syncUps"
@@ -1853,7 +1909,10 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth, String._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += String._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -1890,7 +1949,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "syncUps"
@@ -2026,7 +2088,10 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth, <#Type#>._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += <#Type#>._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -2059,7 +2124,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth, <#Type#>._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += <#Type#>._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "syncUps"
@@ -2189,7 +2257,11 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth, Color.HexRepresentation._columnWidth, Swift.String._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += Color.HexRepresentation._columnWidth
+              columnWidth += Swift.String._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -2226,7 +2298,11 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth, Color.HexRepresentation._columnWidth, Swift.String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += Color.HexRepresentation._columnWidth
+            columnWidth += Swift.String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "remindersLists"
@@ -2319,7 +2395,9 @@ extension SnapshotTests {
           TableColumns()
         }
         public nonisolated static var _columnWidth: Int {
-          [String._columnWidth].reduce(0, +)
+          var columnWidth = 0
+          columnWidth += String._columnWidth
+          return columnWidth
         }
         public nonisolated static var tableName: String {
           "foos"
@@ -2940,7 +3018,9 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -2969,7 +3049,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -3073,7 +3155,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             Foo.tableName
@@ -3199,7 +3283,10 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth, String._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += String._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -3236,7 +3323,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "foos"
@@ -3383,7 +3473,12 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth, Swift.String._columnWidth, Date.UnixTimeRepresentation?._columnWidth, Priority?._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += Swift.String._columnWidth
+              columnWidth += Date.UnixTimeRepresentation?._columnWidth
+              columnWidth += Priority?._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -3424,7 +3519,12 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth, Swift.String._columnWidth, Date.UnixTimeRepresentation?._columnWidth, Priority?._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += Swift.String._columnWidth
+            columnWidth += Date.UnixTimeRepresentation?._columnWidth
+            columnWidth += Priority?._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "reminders"
@@ -3530,7 +3630,9 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [UUID.BytesRepresentation?._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += UUID.BytesRepresentation?._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -3559,7 +3661,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [UUID.BytesRepresentation._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += UUID.BytesRepresentation._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "reminders"
@@ -3628,7 +3732,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "reminders"
@@ -3743,7 +3849,10 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Int?._columnWidth, Swift.String._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += Swift.String._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -3776,7 +3885,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Int?._columnWidth, Swift.String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Int?._columnWidth
+            columnWidth += Swift.String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "reminders"
@@ -3889,7 +4001,10 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [UUID?._columnWidth, Timestamps._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += UUID?._columnWidth
+              columnWidth += Timestamps._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -3926,7 +4041,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [UUID._columnWidth, Timestamps._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += UUID._columnWidth
+            columnWidth += Timestamps._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "rows"
@@ -4034,7 +4152,9 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [ReminderTagID?._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += ReminderTagID?._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -4063,7 +4183,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [ReminderTagID._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += ReminderTagID._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "remindersTags"
@@ -4192,7 +4314,11 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [Reminder.ID?._columnWidth, String._columnWidth, String._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += Reminder.ID?._columnWidth
+              columnWidth += String._columnWidth
+              columnWidth += String._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -4237,7 +4363,11 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Reminder.ID._columnWidth, String._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Reminder.ID._columnWidth
+            columnWidth += String._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "reminderWithLists"
@@ -4362,7 +4492,10 @@ extension SnapshotTests {
             }
 
             public nonisolated static var _columnWidth: Int {
-              [MetadataID?._columnWidth, Date._columnWidth].reduce(0, +)
+              var columnWidth = 0
+              columnWidth += MetadataID?._columnWidth
+              columnWidth += Date._columnWidth
+              return columnWidth
             }
 
             public nonisolated static var tableName: String {
@@ -4399,7 +4532,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [MetadataID._columnWidth, Date._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += MetadataID._columnWidth
+            columnWidth += Date._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "metadatas"
