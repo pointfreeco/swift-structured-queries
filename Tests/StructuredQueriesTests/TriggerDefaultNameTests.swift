@@ -15,6 +15,25 @@ extension SnapshotTests {
           Values(1)
         }
       )
+      assertQuery(
+        trigger
+      ) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggerDefaultNameTests.swift:13:57"
+        AFTER INSERT ON "remindersLists"
+        FOR EACH ROW BEGIN
+          SELECT 1;
+        END
+        """
+      }
+      assertQuery(
+        trigger.drop()
+      ) {
+        """
+        DROP TRIGGER "after_insert_on_remindersLists@StructuredQueriesTests/TriggerDefaultNameTests.swift:13:57"
+        """
+      }
     }
   }
 }
