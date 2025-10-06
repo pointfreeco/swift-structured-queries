@@ -79,7 +79,7 @@ comes with another specialized too just for that kind of trigger,
   @Column {
     ```swift
     Reminder.createTemporaryTrigger(
-      after .update(touch: \.updatedAt)
+      after: .update(touch: \.updatedAt)
     )
     ```
   }
