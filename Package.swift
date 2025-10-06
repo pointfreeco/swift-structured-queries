@@ -4,9 +4,9 @@ import CompilerPluginSupport
 import PackageDescription
 
 #if canImport(FoundationEssentials)
-import FoundationEssentials
+  import FoundationEssentials
 #else
-import Foundation
+  import Foundation
 #endif
 
 let package = Package(
@@ -93,14 +93,14 @@ let package = Package(
       exclude: ["Symbolic Links/README.md"]
     ),
 
-      .target(
-        name: "StructuredQueriesSQLite",
-        dependencies: [
-          "StructuredQueries",
-          "StructuredQueriesSQLiteCore",
-          "StructuredQueriesSQLiteMacros",
-        ]
-      ),
+    .target(
+      name: "StructuredQueriesSQLite",
+      dependencies: [
+        "StructuredQueries",
+        "StructuredQueriesSQLiteCore",
+        "StructuredQueriesSQLiteMacros",
+      ]
+    ),
     .target(
       name: "StructuredQueriesSQLiteCore",
       dependencies: [
@@ -116,14 +116,14 @@ let package = Package(
       ]
     ),
 
-      .target(
-        name: "StructuredQueriesTestSupport",
-        dependencies: [
-          "StructuredQueriesCore",
-          .product(name: "CustomDump", package: "swift-custom-dump"),
-          .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-        ]
-      ),
+    .target(
+      name: "StructuredQueriesTestSupport",
+      dependencies: [
+        "StructuredQueriesCore",
+        .product(name: "CustomDump", package: "swift-custom-dump"),
+        .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+      ]
+    ),
     .testTarget(
       name: "StructuredQueriesMacrosTests",
       dependencies: [
@@ -146,12 +146,12 @@ let package = Package(
       ]
     ),
 
-      .target(
-        name: "_StructuredQueriesSQLite",
-        dependencies: [
-          "StructuredQueriesSQLite"
-        ]
-      ),
+    .target(
+      name: "_StructuredQueriesSQLite",
+      dependencies: [
+        "StructuredQueriesSQLite"
+      ]
+    ),
   ],
   swiftLanguageModes: [.v6]
 )
@@ -184,23 +184,23 @@ for index in package.targets.indices {
 }
 
 #if !canImport(Darwin)
-package.targets.append(
-  .systemLibrary(
-    name: "_StructuredQueriesSQLite3",
-    providers: [.apt(["libsqlite3-dev"])]
+  package.targets.append(
+    .systemLibrary(
+      name: "_StructuredQueriesSQLite3",
+      providers: [.apt(["libsqlite3-dev"])]
+    )
   )
-)
 
-for index in package.targets.indices {
-  if package.targets[index].name == "_StructuredQueriesSQLite" {
-    package.targets[index].dependencies.append("_StructuredQueriesSQLite3")
+  for index in package.targets.indices {
+    if package.targets[index].name == "_StructuredQueriesSQLite" {
+      package.targets[index].dependencies.append("_StructuredQueriesSQLite3")
+    }
   }
-}
 #endif
 
 #if !os(Windows)
-// Add the documentation compiler plugin if possible
-package.dependencies.append(
-  .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.4.0")
-)
+  // Add the documentation compiler plugin if possible
+  package.dependencies.append(
+    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.4.0")
+  )
 #endif
