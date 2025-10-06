@@ -53,6 +53,15 @@ key field is made optional:
 let draft = Reminder.Draft(title: "Get groceries")
 ```
 
+> Note: While the draft type is generated with all of the same fields as your type, it is _not_
+> generated with all the same conformances. If your `@Table` type conforms to `Equatable`,
+> `Hashable`, `Codable`, `Sendable`, or any other protocol that you wish for the `Draft` type to
+> conform to, you must specify this conformance manually _via_ extension. For example:
+>
+> ```swift
+> extension Reminder.Draft: Equatable {}
+> ```
+
 The `id` is not necessary to provide because it is optional. This allows you to insert rows into
 your database without specifying the id. The library comes with a special
 ``PrimaryKeyedTable/insert(_:onConflict:)`` method that allows you to insert a row into the database
