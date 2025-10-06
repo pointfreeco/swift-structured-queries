@@ -45,13 +45,13 @@ refreshed with the current time immediately.
 
 This pattern of updating a timestamp when a row changes is so common that the library comes with
 a specialized tool just for that kind of trigger,
-``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
+``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:when:fileID:line:column:)``:
 
 @Row {
   @Column {
     ```swift
     Reminder.createTemporaryTrigger(
-      afterUpdateTouch: {
+      after: .update: {
         $0.updatedAt = datetime('subsec')
       }
     )
@@ -72,14 +72,14 @@ a specialized tool just for that kind of trigger,
 
 And further, the pattern of specifically updating a _timestamp_ column is so common that the library
 comes with another specialized too just for that kind of trigger,
-``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``:
+``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:when:fileID:line:column:)``:
 
 
 @Row {
   @Column {
     ```swift
     Reminder.createTemporaryTrigger(
-      afterUpdateTouch: \.updatedAt
+      after .update(touch: \.updatedAt)
     )
     ```
   }
@@ -197,8 +197,8 @@ reminder is inserted into the database with the following trigger:
 
 ### Touching records
 
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:fileID:line:column:)``
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:when:fileID:line:column:)``
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:when:fileID:line:column:)``
 
 ### Triggers
 

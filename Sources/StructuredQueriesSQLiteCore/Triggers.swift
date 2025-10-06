@@ -124,6 +124,7 @@ extension Table {
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
   ///   - updates: The updates to apply after the row has been updated.
+  ///   - condition: A predicate that must be satisfied to perform the given statement.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
@@ -132,6 +133,10 @@ extension Table {
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterUpdateTouch updates: (inout Updates<Self>) -> Void,
+    when condition: (
+      (_ old: TemporaryTrigger<Self>.Operation.Old, _ new: TemporaryTrigger<Self>.Operation.New) ->
+        any QueryExpression<Bool>
+    )? = nil,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -139,11 +144,14 @@ extension Table {
     Self.createTemporaryTrigger(
       name,
       ifNotExists: ifNotExists,
-      after: .update { _, new in
-        Self
-          .where { $0.rowid.eq(new.rowid) }
-          .update { updates(&$0) }
-      },
+      after: .update(
+        forEachRow: { _, new in
+          Self
+            .where { $0.rowid.eq(new.rowid) }
+            .update { updates(&$0) }
+        },
+        when: condition
+      ),
       fileID: fileID,
       line: line,
       column: column
@@ -166,6 +174,7 @@ extension Table {
   ///   - dateColumn: A key path to a datetime column.
   ///   - dateFunction: A database function that returns the current datetime, _e.g._,
   ///     `#sql("datetime('subsec'))"`.
+  ///   - condition: A predicate that must be satisfied to perform the given statement.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
@@ -175,6 +184,10 @@ extension Table {
     ifNotExists: Bool = false,
     afterUpdateTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
     date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+    when condition: (
+      (_ old: TemporaryTrigger<Self>.Operation.Old, _ new: TemporaryTrigger<Self>.Operation.New) ->
+        any QueryExpression<Bool>
+    )? = nil,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -185,6 +198,7 @@ extension Table {
       afterUpdateTouch: {
         $0[dynamicMember: dateColumn] = dateFunction
       },
+      when: condition,
       fileID: fileID,
       line: line,
       column: column
@@ -205,6 +219,7 @@ extension Table {
   ///     operation, and source location.
   ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
   ///   - updates: The updates to apply after the row has been inserted.
+  ///   - condition: A predicate that must be satisfied to perform the given statement.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
@@ -213,6 +228,8 @@ extension Table {
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterInsertTouch updates: (inout Updates<Self>) -> Void,
+    when condition: ((_ new: TemporaryTrigger<Self>.Operation.New) -> any QueryExpression<Bool>)? =
+      nil,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -220,11 +237,14 @@ extension Table {
     Self.createTemporaryTrigger(
       name,
       ifNotExists: ifNotExists,
-      after: .insert { new in
-        Self
-          .where { $0.rowid.eq(new.rowid) }
-          .update { updates(&$0) }
-      },
+      after: .insert(
+        forEachRow: { new in
+          Self
+            .where { $0.rowid.eq(new.rowid) }
+            .update { updates(&$0) }
+        },
+        when: condition
+      ),
       fileID: fileID,
       line: line,
       column: column
@@ -247,6 +267,7 @@ extension Table {
   ///   - dateColumn: A key path to a datetime column.
   ///   - dateFunction: A database function that returns the current datetime, _e.g._,
   ///     `#sql("datetime('subsec'))"`.
+  ///   - condition: A predicate that must be satisfied to perform the given statement.
   ///   - fileID: The source `#fileID` associated with the trigger.
   ///   - line: The source `#line` associated with the trigger.
   ///   - column: The source `#column` associated with the trigger.
@@ -256,6 +277,8 @@ extension Table {
     ifNotExists: Bool = false,
     afterInsertTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
     date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+    when condition: ((_ new: TemporaryTrigger<Self>.Operation.New) -> any QueryExpression<Bool>)? =
+      nil,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -266,6 +289,7 @@ extension Table {
       afterInsertTouch: {
         $0[dynamicMember: dateColumn] = dateFunction
       },
+      when: condition,
       fileID: fileID,
       line: line,
       column: column
@@ -276,8 +300,8 @@ extension Table {
 /// A `CREATE TEMPORARY TRIGGER` statement.
 ///
 /// This type of statement is returned from the
-/// `[Table.createTemporaryTrigger]<doc:Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)>` family of
-/// functions.
+/// `[Table.createTemporaryTrigger]<doc:Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)>`
+/// family of functions.
 ///
 /// To learn more, see <doc:Triggers>.
 public struct TemporaryTrigger<On: Table>: Sendable, Statement {
@@ -317,6 +341,33 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       Self(
         kind: .insert(operations: perform(On.as(_New.self).columns)),
         when: condition?(On.as(_New.self).columns).queryFragment
+      )
+    }
+
+    @_disfavoredOverload
+    public static func insert(
+      touch updates: (inout Updates<On>) -> Void,
+      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.insert(
+        forEachRow: { new in
+          On
+            .where { $0.rowid.eq(new.rowid) }
+            .update { updates(&$0) }
+        },
+        when: condition
+      )
+    }
+
+    @_disfavoredOverload
+    public static func insert<D: _OptionalPromotable<Date?>>(
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.insert(
+        touch: { $0[dynamicMember: dateColumn] = dateFunction },
+        when: condition
       )
     }
 
@@ -361,6 +412,64 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
           columnNames: columnNames
         ),
         when: condition?(On.as(_Old.self).columns, On.as(_New.self).columns).queryFragment
+      )
+    }
+
+    @_disfavoredOverload
+    public static func update(
+      touch updates: (inout Updates<On>) -> Void,
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.update(
+        forEachRow: { _, new in
+          On
+            .where { $0.rowid.eq(new.rowid) }
+            .update { updates(&$0) }
+        },
+        when: condition
+      )
+    }
+
+    @_disfavoredOverload
+    public static func update<D: _OptionalPromotable<Date?>>(
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.update(
+        touch: { $0[dynamicMember: dateColumn] = dateFunction },
+        when: condition
+      )
+    }
+
+    @_disfavoredOverload
+    public static func update<each Column: _TableColumnExpression>(
+      of columns: (On.TableColumns) -> (repeat each Column),
+      touch updates: (inout Updates<On>) -> Void,
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.update(
+        of: columns,
+        forEachRow: { _, new in
+          On
+            .where { $0.rowid.eq(new.rowid) }
+            .update { updates(&$0) }
+        },
+        when: condition
+      )
+    }
+
+    @_disfavoredOverload
+    public static func update<each Column: _TableColumnExpression, D: _OptionalPromotable<Date?>>(
+      of columns: (On.TableColumns) -> (repeat each Column),
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.update(
+        of: columns,
+        touch: { $0[dynamicMember: dateColumn] = dateFunction },
+        when: condition
       )
     }
 
