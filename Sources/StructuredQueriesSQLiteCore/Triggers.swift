@@ -141,12 +141,12 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     public typealias Old = TableAlias<On, _Old>.TableColumns
     public typealias New = TableAlias<On, _New>.TableColumns
 
-    /// An `AFTER INSERT` trigger operation.
+    /// An `INSERT` trigger operation.
     ///
     /// - Parameters:
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `AFTER INSERT` trigger operation.
+    /// - Returns: An `INSERT` trigger operation.
     public static func insert(
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ new: New) -> [QueryFragment],
@@ -158,6 +158,12 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
+    /// An `INSERT` trigger operation that applies additional updates to the associated rows.
+    ///
+    /// - Parameters:
+    ///   - updates: The updates to apply to associated rows.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `INSERT` trigger operation.
     @_disfavoredOverload
     public static func insert(
       touch updates: (inout Updates<On>) -> Void,
@@ -173,6 +179,14 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
+    /// An `INSERT` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - dateColumn: A key path to a datetime column.
+    ///   - dateFunction: A database function that returns the current datetime, _e.g._,
+    ///     `#sql("datetime('subsec'))"`.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
     @_disfavoredOverload
     public static func insert<D: _OptionalPromotable<Date?>>(
       touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
@@ -185,12 +199,12 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
-    /// An `AFTER UPDATE` trigger operation.
+    /// An `UPDATE` trigger operation.
     ///
     /// - Parameters:
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `AFTER UPDATE` trigger operation.
+    /// - Returns: An `UPDATE` trigger operation.
     public static func update(
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ old: Old, _ new: New) -> [QueryFragment],
@@ -203,13 +217,13 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
-    /// An `AFTER UPDATE` trigger operation.
+    /// An `UPDATE` trigger operation.
     ///
     /// - Parameters:
     ///   - columns: Updated columns to scope the operation to.
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `AFTER UPDATE` trigger operation.
+    /// - Returns: An `UPDATE` trigger operation.
     public static func update<each Column: _TableColumnExpression>(
       of columns: (On.TableColumns) -> (repeat each Column),
       @QueryFragmentBuilder<any Statement>
@@ -229,6 +243,12 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
+    /// An `UPDATE` trigger operation that applies additional updates to the associated rows.
+    ///
+    /// - Parameters:
+    ///   - updates: The updates to apply to associated rows.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
     @_disfavoredOverload
     public static func update(
       touch updates: (inout Updates<On>) -> Void,
@@ -244,6 +264,14 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
+    /// An `UPDATE` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - dateColumn: A key path to a datetime column.
+    ///   - dateFunction: A database function that returns the current datetime, _e.g._,
+    ///     `#sql("datetime('subsec'))"`.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
     @_disfavoredOverload
     public static func update<D: _OptionalPromotable<Date?>>(
       touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
@@ -256,6 +284,13 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
+    /// An `UPDATE` trigger operation that applies additional updates to the associated rows.
+    ///
+    /// - Parameters:
+    ///   - columns: Updated columns to scope the operation to.
+    ///   - updates: The updates to apply to associated rows.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
     @_disfavoredOverload
     public static func update<each Column: _TableColumnExpression>(
       of columns: (On.TableColumns) -> (repeat each Column),
@@ -273,6 +308,15 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
+    /// An `UPDATE` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - columns: Updated columns to scope the operation to.
+    ///   - dateColumn: A key path to a datetime column.
+    ///   - dateFunction: A database function that returns the current datetime, _e.g._,
+    ///     `#sql("datetime('subsec'))"`.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
     @_disfavoredOverload
     public static func update<each Column: _TableColumnExpression, D: _OptionalPromotable<Date?>>(
       of columns: (On.TableColumns) -> (repeat each Column),
@@ -287,12 +331,12 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
-    /// An `AFTER DELETE` trigger operation.
+    /// A `DELETE` trigger operation.
     ///
     /// - Parameters:
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `AFTER DELETE` trigger operation.
+    /// - Returns: A `DELETE` trigger operation.
     public static func delete(
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ old: Old) -> [QueryFragment],
