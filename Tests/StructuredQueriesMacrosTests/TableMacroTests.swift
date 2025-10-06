@@ -36,7 +36,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -106,7 +106,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -232,7 +232,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = User
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -276,7 +276,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.email), \(self.age)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -403,7 +403,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -513,7 +513,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Bar
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -639,7 +639,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -718,7 +718,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -833,7 +833,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -907,7 +907,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = User
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1008,7 +1008,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = User
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1097,7 +1097,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = User
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1137,7 +1137,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.name)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -1263,7 +1263,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1335,7 +1335,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1405,7 +1405,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1475,7 +1475,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1545,7 +1545,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1620,7 +1620,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = User
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1658,7 +1658,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.referrerID)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -1770,7 +1770,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = SyncUp
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1849,7 +1849,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = SyncUp
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -1887,7 +1887,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.name)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -2028,7 +2028,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = SyncUp
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -2066,7 +2066,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.seconds)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -2189,7 +2189,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = RemindersList
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -2233,7 +2233,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.color), \(self.name)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -2375,7 +2375,7 @@ extension SnapshotTests {
           }
         }
 
-        public struct Selection: StructuredQueriesCore.TableExpression {
+        public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
           public typealias QueryValue = Foo
           public let allColumns: [any StructuredQueriesCore.QueryExpression]
           public init(
@@ -2966,7 +2966,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -2998,7 +2998,7 @@ extension SnapshotTests {
                 "\(self.id)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -3129,7 +3129,7 @@ extension SnapshotTests {
               }
             }
 
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -3223,7 +3223,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -3261,7 +3261,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.name)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -3397,7 +3397,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Reminder
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -3447,7 +3447,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.title), \(self.date), \(self.priority)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -3578,7 +3578,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Reminder
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -3610,7 +3610,7 @@ extension SnapshotTests {
                 "\(self.id)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -3712,7 +3712,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Reminder
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -3789,7 +3789,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Reminder
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -3827,7 +3827,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.title)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -3941,7 +3941,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Row
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -3979,7 +3979,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.timestamps)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -4100,7 +4100,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = ReminderTag
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -4132,7 +4132,7 @@ extension SnapshotTests {
                 "\(self.id)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -4246,7 +4246,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = ReminderWithList
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -4290,7 +4290,7 @@ extension SnapshotTests {
                 "\(self.reminderID), \(self.reminderTitle), \(self.remindersListTitle)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
@@ -4432,7 +4432,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Metadata
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -4470,7 +4470,7 @@ extension SnapshotTests {
                 "\(self.id), \(self.userModificationDate)"
               }
             }
-            public struct Selection: StructuredQueriesCore.TableExpression {
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
