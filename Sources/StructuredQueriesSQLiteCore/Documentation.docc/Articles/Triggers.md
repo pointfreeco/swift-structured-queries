@@ -45,7 +45,7 @@ refreshed with the current time immediately.
 
 This pattern of updating a timestamp when a row changes is so common that the library comes with
 a specialized tool just for that kind of trigger,
-``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:when:fileID:line:column:)``:
+``TemporaryTrigger/Operation/update(touch:when:)``:
 
 @Row {
   @Column {
@@ -72,7 +72,7 @@ a specialized tool just for that kind of trigger,
 
 And further, the pattern of specifically updating a _timestamp_ column is so common that the library
 comes with another specialized too just for that kind of trigger,
-``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:when:fileID:line:column:)``:
+``TemporaryTrigger/Operation/update(touch:when:)``:
 
 
 @Row {
@@ -195,11 +195,11 @@ reminder is inserted into the database with the following trigger:
 - ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:before:fileID:line:column:)``
 - ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:insteadOf:fileID:line:column:)``
 
-### Touching records
-
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:when:fileID:line:column:)``
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:when:fileID:line:column:)``
-
 ### Triggers
 
 - ``TemporaryTrigger``
+
+### Deprecations
+
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:fileID:line:column:)``
+- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``
