@@ -50,3 +50,41 @@ extension ScalarDatabaseFunction {
     }
   }
 }
+
+/// A type representing an aggregate database function.
+///
+/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
+/// a conformance.
+public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
+  /// The function body. Uses a query decoder to process the input of a database function into a
+  /// bindable value.
+  ///
+  /// - Parameter decoder: A query decoder.
+  /// - Returns: A binding returned from the database function.
+  mutating func invoke(_ decoder: inout some QueryDecoder) throws
+
+  var result: QueryBinding { get throws }
+}
+
+extension AggregateDatabaseFunction {
+  /// A function call expression.
+  ///
+  /// - Parameter input: Expressions representing the arguments of the function.
+  /// - Returns: An expression representing the function call.
+  @_disfavoredOverload
+  public func callAsFunction<each T: QueryExpression>(
+    _ input: repeat each T,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<Output>
+  where Input == (repeat (each T).QueryValue) {
+    $_isSelecting.withValue(false) {
+      AggregateFunction(
+        QueryFragment(quote: name),
+        Array(repeat each input),
+        order: order?.queryFragment,
+        filter: filter?.queryFragment
+      )
+    }
+  }
+}

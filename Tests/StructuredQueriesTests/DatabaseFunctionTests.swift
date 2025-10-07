@@ -451,5 +451,83 @@ extension SnapshotTests {
         """
       }
     }
+
+    // ...
+
+    func joined(_ arguments: some Sequence<(String, separator: String)>) -> String? {
+      var iterator = arguments.makeIterator()
+      guard var (result, _) = iterator.next() else { return nil }
+      while let (string, separator) = iterator.next() {
+        result.append(separator)
+        result.append(string)
+      }
+      return result
+    }
+
+    var _$joined: Joined {
+      Joined { joined($0) }
+    }
+
+    struct Joined: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+      public typealias Input = (String, separator: String)
+      public typealias Output = String?
+      public let name = "joined"
+      public let argumentCount: Int? = 2
+      public let isDeterministic = true
+      public let body: (any Sequence<(String, separator: String)>) -> String?
+      public init(_ body: @escaping (any Sequence<(String, separator: String)>) -> String?) {
+        self.body = body
+      }
+      private var rows: [Input] = []
+      public func callAsFunction(
+        _ n0: some StructuredQueriesCore.QueryExpression<String>,
+        separator: some StructuredQueriesCore.QueryExpression<String>,
+        order: (some QueryExpression)? = Bool?.none,
+        filter: (some QueryExpression<Bool>)? = Bool?.none
+      ) -> some StructuredQueriesCore.QueryExpression<String?> {
+        $_isSelecting.withValue(false) {
+          AggregateFunction(
+            QueryFragment(quote: name),
+            [n0.queryFragment, separator.queryFragment],
+            order: order?.queryFragment,
+            filter: filter?.queryFragment
+          )
+        }
+      }
+      public mutating func invoke(_ decoder: inout some QueryDecoder) throws {
+        var decoder = decoder
+        let p0 = try decoder.decode(String.self)
+        let separator = try decoder.decode(String.self)
+        guard let p0 else { throw InvalidInvocation() }
+        guard let separator else { throw InvalidInvocation() }
+        rows.append((p0, separator))
+      }
+      public var result: QueryBinding {
+        get throws {
+          body(rows).queryBinding
+        }
+      }
+      private struct InvalidInvocation: Error {
+      }
+    }
+
+    @Test func aggregate() {
+      _$joined.install(database.handle)
+
+      assertQuery(
+        Tag.select { _$joined($0.title, separator: ", ") }
+      ) {
+        """
+        SELECT "joined"("tags"."title", ', ')
+        FROM "tags"
+        """
+      } results: {
+        """
+        ┌────────────────────────────────┐
+        │ "car, kids, someday, optional" │
+        └────────────────────────────────┘
+        """
+      }
+    }
   }
 }
