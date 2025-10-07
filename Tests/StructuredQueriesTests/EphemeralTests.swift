@@ -17,6 +17,10 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func equality() {
+      #expect(TestTable(displayName: "Blob Jr") != TestTable(displayName: "Blob Sr"))
+    }
   }
 }
 
