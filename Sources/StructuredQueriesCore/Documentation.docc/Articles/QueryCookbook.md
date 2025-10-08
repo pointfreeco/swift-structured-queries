@@ -50,6 +50,10 @@ extension Reminder {
 }
 ```
 
+> Note: If your project is using [default main actor isolation] then you further need to annotate
+> your extension as `nonisolated`, or define the helpers directly in the declaration of the struct.
+[default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
+
 Then these helpers can be used when composing together a larger, more complex query. For example,
 we can select all non-deleted lists with the count of all non-deleted reminders in each list like
 so:
@@ -130,6 +134,10 @@ extension Reminder.TableColumns {
   }
 }
 ```
+
+> Note: If your project is using [default main actor isolation] then you further need to annotate
+> your extension as `nonisolated`.
+[default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
 
 Then you can use these helpers when building a query. For example, you can use
 ``PrimaryKeyedTableDefinition/count(distinct:filter:)`` to count the number of past due, current and
