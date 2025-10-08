@@ -25,3 +25,5 @@ extension Never: Table {
 
   private struct NotDecodable: Error {}
 }
+
+extension Never: _Selection {}

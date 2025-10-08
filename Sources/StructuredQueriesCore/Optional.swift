@@ -183,6 +183,8 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
   public typealias Selection = Wrapped.Selection?
 }
 
+extension Optional: _Selection where Wrapped: _Selection {}
+
 extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
   public typealias Draft = Wrapped.Draft?
 }
