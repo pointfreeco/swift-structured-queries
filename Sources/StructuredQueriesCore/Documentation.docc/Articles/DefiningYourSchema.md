@@ -51,6 +51,10 @@ To define a Swift data type that represents this table, one can use the `@Table`
 }
 ```
 
+> Note: If your project is using [default main actor isolation] then you further need to annotate
+> your struct as `nonisolated`.
+[default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
+
 Note that the struct's field names match the column tables of the table exactly. In order to support
 property names that differ from the columns names, you can use the `@Column` macro. See the section
 below, <doc:DefiningYourSchema#Customizing-a-table>,  for more information on how to customize your
