@@ -95,15 +95,3 @@ private func functionWithLotsOfArguments(
   a12: Foo?
 ) {
 }
-
-@Table private struct NonisolatedTable {
-  var title = ""
-}
-@Table private struct NonisolatedPrimaryKeyedTable {
-  let id: Int
-  var title = ""
-}
-@Selection private struct NonisolatedSelection {
-  let id: Int
-  var title = ""
-}
