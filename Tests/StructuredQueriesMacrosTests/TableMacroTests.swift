@@ -2353,7 +2353,7 @@ extension SnapshotTests {
         nonisolated struct Foo {
           var title = ""
 
-          public nonisolated struct TableColumns: nonisolated  StructuredQueriesCore.TableDefinition {
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
@@ -2371,7 +2371,7 @@ extension SnapshotTests {
             }
           }
 
-          public nonisolated struct Selection: nonisolated  StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
@@ -2384,7 +2384,7 @@ extension SnapshotTests {
           }
         }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, nonisolated  StructuredQueriesCore.PartialSelectStatement {
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
           public typealias From = Swift.Never
           public nonisolated static var columns: TableColumns {
