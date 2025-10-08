@@ -85,7 +85,7 @@ extension SnapshotTests {
       assertQuery(
         RemindersList.createTemporaryTrigger(
           "after_update_on_remindersLists",
-          afterUpdateTouch: {
+          after: .update {
             $0.position += 1
           }
         )
@@ -105,7 +105,10 @@ extension SnapshotTests {
 
     @Test func afterUpdateTouchDate() {
       assertQuery(
-        Reminder.createTemporaryTrigger("after_update_on_reminders", afterUpdateTouch: \.updatedAt)
+        Reminder.createTemporaryTrigger(
+          "after_update_on_reminders",
+          after: .update(touch: \.updatedAt)
+        )
       ) {
         """
         CREATE TEMPORARY TRIGGER
@@ -132,7 +135,7 @@ extension SnapshotTests {
       assertQuery(
         Episode.createTemporaryTrigger(
           "after_update_on_episodes",
-          afterUpdateTouch: \.timestamps.updatedAt
+          after: .update(touch: \.timestamps.updatedAt)
         )
       ) {
         """
@@ -152,8 +155,7 @@ extension SnapshotTests {
       assertQuery(
         Reminder.createTemporaryTrigger(
           "after_update_on_reminders",
-          afterUpdateTouch: \.updatedAt,
-          date: #sql("customDate()")
+          after: .update(touch: \.updatedAt, date: #sql("customDate()"))
         )
       ) {
         """
