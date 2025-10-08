@@ -24,7 +24,7 @@ extension SnapshotTests {
   }
 }
 
-@Table private struct TestTable {
+@Table private struct TestTable: Equatable {
   var firstName = ""
   var lastName = ""
   @Ephemeral
