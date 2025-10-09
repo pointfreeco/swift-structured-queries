@@ -56,14 +56,9 @@ extension ScalarDatabaseFunction {
 /// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
 /// a conformance.
 public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
-  /// The function body. Uses a query decoder to process the input of a database function into a
-  /// bindable value.
-  ///
-  /// - Parameter decoder: A query decoder.
-  /// - Returns: A binding returned from the database function.
-  mutating func invoke(_ decoder: inout some QueryDecoder) throws
+  func step(_ decoder: inout some QueryDecoder) throws -> Input
 
-  var result: QueryBinding { get throws }
+  func invoke(_ sequence: some Sequence<Input>) throws -> QueryBinding
 }
 
 extension AggregateDatabaseFunction {

@@ -53,7 +53,7 @@ extension AggregateDatabaseFunction {
         var decoder = SQLiteFunctionDecoder(argumentCount: argumentCount, arguments: arguments)
         let function = AggregateDatabaseFunctionContext[context].takeUnretainedValue()
         do {
-          try function.body.invoke(&decoder)
+          try function.iterator.step(&decoder)
         } catch {
           sqlite3_result_error(context, error.localizedDescription, -1)
         }
@@ -62,8 +62,9 @@ extension AggregateDatabaseFunction {
         let unmanagedFunction = AggregateDatabaseFunctionContext[context]
         let function = unmanagedFunction.takeUnretainedValue()
         unmanagedFunction.release()
+        function.iterator.finish()
         do {
-          try function.body.result.result(db: context)
+          try function.iterator.result.result(db: context)
         } catch {
           sqlite3_result_error(context, error.localizedDescription, -1)
         }
@@ -103,9 +104,91 @@ private final class AggregateDatabaseFunctionContext {
         .pointee
     }
   }
-  var body: any AggregateDatabaseFunction
+  let iterator: any AggregateDatabaseFunctionIteratorProtocol
   init(_ body: some AggregateDatabaseFunction) {
+    self.iterator = AggregateDatabaseFunctionIterator(body)
+  }
+}
+
+private protocol AggregateDatabaseFunctionIteratorProtocol<Body> {
+  associatedtype Body: AggregateDatabaseFunction
+
+  var body: Body { get }
+  var stream: Stream<Body.Input> { get }
+  func start()
+  func step(_ decoder: inout some QueryDecoder) throws
+  func finish()
+  var result: QueryBinding { get throws }
+}
+
+private final class AggregateDatabaseFunctionIterator<
+  Body: AggregateDatabaseFunction
+>: AggregateDatabaseFunctionIteratorProtocol {
+  let body: Body
+  let stream = Stream<Body.Input>()
+  let queue = DispatchQueue.global()
+  var _result: QueryBinding?
+  init(_ body: Body) {
     self.body = body
+    nonisolated(unsafe) let iterator: any AggregateDatabaseFunctionIteratorProtocol = self
+    queue.async {
+      iterator.start()
+    }
+  }
+  func start() {
+    do {
+      _result = try body.invoke(stream)
+    } catch {
+      _result = .invalid(error)
+    }
+  }
+  func step(_ decoder: inout some QueryDecoder) throws {
+    try stream.send(body.step(&decoder))
+  }
+  func finish() {
+    stream.finish()
+  }
+  var result: QueryBinding {
+    get throws {
+      while true {
+        if let _result { return _result }
+      }
+    }
+  }
+}
+
+private final class Stream<Element>: Sequence {
+  let condition = NSCondition()
+  private var buffer: [Element] = []
+  private var isFinished = false
+
+  func send(_ element: Element) {
+    condition.withLock {
+      buffer.append(element)
+      condition.signal()
+    }
+  }
+
+  func finish() {
+    condition.withLock {
+      isFinished = true
+      condition.broadcast()
+    }
+  }
+
+  func makeIterator() -> Iterator { Iterator(base: self) }
+
+  struct Iterator: IteratorProtocol {
+    fileprivate let base: Stream
+    mutating func next() -> Element? {
+      base.condition.withLock {
+        while base.buffer.isEmpty && !base.isFinished {
+          base.condition.wait()
+        }
+        guard !base.buffer.isEmpty else { return nil }
+        return base.buffer.removeFirst()
+      }
+    }
   }
 }
 

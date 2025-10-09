@@ -474,11 +474,10 @@ extension SnapshotTests {
       public let name = "joined"
       public let argumentCount: Int? = 2
       public let isDeterministic = true
-      public let body: (any Sequence<(String, separator: String)>) -> String?
-      public init(_ body: @escaping (any Sequence<(String, separator: String)>) -> String?) {
+      public let body: (any Sequence<Input>) -> String?
+      public init(_ body: @escaping (any Sequence<(Input)>) -> String?) {
         self.body = body
       }
-      private var rows: [Input] = []
       public func callAsFunction(
         _ n0: some StructuredQueriesCore.QueryExpression<String>,
         separator: some StructuredQueriesCore.QueryExpression<String>,
@@ -494,18 +493,15 @@ extension SnapshotTests {
           )
         }
       }
-      public mutating func invoke(_ decoder: inout some QueryDecoder) throws {
-        var decoder = decoder
+      public func step(_ decoder: inout some QueryDecoder) throws -> Input {
         let p0 = try decoder.decode(String.self)
         let separator = try decoder.decode(String.self)
         guard let p0 else { throw InvalidInvocation() }
         guard let separator else { throw InvalidInvocation() }
-        rows.append((p0, separator))
+        return (p0, separator)
       }
-      public var result: QueryBinding {
-        get throws {
-          body(rows).queryBinding
-        }
+      public func invoke(_ sequence: some Sequence<Input>) -> QueryBinding {
+        self.body(sequence).queryBinding
       }
       private struct InvalidInvocation: Error {
       }
