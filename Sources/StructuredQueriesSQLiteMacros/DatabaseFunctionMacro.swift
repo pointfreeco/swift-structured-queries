@@ -259,6 +259,10 @@ extension DatabaseFunctionMacro: PeerMacro {
         canThrowInvalidInvocation = true
       }
       representableInputType = representableInputTypes.joined(separator: ", ")
+      representableInputType =
+        representableInputTypes.count == 1
+        ? representableInputType
+        : "(\(representableInputType))"
       projectedCallSyntax = "\(functionTypeName)(\(declaration.name.trimmed))"
     }
     let isVoidReturning = signature.returnClause == nil
@@ -295,10 +299,6 @@ extension DatabaseFunctionMacro: PeerMacro {
         continue
       }
     }
-    representableInputType =
-      representableInputTypes.count == 1
-      ? representableInputType
-      : "(\(representableInputType))"
 
     let argumentCount =
       argumentCounts.isEmpty

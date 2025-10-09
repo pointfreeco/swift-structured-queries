@@ -1263,7 +1263,7 @@ extension SnapshotTests {
               return xs
             }
             public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
-              Int(queryOutput: self.body(arguments)).queryBinding
+              return Int(queryOutput: self.body(arguments)).queryBinding
             }
             private struct InvalidInvocation: Error {
             }
@@ -1323,7 +1323,7 @@ extension SnapshotTests {
               return xs
             }
             public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
-              Int(queryOutput: self.body(arguments)).queryBinding
+              return Int(queryOutput: self.body(arguments)).queryBinding
             }
             private struct InvalidInvocation: Error {
             }
@@ -1365,7 +1365,7 @@ extension SnapshotTests {
           }
 
           struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
-            public typealias Input = ((String, separator: String))
+            public typealias Input = (String, separator: String)
             public typealias Output = String?
             public let name = "joined"
             public var argumentCount: Int? {
@@ -1379,7 +1379,7 @@ extension SnapshotTests {
             public init(_ body: @escaping (_ arguments: any Sequence<(String, separator: String)>) -> String?) {
               self.body = body
             }
-            public func callAsFunction(_ p0: some StructuredQueriesCore.QueryExpression<String>, separator separator: some StructuredQueriesCore.QueryExpression<String>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<String?> {
+            public func callAsFunction(_ p0: some StructuredQueriesCore.QueryExpression<String>, separator: some StructuredQueriesCore.QueryExpression<String>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<String?> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
                 StructuredQueriesCore.AggregateFunction(
                   self.name, p0, separator, order: order, filter: filter
@@ -1388,7 +1388,7 @@ extension SnapshotTests {
             }
             public func step(
               _ decoder: inout some QueryDecoder
-            ) throws -> ((String, separator: String)) {
+            ) throws -> (String, separator: String) {
               let p0 = try decoder.decode(String.self)
               let separator = try decoder.decode(String.self)
               guard let p0 else {
@@ -1463,7 +1463,7 @@ extension SnapshotTests {
               return arrays
             }
             public func invoke(_ arguments: some Sequence<[String]>) -> QueryBinding {
-              [String].JSONRepresentation(queryOutput: self.body(arguments)).queryBinding
+              return [String].JSONRepresentation(queryOutput: self.body(arguments)).queryBinding
             }
             private struct InvalidInvocation: Error {
             }
@@ -1561,7 +1561,7 @@ extension SnapshotTests {
 
           var $validatePositive: __macro_local_16validatePositivefMu_ {
             __macro_local_16validatePositivefMu_ {
-              validatePositive($0)
+              try validatePositive($0)
             }
           }
 
