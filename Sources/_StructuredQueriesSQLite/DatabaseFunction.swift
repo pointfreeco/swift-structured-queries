@@ -126,7 +126,7 @@ private final class AggregateDatabaseFunctionIterator<
 >: AggregateDatabaseFunctionIteratorProtocol {
   let body: Body
   let stream = Stream<Body.Input>()
-  let queue = DispatchQueue.global()
+  let queue = DispatchQueue.global(qos: .userInitiated)
   var _result: QueryBinding?
   init(_ body: Body) {
     self.body = body
@@ -151,7 +151,9 @@ private final class AggregateDatabaseFunctionIterator<
   var result: QueryBinding {
     get throws {
       while true {
-        if let _result { return _result }
+        if let result = queue.sync(execute: { _result }) {
+          return result
+        }
       }
     }
   }
