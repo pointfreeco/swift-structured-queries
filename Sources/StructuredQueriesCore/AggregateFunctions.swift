@@ -216,6 +216,22 @@ public struct AggregateFunction<QueryValue>: QueryExpression, Sendable {
   var order: QueryFragment?
   var filter: QueryFragment?
 
+  public init<each Argument: QueryExpression>(
+    _ name: String,
+    distinct isDistinct: Bool = false,
+    _ arguments: repeat each Argument,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) {
+    self.init(
+      QueryFragment(quote: name),
+      isDistinct: false,
+      Array(repeat each arguments),
+      order: order?.queryFragment,
+      filter: filter?.queryFragment
+    )
+  }
+
   package init(
     _ name: QueryFragment,
     isDistinct: Bool = false,

@@ -2453,7 +2453,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Post
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public static func photo(
@@ -2482,7 +2482,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Photo._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "posts"
@@ -2557,7 +2560,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Post
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public static func photo(
@@ -2586,7 +2589,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Photo._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "posts"
@@ -2657,7 +2663,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Post
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public static func photo(
@@ -2686,7 +2692,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Photo._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "posts"
@@ -2742,7 +2751,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Post
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public static func photo(
@@ -2771,7 +2780,10 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Photo._columnWidth, String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Photo._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "posts"
@@ -2823,7 +2835,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Post
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public static func note(
@@ -2843,7 +2855,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [String._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += String._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "posts"
@@ -2893,7 +2907,7 @@ extension SnapshotTests {
             }
           }
 
-          public struct Selection: StructuredQueriesCore.TableExpression {
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
             public typealias QueryValue = Post
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public static func timestamp(
@@ -2913,7 +2927,9 @@ extension SnapshotTests {
             TableColumns()
           }
           public nonisolated static var _columnWidth: Int {
-            [Date.UnixTimeRepresentation._columnWidth].reduce(0, +)
+            var columnWidth = 0
+            columnWidth += Date.UnixTimeRepresentation._columnWidth
+            return columnWidth
           }
           public nonisolated static var tableName: String {
             "posts"

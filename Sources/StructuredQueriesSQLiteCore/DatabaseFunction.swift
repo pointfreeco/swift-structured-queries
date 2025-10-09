@@ -58,7 +58,7 @@ extension ScalarDatabaseFunction {
 public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
   func step(_ decoder: inout some QueryDecoder) throws -> Input
 
-  func invoke(_ sequence: some Sequence<Input>) throws -> QueryBinding
+  func invoke(_ arguments: some Sequence<Input>) throws -> QueryBinding
 }
 
 extension AggregateDatabaseFunction {

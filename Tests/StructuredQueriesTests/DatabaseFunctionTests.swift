@@ -452,9 +452,32 @@ extension SnapshotTests {
       }
     }
 
-    // ...
+    @DatabaseFunction
+    func sum(of xs: some Sequence<Int>) -> Int {
+      xs.reduce(into: 0, +=)
+    }
 
-    func joined(_ arguments: some Sequence<(String, separator: String)>) -> String? {
+    @Test func aggregate() {
+      $sum.install(database.handle)
+
+      assertQuery(
+        Reminder.select { $sum(of: $0.id) }
+      ) {
+        """
+        SELECT "sum"("reminders"."id")
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 55 │
+        └────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    func joined(_ arguments: some Sequence<(String, separator: String)>) throws -> String? {
       var iterator = arguments.makeIterator()
       guard var (result, _) = iterator.next() else { return nil }
       while let (string, separator) = iterator.next() {
@@ -464,54 +487,11 @@ extension SnapshotTests {
       return result
     }
 
-    var _$joined: Joined {
-      Joined { joined($0) }
-    }
-
-    struct Joined: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
-      public typealias Input = (String, separator: String)
-      public typealias Output = String?
-      public let name = "joined"
-      public let argumentCount: Int? = 2
-      public let isDeterministic = true
-      public let body: (any Sequence<Input>) -> String?
-      public init(_ body: @escaping (any Sequence<(Input)>) -> String?) {
-        self.body = body
-      }
-      public func callAsFunction(
-        _ n0: some StructuredQueriesCore.QueryExpression<String>,
-        separator: some StructuredQueriesCore.QueryExpression<String>,
-        order: (some QueryExpression)? = Bool?.none,
-        filter: (some QueryExpression<Bool>)? = Bool?.none
-      ) -> some StructuredQueriesCore.QueryExpression<String?> {
-        $_isSelecting.withValue(false) {
-          AggregateFunction(
-            QueryFragment(quote: name),
-            [n0.queryFragment, separator.queryFragment],
-            order: order?.queryFragment,
-            filter: filter?.queryFragment
-          )
-        }
-      }
-      public func step(_ decoder: inout some QueryDecoder) throws -> Input {
-        let p0 = try decoder.decode(String.self)
-        let separator = try decoder.decode(String.self)
-        guard let p0 else { throw InvalidInvocation() }
-        guard let separator else { throw InvalidInvocation() }
-        return (p0, separator)
-      }
-      public func invoke(_ sequence: some Sequence<Input>) -> QueryBinding {
-        self.body(sequence).queryBinding
-      }
-      private struct InvalidInvocation: Error {
-      }
-    }
-
-    @Test func aggregate() {
-      _$joined.install(database.handle)
+    @Test func multiAggregate() {
+      $joined.install(database.handle)
 
       assertQuery(
-        Tag.select { _$joined($0.title, separator: ", ", order: $0.title) }
+        Tag.select { $joined($0.title, separator: ", ", order: $0.title) }
       ) {
         """
         SELECT "joined"("tags"."title", ', ' ORDER BY "tags"."title")
