@@ -1409,7 +1409,6 @@ extension SnapshotTests {
         }
       }
 
-      // TODO
       @Test func customRepresentations() {
         assertMacro {
           #"""
@@ -1433,12 +1432,12 @@ extension SnapshotTests {
           }
 
           struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
-            public typealias Input = [String]
+            public typealias Input = [String].JSONRepresentation
             public typealias Output = [String].JSONRepresentation
             public let name = "joined"
             public var argumentCount: Int? {
               var argumentCount = 0
-              argumentCount += any Sequence<[String].JSONRepresentation>._columnWidth
+              argumentCount += [String].JSONRepresentation._columnWidth
               return argumentCount
             }
             public let isDeterministic = false
@@ -1446,7 +1445,7 @@ extension SnapshotTests {
             public init(_ body: @escaping (_ arrays: any Sequence<[String]>) -> [String]) {
               self.body = body
             }
-            public func callAsFunction(_ arrays: some StructuredQueriesCore.QueryExpression<any Sequence<[String].JSONRepresentation>>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
+            public func callAsFunction(_ arrays: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
                 StructuredQueriesCore.AggregateFunction(
                   self.name, arrays, order: order, filter: filter
@@ -1456,7 +1455,7 @@ extension SnapshotTests {
             public func step(
               _ decoder: inout some QueryDecoder
             ) throws -> [String] {
-              let arrays = try decoder.decode(any Sequence<[String].JSONRepresentation>.self)
+              let arrays = try decoder.decode([String].JSONRepresentation.self)
               guard let arrays else {
                 throw InvalidInvocation()
               }

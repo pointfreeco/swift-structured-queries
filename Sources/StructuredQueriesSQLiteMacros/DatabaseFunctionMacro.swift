@@ -110,7 +110,6 @@ extension DatabaseFunctionMacro: PeerMacro {
     var invocationArgumentTypes: [TypeSyntax] = []
     var parameters: [String] = []
     var argumentBindings: [String] = []
-    var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
 
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
@@ -118,6 +117,7 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     let isAggregate: Bool
     var representableInputType: String
+    var rowType = ""
     let projectedCallSyntax: ExprSyntax
 
     if signature.parameterClause.parameters.count == 1,
@@ -131,7 +131,6 @@ extension DatabaseFunctionMacro: PeerMacro {
       let genericArgument = genericArgumentClause.arguments.first
     {
       isAggregate = true
-      representableInputType = "\(genericArgument)"
 
       someOrAnyParameterType.someOrAnySpecifier.tokenKind = .keyword(.any)
       let bodySignature =
@@ -159,10 +158,26 @@ extension DatabaseFunctionMacro: PeerMacro {
           ]
         )
 
+      let representableInputGeneric = functionRepresentation?
+        .parameters.first?
+        .type.as(SomeOrAnyTypeSyntax.self)?
+        .constraint.as(IdentifierTypeSyntax.self)?
+        .genericArgumentClause?
+        .arguments.first
+      let representableInputGenericArgument = representableInputGeneric?.argument
+
+      representableInputType = "\(representableInputGeneric ?? genericArgument)"
+      rowType = "\(genericArgument)"
+
+      let representableInputArguments =
+        representableInputGenericArgument?.as(TupleTypeSyntax.self)?.elements.map(\.type)
+        ?? (representableInputGenericArgument?.cast(TypeSyntax.self)).map { [$0] }
+      var representableInputArgumentsIterator = representableInputArguments?.makeIterator()
+
       var offset = 0
       for var element in tupleType.elements {
         defer { offset += 1 }
-        var type = (functionRepresentationIterator?.next()?.type ?? element.type)
+        var type = representableInputArgumentsIterator?.next() ?? element.type
         element.type = type.asQueryExpression()
         type = type.trimmed
         representableInputTypes.append(type.description)
@@ -225,6 +240,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         """
     } else {
       isAggregate = false
+      var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
 
       for index in signature.parameterClause.parameters.indices {
         var parameter = signature.parameterClause.parameters[index]
@@ -343,7 +359,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         """
         public func step(
         _ decoder: inout some QueryDecoder
-        ) throws -> \(raw: representableInputType) {
+        ) throws -> \(raw: rowType) {
         \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
         \(raw: stepReturnClause)\
         }

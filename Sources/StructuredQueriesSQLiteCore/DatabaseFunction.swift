@@ -56,9 +56,11 @@ extension ScalarDatabaseFunction {
 /// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
 /// a conformance.
 public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
-  func step(_ decoder: inout some QueryDecoder) throws -> Input
+  associatedtype Row
 
-  func invoke(_ arguments: some Sequence<Input>) throws -> QueryBinding
+  func step(_ decoder: inout some QueryDecoder) throws -> Row
+
+  func invoke(_ arguments: some Sequence<Row>) throws -> QueryBinding
 }
 
 extension AggregateDatabaseFunction {
