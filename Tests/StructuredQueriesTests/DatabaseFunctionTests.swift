@@ -554,5 +554,29 @@ extension SnapshotTests {
         """
       }
     }
+
+    @DatabaseFunction
+    func tagged(_ tags: some Sequence<Tag>) -> String {
+      tags.map { "#\($0.title)" }.joined(separator: " ")
+    }
+
+    @Test func selectionTableAggregate() {
+      $tagged.install(database.handle)
+
+      assertQuery(
+        Tag.select { $tagged($0) }
+      ) {
+        """
+        SELECT "tagged"("tags"."id", "tags"."title")
+        FROM "tags"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────┐
+        │ "#car #kids #someday #optional" │
+        └─────────────────────────────────┘
+        """
+      }
+    }
   }
 }

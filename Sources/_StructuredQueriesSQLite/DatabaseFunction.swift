@@ -126,7 +126,9 @@ private final class AggregateDatabaseFunctionIterator<
 >: AggregateDatabaseFunctionIteratorProtocol {
   let body: Body
   let stream = Stream<Body.Row>()
-  let queue = DispatchQueue.global(qos: .userInitiated)
+  let queue = DispatchQueue(
+    label: "co.pointfree.StructuredQueriesSQLite.AggregateDatabaseFunction"
+  )
   var _result: QueryBinding?
   init(_ body: Body) {
     self.body = body
