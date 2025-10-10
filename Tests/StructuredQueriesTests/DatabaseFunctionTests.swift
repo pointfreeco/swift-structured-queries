@@ -491,16 +491,16 @@ extension SnapshotTests {
       $joined.install(database.handle)
 
       assertQuery(
-        Tag.select { $joined($0.title, separator: ", ", order: $0.title) }
+        Tag.select { $joined($0.title, separator: ", ") }
       ) {
         """
-        SELECT "joined"("tags"."title", ', ' ORDER BY "tags"."title")
+        SELECT "joined"("tags"."title", ', ')
         FROM "tags"
         """
       } results: {
         """
         ┌────────────────────────────────┐
-        │ "car, kids, optional, someday" │
+        │ "car, kids, someday, optional" │
         └────────────────────────────────┘
         """
       }
