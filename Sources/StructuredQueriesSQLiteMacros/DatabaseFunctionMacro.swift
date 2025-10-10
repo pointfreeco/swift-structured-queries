@@ -447,12 +447,13 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     return [
       """
-      \(attributes)\(access)\(`static`)var $\(raw: declarationName): \(functionTypeName) {
+      \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
+      \(functionTypeName) {
       \(projectedCallSyntax)
       }
       """,
       """
-      \(attributes)\(access)struct \(functionTypeName): \
+      \(attributes)\(access)\(nonisolated)struct \(functionTypeName): \
       StructuredQueriesSQLiteCore.\(raw: isAggregate ? "Aggregate" : "Scalar")DatabaseFunction {
       public typealias Input = \(raw: representableInputType)
       public typealias Output = \(representableOutputType)

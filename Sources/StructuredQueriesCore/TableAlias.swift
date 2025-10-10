@@ -183,6 +183,8 @@ public struct TableAlias<
   }
 }
 
+extension TableAlias: _Selection where Base: _Selection {}
+
 extension TableAlias: PrimaryKeyedTable where Base: PrimaryKeyedTable {
   public typealias Draft = TableAlias<Base.Draft, Name>
 }

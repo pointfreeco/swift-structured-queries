@@ -17,10 +17,14 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func equality() {
+      #expect(TestTable(displayName: "Blob Jr") != TestTable(displayName: "Blob Sr"))
+    }
   }
 }
 
-@Table private struct TestTable {
+@Table private struct TestTable: Equatable {
   var firstName = ""
   var lastName = ""
   @Ephemeral

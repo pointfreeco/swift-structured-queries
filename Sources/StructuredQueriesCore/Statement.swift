@@ -1,5 +1,5 @@
 /// A type that represents a full SQL query.
-public protocol Statement<QueryValue>: QueryExpression, Hashable {
+public protocol Statement<QueryValue>: QueryExpression {
   /// A type representing the table being queried.
   associatedtype From: Table
 
@@ -13,15 +13,5 @@ public protocol Statement<QueryValue>: QueryExpression, Hashable {
 extension Statement {
   public var queryFragment: QueryFragment {
     "(\(.newline)\(query.indented())\(.newline))"
-  }
-}
-
-extension Statement {
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.query == rhs.query
-  }
-
-  public func hash(into hasher: inout Hasher) {
-    hasher.combine(query)
   }
 }

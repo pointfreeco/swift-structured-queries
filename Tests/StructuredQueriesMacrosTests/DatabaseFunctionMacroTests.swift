@@ -19,11 +19,11 @@ extension SnapshotTests {
           Date()
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
@@ -69,11 +69,11 @@ extension SnapshotTests {
           Date()
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "current_date"
@@ -119,11 +119,11 @@ extension SnapshotTests {
           strings.map { $0.capitalized }
         }
 
-        var $jsonCapitalize: __macro_local_14jsonCapitalizefMu_ {
+        nonisolated var $jsonCapitalize: __macro_local_14jsonCapitalizefMu_ {
           __macro_local_14jsonCapitalizefMu_(jsonCapitalize)
         }
 
-        struct __macro_local_14jsonCapitalizefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_14jsonCapitalizefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = [String].JSONRepresentation
           public typealias Output = [String].JSONRepresentation
           public let name = "jsonCapitalize"
@@ -177,11 +177,11 @@ extension SnapshotTests {
           42
         }
 
-        var $fortyTwo: __macro_local_8fortyTwofMu_ {
+        nonisolated var $fortyTwo: __macro_local_8fortyTwofMu_ {
           __macro_local_8fortyTwofMu_(fortyTwo)
         }
 
-        struct __macro_local_8fortyTwofMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_8fortyTwofMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Int
           public let name = "fortyTwo"
@@ -227,11 +227,11 @@ extension SnapshotTests {
           dateFormatter.date(from: format)
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String
           public typealias Output = Date?
           public let name = "currentDate"
@@ -285,11 +285,11 @@ extension SnapshotTests {
           dateFormatter.date(from: format)
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String
           public typealias Output = Date?
           public let name = "currentDate"
@@ -343,11 +343,11 @@ extension SnapshotTests {
           dateFormatter.date(from: format)
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String
           public typealias Output = Date?
           public let name = "currentDate"
@@ -401,11 +401,11 @@ extension SnapshotTests {
           dateFormatter.date(from: format)
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String
           public typealias Output = Date?
           public let name = "currentDate"
@@ -459,11 +459,11 @@ extension SnapshotTests {
           first + second
         }
 
-        var $concat: __macro_local_6concatfMu_ {
+        nonisolated var $concat: __macro_local_6concatfMu_ {
           __macro_local_6concatfMu_(concat)
         }
 
-        struct __macro_local_6concatfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_6concatfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = (String, String)
           public typealias Output = String
           public let name = "concat"
@@ -539,11 +539,11 @@ extension SnapshotTests {
           dateFormatter.date(from: format)
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String?
           public typealias Output = Date?
           public let name = "currentDate"
@@ -597,11 +597,11 @@ extension SnapshotTests {
           Date()
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
@@ -651,11 +651,11 @@ extension SnapshotTests {
           Date()
         }
 
-        var $currentDate: __macro_local_11currentDatefMu_ {
+        nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
@@ -705,11 +705,11 @@ extension SnapshotTests {
           Date()
         }
 
-        public var $currentDate: __macro_local_11currentDatefMu_ {
+        public nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        public struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        public nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
@@ -755,11 +755,11 @@ extension SnapshotTests {
           Date()
         }
 
-        static var $currentDate: __macro_local_11currentDatefMu_ {
+        static nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
@@ -828,11 +828,11 @@ extension SnapshotTests {
           Date()
         }
 
-        @available(*, unavailable) var $currentDate: __macro_local_11currentDatefMu_ {
+        @available(*, unavailable) nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
           __macro_local_11currentDatefMu_(currentDate)
         }
 
-        @available(*, unavailable) struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        @available(*, unavailable) nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
           public let name = "currentDate"
@@ -878,11 +878,11 @@ extension SnapshotTests {
           42
         }
 
-        public var $default: __macro_local_7defaultfMu_ {
+        public nonisolated var $default: __macro_local_7defaultfMu_ {
           __macro_local_7defaultfMu_(`default`)
         }
 
-        public struct __macro_local_7defaultfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        public nonisolated struct __macro_local_7defaultfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Int
           public let name = "default"
@@ -928,11 +928,11 @@ extension SnapshotTests {
           print("...")
         }
 
-        public var $void: __macro_local_4voidfMu_ {
+        public nonisolated var $void: __macro_local_4voidfMu_ {
           __macro_local_4voidfMu_(void)
         }
 
-        public struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        public nonisolated struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Swift.Void
           public let name = "void"
@@ -973,11 +973,11 @@ extension SnapshotTests {
           throw Failure()
         }
 
-        public var $void: __macro_local_4voidfMu_ {
+        public nonisolated var $void: __macro_local_4voidfMu_ {
           __macro_local_4voidfMu_(void)
         }
 
-        public struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        public nonisolated struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Swift.Void
           public let name = "void"
@@ -1031,11 +1031,11 @@ extension SnapshotTests {
           Swift.min(x, y)
         }
 
-        var $min: __macro_local_3minfMu_ {
+        nonisolated var $min: __macro_local_3minfMu_ {
           __macro_local_3minfMu_(min)
         }
 
-        struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = (Int, Int)
           public typealias Output = Swift.Void
           public let name = "min"
@@ -1098,11 +1098,11 @@ extension SnapshotTests {
           Swift.min(x, y)
         }
 
-        var $min: __macro_local_3minfMu_ {
+        nonisolated var $min: __macro_local_3minfMu_ {
           __macro_local_3minfMu_(min)
         }
 
-        struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = (Int, Int)
           public typealias Output = Swift.Void
           public let name = "min"
@@ -1162,11 +1162,11 @@ extension SnapshotTests {
           !reminder.title.isEmpty || override
         }
 
-        var $isValid: __macro_local_7isValidfMu_ {
+        nonisolated var $isValid: __macro_local_7isValidfMu_ {
           __macro_local_7isValidfMu_(isValid)
         }
 
-        struct __macro_local_7isValidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+        nonisolated struct __macro_local_7isValidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = (Reminder, Bool)
           public typealias Output = Bool
           public let name = "isValid"
@@ -1226,13 +1226,13 @@ extension SnapshotTests {
             xs.reduce(into: 0, +=)
           }
 
-          var $sum: __macro_local_3sumfMu_ {
+          nonisolated var $sum: __macro_local_3sumfMu_ {
             __macro_local_3sumfMu_ {
               sum($0)
             }
           }
 
-          struct __macro_local_3sumfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+          nonisolated struct __macro_local_3sumfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = Int
             public typealias Output = Int
             public let name = "sum"
@@ -1286,13 +1286,13 @@ extension SnapshotTests {
             xs.reduce(into: 0, +=)
           }
 
-          var $sum: __macro_local_3sumfMu_ {
+          nonisolated var $sum: __macro_local_3sumfMu_ {
             __macro_local_3sumfMu_ {
               sum(of: $0)
             }
           }
 
-          struct __macro_local_3sumfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+          nonisolated struct __macro_local_3sumfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = Int
             public typealias Output = Int
             public let name = "sum"
@@ -1358,13 +1358,13 @@ extension SnapshotTests {
             return result
           }
 
-          var $joined: __macro_local_6joinedfMu_ {
+          nonisolated var $joined: __macro_local_6joinedfMu_ {
             __macro_local_6joinedfMu_ {
               joined($0)
             }
           }
 
-          struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+          nonisolated struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = (String, separator: String)
             public typealias Output = String?
             public let name = "joined"
@@ -1425,13 +1425,13 @@ extension SnapshotTests {
             arrays.flatMap(\.self)
           }
 
-          var $joined: __macro_local_6joinedfMu_ {
+          nonisolated var $joined: __macro_local_6joinedfMu_ {
             __macro_local_6joinedfMu_ {
               joined($0)
             }
           }
 
-          struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+          nonisolated struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = [String].JSONRepresentation
             public typealias Output = [String].JSONRepresentation
             public let name = "joined"
@@ -1489,13 +1489,13 @@ extension SnapshotTests {
             }
           }
 
-          var $print: __macro_local_5printfMu_ {
+          nonisolated var $print: __macro_local_5printfMu_ {
             __macro_local_5printfMu_ {
               print($0)
             }
           }
 
-          struct __macro_local_5printfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+          nonisolated struct __macro_local_5printfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = Int
             public typealias Output = Swift.Void
             public let name = "print"
@@ -1558,13 +1558,13 @@ extension SnapshotTests {
             }
           }
 
-          var $validatePositive: __macro_local_16validatePositivefMu_ {
+          nonisolated var $validatePositive: __macro_local_16validatePositivefMu_ {
             __macro_local_16validatePositivefMu_ {
               try validatePositive($0)
             }
           }
 
-          struct __macro_local_16validatePositivefMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+          nonisolated struct __macro_local_16validatePositivefMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = Int
             public typealias Output = Swift.Void
             public let name = "validatePositive"

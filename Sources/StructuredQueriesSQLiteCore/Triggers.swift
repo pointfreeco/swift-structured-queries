@@ -109,175 +109,13 @@ extension Table {
       column: column
     )
   }
-
-  /// A `CREATE TEMPORARY TRIGGER` statement that applies additional updates to a row that has just
-  /// been updated.
-  ///
-  /// See <doc:Triggers> for more information.
-  ///
-  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
-  /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
-  ///
-  /// - Parameters:
-  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
-  ///     operation, and source location.
-  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
-  ///   - updates: The updates to apply after the row has been updated.
-  ///   - fileID: The source `#fileID` associated with the trigger.
-  ///   - line: The source `#line` associated with the trigger.
-  ///   - column: The source `#column` associated with the trigger.
-  /// - Returns: A temporary trigger.
-  public static func createTemporaryTrigger(
-    _ name: String? = nil,
-    ifNotExists: Bool = false,
-    afterUpdateTouch updates: (inout Updates<Self>) -> Void,
-    fileID: StaticString = #fileID,
-    line: UInt = #line,
-    column: UInt = #column
-  ) -> TemporaryTrigger<Self> {
-    Self.createTemporaryTrigger(
-      name,
-      ifNotExists: ifNotExists,
-      after: .update { _, new in
-        Self
-          .where { $0.rowid.eq(new.rowid) }
-          .update { updates(&$0) }
-      },
-      fileID: fileID,
-      line: line,
-      column: column
-    )
-  }
-
-  /// A `CREATE TEMPORARY TRIGGER` statement that updates a datetime column when a row has been
-  /// updated.
-  ///
-  /// See <doc:Triggers> for more information.
-  ///
-  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
-  /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
-  ///
-  /// - Parameters:
-  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
-  ///     operation, and source location.
-  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
-  ///   - dateColumn: A key path to a datetime column.
-  ///   - dateFunction: A database function that returns the current datetime, _e.g._,
-  ///     `#sql("datetime('subsec'))"`.
-  ///   - fileID: The source `#fileID` associated with the trigger.
-  ///   - line: The source `#line` associated with the trigger.
-  ///   - column: The source `#column` associated with the trigger.
-  /// - Returns: A temporary trigger.
-  public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
-    _ name: String? = nil,
-    ifNotExists: Bool = false,
-    afterUpdateTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
-    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
-    fileID: StaticString = #fileID,
-    line: UInt = #line,
-    column: UInt = #column
-  ) -> TemporaryTrigger<Self> {
-    Self.createTemporaryTrigger(
-      name,
-      ifNotExists: ifNotExists,
-      afterUpdateTouch: {
-        $0[dynamicMember: dateColumn] = dateFunction
-      },
-      fileID: fileID,
-      line: line,
-      column: column
-    )
-  }
-
-  /// A `CREATE TEMPORARY TRIGGER` statement that applies additional updates to a row that has just
-  /// been inserted.
-  ///
-  /// See <doc:Triggers> for more information.
-  ///
-  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
-  /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
-  ///
-  /// - Parameters:
-  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
-  ///     operation, and source location.
-  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
-  ///   - updates: The updates to apply after the row has been inserted.
-  ///   - fileID: The source `#fileID` associated with the trigger.
-  ///   - line: The source `#line` associated with the trigger.
-  ///   - column: The source `#column` associated with the trigger.
-  /// - Returns: A temporary trigger.
-  public static func createTemporaryTrigger(
-    _ name: String? = nil,
-    ifNotExists: Bool = false,
-    afterInsertTouch updates: (inout Updates<Self>) -> Void,
-    fileID: StaticString = #fileID,
-    line: UInt = #line,
-    column: UInt = #column
-  ) -> TemporaryTrigger<Self> {
-    Self.createTemporaryTrigger(
-      name,
-      ifNotExists: ifNotExists,
-      after: .insert { new in
-        Self
-          .where { $0.rowid.eq(new.rowid) }
-          .update { updates(&$0) }
-      },
-      fileID: fileID,
-      line: line,
-      column: column
-    )
-  }
-
-  /// A `CREATE TEMPORARY TRIGGER` statement that updates a datetime column when a row has been
-  /// inserted.
-  ///
-  /// See <doc:Triggers> for more information.
-  ///
-  /// > Important: A name for the trigger is automatically derived from the arguments if one is not
-  /// > provided. If you build your own trigger helper that call this function, then your helper
-  /// > should also take `fileID`, `line` and `column` arguments and pass them to this function.
-  ///
-  /// - Parameters:
-  ///   - name: The trigger's name. By default a unique name is generated depending using the table,
-  ///     operation, and source location.
-  ///   - ifNotExists: Adds an `IF NOT EXISTS` clause to the `CREATE TRIGGER` statement.
-  ///   - dateColumn: A key path to a datetime column.
-  ///   - dateFunction: A database function that returns the current datetime, _e.g._,
-  ///     `#sql("datetime('subsec'))"`.
-  ///   - fileID: The source `#fileID` associated with the trigger.
-  ///   - line: The source `#line` associated with the trigger.
-  ///   - column: The source `#column` associated with the trigger.
-  /// - Returns: A temporary trigger.
-  public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
-    _ name: String? = nil,
-    ifNotExists: Bool = false,
-    afterInsertTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
-    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
-    fileID: StaticString = #fileID,
-    line: UInt = #line,
-    column: UInt = #column
-  ) -> TemporaryTrigger<Self> {
-    Self.createTemporaryTrigger(
-      name,
-      ifNotExists: ifNotExists,
-      afterInsertTouch: {
-        $0[dynamicMember: dateColumn] = dateFunction
-      },
-      fileID: fileID,
-      line: line,
-      column: column
-    )
-  }
 }
 
 /// A `CREATE TEMPORARY TRIGGER` statement.
 ///
 /// This type of statement is returned from the
-/// `[Table.createTemporaryTrigger]<doc:Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)>` family of
-/// functions.
+/// `[Table.createTemporaryTrigger]<doc:Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)>`
+/// family of functions.
 ///
 /// To learn more, see <doc:Triggers>.
 public struct TemporaryTrigger<On: Table>: Sendable, Statement {
@@ -303,12 +141,12 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     public typealias Old = TableAlias<On, _Old>.TableColumns
     public typealias New = TableAlias<On, _New>.TableColumns
 
-    /// An `AFTER INSERT` trigger operation.
+    /// An `INSERT` trigger operation.
     ///
     /// - Parameters:
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `AFTER INSERT` trigger operation.
+    /// - Returns: An `INSERT` trigger operation.
     public static func insert(
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ new: New) -> [QueryFragment],
@@ -320,12 +158,53 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
-    /// An `AFTER UPDATE` trigger operation.
+    /// An `INSERT` trigger operation that applies additional updates to the associated rows.
+    ///
+    /// - Parameters:
+    ///   - updates: The updates to apply to associated rows.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `INSERT` trigger operation.
+    @_disfavoredOverload
+    public static func insert(
+      touch updates: (inout Updates<On>) -> Void,
+      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.insert(
+        forEachRow: { new in
+          On
+            .where { $0.rowid.eq(new.rowid) }
+            .update { updates(&$0) }
+        },
+        when: condition
+      )
+    }
+
+    /// An `INSERT` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - dateColumn: A key path to a datetime column.
+    ///   - dateFunction: A database function that returns the current datetime, _e.g._,
+    ///     `#sql("datetime('subsec'))"`.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
+    @_disfavoredOverload
+    public static func insert<D: _OptionalPromotable<Date?>>(
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.insert(
+        touch: { $0[dynamicMember: dateColumn] = dateFunction },
+        when: condition
+      )
+    }
+
+    /// An `UPDATE` trigger operation.
     ///
     /// - Parameters:
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `AFTER UPDATE` trigger operation.
+    /// - Returns: An `UPDATE` trigger operation.
     public static func update(
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ old: Old, _ new: New) -> [QueryFragment],
@@ -338,13 +217,13 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
-    /// An `AFTER UPDATE` trigger operation.
+    /// An `UPDATE` trigger operation.
     ///
     /// - Parameters:
     ///   - columns: Updated columns to scope the operation to.
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `AFTER UPDATE` trigger operation.
+    /// - Returns: An `UPDATE` trigger operation.
     public static func update<each Column: _TableColumnExpression>(
       of columns: (On.TableColumns) -> (repeat each Column),
       @QueryFragmentBuilder<any Statement>
@@ -364,12 +243,100 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       )
     }
 
-    /// An `AFTER DELETE` trigger operation.
+    /// An `UPDATE` trigger operation that applies additional updates to the associated rows.
+    ///
+    /// - Parameters:
+    ///   - updates: The updates to apply to associated rows.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
+    @_disfavoredOverload
+    public static func update(
+      touch updates: (inout Updates<On>) -> Void,
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.update(
+        forEachRow: { _, new in
+          On
+            .where { $0.rowid.eq(new.rowid) }
+            .update { updates(&$0) }
+        },
+        when: condition
+      )
+    }
+
+    /// An `UPDATE` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - dateColumn: A key path to a datetime column.
+    ///   - dateFunction: A database function that returns the current datetime, _e.g._,
+    ///     `#sql("datetime('subsec'))"`.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
+    @_disfavoredOverload
+    public static func update<D: _OptionalPromotable<Date?>>(
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.update(
+        touch: { $0[dynamicMember: dateColumn] = dateFunction },
+        when: condition
+      )
+    }
+
+    /// An `UPDATE` trigger operation that applies additional updates to the associated rows.
+    ///
+    /// - Parameters:
+    ///   - columns: Updated columns to scope the operation to.
+    ///   - updates: The updates to apply to associated rows.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
+    @_disfavoredOverload
+    public static func update<each Column: _TableColumnExpression>(
+      of columns: (On.TableColumns) -> (repeat each Column),
+      touch updates: (inout Updates<On>) -> Void,
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.update(
+        of: columns,
+        forEachRow: { _, new in
+          On
+            .where { $0.rowid.eq(new.rowid) }
+            .update { updates(&$0) }
+        },
+        when: condition
+      )
+    }
+
+    /// An `UPDATE` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - columns: Updated columns to scope the operation to.
+    ///   - dateColumn: A key path to a datetime column.
+    ///   - dateFunction: A database function that returns the current datetime, _e.g._,
+    ///     `#sql("datetime('subsec'))"`.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
+    @_disfavoredOverload
+    public static func update<each Column: _TableColumnExpression, D: _OptionalPromotable<Date?>>(
+      of columns: (On.TableColumns) -> (repeat each Column),
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      Self.update(
+        of: columns,
+        touch: { $0[dynamicMember: dateColumn] = dateFunction },
+        when: condition
+      )
+    }
+
+    /// A `DELETE` trigger operation.
     ///
     /// - Parameters:
     ///   - perform: A statement to perform for each triggered row.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `AFTER DELETE` trigger operation.
+    /// - Returns: A `DELETE` trigger operation.
     public static func delete(
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ old: Old) -> [QueryFragment],

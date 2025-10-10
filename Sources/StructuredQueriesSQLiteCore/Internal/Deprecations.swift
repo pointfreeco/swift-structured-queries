@@ -1,11 +1,123 @@
 import Foundation
 import StructuredQueriesCore
 
+// NB: Deprecated after 0.22.2:
+
+extension Table {
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'createTemporaryTrigger(after: .update(touch:))', instead"
+  )
+  public static func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterUpdateTouch updates: (inout Updates<Self>) -> Void,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      after: .update { _, new in
+        Self
+          .where { $0.rowid.eq(new.rowid) }
+          .update { updates(&$0) }
+      },
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'createTemporaryTrigger(after: .update(touch:))', instead"
+  )
+  public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterUpdateTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
+    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      afterUpdateTouch: {
+        $0[dynamicMember: dateColumn] = dateFunction
+      },
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'createTemporaryTrigger(after: .insert(touch:))', instead"
+  )
+  public static func createTemporaryTrigger(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterInsertTouch updates: (inout Updates<Self>) -> Void,
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      after: .insert { new in
+        Self
+          .where { $0.rowid.eq(new.rowid) }
+          .update { updates(&$0) }
+      },
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'createTemporaryTrigger(after: .insert(touch:))', instead"
+  )
+  public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterInsertTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
+    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      afterInsertTouch: {
+        $0[dynamicMember: dateColumn] = dateFunction
+      },
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+}
+
 // NB: Deprecated after 0.5.1:
 
 extension Table {
   @available(
-    *, deprecated, message: "Use a trailing closure, instead: 'Table.insert { row }'"
+    *,
+    deprecated,
+    message: "Use a trailing closure, instead: 'Table.insert { row }'"
   )
   public static func insert(
     or conflictResolution: ConflictResolution,
@@ -16,7 +128,9 @@ extension Table {
   }
 
   @available(
-    *, deprecated, message: "Use a trailing closure, instead: 'Table.insert { rows }'"
+    *,
+    deprecated,
+    message: "Use a trailing closure, instead: 'Table.insert { rows }'"
   )
   public static func insert(
     or conflictResolution: ConflictResolution,
@@ -49,7 +163,10 @@ extension Table {
 
   @available(*, deprecated, renamed: "insert(or:_:select:onConflictDoUpdate:)")
   public static func insert<
-    V1, each V2, From, Joins
+    V1,
+    each V2,
+    From,
+    Joins
   >(
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
@@ -62,7 +179,9 @@ extension Table {
 
 extension PrimaryKeyedTable {
   @available(
-    *, deprecated, message: "Use a trailing closure, instead: 'Table.insert { draft }'"
+    *,
+    deprecated,
+    message: "Use a trailing closure, instead: 'Table.insert { draft }'"
   )
   public static func insert(
     or conflictResolution: ConflictResolution,
@@ -73,7 +192,9 @@ extension PrimaryKeyedTable {
   }
 
   @available(
-    *, deprecated, message: "Use a trailing closure, instead: 'Table.insert { drafts }'"
+    *,
+    deprecated,
+    message: "Use a trailing closure, instead: 'Table.insert { drafts }'"
   )
   public static func insert(
     or conflictResolution: ConflictResolution,
@@ -84,7 +205,9 @@ extension PrimaryKeyedTable {
   }
 
   @available(
-    *, deprecated, message: "Use a trailing closure, instead: 'Table.upsert { draft }'"
+    *,
+    deprecated,
+    message: "Use a trailing closure, instead: 'Table.upsert { draft }'"
   )
   public static func upsert(
     or conflictResolution: ConflictResolution,
