@@ -451,5 +451,132 @@ extension SnapshotTests {
         """
       }
     }
+
+    @DatabaseFunction
+    func sum(of xs: some Sequence<Int>) -> Int {
+      xs.reduce(into: 0, +=)
+    }
+
+    @Test func aggregate() {
+      $sum.install(database.handle)
+
+      assertQuery(
+        Reminder.select { $sum(of: $0.id) }
+      ) {
+        """
+        SELECT "sum"("reminders"."id")
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 55 │
+        └────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    func joined(_ arguments: some Sequence<(String, separator: String)>) -> String? {
+      var iterator = arguments.makeIterator()
+      guard var (result, _) = iterator.next() else { return nil }
+      while let (string, separator) = iterator.next() {
+        result.append(separator)
+        result.append(string)
+      }
+      return result
+    }
+
+    @Test func multiAggregate() {
+      $joined.install(database.handle)
+
+      assertQuery(
+        Tag.select { $joined($0.title, separator: ", ") }
+      ) {
+        """
+        SELECT "joined"("tags"."title", ', ')
+        FROM "tags"
+        """
+      } results: {
+        """
+        ┌────────────────────────────────┐
+        │ "car, kids, someday, optional" │
+        └────────────────────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction(
+      as: ((any Sequence<[String].JSONRepresentation>) -> [String].JSONRepresentation).self
+    )
+    func jsonJoined(_ arrays: some Sequence<[String]>) -> [String] {
+      arrays.flatMap(\.self)
+    }
+
+    @Test func aggregateRepresentation() {
+      $jsonJoined.install(database.handle)
+
+      assertQuery(
+        Reminder.select {
+          $jsonJoined(#sql("json_array(\($0.title.lower()), \($0.title.upper()))"))
+        }
+      ) {
+        """
+        SELECT "jsonJoined"(json_array(lower("reminders"."title"), upper("reminders"."title")))
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────┐
+        │ [                                   │
+        │   [0]: "groceries",                 │
+        │   [1]: "GROCERIES",                 │
+        │   [2]: "haircut",                   │
+        │   [3]: "HAIRCUT",                   │
+        │   [4]: "doctor appointment",        │
+        │   [5]: "DOCTOR APPOINTMENT",        │
+        │   [6]: "take a walk",               │
+        │   [7]: "TAKE A WALK",               │
+        │   [8]: "buy concert tickets",       │
+        │   [9]: "BUY CONCERT TICKETS",       │
+        │   [10]: "pick up kids from school", │
+        │   [11]: "PICK UP KIDS FROM SCHOOL", │
+        │   [12]: "get laundry",              │
+        │   [13]: "GET LAUNDRY",              │
+        │   [14]: "take out trash",           │
+        │   [15]: "TAKE OUT TRASH",           │
+        │   [16]: "call accountant",          │
+        │   [17]: "CALL ACCOUNTANT",          │
+        │   [18]: "send weekly emails",       │
+        │   [19]: "SEND WEEKLY EMAILS"        │
+        │ ]                                   │
+        └─────────────────────────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    func tagged(_ tags: some Sequence<Tag>) -> String {
+      tags.map { "#\($0.title)" }.joined(separator: " ")
+    }
+
+    @Test func selectionTableAggregate() {
+      $tagged.install(database.handle)
+
+      assertQuery(
+        Tag.select { $tagged($0) }
+      ) {
+        """
+        SELECT "tagged"("tags"."id", "tags"."title")
+        FROM "tags"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────┐
+        │ "#car #kids #someday #optional" │
+        └─────────────────────────────────┘
+        """
+      }
+    }
   }
 }
