@@ -342,6 +342,44 @@
           """
         }
       }
+
+      @Test func selection() {
+        assertQuery(
+          Values(
+            Attachment.Kind.Selection.note("Hello, world!")
+          )
+        ) {
+          """
+          SELECT NULL AS "link", 'Hello, world!' AS "note", NULL AS "videoURL", NULL AS "videoKind", NULL AS "imageCaption", NULL AS "imageURL"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────┐
+          │ Attachment.Kind.note("Hello, world!") │
+          └───────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Values(
+            Attachment.Kind.Selection.image(Attachment.Image(caption: "Blob", url: URL(string: "https://pointfree.co")!))
+          )
+        ) {
+          """
+          SELECT NULL AS "link", NULL AS "note", NULL AS "videoURL", NULL AS "videoKind", 'Blob', 'https://pointfree.co' AS "imageCaption"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────┐
+          │ Attachment.Kind.image(             │
+          │   Attachment.Image(                │
+          │     caption: "Blob",               │
+          │     url: URL(https://pointfree.co) │
+          │   )                                │
+          │ )                                  │
+          └────────────────────────────────────┘
+          """
+        }
+      }
     }
   }
 
