@@ -361,7 +361,8 @@
         }
         assertQuery(
           Values(
-            Attachment.Kind.Selection.image(Attachment.Image(caption: "Blob", url: URL(string: "https://pointfree.co")!))
+            Attachment.Kind.Selection.image(
+              Attachment.Image(caption: "Blob", url: URL(string: "https://pointfree.co")!))
           )
         ) {
           """
