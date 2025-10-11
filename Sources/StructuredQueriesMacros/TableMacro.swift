@@ -913,7 +913,7 @@ extension TableMacro: MemberMacro {
       [(name: TokenSyntax, firstName: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] = []
     var allColumnNames: [TokenSyntax] = []
     var writableColumns: [TokenSyntax] = []
-    var selectedColumns: [TokenSyntax] = []
+    var selectedColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
     var columnsProperties: [DeclSyntax] = []
     var expansionFailed = false
 
@@ -1045,7 +1045,7 @@ extension TableMacro: MemberMacro {
           )
         }
 
-        selectedColumns.append(identifier)
+        selectedColumns.append((identifier, columnQueryValueType))
 
         if !isGenerated {
           // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
@@ -1190,7 +1190,7 @@ extension TableMacro: MemberMacro {
 
       let selectionAssignment =
         selectedColumns
-        .map { "allColumns.append(contentsOf: \($0)._allColumns)\n" }
+        .map { c, _ in "allColumns.append(contentsOf: \(c)._allColumns)\n" }
         .joined()
 
       selectionInitializers.append(
@@ -1268,7 +1268,7 @@ extension TableMacro: MemberMacro {
           }
         }
 
-        selectedColumns.append(identifier)
+        selectedColumns.append((identifier, columnQueryValueType))
 
         let defaultValue = parameter.defaultValue?.value.rewritten(selfRewriter)
         let tableColumnType =
@@ -1312,7 +1312,7 @@ extension TableMacro: MemberMacro {
           argument.append(" = \(type)(queryOutput: \(defaultValue))")
         }
         let staticColumns = selectedColumns.map {
-          $0 == identifier ? "\($0)" : "\(valueType)?(queryOutput: nil)" as ExprSyntax
+          $0 == identifier ? "\($0)" : "\($1)?(queryOutput: nil)" as ExprSyntax
         }
         let staticInitialization =
           staticColumns
@@ -1469,7 +1469,7 @@ extension TableMacro: MemberMacro {
       \(raw: writableColumnsAssignment)return writableColumns
       }
       public var queryFragment: QueryFragment {
-      "\(raw: selectedColumns.map { #"\(self.\#($0))"# }.joined(separator: ", "))"
+      "\(raw: selectedColumns.map { c, _ in #"\(self.\#(c))"# }.joined(separator: ", "))"
       }
       }
       """,

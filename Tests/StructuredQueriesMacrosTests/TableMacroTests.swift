@@ -2461,14 +2461,14 @@ extension SnapshotTests {
             ) -> Self {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: photo._allColumns)
-              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
               return Self(allColumns: allColumns)
             }
             public static func note(
               _ note: some StructuredQueriesCore.QueryExpression<String>
             ) -> Self {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
-              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
               allColumns.append(contentsOf: note._allColumns)
               return Self(allColumns: allColumns)
             }
@@ -2568,14 +2568,14 @@ extension SnapshotTests {
             ) -> Self {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: photo._allColumns)
-              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
               return Self(allColumns: allColumns)
             }
             public static func note(
               _ note: some StructuredQueriesCore.QueryExpression<String>
             ) -> Self {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
-              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
               allColumns.append(contentsOf: note._allColumns)
               return Self(allColumns: allColumns)
             }
@@ -2671,14 +2671,14 @@ extension SnapshotTests {
             ) -> Self {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: photo._allColumns)
-              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
               return Self(allColumns: allColumns)
             }
             public static func note(
               _ note: some StructuredQueriesCore.QueryExpression<String>
             ) -> Self {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
-              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
               allColumns.append(contentsOf: note._allColumns)
               return Self(allColumns: allColumns)
             }
@@ -2759,14 +2759,14 @@ extension SnapshotTests {
             ) -> Self {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: photo._allColumns)
-              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
               return Self(allColumns: allColumns)
             }
             public static func note(
               text note: some StructuredQueriesCore.QueryExpression<String>
             ) -> Self {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
-              allColumns.append(contentsOf: String?(queryOutput: nil)._allColumns)
+              allColumns.append(contentsOf: Photo?(queryOutput: nil)._allColumns)
               allColumns.append(contentsOf: note._allColumns)
               return Self(allColumns: allColumns)
             }
