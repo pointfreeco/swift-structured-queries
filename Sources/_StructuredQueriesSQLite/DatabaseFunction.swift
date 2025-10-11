@@ -99,7 +99,8 @@ private final class AggregateDatabaseFunctionContext {
         .pointee = unmanagedContext
       return unmanagedContext
     } else {
-      return pointer
+      return
+        pointer
         .assumingMemoryBound(to: Unmanaged<AggregateDatabaseFunctionContext>.self)
         .pointee
     }
@@ -126,12 +127,13 @@ private final class AggregateDatabaseFunctionIterator<
 >: AggregateDatabaseFunctionIteratorProtocol {
   let body: Body
   let stream = Stream<Body.Row>()
-  let queue = DispatchQueue(
-    label: "co.pointfree.StructuredQueriesSQLite.AggregateDatabaseFunction"
-  )
+  let queue: DispatchQueue
   var _result: QueryBinding?
   init(_ body: Body) {
     self.body = body
+    self.queue = DispatchQueue(
+      label: "co.pointfree.StructuredQueriesSQLite.AggregateDatabaseFunction.\(body.name)"
+    )
     nonisolated(unsafe) let iterator: any AggregateDatabaseFunctionIteratorProtocol = self
     queue.async {
       iterator.start()
