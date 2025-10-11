@@ -56,10 +56,10 @@ extension ScalarDatabaseFunction {
 /// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
 /// a conformance.
 public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
-  /// A type representing a row's input to the aggregate function.
+  /// A type representing one row of input to the aggregate function.
   associatedtype Element = Input
 
-  /// Decodes rows into elements to aggregate a result from.
+  /// Decodes a row into an element to aggregate a result from.
   ///
   /// - Parameter decoder: A query decoder.
   /// - Returns: An element to append to the sequence sent to the aggregate function.
