@@ -56,11 +56,20 @@ extension ScalarDatabaseFunction {
 /// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
 /// a conformance.
 public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
-  associatedtype Row
+  /// A type representing a row's input to the aggregate function.
+  associatedtype Element = Input
 
-  func step(_ decoder: inout some QueryDecoder) throws -> Row
+  /// Decodes rows into elements to aggregate a result from.
+  ///
+  /// - Parameter decoder: A query decoder.
+  /// - Returns: An element to append to the sequence sent to the aggregate function.
+  func step(_ decoder: inout some QueryDecoder) throws -> Element
 
-  func invoke(_ arguments: some Sequence<Row>) throws -> QueryBinding
+  /// Aggregates elements into a bindable value.
+  ///
+  /// - Parameter arguments: A sequence of elements to aggregate from.
+  /// - Returns: A binding returned from the aggregate function.
+  func invoke(_ arguments: some Sequence<Element>) throws -> QueryBinding
 }
 
 extension AggregateDatabaseFunction {

@@ -115,7 +115,7 @@ private protocol AggregateDatabaseFunctionIteratorProtocol<Body> {
   associatedtype Body: AggregateDatabaseFunction
 
   var body: Body { get }
-  var stream: Stream<Body.Row> { get }
+  var stream: Stream<Body.Element> { get }
   func start()
   func step(_ decoder: inout some QueryDecoder) throws
   func finish()
@@ -126,7 +126,7 @@ private final class AggregateDatabaseFunctionIterator<
   Body: AggregateDatabaseFunction
 >: AggregateDatabaseFunctionIteratorProtocol {
   let body: Body
-  let stream = Stream<Body.Row>()
+  let stream = Stream<Body.Element>()
   let queue: DispatchQueue
   var _result: QueryBinding?
   init(_ body: Body) {
