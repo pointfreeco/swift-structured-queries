@@ -225,7 +225,7 @@ public struct AggregateFunction<QueryValue>: QueryExpression, Sendable {
   ) {
     self.init(
       QueryFragment(quote: name),
-      isDistinct: false,
+      isDistinct: isDistinct,
       Array(repeat each arguments),
       order: order?.queryFragment,
       filter: filter?.queryFragment

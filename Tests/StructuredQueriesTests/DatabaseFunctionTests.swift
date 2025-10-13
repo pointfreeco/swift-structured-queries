@@ -474,6 +474,20 @@ extension SnapshotTests {
         └────┘
         """
       }
+      assertQuery(
+        Reminder.select { $sum($0.id, distinct: true) }
+      ) {
+        """
+        SELECT "sum"(DISTINCT "reminders"."id")
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 55 │
+        └────┘
+        """
+      }
     }
 
     @DatabaseFunction
