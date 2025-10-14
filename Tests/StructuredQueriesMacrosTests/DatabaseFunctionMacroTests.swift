@@ -1248,7 +1248,7 @@ extension SnapshotTests {
             }
             public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
-                StructuredQueriesCore.AggregateFunction(
+                StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, xs, order: order, filter: filter
                 )
               }
@@ -1308,7 +1308,7 @@ extension SnapshotTests {
             }
             public func callAsFunction(of xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
-                StructuredQueriesCore.AggregateFunction(
+                StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, xs, order: order, filter: filter
                 )
               }
@@ -1381,7 +1381,7 @@ extension SnapshotTests {
             }
             public func callAsFunction(_ p0: some StructuredQueriesCore.QueryExpression<String>, separator: some StructuredQueriesCore.QueryExpression<String>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<String?> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
-                StructuredQueriesCore.AggregateFunction(
+                StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, p0, separator, order: order, filter: filter
                 )
               }
@@ -1447,7 +1447,7 @@ extension SnapshotTests {
             }
             public func callAsFunction(_ arrays: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
-                StructuredQueriesCore.AggregateFunction(
+                StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, arrays, order: order, filter: filter
                 )
               }
@@ -1511,7 +1511,7 @@ extension SnapshotTests {
             }
             public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
-                StructuredQueriesCore.AggregateFunction(
+                StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, xs, order: order, filter: filter
                 )
               }
@@ -1580,7 +1580,7 @@ extension SnapshotTests {
             }
             public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
-                StructuredQueriesCore.AggregateFunction(
+                StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, xs, order: order, filter: filter
                 )
               }

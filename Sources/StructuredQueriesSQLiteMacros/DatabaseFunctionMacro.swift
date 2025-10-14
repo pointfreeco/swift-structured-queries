@@ -337,7 +337,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         """
         public func callAsFunction\(signature.trimmed) {
         StructuredQueriesCore.$_isSelecting.withValue(false) {
-        StructuredQueriesCore.AggregateFunction(
+        StructuredQueriesCore.AggregateFunctionExpression(
         self.name, \
         \(raw: parameters.joined(separator: ", ")), \
         order: order, \

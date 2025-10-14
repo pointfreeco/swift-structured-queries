@@ -319,8 +319,7 @@ extension QueryExpression where QueryValue == [UInt8] {
   }
 }
 
-/// A query expression of a generalized query function.
-public struct QueryFunction<QueryValue>: QueryExpression {
+package struct QueryFunction<QueryValue>: QueryExpression {
   let name: QueryFragment
   let arguments: [QueryFragment]
 

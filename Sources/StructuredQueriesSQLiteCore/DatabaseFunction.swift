@@ -91,7 +91,7 @@ extension AggregateDatabaseFunction {
   ) -> some QueryExpression<Output>
   where Input: QueryBindable {
     $_isSelecting.withValue(false) {
-      AggregateFunction(name, distinct: isDistinct, input, order: order, filter: filter)
+      AggregateFunctionExpression(name, distinct: isDistinct, input, order: order, filter: filter)
     }
   }
 
@@ -110,7 +110,7 @@ extension AggregateDatabaseFunction {
   ) -> some QueryExpression<Output>
   where Input == (repeat (each T).QueryValue) {
     $_isSelecting.withValue(false) {
-      AggregateFunction(name, repeat each input, order: order, filter: filter)
+      AggregateFunctionExpression(name, repeat each input, order: order, filter: filter)
     }
   }
 }
