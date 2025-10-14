@@ -5,6 +5,8 @@ from SQLite.
 
 ## Overview
 
+### Scalar functions
+
 StructuredQueries defines a macro specifically for defining Swift functions that can be called from
 a query. It's called `@DatabaseFunction`, and can annotate any function that works with
 query-representable types.
@@ -18,11 +20,14 @@ func exclaim(_ string: String) -> String {
 }
 ```
 
+This defines a "scalar" function, which is called on a value for each row in a query, returning its
+result.
+
 > Note: If your project is using [default main actor isolation] then you further need to annotate
 > your function as `nonisolated`.
 [default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
 
-And will be immediately callable in a query by prefixing the function with `$`:
+Once defined, the function is immediately callable in a query by prefixing the function with `$`:
 
 ```swift
 Reminder.select { $exclaim($0.title) }
@@ -52,9 +57,26 @@ configuration.prepareDatabase { db in
 > }
 > ```
 
+### Aggregate functions
+
+It is also possible to define a Swift function that builds a single result from multiple rows of a
+query. The function must simply take a _sequence_ of query-representable types.
+
+For example, a custom `sum` function could be defined like so:
+
+```swift
+@DatabaseFunction
+func sum(_ ints: some Sequence<Int>) -> Int {
+  ints.reduce(into: 0, +=)
+}
+```
+
+This defines an "aggregate" function, where every element in `int` represents a row returned from
+the base query.
+
 ### Custom representations
 
-To define a type that works with a custom representation, i.e. anytime you use `@Column(as:)` in
+To define a type that works with a custom representation, _i.e._ anytime you use `@Column(as:)` in
 your data type, you can use the `as` parameter of the macro to specify those types. For example,
 if your model holds onto a date and you want to store that date as a
 [unix timestamp](<doc:Foundation/Date/UnixTimeRepresentation-struct>) (i.e. double),
@@ -99,3 +121,4 @@ func jsonArrayExclaim(_ strings: [String]) -> [String] {
 
 - ``DatabaseFunction``
 - ``ScalarDatabaseFunction``
+- ``AggregateDatabaseFunction``
