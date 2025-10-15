@@ -598,13 +598,13 @@ extension SnapshotTests {
 
     @DatabaseFunction
     func mode(priority priorities: some Sequence<Priority?>) -> Priority? {
-      var counts: [Priority: Int] = [:]
+      var occurences: [Priority: Int] = [:]
       for priority in priorities {
         guard let priority
         else { continue }
-        counts[priority, default: 0] += 1
+        occurences[priority, default: 0] += 1
       }
-      return counts.max { $0.value < $1.value }?.key
+      return occurences.max { $0.value < $1.value }?.key
     }
     @Test func modePriorityAggregate() {
       $mode.install(database.handle)

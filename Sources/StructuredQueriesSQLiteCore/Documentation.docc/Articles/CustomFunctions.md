@@ -62,17 +62,43 @@ configuration.prepareDatabase { db in
 It is also possible to define a Swift function that builds a single result from multiple rows of a
 query. The function must simply take a _sequence_ of query-representable types.
 
-For example, a custom `sum` function could be defined like so:
+For example, suppose you want to compute the most common priority used across all reminders. This
+computation is called the "mode" in statistics, and unfortunately SQLite does not supply such
+a function. But it is quite easy to write this function in plain Swift:
 
 ```swift
 @DatabaseFunction
-func sum(_ ints: some Sequence<Int>) -> Int {
-  ints.reduce(into: 0, +=)
+func mode(priority priorities: some Sequence<Priority?>) -> Priority? {
+  var occurences: [Priority: Int] = [:]
+  for priority in priorities {
+    guard let priority
+    else { continue }
+    occurences[priority, default: 0] += 1
+  }
+  return occurences.max { $0.value < $1.value }?.key
 }
 ```
 
-This defines an "aggregate" function, where every element in `int` represents a row returned from
-the base query.
+This defines an "aggregate" function, and the sequence `priorities` that is passed to it represents
+all of the data from the database passed to it while aggregating. It is now straightfoward
+to compute the mode of priorities across all reminders:
+
+```swift
+Reminder
+  .select { $mode(priority: $0.priority) }
+```
+
+> Tip: Be sure to install the function in the database connection as discussed in 
+> <doc:CustomFunctions#Scalar-functions> above.
+
+You can also compute the mode of priorities inside each reminders list:
+
+```swift
+RemindersList
+  .group(by: \.id)
+  .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
+  .select { ($0.title, $mode(priority: $1.priority)) }
+```
 
 ### Custom representations
 
@@ -112,6 +138,18 @@ function, then you can shuffle the data through using json:
 )
 func jsonArrayExclaim(_ strings: [String]) -> [String] {
   strings.map { $0.localizedUppercase + "!" }
+}
+```
+
+It is also possible to do this with aggregate functions, but you must describe the sequence as an
+`any Sequence` instead of a `some Sequence`:
+
+```swift
+@DatabaseFunction(
+  as: ((any Sequence<[String].JSONRepresentation>) -> [String].JSONRepresentation).self
+)
+func jsonJoined(_ arrays: some Sequence<[String]>) -> [String] {
+  arrays.flatMap(\.self)
 }
 ```
 
