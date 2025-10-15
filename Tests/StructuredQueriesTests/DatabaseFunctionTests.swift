@@ -492,10 +492,13 @@ extension SnapshotTests {
 
     @DatabaseFunction
     func joined(_ arguments: some Sequence<(String, separator: String)>) -> String? {
-      var iterator = arguments.makeIterator()
-      guard var (result, _) = iterator.next() else { return nil }
-      while let (string, separator) = iterator.next() {
-        result.append(separator)
+      var isFirst = true
+      var result = ""
+      for (string, separator) in arguments {
+        defer { isFirst = false }
+        if !isFirst {
+          result.append(separator)
+        }
         result.append(string)
       }
       return result
@@ -589,6 +592,57 @@ extension SnapshotTests {
         ┌─────────────────────────────────┐
         │ "#car #kids #someday #optional" │
         └─────────────────────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    func mode(priority priorities: some Sequence<Priority?>) -> Priority? {
+      var counts: [Priority: Int] = [:]
+      for priority in priorities {
+        guard let priority
+        else { continue }
+        counts[priority, default: 0] += 1
+      }
+      return counts.max { $0.value < $1.value }?.key
+    }
+    @Test func modePriorityAggregate() {
+      $mode.install(database.handle)
+
+      assertQuery(
+        Reminder
+          .select { $mode(priority: $0.priority) }
+      ) {
+        """
+        SELECT "mode"("reminders"."priority")
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌───────┐
+        │ .high │
+        └───────┘
+        """
+      }
+      assertQuery(
+        RemindersList
+          .group(by: \.id)
+          .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
+          .select { ($0.title, $mode(priority: $1.priority)) }
+      ) {
+        """
+        SELECT "remindersLists"."title", "mode"("reminders"."priority")
+        FROM "remindersLists"
+        LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
+        GROUP BY "remindersLists"."id"
+        """
+      } results: {
+        """
+        ┌────────────┬─────────┐
+        │ "Personal" │ .high   │
+        │ "Family"   │ .high   │
+        │ "Business" │ .medium │
+        └────────────┴─────────┘
         """
       }
     }

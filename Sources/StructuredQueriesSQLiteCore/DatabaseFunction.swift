@@ -1,7 +1,7 @@
 /// A type representing a database function.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
-/// a conformance.
+/// Don't conform to this protocol directly. Instead, use the
+/// [`@DatabaseFunction`](<doc:CustomFunctions>) macro to generate a conformance.
 public protocol DatabaseFunction<Input, Output> {
   /// A type representing the function's arguments.
   associatedtype Input
@@ -22,8 +22,8 @@ public protocol DatabaseFunction<Input, Output> {
 
 /// A type representing a scalar database function.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
-/// a conformance.
+/// Don't conform to this protocol directly. Instead, use the
+/// [`@DatabaseFunction`](<doc:CustomFunctions#Scalar-functions>) macro to generate a conformance.
 public protocol ScalarDatabaseFunction<Input, Output>: DatabaseFunction {
   /// The function body. Uses a query decoder to process the input of a database function into a
   /// bindable value.
@@ -53,8 +53,9 @@ extension ScalarDatabaseFunction {
 
 /// A type representing an aggregate database function.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
-/// a conformance.
+/// Don't conform to this protocol directly. Instead, use the
+/// [`@DatabaseFunction`](<doc:CustomFunctions#Aggregate-functions>) macro to generate a
+/// conformance.
 public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
   /// A type representing one row of input to the aggregate function.
   associatedtype Element = Input
