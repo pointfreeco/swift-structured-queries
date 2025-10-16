@@ -88,7 +88,7 @@ Reminder
   .select { $mode(priority: $0.priority) }
 ```
 
-> Tip: Be sure to install the function in the database connection as discussed in 
+> Tip: Be sure to install the function in the database connection as discussed in
 > <doc:CustomFunctions#Scalar-functions> above.
 
 You can also compute the mode of priorities inside each reminders list:

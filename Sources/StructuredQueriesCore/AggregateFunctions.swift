@@ -134,7 +134,8 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
     distinct isDistinct: Bool = false,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<Double?> {
-    AggregateFunctionExpression("avg", isDistinct: isDistinct, [queryFragment], filter: filter?.queryFragment)
+    AggregateFunctionExpression(
+      "avg", isDistinct: isDistinct, [queryFragment], filter: filter?.queryFragment)
   }
 
   /// An sum aggregate of this expression.
