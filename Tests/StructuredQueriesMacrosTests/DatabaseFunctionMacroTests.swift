@@ -50,8 +50,6 @@ extension SnapshotTests {
             )
             .queryBinding
           }
-          private struct InvalidInvocation: Error {
-          }
         }
         """#
       }
@@ -101,8 +99,6 @@ extension SnapshotTests {
               queryOutput: self.body()
             )
             .queryBinding
-          }
-          private struct InvalidInvocation: Error {
           }
         }
         """#
@@ -211,8 +207,6 @@ extension SnapshotTests {
               queryOutput: self.body()
             )
             .queryBinding
-          }
-          private struct InvalidInvocation: Error {
           }
         }
         """#
@@ -638,8 +632,6 @@ extension SnapshotTests {
               return .invalid(error)
             }
           }
-          private struct InvalidInvocation: Error {
-          }
         }
         """#
       }
@@ -694,8 +686,6 @@ extension SnapshotTests {
               return .invalid(error)
             }
           }
-          private struct InvalidInvocation: Error {
-          }
         }
         """#
       }
@@ -746,8 +736,6 @@ extension SnapshotTests {
             )
             .queryBinding
           }
-          private struct InvalidInvocation: Error {
-          }
         }
         """#
       }
@@ -797,8 +785,6 @@ extension SnapshotTests {
               queryOutput: self.body()
             )
             .queryBinding
-          }
-          private struct InvalidInvocation: Error {
           }
         }
         """#
@@ -873,8 +859,6 @@ extension SnapshotTests {
             )
             .queryBinding
           }
-          private struct InvalidInvocation: Error {
-          }
         }
         """#
       }
@@ -925,8 +909,6 @@ extension SnapshotTests {
             )
             .queryBinding
           }
-          private struct InvalidInvocation: Error {
-          }
         }
         """#
       }
@@ -974,8 +956,6 @@ extension SnapshotTests {
           ) throws -> StructuredQueriesCore.QueryBinding {
             self.body()
             return .null
-          }
-          private struct InvalidInvocation: Error {
           }
         }
         """#
@@ -1025,8 +1005,6 @@ extension SnapshotTests {
             } catch {
               return .invalid(error)
             }
-          }
-          private struct InvalidInvocation: Error {
           }
         }
         """#
@@ -1230,6 +1208,405 @@ extension SnapshotTests {
           }
         }
         """#
+      }
+    }
+
+    @Suite struct AggregateTests {
+      @Test func basics() {
+        assertMacro {
+          """
+          @DatabaseFunction
+          func sum(_ xs: some Sequence<Int>) -> Int {
+            xs.reduce(into: 0, +=)
+          }
+          """
+        } expansion: {
+          """
+          func sum(_ xs: some Sequence<Int>) -> Int {
+            xs.reduce(into: 0, +=)
+          }
+
+          nonisolated var $sum: __macro_local_3sumfMu_ {
+            __macro_local_3sumfMu_ {
+              sum($0)
+            }
+          }
+
+          nonisolated struct __macro_local_3sumfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+            public typealias Input = Int
+            public typealias Output = Int
+            public let name = "sum"
+            public var argumentCount: Int? {
+              var argumentCount = 0
+              argumentCount += Int._columnWidth
+              return argumentCount
+            }
+            public let isDeterministic = false
+            public let body: (_ xs: any Sequence<Int>) -> Int
+            public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Int) {
+              self.body = body
+            }
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, xs, order: order, filter: filter
+                )
+              }
+            }
+            public func step(
+              _ decoder: inout some QueryDecoder
+            ) throws -> Int {
+              let xs = try decoder.decode(Int.self)
+              guard let xs else {
+                throw InvalidInvocation()
+              }
+              return xs
+            }
+            public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
+              return Int(queryOutput: self.body(arguments)).queryBinding
+            }
+            private struct InvalidInvocation: Error {
+            }
+          }
+          """
+        }
+      }
+
+      @Test func namedArgument() {
+        assertMacro {
+          """
+          @DatabaseFunction
+          func sum(of xs: some Sequence<Int>) -> Int {
+            xs.reduce(into: 0, +=)
+          }
+          """
+        } expansion: {
+          """
+          func sum(of xs: some Sequence<Int>) -> Int {
+            xs.reduce(into: 0, +=)
+          }
+
+          nonisolated var $sum: __macro_local_3sumfMu_ {
+            __macro_local_3sumfMu_ {
+              sum(of: $0)
+            }
+          }
+
+          nonisolated struct __macro_local_3sumfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+            public typealias Input = Int
+            public typealias Output = Int
+            public let name = "sum"
+            public var argumentCount: Int? {
+              var argumentCount = 0
+              argumentCount += Int._columnWidth
+              return argumentCount
+            }
+            public let isDeterministic = false
+            public let body: (_ xs: any Sequence<Int>) -> Int
+            public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Int) {
+              self.body = body
+            }
+            public func callAsFunction(of xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, xs, order: order, filter: filter
+                )
+              }
+            }
+            public func step(
+              _ decoder: inout some QueryDecoder
+            ) throws -> Int {
+              let xs = try decoder.decode(Int.self)
+              guard let xs else {
+                throw InvalidInvocation()
+              }
+              return xs
+            }
+            public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
+              return Int(queryOutput: self.body(arguments)).queryBinding
+            }
+            private struct InvalidInvocation: Error {
+            }
+          }
+          """
+        }
+      }
+
+      @Test func multipleArguments() {
+        assertMacro {
+          """
+          @DatabaseFunction
+          func joined(_ arguments: some Sequence<(String, separator: String)>) -> String? {
+            var iterator = arguments.makeIterator()
+            guard var (result, _) = iterator.next() else { return nil }
+            while let (string, separator) = iterator.next() {
+              result.append(separator)
+              result.append(string)
+            }
+            return result
+          }
+          """
+        } expansion: {
+          """
+          func joined(_ arguments: some Sequence<(String, separator: String)>) -> String? {
+            var iterator = arguments.makeIterator()
+            guard var (result, _) = iterator.next() else { return nil }
+            while let (string, separator) = iterator.next() {
+              result.append(separator)
+              result.append(string)
+            }
+            return result
+          }
+
+          nonisolated var $joined: __macro_local_6joinedfMu_ {
+            __macro_local_6joinedfMu_ {
+              joined($0)
+            }
+          }
+
+          nonisolated struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+            public typealias Input = (String, separator: String)
+            public typealias Output = String?
+            public let name = "joined"
+            public var argumentCount: Int? {
+              var argumentCount = 0
+              argumentCount += String._columnWidth
+              argumentCount += String._columnWidth
+              return argumentCount
+            }
+            public let isDeterministic = false
+            public let body: (_ arguments: any Sequence<(String, separator: String)>) -> String?
+            public init(_ body: @escaping (_ arguments: any Sequence<(String, separator: String)>) -> String?) {
+              self.body = body
+            }
+            public func callAsFunction(_ p0: some StructuredQueriesCore.QueryExpression<String>, separator: some StructuredQueriesCore.QueryExpression<String>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<String?> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, p0, separator, order: order, filter: filter
+                )
+              }
+            }
+            public func step(
+              _ decoder: inout some QueryDecoder
+            ) throws -> (String, separator: String) {
+              let p0 = try decoder.decode(String.self)
+              let separator = try decoder.decode(String.self)
+              guard let p0 else {
+                throw InvalidInvocation()
+              }
+              guard let separator else {
+                throw InvalidInvocation()
+              }
+              return (p0, separator)
+            }
+            public func invoke(_ arguments: some Sequence<(String, separator: String)>) -> QueryBinding {
+              return String?(queryOutput: self.body(arguments)).queryBinding
+            }
+            private struct InvalidInvocation: Error {
+            }
+          }
+          """
+        }
+      }
+
+      @Test func customRepresentations() {
+        assertMacro {
+          #"""
+          @DatabaseFunction(
+            as: ((any Sequence<[String].JSONRepresentation>) -> [String].JSONRepresentation).self
+          ) 
+          func joined(_ arrays: some Sequence<[String]>) -> [String] {
+            arrays.flatMap(\.self)
+          }
+          """#
+        } expansion: {
+          #"""
+          func joined(_ arrays: some Sequence<[String]>) -> [String] {
+            arrays.flatMap(\.self)
+          }
+
+          nonisolated var $joined: __macro_local_6joinedfMu_ {
+            __macro_local_6joinedfMu_ {
+              joined($0)
+            }
+          }
+
+          nonisolated struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+            public typealias Input = [String].JSONRepresentation
+            public typealias Output = [String].JSONRepresentation
+            public let name = "joined"
+            public var argumentCount: Int? {
+              var argumentCount = 0
+              argumentCount += [String].JSONRepresentation._columnWidth
+              return argumentCount
+            }
+            public let isDeterministic = false
+            public let body: (_ arrays: any Sequence<[String]>) -> [String]
+            public init(_ body: @escaping (_ arrays: any Sequence<[String]>) -> [String]) {
+              self.body = body
+            }
+            public func callAsFunction(_ arrays: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, arrays, order: order, filter: filter
+                )
+              }
+            }
+            public func step(
+              _ decoder: inout some QueryDecoder
+            ) throws -> [String] {
+              let arrays = try decoder.decode([String].JSONRepresentation.self)
+              guard let arrays else {
+                throw InvalidInvocation()
+              }
+              return arrays
+            }
+            public func invoke(_ arguments: some Sequence<[String]>) -> QueryBinding {
+              return [String].JSONRepresentation(queryOutput: self.body(arguments)).queryBinding
+            }
+            private struct InvalidInvocation: Error {
+            }
+          }
+          """#
+        }
+      }
+
+      @Test func voidReturning() {
+        assertMacro {
+          """
+          @DatabaseFunction
+          func print(_ xs: some Sequence<Int>) {
+            for x in xs {
+              Swift.print(x)
+            }
+          }
+          """
+        } expansion: {
+          """
+          func print(_ xs: some Sequence<Int>) {
+            for x in xs {
+              Swift.print(x)
+            }
+          }
+
+          nonisolated var $print: __macro_local_5printfMu_ {
+            __macro_local_5printfMu_ {
+              print($0)
+            }
+          }
+
+          nonisolated struct __macro_local_5printfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+            public typealias Input = Int
+            public typealias Output = Swift.Void
+            public let name = "print"
+            public var argumentCount: Int? {
+              var argumentCount = 0
+              argumentCount += Int._columnWidth
+              return argumentCount
+            }
+            public let isDeterministic = false
+            public let body: (_ xs: any Sequence<Int>) -> Swift.Void
+            public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Swift.Void) {
+              self.body = body
+            }
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, xs, order: order, filter: filter
+                )
+              }
+            }
+            public func step(
+              _ decoder: inout some QueryDecoder
+            ) throws -> Int {
+              let xs = try decoder.decode(Int.self)
+              guard let xs else {
+                throw InvalidInvocation()
+              }
+              return xs
+            }
+            public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
+              self.body(arguments)
+              return .null
+            }
+            private struct InvalidInvocation: Error {
+            }
+          }
+          """
+        }
+      }
+
+      @Test func throwing() {
+        assertMacro {
+          """
+          @DatabaseFunction
+          func validatePositive(_ xs: some Sequence<Int>) throws {
+            for x in xs {
+              guard x.sign == .plus else {
+                throw NegativeError()
+              }
+            }
+          }
+          """
+        } expansion: {
+          """
+          func validatePositive(_ xs: some Sequence<Int>) throws {
+            for x in xs {
+              guard x.sign == .plus else {
+                throw NegativeError()
+              }
+            }
+          }
+
+          nonisolated var $validatePositive: __macro_local_16validatePositivefMu_ {
+            __macro_local_16validatePositivefMu_ {
+              try validatePositive($0)
+            }
+          }
+
+          nonisolated struct __macro_local_16validatePositivefMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
+            public typealias Input = Int
+            public typealias Output = Swift.Void
+            public let name = "validatePositive"
+            public var argumentCount: Int? {
+              var argumentCount = 0
+              argumentCount += Int._columnWidth
+              return argumentCount
+            }
+            public let isDeterministic = false
+            public let body: (_ xs: any Sequence<Int>) throws -> Swift.Void
+            public init(_ body: @escaping (_ xs: any Sequence<Int>) throws -> Swift.Void) {
+              self.body = body
+            }
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, xs, order: order, filter: filter
+                )
+              }
+            }
+            public func step(
+              _ decoder: inout some QueryDecoder
+            ) throws -> Int {
+              let xs = try decoder.decode(Int.self)
+              guard let xs else {
+                throw InvalidInvocation()
+              }
+              return xs
+            }
+            public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
+              do {
+                try self.body(arguments)
+                return .null
+              } catch {
+                return .invalid(error)
+              }
+            }
+            private struct InvalidInvocation: Error {
+            }
+          }
+          """
+        }
       }
     }
   }

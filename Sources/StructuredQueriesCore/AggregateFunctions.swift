@@ -20,7 +20,7 @@ extension QueryExpression where QueryValue: QueryBindable {
     distinct isDistinct: Bool = false,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<Int> {
-    AggregateFunction(
+    AggregateFunctionExpression(
       "count",
       isDistinct: isDistinct,
       [queryFragment],
@@ -51,7 +51,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<String?> {
-    AggregateFunction(
+    AggregateFunctionExpression(
       "group_concat",
       separator.map { [queryFragment, $0.queryFragment] } ?? [queryFragment],
       order: order?.queryFragment,
@@ -74,7 +74,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
     order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<String?> {
-    AggregateFunction(
+    AggregateFunctionExpression(
       "group_concat",
       isDistinct: isDistinct,
       [queryFragment],
@@ -97,7 +97,7 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable 
   public func max(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
-    AggregateFunction("max", [queryFragment], filter: filter?.queryFragment)
+    AggregateFunctionExpression("max", [queryFragment], filter: filter?.queryFragment)
   }
 
   /// A minimum aggregate of this expression.
@@ -112,7 +112,7 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable 
   public func min(
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
-    AggregateFunction("min", [queryFragment], filter: filter?.queryFragment)
+    AggregateFunctionExpression("min", [queryFragment], filter: filter?.queryFragment)
   }
 }
 
@@ -134,7 +134,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
     distinct isDistinct: Bool = false,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<Double?> {
-    AggregateFunction("avg", isDistinct: isDistinct, [queryFragment], filter: filter?.queryFragment)
+    AggregateFunctionExpression("avg", isDistinct: isDistinct, [queryFragment], filter: filter?.queryFragment)
   }
 
   /// An sum aggregate of this expression.
@@ -156,7 +156,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
     // NB: We must explicitly erase here to avoid a runtime crash with opaque return types
     // TODO: Report issue to Swift team.
     SQLQueryExpression(
-      AggregateFunction<QueryValue._Optionalized>(
+      AggregateFunctionExpression<QueryValue._Optionalized>(
         "sum",
         isDistinct: isDistinct,
         [queryFragment],
@@ -182,7 +182,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
     distinct isDistinct: Bool = false,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<QueryValue> {
-    AggregateFunction(
+    AggregateFunctionExpression(
       "total",
       isDistinct: isDistinct,
       [queryFragment],
@@ -191,7 +191,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   }
 }
 
-extension QueryExpression where Self == AggregateFunction<Int> {
+extension QueryExpression where Self == AggregateFunctionExpression<Int> {
   /// A `count(*)` aggregate.
   ///
   /// ```swift
@@ -204,17 +204,33 @@ extension QueryExpression where Self == AggregateFunction<Int> {
   public static func count(
     filter: (any QueryExpression<Bool>)? = nil
   ) -> Self {
-    AggregateFunction("count", ["*"], filter: filter?.queryFragment)
+    AggregateFunctionExpression("count", ["*"], filter: filter?.queryFragment)
   }
 }
 
 /// A query expression of an aggregate function.
-public struct AggregateFunction<QueryValue>: QueryExpression, Sendable {
+public struct AggregateFunctionExpression<QueryValue>: QueryExpression, Sendable {
   var name: QueryFragment
   var isDistinct: Bool
   var arguments: [QueryFragment]
   var order: QueryFragment?
   var filter: QueryFragment?
+
+  public init<each Argument: QueryExpression>(
+    _ name: String,
+    distinct isDistinct: Bool = false,
+    _ arguments: repeat each Argument,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) {
+    self.init(
+      QueryFragment(quote: name),
+      isDistinct: isDistinct,
+      Array(repeat each arguments),
+      order: order?.queryFragment,
+      filter: filter?.queryFragment
+    )
+  }
 
   package init(
     _ name: QueryFragment,

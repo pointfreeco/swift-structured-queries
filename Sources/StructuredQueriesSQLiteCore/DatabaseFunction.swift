@@ -1,7 +1,7 @@
 /// A type representing a database function.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
-/// a conformance.
+/// Don't conform to this protocol directly. Instead, use the
+/// [`@DatabaseFunction`](<doc:CustomFunctions>) macro to generate a conformance.
 public protocol DatabaseFunction<Input, Output> {
   /// A type representing the function's arguments.
   associatedtype Input
@@ -22,8 +22,8 @@ public protocol DatabaseFunction<Input, Output> {
 
 /// A type representing a scalar database function.
 ///
-/// Don't conform to this protocol directly. Instead, use the `@DatabaseFunction` macro to generate
-/// a conformance.
+/// Don't conform to this protocol directly. Instead, use the
+/// [`@DatabaseFunction`](<doc:CustomFunctions#Scalar-functions>) macro to generate a conformance.
 public protocol ScalarDatabaseFunction<Input, Output>: DatabaseFunction {
   /// The function body. Uses a query decoder to process the input of a database function into a
   /// bindable value.
@@ -47,6 +47,71 @@ extension ScalarDatabaseFunction {
       SQLQueryExpression(
         "\(quote: name)(\(Array(repeat each input).joined(separator: ", ")))"
       )
+    }
+  }
+}
+
+/// A type representing an aggregate database function.
+///
+/// Don't conform to this protocol directly. Instead, use the
+/// [`@DatabaseFunction`](<doc:CustomFunctions#Aggregate-functions>) macro to generate a
+/// conformance.
+public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
+  /// A type representing one row of input to the aggregate function.
+  associatedtype Element = Input
+
+  /// Decodes a row into an element to aggregate a result from.
+  ///
+  /// - Parameter decoder: A query decoder.
+  /// - Returns: An element to append to the sequence sent to the aggregate function.
+  func step(_ decoder: inout some QueryDecoder) throws -> Element
+
+  /// Aggregates elements into a bindable value.
+  ///
+  /// - Parameter arguments: A sequence of elements to aggregate from.
+  /// - Returns: A binding returned from the aggregate function.
+  func invoke(_ arguments: some Sequence<Element>) throws -> QueryBinding
+}
+
+extension AggregateDatabaseFunction {
+  /// An aggregate function call expression.
+  ///
+  /// - Parameters
+  ///   - input: Expressions representing the arguments of the function.
+  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
+  ///     the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: An expression representing the function call.
+  @_disfavoredOverload
+  public func callAsFunction(
+    _ input: some QueryExpression<Input>,
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<Output>
+  where Input: QueryBindable {
+    $_isSelecting.withValue(false) {
+      AggregateFunctionExpression(name, distinct: isDistinct, input, order: order, filter: filter)
+    }
+  }
+
+  /// An aggregate function call expression.
+  ///
+  /// - Parameters
+  ///   - input: Expressions representing the arguments of the function.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: An expression representing the function call.
+  @_disfavoredOverload
+  public func callAsFunction<each T: QueryExpression>(
+    _ input: repeat each T,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<Output>
+  where Input == (repeat (each T).QueryValue) {
+    $_isSelecting.withValue(false) {
+      AggregateFunctionExpression(name, repeat each input, order: order, filter: filter)
     }
   }
 }

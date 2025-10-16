@@ -110,45 +110,177 @@ extension DatabaseFunctionMacro: PeerMacro {
     var invocationArgumentTypes: [TypeSyntax] = []
     var parameters: [String] = []
     var argumentBindings: [String] = []
-    var offset = 0
-    var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
 
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
+    var canThrowInvalidInvocation = false
 
-    for index in signature.parameterClause.parameters.indices {
-      defer { offset += 1 }
-      var parameter = signature.parameterClause.parameters[index]
-      if let ellipsis = parameter.ellipsis {
-        context.diagnose(
-          Diagnostic(
-            node: ellipsis,
-            message: MacroExpansionErrorMessage("Variadic arguments are not supported")
+    let isAggregate: Bool
+    var representableInputType: String
+    var rowType = ""
+    let projectedCallSyntax: ExprSyntax
+
+    if signature.parameterClause.parameters.count == 1,
+      let parameter = signature.parameterClause.parameters.first,
+      var someOrAnyParameterType = parameter.type.as(SomeOrAnyTypeSyntax.self),
+      someOrAnyParameterType.someOrAnySpecifier.tokenKind == .keyword(.some),
+      let parameterType = someOrAnyParameterType.constraint.as(IdentifierTypeSyntax.self),
+      ["Sequence", "Swift.Sequence"].contains(parameterType.name.text),
+      let genericArgumentClause = parameterType.genericArgumentClause,
+      genericArgumentClause.arguments.count == 1,
+      let genericArgument = genericArgumentClause.arguments.first
+    {
+      isAggregate = true
+
+      someOrAnyParameterType.someOrAnySpecifier.tokenKind = .keyword(.any)
+      let bodySignature =
+        signature
+        .with(
+          \.parameterClause.parameters[signature.parameterClause.parameters.startIndex],
+          parameter
+            .with(\.firstName, .wildcardToken(trailingTrivia: .space))
+            .with(\.type, TypeSyntax(someOrAnyParameterType))
+        )
+      bodyArguments.append("\(bodySignature.parameterClause.parameters)")
+
+      var parameterClause = signature.parameterClause.with(\.parameters, [])
+      let firstName = parameter.firstName.tokenKind == .wildcard ? nil : parameter.firstName
+
+      let tupleType =
+        genericArgument.argument.as(TupleTypeSyntax.self)
+        ?? TupleTypeSyntax(
+          elements: [
+            TupleTypeElementSyntax(
+              firstName: firstName,
+              secondName: parameter.secondName,
+              type: genericArgument.argument.cast(TypeSyntax.self)
+            )
+          ]
+        )
+
+      let representableInputGeneric = functionRepresentation?
+        .parameters.first?
+        .type.as(SomeOrAnyTypeSyntax.self)?
+        .constraint.as(IdentifierTypeSyntax.self)?
+        .genericArgumentClause?
+        .arguments.first
+      let representableInputGenericArgument = representableInputGeneric?.argument
+
+      representableInputType = "\(representableInputGeneric ?? genericArgument)"
+      rowType = "\(genericArgument)"
+
+      let representableInputArguments =
+        representableInputGenericArgument?.as(TupleTypeSyntax.self)?.elements.map(\.type)
+        ?? (representableInputGenericArgument?.cast(TypeSyntax.self)).map { [$0] }
+      var representableInputArgumentsIterator = representableInputArguments?.makeIterator()
+
+      var offset = 0
+      for var element in tupleType.elements {
+        defer { offset += 1 }
+        var type = representableInputArgumentsIterator?.next() ?? element.type
+        element.type = type.asQueryExpression()
+        type = type.trimmed
+        representableInputTypes.append(type.description)
+        invocationArgumentTypes.append(type)
+        let firstName = element.firstName?.trimmedDescription
+        let secondName = element.secondName?.trimmedDescription ?? firstName ?? "p\(offset)"
+        parameters.append(secondName)
+        argumentBindings.append(secondName)
+
+        argumentCounts.append("\(type)")
+        decodings.append("let \(secondName) = try decoder.decode(\(type).self)")
+        decodingUnwrappings.append(
+          "guard let \(secondName) else { throw InvalidInvocation() }"
+        )
+        canThrowInvalidInvocation = true
+
+        parameterClause.parameters.append(
+          FunctionParameterSyntax(
+            firstName: firstName.map { .identifier($0) } ?? .wildcardToken(),
+            secondName: firstName == secondName
+              ? nil
+              : .identifier(secondName, leadingTrivia: .space),
+            colon: .colonToken(),
+            type: element.type,
+            trailingComma: .commaToken(),
+            trailingTrivia: .space
           )
         )
-        return []
       }
-      bodyArguments.append("\(parameter.type.trimmed)")
-      var type = (functionRepresentationIterator?.next()?.type ?? parameter.type)
-      parameter.type = type.asQueryExpression()
-      type = type.trimmed
-      representableInputTypes.append(type.description)
-      if let defaultValue = parameter.defaultValue,
-        defaultValue.value.is(NilLiteralExprSyntax.self)
-      {
-        parameter.defaultValue?.value = "\(type).none"
-      }
-      signature.parameterClause.parameters[index] = parameter
-      invocationArgumentTypes.append(type)
-      let parameterName = (parameter.secondName ?? parameter.firstName).trimmedDescription
-      parameters.append(parameterName)
-      argumentBindings.append(parameterName)
+      parameterClause.parameters.append(
+        FunctionParameterSyntax(
+          firstName: "order",
+          colon: .colonToken(),
+          type: "(some QueryExpression)?" as TypeSyntax,
+          defaultValue: InitializerClauseSyntax(
+            equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+            value: "Bool?.none" as ExprSyntax
+          ),
+          trailingComma: .commaToken(),
+          trailingTrivia: .space
+        )
+      )
+      parameterClause.parameters.append(
+        FunctionParameterSyntax(
+          firstName: "filter",
+          colon: .colonToken(trailingTrivia: .space),
+          type: "(some QueryExpression<Bool>)?" as TypeSyntax,
+          defaultValue: InitializerClauseSyntax(
+            equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+            value: "Bool?.none" as ExprSyntax
+          )
+        )
+      )
+      signature.parameterClause = parameterClause
+      projectedCallSyntax = """
+        \(functionTypeName) {
+        \(raw: declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")\
+        \(declaration.name.trimmed)(\(raw: firstName.map { "\($0.trimmedDescription): " } ?? "")$0)
+        }
+        """
+    } else {
+      isAggregate = false
+      var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
 
-      argumentCounts.append("\(type)")
-      decodings.append("let \(parameterName) = try decoder.decode(\(type).self)")
-      decodingUnwrappings.append("guard let \(parameterName) else { throw InvalidInvocation() }")
+      for index in signature.parameterClause.parameters.indices {
+        var parameter = signature.parameterClause.parameters[index]
+        if let ellipsis = parameter.ellipsis {
+          context.diagnose(
+            Diagnostic(
+              node: ellipsis,
+              message: MacroExpansionErrorMessage("Variadic arguments are not supported")
+            )
+          )
+          return []
+        }
+        bodyArguments.append("\(parameter.type.trimmed)")
+        var type = (functionRepresentationIterator?.next()?.type ?? parameter.type)
+        parameter.type = type.asQueryExpression()
+        type = type.trimmed
+        representableInputTypes.append(type.description)
+        if let defaultValue = parameter.defaultValue,
+          defaultValue.value.is(NilLiteralExprSyntax.self)
+        {
+          parameter.defaultValue?.value = "\(type).none"
+        }
+        signature.parameterClause.parameters[index] = parameter
+        invocationArgumentTypes.append(type)
+        let parameterName = (parameter.secondName ?? parameter.firstName).trimmedDescription
+        parameters.append(parameterName)
+        argumentBindings.append(parameterName)
+
+        argumentCounts.append("\(type)")
+        decodings.append("let \(parameterName) = try decoder.decode(\(type).self)")
+        decodingUnwrappings.append("guard let \(parameterName) else { throw InvalidInvocation() }")
+        canThrowInvalidInvocation = true
+      }
+      representableInputType = representableInputTypes.joined(separator: ", ")
+      representableInputType =
+        representableInputTypes.count == 1
+        ? representableInputType
+        : "(\(representableInputType))"
+      projectedCallSyntax = "\(functionTypeName)(\(declaration.name.trimmed))"
     }
-    var representableInputType = representableInputTypes.joined(separator: ", ")
     let isVoidReturning = signature.returnClause == nil
     let outputType = returnClause.type.trimmed
     signature.returnClause = returnClause
@@ -161,35 +293,8 @@ extension DatabaseFunctionMacro: PeerMacro {
       \(declaration.signature.effectSpecifiers?.trimmedDescription ?? "")\
       \(bodyReturnClause)
       """
-    let bodyInvocation = """
-      \(declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")self.body(\
-      \(argumentBindings.joined(separator: ", "))\
-      )
-      """
     // TODO: Diagnose 'asyncClause'?
     signature.effectSpecifiers?.throwsClause = nil
-
-    var invocationBody =
-      isVoidReturning
-      ? """
-      \(bodyInvocation)
-      return .null
-      """
-      : """
-      return \(functionRepresentation?.returnClause.type ?? outputType)(
-      queryOutput: \(bodyInvocation)
-      )
-      .queryBinding
-      """
-    if declaration.signature.effectSpecifiers?.throwsClause != nil {
-      invocationBody = """
-        do {
-        \(invocationBody)
-        } catch {
-        return .invalid(error)
-        }
-        """
-    }
 
     var attributes = declaration.attributes
     if let index = attributes.firstIndex(where: {
@@ -210,10 +315,6 @@ extension DatabaseFunctionMacro: PeerMacro {
         continue
       }
     }
-    representableInputType =
-      representableInputTypes.count == 1
-      ? representableInputType
-      : "(\(representableInputType))"
 
     let argumentCount =
       argumentCounts.isEmpty
@@ -224,15 +325,136 @@ extension DatabaseFunctionMacro: PeerMacro {
       return argumentCount
       """
 
+    var methods: [DeclSyntax] = []
+    if isAggregate {
+      var parameter = declaration.signature.parameterClause.parameters[
+        declaration.signature.parameterClause.parameters.startIndex
+      ]
+      parameter.firstName = .wildcardToken(trailingTrivia: .space)
+      parameter.secondName = "arguments"
+
+      methods.append(
+        """
+        public func callAsFunction\(signature.trimmed) {
+        StructuredQueriesCore.$_isSelecting.withValue(false) {
+        StructuredQueriesCore.AggregateFunctionExpression(
+        self.name, \
+        \(raw: parameters.joined(separator: ", ")), \
+        order: order, \
+        filter: filter
+        )
+        }
+        }
+        """
+      )
+
+      let stepReturnClause: String
+      switch parameters.count {
+      case 0: stepReturnClause = ""
+      case 1: stepReturnClause = "return \(parameters[0])\n"
+      default: stepReturnClause = "return (\(parameters.joined(separator: ", ")))\n"
+      }
+
+      methods.append(
+        """
+        public func step(
+        _ decoder: inout some QueryDecoder
+        ) throws -> \(raw: rowType) {
+        \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
+        \(raw: stepReturnClause)\
+        }
+        """
+      )
+
+      let bodyInvocation = """
+        \(declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")\
+        self.body(arguments)
+        """
+      var invocationBody =
+        isVoidReturning
+        ? """
+        \(bodyInvocation)
+        return .null
+        """
+        : "return \(representableOutputType)(queryOutput: \(bodyInvocation)).queryBinding"
+      if declaration.signature.effectSpecifiers?.throwsClause != nil {
+        invocationBody = """
+          do {
+          \(invocationBody)
+          } catch {
+          return .invalid(error)
+          }
+          """
+      }
+      methods.append(
+        """
+        public func invoke(\(parameter)) -> QueryBinding {
+        \(raw: invocationBody)
+        }
+        """
+      )
+    } else {
+      methods.append(
+        """
+        public func callAsFunction\(signature.trimmed) {
+        StructuredQueriesCore.$_isSelecting.withValue(false) {
+        StructuredQueriesCore.SQLQueryExpression(
+        "\\(quote: self.name)(\(raw: parameters.map { "\\(\($0))" }.joined(separator: ", ")))"
+        )
+        }
+        }
+        """
+      )
+
+      let bodyInvocation = """
+        \(declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")self.body(\
+        \(argumentBindings.joined(separator: ", "))\
+        )
+        """
+      var invocationBody =
+        isVoidReturning
+        ? """
+        \(bodyInvocation)
+        return .null
+        """
+        : """
+        return \(functionRepresentation?.returnClause.type ?? outputType)(
+        queryOutput: \(bodyInvocation)
+        )
+        .queryBinding
+        """
+      if declaration.signature.effectSpecifiers?.throwsClause != nil {
+        invocationBody = """
+          do {
+          \(invocationBody)
+          } catch {
+          return .invalid(error)
+          }
+          """
+      }
+
+      methods.append(
+        """
+        public func invoke(
+        _ decoder: inout some QueryDecoder
+        ) throws -> StructuredQueriesCore.QueryBinding {
+        \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
+        \(raw: invocationBody)
+        }
+        """
+      )
+    }
+
     return [
       """
-      \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \(functionTypeName) {
-      \(functionTypeName)(\(declaration.name.trimmed))
+      \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
+      \(functionTypeName) {
+      \(projectedCallSyntax)
       }
       """,
       """
       \(attributes)\(access)\(nonisolated)struct \(functionTypeName): \
-      StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+      StructuredQueriesSQLiteCore.\(raw: isAggregate ? "Aggregate" : "Scalar")DatabaseFunction {
       public typealias Input = \(raw: representableInputType)
       public typealias Output = \(representableOutputType)
       public let name = \(databaseFunctionName)
@@ -244,20 +466,8 @@ extension DatabaseFunctionMacro: PeerMacro {
       public init(_ body: @escaping \(raw: bodyType)) {
       self.body = body
       }
-      public func callAsFunction\(signature.trimmed) {
-      StructuredQueriesCore.$_isSelecting.withValue(false) {
-      StructuredQueriesCore.SQLQueryExpression(
-      "\\(quote: self.name)(\(raw: parameters.map { "\\(\($0))" }.joined(separator: ", ")))"
-      )
-      }
-      }
-      public func invoke(
-      _ decoder: inout some QueryDecoder
-      ) throws -> StructuredQueriesCore.QueryBinding {
-      \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
-      \(raw: invocationBody)
-      }
-      private struct InvalidInvocation: Error {}
+      \(raw: methods.map(\.description).joined(separator: "\n"))\
+      \(raw: canThrowInvalidInvocation ? "\nprivate struct InvalidInvocation: Error {}" : "")
       }
       """,
     ]
