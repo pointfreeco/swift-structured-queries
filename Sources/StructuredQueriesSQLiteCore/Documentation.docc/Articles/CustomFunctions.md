@@ -69,18 +69,18 @@ a function. But it is quite easy to write this function in plain Swift:
 ```swift
 @DatabaseFunction
 func mode(priority priorities: some Sequence<Priority?>) -> Priority? {
-  var occurences: [Priority: Int] = [:]
+  var occurrences: [Priority: Int] = [:]
   for priority in priorities {
     guard let priority
     else { continue }
-    occurences[priority, default: 0] += 1
+    occurrences[priority, default: 0] += 1
   }
-  return occurences.max { $0.value < $1.value }?.key
+  return occurrences.max { $0.value < $1.value }?.key
 }
 ```
 
 This defines an "aggregate" function, and the sequence `priorities` that is passed to it represents
-all of the data from the database passed to it while aggregating. It is now straightfoward
+all of the data from the database passed to it while aggregating. It is now straightforward
 to compute the mode of priorities across all reminders:
 
 ```swift
@@ -141,8 +141,8 @@ func jsonArrayExclaim(_ strings: [String]) -> [String] {
 }
 ```
 
-It is also possible to do this with aggregate functions, but you must describe the sequence as an
-`any Sequence` instead of a `some Sequence`:
+It is also possible to do this with aggregate functions, too, but you must describe the sequence as
+an `any Sequence` instead of a `some Sequence`:
 
 ```swift
 @DatabaseFunction(
