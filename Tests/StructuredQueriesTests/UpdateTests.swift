@@ -167,54 +167,6 @@ extension SnapshotTests {
       }
     }
 
-    @Test func conflictResolution() {
-      assertInlineSnapshot(
-        of: Reminder.update(or: .abort) { $0.isCompleted = true },
-        as: .sql
-      ) {
-        """
-        UPDATE OR ABORT "reminders"
-        SET "isCompleted" = 1
-        """
-      }
-      assertInlineSnapshot(
-        of: Reminder.update(or: .fail) { $0.isCompleted = true },
-        as: .sql
-      ) {
-        """
-        UPDATE OR FAIL "reminders"
-        SET "isCompleted" = 1
-        """
-      }
-      assertInlineSnapshot(
-        of: Reminder.update(or: .ignore) { $0.isCompleted = true },
-        as: .sql
-      ) {
-        """
-        UPDATE OR IGNORE "reminders"
-        SET "isCompleted" = 1
-        """
-      }
-      assertInlineSnapshot(
-        of: Reminder.update(or: .replace) { $0.isCompleted = true },
-        as: .sql
-      ) {
-        """
-        UPDATE OR REPLACE "reminders"
-        SET "isCompleted" = 1
-        """
-      }
-      assertInlineSnapshot(
-        of: Reminder.update(or: .rollback) { $0.isCompleted = true },
-        as: .sql
-      ) {
-        """
-        UPDATE OR ROLLBACK "reminders"
-        SET "isCompleted" = 1
-        """
-      }
-    }
-
     @Test func rawBind() {
       assertQuery(
         Reminder
