@@ -479,7 +479,7 @@ struct Event {
   var duration: TimeInterval
 
   @Column(generated: .stored)
-  var endAt: Date
+  let endAt: Date
 }
 ```
 
