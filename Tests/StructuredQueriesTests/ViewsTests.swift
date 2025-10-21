@@ -214,10 +214,6 @@ extension SnapshotTests {
         VALUES
         (NULL, 'Morning sync', 'Business')
         """
-      } results: {
-        """
-
-        """
       }
 
       assertQuery(
@@ -290,11 +286,84 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func viewWithBindings() {
+      assertQuery(
+        PastDueReminder.createTemporaryView(
+          as:
+            Reminder.where(\.isPastDue)
+            .select {
+              PastDueReminder.Columns(
+                reminderID: $0.id,
+                title: $0.title
+              )
+            }
+        )
+      ) {
+        """
+        CREATE TEMPORARY VIEW
+        "pastDueReminders"
+        ("reminderID", "title")
+        AS
+        SELECT "reminders"."id" AS "reminderID", "reminders"."title" AS "title"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted")) AND (coalesce("reminders"."dueDate", date('now')) < date('now'))
+        """
+      }
+      assertQuery(
+        PastDueReminder.all
+      ) {
+        """
+        SELECT "pastDueReminders"."reminderID", "pastDueReminders"."title"
+        FROM "pastDueReminders"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────┐
+        │ PastDueReminder(                    │
+        │   reminderID: 1,                    │
+        │   title: "Groceries"                │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ PastDueReminder(                    │
+        │   reminderID: 2,                    │
+        │   title: "Haircut"                  │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ PastDueReminder(                    │
+        │   reminderID: 3,                    │
+        │   title: "Doctor appointment"       │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ PastDueReminder(                    │
+        │   reminderID: 6,                    │
+        │   title: "Pick up kids from school" │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ PastDueReminder(                    │
+        │   reminderID: 8,                    │
+        │   title: "Take out trash"           │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ PastDueReminder(                    │
+        │   reminderID: 9,                    │
+        │   title: "Call accountant"          │
+        │ )                                   │
+        └─────────────────────────────────────┘
+        """
+      }
+    }
   }
 }
 
 @Table
 private struct CompletedReminder {
+  let reminderID: Reminder.ID
+  let title: String
+}
+
+@Table
+private struct PastDueReminder {
   let reminderID: Reminder.ID
   let title: String
 }
