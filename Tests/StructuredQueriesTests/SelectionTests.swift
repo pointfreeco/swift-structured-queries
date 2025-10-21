@@ -298,7 +298,27 @@ extension SnapshotTests {
               remindersCount: $0.id.count()
             )
           }
-      )
+      ) {
+        """
+        SELECT "rLs"."id" AS "id", "rLs"."color" AS "color", "rLs"."title" AS "title", "rLs"."position" AS "position", count("reminders"."id") AS "remindersCount"
+        FROM "reminders"
+        LEFT JOIN "remindersLists" AS "rLs" ON ("reminders"."remindersListID") = ("rLs"."id")
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┐
+        │ OptionalRemindersListAliasAndReminderCount( │
+        │   remindersList: RemindersList(             │
+        │     id: 1,                                  │
+        │     color: 4889071,                         │
+        │     title: "Personal",                      │
+        │     position: 0                             │
+        │   ),                                        │
+        │   remindersCount: 10                        │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
+        """
+      }
     }
   }
 }
