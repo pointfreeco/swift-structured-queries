@@ -284,6 +284,22 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func optionalAlias() {
+      let baseQuery =
+        Reminder
+        .leftJoin(RemindersList.as(RL.self).all) { $0.remindersListID.eq($1.id) }
+
+      assertQuery(
+        baseQuery
+          .select {
+            OptionalRemindersListAliasAndReminderCount.Columns(
+              remindersList: $1,
+              remindersCount: $0.id.count()
+            )
+          }
+      )
+    }
   }
 }
 
@@ -310,6 +326,13 @@ enum RL: AliasName {}
 struct RemindersListAliasAndReminderCount {
   @Columns(as: TableAlias<RemindersList, RL>.self)
   let remindersList: RemindersList
+  let remindersCount: Int
+}
+
+@Selection
+struct OptionalRemindersListAliasAndReminderCount {
+  @Columns(as: TableAlias<RemindersList, RL>?.self)
+  let remindersList: RemindersList?
   let remindersCount: Int
 }
 
