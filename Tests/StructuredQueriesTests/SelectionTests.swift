@@ -234,6 +234,56 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func alias() {
+      let baseQuery =
+        RemindersList.as(RL.self).all
+        .group(by: \.id)
+        .limit(2)
+        .join(Reminder.all) { $0.id.eq($1.remindersListID) }
+
+      assertQuery(
+        baseQuery
+          .select {
+            RemindersListAliasAndReminderCount.Columns(
+              remindersList: $0,
+              remindersCount: $1.id.count()
+            )
+          }
+      ) {
+        """
+        SELECT "rLs"."id" AS "id", "rLs"."color" AS "color", "rLs"."title" AS "title", "rLs"."position" AS "position", count("reminders"."id") AS "remindersCount"
+        FROM "remindersLists" AS "rLs"
+        JOIN "reminders" ON ("rLs"."id") = ("reminders"."remindersListID")
+        GROUP BY "rLs"."id"
+        LIMIT 2
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────┐
+        │ RemindersListAliasAndReminderCount( │
+        │   remindersList: RemindersList(     │
+        │     id: 1,                          │
+        │     color: 4889071,                 │
+        │     title: "Personal",              │
+        │     position: 0                     │
+        │   ),                                │
+        │   remindersCount: 5                 │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ RemindersListAliasAndReminderCount( │
+        │   remindersList: RemindersList(     │
+        │     id: 2,                          │
+        │     color: 15567157,                │
+        │     title: "Family",                │
+        │     position: 0                     │
+        │   ),                                │
+        │   remindersCount: 3                 │
+        │ )                                   │
+        └─────────────────────────────────────┘
+        """
+      }
+    }
   }
 }
 
@@ -250,6 +300,15 @@ struct ReminderTitleAndAssignedUserName {
 
 @Selection
 struct RemindersListAndReminderCount {
+  let remindersList: RemindersList
+  let remindersCount: Int
+}
+
+enum RL: AliasName {}
+
+@Selection
+struct RemindersListAliasAndReminderCount {
+  @Columns(as: TableAlias<RemindersList, RL>.self)
   let remindersList: RemindersList
   let remindersCount: Int
 }

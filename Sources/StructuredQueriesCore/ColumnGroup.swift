@@ -4,16 +4,16 @@
 /// to generate values of this type.
 @dynamicMemberLookup
 public struct ColumnGroup<Root: Table, Values: Table>: _TableColumnExpression
-where Values.QueryOutput == Values {
+where Values.QueryOutput: Table {
   public typealias Value = Values
 
   public var _names: [String] { Values.TableColumns.allColumns.map(\.name) }
 
   public typealias QueryValue = Values
 
-  public let keyPath: KeyPath<Root, Values>
+  public let keyPath: KeyPath<Root, Values.QueryOutput>
 
-  public init(keyPath: KeyPath<Root, Values>) {
+  public init(keyPath: KeyPath<Root, Values.QueryOutput>) {
     self.keyPath = keyPath
   }
 
@@ -22,7 +22,7 @@ where Values.QueryOutput == Values {
   }
 
   public subscript<Member>(
-    dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values, Member>>
+    dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values.QueryOutput, Member>>
   ) -> TableColumn<Root, Member> {
     let column = Values.columns[keyPath: keyPath]
     return TableColumn<Root, Member>(
@@ -33,7 +33,7 @@ where Values.QueryOutput == Values {
   }
 
   public subscript<Member>(
-    dynamicMember keyPath: KeyPath<Values.TableColumns, GeneratedColumn<Values, Member>>
+    dynamicMember keyPath: KeyPath<Values.TableColumns, GeneratedColumn<Values.QueryOutput, Member>>
   ) -> GeneratedColumn<Root, Member> {
     let column = Values.columns[keyPath: keyPath]
     return GeneratedColumn<Root, Member>(
@@ -44,7 +44,7 @@ where Values.QueryOutput == Values {
   }
 
   public subscript<Member>(
-    dynamicMember keyPath: KeyPath<Values.TableColumns, ColumnGroup<Values, Member>>
+    dynamicMember keyPath: KeyPath<Values.TableColumns, ColumnGroup<Values.QueryOutput, Member>>
   ) -> ColumnGroup<Root, Member> {
     let column = Values.columns[keyPath: keyPath]
     return ColumnGroup<Root, Member>(
@@ -53,12 +53,12 @@ where Values.QueryOutput == Values {
   }
 
   public var _allColumns: [any TableColumnExpression] {
-    Values.TableColumns.allColumns.map { column in
+    Values.QueryOutput.TableColumns.allColumns.map { column in
       func open<R, V>(
         _ column: some TableColumnExpression<R, V>
       ) -> any TableColumnExpression {
         let keyPath = keyPath.appending(
-          path: unsafeDowncast(column.keyPath, to: KeyPath<Values, V.QueryOutput>.self)
+          path: unsafeDowncast(column.keyPath, to: KeyPath<Values.QueryOutput, V.QueryOutput>.self)
         )
         return TableColumn<Root, V>(
           column.name,
@@ -71,12 +71,12 @@ where Values.QueryOutput == Values {
   }
 
   public var _writableColumns: [any WritableTableColumnExpression] {
-    Values.TableColumns.writableColumns.map { column in
+    Values.QueryOutput.TableColumns.writableColumns.map { column in
       func open<R, V>(
         _ column: some WritableTableColumnExpression<R, V>
       ) -> any WritableTableColumnExpression {
         let keyPath = keyPath.appending(
-          path: unsafeDowncast(column.keyPath, to: KeyPath<Values, V.QueryOutput>.self)
+          path: unsafeDowncast(column.keyPath, to: KeyPath<Values.QueryOutput, V.QueryOutput>.self)
         )
         return TableColumn<Root, V>(
           column.name,

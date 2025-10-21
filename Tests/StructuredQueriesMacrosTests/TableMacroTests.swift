@@ -2414,6 +2414,90 @@ extension SnapshotTests {
     }
   }
 
+  @Test func columnsRepresentation() {
+    assertMacro {
+      """
+      @Selection
+      struct RemindersListAliasAndReminderCount {
+        @Columns(as: TableAlias<RemindersList, RL>.self)
+        let remindersList: RemindersList
+        let remindersCount: Int
+      }
+      """
+    } expansion: {
+      #"""
+      struct RemindersListAliasAndReminderCount {
+        let remindersList: RemindersList
+        let remindersCount: Int
+
+        public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+          public typealias QueryValue = RemindersListAliasAndReminderCount
+          public let remindersList = StructuredQueriesCore.ColumnGroup<QueryValue, TableAlias<RemindersList, RL>>(keyPath: \QueryValue.remindersList)
+          public let remindersCount = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("remindersCount", keyPath: \QueryValue.remindersCount)
+          public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+            var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            allColumns.append(contentsOf: QueryValue.columns.remindersList._allColumns)
+            allColumns.append(contentsOf: QueryValue.columns.remindersCount._allColumns)
+            return allColumns
+          }
+          public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+            var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            writableColumns.append(contentsOf: QueryValue.columns.remindersList._writableColumns)
+            writableColumns.append(contentsOf: QueryValue.columns.remindersCount._writableColumns)
+            return writableColumns
+          }
+          public var queryFragment: QueryFragment {
+            "\(self.remindersList), \(self.remindersCount)"
+          }
+        }
+
+        public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+          public typealias QueryValue = RemindersListAliasAndReminderCount
+          public let allColumns: [any StructuredQueriesCore.QueryExpression]
+          public init(
+            remindersList: some StructuredQueriesCore.QueryExpression<TableAlias<RemindersList, RL>>,
+            remindersCount: some StructuredQueriesCore.QueryExpression<Int>
+          ) {
+            var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+            allColumns.append(contentsOf: remindersList._allColumns)
+            allColumns.append(contentsOf: remindersCount._allColumns)
+            self.allColumns = allColumns
+          }
+        }
+      }
+
+      nonisolated extension RemindersListAliasAndReminderCount: StructuredQueriesCore.Table, StructuredQueriesCore._Selection, StructuredQueriesCore.PartialSelectStatement {
+        public typealias QueryValue = Self
+        public typealias From = Swift.Never
+        public nonisolated static var columns: TableColumns {
+          TableColumns()
+        }
+        public nonisolated static var _columnWidth: Int {
+          var columnWidth = 0
+          columnWidth += TableAlias<RemindersList, RL>._columnWidth
+          columnWidth += Int._columnWidth
+          return columnWidth
+        }
+        public nonisolated static var tableName: String {
+          "remindersListAliasAndReminderCounts"
+        }
+        public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          let remindersList = try decoder.decode(TableAlias<RemindersList, RL>.self)
+          let remindersCount = try decoder.decode(Int.self)
+          guard let remindersList else {
+            throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+          }
+          guard let remindersCount else {
+            throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+          }
+          self.remindersList = remindersList
+          self.remindersCount = remindersCount
+        }
+      }
+      """#
+    }
+  }
+
   #if StructuredQueriesCasePaths
     @Test func enumBasics() {
       assertMacro {
