@@ -114,7 +114,7 @@ public macro Column(
 /// - Parameters primaryKey: These columns are the table's composite primary key.
 @attached(peer)
 public macro Columns(
-  // as representableType: (any QueryRepresentable.Type)? = nil,
+  as representableType: (any QueryRepresentable.Type)? = nil,
   primaryKey: Bool = false
 ) =
   #externalMacro(
