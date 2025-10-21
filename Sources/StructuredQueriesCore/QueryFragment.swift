@@ -169,7 +169,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
             }
             $0.append(hex)
           }
-          $0.append("unhex(\(quote: hex, delimiter: .text))")
+          $0.append("X\(quote: hex, delimiter: .text)")
         case .bool(let bool):
           $0.append("\(raw: bool ? 1 : 0)")
         case .double(let double):
