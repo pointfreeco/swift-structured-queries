@@ -148,7 +148,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     self.init(sql.quoted(delimiter))
   }
 
-  package func compiled() -> Self {
+  package func compiled(statementType: String) -> Self {
     segments.reduce(into: QueryFragment()) {
       switch $1 {
       case .sql(let sql):
@@ -156,12 +156,6 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       case .binding(let binding):
         switch binding {
         case .blob(let blob):
-          reportIssue(
-            """
-            Cannot bind bytes to a trigger statement. To hardcode a constant BLOB, use the '#sql' \
-            macro.
-            """
-          )
           let hex = blob.reduce(into: "") {
             let hex = String($1, radix: 16)
             if hex.count == 1 {
@@ -177,8 +171,8 @@ extension QueryFragment: ExpressibleByStringInterpolation {
         case .date(let date):
           reportIssue(
             """
-            Cannot bind a date to a trigger statement. Specify dates using the '#sql' macro, \
-            instead. For example, the current date:
+            Swift Date values should not be bound to a '\(statementType)' statement. Specify dates \
+            using the '#sql' macro, instead. For example, the current date:
 
                 #sql("datetime()")
 
@@ -199,8 +193,8 @@ extension QueryFragment: ExpressibleByStringInterpolation {
         case .uuid(let uuid):
           reportIssue(
             """
-            Cannot bind a UUID to a trigger statement. Specify UUIDs using the '#sql' macro, \
-            instead. For example, a random UUID:
+            Swift UUID values should not be bound to a '\(statementType)' statement. Specify UUIDs \
+            using the '#sql' macro, instead. For example, a random UUID:
 
                 #sql("uuid()")
 

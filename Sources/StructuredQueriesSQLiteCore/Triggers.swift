@@ -424,7 +424,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     }
     query.append("\(.newlineOrSpace)\(triggerName.indented())")
     query.append("\(.newlineOrSpace)\(when.rawValue) \(operation)")
-    return query.compiled()
+    return query.compiled(statementType: "CREATE TEMPORARY TRIGGER")
   }
 
   private var triggerName: QueryFragment {
