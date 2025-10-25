@@ -68,8 +68,8 @@ extension SnapshotTests {
       } matching: {
         $0.description.contains(
           """
-          Cannot bind a date to a trigger statement. Specify dates using the '#sql' macro, \
-          instead. For example, the current date:
+          Swift Date values should not be bound to a 'CREATE TEMPORARY TRIGGER' statement. Specify \
+          dates using the '#sql' macro, instead. For example, the current date:
 
               #sql("datetime()")
 

@@ -252,7 +252,7 @@ where Base.TableColumns.PrimaryColumn: WritableTableColumnExpression {
 }
 
 extension TableAlias: QueryExpression where Base: QueryExpression {
-  public typealias QueryValue = Base.QueryValue
+  public typealias QueryValue = Self
 
   public var queryFragment: QueryFragment {
     base.queryFragment

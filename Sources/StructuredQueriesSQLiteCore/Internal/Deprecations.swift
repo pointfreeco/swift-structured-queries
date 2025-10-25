@@ -1,6 +1,336 @@
 import Foundation
 import StructuredQueriesCore
 
+// NB: Deprecated after 0.24.0:
+
+extension Table {
+  @available(*, deprecated, renamed: "insert(_:values:onConflictDoUpdate:where:)")
+  public static func insert(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> TableColumns = { $0 },
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(columns, values: values, onConflictDoUpdate: updates, where: updateFilter)
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:values:onConflictDoUpdate:where:)")
+  public static func insert(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> TableColumns = { $0 },
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(columns, values: values, onConflictDoUpdate: updates, where: updateFilter)
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:values:onConflict:where:doUpdate:where:)")
+  public static func insert<T1, each T2>(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> TableColumns = { $0 },
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(
+      columns,
+      values: values,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
+    )
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:values:onConflict:where:doUpdate:where:)")
+  public static func insert<T1, each T2>(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> TableColumns = { $0 },
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>) -> Void,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(
+      columns,
+      values: values,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
+    )
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:values:onConflictDoUpdate:where:)")
+  public static func insert<V1, each V2>(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
+    onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(columns, values: values, onConflictDoUpdate: updates, where: updateFilter)
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:values:onConflictDoUpdate:where:)")
+  public static func insert<V1, each V2>(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(columns, values: values, onConflictDoUpdate: updates, where: updateFilter)
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:values:onConflict:where:doUpdate:where:)")
+  public static func insert<V1, each V2, T1, each T2>(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(
+      columns,
+      values: values,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
+    )
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:values:onConflict:where:doUpdate:where:)")
+  public static func insert<V1, each V2, T1, each T2>(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    @InsertValuesBuilder<(V1, repeat each V2)>
+    values: () -> [[QueryFragment]],
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>) -> Void,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(
+      columns,
+      values: values,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
+    )
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:select:onConflictDoUpdate:where:)")
+  public static func insert<
+    V1,
+    each V2
+  >(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
+    onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(
+      columns,
+      select: selection,
+      onConflictDoUpdate: updates,
+      where: updateFilter
+    )
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  public static func insert<
+    V1,
+    each V2
+  >(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
+    onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(
+      columns,
+      select: selection,
+      onConflictDoUpdate: updates,
+      where: updateFilter
+    )
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:select:onConflict:where:doUpdate:where:)")
+  public static func insert<
+    V1,
+    each V2,
+    T1,
+    each T2
+  >(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(
+      columns,
+      select: selection,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
+    )
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert(_:select:onConflict:where:doUpdate:where:)")
+  public static func insert<
+    V1,
+    each V2,
+    T1,
+    each T2
+  >(
+    or conflictResolution: ConflictResolution,
+    _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
+    select selection: () -> some PartialSelectStatement<(V1, repeat each V2)>,
+    onConflict conflictTargets: (TableColumns) -> (
+      TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
+    ),
+    @QueryFragmentBuilder<Bool>
+    where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
+    doUpdate updates: (inout Updates<Self>) -> Void,
+    @QueryFragmentBuilder<Bool>
+    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+  ) -> InsertOf<Self> {
+    var insert = insert(
+      columns,
+      select: selection,
+      onConflict: conflictTargets,
+      where: targetFilter,
+      doUpdate: updates,
+      where: updateFilter
+    )
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+
+  @available(*, deprecated, renamed: "insert()")
+  public static func insert(
+    or conflictResolution: ConflictResolution
+  ) -> InsertOf<Self> {
+    var insert = insert()
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+}
+
+extension PrimaryKeyedTable {
+  @available(*, deprecated, renamed: "upsert(value:)")
+  public static func upsert(
+    or conflictResolution: ConflictResolution,
+    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]]
+  ) -> InsertOf<Self> {
+    var insert = upsert(values: values)
+    insert.conflictResolution = conflictResolution.queryFragment
+    return insert
+  }
+}
+
+extension Table {
+  @available(*, deprecated, renamed: "update(set:)")
+  public static func update(
+    or conflictResolution: ConflictResolution,
+    set updates: (inout Updates<Self>) -> Void
+  ) -> UpdateOf<Self> {
+    var update = Where().update(set: updates)
+    update.conflictResolution = conflictResolution.queryFragment
+    return update
+  }
+}
+
+extension PrimaryKeyedTable {
+  @available(*, deprecated, renamed: "update(_:)")
+  public static func update(
+    or conflictResolution: ConflictResolution,
+    _ row: Self
+  ) -> UpdateOf<Self> {
+    var update = update(row)
+    update.conflictResolution = conflictResolution.queryFragment
+    return update
+  }
+}
+
+extension Where {
+  @available(*, deprecated, renamed: "update(set:)")
+  public func update(
+    or conflictResolution: ConflictResolution,
+    set updates: (inout Updates<From>) -> Void
+  ) -> UpdateOf<From> {
+    var update = update(set: updates)
+    update.conflictResolution = conflictResolution.queryFragment
+    return update
+  }
+}
+
 // NB: Deprecated after 0.22.2:
 
 extension Table {

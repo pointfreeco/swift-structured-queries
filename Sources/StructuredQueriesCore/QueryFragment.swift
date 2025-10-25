@@ -1,3 +1,6 @@
+import Foundation
+import IssueReporting
+
 /// A type representing a SQL string and its bindings.
 ///
 /// You will typically create instances of this type using string literals, where bindings are
@@ -143,6 +146,69 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     delimiter: QuoteDelimiter = .identifier
   ) {
     self.init(sql.quoted(delimiter))
+  }
+
+  package func compiled(statementType: String) -> Self {
+    segments.reduce(into: QueryFragment()) {
+      switch $1 {
+      case .sql(let sql):
+        $0.append("\(raw: sql)")
+      case .binding(let binding):
+        switch binding {
+        case .blob(let blob):
+          let hex = blob.reduce(into: "") {
+            let hex = String($1, radix: 16)
+            if hex.count == 1 {
+              $0.append("0")
+            }
+            $0.append(hex)
+          }
+          $0.append("X\(quote: hex, delimiter: .text)")
+        case .bool(let bool):
+          $0.append("\(raw: bool ? 1 : 0)")
+        case .double(let double):
+          $0.append("\(raw: double)")
+        case .date(let date):
+          reportIssue(
+            """
+            Swift Date values should not be bound to a '\(statementType)' statement. Specify dates \
+            using the '#sql' macro, instead. For example, the current date:
+
+                #sql("datetime()")
+
+            Or a constant date:
+
+                #sql("'2018-01-29 00:08:00'")
+            """
+          )
+          $0.append("\(quote: date.iso8601String, delimiter: .text)")
+        case .int(let int):
+          $0.append("\(raw: int)")
+        case .null:
+          $0.append("NULL")
+        case .text(let string):
+          $0.append("\(quote: string, delimiter: .text)")
+        case .uint(let uint):
+          $0.append("\(raw: uint)")
+        case .uuid(let uuid):
+          reportIssue(
+            """
+            Swift UUID values should not be bound to a '\(statementType)' statement. Specify UUIDs \
+            using the '#sql' macro, instead. For example, a random UUID:
+
+                #sql("uuid()")
+
+            Or a constant UUID:
+
+                #sql("'00000000-0000-0000-0000-000000000000'")
+            """
+          )
+          $0.append("\(quote: uuid.uuidString.lowercased(), delimiter: .text)")
+        case .invalid(let error):
+          $0.append("\(.invalid(error.underlyingError))")
+        }
+      }
+    }
   }
 
   public struct StringInterpolation: StringInterpolationProtocol {

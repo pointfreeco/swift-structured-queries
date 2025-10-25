@@ -61,6 +61,6 @@ where Selection.QueryValue == View {
     query.append("\(.newlineOrSpace)(\(columnNames.joined(separator: ", ")))")
     query.append("\(.newlineOrSpace)AS")
     query.append("\(.newlineOrSpace)\(select)")
-    return query
+    return query.compiled(statementType: "CREATE TEMPORARY VIEW")
   }
 }

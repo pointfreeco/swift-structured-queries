@@ -868,9 +868,9 @@ extension TableMacro: ExtensionMacro {
       public typealias From = Swift.Never
       """,
     ])
-    let columnWidth: ExprSyntax = """
+    let columnWidth = """
       var columnWidth = 0
-      columnWidth += \(columnWidths, separator: "\ncolumnWidth += ")
+      columnWidth += \(columnWidths.map(\.description).joined(separator: "\ncolumnWidth += "))
       return columnWidth
       """
 
@@ -881,7 +881,7 @@ extension TableMacro: ExtensionMacro {
         \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
         \(statics, separator: "\n")
         public \(nonisolated)static var columns: TableColumns { TableColumns() }
-        public \(nonisolated)static var _columnWidth: Int { \(columnWidth) }
+        public \(nonisolated)static var _columnWidth: Int { \(raw: columnWidth) }
         public \(nonisolated)static var tableName: String { \(tableName) }\
         \(letSchemaName)\(initDecoder)\(initFromOther)
         }
