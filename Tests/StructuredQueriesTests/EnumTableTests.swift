@@ -239,15 +239,15 @@
           Attachment.where { $0.kind.is(Attachment.Kind.note("Today was a good day")) }
         ) {
           """
-          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
-          WHERE ("attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL") IS (NULL, 'Today was a good day', NULL, NULL, NULL, NULL, NULL)
+          WHERE ("attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL") IS (NULL, 'Today was a good day', NULL, NULL, NULL, NULL, NULL, NULL)
           """
         } results: {
           """
           ┌───────────────────────────────────────┐
           │ Attachment(                           │
-          │   id: 3,                              │
+          │   id: 4,                              │
           │   kind: .note("Today was a good day") │
           │ )                                     │
           └───────────────────────────────────────┘
@@ -257,7 +257,7 @@
           Attachment.where { $0.kind.note.is("Today was a good day") }
         ) {
           """
-          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
           WHERE ("attachments"."note") IS ('Today was a good day')
           """
@@ -265,7 +265,7 @@
           """
           ┌───────────────────────────────────────┐
           │ Attachment(                           │
-          │   id: 3,                              │
+          │   id: 4,                              │
           │   kind: .note("Today was a good day") │
           │ )                                     │
           └───────────────────────────────────────┘
@@ -438,6 +438,40 @@
           └────────────────────────────────────┘
           """
         }
+        assertQuery(
+          Attachment
+            .where { $0.kind.notes.list.isNot(nil) }
+            .select { attachment in
+              Attachment.Columns(
+                id: attachment.id,
+                kind: Attachment.Kind.Columns.notesInline(
+                  attachment.kind.notes.list.jsonGroupArray()
+                )
+              )
+            }
+        ) {
+          """
+          SELECT "attachments"."id" AS "id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL" AS "link"
+          FROM "attachments"
+          WHERE ("attachments"."notes") IS NOT (NULL)
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────────┐
+          │ Attachment(                                     │
+          │   id: 2,                                        │
+          │   kind: .notes(                                 │
+          │     Attachment.Notes(                           │
+          │       notes: [                                  │
+          │         [0]: "Today I found a programming bug", │
+          │         [1]: "Just fixed it!"                   │
+          │       ]                                         │
+          │     )                                           │
+          │   )                                             │
+          │ )                                               │
+          └─────────────────────────────────────────────────┘
+          """
+        }
       }
     }
   }
@@ -459,7 +493,7 @@
 
     @Selection fileprivate struct Notes {
       @Column(as: [String].JSONRepresentation.self)
-      let notes: [String]
+      let list: [String]
     }
     @Selection fileprivate struct Video {
       @Column("videoURL")
