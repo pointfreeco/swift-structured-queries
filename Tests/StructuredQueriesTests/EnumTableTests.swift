@@ -49,7 +49,13 @@
         try db.execute(
           """
           INSERT INTO "attachments"
-          ("note") VALUES ('Today was a good day')
+          ("note") VALUES ('Yesterday was a good day')
+          """
+        )
+        try db.execute(
+          """
+          INSERT INTO "attachments"
+          ("note") VALUES ('Today is a great day')
           """
         )
         try db.execute(
@@ -408,7 +414,7 @@
           )
         ) {
           """
-          SELECT NULL AS "link", 'Hello, world!' AS "note", NULL AS "notes", NULL AS "notesInline", NULL AS "videoURL", NULL AS "videoKind", NULL AS "imageCaption", NULL AS "imageURL"
+          SELECT NULL AS "link", 'Hello, world!' AS "note", NULL AS "list", NULL AS "notesInline", NULL AS "videoURL", NULL AS "videoKind", NULL AS "imageCaption", NULL AS "imageURL"
           """
         } results: {
           """
@@ -424,7 +430,7 @@
           )
         ) {
           """
-          SELECT NULL AS "link", NULL AS "note", NULL AS "notes", NULL AS "notesInline", NULL AS "videoURL", NULL AS "videoKind", 'Blob', 'https://pointfree.co' AS "imageCaption"
+          SELECT NULL AS "link", NULL AS "note", NULL AS "list", NULL AS "notesInline", NULL AS "videoURL", NULL AS "videoKind", 'Blob', 'https://pointfree.co' AS "imageCaption"
           """
         } results: {
           """
@@ -440,36 +446,38 @@
         }
         assertQuery(
           Attachment
-            .where { $0.kind.notes.list.isNot(nil) }
+            .where { $0.kind.note.isNot(nil) }
             .select { attachment in
               Attachment.Columns(
                 id: attachment.id,
-                kind: Attachment.Kind.Columns.notesInline(
-                  attachment.kind.notes.list.jsonGroupArray()
+                kind: Attachment.Kind.Columns(
+                  allColumns: attachment.kind.link._allColumns
+                    + String?(queryOutput: nil)._allColumns
+                    + attachment.kind.note.jsonGroupArray()._allColumns
                 )
               )
             }
         ) {
           """
-          SELECT "attachments"."id" AS "id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL" AS "link"
+          SELECT "attachments"."id" AS "id", "attachments"."link" AS "link", NULL AS "note", json_group_array("attachments"."note") AS "list"
           FROM "attachments"
-          WHERE ("attachments"."notes") IS NOT (NULL)
+          WHERE ("attachments"."note") IS NOT (NULL)
           """
         } results: {
           """
-          ┌─────────────────────────────────────────────────┐
-          │ Attachment(                                     │
-          │   id: 2,                                        │
-          │   kind: .notes(                                 │
-          │     Attachment.Notes(                           │
-          │       notes: [                                  │
-          │         [0]: "Today I found a programming bug", │
-          │         [1]: "Just fixed it!"                   │
-          │       ]                                         │
-          │     )                                           │
-          │   )                                             │
-          │ )                                               │
-          └─────────────────────────────────────────────────┘
+          ┌──────────────────────────────────────────┐
+          │ Attachment(                              │
+          │   id: 4,                                 │
+          │   kind: .notes(                          │
+          │     Attachment.Notes(                    │
+          │       list: [                            │
+          │         [0]: "Yesterday was a good day", │
+          │         [1]: "Today is a great day"      │
+          │       ]                                  │
+          │     )                                    │
+          │   )                                      │
+          │ )                                        │
+          └──────────────────────────────────────────┘
           """
         }
       }
