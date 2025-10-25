@@ -440,12 +440,12 @@
         }
         assertQuery(
           Attachment
-            .where { $0.kind.notes.list.isNot(nil) }
+            .where { $0.kind.note.isNot(nil) }
             .select { attachment in
               Attachment.Columns(
                 id: attachment.id,
                 kind: Attachment.Kind.Columns.notesInline(
-                  attachment.kind.notes.list.jsonGroupArray()
+                  attachment.kind.note.jsonGroupArray()
                 )
               )
             }
