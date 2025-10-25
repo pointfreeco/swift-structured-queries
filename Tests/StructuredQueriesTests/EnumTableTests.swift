@@ -19,6 +19,8 @@
             "id" INTEGER PRIMARY KEY,
             "link" TEXT,
             "note" TEXT,
+            "notes" TEXT,
+            "notesInline" TEXT,
             "videoURL" TEXT,
             "videoKind" TEXT,
             "imageCaption" TEXT,
@@ -30,6 +32,18 @@
           """
           INSERT INTO "attachments"
           ("link") VALUES ('https://www.pointfree.co')
+          """
+        )
+        try db.execute(
+          """
+          INSERT INTO "attachments"
+          ("notes") VALUES ('["Today I found a programming bug", "Just fixed it!"]')
+          """
+        )
+        try db.execute(
+          """
+          INSERT INTO "attachments"
+          ("notesInline") VALUES ('["It is going to rain today", "Forgot my umbrella"]')
           """
         )
         try db.execute(
@@ -57,7 +71,7 @@
           Attachment.all
         ) {
           """
-          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
           """
         } results: {
@@ -70,11 +84,33 @@
           ├─────────────────────────────────────────────────────┤
           │ Attachment(                                         │
           │   id: 2,                                            │
-          │   kind: .note("Today was a good day")               │
+          │   kind: .notes(                                     │
+          │     Attachment.Notes(                               │
+          │       notes: [                                      │
+          │         [0]: "Today I found a programming bug",     │
+          │         [1]: "Just fixed it!"                       │
+          │       ]                                             │
+          │     )                                               │
+          │   )                                                 │
           │ )                                                   │
           ├─────────────────────────────────────────────────────┤
           │ Attachment(                                         │
           │   id: 3,                                            │
+          │   kind: .notesInline(                               │
+          │     [                                               │
+          │       [0]: "It is going to rain today",             │
+          │       [1]: "Forgot my umbrella"                     │
+          │     ]                                               │
+          │   )                                                 │
+          │ )                                                   │
+          ├─────────────────────────────────────────────────────┤
+          │ Attachment(                                         │
+          │   id: 4,                                            │
+          │   kind: .note("Today was a good day")               │
+          │ )                                                   │
+          ├─────────────────────────────────────────────────────┤
+          │ Attachment(                                         │
+          │   id: 5,                                            │
           │   kind: .video(                                     │
           │     Attachment.Video(                               │
           │       url: URL(https://www.youtube.com/video/1234), │
@@ -84,7 +120,7 @@
           │ )                                                   │
           ├─────────────────────────────────────────────────────┤
           │ Attachment(                                         │
-          │   id: 4,                                            │
+          │   id: 6,                                            │
           │   kind: .image(                                     │
           │     Attachment.Image(                               │
           │       caption: "Blob",                              │
@@ -102,13 +138,29 @@
           Attachment.select { $0.kind }
         ) {
           """
-          SELECT "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          SELECT "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
           """
         } results: {
           """
           ┌─────────────────────────────────────────────────────┐
           │ Attachment.Kind.link(URL(https://www.pointfree.co)) │
+          ├─────────────────────────────────────────────────────┤
+          │ Attachment.Kind.notes(                              │
+          │   Attachment.Notes(                                 │
+          │     notes: [                                        │
+          │       [0]: "Today I found a programming bug",       │
+          │       [1]: "Just fixed it!"                         │
+          │     ]                                               │
+          │   )                                                 │
+          │ )                                                   │
+          ├─────────────────────────────────────────────────────┤
+          │ Attachment.Kind.notesInline(                        │
+          │   [                                                 │
+          │     [0]: "It is going to rain today",               │
+          │     [1]: "Forgot my umbrella"                       │
+          │   ]                                                 │
+          │ )                                                   │
           ├─────────────────────────────────────────────────────┤
           │ Attachment.Kind.note("Today was a good day")        │
           ├─────────────────────────────────────────────────────┤
@@ -147,6 +199,10 @@
           ├───────────────────────────────────────────────┤
           │ nil                                           │
           ├───────────────────────────────────────────────┤
+          │ nil                                           │
+          ├───────────────────────────────────────────────┤
+          │ nil                                           │
+          ├───────────────────────────────────────────────┤
           │ Attachment.Image(                             │
           │   caption: "Blob",                            │
           │   url: URL(https://www.pointfree.co/blob.jpg) │
@@ -170,6 +226,8 @@
           │ nil    │
           │ nil    │
           │ nil    │
+          │ nil    │
+          │ nil    │
           │ "Blob" │
           └────────┘
           """
@@ -181,15 +239,15 @@
           Attachment.where { $0.kind.is(Attachment.Kind.note("Today was a good day")) }
         ) {
           """
-          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
-          WHERE ("attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL") IS (NULL, 'Today was a good day', NULL, NULL, NULL, NULL)
+          WHERE ("attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL") IS (NULL, 'Today was a good day', NULL, NULL, NULL, NULL, NULL)
           """
         } results: {
           """
           ┌───────────────────────────────────────┐
           │ Attachment(                           │
-          │   id: 2,                              │
+          │   id: 3,                              │
           │   kind: .note("Today was a good day") │
           │ )                                     │
           └───────────────────────────────────────┘
@@ -199,7 +257,7 @@
           Attachment.where { $0.kind.note.is("Today was a good day") }
         ) {
           """
-          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
           WHERE ("attachments"."note") IS ('Today was a good day')
           """
@@ -207,7 +265,7 @@
           """
           ┌───────────────────────────────────────┐
           │ Attachment(                           │
-          │   id: 2,                              │
+          │   id: 3,                              │
           │   kind: .note("Today was a good day") │
           │ )                                     │
           └───────────────────────────────────────┘
@@ -220,7 +278,7 @@
           Attachment.where { $0.kind.image.isNot(nil) }
         ) {
           """
-          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
           WHERE ("attachments"."imageCaption", "attachments"."imageURL") IS NOT (NULL, NULL)
           """
@@ -228,7 +286,7 @@
           """
           ┌───────────────────────────────────────────────────┐
           │ Attachment(                                       │
-          │   id: 4,                                          │
+          │   id: 6,                                          │
           │   kind: .image(                                   │
           │     Attachment.Image(                             │
           │       caption: "Blob",                            │
@@ -249,7 +307,7 @@
             }
         ) {
           """
-          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."notes", "attachments"."notesInline", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
           WHERE ("attachments"."imageCaption", "attachments"."imageURL") IS NOT (NULL, NULL)
           """
@@ -257,7 +315,7 @@
           """
           ┌───────────────────────────────────────────────────┐
           │ Attachment(                                       │
-          │   id: 4,                                          │
+          │   id: 6,                                          │
           │   kind: .image(                                   │
           │     Attachment.Image(                             │
           │       caption: "Blob",                            │
@@ -289,21 +347,21 @@
         ) {
           """
           INSERT INTO "attachments"
-          ("id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL")
+          ("id", "link", "note", "notes", "notesInline", "videoURL", "videoKind", "imageCaption", "imageURL")
           VALUES
-          (NULL, NULL, 'Hello world!', NULL, NULL, NULL, NULL), (NULL, NULL, NULL, NULL, NULL, 'Image', 'image.jpg')
-          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          (NULL, NULL, 'Hello world!', NULL, NULL, NULL, NULL, NULL, NULL), (NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Image', 'image.jpg')
+          RETURNING "id", "link", "note", "notes", "notesInline", "videoURL", "videoKind", "imageCaption", "imageURL"
           """
         } results: {
           """
           ┌───────────────────────────────┐
           │ Attachment(                   │
-          │   id: 5,                      │
+          │   id: 7,                      │
           │   kind: .note("Hello world!") │
           │ )                             │
           ├───────────────────────────────┤
           │ Attachment(                   │
-          │   id: 6,                      │
+          │   id: 8,                      │
           │   kind: .image(               │
           │     Attachment.Image(         │
           │       caption: "Image",       │
@@ -350,7 +408,7 @@
           )
         ) {
           """
-          SELECT NULL AS "link", 'Hello, world!' AS "note", NULL AS "videoURL", NULL AS "videoKind", NULL AS "imageCaption", NULL AS "imageURL"
+          SELECT NULL AS "link", 'Hello, world!' AS "note", NULL AS "notes", NULL AS "notesInline", NULL AS "videoURL", NULL AS "videoKind", NULL AS "imageCaption", NULL AS "imageURL"
           """
         } results: {
           """
@@ -366,7 +424,7 @@
           )
         ) {
           """
-          SELECT NULL AS "link", NULL AS "note", NULL AS "videoURL", NULL AS "videoKind", 'Blob', 'https://pointfree.co' AS "imageCaption"
+          SELECT NULL AS "link", NULL AS "note", NULL AS "notes", NULL AS "notesInline", NULL AS "videoURL", NULL AS "videoKind", 'Blob', 'https://pointfree.co' AS "imageCaption"
           """
         } results: {
           """
@@ -392,10 +450,17 @@
     fileprivate enum Kind {
       case link(URL)
       case note(String)
+      case notes(Attachment.Notes)
+      @Column(as: [String].JSONRepresentation.self)
+      case notesInline([String])
       case video(Attachment.Video)
       case image(Attachment.Image)
     }
 
+    @Selection fileprivate struct Notes {
+      @Column(as: [String].JSONRepresentation.self)
+      let notes: [String]
+    }
     @Selection fileprivate struct Video {
       @Column("videoURL")
       let url: URL
