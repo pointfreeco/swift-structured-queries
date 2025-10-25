@@ -452,8 +452,8 @@
                 id: attachment.id,
                 kind: Attachment.Kind.Columns(
                   allColumns: attachment.kind.link._allColumns
-                    + String?(queryOutput: nil)._allColumns
-                    + attachment.kind.note.jsonGroupArray()._allColumns
+                  + String?(queryOutput: nil)._allColumns
+                  + attachment.kind.note.jsonGroupArray()._allColumns
                 )
               )
             }
@@ -478,6 +478,30 @@
           │   )                                      │
           │ )                                        │
           └──────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Attachment
+            .where { $0.kind.notes.isNot(nil) }
+            .select { attachment in
+              Attachment.Columns(
+                id: attachment.id,
+                kind: Attachment.Kind.Columns(
+                  allColumns: attachment.kind.link._allColumns
+                  + String?(queryOutput: nil)._allColumns
+                  + attachment.kind.notes._allColumns
+                )
+              )
+            }
+        ) {
+          """
+          SELECT "attachments"."id" AS "id", "attachments"."link" AS "link", NULL AS "note", "attachments"."list" AS "list"
+          FROM "attachments"
+          WHERE ("attachments"."list") IS NOT (NULL)
+          """
+        } results: {
+          """
+          no such column: attachments.list
           """
         }
       }
