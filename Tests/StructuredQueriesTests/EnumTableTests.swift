@@ -489,13 +489,15 @@
                 kind: Attachment.Kind.Columns(
                   allColumns: attachment.kind.link._allColumns
                   + String?(queryOutput: nil)._allColumns
-                  + attachment.kind.notes._allColumns
+                  + Attachment.Notes.Columns(
+                    list: attachment.kind.notes.list
+                  )._allColumns
                 )
               )
             }
         ) {
           """
-          SELECT "attachments"."id" AS "id", "attachments"."link" AS "link", NULL AS "note", "attachments"."list" AS "list"
+          SELECT "attachments"."id" AS "id", "attachments"."link" AS "link", NULL AS "note", NULL AS "list"
           FROM "attachments"
           WHERE ("attachments"."list") IS NOT (NULL)
           """
