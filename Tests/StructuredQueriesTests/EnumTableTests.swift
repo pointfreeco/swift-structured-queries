@@ -19,7 +19,7 @@
             "id" INTEGER PRIMARY KEY,
             "link" TEXT,
             "note" TEXT,
-            "notes" TEXT,
+            "list" TEXT,
             "notesInline" TEXT,
             "videoURL" TEXT,
             "videoKind" TEXT,
@@ -37,7 +37,7 @@
         try db.execute(
           """
           INSERT INTO "attachments"
-          ("notes") VALUES ('["Today I found a programming bug", "Just fixed it!"]')
+          ("list") VALUES ('["Today I found a programming bug", "Just fixed it!"]')
           """
         )
         try db.execute(
@@ -488,22 +488,68 @@
                 id: attachment.id,
                 kind: Attachment.Kind.Columns(
                   allColumns: attachment.kind.link._allColumns
-                  + String?(queryOutput: nil)._allColumns
-                  + Attachment.Notes.Columns(
-                    list: attachment.kind.notes.list
-                  )._allColumns
+                  + attachment.kind.note._allColumns
+                  + attachment.kind.notes._allColumns
                 )
               )
             }
         ) {
           """
-          SELECT "attachments"."id" AS "id", "attachments"."link" AS "link", NULL AS "note", NULL AS "list"
+          SELECT "attachments"."id" AS "id", "attachments"."link" AS "link", "attachments"."note" AS "note", "attachments"."list" AS "list"
           FROM "attachments"
           WHERE ("attachments"."list") IS NOT (NULL)
           """
         } results: {
           """
-          no such column: attachments.list
+          ┌─────────────────────────────────────────────────┐
+          │ Attachment(                                     │
+          │   id: 2,                                        │
+          │   kind: .notes(                                 │
+          │     Attachment.Notes(                           │
+          │       list: [                                   │
+          │         [0]: "Today I found a programming bug", │
+          │         [1]: "Just fixed it!"                   │
+          │       ]                                         │
+          │     )                                           │
+          │   )                                             │
+          │ )                                               │
+          └─────────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Attachment
+            .where { $0.kind.notes.isNot(nil) }
+            .select { attachment in
+              Attachment.Columns(
+                id: attachment.id,
+                kind: Attachment.Kind.Columns(
+                  allColumns: attachment.kind.link._allColumns
+                  + attachment.kind.note._allColumns
+                  + attachment.kind.notes.list._allColumns
+                )
+              )
+            }
+        ) {
+          """
+          SELECT "attachments"."id" AS "id", "attachments"."link" AS "link", "attachments"."note" AS "note", "attachments"."list" AS "list"
+          FROM "attachments"
+          WHERE ("attachments"."list") IS NOT (NULL)
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────────┐
+          │ Attachment(                                     │
+          │   id: 2,                                        │
+          │   kind: .notes(                                 │
+          │     Attachment.Notes(                           │
+          │       list: [                                   │
+          │         [0]: "Today I found a programming bug", │
+          │         [1]: "Just fixed it!"                   │
+          │       ]                                         │
+          │     )                                           │
+          │   )                                             │
+          │ )                                               │
+          └─────────────────────────────────────────────────┘
           """
         }
       }
