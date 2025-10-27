@@ -85,7 +85,7 @@ With {
     .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
     .select { remindersList, _ in
       HighPriorityRemindersList.Columns(
-        remindersList: remindersList
+        id: remindersList.id
       )
     }
     .having { $1.priority.avg() > 1.5 }
@@ -106,7 +106,7 @@ With {
     .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
     .select { remindersList, _ in
       HighPriorityRemindersList.Columns(
-        remindersList: remindersList
+        id: remindersList.id
       )
     }
     .having { $1.priority.avg() > 1.5 }
@@ -128,7 +128,7 @@ With {
     .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
     .select { remindersList, _ in
       HighPriorityRemindersList.Columns(
-        remindersList: remindersList
+        id: remindersList.id
       )
     }
     .having { $1.priority.avg() > 1.5 }
@@ -150,7 +150,7 @@ With {
     .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
     .select { remindersList, _ in
       HighPriorityRemindersList.Columns(
-        remindersList: remindersList
+        id: remindersList.id
       )
     }
     .having { $1.priority.avg() > 1.5 }
