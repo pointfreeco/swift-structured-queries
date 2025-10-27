@@ -447,14 +447,10 @@
         assertQuery(
           Attachment
             .where { $0.kind.note.isNot(nil) }
-            .select { attachment in
+            .select {
               Attachment.Columns(
-                id: attachment.id,
-                kind: Attachment.Kind.Columns(
-                  allColumns: attachment.kind.link._allColumns
-                  + String?(queryOutput: nil)._allColumns
-                  + attachment.kind.note.jsonGroupArray()._allColumns
-                )
+                id: $0.id,
+                kind: Attachment.Kind.note($0.kind.note.jsonGroupArray())
               )
             }
         ) {
@@ -483,14 +479,10 @@
         assertQuery(
           Attachment
             .where { $0.kind.notes.isNot(nil) }
-            .select { attachment in
+            .select {
               Attachment.Columns(
                 id: attachment.id,
-                kind: Attachment.Kind.Columns(
-                  allColumns: attachment.kind.link._allColumns
-                  + attachment.kind.note._allColumns
-                  + attachment.kind.notes._allColumns
-                )
+                kind: Attachment.Kind.Columns.notes($0.kind.notes)
               )
             }
         ) {
@@ -519,14 +511,10 @@
         assertQuery(
           Attachment
             .where { $0.kind.notes.isNot(nil) }
-            .select { attachment in
+            .select {
               Attachment.Columns(
-                id: attachment.id,
-                kind: Attachment.Kind.Columns(
-                  allColumns: attachment.kind.link._allColumns
-                  + attachment.kind.note._allColumns
-                  + attachment.kind.notes.list._allColumns
-                )
+                id: $0.id,
+                kind: Attachment.Kind.list($0.kind.notes.list)
               )
             }
         ) {
