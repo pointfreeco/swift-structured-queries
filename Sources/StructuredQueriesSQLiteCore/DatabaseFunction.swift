@@ -128,7 +128,7 @@ public func _columnWidth<T: QueryExpression>(_: T.Type) -> Int {
 // NB: Provides better error diagnostics for '@DatabaseFunction' macro-generated code.
 //
 //     - No exact matches in call to instance method 'decode'
-//     + Global function '_requireQueryRepresentable' requires that 'Foo' conform to 'QueryRepresentable'
+//     + Global function '_requireQueryRepresentable' requires that 'CKShare' conform to 'QueryRepresentable'
 @_transparent
 public func _requireQueryRepresentable<T: QueryRepresentable>(_: T.Type) -> T.Type {
   T.self
