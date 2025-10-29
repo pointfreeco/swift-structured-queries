@@ -131,6 +131,7 @@ let package = Package(
         "StructuredQueriesSQLiteMacros",
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "MacroTesting", package: "swift-macro-testing"),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
     ),
     .testTarget(
