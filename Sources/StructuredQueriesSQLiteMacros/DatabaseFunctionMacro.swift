@@ -188,7 +188,9 @@ extension DatabaseFunctionMacro: PeerMacro {
         argumentBindings.append(secondName)
 
         argumentCounts.append("\(type)")
-        decodings.append("let \(secondName) = try decoder.decode(\(type).self)")
+        decodings.append(
+          "let \(secondName) = try decoder.decode(_requireQueryRepresentable(\(type).self))"
+        )
         decodingUnwrappings.append(
           "guard let \(secondName) else { throw InvalidInvocation() }"
         )
@@ -270,7 +272,9 @@ extension DatabaseFunctionMacro: PeerMacro {
         argumentBindings.append(parameterName)
 
         argumentCounts.append("\(type)")
-        decodings.append("let \(parameterName) = try decoder.decode(\(type).self)")
+        decodings.append(
+          "let \(parameterName) = try decoder.decode(_requireQueryRepresentable(\(type).self))"
+        )
         decodingUnwrappings.append("guard let \(parameterName) else { throw InvalidInvocation() }")
         canThrowInvalidInvocation = true
       }
@@ -321,7 +325,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       ? "0"
       : """
       var argumentCount = 0
-      \(argumentCounts.map { "argumentCount += \($0)._columnWidth\n" }.joined())\
+      \(argumentCounts.map { "argumentCount += _columnWidth(\($0).self)\n" }.joined())\
       return argumentCount
       """
 
