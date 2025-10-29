@@ -129,7 +129,7 @@ extension SnapshotTests {
           public let name = "jsonCapitalize"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += [String].JSONRepresentation._columnWidth
+            argumentCount += _columnWidth([String].JSONRepresentation.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -147,7 +147,7 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let strings = try decoder.decode([String].JSONRepresentation.self)
+            let strings = try decoder.decode(_requireQueryRepresentable([String].JSONRepresentation.self))
             guard let strings else {
               throw InvalidInvocation()
             }
@@ -237,7 +237,7 @@ extension SnapshotTests {
           public let name = "currentDate"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += String._columnWidth
+            argumentCount += _columnWidth(String.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -255,7 +255,7 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let format = try decoder.decode(String.self)
+            let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
               throw InvalidInvocation()
             }
@@ -295,7 +295,7 @@ extension SnapshotTests {
           public let name = "currentDate"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += String._columnWidth
+            argumentCount += _columnWidth(String.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -313,7 +313,7 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let format = try decoder.decode(String.self)
+            let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
               throw InvalidInvocation()
             }
@@ -353,7 +353,7 @@ extension SnapshotTests {
           public let name = "currentDate"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += String._columnWidth
+            argumentCount += _columnWidth(String.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -371,7 +371,7 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let format = try decoder.decode(String.self)
+            let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
               throw InvalidInvocation()
             }
@@ -411,7 +411,7 @@ extension SnapshotTests {
           public let name = "currentDate"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += String._columnWidth
+            argumentCount += _columnWidth(String.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -429,7 +429,7 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let format = try decoder.decode(String.self)
+            let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
               throw InvalidInvocation()
             }
@@ -469,8 +469,8 @@ extension SnapshotTests {
           public let name = "concat"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += String._columnWidth
-            argumentCount += String._columnWidth
+            argumentCount += _columnWidth(String.self)
+            argumentCount += _columnWidth(String.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -488,8 +488,8 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let first = try decoder.decode(String.self)
-            let second = try decoder.decode(String.self)
+            let first = try decoder.decode(_requireQueryRepresentable(String.self))
+            let second = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let first else {
               throw InvalidInvocation()
             }
@@ -549,7 +549,7 @@ extension SnapshotTests {
           public let name = "currentDate"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += String?._columnWidth
+            argumentCount += _columnWidth(String?.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -567,7 +567,7 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let format = try decoder.decode(String?.self)
+            let format = try decoder.decode(_requireQueryRepresentable(String?.self))
             guard let format else {
               throw InvalidInvocation()
             }
@@ -1041,8 +1041,8 @@ extension SnapshotTests {
           public let name = "min"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += Int._columnWidth
-            argumentCount += Int._columnWidth
+            argumentCount += _columnWidth(Int.self)
+            argumentCount += _columnWidth(Int.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -1063,8 +1063,8 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let x = try decoder.decode(Int.self)
-            let y = try decoder.decode(Int.self)
+            let x = try decoder.decode(_requireQueryRepresentable(Int.self))
+            let y = try decoder.decode(_requireQueryRepresentable(Int.self))
             guard let x else {
               throw InvalidInvocation()
             }
@@ -1108,8 +1108,8 @@ extension SnapshotTests {
           public let name = "min"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += Int._columnWidth
-            argumentCount += Int._columnWidth
+            argumentCount += _columnWidth(Int.self)
+            argumentCount += _columnWidth(Int.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -1130,8 +1130,8 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let x = try decoder.decode(Int.self)
-            let y = try decoder.decode(Int.self)
+            let x = try decoder.decode(_requireQueryRepresentable(Int.self))
+            let y = try decoder.decode(_requireQueryRepresentable(Int.self))
             guard let x else {
               throw InvalidInvocation()
             }
@@ -1172,8 +1172,8 @@ extension SnapshotTests {
           public let name = "isValid"
           public var argumentCount: Int? {
             var argumentCount = 0
-            argumentCount += Reminder._columnWidth
-            argumentCount += Bool._columnWidth
+            argumentCount += _columnWidth(Reminder.self)
+            argumentCount += _columnWidth(Bool.self)
             return argumentCount
           }
           public let isDeterministic = false
@@ -1191,8 +1191,8 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            let reminder = try decoder.decode(Reminder.self)
-            let override = try decoder.decode(Bool.self)
+            let reminder = try decoder.decode(_requireQueryRepresentable(Reminder.self))
+            let override = try decoder.decode(_requireQueryRepresentable(Bool.self))
             guard let reminder else {
               throw InvalidInvocation()
             }
@@ -1238,7 +1238,7 @@ extension SnapshotTests {
             public let name = "sum"
             public var argumentCount: Int? {
               var argumentCount = 0
-              argumentCount += Int._columnWidth
+              argumentCount += _columnWidth(Int.self)
               return argumentCount
             }
             public let isDeterministic = false
@@ -1256,7 +1256,7 @@ extension SnapshotTests {
             public func step(
               _ decoder: inout some QueryDecoder
             ) throws -> Int {
-              let xs = try decoder.decode(Int.self)
+              let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
                 throw InvalidInvocation()
               }
@@ -1298,7 +1298,7 @@ extension SnapshotTests {
             public let name = "sum"
             public var argumentCount: Int? {
               var argumentCount = 0
-              argumentCount += Int._columnWidth
+              argumentCount += _columnWidth(Int.self)
               return argumentCount
             }
             public let isDeterministic = false
@@ -1316,7 +1316,7 @@ extension SnapshotTests {
             public func step(
               _ decoder: inout some QueryDecoder
             ) throws -> Int {
-              let xs = try decoder.decode(Int.self)
+              let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
                 throw InvalidInvocation()
               }
@@ -1370,8 +1370,8 @@ extension SnapshotTests {
             public let name = "joined"
             public var argumentCount: Int? {
               var argumentCount = 0
-              argumentCount += String._columnWidth
-              argumentCount += String._columnWidth
+              argumentCount += _columnWidth(String.self)
+              argumentCount += _columnWidth(String.self)
               return argumentCount
             }
             public let isDeterministic = false
@@ -1389,8 +1389,8 @@ extension SnapshotTests {
             public func step(
               _ decoder: inout some QueryDecoder
             ) throws -> (String, separator: String) {
-              let p0 = try decoder.decode(String.self)
-              let separator = try decoder.decode(String.self)
+              let p0 = try decoder.decode(_requireQueryRepresentable(String.self))
+              let separator = try decoder.decode(_requireQueryRepresentable(String.self))
               guard let p0 else {
                 throw InvalidInvocation()
               }
@@ -1437,7 +1437,7 @@ extension SnapshotTests {
             public let name = "joined"
             public var argumentCount: Int? {
               var argumentCount = 0
-              argumentCount += [String].JSONRepresentation._columnWidth
+              argumentCount += _columnWidth([String].JSONRepresentation.self)
               return argumentCount
             }
             public let isDeterministic = false
@@ -1455,7 +1455,7 @@ extension SnapshotTests {
             public func step(
               _ decoder: inout some QueryDecoder
             ) throws -> [String] {
-              let arrays = try decoder.decode([String].JSONRepresentation.self)
+              let arrays = try decoder.decode(_requireQueryRepresentable([String].JSONRepresentation.self))
               guard let arrays else {
                 throw InvalidInvocation()
               }
@@ -1501,7 +1501,7 @@ extension SnapshotTests {
             public let name = "print"
             public var argumentCount: Int? {
               var argumentCount = 0
-              argumentCount += Int._columnWidth
+              argumentCount += _columnWidth(Int.self)
               return argumentCount
             }
             public let isDeterministic = false
@@ -1519,7 +1519,7 @@ extension SnapshotTests {
             public func step(
               _ decoder: inout some QueryDecoder
             ) throws -> Int {
-              let xs = try decoder.decode(Int.self)
+              let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
                 throw InvalidInvocation()
               }
@@ -1570,7 +1570,7 @@ extension SnapshotTests {
             public let name = "validatePositive"
             public var argumentCount: Int? {
               var argumentCount = 0
-              argumentCount += Int._columnWidth
+              argumentCount += _columnWidth(Int.self)
               return argumentCount
             }
             public let isDeterministic = false
@@ -1588,7 +1588,7 @@ extension SnapshotTests {
             public func step(
               _ decoder: inout some QueryDecoder
             ) throws -> Int {
-              let xs = try decoder.decode(Int.self)
+              let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
                 throw InvalidInvocation()
               }
