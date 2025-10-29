@@ -527,6 +527,7 @@ extension TableMacro: ExtensionMacro {
         """
     } else if declaration.is(EnumDeclSyntax.self) {
       var decodings: [String] = []
+      var decodingAssignments: [String] = []
       for member in declaration.memberBlock.members {
         guard let caseDecl = member.decl.as(EnumCaseDeclSyntax.self) else { continue }
         guard
@@ -685,7 +686,12 @@ extension TableMacro: ExtensionMacro {
         let decodedType = columnQueryValueType.asNonOptionalType()
         decodings.append(
           """
-          if let \(identifier) = try decoder.decode(\(decodedType).self) {
+          let \(identifier) = try decoder.decode(\(decodedType).self)
+          """
+        )
+        decodingAssignments.append(
+          """
+          if let \(identifier) {
           self = .\(identifier)(\(identifier))
           }
           """
@@ -694,7 +700,8 @@ extension TableMacro: ExtensionMacro {
       initDecoder = """
 
         public \(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws {
-        \(raw: decodings.joined(separator: " else ")) else {
+        \(raw: decodings.joined(separator: "\n"))
+        \(raw: decodingAssignments.joined(separator: " else ")) else {
         throw \(moduleName).QueryDecodingError.missingRequiredColumn
         }
         }
