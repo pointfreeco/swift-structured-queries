@@ -156,9 +156,11 @@ let package = Package(
   swiftLanguageModes: [.v6]
 )
 
-// NB: For local testing in Xcode:
-// if true {
-if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil {
+if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil
+  || ProcessInfo.processInfo.environment["CI"] != nil
+  // NB: For local testing in Xcode:
+  // || true
+{
   package.traits.insert(
     .default(
       enabledTraits: [

@@ -2575,9 +2575,11 @@ extension SnapshotTests {
             "posts"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            if let photo = try decoder.decode(Photo.self) {
+            let photo = try decoder.decode(Photo.self)
+            let note = try decoder.decode(String.self)
+            if let photo {
               self = .photo(photo)
-            } else if let note = try decoder.decode(String.self) {
+            } else if let note {
               self = .note(note)
             } else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -2682,9 +2684,11 @@ extension SnapshotTests {
             "posts"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            if let photo = try decoder.decode(Photo.self) {
+            let photo = try decoder.decode(Photo.self)
+            let note = try decoder.decode(String.self)
+            if let photo {
               self = .photo(photo)
-            } else if let note = try decoder.decode(String.self) {
+            } else if let note {
               self = .note(note)
             } else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -2785,9 +2789,11 @@ extension SnapshotTests {
             "posts"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            if let photo = try decoder.decode(Photo.self) {
+            let photo = try decoder.decode(Photo.self)
+            let note = try decoder.decode(String.self)
+            if let photo {
               self = .photo(photo)
-            } else if let note = try decoder.decode(String.self) {
+            } else if let note {
               self = .note(note)
             } else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -2873,9 +2879,11 @@ extension SnapshotTests {
             "posts"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            if let photo = try decoder.decode(Photo.self) {
+            let photo = try decoder.decode(Photo.self)
+            let note = try decoder.decode(String.self)
+            if let photo {
               self = .photo(photo)
-            } else if let note = try decoder.decode(String.self) {
+            } else if let note {
               self = .note(note)
             } else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -2947,7 +2955,8 @@ extension SnapshotTests {
             "posts"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            if let note = try decoder.decode(String.self) {
+            let note = try decoder.decode(String.self)
+            if let note {
               self = .note(note)
             } else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -3019,7 +3028,8 @@ extension SnapshotTests {
             "posts"
           }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            if let timestamp = try decoder.decode(Date.UnixTimeRepresentation.self) {
+            let timestamp = try decoder.decode(Date.UnixTimeRepresentation.self)
+            if let timestamp {
               self = .timestamp(timestamp)
             } else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
