@@ -64,6 +64,38 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonGroupArrayOptionalColumn() {
+      assertQuery(
+        RemindersList
+          .group(by: \.id)
+          .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
+          .select { list, reminder in
+            (list.title, reminder.title.jsonGroupArray())
+          }
+          .limit(1)
+      ) {
+        """
+        SELECT "remindersLists"."title", "json_group_array"("reminders"."title") FILTER (WHERE ("reminders"."id") IS NOT (NULL))
+        FROM "remindersLists"
+        LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
+        GROUP BY "remindersLists"."id"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌────────────┬──────────────────────────────┐
+        │ "Personal" │ [                            │
+        │            │   [0]: "Groceries",          │
+        │            │   [1]: "Haircut",            │
+        │            │   [2]: "Doctor appointment", │
+        │            │   [3]: "Take a walk",        │
+        │            │   [4]: "Buy concert tickets" │
+        │            │ ]                            │
+        └────────────┴──────────────────────────────┘
+        """
+      }
+    }
+
     @Test func jsonArrayLength() {
       assertQuery(
         Reminder.select {

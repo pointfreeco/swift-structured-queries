@@ -210,6 +210,72 @@ where
   }
 }
 
+extension TableColumnExpression
+where
+  Root: PrimaryKeyedTable & _OptionalProtocol,
+  QueryValue: _OptionalProtocol & Codable & QueryBindable,
+  QueryValue.Wrapped: Codable
+{
+  /// A JSON array aggregate of an optional column's wrapped value.
+  ///
+  /// When aggregating from a joined table that may be `NULL` (for instance, a `LEFT JOIN` that
+  /// yields no matching rows), this overload automatically filters out the rows where the joined
+  /// table's primary key is `NULL`, ensuring the resulting JSON array only contains fully realized
+  /// rows.
+  ///
+  /// ```swift
+  /// RemindersList
+  ///   .group(by: \.id)
+  ///   .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
+  ///   .select { list, reminder in
+  ///     (
+  ///       list.title,
+  ///       reminder.title.jsonGroupArray()
+  ///     )
+  ///   }
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean that enables the `DISTINCT` clause on the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this column's wrapped value.
+  public func jsonGroupArray(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryValue.Wrapped].JSONRepresentation> {
+    let primaryKeyNames = Root.columns.primaryKey._names
+    let primaryKeyColumns: QueryFragment = primaryKeyNames
+      .map { "\(Root.self).\(quote: $0)" }
+      .joined(separator: ", ")
+    let primaryKeyNulls: QueryFragment = Array(
+      repeating: QueryFragment("NULL"),
+      count: primaryKeyNames.count
+    )
+      .joined(separator: ", ")
+    let primaryKeyFilter = SQLQueryExpression(
+      "(\(primaryKeyColumns)) IS NOT (\(primaryKeyNulls))",
+      as: Bool.self
+      
+    )
+    let combinedFilter: SQLQueryExpression<Bool>
+    if let filter {
+      combinedFilter = SQLQueryExpression(primaryKeyFilter.and(filter))
+    } else {
+      combinedFilter = primaryKeyFilter
+    }
+    
+    return AggregateFunctionExpression<[QueryValue.Wrapped].JSONRepresentation>(
+      "json_group_array",
+      distinct: isDistinct,
+      self,
+      order: order,
+      filter: combinedFilter
+    )
+  }
+}
+
 extension TableDefinition where QueryValue: Codable {
   /// A JSON representation of a table's columns.
   ///
