@@ -246,18 +246,19 @@ where
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue.Wrapped].JSONRepresentation> {
     let primaryKeyNames = Root.columns.primaryKey._names
-    let primaryKeyColumns: QueryFragment = primaryKeyNames
+    let primaryKeyColumns: QueryFragment =
+      primaryKeyNames
       .map { "\(Root.self).\(quote: $0)" }
       .joined(separator: ", ")
     let primaryKeyNulls: QueryFragment = Array(
       repeating: QueryFragment("NULL"),
       count: primaryKeyNames.count
     )
-      .joined(separator: ", ")
+    .joined(separator: ", ")
     let primaryKeyFilter = SQLQueryExpression(
       "(\(primaryKeyColumns)) IS NOT (\(primaryKeyNulls))",
       as: Bool.self
-      
+
     )
     let combinedFilter: SQLQueryExpression<Bool>
     if let filter {
@@ -265,7 +266,7 @@ where
     } else {
       combinedFilter = primaryKeyFilter
     }
-    
+
     return AggregateFunctionExpression<[QueryValue.Wrapped].JSONRepresentation>(
       "json_group_array",
       distinct: isDistinct,
