@@ -275,7 +275,15 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   public func map<T>(
     _ transform: (SQLQueryExpression<QueryValue.Wrapped>) -> some QueryExpression<T>
   ) -> some QueryExpression<T?> {
-    SQLQueryExpression(transform(SQLQueryExpression(queryFragment)).queryFragment)
+    SQLQueryExpression(
+      """
+      IIF(\(self), \(transform(SQLQueryExpression(queryFragment))), NULL)
+      """
+    )
+    //SQLQueryExpression(transform(SQLQueryExpression(queryFragment)).queryFragment)
+//    Case(self).when(SQLQueryExpression("NULL"), then: SQLQueryExpression("NULL")).else(
+//      SQLQueryExpression(transform(SQLQueryExpression(queryFragment)).queryFragment)
+//    )
   }
 
   /// Creates a new optional expression from this one by applying an unwrapped version of this
