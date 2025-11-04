@@ -14,12 +14,14 @@ extension SnapshotTests {
 
     @Test func mapWithDatabaseFunction() throws {
       $increment.install(database.handle)
-      try database.execute("""
+      try database.execute(
+        """
         CREATE TABLE "optionalIntegers" (
           "value" INTEGER
         ) STRICT
         """)
-      try database.execute("""
+      try database.execute(
+        """
         INSERT INTO "optionalIntegers" ("value") VALUES (1), (NULL), (3)
         """)
 
