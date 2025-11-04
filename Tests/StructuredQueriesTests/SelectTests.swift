@@ -1369,7 +1369,7 @@ extension SnapshotTests {
         }
         assertQuery(query) {
           """
-          SELECT ("reminders"."priority") < (3)
+          SELECT CASE "reminders"."priority" IS NULL WHEN 1 THEN NULL ELSE ("reminders"."priority") < (3) END
           FROM "reminders"
           """
         } results: {

@@ -29,7 +29,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT IIF("optionalIntegers"."value", "increment"("optionalIntegers"."value"), NULL)
+        SELECT CASE "optionalIntegers"."value" IS NULL WHEN 1 THEN NULL ELSE "increment"("optionalIntegers"."value") END
         FROM "optionalIntegers"
         """
       } results: {
