@@ -20,7 +20,15 @@ import StructuredQueriesCore
   named(schemaName),
   named(tableName)
 )
-@attached(member, names: named(Draft), named(Selection), named(TableColumns))
+@attached(
+  member,
+  conformances: Table,
+  PartialSelectStatement,
+  PrimaryKeyedTable,
+  names: named(Draft),
+  named(Selection),
+  named(TableColumns)
+)
 @attached(memberAttribute)
 public macro Table(
   _ name: String = "",
@@ -78,7 +86,16 @@ public macro Table(
   named(schemaName),
   named(tableName)
 )
-@attached(member, names: named(Draft), named(Selection), named(TableColumns))
+@attached(
+  member,
+  conformances: _Selection,
+  Table,
+  PartialSelectStatement,
+  PrimaryKeyedTable,
+  names: named(Draft),
+  named(Selection),
+  named(TableColumns)
+)
 @attached(memberAttribute)
 public macro Selection(
   _ name: String = ""
