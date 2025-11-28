@@ -1,12 +1,16 @@
 import Foundation
 
-public struct _CodableJSONRepresentation<QueryOutput: Codable>: QueryRepresentable {
+public struct _CodableJSONRepresentation<QueryOutput: Codable>: Codable, QueryRepresentable {
   public var queryOutput: QueryOutput
 
   public init(queryOutput: QueryOutput) {
     self.queryOutput = queryOutput
   }
 }
+
+extension _CodableJSONRepresentation: Equatable where QueryOutput: Equatable {}
+extension _CodableJSONRepresentation: Hashable where QueryOutput: Hashable {}
+extension _CodableJSONRepresentation: Sendable where QueryOutput: Sendable {}
 
 extension Decodable where Self: Encodable {
   /// A query expression representing codable JSON.
