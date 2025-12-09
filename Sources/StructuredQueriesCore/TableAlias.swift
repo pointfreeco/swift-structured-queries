@@ -60,6 +60,21 @@ extension Table {
   /// // ON "users"."referrerID" = "referrers"."id"
   /// ```
   ///
+  /// Table aliases are representable in selections by providing the type to the `@Column` macro:
+  ///
+  /// ```swift
+  /// @Selection
+  /// struct UserWithReferrer {
+  ///   let user: User
+  ///   @Column(as: TableAlias<User, Referrer>.self)
+  ///   let referrer: User
+  /// }
+  ///
+  /// let usersWithReferrers = User
+  ///   .join(User.as(Referrer.self).all) { $0.referrerID == $1.id }
+  ///   .select { UserWithReferrer.Columns(user: $0, referrer: $1) }
+  /// ```
+  ///
   /// - Parameter aliasName: An alias name for this table.
   /// - Returns: A table alias of this table type.
   public static func `as`<Name: AliasName>(_ aliasName: Name.Type) -> TableAlias<Self, Name>.Type {
