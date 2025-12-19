@@ -267,7 +267,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        
+
         """
       }
     }
@@ -303,7 +303,7 @@ extension SnapshotTests {
 
     @Test func complexMutation() {
       let updateQuery =
-      Reminder
+        Reminder
         .find(1)
         .update {
           $0.dueDate = Case()
@@ -352,7 +352,7 @@ extension SnapshotTests {
         Reminder.none.update { $0.isCompleted.toggle() }
       ) {
         """
-        
+
         """
       }
     }
