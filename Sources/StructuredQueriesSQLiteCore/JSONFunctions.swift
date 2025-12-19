@@ -26,7 +26,7 @@ extension QueryExpression {
   }
 }
 
-extension QueryExpression where QueryValue: Codable {
+extension QueryExpression where QueryValue: Codable & QueryBindable {
   /// A JSON array aggregate of this expression
   ///
   /// Concatenates all of the values in a group.
@@ -56,7 +56,7 @@ extension QueryExpression where QueryValue: Codable {
   }
 }
 
-extension PrimaryKeyedTableDefinition where QueryValue: Codable {
+extension TableDefinition where QueryValue: Codable {
   /// A JSON array representation of the aggregation of a table's columns.
   ///
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
@@ -122,11 +122,7 @@ extension PrimaryKeyedTableDefinition where QueryValue: Codable {
   }
 }
 
-extension PrimaryKeyedTableDefinition
-where
-  QueryValue: _OptionalProtocol & Codable,
-  PrimaryColumn: _TableColumnExpression<QueryValue, PrimaryKey>
-{
+extension TableDefinition where QueryValue: _OptionalProtocol & Codable {
   /// A JSON array representation of the aggregation of a table's columns.
   ///
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
@@ -183,22 +179,12 @@ where
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[Wrapped].JSONRepresentation>
   where QueryValue == Wrapped? {
-    let primaryKeyColumns: QueryFragment = self.primaryKey._names
-      .map { "\(QueryValue.self).\(quote: $0)" }
-      .joined(separator: ", ")
-    let primaryKeyNulls: QueryFragment = Array(
-      repeating: QueryFragment("NULL"), count: self.primaryKey._names.count
-    )
-    .joined(separator: ", ")
-    let primaryKeyFilter = SQLQueryExpression(
-      "(\(primaryKeyColumns)) IS NOT (\(primaryKeyNulls))",
-      as: Bool.self
-    )
+    let rowFilter = rowid.isNot(nil)
     let filterQueryFragment =
       if let filter {
-        primaryKeyFilter.and(filter).queryFragment
+        rowFilter.and(filter).queryFragment
       } else {
-        primaryKeyFilter.queryFragment
+        rowFilter.queryFragment
       }
     return AggregateFunctionExpression(
       "json_group_array",
