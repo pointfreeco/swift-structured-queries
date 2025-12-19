@@ -514,34 +514,40 @@ extension SnapshotTests {
       assertQuery(
         Item
           .group(by: \.bucket)
-          .select { ($0.bucket, $0.jsonGroupArray()) }
+          .select { GroupedItem.Columns(bucket: $0.bucket, items: $0.jsonGroupArray()) }
       ) {
         """
-        SELECT "items"."bucket", json_group_array(json_object('bucket', json_quote("items"."bucket"), 'value', json_quote("items"."value")))
+        SELECT "items"."bucket" AS "bucket", json_group_array(json_object('bucket', json_quote("items"."bucket"), 'value', json_quote("items"."value"))) AS "items"
         FROM "items"
         GROUP BY "items"."bucket"
         """
       } results: {
         """
-        ┌───┬────────────────┐
-        │ 1 │ [              │
-        │   │   [0]: Item(   │
-        │   │     bucket: 1, │
-        │   │     value: 1   │
-        │   │   ),           │
-        │   │   [1]: Item(   │
-        │   │     bucket: 1, │
-        │   │     value: 2   │
-        │   │   )            │
-        │   │ ]              │
-        ├───┼────────────────┤
-        │ 2 │ [              │
-        │   │   [0]: Item(   │
-        │   │     bucket: 2, │
-        │   │     value: 1   │
-        │   │   )            │
-        │   │ ]              │
-        └───┴────────────────┘
+        ┌──────────────────┐
+        │ GroupedItem(     │
+        │   bucket: 1,     │
+        │   items: [       │
+        │     [0]: Item(   │
+        │       bucket: 1, │
+        │       value: 1   │
+        │     ),           │
+        │     [1]: Item(   │
+        │       bucket: 1, │
+        │       value: 2   │
+        │     )            │
+        │   ]              │
+        │ )                │
+        ├──────────────────┤
+        │ GroupedItem(     │
+        │   bucket: 2,     │
+        │   items: [       │
+        │     [0]: Item(   │
+        │       bucket: 2, │
+        │       value: 1   │
+        │     )            │
+        │   ]              │
+        │ )                │
+        └──────────────────┘
         """
       }
     }
@@ -569,4 +575,11 @@ private struct RemindersListRow {
 private struct Item: Codable {
   var bucket: Int
   var value: Int
+}
+
+@Selection
+private struct GroupedItem {
+  let bucket: Int
+  @Column(as: [Item].JSONRepresentation.self)
+  let items: [Item]
 }
