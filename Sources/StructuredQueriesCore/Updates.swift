@@ -56,8 +56,8 @@ public struct Updates<Base: Table> {
 
   public subscript<Value: QueryExpression>(
     dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Value>>
-  ) -> Updates<Value> {
-    get { Updates<Value> { _ in } }
+  ) -> Updates<TableAlias<Value, _TableAliasName<Base>>> {
+    get { Updates<TableAlias<Value, _TableAliasName<Base>>> { _ in } }
     set { updates.append(contentsOf: newValue.updates) }
   }
 
@@ -88,4 +88,8 @@ extension Updates: QueryExpression {
   public var queryFragment: QueryFragment {
     "SET \(updates.map { "\(quote: $0) = \($1)" }.joined(separator: ", "))"
   }
+}
+
+public struct _TableAliasName<Base: Table>: AliasName {
+  public static var aliasName: String { Base.tableName }
 }

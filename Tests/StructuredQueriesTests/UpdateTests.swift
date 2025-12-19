@@ -367,7 +367,7 @@ extension SnapshotTests {
       assertInlineSnapshot(
         of: Root.update {
           $0.fields.honestCount = honestValue
-          //$0.fields.optionalCount = honestValue
+          $0.fields.optionalCount = #bind(honestValue)
           $0.fields.optionalCount = optionalValue
         },
         as: .sql
@@ -403,7 +403,7 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "roots"
-        SET "optionalCount" = "nestedFieldses"."optionalCount", "honestCount" = "nestedFieldses"."honestCount"
+        SET "optionalCount" = "roots"."optionalCount", "honestCount" = "roots"."honestCount"
         """
       }
     }

@@ -202,6 +202,22 @@ extension SnapshotTests {
         └──────────────────────────┘
         """
       }
+      assertQuery(
+        Item.select { dump($0.status).isOutOfStock }
+      ) {
+        """
+        SELECT "items"."isOutOfStock"
+        FROM "items"
+        """
+      } results: {
+        """
+        ┌──────┐
+        │ true │
+        │ true │
+        │ true │
+        └──────┘
+        """
+      }
     }
 
     @Test func optionalDoubleNested() async throws {
