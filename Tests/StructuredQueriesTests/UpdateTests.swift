@@ -368,7 +368,6 @@ extension SnapshotTests {
         of: Root.update {
           $0.fields.honestCount = honestValue
           $0.fields.optionalCount = #bind(honestValue)
-          $0.fields.optionalCount = optionalValue
         },
         as: .sql
       ) {
