@@ -157,8 +157,7 @@ let package = Package(
 )
 
 if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil
-  || ProcessInfo.processInfo.environment["CI"] != nil  // NB: For local testing in Xcode:
-// || true
+  || ProcessInfo.processInfo.environment["GITHUB_ACTION"] != nil  // || true  // NB: Uncomment for local testing in Xcode
 {
   package.traits.insert(
     .default(

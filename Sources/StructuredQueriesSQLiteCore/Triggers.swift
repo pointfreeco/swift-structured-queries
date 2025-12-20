@@ -185,7 +185,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ///   - dateFunction: A database function that returns the current datetime, _e.g._,
     ///     `#sql("datetime('subsec'))"`.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
-    /// - Returns: An `UPDATE` trigger operation.
+    /// - Returns: An `INSERT` trigger operation.
     @_disfavoredOverload
     public static func insert<D: _OptionalPromotable<Date?>>(
       touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
