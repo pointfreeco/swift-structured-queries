@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         xcode: ['26.2']
-    runs-on: macos26
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Select Xcode ${{ matrix.xcode }}
