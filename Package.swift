@@ -157,7 +157,8 @@ let package = Package(
 )
 
 if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil
-  || (ProcessInfo.processInfo.environment["GITHUB_ACTION_REPOSITORY"] ?? "").contains("swift-structured-queries") // || true  // NB: Uncomment for local testing in Xcode
+  || (ProcessInfo.processInfo.environment["GITHUB_ACTION_REPOSITORY"] ?? "").contains(
+    "swift-structured-queries")  // || true  // NB: Uncomment for local testing in Xcode
 {
   package.traits.insert(
     .default(
