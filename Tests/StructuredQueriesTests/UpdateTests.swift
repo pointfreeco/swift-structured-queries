@@ -357,9 +357,68 @@ extension SnapshotTests {
       }
     }
   }
+
+  @Suite struct SelectionUpdateTests {
+    @Dependency(\.defaultDatabase) var db
+
+    @Test func setSelectionFields() {
+      let honestValue: Int = 1
+      let optionalValue: Int? = 1
+      assertInlineSnapshot(
+        of: Root.update {
+          $0.fields.honestCount = honestValue
+          $0.fields.optionalCount = #bind(honestValue)
+        },
+        as: .sql
+      ) {
+        """
+        UPDATE "roots"
+        SET "honestCount" = 1, "optionalCount" = 1
+        """
+      }
+    }
+
+    @Test func setSelectionValue() {
+      assertInlineSnapshot(
+        of: Root.update {
+          $0.fields = NestedFields(honestCount: 1, optionalCount: 1)
+        },
+        as: .sql
+      ) {
+        """
+        UPDATE "roots"
+        SET "honestCount" = 1, "optionalCount" = 1
+        """
+      }
+    }
+
+    @Test func readSelectionFields() {
+      assertInlineSnapshot(
+        of: Root.update {
+          $0.fields.optionalCount = $0.fields.optionalCount
+          $0.fields.honestCount = $0.fields.honestCount
+        },
+        as: .sql
+      ) {
+        """
+        UPDATE "roots"
+        SET "optionalCount" = "roots"."optionalCount", "honestCount" = "roots"."honestCount"
+        """
+      }
+    }
+  }
 }
 
 @Table private struct Item {
   var title = ""
   var quantity = 0
+}
+
+@Table private struct Root {
+  @Columns var fields: NestedFields
+}
+
+@Selection struct NestedFields {
+  var honestCount: Int = 0
+  var optionalCount: Int?
 }
