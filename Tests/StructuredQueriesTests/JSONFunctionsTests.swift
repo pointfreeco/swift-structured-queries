@@ -40,7 +40,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func jsonGroupArrayDisctinct() {
+    @Test func jsonGroupArrayDistinct() {
       assertQuery(
         Reminder.select {
           $0.priority.jsonGroupArray(distinct: true)
@@ -142,7 +142,7 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "users"."id" AS "id", "users"."name" AS "name", "reminders"."id" AS "id", "reminders"."assignedUserID" AS "assignedUserID", "reminders"."dueDate" AS "dueDate", "reminders"."isCompleted" AS "isCompleted", "reminders"."isFlagged" AS "isFlagged", "reminders"."notes" AS "notes", "reminders"."priority" AS "priority", "reminders"."remindersListID" AS "remindersListID", "reminders"."title" AS "title", "reminders"."updatedAt" AS "updatedAt", json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."id") IS NOT (NULL)) AS "tags"
+        SELECT "users"."id" AS "id", "users"."name" AS "name", "reminders"."id" AS "id", "reminders"."assignedUserID" AS "assignedUserID", "reminders"."dueDate" AS "dueDate", "reminders"."isCompleted" AS "isCompleted", "reminders"."isFlagged" AS "isFlagged", "reminders"."notes" AS "notes", "reminders"."priority" AS "priority", "reminders"."remindersListID" AS "remindersListID", "reminders"."title" AS "title", "reminders"."updatedAt" AS "updatedAt", json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."rowid") IS NOT (NULL)) AS "tags"
         FROM "reminders"
         LEFT JOIN "remindersTags" ON ("reminders"."id") = ("remindersTags"."reminderID")
         LEFT JOIN "tags" ON ("remindersTags"."tagID") = ("tags"."id")
@@ -228,7 +228,7 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", json_group_array(DISTINCT CASE WHEN ("milestones"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("milestones"."id"), 'remindersListID', json_quote("milestones"."remindersListID"), 'title', json_quote("milestones"."title")) END) FILTER (WHERE ("milestones"."id") IS NOT (NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")) END) FILTER (WHERE ("reminders"."id") IS NOT (NULL)) AS "reminders"
+        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", json_group_array(DISTINCT CASE WHEN ("milestones"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("milestones"."id"), 'remindersListID', json_quote("milestones"."remindersListID"), 'title', json_quote("milestones"."title")) END) FILTER (WHERE ("milestones"."rowid") IS NOT (NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")) END) FILTER (WHERE ("reminders"."rowid") IS NOT (NULL)) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "milestones" ON ("remindersLists"."id") = ("milestones"."remindersListID")
         LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
@@ -491,6 +491,66 @@ extension SnapshotTests {
         """#
       }
     }
+
+    @Test func codableJSONGroup() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "items" (
+            "bucket" INTEGER NOT NULL,
+            "value" INTEGER NOT NULL
+          ) STRICT
+          """
+        )
+      )
+      let seeds = Seeds {
+        Item(bucket: 1, value: 1)
+        Item(bucket: 1, value: 2)
+        Item(bucket: 2, value: 1)
+      }
+      for seed in seeds {
+        try db.execute(seed)
+      }
+      assertQuery(
+        Item
+          .group(by: \.bucket)
+          .select { GroupedItem.Columns(bucket: $0.bucket, items: $0.jsonGroupArray()) }
+      ) {
+        """
+        SELECT "items"."bucket" AS "bucket", json_group_array(json_object('bucket', json_quote("items"."bucket"), 'value', json_quote("items"."value"))) AS "items"
+        FROM "items"
+        GROUP BY "items"."bucket"
+        """
+      } results: {
+        """
+        ┌──────────────────┐
+        │ GroupedItem(     │
+        │   bucket: 1,     │
+        │   items: [       │
+        │     [0]: Item(   │
+        │       bucket: 1, │
+        │       value: 1   │
+        │     ),           │
+        │     [1]: Item(   │
+        │       bucket: 1, │
+        │       value: 2   │
+        │     )            │
+        │   ]              │
+        │ )                │
+        ├──────────────────┤
+        │ GroupedItem(     │
+        │   bucket: 2,     │
+        │   items: [       │
+        │     [0]: Item(   │
+        │       bucket: 2, │
+        │       value: 1   │
+        │     )            │
+        │   ]              │
+        │ )                │
+        └──────────────────┘
+        """
+      }
+    }
   }
 }
 
@@ -509,4 +569,17 @@ private struct RemindersListRow {
   let milestones: [Milestone]
   @Column(as: [Reminder].JSONRepresentation.self)
   let reminders: [Reminder]
+}
+
+@Table
+private struct Item: Codable {
+  var bucket: Int
+  var value: Int
+}
+
+@Selection
+private struct GroupedItem {
+  let bucket: Int
+  @Column(as: [Item].JSONRepresentation.self)
+  let items: [Item]
 }
