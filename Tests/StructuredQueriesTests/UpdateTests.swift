@@ -363,7 +363,6 @@ extension SnapshotTests {
 
     @Test func setSelectionFields() {
       let honestValue: Int = 1
-      let optionalValue: Int? = 1
       assertInlineSnapshot(
         of: Root.update {
           $0.fields.honestCount = honestValue
