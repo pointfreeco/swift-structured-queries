@@ -51,7 +51,7 @@ extension QueryExpression where QueryValue: QueryRepresentable {
   /// - Parameter other: An expression to compare this one to.
   /// - Returns: A predicate expression.
   public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
+    BinaryOperator(lhs: self, operator: isNull(other) ? "IS" : "=", rhs: other)
   }
 
   /// Returns a predicate expression indicating whether two query expressions are not equal.
@@ -64,7 +64,7 @@ extension QueryExpression where QueryValue: QueryRepresentable {
   /// - Parameter other: An expression to compare this one to.
   /// - Returns: A predicate expression.
   public func neq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "<>", rhs: other)
+    BinaryOperator(lhs: self, operator: isNull(other) ? "IS NOT" : "<>", rhs: other)
   }
 
   /// Returns a predicate expression indicating whether two query expressions are equal (or are
@@ -137,22 +137,22 @@ extension _Null: ExpressibleByNilLiteral {
 extension QueryExpression where QueryValue: QueryRepresentable & _OptionalProtocol {
   @_documentation(visibility: private)
   public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
+    BinaryOperator(lhs: self, operator: isNull(other) ? "IS" : "=", rhs: other)
   }
 
   @_documentation(visibility: private)
   public func neq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "<>", rhs: other)
+    BinaryOperator(lhs: self, operator: isNull(other) ? "IS NOT" : "<>", rhs: other)
   }
 
   @_documentation(visibility: private)
   public func eq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "=", rhs: other)
+    BinaryOperator(lhs: self, operator: isNull(other) ? "IS" : "=", rhs: other)
   }
 
   @_documentation(visibility: private)
   public func neq(_ other: some QueryExpression<QueryValue>) -> some QueryExpression<Bool> {
-    BinaryOperator(lhs: self, operator: "<>", rhs: other)
+    BinaryOperator(lhs: self, operator: isNull(other) ? "IS NOT" : "<>", rhs: other)
   }
 
   @_documentation(visibility: private)
