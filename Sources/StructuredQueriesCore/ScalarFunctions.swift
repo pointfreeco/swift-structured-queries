@@ -78,9 +78,9 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   /// ```
   ///
   /// - Returns: A non-optional expression of the `ifnull` function wrapping this expression.
-  public func ifnull(
-    _ other: some QueryExpression<QueryValue.Wrapped>
-  ) -> some QueryExpression<QueryValue.Wrapped> {
+  public func ifnull<W>(
+    _ other: some QueryExpression<W>
+  ) -> some QueryExpression<W> where W == QueryValue.Wrapped {
     QueryFunction("ifnull", self, other)
   }
 
