@@ -27,7 +27,7 @@ jobs:
       - name: Run tests
         run: swift test --disable-experimental-prebuilts
       - name: Build release
-        run: swift build -c release --build-tests
+        run: swift build -c release --build-tests --disable-experimental-prebuilts
 
   linux:
     name: Linux
