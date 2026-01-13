@@ -646,5 +646,74 @@ extension SnapshotTests {
         """
       }
     }
+
+    @DatabaseFunction
+    var epoch: Date {
+      Date(timeIntervalSince1970: 0)
+    }
+    @Test func computedProperty() {
+      $epoch.install(database.handle)
+
+      assertQuery(
+        Values($epoch)
+      ) {
+        """
+        SELECT "epoch"()
+        """
+      } results: {
+        """
+        ┌────────────────────────────────┐
+        │ Date(1970-01-01T00:00:00.000Z) │
+        └────────────────────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction("epoch", as: Date.UnixTimeRepresentation.self)
+    var seconds: Date {
+      Date(timeIntervalSinceReferenceDate: 0)
+    }
+    @Test func computedPropertyRepresentation() {
+      $seconds.install(database.handle)
+
+      assertQuery(
+        Values($seconds)
+      ) {
+        """
+        SELECT "epoch"()
+        """
+      } results: {
+        """
+        ┌────────────────────────────────┐
+        │ Date(2001-01-01T00:00:00.000Z) │
+        └────────────────────────────────┘
+        """
+      }
+    }
+
+    @DatabaseFunction
+    var `throw`: Date {
+      get throws {
+        struct Raise: LocalizedError {
+          var errorDescription: String? { "Something went wrong." }
+        }
+        throw Raise()
+      }
+    }
+    @Test func computedPropertyThrowing() {
+      $throw.install(database.handle)
+
+      assertQuery(
+        Values($throw)
+      ) {
+        """
+        SELECT "throw"()
+        """
+      } results: {
+        """
+        Something went wrong.
+        """
+      }
+    }
   }
 }

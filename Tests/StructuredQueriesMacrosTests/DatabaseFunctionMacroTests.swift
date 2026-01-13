@@ -43,7 +43,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
@@ -93,7 +93,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
@@ -145,7 +145,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let strings = try decoder.decode(_requireQueryRepresentable([String].JSONRepresentation.self))
             guard let strings else {
@@ -201,7 +201,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Int(
               queryOutput: self.body()
@@ -253,7 +253,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
@@ -311,7 +311,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
@@ -369,7 +369,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
@@ -427,7 +427,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
@@ -486,7 +486,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let first = try decoder.decode(_requireQueryRepresentable(String.self))
             let second = try decoder.decode(_requireQueryRepresentable(String.self))
@@ -518,7 +518,7 @@ extension SnapshotTests {
       } diagnostics: {
         """
         @DatabaseFunction
-        ╰─ 🛑 '@DatabaseFunction' must be applied to functions
+        ╰─ 🛑 '@DatabaseFunction' must be applied to a function or computed property
         struct Foo {
         }
         """
@@ -565,7 +565,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let format = try decoder.decode(_requireQueryRepresentable(String?.self))
             guard let format else {
@@ -621,7 +621,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             do {
               return Date(
@@ -675,7 +675,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             do {
               return Date(
@@ -729,7 +729,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
@@ -779,7 +779,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
@@ -852,7 +852,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
               queryOutput: self.body()
@@ -902,7 +902,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Int(
               queryOutput: self.body()
@@ -952,7 +952,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             self.body()
             return .null
@@ -997,7 +997,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             do {
               try self.body()
@@ -1061,7 +1061,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let x = try decoder.decode(_requireQueryRepresentable(Int.self))
             let y = try decoder.decode(_requireQueryRepresentable(Int.self))
@@ -1128,7 +1128,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let x = try decoder.decode(_requireQueryRepresentable(Int.self))
             let y = try decoder.decode(_requireQueryRepresentable(Int.self))
@@ -1189,7 +1189,7 @@ extension SnapshotTests {
             }
           }
           public func invoke(
-            _ decoder: inout some QueryDecoder
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             let reminder = try decoder.decode(_requireQueryRepresentable(Reminder.self))
             let override = try decoder.decode(_requireQueryRepresentable(Bool.self))
@@ -1205,6 +1205,214 @@ extension SnapshotTests {
             .queryBinding
           }
           private struct InvalidInvocation: Error {
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func computedProperty() {
+      assertMacro {
+        """
+        @DatabaseFunction
+        var now: Date {
+          Date()
+        }
+        """
+      } expansion: {
+        #"""
+        var now: Date {
+          Date()
+        }
+
+        nonisolated var $now: __macro_local_3nowfMu_ {
+          __macro_local_3nowfMu_ {
+            now
+          }
+        }
+
+        nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
+          public typealias Input = ()
+          public typealias Output = Date
+          public typealias QueryValue = Output
+          public let name = "now"
+          public var argumentCount: Int? {
+            0
+          }
+          public let isDeterministic = false
+          public let body: () -> Date
+          public init(_ body: @escaping () -> Date) {
+            self.body = body
+          }
+          public func invoke(
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            return Date(
+              queryOutput: self.body()
+            )
+            .queryBinding
+          }
+          public var queryFragment: StructuredQueriesCore.QueryFragment {
+            "\(quote: self.name)()"
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func computedPropertyGetter() {
+      assertMacro {
+        """
+        @DatabaseFunction
+        var now: Date {
+          get {
+            Date()
+          }
+        }
+        """
+      } expansion: {
+        #"""
+        var now: Date {
+          get {
+            Date()
+          }
+        }
+
+        nonisolated var $now: __macro_local_3nowfMu_ {
+          __macro_local_3nowfMu_ {
+            now
+          }
+        }
+
+        nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
+          public typealias Input = ()
+          public typealias Output = Date
+          public typealias QueryValue = Output
+          public let name = "now"
+          public var argumentCount: Int? {
+            0
+          }
+          public let isDeterministic = false
+          public let body: () -> Date
+          public init(_ body: @escaping () -> Date) {
+            self.body = body
+          }
+          public func invoke(
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            return Date(
+              queryOutput: self.body()
+            )
+            .queryBinding
+          }
+          public var queryFragment: StructuredQueriesCore.QueryFragment {
+            "\(quote: self.name)()"
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func computedThrowingProperty() {
+      assertMacro {
+        """
+        @DatabaseFunction
+        var now: Date {
+          get throws {
+            Date()
+          }
+        }
+        """
+      } expansion: {
+        #"""
+        var now: Date {
+          get throws {
+            Date()
+          }
+        }
+
+        nonisolated var $now: __macro_local_3nowfMu_ {
+          __macro_local_3nowfMu_ {
+            try now
+          }
+        }
+
+        nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
+          public typealias Input = ()
+          public typealias Output = Date
+          public typealias QueryValue = Output
+          public let name = "now"
+          public var argumentCount: Int? {
+            0
+          }
+          public let isDeterministic = false
+          public let body: () throws -> Date
+          public init(_ body: @escaping () throws -> Date) {
+            self.body = body
+          }
+          public func invoke(
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            return Date(
+              queryOutput: try self.body()
+            )
+            .queryBinding
+          }
+          public var queryFragment: StructuredQueriesCore.QueryFragment {
+            "\(quote: self.name)()"
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func staticProperty() {
+      assertMacro {
+        """
+        enum Functions {
+          @DatabaseFunction
+          static var now: Date {
+            Date()
+          }
+        }
+        """
+      } expansion: {
+        #"""
+        enum Functions {
+          static var now: Date {
+            Date()
+          }
+
+          static nonisolated var $now: __macro_local_3nowfMu_ {
+            __macro_local_3nowfMu_ {
+              now
+            }
+          }
+
+          nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
+            public typealias Input = ()
+            public typealias Output = Date
+            public typealias QueryValue = Output
+            public let name = "now"
+            public var argumentCount: Int? {
+              0
+            }
+            public let isDeterministic = false
+            public let body: () -> Date
+            public init(_ body: @escaping () -> Date) {
+              self.body = body
+            }
+            public func invoke(
+              _ decoder: inout some StructuredQueriesCore.QueryDecoder
+            ) throws -> StructuredQueriesCore.QueryBinding {
+              return Date(
+                queryOutput: self.body()
+              )
+              .queryBinding
+            }
+            public var queryFragment: StructuredQueriesCore.QueryFragment {
+              "\(quote: self.name)()"
+            }
           }
         }
         """#
@@ -1254,7 +1462,7 @@ extension SnapshotTests {
               }
             }
             public func step(
-              _ decoder: inout some QueryDecoder
+              _ decoder: inout some StructuredQueriesCore.QueryDecoder
             ) throws -> Int {
               let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
@@ -1314,7 +1522,7 @@ extension SnapshotTests {
               }
             }
             public func step(
-              _ decoder: inout some QueryDecoder
+              _ decoder: inout some StructuredQueriesCore.QueryDecoder
             ) throws -> Int {
               let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
@@ -1387,7 +1595,7 @@ extension SnapshotTests {
               }
             }
             public func step(
-              _ decoder: inout some QueryDecoder
+              _ decoder: inout some StructuredQueriesCore.QueryDecoder
             ) throws -> (String, separator: String) {
               let p0 = try decoder.decode(_requireQueryRepresentable(String.self))
               let separator = try decoder.decode(_requireQueryRepresentable(String.self))
@@ -1453,7 +1661,7 @@ extension SnapshotTests {
               }
             }
             public func step(
-              _ decoder: inout some QueryDecoder
+              _ decoder: inout some StructuredQueriesCore.QueryDecoder
             ) throws -> [String] {
               let arrays = try decoder.decode(_requireQueryRepresentable([String].JSONRepresentation.self))
               guard let arrays else {
@@ -1517,7 +1725,7 @@ extension SnapshotTests {
               }
             }
             public func step(
-              _ decoder: inout some QueryDecoder
+              _ decoder: inout some StructuredQueriesCore.QueryDecoder
             ) throws -> Int {
               let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
@@ -1586,7 +1794,7 @@ extension SnapshotTests {
               }
             }
             public func step(
-              _ decoder: inout some QueryDecoder
+              _ decoder: inout some StructuredQueriesCore.QueryDecoder
             ) throws -> Int {
               let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
