@@ -1366,6 +1366,59 @@ extension SnapshotTests {
       }
     }
 
+    @Test func staticProperty() {
+      assertMacro {
+        """
+        enum Functions {
+          @DatabaseFunction
+          static var now: Date {
+            Date()
+          }
+        }
+        """
+      } expansion: {
+        #"""
+        enum Functions {
+          static var now: Date {
+            Date()
+          }
+
+          static nonisolated var $now: __macro_local_3nowfMu_ {
+            __macro_local_3nowfMu_ {
+              now
+            }
+          }
+
+          nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
+            public typealias Input = ()
+            public typealias Output = Date
+            public typealias QueryValue = Output
+            public let name = "now"
+            public var argumentCount: Int? {
+              0
+            }
+            public let isDeterministic = false
+            public let body: () -> Date
+            public init(_ body: @escaping () -> Date) {
+              self.body = body
+            }
+            public func invoke(
+              _ decoder: inout some StructuredQueriesCore.QueryDecoder
+            ) throws -> StructuredQueriesCore.QueryBinding {
+              return Date(
+                queryOutput: self.body()
+              )
+              .queryBinding
+            }
+            public var queryFragment: StructuredQueriesCore.QueryFragment {
+              "\(quote: self.name)()"
+            }
+          }
+        }
+        """#
+      }
+    }
+
     @Suite struct AggregateTests {
       @Test func basics() {
         assertMacro {
