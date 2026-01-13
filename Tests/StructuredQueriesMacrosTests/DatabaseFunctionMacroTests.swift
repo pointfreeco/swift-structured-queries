@@ -1233,7 +1233,7 @@ extension SnapshotTests {
 
         nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
           public typealias Input = ()
-          public typealias Output =
+          public typealias Output = Date
           public typealias QueryValue = Output
           public let name = "now"
           public var argumentCount: Int? {
@@ -1253,7 +1253,7 @@ extension SnapshotTests {
             .queryBinding
           }
           public var queryFragment: StructuredQueriesCore.QueryFragment {
-            StructuredQueriesCore.SQLQueryExpression("\(quote: self.name)()")
+            "\(quote: self.name)()"
           }
         }
         """#
@@ -1286,7 +1286,7 @@ extension SnapshotTests {
 
         nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
           public typealias Input = ()
-          public typealias Output =
+          public typealias Output = Date
           public typealias QueryValue = Output
           public let name = "now"
           public var argumentCount: Int? {
@@ -1306,7 +1306,7 @@ extension SnapshotTests {
             .queryBinding
           }
           public var queryFragment: StructuredQueriesCore.QueryFragment {
-            StructuredQueriesCore.SQLQueryExpression("\(quote: self.name)()")
+            "\(quote: self.name)()"
           }
         }
         """#
@@ -1333,13 +1333,13 @@ extension SnapshotTests {
 
         nonisolated var $now: __macro_local_3nowfMu_ {
           __macro_local_3nowfMu_ {
-            now
+            try now
           }
         }
 
         nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
           public typealias Input = ()
-          public typealias Output =
+          public typealias Output = Date
           public typealias QueryValue = Output
           public let name = "now"
           public var argumentCount: Int? {
@@ -1359,7 +1359,7 @@ extension SnapshotTests {
             .queryBinding
           }
           public var queryFragment: StructuredQueriesCore.QueryFragment {
-            StructuredQueriesCore.SQLQueryExpression("\(quote: self.name)()")
+            "\(quote: self.name)()"
           }
         }
         """#
