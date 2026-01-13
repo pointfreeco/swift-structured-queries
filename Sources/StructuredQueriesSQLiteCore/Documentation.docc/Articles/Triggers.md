@@ -52,7 +52,7 @@ a specialized tool just for that kind of trigger,
     ```swift
     Reminder.createTemporaryTrigger(
       after: .update: {
-        $0.updatedAt = datetime('subsec')
+        $0.updatedAt = #sql("datetime('subsec')")
       }
     )
     ```

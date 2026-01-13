@@ -825,10 +825,20 @@ extension QueryExpression where QueryValue: QueryExpression {
   /// Returns a predicate expression indicating whether the expression is in a sequence.
   ///
   /// - Parameter expression: A sequence of expressions.
-  /// - Returns: A predicate expression indicating whether this expression is in the given sequence
+  /// - Returns: A predicate expression indicating whether this expression is in the given sequence.
   public func `in`<S: Sequence>(_ expression: S) -> some QueryExpression<Bool>
   where S.Element: QueryExpression<QueryValue> {
     BinaryOperator(lhs: self, operator: "IN", rhs: S.Expression(elements: expression))
+  }
+
+  /// Returns a predicate expression indicating whether the expression is not in a sequence.
+  ///
+  /// - Parameter expression: A sequence of expressions.
+  /// - Returns: A predicate expression indicating whether this expression is not in the given
+  ///   sequence.
+  public func notIn<S: Sequence>(_ expression: S) -> some QueryExpression<Bool>
+  where S.Element: QueryExpression<QueryValue> {
+    BinaryOperator(lhs: self, operator: "NOT IN", rhs: S.Expression(elements: expression))
   }
 
   /// Returns a predicate expression indicating whether the expression is in a subquery.
@@ -839,6 +849,19 @@ extension QueryExpression where QueryValue: QueryExpression {
     BinaryOperator(
       lhs: self,
       operator: "IN",
+      rhs: SQLQueryExpression("(\(query.query))", as: Void.self)
+    )
+  }
+
+  /// Returns a predicate expression indicating whether the expression is not in a subquery.
+  ///
+  /// - Parameter query: A subquery.
+  /// - Returns: A predicate expression indicating whether this expression is not in the given
+  ///   subquery.
+  public func notIn(_ query: some Statement<QueryValue>) -> some QueryExpression<Bool> {
+    BinaryOperator(
+      lhs: self,
+      operator: "NOT IN",
       rhs: SQLQueryExpression("(\(query.query))", as: Void.self)
     )
   }
