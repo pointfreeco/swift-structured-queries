@@ -13,12 +13,124 @@ extension DatabaseFunctionMacro: PeerMacro {
     providingPeersOf declaration: D,
     in context: C
   ) throws -> [DeclSyntax] {
+    if let declaration = declaration.as(VariableDeclSyntax.self),
+      declaration.bindings.count == 1,
+      let binding = declaration.bindings.first,
+      let outputType = binding.typeAnnotation?.type,
+      let getter = binding.getter,
+      let rawDeclarationName = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier
+    {
+      let declarationName = rawDeclarationName.trimmedDescription.trimmingBackticks()
+      var functionName = declarationName
+      var representableOutputType = outputType.trimmedDescription
+      var isDeterministic = false
+      if case .argumentList(let arguments) = node.arguments {
+        for argumentIndex in arguments.indices {
+          let argument = arguments[argumentIndex]
+          switch argument.label {
+          case nil:
+            guard
+              let string = argument.expression.as(StringLiteralExprSyntax.self)?
+                .representedLiteralValue
+            else {
+              context.diagnose(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
+                )
+              )
+              return []
+            }
+            functionName = string
+
+          case .some(let label) where label.text == "as":
+            guard
+              let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
+              memberAccess.declName.baseName.tokenKind == .keyword(.self),
+              let base = memberAccess.base
+            else {
+              context.diagnose(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage("Argument must be a type literal")
+                )
+              )
+              return []
+            }
+            representableOutputType = base.trimmedDescription
+
+          case .some(let label) where label.text == "isDeterministic":
+            guard
+              let bool = argument.expression.as(BooleanLiteralExprSyntax.self)
+            else {
+              context.diagnose(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage("Argument must be a boolean literal")
+                )
+              )
+              return []
+            }
+            isDeterministic = bool.literal.tokenKind == .keyword(.true)
+
+          case let argument?:
+            fatalError("Unexpected argument: \(argument)")
+          }
+        }
+      }
+      let functionTypeName = context.makeUniqueName(declarationName)
+      let databaseFunctionName = StringLiteralExprSyntax(content: functionName)
+
+      var attributes = declaration.attributes
+      attributes.remove("DatabaseFunction")
+
+      let (access, `static`) = declaration.modifiers.metadata
+
+      let bodyType = "()\(getter.throws ? " throws" : "") -> \(outputType.trimmed)"
+
+      return [
+        """
+        \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
+        \(functionTypeName) {
+        \(functionTypeName) { \(raw: getter.throws ? "try " : "")\(rawDeclarationName.trimmed) }
+        }
+        """,
+        """
+        \(attributes)\(access)\(nonisolated)struct \(functionTypeName): \
+        StructuredQueriesSQLiteCore.ScalarDatabaseFunction, \
+        StructuredQueriesCore.QueryExpression {
+        public typealias Input = ()
+        public typealias Output = \(raw: representableOutputType)
+        public typealias QueryValue = Output
+        public let name = \(databaseFunctionName)
+        public var argumentCount: Int? { 0 }
+        public let isDeterministic = \(raw: isDeterministic)
+        public let body: \(raw: bodyType)
+        public init(_ body: @escaping \(raw: bodyType)) {
+        self.body = body
+        }
+        public func invoke(
+        _ decoder: inout some StructuredQueriesCore.QueryDecoder
+        ) throws -> StructuredQueriesCore.QueryBinding {
+        return \(raw: representableOutputType)(
+        queryOutput: \(raw: getter.throws ? "try " : "")self.body()
+        )
+        .queryBinding
+        }
+        public var queryFragment: StructuredQueriesCore.QueryFragment {
+        "\\(quote: self.name)()"
+        }
+        }
+        """,
+      ]
+    }
+
     guard let declaration = declaration.as(FunctionDeclSyntax.self) else {
       context.diagnose(
         Diagnostic(
           node: declaration,
           message: MacroExpansionErrorMessage(
-            "'@DatabaseFunction' must be applied to functions"
+            "'@DatabaseFunction' must be applied to a function or computed property"
           )
         )
       )
@@ -301,24 +413,9 @@ extension DatabaseFunctionMacro: PeerMacro {
     signature.effectSpecifiers?.throwsClause = nil
 
     var attributes = declaration.attributes
-    if let index = attributes.firstIndex(where: {
-      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
-        == "DatabaseFunction"
-    }) {
-      attributes.remove(at: index)
-    }
-    var access: TokenSyntax?
-    var `static`: TokenSyntax?
-    for modifier in declaration.modifiers {
-      switch modifier.name.tokenKind {
-      case .keyword(.private), .keyword(.internal), .keyword(.package), .keyword(.public):
-        access = modifier.name
-      case .keyword(.static):
-        `static` = modifier.name
-      default:
-        continue
-      }
-    }
+    attributes.remove("DatabaseFunction")
+
+    let (access, `static`) = declaration.modifiers.metadata
 
     let argumentCount =
       argumentCounts.isEmpty
@@ -362,7 +459,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       methods.append(
         """
         public func step(
-        _ decoder: inout some QueryDecoder
+        _ decoder: inout some StructuredQueriesCore.QueryDecoder
         ) throws -> \(raw: rowType) {
         \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
         \(raw: stepReturnClause)\
@@ -440,7 +537,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       methods.append(
         """
         public func invoke(
-        _ decoder: inout some QueryDecoder
+        _ decoder: inout some StructuredQueriesCore.QueryDecoder
         ) throws -> StructuredQueriesCore.QueryBinding {
         \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
         \(raw: invocationBody)
@@ -509,5 +606,35 @@ extension TypeSyntaxProtocol {
     \(raw: `any` ? "any" : "some") \
     StructuredQueriesCore.QueryExpression<\(trimmed)>\(trailingTrivia)
     """
+  }
+}
+
+extension AttributeListSyntax {
+  fileprivate mutating func remove(_ attributeName: String) {
+    guard
+      let index = firstIndex(where: {
+        $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+          == attributeName
+      })
+    else { return }
+    remove(at: index)
+  }
+}
+
+extension DeclModifierListSyntax {
+  fileprivate var metadata: (access: TokenSyntax?, static: TokenSyntax?) {
+    var access: TokenSyntax?
+    var `static`: TokenSyntax?
+    for modifier in self {
+      switch modifier.name.tokenKind {
+      case .keyword(.private), .keyword(.internal), .keyword(.package), .keyword(.public):
+        access = modifier.name
+      case .keyword(.static):
+        `static` = modifier.name
+      default:
+        continue
+      }
+    }
+    return (access, `static`)
   }
 }
