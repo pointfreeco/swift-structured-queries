@@ -267,7 +267,10 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   ///   $0.dueDate.map { $0 > Date() }
   /// }
   /// // SELECT … FROM "reminders"
-  /// // WHERE "reminders"."dueDate" > '2018-01-29 00:08:00.000'
+  /// // WHERE CASE "reminders"."dueDate" IS NULL
+  /// //   WHEN 1 THEN NULL
+  /// //   ELSE ("reminders"."dueDate") > ('2018-01-29 00:08:00.000')
+  /// // END
   /// ```
   ///
   /// - Parameter transform: A closure that takes an unwrapped version of this expression.

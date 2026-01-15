@@ -23,11 +23,11 @@ extension Table {
   ///   $0.title += "!"
   /// }
   /// // UPDATE "reminders"
-  /// // SET "title" = "title" || 'Get haircut'
+  /// // SET "title" = "title" || '!'
   /// ```
   ///
   /// The syntax `$0.title += "!"` is translated into the equivalent SQL of
-  /// `"title" = "title" || 'Get haircut'`
+  /// `"title" = "title" || '!'`
   ///
   /// - Parameter updates: A closure describing column-wise updates to perform.
   /// - Returns: An update statement.

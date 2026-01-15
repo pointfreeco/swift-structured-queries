@@ -12,7 +12,7 @@ public struct Collation: QueryExpression, Sendable {
   ///   static let fr_FR = Self(rawValue: "fr_FR")
   /// }
   ///
-  /// Reminder.order { $0.title.collate(.fr_FR)  }
+  /// Reminder.order { $0.title.collate(.fr_FR) }
   /// // SELECT … FROM "reminders"
   /// // ORDER BY "reminders"."title" COLLATE "fr_FR"
   /// ```

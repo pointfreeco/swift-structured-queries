@@ -8,7 +8,7 @@
 /// // => (Bool, Double, String)
 /// ```
 ///
-/// While not particularly useful on its own it can act as a helpful starting point for recursive
+/// While not particularly useful on its own, it can act as a helpful starting point for recursive
 /// common table expressions and other subqueries. See <doc:CommonTableExpressions> for more.
 public struct Values<QueryValue>: PartialSelectStatement {
   public typealias From = Never

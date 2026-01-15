@@ -103,7 +103,7 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable 
   /// A minimum aggregate of this expression.
   ///
   /// ```swift
-  /// Reminder.select { $0.date.max() }
+  /// Reminder.select { $0.date.min() }
   /// // SELECT min("reminders"."date") FROM "reminders"
   /// ```
   ///
@@ -121,8 +121,8 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   /// An average aggregate of this expression.
   ///
   /// ```swift
-  /// Reminder.select { $0.date.max() }
-  /// // SELECT min("reminders"."date") FROM "reminders"
+  /// Item.select { $0.price.avg() }
+  /// // SELECT avg("items"."price") FROM "items"
   /// ```
   ///
   /// - Parameters:
@@ -138,7 +138,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
       "avg", isDistinct: isDistinct, [queryFragment], filter: filter?.queryFragment)
   }
 
-  /// An sum aggregate of this expression.
+  /// A sum aggregate of this expression.
   ///
   /// ```swift
   /// Item.select { $0.quantity.sum() }
@@ -167,7 +167,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
     )
   }
 
-  /// An total aggregate of this expression.
+  /// A total aggregate of this expression.
   ///
   /// ```swift
   /// Item.select { $0.price.total() }

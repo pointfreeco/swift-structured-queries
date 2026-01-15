@@ -7,7 +7,7 @@ extension QueryExpression where QueryValue: QueryBindable {
     OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
   }
 
-  /// This expression with an descending ordering term.
+  /// This expression with a descending ordering term.
   ///
   /// - Parameter nullOrdering: `NULL`-specific ordering.
   /// - Returns: A descending ordering of this expression.

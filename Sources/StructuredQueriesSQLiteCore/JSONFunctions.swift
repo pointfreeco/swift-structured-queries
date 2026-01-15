@@ -4,7 +4,7 @@ extension QueryExpression {
   /// Passes this expression and the given one to the `json_patch` function.
   ///
   /// - Parameter other: A JSON object to patch this object with.
-  /// - Returns: A JSON expression of the result of the invoking the `json_patch` function.
+  /// - Returns: A JSON expression of the result of invoking the `json_patch` function.
   public func jsonPatch<QueryOutput: Codable>(
     _ other: some QueryExpression<QueryValue>
   ) -> some QueryExpression<QueryValue>
@@ -27,7 +27,7 @@ extension QueryExpression {
 }
 
 extension QueryExpression where QueryValue: Codable & QueryBindable {
-  /// A JSON array aggregate of this expression
+  /// A JSON array aggregate of this expression.
   ///
   /// Concatenates all of the values in a group.
   ///
@@ -37,7 +37,7 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
   /// ```
   ///
   /// - Parameters:
-  ///   - isDistinct: An boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this expression.
@@ -103,7 +103,7 @@ extension TableDefinition where QueryValue: Codable {
   /// }
   ///
   /// - Parameters:
-  ///   - isDistinct: An boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
@@ -162,14 +162,14 @@ extension TableDefinition where QueryValue: _OptionalProtocol & Codable {
   ///         )
   ///       END AS "reminders"
   ///     FROM "remindersLists"
-  ///     JOIN "reminders"
+  ///     LEFT JOIN "reminders"
   ///       ON ("remindersLists"."id" = "reminders"."remindersListID")
   ///     ```
   ///   }
   /// }
   ///
   /// - Parameters:
-  ///   - isDistinct: An boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
