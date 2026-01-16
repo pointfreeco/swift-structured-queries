@@ -6,13 +6,11 @@ extension Table {
   /// struct User {
   ///   let id: Int
   ///   var email: String
+  ///   var isAdmin = false
   /// }
   ///
-  /// User.where { $0.id == 1 }
-  /// // WHERE ("users"."id" = 1)
-  ///
-  /// User.where { $0.like("%@pointfree.co") }
-  /// // WHERE ("users"."email" LIKE '%@pointfree.co')
+  /// User.where(\.isAdmin)
+  /// // WHERE "users"."isAdmin"
   /// ```
   ///
   /// See <doc:WhereClauses> for more.

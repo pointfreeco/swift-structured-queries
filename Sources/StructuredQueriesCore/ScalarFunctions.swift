@@ -8,7 +8,7 @@ extension QueryExpression where QueryValue: Collection {
   /// // SELECT length("reminders"."title") FROM "reminders"
   ///
   /// Asset.select { $0.bytes.length() }
-  /// // SELECT length("assets"."bytes") FROM "assets
+  /// // SELECT length("assets"."bytes") FROM "assets"
   /// ```
   ///
   /// - Returns: An integer expression of the `length` function wrapping this expression.
@@ -176,7 +176,7 @@ extension QueryExpression {
 }
 
 extension QueryExpression where QueryValue == String {
-  /// Wraps this optional query expression with the `instr` function.
+  /// Wraps this string query expression with the `instr` function.
   ///
   /// - Returns: An integer expression of the `instr` function wrapping this expression.
   public func instr(_ occurrence: some QueryExpression<QueryValue>) -> some QueryExpression<Int> {

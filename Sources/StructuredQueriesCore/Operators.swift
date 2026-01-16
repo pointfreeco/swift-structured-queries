@@ -789,7 +789,7 @@ extension SQLQueryExpression<String> {
   ///
   /// ```swift
   /// Reminder.update { $0.title += " 2" }
-  /// // UPDATE "reminders" SET "title" = ("reminders"."title" || " 2")
+  /// // UPDATE "reminders" SET "title" = ("reminders"."title" || ` 2`)
   /// ```
   ///
   /// - Parameters:

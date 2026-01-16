@@ -32,6 +32,7 @@ extension Snapshotting where Value: QueryExpression {
   ///   SELECT "reminders"."title" FROM "reminders"
   ///   """
   /// }
+  /// ```
   public static var sql: Snapshotting<Value, String> {
     SimplySnapshotting.lines.pullback(\.queryFragment.debugDescription)
   }

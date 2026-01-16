@@ -226,11 +226,11 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     /// Append a quoted fragment to the interpolation.
     ///
     /// ```swift
-    /// #sql("SELECT \(quote: "id") FROM \(quote: "reminders")", as: Reminder.self)
+    /// #sql("SELECT \(quote: "id") FROM \(quote: "reminders")", as: Int.self)
     /// // SELECT "id" FROM "reminders"
     ///
     /// #sql("CREATE TABLE t (c TEXT DEFAULT \(quote: "Blob's world", delimiter: .text))")
-    /// // SELECT TABLE t (c TEXT DEFAULT 'Blob''s world')
+    /// // CREATE TABLE t (c TEXT DEFAULT 'Blob''s world')
     /// ```
     ///
     /// - Parameters:
@@ -330,7 +330,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///   as: String.self
     /// )
     /// // SELECT title FROM reminders
-    /// // WHERE priority > (SELECT avg("reminders"."priority) FROM "reminders")
+    /// // WHERE priority > (SELECT avg("reminders"."priority") FROM "reminders")
     /// ```
     ///
     /// - Parameter statement: A statement.
@@ -341,7 +341,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     /// Append a table's alias or name to the interpolation.
     ///
     /// ```swift
-    /// #sql("SELECT title FROM \(Reminder.self)), as: String.self)
+    /// #sql("SELECT title FROM \(Reminder.self)", as: String.self)
     /// // SELECT title FROM "reminders"
     ///
     /// enum R: AliasName {}

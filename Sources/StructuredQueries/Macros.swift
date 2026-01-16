@@ -46,7 +46,7 @@ public macro Table(
 /// ```swift
 /// RemindersList
 ///   .group(by: \.id)
-///   .join(Reminder.all) { $0.id == $0.remindersListID }
+///   .join(Reminder.all) { $0.id == $1.remindersListID }
 ///   .select { ($0, $1.count()) }
 /// // [(RemindersList, Int)]
 /// ```
@@ -62,9 +62,9 @@ public macro Table(
 ///
 /// RemindersList
 ///   .group(by: \.id)
-///   .join(Reminder.all) { $0.id == $0.remindersListID }
+///   .join(Reminder.all) { $0.id == $1.remindersListID }
 ///   .select { ListWithCount.Columns(list: $0, count: $1.count()) }
-/// // [RemindersListWithReminderCount]
+/// // [ListWithCount]
 /// ```
 ///
 /// > Tip: `@Selection`s can also be used to build up common table expressions.

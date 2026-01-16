@@ -51,7 +51,7 @@ public protocol Table: QueryRepresentable, PartialSelectStatement {
   ///   var isDeleted = false
   /// }
   ///
-  /// Item.where { name.contains("red") }
+  /// Item.where { $0.name.contains("red") }
   /// // SELECT … FROM "items"
   /// // WHERE (NOT "items"."isDeleted")    -- Automatically applied from 'all'
   /// // AND ("items"."name" LIKE '%red%')
@@ -121,7 +121,7 @@ extension Table {
   ///
   /// ```swift
   /// #sql("SELECT \(Reminder.id) FROM \(Reminder.self)", as: Int.self)
-  /// // SELECT "reminders"."id" FROM "reminders
+  /// // SELECT "reminders"."id" FROM "reminders"
   /// ```
   public static subscript<Member: _TableColumnExpression>(
     dynamicMember keyPath: KeyPath<TableColumns, Member>
