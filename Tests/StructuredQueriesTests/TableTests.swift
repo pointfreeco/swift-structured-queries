@@ -41,7 +41,7 @@ extension SnapshotTests {
           """
           SELECT "rows"."id", "rows"."isDeleted"
           FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           ORDER BY "rows"."id" DESC
           """
         } results: {
@@ -58,7 +58,7 @@ extension SnapshotTests {
           """
           SELECT "rows"."id", "rows"."isDeleted"
           FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           ORDER BY "rows"."id" DESC
           """
         } results: {
@@ -75,7 +75,7 @@ extension SnapshotTests {
           """
           SELECT "rows"."id"
           FROM "rows"
-          WHERE NOT ("rows"."isDeleted")
+          WHERE (NOT ("rows"."isDeleted"))
           ORDER BY "rows"."id" DESC
           """
         } results: {
@@ -116,7 +116,7 @@ extension SnapshotTests {
         ) {
           """
           DELETE FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -137,7 +137,7 @@ extension SnapshotTests {
         ) {
           """
           DELETE FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -155,7 +155,7 @@ extension SnapshotTests {
         ) {
           """
           DELETE FROM "rows"
-          WHERE ("rows"."id") > (0)
+          WHERE (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -180,7 +180,7 @@ extension SnapshotTests {
           """
           UPDATE "rows"
           SET "isDeleted" = NOT ("rows"."isDeleted")
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -202,7 +202,7 @@ extension SnapshotTests {
           """
           UPDATE "rows"
           SET "isDeleted" = NOT ("rows"."isDeleted")
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -221,7 +221,7 @@ extension SnapshotTests {
           """
           UPDATE "rows"
           SET "isDeleted" = NOT ("rows"."isDeleted")
-          WHERE ("rows"."id") > (0)
+          WHERE (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -247,7 +247,7 @@ extension SnapshotTests {
             """
             SELECT "rows"."id", "rows"."isDeleted"
             FROM "rows"
-            WHERE NOT ("rows"."isDeleted")
+            WHERE (NOT ("rows"."isDeleted"))
             ORDER BY "rows"."id" DESC
             """
           } results: {
@@ -267,7 +267,7 @@ extension SnapshotTests {
             """
             SELECT "rows"."id", "rows"."isDeleted"
             FROM "rows"
-            WHERE NOT ("rows"."isDeleted")
+            WHERE (NOT ("rows"."isDeleted"))
             ORDER BY "rows"."id" DESC
             """
           } results: {
@@ -288,7 +288,7 @@ extension SnapshotTests {
           """
           SELECT "rows"."id"
           FROM "rows"
-          WHERE NOT ("rows"."isDeleted")
+          WHERE (NOT ("rows"."isDeleted"))
           ORDER BY "rows"."id" DESC
           """
         } results: {
@@ -306,7 +306,7 @@ extension SnapshotTests {
           """
           SELECT "rs"."id"
           FROM "rows" AS "rs"
-          WHERE NOT ("rs"."isDeleted")
+          WHERE (NOT ("rs"."isDeleted"))
           ORDER BY "rs"."id" DESC
           """
         } results: {
@@ -366,7 +366,7 @@ extension SnapshotTests {
           """
           SELECT "rows"."id", "rows"."isDeleted"
           FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           """
         } results: {
           """
@@ -382,7 +382,7 @@ extension SnapshotTests {
           """
           SELECT "rows"."id", "rows"."isDeleted"
           FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           """
         } results: {
           """
@@ -425,7 +425,7 @@ extension SnapshotTests {
         ) {
           """
           DELETE FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -446,7 +446,7 @@ extension SnapshotTests {
         ) {
           """
           DELETE FROM "rows"
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -464,7 +464,7 @@ extension SnapshotTests {
         ) {
           """
           DELETE FROM "rows"
-          WHERE ("rows"."id") > (0)
+          WHERE (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -489,7 +489,7 @@ extension SnapshotTests {
           """
           UPDATE "rows"
           SET "isDeleted" = NOT ("rows"."isDeleted")
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -511,7 +511,7 @@ extension SnapshotTests {
           """
           UPDATE "rows"
           SET "isDeleted" = NOT ("rows"."isDeleted")
-          WHERE NOT ("rows"."isDeleted") AND ("rows"."id") > (0)
+          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -530,7 +530,7 @@ extension SnapshotTests {
           """
           UPDATE "rows"
           SET "isDeleted" = NOT ("rows"."isDeleted")
-          WHERE ("rows"."id") > (0)
+          WHERE (("rows"."id") > (0))
           RETURNING "id", "isDeleted"
           """
         } results: {
@@ -556,7 +556,7 @@ extension SnapshotTests {
             """
             SELECT "rows"."id", "rows"."isDeleted"
             FROM "rows"
-            WHERE NOT ("rows"."isDeleted")
+            WHERE (NOT ("rows"."isDeleted"))
             """
           } results: {
             """
@@ -575,7 +575,7 @@ extension SnapshotTests {
             """
             SELECT "rows"."id", "rows"."isDeleted"
             FROM "rows"
-            WHERE NOT ("rows"."isDeleted")
+            WHERE (NOT ("rows"."isDeleted"))
             """
           } results: {
             """
@@ -595,7 +595,7 @@ extension SnapshotTests {
           """
           SELECT "rows"."id"
           FROM "rows"
-          WHERE NOT ("rows"."isDeleted")
+          WHERE (NOT ("rows"."isDeleted"))
           """
         } results: {
           """
@@ -651,7 +651,7 @@ extension SnapshotTests {
           """
           SELECT "rs"."id"
           FROM "rows" AS "rs"
-          WHERE CAST("rs"."id" AS TEXT) = '"rs"'
+          WHERE (CAST("rs"."id" AS TEXT) = '"rs"')
           """
         } results: {
           """

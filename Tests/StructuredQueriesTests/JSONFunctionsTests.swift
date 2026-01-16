@@ -232,7 +232,7 @@ extension SnapshotTests {
         FROM "remindersLists"
         LEFT JOIN "milestones" ON ("remindersLists"."id") = ("milestones"."remindersListID")
         LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
-        WHERE NOT ("reminders"."isCompleted")
+        WHERE (NOT ("reminders"."isCompleted"))
         GROUP BY "remindersLists"."id"
         LIMIT 1
         """

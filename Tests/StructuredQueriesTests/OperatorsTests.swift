@@ -433,13 +433,13 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
-        WHERE "reminders"."id" BETWEEN coalesce((
+        WHERE ("reminders"."id" BETWEEN coalesce((
           SELECT min("reminders"."id")
           FROM "reminders"
         ), 0) AND (coalesce((
           SELECT max("reminders"."id")
           FROM "reminders"
-        ), 0)) / (3)
+        ), 0)) / (3))
         """
       } results: {
         """
@@ -512,8 +512,8 @@ extension SnapshotTests {
         """
         SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string"
         FROM "rows"
-        WHERE ("rows"."c") IN ((SELECT CAST("rows"."bool" AS INTEGER)
-        FROM "rows"))
+        WHERE (("rows"."c") IN ((SELECT CAST("rows"."bool" AS INTEGER)
+        FROM "rows")))
         """
       }
       assertInlineSnapshot(
@@ -525,10 +525,10 @@ extension SnapshotTests {
         """
         SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string"
         FROM "rows"
-        WHERE ((CAST("rows"."c" AS REAL)) >= ((
+        WHERE (((CAST("rows"."c" AS REAL)) >= ((
           SELECT coalesce(avg("rows"."c"), 0.0)
           FROM "rows"
-        ))) AND ((CAST("rows"."c" AS REAL)) > (1.0))
+        ))) AND ((CAST("rows"."c" AS REAL)) > (1.0)))
         """
       }
     }
@@ -540,7 +540,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id"
         FROM "reminders"
-        WHERE ("reminders"."id") IN ((1), (2))
+        WHERE (("reminders"."id") IN ((1), (2)))
         """
       } results: {
         """
@@ -596,7 +596,7 @@ extension SnapshotTests {
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
           FROM "reminders"
-          WHERE ("reminders"."id") = (1)
+          WHERE (("reminders"."id") = (1))
         )
         """
       } results: {
@@ -611,7 +611,7 @@ extension SnapshotTests {
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
           FROM "reminders"
-          WHERE ("reminders"."id") = (100)
+          WHERE (("reminders"."id") = (100))
         )
         """
       } results: {

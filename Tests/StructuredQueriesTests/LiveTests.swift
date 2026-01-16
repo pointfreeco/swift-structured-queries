@@ -167,8 +167,8 @@ extension SnapshotTests {
           FROM "reminders"
         )
         FROM "reminders"
-        WHERE ("reminders"."priority" < (SELECT avg(CAST("reminders"."priority" AS INTEGER))
-        FROM "reminders")) OR (("reminders"."priority") IS (NULL))
+        WHERE (("reminders"."priority" < (SELECT avg(CAST("reminders"."priority" AS INTEGER))
+        FROM "reminders")) OR (("reminders"."priority") IS (NULL)))
         ORDER BY "reminders"."priority" DESC
         """
       } results: {

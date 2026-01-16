@@ -242,7 +242,7 @@ extension SnapshotTests {
         ("title")
         SELECT lower("remindersLists"."title")
         FROM "remindersLists"
-        WHERE 1
+        WHERE (1)
         ON CONFLICT ("title")
         DO UPDATE SET "title" = ("excluded"."title") || ('-copy')
         RETURNING "id", "title"
@@ -285,7 +285,7 @@ extension SnapshotTests {
         ("title")
         SELECT (lower("remindersLists"."title")) || ('-copy')
         FROM "remindersLists"
-        WHERE 1
+        WHERE (1)
         ON CONFLICT ("title")
         DO UPDATE SET "title" = ("tags"."title") || ('-2')
         RETURNING "id", "title"
@@ -388,7 +388,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
-        WHERE ("reminders"."id") = (1)
+        WHERE (("reminders"."id") = (1))
         """
       } results: {
         """

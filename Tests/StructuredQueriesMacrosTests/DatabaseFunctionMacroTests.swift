@@ -9,7 +9,8 @@ extension SnapshotTests {
       assertMacro {
         """
         @DatabaseFunction
-        func currentDate() -> Date {
+        func ∫˜
+        currentDate() -> Date {
           Date()
         }
         """

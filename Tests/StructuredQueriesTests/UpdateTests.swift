@@ -47,7 +47,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "isCompleted" = 1
-        WHERE ("reminders"."priority") IS (NULL)
+        WHERE (("reminders"."priority") IS (NULL))
         RETURNING "title", "priority", "isCompleted"
         """
       } results: {
@@ -103,7 +103,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "assignedUserID" = 1, "dueDate" = '2001-01-01 00:00:00.000', "isCompleted" = 1, "isFlagged" = 0, "notes" = 'Milk, Eggs, Apples', "priority" = NULL, "remindersListID" = 1, "title" = 'Groceries', "updatedAt" = '2040-02-14 23:31:30.000'
-        WHERE ("reminders"."id") = (1)
+        WHERE (("reminders"."id") = (1))
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt"
         """
       } results: {
@@ -177,7 +177,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "dueDate" = CURRENT_TIMESTAMP
-        WHERE ("reminders"."id") = (1)
+        WHERE (("reminders"."id") = (1))
         RETURNING "title"
         """
       } results: {
@@ -199,7 +199,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "isFlagged" = NOT ("reminders"."isFlagged")
-        WHERE "reminders"."isFlagged"
+        WHERE ("reminders"."isFlagged")
         RETURNING "title"
         """
       } results: {
@@ -223,7 +223,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders" AS "rs"
         SET "title" = ("rs"."title") || (' 2')
-        WHERE ("rs"."id") = (1)
+        WHERE (("rs"."id") = (1))
         RETURNING "id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt"
         """
       } results: {
@@ -296,7 +296,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "assignedUserID" = NULL, "dueDate" = NULL, "isCompleted" = 1, "isFlagged" = 0, "notes" = '', "priority" = NULL, "remindersListID" = 1, "title" = 'Buy iPhone', "updatedAt" = '2040-02-14 23:31:30.000'
-        WHERE ("reminders"."id") = (100)
+        WHERE (("reminders"."id") = (100))
         """
       }
     }
@@ -317,7 +317,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "dueDate" = CASE WHEN ("reminders"."dueDate") IS (NULL) THEN '2018-01-29 00:08:00.000' END
-        WHERE ("reminders"."id") IN ((1))
+        WHERE (("reminders"."id") IN ((1)))
         RETURNING "dueDate"
         """
       } results: {
@@ -335,7 +335,7 @@ extension SnapshotTests {
         """
         UPDATE "reminders"
         SET "dueDate" = CASE WHEN ("reminders"."dueDate") IS (NULL) THEN '2018-01-29 00:08:00.000' END
-        WHERE ("reminders"."id") IN ((1))
+        WHERE (("reminders"."id") IN ((1)))
         RETURNING "dueDate"
         """
       } results: {
