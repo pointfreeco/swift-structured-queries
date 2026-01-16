@@ -24,7 +24,7 @@ extension SnapshotTests {
         AS
         SELECT "reminders"."id" AS "reminderID", "reminders"."title" AS "title"
         FROM "reminders"
-        WHERE "reminders"."isCompleted"
+        WHERE ("reminders"."isCompleted")
         """
       } results: {
         """
@@ -136,7 +136,7 @@ extension SnapshotTests {
         WITH "completedReminders" AS (
           SELECT "reminders"."id" AS "reminderID", "reminders"."title" AS "title"
           FROM "reminders"
-          WHERE "reminders"."isCompleted"
+          WHERE ("reminders"."isCompleted")
         )
         SELECT "completedReminders"."reminderID", "completedReminders"."title"
         FROM "completedReminders"
@@ -197,7 +197,7 @@ extension SnapshotTests {
           ("new"."reminderTitle", (
             SELECT "remindersLists"."id"
             FROM "remindersLists"
-            WHERE ("remindersLists"."title") = ("new"."remindersListTitle")
+            WHERE (("remindersLists"."title") = ("new"."remindersListTitle"))
           ));
         END
         """
@@ -237,7 +237,7 @@ extension SnapshotTests {
         """
         SELECT "reminderWithLists"."reminderID", "reminderWithLists"."reminderTitle", "reminderWithLists"."remindersListTitle"
         FROM "reminderWithLists"
-        WHERE ("reminderWithLists"."reminderID") IN ((1))
+        WHERE (("reminderWithLists"."reminderID") IN ((1)))
         """
       } results: {
         """
@@ -307,7 +307,7 @@ extension SnapshotTests {
         AS
         SELECT "reminders"."id" AS "reminderID", "reminders"."title" AS "title"
         FROM "reminders"
-        WHERE (NOT ("reminders"."isCompleted")) AND (coalesce("reminders"."dueDate", date('now')) < date('now'))
+        WHERE ((NOT ("reminders"."isCompleted")) AND (coalesce("reminders"."dueDate", date('now')) < date('now')))
         """
       }
       assertQuery(

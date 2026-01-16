@@ -128,7 +128,7 @@ extension SnapshotTests {
         """
         SELECT "items"."isOutOfStock", "items"."isOnBackOrder"
         FROM "items"
-        WHERE ("items"."isOutOfStock", "items"."isOnBackOrder") = (0, 0)
+        WHERE (("items"."isOutOfStock", "items"."isOnBackOrder") = (0, 0))
         """
       } results: {
         """
@@ -403,7 +403,7 @@ extension SnapshotTests {
         """
         SELECT "metadatas"."recordID", "metadatas"."recordType", "metadatas"."userModificationDate"
         FROM "metadatas"
-        WHERE ("metadatas"."recordID", "metadatas"."recordType") IN (('00000000-0000-0000-0000-000000000000', 'reminders'))
+        WHERE (("metadatas"."recordID", "metadatas"."recordType") IN (('00000000-0000-0000-0000-000000000000', 'reminders')))
         """
       } results: {
         """
@@ -506,7 +506,7 @@ extension SnapshotTests {
         SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
-        WHERE color > 0
+        WHERE (color > 0)
         """
       } results: {
         """

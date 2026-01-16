@@ -89,7 +89,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "users"
-        WHERE "users"."isAdmin"
+        WHERE ("users"."isAdmin")
         """
       }
     }
@@ -161,7 +161,7 @@ extension SnapshotTests {
         """
         SELECT sum("reminders"."id")
         FROM "reminders"
-        WHERE 0
+        WHERE (0)
         """
       } results: {
         """

@@ -1765,7 +1765,7 @@ extension Select: SelectStatement {
       query.append("\(.newlineOrSpace)\(join)")
     }
     if !`where`.isEmpty {
-      query.append("\(.newlineOrSpace)WHERE \(`where`.joined(separator: " AND "))")
+      query.append("\(.newlineOrSpace)WHERE \(`where`.map { "(" + $0 + ")" }.joined(separator: " AND "))")
     }
     if !group.isEmpty {
       query.append("\(.newlineOrSpace)GROUP BY \(group.joined(separator: ", "))")

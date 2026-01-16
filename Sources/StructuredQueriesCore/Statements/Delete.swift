@@ -152,7 +152,7 @@ extension Delete: Statement {
       query.append(" AS \(quote: tableAlias)")
     }
     if !`where`.isEmpty {
-      query.append("\(.newlineOrSpace)WHERE \(`where`.joined(separator: " AND "))")
+      query.append("\(.newlineOrSpace)WHERE \(`where`.map { "(" + $0 + ")" }.joined(separator: " AND "))")
     }
     if !returning.isEmpty {
       query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")

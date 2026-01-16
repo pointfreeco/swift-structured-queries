@@ -499,7 +499,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"
-        WHERE "reminders"."isCompleted"
+        WHERE ("reminders"."isCompleted")
         """
       } results: {
         """
@@ -561,7 +561,7 @@ extension SnapshotTests {
         """
         SELECT "reminders"."id"
         FROM "reminders"
-        WHERE "reminders"."isCompleted"
+        WHERE ("reminders"."isCompleted")
         """
       } results: {
         """
@@ -615,7 +615,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE ("reminders"."isCompleted") AND ("reminders"."isFlagged")
+        WHERE (("reminders"."isCompleted") AND ("reminders"."isFlagged"))
         """
       } results: {
         """
@@ -634,7 +634,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE ("reminders"."isCompleted") OR ("reminders"."isFlagged")
+        WHERE (("reminders"."isCompleted") OR ("reminders"."isFlagged"))
         """
       } results: {
         """
@@ -1173,7 +1173,7 @@ extension SnapshotTests {
         """
         SELECT "vecExamples"."rowid", "vecExamples"."distance"
         FROM "vecExamples"
-        WHERE sample_embedding match '[
+        WHERE (sample_embedding match '[
           0.89,
           0.544,
           0.825,
@@ -1182,7 +1182,7 @@ extension SnapshotTests {
           0.0196,
           0.521,
           0.175
-        ]'
+        ]')
         ORDER BY "vecExamples"."distance"
         LIMIT 2
         """
@@ -1199,7 +1199,7 @@ extension SnapshotTests {
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
-        WHERE ifnull(("reminders"."priority") IS (3), 0)
+        WHERE (ifnull(("reminders"."priority") IS (3), 0))
         """
       } results: {
         """
@@ -1255,7 +1255,7 @@ extension SnapshotTests {
           """
           SELECT "reminders"."id"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
           """
         } results: {
           """
@@ -1276,7 +1276,7 @@ extension SnapshotTests {
           """
           SELECT "reminders"."id"
           FROM "reminders"
-          WHERE 1 AND NOT ("reminders"."isCompleted")
+          WHERE (1) AND (NOT ("reminders"."isCompleted"))
           """
         } results: {
           """
@@ -1297,7 +1297,7 @@ extension SnapshotTests {
           """
           SELECT "reminders"."id"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
           """
         } results: {
           """
@@ -1318,7 +1318,7 @@ extension SnapshotTests {
           """
           SELECT "reminders"."id"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
           """
         } results: {
           """
@@ -1580,7 +1580,7 @@ extension SnapshotTests {
         """
         SELECT "tags"."id", "tags"."title"
         FROM "tags"
-        WHERE ("tags"."id", "tags"."title") = (1, 'car')
+        WHERE (("tags"."id", "tags"."title") = (1, 'car'))
         """
       } results: {
         """
@@ -1600,7 +1600,7 @@ extension SnapshotTests {
         """
         SELECT "tags"."id", "tags"."title"
         FROM "tags"
-        WHERE ("tags"."id", "tags"."title") > (1, 'car')
+        WHERE (("tags"."id", "tags"."title") > (1, 'car'))
         """
       } results: {
         """

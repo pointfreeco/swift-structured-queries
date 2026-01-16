@@ -15,7 +15,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE ("reminders"."isCompleted") AND ("reminders"."isFlagged")
+        WHERE (("reminders"."isCompleted") AND ("reminders"."isFlagged"))
         """
       } results: {
         """
@@ -31,7 +31,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE ("reminders"."isCompleted") AND ("reminders"."isFlagged")
+        WHERE (("reminders"."isCompleted") AND ("reminders"."isFlagged"))
         """
       } results: {
         """
@@ -46,7 +46,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE "reminders"."isFlagged"
+        WHERE ("reminders"."isFlagged")
         """
       } results: {
         """
@@ -61,7 +61,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE "reminders"."isFlagged"
+        WHERE ("reminders"."isFlagged")
         """
       } results: {
         """
@@ -98,7 +98,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE ("reminders"."isCompleted") OR ("reminders"."isFlagged")
+        WHERE (("reminders"."isCompleted") OR ("reminders"."isFlagged"))
         """
       } results: {
         """
@@ -114,7 +114,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE ("reminders"."isCompleted") OR ("reminders"."isFlagged")
+        WHERE (("reminders"."isCompleted") OR ("reminders"."isFlagged"))
         """
       } results: {
         """
@@ -129,7 +129,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE "reminders"."isFlagged"
+        WHERE ("reminders"."isFlagged")
         """
       } results: {
         """
@@ -144,7 +144,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE "reminders"."isFlagged"
+        WHERE ("reminders"."isFlagged")
         """
       } results: {
         """
@@ -163,7 +163,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
+        WHERE (NOT ("reminders"."isCompleted"))
         """
       } results: {
         """
@@ -179,7 +179,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE NOT ("reminders"."isCompleted")
+        WHERE (NOT ("reminders"."isCompleted"))
         """
       } results: {
         """
@@ -194,7 +194,7 @@ extension SnapshotTests {
         """
         SELECT count(*)
         FROM "reminders"
-        WHERE NOT (1)
+        WHERE (NOT (1))
         """
       } results: {
         """
@@ -225,7 +225,7 @@ extension SnapshotTests {
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position", "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "remindersLists"
         LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
-        WHERE ("remindersLists"."id") IN ((4)) AND "reminders"."isCompleted"
+        WHERE (("remindersLists"."id") IN ((4))) AND ("reminders"."isCompleted")
         """
       } results: {
         """
@@ -246,9 +246,27 @@ extension SnapshotTests {
         """
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position"
         FROM "remindersLists"
-        WHERE ("remindersLists"."title" LIKE '%daily%') AND ("remindersLists"."title" LIKE '%monthly%')
+        WHERE (("remindersLists"."title" LIKE '%daily%')) AND (("remindersLists"."title" LIKE '%monthly%'))
         """
       }
+    }
+  }
+  
+  @Test func multipleWheres() {
+    assertQuery(
+      Reminder
+        .where { $0.assignedUserID.eq(42) }
+        .where { !$0.isCompleted }
+        .where {
+          ($0.isFlagged && $0.priority.ifnull(Priority.low).gte(Priority.medium)) ||
+          (#sql("\($0.dueDate) <= date('now')") && $0.priority.is(nil))
+        }
+    ) {
+      """
+      SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
+      FROM "reminders"
+      WHERE (("reminders"."assignedUserID") = (42)) AND (NOT ("reminders"."isCompleted")) AND ((("reminders"."isFlagged") AND ((ifnull("reminders"."priority", 1)) >= (2))) OR (("reminders"."dueDate" <= date('now')) AND (("reminders"."priority") IS (NULL))))
+      """
     }
   }
 }
