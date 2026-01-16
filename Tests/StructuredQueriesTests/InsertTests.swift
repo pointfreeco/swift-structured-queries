@@ -755,6 +755,28 @@ extension SnapshotTests {
         """
       }
     }
+    
+    @Test func onConflict_whereExcluded() {
+      assertQuery(
+        Reminder.insert {
+          Reminder.Draft(remindersListID: 1)
+        } onConflictDoUpdate: { updates, excluded in
+          updates.updatedAt = excluded.updatedAt
+        }
+        where: { columns, excluded in
+          excluded.updatedAt.gt(columns.updatedAt)
+        }
+      ) {
+        """
+        INSERT INTO "reminders"
+        ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt")
+        VALUES
+        (NULL, NULL, NULL, 0, 0, '', NULL, 1, '', '2040-02-14 23:31:30.000')
+        ON CONFLICT DO UPDATE SET "updatedAt" = "excluded"."updatedAt"
+        WHERE ("excluded"."updatedAt") > ("reminders"."updatedAt")
+        """
+      }
+    }
 
     @Test func insertSelectSQL() {
       assertQuery(
