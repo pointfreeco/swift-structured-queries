@@ -13,7 +13,13 @@ extension Table {
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
-    var insert = insert(columns, values: values, onConflictDoUpdate: updates, where: updateFilter)
+    var insert = insert(
+      columns,
+      values: values, onConflictDoUpdate: updates,
+      where: { columns, _ in
+        let queryFragments = updateFilter(columns)
+        return queryFragments
+      })
     insert.conflictResolution = conflictResolution.queryFragment
     return insert
   }
@@ -94,7 +100,14 @@ extension Table {
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
   ) -> InsertOf<Self> {
-    var insert = insert(columns, values: values, onConflictDoUpdate: updates, where: updateFilter)
+    var insert = insert(
+      columns,
+      values: values,
+      onConflictDoUpdate: updates,
+      where: { columns, _ in
+        let queryFragments = updateFilter(columns)
+        return queryFragments
+      })
     insert.conflictResolution = conflictResolution.queryFragment
     return insert
   }
@@ -184,7 +197,10 @@ extension Table {
       columns,
       select: selection,
       onConflictDoUpdate: updates,
-      where: updateFilter
+      where: { columns, _ in
+        let queryFragments = updateFilter(columns)
+        return queryFragments
+      }
     )
     insert.conflictResolution = conflictResolution.queryFragment
     return insert
