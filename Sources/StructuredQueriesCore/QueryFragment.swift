@@ -120,7 +120,11 @@ extension [QueryFragment] {
 
 extension QueryFragment: ExpressibleByStringInterpolation {
   public init(stringInterpolation: StringInterpolation) {
-    self.init(segments: stringInterpolation.segments)
+    var segments = stringInterpolation.segments
+    if !stringInterpolation.sqlBuffer.isEmpty {
+      segments.append(.sql(stringInterpolation.sqlBuffer))
+    }
+    self.init(segments: segments)
   }
 
   public init(stringLiteral value: String) {
@@ -213,14 +217,16 @@ extension QueryFragment: ExpressibleByStringInterpolation {
 
   public struct StringInterpolation: StringInterpolationProtocol {
     fileprivate var segments: [Segment] = []
+    fileprivate var sqlBuffer = ""
 
     public init(literalCapacity: Int, interpolationCount: Int) {
-      segments.reserveCapacity(interpolationCount)
+      segments.reserveCapacity(interpolationCount + 1)
+      sqlBuffer.reserveCapacity(literalCapacity)
     }
 
     public mutating func appendLiteral(_ literal: String) {
       guard !literal.isEmpty else { return }
-      segments.append(.sql(literal))
+      sqlBuffer.append(literal)
     }
 
     /// Append a quoted fragment to the interpolation.
@@ -241,7 +247,7 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       quote sql: String,
       delimiter: QuoteDelimiter = .identifier
     ) {
-      segments.append(.sql(sql.quoted(delimiter)))
+      sqlBuffer.append(sql.quoted(delimiter))
     }
 
     /// Append a raw SQL string to the interpolation.
@@ -277,6 +283,10 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// - Parameter binding: A query binding.
     public mutating func appendInterpolation(_ binding: QueryBinding) {
+      if !sqlBuffer.isEmpty {
+        segments.append(.sql(sqlBuffer))
+        sqlBuffer.removeAll(keepingCapacity: true)
+      }
       segments.append(.binding(binding))
     }
 
@@ -296,7 +306,14 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// - Parameter fragment: A query fragment.
     public mutating func appendInterpolation(_ fragment: QueryFragment) {
-      segments.append(contentsOf: fragment.segments)
+      for segment in fragment.segments {
+        switch segment {
+        case .binding(let binding):
+          appendInterpolation(binding)
+        case .sql(let sql):
+          appendLiteral(sql)
+        }
+      }
     }
 
     /// Append a query expression to the interpolation.
