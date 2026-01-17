@@ -503,7 +503,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id" AS "remindersListAndReminderCountPayloads_id", "remindersLists"."color" AS "remindersListAndReminderCountPayloads_color", "remindersLists"."title" AS "remindersListAndReminderCountPayloads_title", "remindersLists"."position" AS "remindersListAndReminderCountPayloads_position", count("reminders"."id") AS "remindersListAndReminderCountPayloads_remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         WHERE color > 0
