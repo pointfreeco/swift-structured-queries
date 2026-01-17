@@ -9,8 +9,26 @@ public protocol TableExpression<QueryValue>: QueryExpression where QueryValue: T
 extension TableExpression {
   public var queryFragment: QueryFragment {
     if _isSelecting {
-      return zip(allColumns, QueryValue.TableColumns.allColumns)
-        .map { "\($0) AS \(quote: $1.name)" }
+      let columnNames = QueryValue.TableColumns.allColumns.map(\.name)
+      var columnNameCounts: [String: Int] = [:]
+      for name in columnNames {
+        columnNameCounts[name, default: 0] += 1
+      }
+      var columnNamesCount: [String: Int] = [:]
+      let aliases = columnNames.map { name in
+        var alias =
+          QueryValue.self is any _Selection.Type
+          ? "\(QueryValue.tableAlias ?? QueryValue.tableName)_\(name)"
+          : name
+        if columnNameCounts[name, default: 0] > 1 {
+          let count = (columnNamesCount[name] ?? 0) + 1
+          columnNamesCount[name] = count
+          alias = "\(alias)_\(count)"
+        }
+        return alias
+      }
+      return zip(allColumns, aliases)
+        .map { "\($0) AS \(quote: $1)" }
         .joined(separator: ", ")
     } else {
       return allColumns.map(\.queryFragment).joined(separator: ", ")

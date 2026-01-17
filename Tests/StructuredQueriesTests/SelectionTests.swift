@@ -19,7 +19,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", count("reminders"."id") AS "remindersCount"
+        SELECT "remindersLists"."id" AS "remindersListAndReminderCounts_id", "remindersLists"."color" AS "remindersListAndReminderCounts_color", "remindersLists"."title" AS "remindersListAndReminderCounts_title", "remindersLists"."position" AS "remindersListAndReminderCounts_position", count("reminders"."id") AS "remindersListAndReminderCounts_remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
@@ -158,7 +158,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "reminders"."title" AS "reminderTitle", "users"."name" AS "assignedUserName"
+        SELECT "reminders"."title" AS "reminderTitleAndAssignedUserNames_reminderTitle", "users"."name" AS "reminderTitleAndAssignedUserNames_assignedUserName"
         FROM "reminders"
         LEFT JOIN "users" ON ("reminders"."assignedUserID") IS ("users"."id")
         LIMIT 2
@@ -187,7 +187,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT "reminders"."dueDate" AS "date"
+        SELECT "reminders"."dueDate" AS "reminderDates_date"
         FROM "reminders"
         """
       } results: {
@@ -219,7 +219,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT count("reminders"."id") FILTER (WHERE "reminders"."isCompleted") AS "completedCount", count("reminders"."id") FILTER (WHERE "reminders"."isFlagged") AS "flaggedCount", count("reminders"."id") AS "totalCount"
+        SELECT count("reminders"."id") FILTER (WHERE "reminders"."isCompleted") AS "statses_completedCount", count("reminders"."id") FILTER (WHERE "reminders"."isFlagged") AS "statses_flaggedCount", count("reminders"."id") AS "statses_totalCount"
         FROM "reminders"
         """
       } results: {
@@ -252,7 +252,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "rLs"."id" AS "id", "rLs"."color" AS "color", "rLs"."title" AS "title", "rLs"."position" AS "position", count("reminders"."id") AS "remindersCount"
+        SELECT "rLs"."id" AS "remindersListAliasAndReminderCounts_id", "rLs"."color" AS "remindersListAliasAndReminderCounts_color", "rLs"."title" AS "remindersListAliasAndReminderCounts_title", "rLs"."position" AS "remindersListAliasAndReminderCounts_position", count("reminders"."id") AS "remindersListAliasAndReminderCounts_remindersCount"
         FROM "remindersLists" AS "rLs"
         JOIN "reminders" ON ("rLs"."id") = ("reminders"."remindersListID")
         GROUP BY "rLs"."id"
@@ -300,7 +300,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "rLs"."id" AS "id", "rLs"."color" AS "color", "rLs"."title" AS "title", "rLs"."position" AS "position", count("reminders"."id") AS "remindersCount"
+        SELECT "rLs"."id" AS "optionalRemindersListAliasAndReminderCounts_id", "rLs"."color" AS "optionalRemindersListAliasAndReminderCounts_color", "rLs"."title" AS "optionalRemindersListAliasAndReminderCounts_title", "rLs"."position" AS "optionalRemindersListAliasAndReminderCounts_position", count("reminders"."id") AS "optionalRemindersListAliasAndReminderCounts_remindersCount"
         FROM "reminders"
         LEFT JOIN "remindersLists" AS "rLs" ON ("reminders"."remindersListID") = ("rLs"."id")
         """
@@ -317,6 +317,128 @@ extension SnapshotTests {
         │   remindersCount: 10                        │
         │ )                                           │
         └─────────────────────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func duplicateSelectionColumnNames() {
+      assertQuery(
+        Reminder.select {
+          (IDSelection.Columns(id: $0.id), AnotherIDSelection.Columns(id: $0.id))
+        }
+      ) {
+        """
+        SELECT "reminders"."id" AS "idSelections_id", "reminders"."id" AS "anotherIDSelections_id"
+        FROM "reminders"
+        """
+      } results: {
+        """
+        ┌─────────────────────┬────────────────────────────┐
+        │ IDSelection(id: 1)  │ AnotherIDSelection(id: 1)  │
+        │ IDSelection(id: 2)  │ AnotherIDSelection(id: 2)  │
+        │ IDSelection(id: 3)  │ AnotherIDSelection(id: 3)  │
+        │ IDSelection(id: 4)  │ AnotherIDSelection(id: 4)  │
+        │ IDSelection(id: 5)  │ AnotherIDSelection(id: 5)  │
+        │ IDSelection(id: 6)  │ AnotherIDSelection(id: 6)  │
+        │ IDSelection(id: 7)  │ AnotherIDSelection(id: 7)  │
+        │ IDSelection(id: 8)  │ AnotherIDSelection(id: 8)  │
+        │ IDSelection(id: 9)  │ AnotherIDSelection(id: 9)  │
+        │ IDSelection(id: 10) │ AnotherIDSelection(id: 10) │
+        └─────────────────────┴────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func duplicateColumnNamesWithinSelectionWithColumnGroup() {
+      assertQuery(
+        RemindersList.select {
+          SelectionWithColumnGroupAndID.Columns(id: $0.id, remindersList: $0)
+        }
+      ) {
+        """
+        SELECT "remindersLists"."id" AS "selectionWithColumnGroupAndIDs_id_1", "remindersLists"."id" AS "selectionWithColumnGroupAndIDs_id_2", "remindersLists"."color" AS "selectionWithColumnGroupAndIDs_color", "remindersLists"."title" AS "selectionWithColumnGroupAndIDs_title", "remindersLists"."position" AS "selectionWithColumnGroupAndIDs_position"
+        FROM "remindersLists"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────┐
+        │ SelectionWithColumnGroupAndID(  │
+        │   id: 1,                        │
+        │   remindersList: RemindersList( │
+        │     id: 1,                      │
+        │     color: 4889071,             │
+        │     title: "Personal",          │
+        │     position: 0                 │
+        │   )                             │
+        │ )                               │
+        ├─────────────────────────────────┤
+        │ SelectionWithColumnGroupAndID(  │
+        │   id: 2,                        │
+        │   remindersList: RemindersList( │
+        │     id: 2,                      │
+        │     color: 15567157,            │
+        │     title: "Family",            │
+        │     position: 0                 │
+        │   )                             │
+        │ )                               │
+        ├─────────────────────────────────┤
+        │ SelectionWithColumnGroupAndID(  │
+        │   id: 3,                        │
+        │   remindersList: RemindersList( │
+        │     id: 3,                      │
+        │     color: 11689427,            │
+        │     title: "Business",          │
+        │     position: 0                 │
+        │   )                             │
+        │ )                               │
+        └─────────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func duplicateColumnNamesWithinSelectionWithColumnGroupAlias() {
+      assertQuery(
+        RemindersList.as(RL.self).select {
+          SelectionWithColumnGroupAliasAndID.Columns(id: $0.id, remindersList: $0)
+        }
+      ) {
+        """
+        SELECT "rLs"."id" AS "selectionWithColumnGroupAliasAndIDs_id_1", "rLs"."id" AS "selectionWithColumnGroupAliasAndIDs_id_2", "rLs"."color" AS "selectionWithColumnGroupAliasAndIDs_color", "rLs"."title" AS "selectionWithColumnGroupAliasAndIDs_title", "rLs"."position" AS "selectionWithColumnGroupAliasAndIDs_position"
+        FROM "remindersLists" AS "rLs"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────┐
+        │ SelectionWithColumnGroupAliasAndID( │
+        │   id: 1,                            │
+        │   remindersList: RemindersList(     │
+        │     id: 1,                          │
+        │     color: 4889071,                 │
+        │     title: "Personal",              │
+        │     position: 0                     │
+        │   )                                 │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ SelectionWithColumnGroupAliasAndID( │
+        │   id: 2,                            │
+        │   remindersList: RemindersList(     │
+        │     id: 2,                          │
+        │     color: 15567157,                │
+        │     title: "Family",                │
+        │     position: 0                     │
+        │   )                                 │
+        │ )                                   │
+        ├─────────────────────────────────────┤
+        │ SelectionWithColumnGroupAliasAndID( │
+        │   id: 3,                            │
+        │   remindersList: RemindersList(     │
+        │     id: 3,                          │
+        │     color: 11689427,                │
+        │     title: "Business",              │
+        │     position: 0                     │
+        │   )                                 │
+        │ )                                   │
+        └─────────────────────────────────────┘
         """
       }
     }
@@ -361,4 +483,27 @@ struct Stats {
   let completedCount: Int
   let flaggedCount: Int
   let totalCount: Int
+}
+
+@Selection
+struct IDSelection {
+  let id: Int
+}
+
+@Selection
+struct AnotherIDSelection {
+  let id: Int
+}
+
+@Selection
+struct SelectionWithColumnGroupAndID {
+  let id: Int
+  let remindersList: RemindersList
+}
+
+@Selection
+struct SelectionWithColumnGroupAliasAndID {
+  let id: Int
+  @Columns(as: TableAlias<RemindersList, RL>.self)
+  let remindersList: RemindersList
 }
