@@ -255,7 +255,7 @@ extension SnapshotTests {
   @Test func multipleWheres() {
     assertQuery(
       Reminder
-        .where { $0.assignedUserID.eq(42) }
+        .where { $0.assignedUserID.eq(1) }
         .where { !$0.isCompleted }
         .where {
           ($0.isFlagged && $0.priority.ifnull(Priority.low).gte(Priority.medium)) ||
@@ -265,7 +265,24 @@ extension SnapshotTests {
       """
       SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
       FROM "reminders"
-      WHERE (("reminders"."assignedUserID") = (42)) AND (NOT ("reminders"."isCompleted")) AND ((("reminders"."isFlagged") AND ((ifnull("reminders"."priority", 1)) >= (2))) OR (("reminders"."dueDate" <= date('now')) AND (("reminders"."priority") IS (NULL))))
+      WHERE (("reminders"."assignedUserID") = (1)) AND (NOT ("reminders"."isCompleted")) AND ((("reminders"."isFlagged") AND ((ifnull("reminders"."priority", 1)) >= (2))) OR (("reminders"."dueDate" <= date('now')) AND (("reminders"."priority") IS (NULL))))
+      """
+    } results: {
+      """
+      ┌─────────────────────────────────────────────┐
+      │ Reminder(                                   │
+      │   id: 1,                                    │
+      │   assignedUserID: 1,                        │
+      │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+      │   isCompleted: false,                       │
+      │   isFlagged: false,                         │
+      │   notes: "Milk, Eggs, Apples",              │
+      │   priority: nil,                            │
+      │   remindersListID: 1,                       │
+      │   title: "Groceries",                       │
+      │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+      │ )                                           │
+      └─────────────────────────────────────────────┘
       """
     }
   }
