@@ -741,9 +741,9 @@ extension SnapshotTests {
       assertQuery(
         Reminder.insert {
           Reminder.Draft(remindersListID: 1)
-        } where: { reminder, _ in
+        } where: {
           if condition {
-            reminder.isFlagged
+            $0.isFlagged
           }
         }
       ) {
