@@ -75,11 +75,11 @@ extension SnapshotTests {
         WITH "incompleteReminders" AS (
           SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
         )
         SELECT "incompleteReminders"."isFlagged", "incompleteReminders"."title"
         FROM "incompleteReminders"
-        WHERE ("incompleteReminders"."title" COLLATE "NOCASE" LIKE '%groceries%')
+        WHERE (("incompleteReminders"."title" COLLATE "NOCASE" LIKE '%groceries%'))
         """
       } results: {
         """
@@ -115,7 +115,7 @@ extension SnapshotTests {
         WITH "incompleteReminders" AS (
           SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
         )
         INSERT INTO "reminders"
         ("remindersListID", "title", "isFlagged", "isCompleted")
@@ -151,12 +151,12 @@ extension SnapshotTests {
         WITH "incompleteReminders" AS (
           SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
         )
         UPDATE "reminders"
         SET "title" = upper("reminders"."title")
-        WHERE ("reminders"."title") IN ((SELECT "incompleteReminders"."title"
-        FROM "incompleteReminders"))
+        WHERE (("reminders"."title") IN ((SELECT "incompleteReminders"."title"
+        FROM "incompleteReminders")))
         RETURNING "title"
         """
       } results: {
@@ -191,11 +191,11 @@ extension SnapshotTests {
         WITH "incompleteReminders" AS (
           SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
         )
         DELETE FROM "reminders"
-        WHERE ("reminders"."title") IN ((SELECT "incompleteReminders"."title"
-        FROM "incompleteReminders"))
+        WHERE (("reminders"."title") IN ((SELECT "incompleteReminders"."title"
+        FROM "incompleteReminders")))
         RETURNING "reminders"."title"
         """
       } results: {
@@ -273,7 +273,7 @@ extension SnapshotTests {
         WITH "incompleteReminders" AS (
           SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
         )
         DELETE FROM "reminders"
         RETURNING "reminders"."title"
@@ -344,11 +344,11 @@ extension SnapshotTests {
         WITH "incompleteReminders" AS (
           SELECT "reminders"."isFlagged" AS "isFlagged", "reminders"."title" AS "title"
           FROM "reminders"
-          WHERE NOT ("reminders"."isCompleted")
+          WHERE (NOT ("reminders"."isCompleted"))
         )
         SELECT "incompleteReminders"."isFlagged"
         FROM "incompleteReminders"
-        WHERE ("incompleteReminders"."title" COLLATE "NOCASE" LIKE '%groceries%')
+        WHERE (("incompleteReminders"."title" COLLATE "NOCASE" LIKE '%groceries%'))
         """
       } results: {
         """
