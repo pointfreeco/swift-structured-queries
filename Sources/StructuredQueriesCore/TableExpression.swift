@@ -7,28 +7,10 @@ public protocol TableExpression<QueryValue>: QueryExpression where QueryValue: T
 }
 
 extension TableExpression {
-  package static var uniqueAliases: [String] {
-    let columnNames = QueryValue.TableColumns.allColumns.map(\.name)
-    var columnNameCounts: [String: Int] = [:]
-    for name in columnNames {
-      columnNameCounts[name, default: 0] += 1
-    }
-    var columnNamesCount: [String: Int] = [:]
-    return columnNames.map { name in
-      var alias = name
-      if columnNameCounts[name, default: 0] > 1 {
-        let count = (columnNamesCount[name] ?? 0) + 1
-        columnNamesCount[name] = count
-        alias = "\(alias)_\(count)"
-      }
-      return alias
-    }
-  }
-
   public var queryFragment: QueryFragment {
     if _isSelecting {
-      return zip(allColumns, Self.uniqueAliases)
-        .map { "\($0) AS \(quote: $1)" }
+      return zip(allColumns, QueryValue.TableColumns.allColumns)
+        .map { "\($0) AS \(quote: $1.name)" }
         .joined(separator: ", ")
     } else {
       return allColumns.map(\.queryFragment).joined(separator: ", ")

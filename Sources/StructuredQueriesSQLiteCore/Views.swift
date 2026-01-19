@@ -56,8 +56,9 @@ where Selection.QueryValue == View {
       query.append("\(quote: schemaName).")
     }
     query.append(View.tableFragment)
-    let aliasedColumnNames: [QueryFragment] = View.Selection.uniqueAliases.map { "\(quote: $0)" }
-    query.append("\(.newlineOrSpace)(\(aliasedColumnNames.joined(separator: ", ")))")
+    let columnNames: [QueryFragment] = View.TableColumns.allColumns
+      .map { "\(quote: $0.name)" }
+    query.append("\(.newlineOrSpace)(\(columnNames.joined(separator: ", ")))")
     query.append("\(.newlineOrSpace)AS")
     query.append("\(.newlineOrSpace)\(select)")
     return query.compiled(statementType: "CREATE TEMPORARY VIEW")
