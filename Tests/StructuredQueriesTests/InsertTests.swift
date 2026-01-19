@@ -697,8 +697,8 @@ extension SnapshotTests {
           !$0.isCompleted
         } doUpdate: {
           $0.isCompleted = $1.isCompleted
-        } where: {
-          $0.isFlagged
+        } where: { row, _ in
+          row.isFlagged
         }
       ) {
         """
@@ -741,9 +741,9 @@ extension SnapshotTests {
       assertQuery(
         Reminder.insert {
           Reminder.Draft(remindersListID: 1)
-        } where: { reminder, _ in
+        } where: {
           if condition {
-            reminder.isFlagged
+            $0.isFlagged
           }
         }
       ) {

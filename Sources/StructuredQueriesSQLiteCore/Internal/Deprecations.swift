@@ -56,7 +56,7 @@ extension Table {
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: updates,
-      where: updateFilter
+      where: { row, _ in return updateFilter(row) }
     )
     insert.conflictResolution = conflictResolution.queryFragment
     return insert
@@ -144,7 +144,7 @@ extension Table {
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: updates,
-      where: updateFilter
+      where: { row, _ in return updateFilter(row) }
     )
     insert.conflictResolution = conflictResolution.queryFragment
     return insert
@@ -246,7 +246,7 @@ extension Table {
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: updates,
-      where: updateFilter
+      where: { row, _ in return updateFilter(row) }
     )
     insert.conflictResolution = conflictResolution.queryFragment
     return insert
