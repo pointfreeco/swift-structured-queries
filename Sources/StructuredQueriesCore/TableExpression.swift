@@ -16,10 +16,7 @@ extension TableExpression {
       }
       var columnNamesCount: [String: Int] = [:]
       let aliases = columnNames.map { name in
-        var alias =
-          QueryValue.self is any _Selection.Type
-          ? "\(QueryValue.tableAlias ?? QueryValue.tableName)_\(name)"
-          : name
+        var alias = name
         if columnNameCounts[name, default: 0] > 1 {
           let count = (columnNamesCount[name] ?? 0) + 1
           columnNamesCount[name] = count

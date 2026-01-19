@@ -517,7 +517,7 @@ extension SnapshotTests {
           .select { GroupedItem.Columns(bucket: $0.bucket, items: $0.jsonGroupArray()) }
       ) {
         """
-        SELECT "items"."bucket" AS "groupedItems_bucket", json_group_array(json_object('bucket', json_quote("items"."bucket"), 'value', json_quote("items"."value"))) AS "groupedItems_items"
+        SELECT "items"."bucket" AS "bucket", json_group_array(json_object('bucket', json_quote("items"."bucket"), 'value', json_quote("items"."value"))) AS "items"
         FROM "items"
         GROUP BY "items"."bucket"
         """
