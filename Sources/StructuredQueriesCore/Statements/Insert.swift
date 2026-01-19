@@ -152,7 +152,7 @@ extension Table {
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
     doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
     @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+    where updateFilter: (TableColumns, Excluded) -> [QueryFragment] = { _, _ in [] }
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
@@ -161,7 +161,7 @@ extension Table {
         onConflict: conflictTargets,
         where: targetFilter,
         doUpdate: updates,
-        where: { columns, _ in return updateFilter(columns) }
+        where: updateFilter
       )
     }
   }
@@ -193,7 +193,7 @@ extension Table {
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: { row, _ in updates(&row) },
-      where: updateFilter
+      where: { row, _ in return updateFilter(row) }
     )
   }
 
@@ -319,7 +319,7 @@ extension Table {
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
     doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
     @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+    where updateFilter: (TableColumns, Excluded) -> [QueryFragment] = { _, _ in [] }
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
@@ -328,7 +328,7 @@ extension Table {
         onConflict: conflictTargets,
         where: targetFilter,
         doUpdate: updates,
-        where: { columns, _ in return updateFilter(columns) }
+        where: updateFilter
       )
     }
   }
@@ -366,7 +366,7 @@ extension Table {
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: { row, _ in updates(&row) },
-      where: updateFilter
+      where: { row, _ in return updateFilter(row) }
     )
   }
 
@@ -505,7 +505,7 @@ extension Table {
     where targetFilter: (TableColumns) -> [QueryFragment] = { _ in [] },
     doUpdate updates: (inout Updates<Self>, Excluded) -> Void = { _, _ in },
     @QueryFragmentBuilder<Bool>
-    where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
+    where updateFilter: (TableColumns, Excluded) -> [QueryFragment] = { _, _ in [] }
   ) -> InsertOf<Self> {
     withoutActuallyEscaping(updates) { updates in
       _insert(
@@ -514,7 +514,7 @@ extension Table {
         onConflict: conflictTargets,
         where: targetFilter,
         doUpdate: updates,
-        where: { columns, _ in return updateFilter(columns) }
+        where: updateFilter
       )
     }
   }
@@ -581,7 +581,7 @@ extension Table {
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: { row, _ in updates(&row) },
-      where: updateFilter
+      where: { row, _ in return updateFilter(row) }
     )
   }
 

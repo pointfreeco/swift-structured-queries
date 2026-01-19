@@ -697,8 +697,8 @@ extension SnapshotTests {
           !$0.isCompleted
         } doUpdate: {
           $0.isCompleted = $1.isCompleted
-        } where: {
-          $0.isFlagged
+        } where: { row, _ in
+          row.isFlagged
         }
       ) {
         """
