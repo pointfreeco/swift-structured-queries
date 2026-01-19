@@ -129,10 +129,7 @@ extension Table {
       columns,
       values: values,
       onConflictDoUpdate: updates.map { updates in { row, _ in updates(&row) } },
-      where: { columns, _ in
-        let queryFragments = updateFilter(columns)
-        return queryFragments
-      }
+      where: { columns, _ in return updateFilter(columns) }
     )
   }
 
@@ -164,10 +161,7 @@ extension Table {
         onConflict: conflictTargets,
         where: targetFilter,
         doUpdate: updates,
-        where: { columns, _ in
-          let queryFragments = updateFilter(columns)
-          return queryFragments
-        }
+        where: { columns, _ in return updateFilter(columns) }
       )
     }
   }
@@ -337,10 +331,7 @@ extension Table {
         onConflict: conflictTargets,
         where: targetFilter,
         doUpdate: updates,
-        where: { columns, _ in
-          let queryFragments = updateFilter(columns)
-          return queryFragments
-        }
+        where: { columns, _ in return updateFilter(columns) }
       )
     }
   }
@@ -529,10 +520,7 @@ extension Table {
         onConflict: conflictTargets,
         where: targetFilter,
         doUpdate: updates,
-        where: { columns, _ in
-          let queryFragments = updateFilter(columns)
-          return queryFragments
-        }
+        where: { columns, _ in return updateFilter(columns) }
       )
     }
   }
