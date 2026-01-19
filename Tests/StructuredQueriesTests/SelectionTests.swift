@@ -19,7 +19,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "remindersLists"."id" AS "remindersListAndReminderCounts_id", "remindersLists"."color" AS "remindersListAndReminderCounts_color", "remindersLists"."title" AS "remindersListAndReminderCounts_title", "remindersLists"."position" AS "remindersListAndReminderCounts_position", count("reminders"."id") AS "remindersListAndReminderCounts_remindersCount"
+        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists"
         JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
         GROUP BY "remindersLists"."id"
@@ -158,7 +158,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "reminders"."title" AS "reminderTitleAndAssignedUserNames_reminderTitle", "users"."name" AS "reminderTitleAndAssignedUserNames_assignedUserName"
+        SELECT "reminders"."title" AS "reminderTitle", "users"."name" AS "assignedUserName"
         FROM "reminders"
         LEFT JOIN "users" ON ("reminders"."assignedUserID") IS ("users"."id")
         LIMIT 2
@@ -187,7 +187,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT "reminders"."dueDate" AS "reminderDates_date"
+        SELECT "reminders"."dueDate" AS "date"
         FROM "reminders"
         """
       } results: {
@@ -219,7 +219,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT count("reminders"."id") FILTER (WHERE "reminders"."isCompleted") AS "statses_completedCount", count("reminders"."id") FILTER (WHERE "reminders"."isFlagged") AS "statses_flaggedCount", count("reminders"."id") AS "statses_totalCount"
+        SELECT count("reminders"."id") FILTER (WHERE "reminders"."isCompleted") AS "completedCount", count("reminders"."id") FILTER (WHERE "reminders"."isFlagged") AS "flaggedCount", count("reminders"."id") AS "totalCount"
         FROM "reminders"
         """
       } results: {
@@ -252,7 +252,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "rLs"."id" AS "remindersListAliasAndReminderCounts_id", "rLs"."color" AS "remindersListAliasAndReminderCounts_color", "rLs"."title" AS "remindersListAliasAndReminderCounts_title", "rLs"."position" AS "remindersListAliasAndReminderCounts_position", count("reminders"."id") AS "remindersListAliasAndReminderCounts_remindersCount"
+        SELECT "rLs"."id" AS "id", "rLs"."color" AS "color", "rLs"."title" AS "title", "rLs"."position" AS "position", count("reminders"."id") AS "remindersCount"
         FROM "remindersLists" AS "rLs"
         JOIN "reminders" ON ("rLs"."id") = ("reminders"."remindersListID")
         GROUP BY "rLs"."id"
@@ -300,7 +300,7 @@ extension SnapshotTests {
           }
       ) {
         """
-        SELECT "rLs"."id" AS "optionalRemindersListAliasAndReminderCounts_id", "rLs"."color" AS "optionalRemindersListAliasAndReminderCounts_color", "rLs"."title" AS "optionalRemindersListAliasAndReminderCounts_title", "rLs"."position" AS "optionalRemindersListAliasAndReminderCounts_position", count("reminders"."id") AS "optionalRemindersListAliasAndReminderCounts_remindersCount"
+        SELECT "rLs"."id" AS "id", "rLs"."color" AS "color", "rLs"."title" AS "title", "rLs"."position" AS "position", count("reminders"."id") AS "remindersCount"
         FROM "reminders"
         LEFT JOIN "remindersLists" AS "rLs" ON ("reminders"."remindersListID") = ("rLs"."id")
         """
@@ -328,7 +328,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT "reminders"."id" AS "idSelections_id", "reminders"."id" AS "anotherIDSelections_id"
+        SELECT "reminders"."id" AS "id", "reminders"."id" AS "id"
         FROM "reminders"
         """
       } results: {
@@ -356,7 +356,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT "remindersLists"."id" AS "selectionWithColumnGroupAndIDs_id_1", "remindersLists"."id" AS "selectionWithColumnGroupAndIDs_id_2", "remindersLists"."color" AS "selectionWithColumnGroupAndIDs_color", "remindersLists"."title" AS "selectionWithColumnGroupAndIDs_title", "remindersLists"."position" AS "selectionWithColumnGroupAndIDs_position"
+        SELECT "remindersLists"."id" AS "id_1", "remindersLists"."id" AS "id_2", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position"
         FROM "remindersLists"
         """
       } results: {
@@ -403,7 +403,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT "rLs"."id" AS "selectionWithColumnGroupAliasAndIDs_id_1", "rLs"."id" AS "selectionWithColumnGroupAliasAndIDs_id_2", "rLs"."color" AS "selectionWithColumnGroupAliasAndIDs_color", "rLs"."title" AS "selectionWithColumnGroupAliasAndIDs_title", "rLs"."position" AS "selectionWithColumnGroupAliasAndIDs_position"
+        SELECT "rLs"."id" AS "id_1", "rLs"."id" AS "id_2", "rLs"."color" AS "color", "rLs"."title" AS "title", "rLs"."position" AS "position"
         FROM "remindersLists" AS "rLs"
         """
       } results: {

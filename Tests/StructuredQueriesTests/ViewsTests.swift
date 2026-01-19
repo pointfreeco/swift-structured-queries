@@ -353,6 +353,29 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func viewWithDuplicateColumnNames() {
+      assertQuery(
+        ReminderAndListID.createTemporaryView(
+          as:
+            Reminder
+            .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
+            .select {
+              ReminderAndListID.Columns(reminderID: $0.id, remindersListID: $1.id)
+            }
+        )
+      ) {
+        """
+        CREATE TEMPORARY VIEW
+        "reminderAndListIDs"
+        ("id_1", "id_2")
+        AS
+        SELECT "reminders"."id" AS "id_1", "remindersLists"."id" AS "id_2"
+        FROM "reminders"
+        JOIN "remindersLists" ON ("reminders"."remindersListID") = ("remindersLists"."id")
+        """
+      }
+    }
   }
 }
 
@@ -374,4 +397,12 @@ private struct ReminderWithList {
   let reminderID: Reminder.ID
   let reminderTitle: String
   let remindersListTitle: String
+}
+
+@Table
+private struct ReminderAndListID {
+  @Column("id")
+  let reminderID: Reminder.ID
+  @Column("id")
+  let remindersListID: RemindersList.ID
 }
