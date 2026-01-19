@@ -251,15 +251,15 @@ extension SnapshotTests {
       }
     }
   }
-  
+
   @Test func multipleWheres() {
     assertQuery(
       Reminder
         .where { $0.assignedUserID.eq(1) }
         .where { !$0.isCompleted }
         .where {
-          ($0.isFlagged && $0.priority.ifnull(Priority.low).gte(Priority.medium)) ||
-          (#sql("\($0.dueDate) <= date('now')") && $0.priority.is(nil))
+          ($0.isFlagged && $0.priority.ifnull(Priority.low).gte(Priority.medium))
+            || (#sql("\($0.dueDate) <= date('now')") && $0.priority.is(nil))
         }
     ) {
       """
