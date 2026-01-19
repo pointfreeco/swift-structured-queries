@@ -222,7 +222,8 @@ extension Update: Statement {
     }
     query.append("\(.newlineOrSpace)\(updates)")
     if !`where`.isEmpty {
-      query.append("\(.newlineOrSpace)WHERE \(`where`.map { "(" + $0 + ")" }.joined(separator: " AND "))")
+      let `where`: QueryFragment = `where`.map { "(\($0))" }.joined(separator: " AND ")
+      query.append("\(.newlineOrSpace)WHERE \(`where`)")
     }
     if !returning.isEmpty {
       query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")

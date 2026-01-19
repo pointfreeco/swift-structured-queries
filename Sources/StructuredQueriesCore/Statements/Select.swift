@@ -1765,13 +1765,15 @@ extension Select: SelectStatement {
       query.append("\(.newlineOrSpace)\(join)")
     }
     if !`where`.isEmpty {
-      query.append("\(.newlineOrSpace)WHERE \(`where`.map { "(" + $0 + ")" }.joined(separator: " AND "))")
+      let `where`: QueryFragment = `where`.map { "(\($0))" }.joined(separator: " AND ")
+      query.append("\(.newlineOrSpace)WHERE \(`where`)")
     }
     if !group.isEmpty {
       query.append("\(.newlineOrSpace)GROUP BY \(group.joined(separator: ", "))")
     }
     if !having.isEmpty {
-      query.append("\(.newlineOrSpace)HAVING \(having.joined(separator: " AND "))")
+      let having: QueryFragment = having.map { "(\($0))" }.joined(separator: " AND ")
+      query.append("\(.newlineOrSpace)HAVING \(having)")
     }
     if !order.isEmpty {
       query.append("\(.newlineOrSpace)ORDER BY \(order.joined(separator: ", "))")
