@@ -692,7 +692,7 @@ extension SnapshotTests {
         SELECT "reminders"."isCompleted", count("reminders"."id")
         FROM "reminders"
         GROUP BY "reminders"."isCompleted"
-        HAVING (count("reminders"."id")) > (3)
+        HAVING ((count("reminders"."id")) > (3))
         """
       } results: {
         """
@@ -719,7 +719,7 @@ extension SnapshotTests {
         SELECT "reminders"."isCompleted", count("reminders"."id")
         FROM "reminders"
         GROUP BY "reminders"."isCompleted"
-        HAVING (count("reminders"."id")) > (3)
+        HAVING ((count("reminders"."id")) > (3))
         """
       } results: {
         """
