@@ -755,15 +755,14 @@ extension SnapshotTests {
         """
       }
     }
-    
+
     @Test func onConflict_whereExcluded() {
       assertQuery(
         Reminder.insert {
           Reminder.Draft(remindersListID: 1)
         } onConflictDoUpdate: { updates, excluded in
           updates.updatedAt = excluded.updatedAt
-        }
-        where: { columns, excluded in
+        } where: { columns, excluded in
           excluded.updatedAt.gt(columns.updatedAt)
         }
       ) {

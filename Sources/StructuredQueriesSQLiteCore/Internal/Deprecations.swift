@@ -194,7 +194,7 @@ extension Table {
       select: selection,
       onConflictDoUpdate: updates,
       where: { columns, _ in return updateFilter(columns) }
-      
+
     )
     insert.conflictResolution = conflictResolution.queryFragment
     return insert
