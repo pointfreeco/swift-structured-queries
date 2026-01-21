@@ -149,11 +149,11 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     public static func insert(
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ new: New) -> [QueryFragment],
-      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
+      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil,
     ) -> Self {
       Self(
         kind: .insert(operations: perform(On.as(_New.self).columns)),
-        when: condition?(On.as(_New.self).columns).queryFragment
+        when: condition?(On.as(_New.self).columns)
       )
     }
 
@@ -168,7 +168,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       touch updates: (inout Updates<On>) -> Void,
       when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
-      Self.insert(
+      insert(
         forEachRow: { new in
           On
             .where { $0.rowid.eq(new.rowid) }
@@ -192,7 +192,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
       when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
-      Self.insert(
+      insert(
         touch: { $0[dynamicMember: dateColumn] = dateFunction },
         when: condition
       )
@@ -229,16 +229,18 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       forEachRow perform: (_ old: Old, _ new: New) -> [QueryFragment],
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
-      var columnNames: [String] = []
-      for column in repeat each columns(On.columns) {
-        columnNames.append(contentsOf: column._names)
-      }
-      return Self(
+      Self(
         kind: .update(
           operations: perform(On.as(_Old.self).columns, On.as(_New.self).columns),
-          columnNames: columnNames
+          columnNames: {
+            var columnNames: [String] = []
+            for column in repeat each columns(On.columns) {
+              columnNames.append(contentsOf: column._names)
+            }
+            return columnNames
+          }()
         ),
-        when: condition?(On.as(_Old.self).columns, On.as(_New.self).columns).queryFragment
+        when: condition?(On.as(_Old.self).columns, On.as(_New.self).columns)
       )
     }
 
@@ -253,7 +255,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       touch updates: (inout Updates<On>) -> Void,
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
-      Self.update(
+      update(
         forEachRow: { _, new in
           On
             .where { $0.rowid.eq(new.rowid) }
@@ -277,7 +279,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
-      Self.update(
+      update(
         touch: { $0[dynamicMember: dateColumn] = dateFunction },
         when: condition
       )
@@ -296,7 +298,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       touch updates: (inout Updates<On>) -> Void,
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
-      Self.update(
+      update(
         of: columns,
         forEachRow: { _, new in
           On
@@ -323,7 +325,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
-      Self.update(
+      update(
         of: columns,
         touch: { $0[dynamicMember: dateColumn] = dateFunction },
         when: condition
@@ -343,7 +345,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ) -> Self {
       Self(
         kind: .delete(operations: perform(On.as(_Old.self).columns)),
-        when: condition?(On.as(_Old.self).columns).queryFragment
+        when: condition?(On.as(_Old.self).columns)
       )
     }
 
@@ -355,6 +357,17 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
 
     private let kind: Kind
     private let when: QueryFragment?
+
+    private init(
+      kind: @autoclosure () -> Kind,
+      when: @autoclosure () -> (any QueryExpression<Bool>)?
+    ) {
+      let (kind, when) = $_isCreatingTemporaryTrigger.withValue(true) {
+        (kind(), when()?.queryFragment)
+      }
+      self.kind = kind
+      self.when = when
+    }
 
     public var queryFragment: QueryFragment {
       var query: QueryFragment = ""
@@ -428,9 +441,8 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
   }
 
   private var triggerName: QueryFragment {
-    guard let name else {
-      return "\(quote: "\(operation.description)_on_\(On.tableName)@\(fileID):\(line):\(column)")"
-    }
-    return "\(quote: name)"
+    "\(quote: name ?? "\(operation.description)_on_\(On.tableName)@\(fileID):\(line):\(column)")"
   }
 }
+
+@TaskLocal public var _isCreatingTemporaryTrigger = false
