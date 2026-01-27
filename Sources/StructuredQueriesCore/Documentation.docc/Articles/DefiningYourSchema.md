@@ -279,7 +279,13 @@ To enable the trait, specify it in the Package.swift file that depends on Struct
    from: "0.22.0",
 +  traits: ["StructuredQueriesTagged"]
  ),
++.package(
++  url: "https://github.com/pointfreeco/swift-tagged",
++  from: "0.1.0"
++),
 ```
+
+> Important: You _must_ explicitly depend on the `swift-tagged` package to work around a Swift bug.
 
 This will allow you to introduce distinct `Tagged` identifiers throughout your schema:
 

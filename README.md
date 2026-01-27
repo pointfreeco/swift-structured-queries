@@ -243,14 +243,26 @@ support for other libraries:
  dependencies: [
    .package(
      url: "https://github.com/pointfreeco/swift-structured-queries",
-     from: "0.22.0",
+     from: "0.28.0",
 +    traits: [
 +      "StructuredQueriesCasePaths",
 +      "StructuredQueriesTagged",
-+    ]
++    ],
    ),
++  .package(
++    url: "https://github.com/pointfreeco/swift-case-paths",
++    from: "1.0.0"
++  ),
++  .package(
++    url: "https://github.com/pointfreeco/swift-tagged",
++    from: "0.1.0"
++  ),
  ]
 ```
+
+> [!IMPORTANT]:
+> As shown above, you _must_ explicitly depend on `swift-case-paths` and/or `swift-tagged` depending
+> on the trait(s) you enable to work around a Swift bug.
 
 ## Community
 
