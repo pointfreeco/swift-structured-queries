@@ -240,7 +240,7 @@ this functionality by depending on the desired module:
 
   * `StructuredQueriesTagged`: Adds support for type-safe identifiers _via_
     the [Tagged](https://github.com/pointfreeco/swift-tagged) library.
-    
+
 ```diff
  .product(name: "StructuredQueries", package: "swift-structured-queries"),
 +.product(name: "StructuredQueriesCasePaths", package: "swift-structured-queries"),
