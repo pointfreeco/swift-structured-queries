@@ -32,12 +32,22 @@ let package = Package(
       name: "StructuredQueriesTestSupport",
       targets: ["StructuredQueriesTestSupport"]
     ),
+    .library(
+      name: "StructuredQueriesCasePaths",
+      targets: ["StructuredQueriesCasePaths"]
+    ),
+    .library(
+      name: "StructuredQueriesTagged",
+      targets: ["StructuredQueriesTagged"]
+    ),
   ],
   dependencies: [
+    .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
     .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.1"),
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.4"),
+    .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.2"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"603.0.0"),
   ],
@@ -94,6 +104,21 @@ let package = Package(
         "StructuredQueriesCore",
         .product(name: "CustomDump", package: "swift-custom-dump"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+      ]
+    ),
+
+    .target(
+      name: "StructuredQueriesCasePaths",
+      dependencies: [
+        "StructuredQueriesCore",
+        .product(name: "CasePaths", package: "swift-case-paths"),
+      ]
+    ),
+    .target(
+      name: "StructuredQueriesTagged",
+      dependencies: [
+        "StructuredQueriesCore",
+        .product(name: "Tagged", package: "swift-tagged"),
       ]
     ),
 

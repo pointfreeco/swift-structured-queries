@@ -38,6 +38,14 @@ let package = Package(
       name: "StructuredQueriesTestSupport",
       targets: ["StructuredQueriesTestSupport"]
     ),
+    .library(
+      name: "StructuredQueriesCasePaths",
+      targets: ["StructuredQueriesCasePaths"]
+    ),
+    .library(
+      name: "StructuredQueriesTagged",
+      targets: ["StructuredQueriesTagged"]
+    ),
   ],
   traits: [
     .trait(
@@ -65,22 +73,20 @@ let package = Package(
       dependencies: [
         "StructuredQueriesCore",
         "StructuredQueriesMacros",
+        .target(
+          name: "StructuredQueriesCasePaths",
+          condition: .when(traits: ["StructuredQueriesCasePaths"])
+        ),
+        .target(
+          name: "StructuredQueriesTagged",
+          condition: .when(traits: ["StructuredQueriesTagged"])
+        ),
       ]
     ),
     .target(
       name: "StructuredQueriesCore",
       dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(
-          name: "CasePaths",
-          package: "swift-case-paths",
-          condition: .when(traits: ["StructuredQueriesCasePaths"])
-        ),
-        .product(
-          name: "Tagged",
-          package: "swift-tagged",
-          condition: .when(traits: ["StructuredQueriesTagged"])
-        ),
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
       ],
       exclude: ["Symbolic Links/README.md"]
     ),
@@ -124,6 +130,22 @@ let package = Package(
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
       ]
     ),
+
+    .target(
+      name: "StructuredQueriesCasePaths",
+      dependencies: [
+        "StructuredQueriesCore",
+        .product(name: "CasePaths", package: "swift-case-paths"),
+      ]
+    ),
+    .target(
+      name: "StructuredQueriesTagged",
+      dependencies: [
+        "StructuredQueriesCore",
+        .product(name: "Tagged", package: "swift-tagged"),
+      ]
+    ),
+
     .testTarget(
       name: "StructuredQueriesMacrosTests",
       dependencies: [
