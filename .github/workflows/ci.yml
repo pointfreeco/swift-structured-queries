@@ -42,4 +42,4 @@ jobs:
       - name: Install SQLite
         run: apt update && apt -y install libsqlite3-dev
       - name: Build
-        run: swift build --jobs 1
+        run: swift build
