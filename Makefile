@@ -1,4 +1,4 @@
-SWIFT_VERSION = 6.0
+SWIFT_VERSION = 6.2
 
 format:
 	swift format . --recursive --in-place
@@ -10,7 +10,7 @@ docker-build:
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
 		swift:$(SWIFT_VERSION) \
-		bash -c "swift build"
+		bash -c "apt update && apt -y install libsqlite3-dev && swift build"
 
 docc-preview:
 	swift package --disable-sandbox preview-documentation \
