@@ -149,7 +149,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     public static func insert(
       @QueryFragmentBuilder<any Statement>
       forEachRow perform: (_ new: New) -> [QueryFragment],
-      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil,
+      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       Self(
         kind: .insert(operations: perform(On.as(_New.self).columns)),
