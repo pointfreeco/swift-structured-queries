@@ -40,6 +40,10 @@ let package = Package(
       name: "StructuredQueriesTagged",
       targets: ["StructuredQueriesTagged"]
     ),
+    .library(
+      name: "StructuredQueriesSQLiteTagged",
+      targets: ["StructuredQueriesSQLiteTagged"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.0.0"),

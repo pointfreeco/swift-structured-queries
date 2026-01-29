@@ -46,6 +46,10 @@ let package = Package(
       name: "StructuredQueriesTagged",
       targets: ["StructuredQueriesTagged"]
     ),
+    .library(
+      name: "StructuredQueriesSQLiteTagged",
+      targets: ["StructuredQueriesSQLiteTagged"]
+    ),
   ],
   traits: [
     .trait(

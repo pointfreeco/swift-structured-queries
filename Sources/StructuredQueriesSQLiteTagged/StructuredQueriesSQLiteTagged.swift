@@ -1,4 +1,5 @@
 import StructuredQueriesSQLiteCore
+import StructuredQueriesTagged
 import Tagged
 
 extension Tagged: SQLiteType where RawValue: SQLiteType {
