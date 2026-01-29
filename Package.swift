@@ -145,6 +145,13 @@ let package = Package(
         .product(name: "Tagged", package: "swift-tagged"),
       ]
     ),
+    .target(
+      name: "StructuredQueriesSQLiteTagged",
+      dependencies: [
+        "StructuredQueriesSQLiteCore",
+        "StructuredQueriesTagged"
+      ]
+    ),
 
     .testTarget(
       name: "StructuredQueriesMacrosTests",
