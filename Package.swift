@@ -109,16 +109,16 @@ let package = Package(
         "StructuredQueries",
         "StructuredQueriesSQLiteCore",
         "StructuredQueriesSQLiteMacros",
+        .target(
+          name: "StructuredQueriesSQLiteTagged",
+          condition: .when(traits: ["StructuredQueriesTagged"])
+        ),
       ]
     ),
     .target(
       name: "StructuredQueriesSQLiteCore",
       dependencies: [
         "StructuredQueriesCore",
-        .target(
-          name: "StructuredQueriesSQLiteTagged",
-          condition: .when(traits: ["StructuredQueriesTagged"])
-        ),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
