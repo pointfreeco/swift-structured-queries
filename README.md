@@ -230,10 +230,8 @@ And then adding the product to any target that needs access to the library:
 .product(name: "StructuredQueries", package: "swift-structured-queries"),
 ```
 
-### Extensions
-
-StructuredQueries contains several plug-in modules to enhance its functionality. You can opt into
-this functionality by depending on the desired module:
+If you are on Swift 6.1 or greater, you can enable package traits that extend the library with
+support for other libraries:
 
   * `StructuredQueriesCasePaths`: Adds support for single-table inheritance _via_ "enum" tables by
     leveraging the [CasePaths](https://github.com/pointfreeco/swift-case-paths) library.
@@ -242,9 +240,16 @@ this functionality by depending on the desired module:
     the [Tagged](https://github.com/pointfreeco/swift-tagged) library.
 
 ```diff
- .product(name: "StructuredQueries", package: "swift-structured-queries"),
-+.product(name: "StructuredQueriesCasePaths", package: "swift-structured-queries"),
-+.product(name: "StructuredQueriesTagged", package: "swift-structured-queries"),
+ dependencies: [
+   .package(
+     url: "https://github.com/pointfreeco/swift-structured-queries",
+     from: "0.22.0",
++    traits: [
++      "StructuredQueriesCasePaths",
++      "StructuredQueriesTagged",
++    ]
+   ),
+ ]
 ```
 
 ## Community
