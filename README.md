@@ -260,7 +260,7 @@ support for other libraries:
  ]
 ```
 
-> [!IMPORTANT]:
+> [!IMPORTANT]
 > As shown above, you _must_ explicitly depend on `swift-case-paths` and/or `swift-tagged` depending
 > on the trait(s) you enable to work around a Swift bug.
 
