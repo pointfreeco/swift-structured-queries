@@ -34,7 +34,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '6.2'
+          - '6.1'
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
     steps:
