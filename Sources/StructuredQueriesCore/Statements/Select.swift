@@ -1506,7 +1506,8 @@ extension Select {
   ///
   /// - Parameter ordering: A key path to a column to order by.
   /// - Returns: A new select statement that appends the given column to its `ORDER BY` clause.
-  public func order(by ordering: KeyPath<From.TableColumns, some QueryExpression>) -> Self {
+  public func order(by ordering: KeyPath<From.TableColumns, some QueryExpression>) -> Self
+  where Joins == () {
     var select = self
     select.order.append(From.columns[keyPath: ordering].queryFragment)
     return select
