@@ -386,7 +386,7 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "roots"
-        SET "honestCount" = 1, "optionalCount" = 1
+        SET "honestCount" = 1, "optionalCount" = 1, "string" = NULL
         """
       }
     }
@@ -420,4 +420,21 @@ extension SnapshotTests {
 @Selection struct NestedFields {
   var honestCount: Int = 0
   var optionalCount: Int?
+
+  @Column(as: String.Test?.self)
+  var string: String?
+}
+
+extension String {
+    struct Test: QueryRepresentable, QueryBindable, QueryDecodable {
+        var queryOutput: String
+        var queryBinding: QueryBinding { .text(queryOutput) }
+
+        init(queryOutput: String) {
+            self.queryOutput = queryOutput
+        }
+        init(decoder: inout some QueryDecoder) throws {
+            self.queryOutput = try String(decoder: &decoder)
+        }
+    }
 }
