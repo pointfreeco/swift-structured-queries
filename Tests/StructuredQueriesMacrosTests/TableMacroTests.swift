@@ -335,6 +335,10 @@ extension SnapshotTests {
               self.email = email
               self.age = age
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -1189,6 +1193,10 @@ extension SnapshotTests {
               self.id = id
               self.name = name
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -1706,6 +1714,10 @@ extension SnapshotTests {
               self.id = id
               self.referrerID = referrerID
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -1939,6 +1951,10 @@ extension SnapshotTests {
               self.id = id
               self.name = name
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -2114,6 +2130,10 @@ extension SnapshotTests {
               self.id = id
               self.seconds = seconds
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -2287,6 +2307,10 @@ extension SnapshotTests {
               self.id = id
               self.color = color
               self.name = name
+            }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
             }
           }
         }
@@ -3149,6 +3173,10 @@ extension SnapshotTests {
             ) {
               self.id = id
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -3423,6 +3451,10 @@ extension SnapshotTests {
               self.id = id
               self.name = name
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -3619,6 +3651,10 @@ extension SnapshotTests {
               self.date = date
               self.priority = priority
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -3760,6 +3796,10 @@ extension SnapshotTests {
               id: UUID? = nil
             ) {
               self.id = id
+            }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
             }
           }
         }
@@ -3985,6 +4025,10 @@ extension SnapshotTests {
               self.id = id
               self.title = title
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -4141,6 +4185,10 @@ extension SnapshotTests {
               self.id = id
               self.timestamps = timestamps
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -4282,6 +4330,10 @@ extension SnapshotTests {
               id: ReminderTagID? = nil
             ) {
               self.id = id
+            }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
             }
           }
         }
@@ -4463,6 +4515,10 @@ extension SnapshotTests {
               self.reminderTitle = reminderTitle
               self.remindersListTitle = remindersListTitle
             }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
+            }
           }
         }
 
@@ -4631,6 +4687,10 @@ extension SnapshotTests {
             ) {
               self.id = id
               self.userModificationDate = userModificationDate
+            }
+            private let _draftIdentifier = _DraftIdentifier()
+            public var draftIdentifier: some Hashable {
+              DraftIdentifier(_draftIdentifier)
             }
           }
         }
