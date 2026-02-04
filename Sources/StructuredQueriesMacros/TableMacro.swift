@@ -723,6 +723,11 @@ extension TableMacro: ExtensionMacro {
         @_Draft(\(type).self)
         public struct Draft {
         \(draftProperties, separator: "\n")
+        
+        @Ephemeral
+        private let _draftIdentifier = _DraftIdentifier()
+        public var draftIdentifier: some Hashable {
+          DraftIdentifier(_draftIdentifier)
         }
         """
 
@@ -810,6 +815,10 @@ extension TableMacro: ExtensionMacro {
         \(draftProperties, separator: "\n")
         \(memberBlocks, separator: "\n")
         \(memberwiseInit)
+        private let _draftIdentifier = _DraftIdentifier()
+        public var draftIdentifier: some Hashable {
+        DraftIdentifier(_draftIdentifier)
+        }
         }
         """
       // NB: End of workaround
@@ -1400,6 +1409,10 @@ extension TableMacro: MemberMacro {
         \(draftProperties, separator: "\n")
         \(memberBlocks, separator: "\n")
         \(memberwiseInit)
+        private let _draftIdentifier = _DraftIdentifier()
+        public var draftIdentifier: some Hashable {
+        DraftIdentifier(_draftIdentifier)
+        }
         }
         """
       // NB: End of workaround

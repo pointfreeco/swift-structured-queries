@@ -299,3 +299,31 @@ extension Delete where From: TableDraft {
     self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
+
+import Foundation
+public struct _DraftIdentifier: Hashable, CustomReflectable {
+  public let rawValue: AnyHashable
+  public init() {
+    rawValue = UUID()
+  }
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    true
+  }
+  public func hash(into hasher: inout Hasher) {
+  }
+  public var customMirror: Mirror {
+    Mirror(self, children: [])
+  }
+}
+public struct DraftIdentifier: Hashable {
+  private let rawValue: _DraftIdentifier
+  public init(_ draftIdentifier: _DraftIdentifier) {
+    rawValue = draftIdentifier
+  }
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.rawValue.rawValue == rhs.rawValue.rawValue
+  }
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(rawValue.rawValue)
+  }
+}
