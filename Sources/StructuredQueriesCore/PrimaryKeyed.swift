@@ -301,8 +301,8 @@ extension Delete where From: TableDraft {
 }
 
 import Foundation
-public struct _DraftIdentifier: Hashable, CustomReflectable {
-  public let rawValue: AnyHashable
+public struct _DraftIdentifier: Hashable, CustomReflectable, Sendable {
+  public let rawValue: UUID
   public init() {
     rawValue = UUID()
   }
@@ -315,7 +315,7 @@ public struct _DraftIdentifier: Hashable, CustomReflectable {
     Mirror(self, children: [])
   }
 }
-public struct DraftIdentifier: Hashable {
+public struct DraftIdentifier: Hashable, Sendable {
   private let rawValue: _DraftIdentifier
   public init(_ draftIdentifier: _DraftIdentifier) {
     rawValue = draftIdentifier
