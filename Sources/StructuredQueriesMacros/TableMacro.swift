@@ -723,11 +723,6 @@ extension TableMacro: ExtensionMacro {
         @_Draft(\(type).self)
         public struct Draft {
         \(draftProperties, separator: "\n")
-        
-        @Ephemeral
-        private let _draftIdentifier = _DraftIdentifier()
-        public var draftIdentifier: some Hashable {
-          DraftIdentifier(_draftIdentifier)
         }
         """
 
