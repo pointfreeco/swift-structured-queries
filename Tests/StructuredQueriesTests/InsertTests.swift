@@ -574,7 +574,7 @@ extension SnapshotTests {
         } values: {
           ["Hello", "World"]
         } onConflictDoUpdate: {
-          $0.notes = ["Goodnight", "Moon"]
+          $0.notes = #bind(["Goodnight", "Moon"])
         }
       ) {
         """
