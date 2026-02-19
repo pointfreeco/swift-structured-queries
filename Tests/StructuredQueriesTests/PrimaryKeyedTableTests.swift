@@ -213,7 +213,7 @@ extension SnapshotTests {
     @Test func findByIDWithJoin() {
       assertQuery(
         Reminder
-          .join(RemindersList.all) { $0.remindersListID == $1.id }
+          .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
           .select { ($0.title, $1.title) }
           .find(2)
       ) {

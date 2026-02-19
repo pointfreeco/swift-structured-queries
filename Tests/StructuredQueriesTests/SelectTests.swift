@@ -1628,7 +1628,7 @@ extension SnapshotTests {
 
 extension Reminder.TableColumns {
   var isHighPriority: some QueryExpression<Bool> {
-    self.priority == Priority.high
+    self.priority.is(Priority.high)
   }
 }
 
