@@ -49,7 +49,7 @@ extension SnapshotTests {
             "after_update_on_reminders",
             after: .update { _, new in
               Reminder
-                .update { $0.dueDate = #bind(Date(timeIntervalSinceReferenceDate: 0)) }
+                .update { $0.dueDate = Date(timeIntervalSinceReferenceDate: 0) }
                 .where { $0.id.eq(new.id) }
             }
           )
