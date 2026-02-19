@@ -38,18 +38,19 @@ public struct Updates<Base: Table> {
     set { updates.append((Base.columns[keyPath: keyPath].name, newValue.queryFragment)) }
   }
 
-  public subscript<Value>(
-    dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Value?>>
-  ) -> any QueryExpression<Value> {
-    get { SQLQueryExpression("\(Base.columns[keyPath: keyPath])") }
-    set { updates.append((Base.columns[keyPath: keyPath].name, newValue.queryFragment)) }
-  }
-
-  public subscript<Value>(
-    dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Value?>>
-  ) -> _Null<Value> {
-    get { _Null() }
-    set { updates.append((Base.columns[keyPath: keyPath].name, newValue.queryFragment)) }
+  @_disfavoredOverload
+  @available(
+    *,
+    unavailable,
+    message: """
+      Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+      """
+  )
+  public subscript<Value: QueryExpression>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Value>>
+  ) -> Value.QueryOutput {
+    get { fatalError() }
+    set {}
   }
 
   public subscript<Value: QueryExpression>(
@@ -66,7 +67,9 @@ public struct Updates<Base: Table> {
     @available(
       *,
       unavailable,
-      message: "Use '#bind' to explicitly wrap this value in a query expression."
+      message: """
+        Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+        """
     )
     get { fatalError() }
     set {
