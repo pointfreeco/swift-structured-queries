@@ -197,15 +197,6 @@ extension SnapshotTests {
       }
     }
 
-    @available(*, deprecated)
-    @Test func deprecatedCoalesce() {
-      assertInlineSnapshot(of: User.columns.name ?? User.columns.name, as: .sql) {
-        """
-        coalesce("users"."name", "users"."name")
-        """
-      }
-    }
-
     @Test func ifnull() {
       assertQuery(Reminder.select { ($0.priority, $0.priority.ifnull(Priority.low)) }) {
         """

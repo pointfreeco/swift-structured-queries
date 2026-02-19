@@ -143,36 +143,6 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   ) -> CoalesceFunction<QueryValue> {
     CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
   }
-
-  @_documentation(visibility: private)
-  @available(
-    *,
-    deprecated,
-    message:
-      "Left side of 'NULL' coalescing operator '??' has non-optional query type, so the right side is never used"
-  )
-  public static func ?? (
-    lhs: some QueryExpression<QueryValue.Wrapped>,
-    rhs: Self
-  ) -> CoalesceFunction<QueryValue> {
-    CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
-  }
-}
-
-extension QueryExpression {
-  @_documentation(visibility: private)
-  @available(
-    *,
-    deprecated,
-    message:
-      "Left side of 'NULL' coalescing operator '??' has non-optional query type, so the right side is never used"
-  )
-  public static func ?? (
-    lhs: some QueryExpression<QueryValue>,
-    rhs: Self
-  ) -> CoalesceFunction<QueryValue> {
-    CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
-  }
 }
 
 extension QueryExpression where QueryValue == String {
