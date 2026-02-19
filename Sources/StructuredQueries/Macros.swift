@@ -152,10 +152,10 @@ public macro Ephemeral() =
 /// Explicitly bind a value to a query.
 ///
 /// This macro explicitly binds a Swift value to a query. This is required when binding a value with
-/// multiple query representations, like `Date` and `UUID`:
+/// a query representations, like `JSONRepresentable`:
 ///
 /// ```swift
-/// Reminder.where { $0.date >= #bind(Date()) }
+/// Reminder.update { $0.notes = #bind(["Buy a new jacket"]) }
 /// ```
 ///
 /// > Tip: Explicit binding can also improve the performance of the Swift compiler when

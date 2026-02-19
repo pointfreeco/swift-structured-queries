@@ -1365,6 +1365,7 @@ extension Select {
   ///
   /// - Parameter grouping: A closure that returns a column to group by from this select's tables.
   /// - Returns: A new select statement that groups by the given column.
+  @_disfavoredOverload
   public func group<C: QueryExpression, each J: Table>(
     by grouping: (From.TableColumns, repeat (each J).TableColumns) -> C
   ) -> Self where Joins == (repeat each J) {
@@ -1413,6 +1414,7 @@ extension Select {
     _group(by: grouping)
   }
 
+  @_disfavoredOverload
   private func _group<
     each C: QueryExpression,
     each J: Table
@@ -1547,6 +1549,7 @@ extension Select {
   ///   - maxLength: A closure that produces a `LIMIT` expression from this select's tables.
   ///   - offset: A closure that produces an `OFFSET` expression from this select's tables.
   /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
+  @_disfavoredOverload
   public func limit<each J: Table>(
     _ maxLength: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Int>,
     offset: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Int>)? = nil

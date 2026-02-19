@@ -158,7 +158,7 @@ extension SnapshotTests {
       assertQuery(
         Reminder
           .select { ($0.title, $0.priority, averagePriority) }
-          .where { #sql("\($0.priority) < (\(averagePriority))") || $0.priority == nil }
+          .where { #sql("\($0.priority) < (\(averagePriority))") || $0.priority.is(nil) }
           .order { $0.priority.desc() }
       ) {
         """
