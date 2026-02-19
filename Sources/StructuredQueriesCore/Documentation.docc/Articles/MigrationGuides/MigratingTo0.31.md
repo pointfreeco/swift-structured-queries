@@ -22,7 +22,7 @@ to use `eq` (or `is`) and `neq` (or `isNot`) instead:
  }
  
  RemindersList.where {
--  $0.dueDate == nil            🛑 '==' is unavailable: Use 'is') instead.
+-  $0.dueDate == nil            🛑 '==' is unavailable: Use 'is' instead.
 +  $0.dueDate.is(nil)
  }
 ```
