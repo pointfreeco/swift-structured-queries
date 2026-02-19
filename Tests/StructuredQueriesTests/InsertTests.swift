@@ -384,7 +384,7 @@ extension SnapshotTests {
     }
 
     @Test func upsertWithID() {
-      assertQuery(Reminder.where { $0.id == 1 }) {
+      assertQuery(Reminder.where { $0.id.eq(1) }) {
         """
         SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
         FROM "reminders"

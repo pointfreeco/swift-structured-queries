@@ -7,103 +7,6 @@ import Testing
 
 extension SnapshotTests {
   struct OperatorsTests {
-    @Test func equality() {
-      assertInlineSnapshot(of: Row.columns.c == Row.columns.c, as: .sql) {
-        """
-        ("rows"."c") = ("rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c == Row.columns.a, as: .sql) {
-        """
-        ("rows"."c") = ("rows"."a")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c == nil as Int?, as: .sql) {
-        """
-        ("rows"."c") IS (NULL)
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a == Row.columns.c, as: .sql) {
-        """
-        ("rows"."a") IS ("rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a == Row.columns.a, as: .sql) {
-        """
-        ("rows"."a") IS ("rows"."a")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a == nil as Int?, as: .sql) {
-        """
-        ("rows"."a") IS (NULL)
-        """
-      }
-      assertInlineSnapshot(of: nil as Int? == Row.columns.c, as: .sql) {
-        """
-        (NULL) IS ("rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: nil as Int? == Row.columns.a, as: .sql) {
-        """
-        (NULL) IS ("rows"."a")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c != Row.columns.c, as: .sql) {
-        """
-        ("rows"."c") <> ("rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c != Row.columns.a, as: .sql) {
-        """
-        ("rows"."c") <> ("rows"."a")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c != nil as Int?, as: .sql) {
-        """
-        ("rows"."c") IS NOT (NULL)
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a != Row.columns.c, as: .sql) {
-        """
-        ("rows"."a") IS NOT ("rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a != Row.columns.a, as: .sql) {
-        """
-        ("rows"."a") IS NOT ("rows"."a")
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.a != nil as Int?, as: .sql) {
-        """
-        ("rows"."a") IS NOT (NULL)
-        """
-      }
-      assertInlineSnapshot(of: nil as Int? != Row.columns.c, as: .sql) {
-        """
-        (NULL) IS NOT ("rows"."c")
-        """
-      }
-      assertInlineSnapshot(of: nil as Int? != Row.columns.a, as: .sql) {
-        """
-        (NULL) IS NOT ("rows"."a")
-        """
-      }
-    }
-
-    @available(*, deprecated)
-    @Test func deprecatedEquality() {
-      assertInlineSnapshot(of: Row.columns.c == nil, as: .sql) {
-        """
-        ("rows"."c") IS (NULL)
-        """
-      }
-      assertInlineSnapshot(of: Row.columns.c != nil, as: .sql) {
-        """
-        ("rows"."c") IS NOT (NULL)
-        """
-      }
-    }
-
     @Test func comparison() {
       assertInlineSnapshot(of: Row.columns.c < Row.columns.c, as: .sql) {
         """
@@ -591,7 +494,7 @@ extension SnapshotTests {
         └──────┘
         """
       }
-      assertQuery(Values(Reminder.where { $0.id == 1 }.exists())) {
+      assertQuery(Values(Reminder.where { $0.id.eq(1) }.exists())) {
         """
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
@@ -606,7 +509,7 @@ extension SnapshotTests {
         └──────┘
         """
       }
-      assertQuery(Values(Reminder.where { $0.id == 100 }.exists())) {
+      assertQuery(Values(Reminder.where { $0.id.eq(100) }.exists())) {
         """
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
