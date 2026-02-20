@@ -63,12 +63,13 @@ extension SnapshotTests {
           """
         } results: {
           """
-          ┌───────────────────────────────────────────────────┐
-          │ SnapshotTests.TableTests.DefaultSelect.Row.Draft( │
-          │   id: 1,                                          │
-          │   isDeleted: false                                │
-          │ )                                                 │
-          └───────────────────────────────────────────────────┘
+          ┌────────────────────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultSelect.Row.Draft(          │
+          │   id: 1,                                                   │
+          │   isDeleted: false,                                        │
+          │   _draftIdentifier: StructuredQueriesCore._DraftIdentifier │
+          │ )                                                          │
+          └────────────────────────────────────────────────────────────┘
           """
         }
         assertQuery(Row.select(\.id)) {
@@ -386,12 +387,13 @@ extension SnapshotTests {
           """
         } results: {
           """
-          ┌──────────────────────────────────────────────────┐
-          │ SnapshotTests.TableTests.DefaultWhere.Row.Draft( │
-          │   id: 1,                                         │
-          │   isDeleted: false                               │
-          │ )                                                │
-          └──────────────────────────────────────────────────┘
+          ┌────────────────────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row.Draft(           │
+          │   id: 1,                                                   │
+          │   isDeleted: false,                                        │
+          │   _draftIdentifier: StructuredQueriesCore._DraftIdentifier │
+          │ )                                                          │
+          └────────────────────────────────────────────────────────────┘
           """
         }
         assertQuery(Row.unscoped) {
