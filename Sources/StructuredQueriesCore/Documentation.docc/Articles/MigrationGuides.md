@@ -14,6 +14,7 @@ these guides contain tips to do so.
 
 ## Topics
 
+- <doc:MigratingTo0.31>
 - <doc:MigratingTo0.28>
 - <doc:MigratingTo0.18>
 - <doc:MigratingTo0.16>
