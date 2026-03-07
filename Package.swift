@@ -52,12 +52,12 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
-    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.1"),
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
-    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.4"),
+    .package(url: "https://github.com/pointfreeco/swift-dependencies", branch: "swift-syntax-604"),
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", branch: "swift-syntax-604"),
+    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", branch: "swift-syntax-604"),
     .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.5.2"),
-    .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"603.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..."604.0.0-latest"),
   ],
   targets: [
     .target(
