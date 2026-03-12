@@ -1817,5 +1817,381 @@ extension SnapshotTests {
         }
       }
     }
+
+    @Suite struct WeakSelfTests {
+      @Test func classInstanceMethod() {
+        assertMacro {
+          """
+          class Engine {
+            @DatabaseFunction
+            func uuid() -> String {
+              UUID().uuidString
+            }
+          }
+          """
+        } expansion: {
+          #"""
+          class Engine {
+            func uuid() -> String {
+              UUID().uuidString
+            }
+
+            nonisolated var $uuid: __macro_local_4uuidfMu_ {
+              __macro_local_4uuidfMu_({ [weak self] in
+                  guard let self else {
+                    throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
+                  }
+                  return self.uuid()
+                })
+            }
+
+            nonisolated struct __macro_local_4uuidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+              public typealias Input = ()
+              public typealias Output = String
+              public let name = "uuid"
+              public var argumentCount: Int? {
+                0
+              }
+              public let isDeterministic = false
+              public let body: () throws -> String
+              public init(_ body: @escaping () throws -> String) {
+                self.body = body
+              }
+              public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<String> {
+                StructuredQueriesCore.$_isSelecting.withValue(false) {
+                  StructuredQueriesCore.SQLQueryExpression(
+                    "\(quote: self.name)()"
+                  )
+                }
+              }
+              public func invoke(
+                _ decoder: inout some StructuredQueriesCore.QueryDecoder
+              ) throws -> StructuredQueriesCore.QueryBinding {
+                do {
+                  return String(
+                    queryOutput: try self.body()
+                  )
+                  .queryBinding
+                } catch {
+                  return .invalid(error)
+                }
+              }
+            }
+          }
+          """#
+        }
+      }
+
+      @Test func classInstanceMethodWithLabeledArgs() {
+        assertMacro {
+          """
+          class Engine {
+            @DatabaseFunction
+            func concat(first: String, second: String) -> String {
+              first + second
+            }
+          }
+          """
+        } expansion: {
+          #"""
+          class Engine {
+            func concat(first: String, second: String) -> String {
+              first + second
+            }
+
+            nonisolated var $concat: __macro_local_6concatfMu_ {
+              __macro_local_6concatfMu_({ [weak self] arg0, arg1 in
+                  guard let self else {
+                    throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
+                  }
+                  return self.concat(first: arg0, second: arg1)
+                })
+            }
+
+            nonisolated struct __macro_local_6concatfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+              public typealias Input = (String, String)
+              public typealias Output = String
+              public let name = "concat"
+              public var argumentCount: Int? {
+                var argumentCount = 0
+                argumentCount += _columnWidth(String.self)
+                argumentCount += _columnWidth(String.self)
+                return argumentCount
+              }
+              public let isDeterministic = false
+              public let body: (String, String) throws -> String
+              public init(_ body: @escaping (String, String) throws -> String) {
+                self.body = body
+              }
+              public func callAsFunction(first: some StructuredQueriesCore.QueryExpression<String>, second: some StructuredQueriesCore.QueryExpression<String>) -> some StructuredQueriesCore.QueryExpression<String> {
+                StructuredQueriesCore.$_isSelecting.withValue(false) {
+                  StructuredQueriesCore.SQLQueryExpression(
+                    "\(quote: self.name)(\(first), \(second))"
+                  )
+                }
+              }
+              public func invoke(
+                _ decoder: inout some StructuredQueriesCore.QueryDecoder
+              ) throws -> StructuredQueriesCore.QueryBinding {
+                let first = try decoder.decode(_requireQueryRepresentable(String.self))
+                let second = try decoder.decode(_requireQueryRepresentable(String.self))
+                guard let first else {
+                  throw InvalidInvocation()
+                }
+                guard let second else {
+                  throw InvalidInvocation()
+                }
+                do {
+                  return String(
+                    queryOutput: try self.body(first, second)
+                  )
+                  .queryBinding
+                } catch {
+                  return .invalid(error)
+                }
+              }
+              private struct InvalidInvocation: Error {
+              }
+            }
+          }
+          """#
+        }
+      }
+
+      @Test func classInstanceMethodWithUnlabeledArgs() {
+        assertMacro {
+          """
+          class Engine {
+            @DatabaseFunction
+            func double(_ value: Int) -> Int {
+              value * 2
+            }
+          }
+          """
+        } expansion: {
+          #"""
+          class Engine {
+            func double(_ value: Int) -> Int {
+              value * 2
+            }
+
+            nonisolated var $double: __macro_local_6doublefMu_ {
+              __macro_local_6doublefMu_({ [weak self] arg0 in
+                  guard let self else {
+                    throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
+                  }
+                  return self.double(arg0)
+                })
+            }
+
+            nonisolated struct __macro_local_6doublefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+              public typealias Input = Int
+              public typealias Output = Int
+              public let name = "double"
+              public var argumentCount: Int? {
+                var argumentCount = 0
+                argumentCount += _columnWidth(Int.self)
+                return argumentCount
+              }
+              public let isDeterministic = false
+              public let body: (Int) throws -> Int
+              public init(_ body: @escaping (Int) throws -> Int) {
+                self.body = body
+              }
+              public func callAsFunction(_ value: some StructuredQueriesCore.QueryExpression<Int>) -> some StructuredQueriesCore.QueryExpression<Int> {
+                StructuredQueriesCore.$_isSelecting.withValue(false) {
+                  StructuredQueriesCore.SQLQueryExpression(
+                    "\(quote: self.name)(\(value))"
+                  )
+                }
+              }
+              public func invoke(
+                _ decoder: inout some StructuredQueriesCore.QueryDecoder
+              ) throws -> StructuredQueriesCore.QueryBinding {
+                let value = try decoder.decode(_requireQueryRepresentable(Int.self))
+                guard let value else {
+                  throw InvalidInvocation()
+                }
+                do {
+                  return Int(
+                    queryOutput: try self.body(value)
+                  )
+                  .queryBinding
+                } catch {
+                  return .invalid(error)
+                }
+              }
+              private struct InvalidInvocation: Error {
+              }
+            }
+          }
+          """#
+        }
+      }
+
+      @Test func classStaticMethodNotWeakified() {
+        assertMacro {
+          """
+          class Engine {
+            @DatabaseFunction
+            static func uuid() -> String {
+              UUID().uuidString
+            }
+          }
+          """
+        } expansion: {
+          #"""
+          class Engine {
+            static func uuid() -> String {
+              UUID().uuidString
+            }
+
+            static nonisolated var $uuid: __macro_local_4uuidfMu_ {
+              __macro_local_4uuidfMu_(uuid)
+            }
+
+            nonisolated struct __macro_local_4uuidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+              public typealias Input = ()
+              public typealias Output = String
+              public let name = "uuid"
+              public var argumentCount: Int? {
+                0
+              }
+              public let isDeterministic = false
+              public let body: () -> String
+              public init(_ body: @escaping () -> String) {
+                self.body = body
+              }
+              public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<String> {
+                StructuredQueriesCore.$_isSelecting.withValue(false) {
+                  StructuredQueriesCore.SQLQueryExpression(
+                    "\(quote: self.name)()"
+                  )
+                }
+              }
+              public func invoke(
+                _ decoder: inout some StructuredQueriesCore.QueryDecoder
+              ) throws -> StructuredQueriesCore.QueryBinding {
+                return String(
+                  queryOutput: self.body()
+                )
+                .queryBinding
+              }
+            }
+          }
+          """#
+        }
+      }
+
+      @Test func structInstanceMethodNotWeakified() {
+        assertMacro {
+          """
+          struct Helpers {
+            @DatabaseFunction
+            func uuid() -> String {
+              UUID().uuidString
+            }
+          }
+          """
+        } expansion: {
+          #"""
+          struct Helpers {
+            func uuid() -> String {
+              UUID().uuidString
+            }
+
+            nonisolated var $uuid: __macro_local_4uuidfMu_ {
+              __macro_local_4uuidfMu_(uuid)
+            }
+
+            nonisolated struct __macro_local_4uuidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+              public typealias Input = ()
+              public typealias Output = String
+              public let name = "uuid"
+              public var argumentCount: Int? {
+                0
+              }
+              public let isDeterministic = false
+              public let body: () -> String
+              public init(_ body: @escaping () -> String) {
+                self.body = body
+              }
+              public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<String> {
+                StructuredQueriesCore.$_isSelecting.withValue(false) {
+                  StructuredQueriesCore.SQLQueryExpression(
+                    "\(quote: self.name)()"
+                  )
+                }
+              }
+              public func invoke(
+                _ decoder: inout some StructuredQueriesCore.QueryDecoder
+              ) throws -> StructuredQueriesCore.QueryBinding {
+                return String(
+                  queryOutput: self.body()
+                )
+                .queryBinding
+              }
+            }
+          }
+          """#
+        }
+      }
+
+      @Test func classComputedProperty() {
+        assertMacro {
+          """
+          class Engine {
+            @DatabaseFunction
+            var now: Date {
+              Date()
+            }
+          }
+          """
+        } expansion: {
+          #"""
+          class Engine {
+            var now: Date {
+              Date()
+            }
+
+            nonisolated var $now: __macro_local_3nowfMu_ {
+              __macro_local_3nowfMu_({ [weak self] in
+                  guard let self else {
+                    throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
+                  }
+                  return self.now
+                })
+            }
+
+            nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
+              public typealias Input = ()
+              public typealias Output = Date
+              public typealias QueryValue = Output
+              public let name = "now"
+              public var argumentCount: Int? {
+                0
+              }
+              public let isDeterministic = false
+              public let body: () throws -> Date
+              public init(_ body: @escaping () throws -> Date) {
+                self.body = body
+              }
+              public func invoke(
+                _ decoder: inout some StructuredQueriesCore.QueryDecoder
+              ) throws -> StructuredQueriesCore.QueryBinding {
+                return Date(
+                  queryOutput: try self.body()
+                )
+                .queryBinding
+              }
+              public var queryFragment: StructuredQueriesCore.QueryFragment {
+                "\(quote: self.name)()"
+              }
+            }
+          }
+          """#
+        }
+      }
+    }
   }
 }
