@@ -86,13 +86,29 @@ extension DatabaseFunctionMacro: PeerMacro {
 
       let (access, `static`) = declaration.modifiers.metadata
 
-      let bodyType = "()\(getter.throws ? " throws" : "") -> \(outputType.trimmed)"
+      let needsWeakSelf = `static` == nil
+        && context.lexicalContext.contains(where: { $0.as(ClassDeclSyntax.self) != nil })
+
+      let bodyType = "()\(getter.throws || needsWeakSelf ? " throws" : "") -> \(outputType.trimmed)"
+
+      let projectedCallSyntax: ExprSyntax
+      if needsWeakSelf {
+        projectedCallSyntax = """
+          \(functionTypeName)({ [weak self] in
+          guard let self else { throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated() }
+          return \(raw: getter.throws ? "try " : "")self.\(rawDeclarationName.trimmed)
+          })
+          """
+      } else {
+        projectedCallSyntax =
+          "\(functionTypeName) { \(raw: getter.throws ? "try " : "")\(rawDeclarationName.trimmed) }"
+      }
 
       return [
         """
         \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
         \(functionTypeName) {
-        \(functionTypeName) { \(raw: getter.throws ? "try " : "")\(rawDeclarationName.trimmed) }
+        \(projectedCallSyntax)
         }
         """,
         """
@@ -113,7 +129,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         _ decoder: inout some StructuredQueriesCore.QueryDecoder
         ) throws -> StructuredQueriesCore.QueryBinding {
         return \(raw: representableOutputType)(
-        queryOutput: \(raw: getter.throws ? "try " : "")self.body()
+        queryOutput: \(raw: getter.throws || needsWeakSelf ? "try " : "")self.body()
         )
         .queryBinding
         }
@@ -232,6 +248,15 @@ extension DatabaseFunctionMacro: PeerMacro {
     var rowType = ""
     let projectedCallSyntax: ExprSyntax
 
+    let functionNeedsWeakSelf: Bool = {
+      let isStatic = declaration.modifiers.contains {
+        $0.name.tokenKind == .keyword(.static)
+      }
+      guard !isStatic else { return false }
+      return context.lexicalContext.contains { $0.as(ClassDeclSyntax.self) != nil }
+    }()
+    let functionOriginallyThrows = declaration.signature.effectSpecifiers?.throwsClause != nil
+
     if signature.parameterClause.parameters.count == 1,
       let parameter = signature.parameterClause.parameters.first,
       var someOrAnyParameterType = parameter.type.as(SomeOrAnyTypeSyntax.self),
@@ -346,12 +371,23 @@ extension DatabaseFunctionMacro: PeerMacro {
         )
       )
       signature.parameterClause = parameterClause
-      projectedCallSyntax = """
-        \(functionTypeName) {
-        \(raw: declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")\
-        \(declaration.name.trimmed)(\(raw: firstName.map { "\($0.trimmedDescription): " } ?? "")$0)
-        }
-        """
+      let label = firstName.map { "\($0.trimmedDescription): " } ?? ""
+      if functionNeedsWeakSelf {
+        projectedCallSyntax = """
+          \(functionTypeName)({ [weak self] __input__ in
+          guard let self else { throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated() }
+          return \(raw: functionOriginallyThrows ? "try " : "")self.\
+          \(declaration.name.trimmed)(\(raw: label)__input__)
+          })
+          """
+      } else {
+        projectedCallSyntax = """
+          \(functionTypeName) {
+          \(raw: functionOriginallyThrows ? "try " : "")\
+          \(declaration.name.trimmed)(\(raw: label)$0)
+          }
+          """
+      }
     } else {
       isAggregate = false
       var functionRepresentationIterator = functionRepresentation?.parameters.makeIterator()
@@ -395,7 +431,25 @@ extension DatabaseFunctionMacro: PeerMacro {
         representableInputTypes.count == 1
         ? representableInputType
         : "(\(representableInputType))"
-      projectedCallSyntax = "\(functionTypeName)(\(declaration.name.trimmed))"
+      if functionNeedsWeakSelf {
+        let originalParams = Array(declaration.signature.parameterClause.parameters)
+        let argNames = originalParams.indices.map { "arg\($0)" }
+        let callArgs = zip(originalParams, argNames).map { param, arg -> String in
+          if param.firstName.tokenKind == .wildcard { return arg }
+          else { return "\(param.firstName.text): \(arg)" }
+        }.joined(separator: ", ")
+        let tryPrefix = functionOriginallyThrows ? "try " : ""
+        let argList = argNames.isEmpty ? "in" : argNames.joined(separator: ", ") + " in"
+
+        projectedCallSyntax = """
+          \(functionTypeName)({ [weak self] \(raw: argList)
+          guard let self else { throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated() }
+          return \(raw: tryPrefix)self.\(declaration.name.trimmed)(\(raw: callArgs))
+          })
+          """
+      } else {
+        projectedCallSyntax = "\(functionTypeName)(\(declaration.name.trimmed))"
+      }
     }
     let isVoidReturning = signature.returnClause == nil
     let outputType = returnClause.type.trimmed
@@ -404,9 +458,13 @@ extension DatabaseFunctionMacro: PeerMacro {
       .trimmed
     signature.returnClause?.type = representableOutputType.asQueryExpression()
     let bodyReturnClause = " \(returnClause.trimmedDescription)"
+    var bodyEffects = declaration.signature.effectSpecifiers?.trimmedDescription ?? ""
+    if functionNeedsWeakSelf && !functionOriginallyThrows {
+      bodyEffects = bodyEffects.isEmpty ? " throws" : " \(bodyEffects) throws"
+    }
     let bodyType = """
       (\(bodyArguments.joined(separator: ", ")))\
-      \(declaration.signature.effectSpecifiers?.trimmedDescription ?? "")\
+      \(bodyEffects)\
       \(bodyReturnClause)
       """
     // TODO: Diagnose 'asyncClause'?
@@ -468,7 +526,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       )
 
       let bodyInvocation = """
-        \(declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")\
+        \(functionOriginallyThrows || functionNeedsWeakSelf ? "try " : "")\
         self.body(arguments)
         """
       var invocationBody =
@@ -478,7 +536,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         return .null
         """
         : "return \(representableOutputType)(queryOutput: \(bodyInvocation)).queryBinding"
-      if declaration.signature.effectSpecifiers?.throwsClause != nil {
+      if functionOriginallyThrows || functionNeedsWeakSelf {
         invocationBody = """
           do {
           \(invocationBody)
@@ -508,7 +566,7 @@ extension DatabaseFunctionMacro: PeerMacro {
       )
 
       let bodyInvocation = """
-        \(declaration.signature.effectSpecifiers?.throwsClause != nil ? "try " : "")self.body(\
+        \(functionOriginallyThrows || functionNeedsWeakSelf ? "try " : "")self.body(\
         \(argumentBindings.joined(separator: ", "))\
         )
         """
@@ -524,7 +582,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         )
         .queryBinding
         """
-      if declaration.signature.effectSpecifiers?.throwsClause != nil {
+      if functionOriginallyThrows || functionNeedsWeakSelf {
         invocationBody = """
           do {
           \(invocationBody)

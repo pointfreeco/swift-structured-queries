@@ -133,3 +133,11 @@ public func _columnWidth<T: QueryExpression>(_: T.Type) -> Int {
 public func _requireQueryRepresentable<T: QueryRepresentable>(_: T.Type) -> T.Type {
   T.self
 }
+
+/// An error thrown when a database function's owning object has been deallocated.
+///
+/// This is used internally by `@DatabaseFunction` when applied to class instance methods to break
+/// retain cycles.
+public struct _DatabaseFunctionDeallocated: Error, Sendable {
+  public init() {}
+}
