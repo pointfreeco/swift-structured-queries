@@ -550,6 +550,41 @@ extension SnapshotTests {
         }
       }
 
+      @Test func unscopedFind() throws {
+        assertQuery(Row.unscoped.find(2)) {
+          """
+          SELECT "rows"."id", "rows"."isDeleted"
+          FROM "rows"
+          WHERE (("rows"."id") IN ((2)))
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row( │
+          │   id: 2,                                   │
+          │   isDeleted: true                          │
+          │ )                                          │
+          └────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(Row.Draft.unscoped.find(2)) {
+          """
+          SELECT "rows"."id", "rows"."isDeleted"
+          FROM "rows"
+          WHERE (("rows"."id") IN ((2)))
+          """
+        } results: {
+          """
+          ┌──────────────────────────────────────────────────┐
+          │ SnapshotTests.TableTests.DefaultWhere.Row.Draft( │
+          │   id: 2,                                         │
+          │   isDeleted: true                                │
+          │ )                                                │
+          └──────────────────────────────────────────────────┘
+          """
+        }
+      }
+
       #if compiler(>=6.1)
         @Test func rescope() {
           assertQuery(Row.unscoped.all) {
