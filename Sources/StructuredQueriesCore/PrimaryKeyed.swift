@@ -170,7 +170,7 @@ extension Where where From: TableDraft {
   public func find(
     _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
   ) -> Self {
-    Self.where { $0.primaryKey.in(primaryKeys) }
+    self.where { $0.primaryKey.in(primaryKeys) }
   }
 }
 
