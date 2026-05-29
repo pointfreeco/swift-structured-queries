@@ -1,6 +1,6 @@
 public import Foundation
 public import StructuredQueriesCore
-public import SQLite3
+public import _StructuredQueriesSQLite3
 
 @usableFromInline
 struct SQLiteQueryDecoder: QueryDecoder {
