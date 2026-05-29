@@ -1,3 +1,3 @@
-//#if !EXCLUDE_EXPORTS
-//@_exported import StructuredQueriesCore
-//#endif 
+#if !EXCLUDE_EXPORTS
+@_exported import StructuredQueriesCore
+#endif 
