@@ -1,3 +1,4 @@
+public import StructuredQueriesCore
 import StructuredQueriesSQLiteCore
 
 /// Defines and implements a conformance to the ``/StructuredQueriesSQLiteCore/DatabaseFunction``

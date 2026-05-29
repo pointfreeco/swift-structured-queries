@@ -1,4 +1,6 @@
-import Foundation
+public import Foundation
+public import StructuredQueriesCore
+public import SQLite3
 
 public struct Database {
   @usableFromInline

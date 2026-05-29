@@ -1,3 +1,5 @@
+public import StructuredQueriesCore
+
 extension QueryExpression where QueryValue == Bool {
   /// Wraps this expression with the `likelihood` function given a probability.
   ///

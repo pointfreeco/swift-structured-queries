@@ -1,4 +1,5 @@
-import Foundation
+public import Foundation
+public import StructuredQueriesCore
 
 extension Date {
   /// A query expression representing a date as the integer number of seconds past the unix epoch.

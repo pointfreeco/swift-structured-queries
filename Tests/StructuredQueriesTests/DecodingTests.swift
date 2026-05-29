@@ -1,5 +1,7 @@
 import Foundation
 import StructuredQueries
+import StructuredQueriesCore
+import StructuredQueriesSQLiteCore
 import Testing
 import _StructuredQueriesSQLite
 

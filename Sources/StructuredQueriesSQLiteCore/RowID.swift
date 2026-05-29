@@ -1,3 +1,5 @@
+public import StructuredQueriesCore
+
 extension TableDefinition {
   /// An expression representing the table's rowid.
   ///

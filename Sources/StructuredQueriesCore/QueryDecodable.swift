@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A type that can decode itself from a query.
 public protocol QueryDecodable: _OptionalPromotable {

@@ -1,3 +1,5 @@
+public import StructuredQueriesCore
+
 /// A type representing a database function.
 ///
 /// Don't conform to this protocol directly. Instead, use the

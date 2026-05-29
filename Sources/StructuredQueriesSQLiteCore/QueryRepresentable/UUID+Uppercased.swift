@@ -1,4 +1,5 @@
-import Foundation
+public import Foundation
+public import StructuredQueriesCore
 
 extension UUID {
   /// A query expression representing a UUID as an uppercased string.

@@ -1,6 +1,7 @@
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesCore
 import Testing
 
 extension SnapshotTests {

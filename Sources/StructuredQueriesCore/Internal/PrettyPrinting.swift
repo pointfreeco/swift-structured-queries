@@ -1,5 +1,5 @@
 import Foundation
-import IssueReporting
+public import IssueReporting
 
 extension QueryFragment {
   @inlinable

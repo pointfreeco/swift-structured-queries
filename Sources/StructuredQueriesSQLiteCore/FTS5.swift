@@ -1,4 +1,5 @@
 import IssueReporting
+public import StructuredQueriesCore
 
 /// A virtual table using the FTS5 extension.
 ///

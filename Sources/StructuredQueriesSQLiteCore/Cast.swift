@@ -1,3 +1,5 @@
+public import StructuredQueriesCore
+
 extension QueryExpression where QueryValue: QueryBindable {
   public func cast<Other: SQLiteType>(
     as _: Other.Type = Other.self

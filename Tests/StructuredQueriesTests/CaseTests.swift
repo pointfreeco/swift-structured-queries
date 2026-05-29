@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesCore
 import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite

@@ -1,7 +1,9 @@
 import Dependencies
 import Foundation
 import StructuredQueries
+import StructuredQueriesCore
 import _StructuredQueriesSQLite
+import StructuredQueriesSQLiteCore
 
 @Table
 struct RemindersList: Codable, Equatable, Identifiable {

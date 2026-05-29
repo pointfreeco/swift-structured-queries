@@ -1,4 +1,5 @@
 import Foundation
+public import StructuredQueriesCore
 
 extension QueryExpression {
   /// Passes this expression and the given one to the `json_patch` function.
