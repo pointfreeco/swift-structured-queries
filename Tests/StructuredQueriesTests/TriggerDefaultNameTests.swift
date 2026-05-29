@@ -22,7 +22,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_remindersLists@StructuredQueriesTests/TriggerDefaultNameTests.swift:13:57"
+          "after_insert_on_remindersLists@StructuredQueriesTests/TriggerDefaultNameTests.swift:15:57"
         AFTER INSERT ON "remindersLists"
         FOR EACH ROW BEGIN
           SELECT 1;
@@ -33,7 +33,7 @@ extension SnapshotTests {
         trigger.drop()
       ) {
         """
-        DROP TRIGGER "after_insert_on_remindersLists@StructuredQueriesTests/TriggerDefaultNameTests.swift:13:57"
+        DROP TRIGGER "after_insert_on_remindersLists@StructuredQueriesTests/TriggerDefaultNameTests.swift:15:57"
         """
       }
     }
