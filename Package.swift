@@ -171,35 +171,6 @@ if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil
   )
 }
 
-let swiftSettings: [SwiftSetting] = [
-  .enableUpcomingFeature("MemberImportVisibility")
-  // .unsafeFlags([
-  //   "-Xfrontend",
-  //   "-warn-long-function-bodies=50",
-  //   "-Xfrontend",
-  //   "-warn-long-expression-type-checking=50",
-  // ])
-]
-
-for index in package.targets.indices {
-  package.targets[index].swiftSettings = swiftSettings
-}
-
-#if !canImport(Darwin)
-  package.targets.append(
-    .systemLibrary(
-      name: "_StructuredQueriesSQLite3",
-      providers: [.apt(["libsqlite3-dev"])]
-    )
-  )
-
-  for index in package.targets.indices {
-    if package.targets[index].name == "_StructuredQueriesSQLite" {
-      package.targets[index].dependencies.append("_StructuredQueriesSQLite3")
-    }
-  }
-#endif
-
 for target in package.targets {
   target.swiftSettings = target.swiftSettings ?? []
   target.swiftSettings?.append(contentsOf: [
@@ -216,6 +187,21 @@ for target in package.targets {
     ])
   #endif
 }
+
+#if !canImport(Darwin)
+  package.targets.append(
+    .systemLibrary(
+      name: "_StructuredQueriesSQLite3",
+      providers: [.apt(["libsqlite3-dev"])]
+    )
+  )
+
+  for index in package.targets.indices {
+    if package.targets[index].name == "_StructuredQueriesSQLite" {
+      package.targets[index].dependencies.append("_StructuredQueriesSQLite3")
+    }
+  }
+#endif
 
 #if !os(Windows)
   // Add the documentation compiler plugin if possible
