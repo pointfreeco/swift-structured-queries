@@ -27,7 +27,7 @@ jobs:
       - name: Run tests
         run: swift test --disable-experimental-prebuilts
       - name: Build without exports
-        run: swift build -c release --build-tests --disable-experimental-prebuilts -Xswiftc -D -Xswiftc EXCLUDE_EXPORTS
+        run: swift build -c release -Xswiftc -D -Xswiftc EXCLUDE_EXPORTS
       - name: Build release
         run: swift build -c release --build-tests --disable-experimental-prebuilts
 
