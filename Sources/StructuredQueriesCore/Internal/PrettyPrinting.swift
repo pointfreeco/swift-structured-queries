@@ -1,5 +1,10 @@
 import Foundation
-public import IssueReporting
+
+#if DEBUG
+  public import IssueReporting
+#else
+  import IssueReporting
+#endif
 
 extension QueryFragment {
   @inlinable
