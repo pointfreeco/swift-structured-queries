@@ -2,8 +2,6 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
-import StructuredQueriesCore
-import StructuredQueriesSQLiteCore
 import Testing
 import _StructuredQueriesSQLite
 
@@ -69,7 +67,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_completedReminders@StructuredQueriesTests/ViewsTests.swift:60:49"
+          "after_insert_on_completedReminders@StructuredQueriesTests/ViewsTests.swift:58:49"
         INSTEAD OF INSERT ON "completedReminders"
         FOR EACH ROW BEGIN
           INSERT INTO "reminders"
@@ -190,7 +188,7 @@ extension SnapshotTests {
       ) {
         """
         CREATE TEMPORARY TRIGGER
-          "after_insert_on_reminderWithLists@StructuredQueriesTests/ViewsTests.swift:176:48"
+          "after_insert_on_reminderWithLists@StructuredQueriesTests/ViewsTests.swift:174:48"
         INSTEAD OF INSERT ON "reminderWithLists"
         FOR EACH ROW BEGIN
           INSERT INTO "reminders"

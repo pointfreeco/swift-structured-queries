@@ -1,7 +1,5 @@
 import StructuredQueries
-import StructuredQueriesCore
 import StructuredQueriesSQLite
-import StructuredQueriesSQLiteCore
 
 // NB: This is a compile-time test for a 'select' overload.
 @Table

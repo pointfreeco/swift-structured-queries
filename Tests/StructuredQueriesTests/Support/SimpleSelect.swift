@@ -1,4 +1,4 @@
-import StructuredQueriesCore
+import StructuredQueries
 
 struct SimpleSelect<QueryValue>: PartialSelectStatement {
   typealias From = Never

@@ -1,19 +1,12 @@
 import Dependencies
 import Foundation
 import InlineSnapshotTesting
+import SQLite3
 import StructuredQueries
-import StructuredQueriesCore
 import StructuredQueriesSQLite
-import StructuredQueriesSQLiteCore
 import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite
-
-#if canImport(Darwin)
-  public import SQLite3
-#else
-  public import _StructuredQueriesSQLite3
-#endif
 
 extension SnapshotTests {
   @Suite struct DatabaseFunctionTests {

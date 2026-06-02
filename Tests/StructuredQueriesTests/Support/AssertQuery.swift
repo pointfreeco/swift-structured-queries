@@ -1,5 +1,5 @@
 import Dependencies
-import StructuredQueriesCore
+import StructuredQueries
 import StructuredQueriesTestSupport
 import _StructuredQueriesSQLite
 

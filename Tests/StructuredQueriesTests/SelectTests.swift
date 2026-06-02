@@ -1,9 +1,7 @@
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
-import StructuredQueriesCore
 import StructuredQueriesSQLite
-import StructuredQueriesSQLiteCore
 import StructuredQueriesTestSupport
 import Testing
 
