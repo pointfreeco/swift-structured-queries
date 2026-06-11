@@ -1,4 +1,5 @@
-import Foundation
+public import Foundation
+public import StructuredQueriesCore
 
 extension Table {
   /// A `CREATE TEMPORARY TRIGGER` statement that executes after a database event.

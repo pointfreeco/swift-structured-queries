@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 extension Data: QueryBindable {
   public var queryBinding: QueryBinding {

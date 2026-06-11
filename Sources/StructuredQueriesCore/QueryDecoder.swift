@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A type that can decode values from a database connection into in-memory representations.
 public protocol QueryDecoder {

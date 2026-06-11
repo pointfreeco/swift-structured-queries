@@ -313,7 +313,7 @@ extension TableAlias: Equatable where Base: Equatable {}
 extension TableAlias: Hashable where Base: Hashable {}
 
 extension TableAlias: Decodable where Base: Decodable {
-  public init(from decoder: Decoder) throws {
+  public init(from decoder: any Decoder) throws {
     do {
       self.init(base: try decoder.singleValueContainer().decode(Base.self))
     } catch {
@@ -323,7 +323,7 @@ extension TableAlias: Decodable where Base: Decodable {
 }
 
 extension TableAlias: Encodable where Base: Encodable {
-  public func encode(to encoder: Encoder) throws {
+  public func encode(to encoder: any Encoder) throws {
     do {
       var container = encoder.singleValueContainer()
       try container.encode(self.base)

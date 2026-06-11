@@ -1,4 +1,5 @@
-import Foundation
+public import Foundation
+public import StructuredQueriesCore
 
 extension Date {
   /// A query expression representing a date as double Julian day number.

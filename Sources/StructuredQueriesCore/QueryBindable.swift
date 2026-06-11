@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A type representing a value that can be bound to a parameter of a SQL statement.
 public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryValue: QueryBindable {

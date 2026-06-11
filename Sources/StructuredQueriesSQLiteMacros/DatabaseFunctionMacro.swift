@@ -1,9 +1,9 @@
 import SwiftBasicFormat
 import SwiftDiagnostics
 internal import SwiftParser
-import SwiftSyntax
+public import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
+public import SwiftSyntaxMacros
 
 public enum DatabaseFunctionMacro {}
 

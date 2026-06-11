@@ -1,4 +1,4 @@
-import StructuredQueriesCore
+public import StructuredQueriesCore
 
 /// Defines and implements a conformance to the ``/StructuredQueriesCore/Table`` protocol.
 ///
@@ -189,3 +189,7 @@ public macro sql(
   as queryValueType: Any.Type = Any.self
 ) -> SQLQueryExpression<Any> =
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
+
+@attached(accessor, names: named(get))
+public macro _PrimaryKeyDefault() =
+  #externalMacro(module: "StructuredQueriesMacros", type: "PrimaryKeyDefaultMacro")
