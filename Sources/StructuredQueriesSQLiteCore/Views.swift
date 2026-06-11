@@ -1,3 +1,5 @@
+public import StructuredQueriesCore
+
 extension Table {
   /// A `CREATE TEMPORARY VIEW` statement.
   ///

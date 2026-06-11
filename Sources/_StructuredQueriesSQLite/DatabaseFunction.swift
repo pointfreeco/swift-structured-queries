@@ -1,4 +1,12 @@
 import Foundation
+import StructuredQueriesCore
+public import StructuredQueriesSQLiteCore
+
+#if canImport(Darwin)
+  import SQLite3
+#else
+  import _StructuredQueriesSQLite3
+#endif
 
 extension ScalarDatabaseFunction {
   public func install(_ db: OpaquePointer) {

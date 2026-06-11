@@ -1,5 +1,5 @@
-import Foundation
-import StructuredQueriesCore
+public import Foundation
+public import StructuredQueriesCore
 
 // NB: Deprecated after 0.24.0:
 

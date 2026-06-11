@@ -1,4 +1,11 @@
-import Foundation
+public import Foundation
+public import StructuredQueriesCore
+
+#if canImport(Darwin)
+  public import SQLite3
+#else
+  public import _StructuredQueriesSQLite3
+#endif
 
 @usableFromInline
 struct SQLiteQueryDecoder: QueryDecoder {

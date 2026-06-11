@@ -1,4 +1,4 @@
-import StructuredQueriesCore
+public import StructuredQueriesCore
 
 /// Defines and implements a conformance to the ``/StructuredQueriesCore/Table`` protocol.
 ///

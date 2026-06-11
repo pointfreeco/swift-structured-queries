@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     branches:
-      - '*'
+      - "*"
   workflow_dispatch:
 
 concurrency:
@@ -18,23 +18,25 @@ jobs:
     name: macOS
     strategy:
       matrix:
-        xcode: ['26.2']
+        xcode: ["26.2"]
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Select Xcode ${{ matrix.xcode }}
         run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
       - name: Run tests
-        run: swift test --disable-experimental-prebuilts
+        run: swift test
+      - name: Build without exports
+        run: swift build -c release -Xswiftc -D -Xswiftc EXCLUDE_EXPORTS
       - name: Build release
-        run: swift build -c release --build-tests --disable-experimental-prebuilts
+        run: swift build -c release --build-tests
 
   linux:
     name: Linux
     strategy:
       matrix:
         swift:
-          - '6.1'
+          - "6.1"
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
     steps:

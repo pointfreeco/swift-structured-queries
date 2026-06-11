@@ -171,18 +171,16 @@ if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil
   )
 }
 
-let swiftSettings: [SwiftSetting] = [
-  .enableUpcomingFeature("MemberImportVisibility")
-  // .unsafeFlags([
-  //   "-Xfrontend",
-  //   "-warn-long-function-bodies=50",
-  //   "-Xfrontend",
-  //   "-warn-long-expression-type-checking=50",
-  // ])
-]
-
-for index in package.targets.indices {
-  package.targets[index].swiftSettings = swiftSettings
+for target in package.targets {
+  target.swiftSettings = target.swiftSettings ?? []
+  target.swiftSettings?.append(contentsOf: [
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("ImmutableWeakCaptures"),
+    .enableUpcomingFeature("InferIsolatedConformances"),
+    .enableUpcomingFeature("InternalImportsByDefault"),
+    .enableUpcomingFeature("MemberImportVisibility"),
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+  ])
 }
 
 #if !canImport(Darwin)
