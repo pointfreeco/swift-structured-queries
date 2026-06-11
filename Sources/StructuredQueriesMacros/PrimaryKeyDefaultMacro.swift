@@ -1,7 +1,7 @@
 import SwiftDiagnostics
-import SwiftSyntax
+public import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
+public import SwiftSyntaxMacros
 
 public enum PrimaryKeyDefaultMacro {}
 
