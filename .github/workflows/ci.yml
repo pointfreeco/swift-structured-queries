@@ -25,11 +25,11 @@ jobs:
       - name: Select Xcode ${{ matrix.xcode }}
         run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
       - name: Run tests
-        run: swift test
+        run: swift test --enable-all-traits
       - name: Build without exports
-        run: swift build -c release -Xswiftc -D -Xswiftc EXCLUDE_EXPORTS
+        run: swift build -c release -Xswiftc -D -Xswiftc EXCLUDE_EXPORTS --enable-all-traits
       - name: Build release
-        run: swift build -c release --build-tests
+        run: swift build -c release --build-tests --enable-all-traits
 
   linux:
     name: Linux
