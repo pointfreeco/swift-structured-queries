@@ -8,6 +8,7 @@ struct StructuredQueriesPlugin: CompilerPlugin {
     ColumnMacro.self,
     ColumnsMacro.self,
     EphemeralMacro.self,
+    PrimaryKeyDefaultMacro.self,
     SQLMacro.self,
     TableMacro.self,
   ]
