@@ -2498,7 +2498,7 @@ extension SnapshotTests {
     }
   }
 
-  #if StructuredQueriesCasePaths
+  #if CasePaths
     @Test func enumBasics() {
       assertMacro {
         """

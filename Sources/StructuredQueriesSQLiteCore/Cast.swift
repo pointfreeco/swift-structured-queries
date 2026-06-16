@@ -107,7 +107,7 @@ extension _CodableJSONRepresentation: SQLiteType {
   }
 }
 
-#if StructuredQueriesTagged
+#if Tagged
   public import Tagged
 
   extension Tagged: SQLiteType where RawValue: SQLiteType {

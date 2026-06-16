@@ -56,12 +56,12 @@ extension TableMacro: ExtensionMacro {
           message: MacroExpansionErrorMessage(
             declaration.is(EnumDeclSyntax.self)
               ? """
-              '@Table' can only be applied to enum types when the 'StructuredQueriesCasePaths' \
+              '@Table' can only be applied to enum types when the 'CasePaths' \
               package trait is enabled
               """
               : """
               '@Table' can only be applied to struct types (and enum types with the \
-              'StructuredQueriesCasePaths' package trait enabled)
+              'CasePaths' package trait enabled)
               """
           )
         )

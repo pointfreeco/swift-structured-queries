@@ -220,7 +220,7 @@ it's as simple as adding it to your `Package.swift`:
 
 ``` swift
 dependencies: [
-  .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.22.0"),
+  .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.32.0"),
 ]
 ```
 
@@ -233,10 +233,10 @@ And then adding the product to any target that needs access to the library:
 If you are on Swift 6.1 or greater, you can enable package traits that extend the library with
 support for other libraries:
 
-  * `StructuredQueriesCasePaths`: Adds support for single-table inheritance _via_ "enum" tables by
+  * `CasePaths`: Adds support for single-table inheritance _via_ "enum" tables by
     leveraging the [CasePaths](https://github.com/pointfreeco/swift-case-paths) library.
 
-  * `StructuredQueriesTagged`: Adds support for type-safe identifiers _via_
+  * `Tagged`: Adds support for type-safe identifiers _via_
     the [Tagged](https://github.com/pointfreeco/swift-tagged) library.
 
 ```diff
@@ -245,8 +245,8 @@ support for other libraries:
      url: "https://github.com/pointfreeco/swift-structured-queries",
      from: "0.28.0",
 +    traits: [
-+      "StructuredQueriesCasePaths",
-+      "StructuredQueriesTagged",
++      "CasePaths",
++      "Tagged",
 +    ],
    ),
 +  .package(

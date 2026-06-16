@@ -269,15 +269,15 @@ With that you can insert reminders with notes like so:
 
 The [Tagged](https://github.com/pointfreeco/swift-tagged) library provides lightweight syntax for
 introducing type-safe identifiers (and more) to your models. StructuredQueries ships support for
-Tagged with a `StructuredQueriesTagged` package trait, which is available starting from Swift 6.1.
+Tagged with a `Tagged` package trait, which is available starting from Swift 6.1.
 
 To enable the trait, specify it in the Package.swift file that depends on StructuredQueries:
 
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.22.0",
-+  traits: ["StructuredQueriesTagged"]
+   from: "0.32.0",
++  traits: ["Tagged"]
  ),
 +.package(
 +  url: "https://github.com/pointfreeco/swift-tagged",
@@ -515,7 +515,7 @@ attachments supported, annotated with the `@Selection` macro:
 
 > Important: It is required to apply the `@CasePathable` macro in order to define columns from an
 > enum. This macro comes from our [Case Paths] library and is automatically included with the
-> library when the `StructuredQueriesCasePaths` trait is enabled.
+> library when the `CasePaths` trait is enabled.
 
 [Case Paths]: http://github.com/pointfreeco/swift-case-paths
 

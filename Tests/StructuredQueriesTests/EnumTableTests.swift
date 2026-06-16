@@ -1,4 +1,4 @@
-#if StructuredQueriesCasePaths
+#if CasePaths
   import CasePaths
   import Dependencies
   import Foundation

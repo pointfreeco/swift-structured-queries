@@ -2,7 +2,7 @@ import SwiftSyntax
 
 extension DeclGroupSyntax {
   var isTableMacroSupported: Bool {
-    #if StructuredQueriesCasePaths
+    #if CasePaths
       self.is(StructDeclSyntax.self) || self.is(EnumDeclSyntax.self)
     #else
       self.is(StructDeclSyntax.self)
