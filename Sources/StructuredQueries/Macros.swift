@@ -193,3 +193,62 @@ public macro sql(
 @attached(accessor, names: named(get))
 public macro _PrimaryKeyDefault() =
   #externalMacro(module: "StructuredQueriesMacros", type: "PrimaryKeyDefaultMacro")
+
+@attached(
+  member,
+  names: named(From),
+  named(QueryValue),
+  named(Selection),
+  named(TableColumns),
+  named(_columnWidth),
+  named(columns)
+)
+@attached(
+  extension,
+  conformances: TableDraft,
+  PartialSelectStatement,
+  names: named(init(_:)),
+  named(init(decoder:))
+)
+public macro _Draft<T>(_ primaryTable: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "TableMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: Codable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailJSONMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: QueryBindable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: QueryBindable & Codable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: Table>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: Table & Codable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T>(_ value: T) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: QueryBindable>(_ value: T) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: Table>(_ value: T) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: QueryBindable & Table>(_ value: T) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")

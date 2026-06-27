@@ -24,3 +24,7 @@ extension QueryExpression {
     [self]
   }
 }
+
+public func _columnWidth<Root, Value: QueryExpression>(_ keyPath: KeyPath<Root, Value>) -> Int {
+  Value._columnWidth
+}

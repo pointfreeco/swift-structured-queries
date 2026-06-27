@@ -2,6 +2,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 
 let moduleName: TokenSyntax = "StructuredQueriesCore"
+let macrosModuleName: TokenSyntax = "StructuredQueries"
 
 extension String {
   func trimmingBackticks() -> String {

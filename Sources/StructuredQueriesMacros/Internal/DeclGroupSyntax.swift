@@ -31,4 +31,16 @@ extension DeclGroupSyntax {
   func hasMacroApplication(_ name: String) -> Bool {
     macroApplication(for: name) != nil
   }
+
+  var accessLevelModifier: DeclModifierSyntax? {
+    modifiers.first { modifier in
+      switch modifier.name.tokenKind {
+      case .keyword(.public), .keyword(.package), .keyword(.internal),
+        .keyword(.fileprivate), .keyword(.private), .keyword(.open):
+        return true
+      default:
+        return false
+      }
+    }
+  }
 }

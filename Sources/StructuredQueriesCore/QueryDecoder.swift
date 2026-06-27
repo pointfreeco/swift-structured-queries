@@ -95,6 +95,14 @@ extension QueryDecoder {
   ) throws -> T? {
     try T?(decoder: &self)?.queryOutput
   }
+
+  @inlinable
+  @inline(__always)
+  public mutating func decode<Root, Value: QueryRepresentable<Value>>(
+    _ keyPath: KeyPath<Root, Value>
+  ) throws -> Value? {
+    try decode(Value.self)
+  }
 }
 
 public enum QueryDecodingError: Error {
