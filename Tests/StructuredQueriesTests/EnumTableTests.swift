@@ -388,7 +388,7 @@
     let id: Int
     let kind: Kind
 
-    @CasePathable @Selection
+    @Selection
     fileprivate enum Kind {
       case link(URL)
       case note(String)

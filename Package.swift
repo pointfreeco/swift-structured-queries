@@ -60,7 +60,7 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.0.0"),
+    .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.8.0"),
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
     .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.1"),
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
@@ -75,6 +75,11 @@ let package = Package(
       dependencies: [
         "StructuredQueriesCore",
         "StructuredQueriesMacros",
+        .product(
+          name: "CasePaths",
+          package: "swift-case-paths",
+          condition: .when(traits: ["CasePaths"])
+        ),
       ]
     ),
     .target(
@@ -97,6 +102,11 @@ let package = Package(
     .macro(
       name: "StructuredQueriesMacros",
       dependencies: [
+        .product(
+          name: "CasePathsMacrosSupport",
+          package: "swift-case-paths",
+          condition: .when(traits: ["CasePaths"])
+        ),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
       ],

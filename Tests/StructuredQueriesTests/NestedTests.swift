@@ -714,13 +714,13 @@ private struct Note {
 }
 
 #if CasePaths
-  @CasePathable @Table
+  @Table
   private enum Post {
     case photo(Photo)
     case note(String = "")
   }
 
-  @CasePathable @Table
+  @Table
   private enum Notes {
     @Column(as: [String].JSONRepresentation.self)
     case list([String])

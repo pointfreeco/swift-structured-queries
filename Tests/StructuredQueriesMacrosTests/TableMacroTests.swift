@@ -2473,7 +2473,7 @@ extension SnapshotTests {
     @Test func enumBasics() {
       assertMacro {
         """
-        @CasePathable @Table
+        @Table
         enum Post {
           @Columns
           case photo(Photo)
@@ -2482,7 +2482,6 @@ extension SnapshotTests {
         """
       } expansion: {
         #"""
-        @CasePathable
         enum Post {
           case photo(Photo)
           case note(String = "")
@@ -2528,6 +2527,44 @@ extension SnapshotTests {
               return Self(allColumns: allColumns)
             }
           }
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
+              if root.is(\.photo) {
+                return \.photo
+              }
+              if root.is(\.note) {
+                return \.note
+              }
+              return \.never
+            }
+            public var photo: CasePaths.AnyCasePath<Post, Photo> {
+              ._$embed(Post.photo) {
+                guard case let .photo(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public var note: CasePaths.AnyCasePath<Post, String> {
+              ._$embed(Post.note) {
+                guard case let .note(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Post>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Post>] = []
+              allCasePaths.append(\.photo)
+              allCasePaths.append(\.note)
+              return allCasePaths.makeIterator()
+            }
+          }
+
+          public static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
@@ -2556,6 +2593,9 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
           }
+        }
+
+        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
         }
         """#
       }
@@ -2570,28 +2610,8 @@ extension SnapshotTests {
           case note(String = "")
         }
         """
-      } diagnostics: {
-        """
-        @Table
-        ┬─────
-        ╰─ 🛑 '@Table' enum type missing required '@CasePathable' macro application
-           ✏️ Insert '@CasePathable'
-        enum Post {
-          case photo(Photo)
-          case note(String = "")
-        }
-        """
-      } fixes: {
-        """
-        @CasePathable @Table
-        enum Post {
-          case photo(Photo)
-          case note(String = "")
-        }
-        """
       } expansion: {
         #"""
-        @CasePathable
         enum Post {
           case photo(Photo)
           case note(String = "")
@@ -2637,6 +2657,44 @@ extension SnapshotTests {
               return Self(allColumns: allColumns)
             }
           }
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
+              if root.is(\.photo) {
+                return \.photo
+              }
+              if root.is(\.note) {
+                return \.note
+              }
+              return \.never
+            }
+            public var photo: CasePaths.AnyCasePath<Post, Photo> {
+              ._$embed(Post.photo) {
+                guard case let .photo(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public var note: CasePaths.AnyCasePath<Post, String> {
+              ._$embed(Post.note) {
+                guard case let .note(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Post>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Post>] = []
+              allCasePaths.append(\.photo)
+              allCasePaths.append(\.note)
+              return allCasePaths.makeIterator()
+            }
+          }
+
+          public static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
@@ -2665,6 +2723,9 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
           }
+        }
+
+        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
         }
         """#
       }
@@ -2678,26 +2739,9 @@ extension SnapshotTests {
           case note(String = "")
         }
         """
-      } diagnostics: {
-        """
-        @Table enum Post {
-        ┬─────
-        ╰─ 🛑 '@Table' enum type missing required '@CasePathable' macro application
-           ✏️ Insert '@CasePathable'
-          case photo(Photo)
-          case note(String = "")
-        }
-        """
-      } fixes: {
-        """
-        @CasePathable @Table enum Post {
-          case photo(Photo)
-          case note(String = "")
-        }
-        """
       } expansion: {
         #"""
-        @CasePathable enum Post {
+        enum Post {
           case photo(Photo)
           case note(String = "")
 
@@ -2742,6 +2786,44 @@ extension SnapshotTests {
               return Self(allColumns: allColumns)
             }
           }
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
+              if root.is(\.photo) {
+                return \.photo
+              }
+              if root.is(\.note) {
+                return \.note
+              }
+              return \.never
+            }
+            public var photo: CasePaths.AnyCasePath<Post, Photo> {
+              ._$embed(Post.photo) {
+                guard case let .photo(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public var note: CasePaths.AnyCasePath<Post, String> {
+              ._$embed(Post.note) {
+                guard case let .note(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Post>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Post>] = []
+              allCasePaths.append(\.photo)
+              allCasePaths.append(\.note)
+              return allCasePaths.makeIterator()
+            }
+          }
+
+          public static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
@@ -2771,6 +2853,9 @@ extension SnapshotTests {
             }
           }
         }
+
+        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        }
         """#
       }
     }
@@ -2778,7 +2863,7 @@ extension SnapshotTests {
     @Test func enumFirstNames() {
       assertMacro {
         """
-        @CasePathable @Table
+        @Table
         enum Post {
           case photo(Photo)
           case note(text: String = "")
@@ -2786,7 +2871,6 @@ extension SnapshotTests {
         """
       } expansion: {
         #"""
-        @CasePathable
         enum Post {
           case photo(Photo)
           case note(text: String = "")
@@ -2832,6 +2916,44 @@ extension SnapshotTests {
               return Self(allColumns: allColumns)
             }
           }
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
+              if root.is(\.photo) {
+                return \.photo
+              }
+              if root.is(\.note) {
+                return \.note
+              }
+              return \.never
+            }
+            public var photo: CasePaths.AnyCasePath<Post, Photo> {
+              ._$embed(Post.photo) {
+                guard case let .photo(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public var note: CasePaths.AnyCasePath<Post, String> {
+              ._$embed(Post.note) {
+                guard case let .note(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Post>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Post>] = []
+              allCasePaths.append(\.photo)
+              allCasePaths.append(\.note)
+              return allCasePaths.makeIterator()
+            }
+          }
+
+          public static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
@@ -2861,6 +2983,9 @@ extension SnapshotTests {
             }
           }
         }
+
+        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        }
         """#
       }
     }
@@ -2868,7 +2993,7 @@ extension SnapshotTests {
     @Test func enumCustomColumn() {
       assertMacro {
         """
-        @CasePathable @Table
+        @Table
         enum Post {
           @Column("note_text")
           case note(text: String = "")
@@ -2876,7 +3001,6 @@ extension SnapshotTests {
         """
       } expansion: {
         #"""
-        @CasePathable
         enum Post {
           case note(text: String = "")
 
@@ -2909,6 +3033,32 @@ extension SnapshotTests {
               return Self(allColumns: allColumns)
             }
           }
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
+              if root.is(\.note) {
+                return \.note
+              }
+              return \.never
+            }
+            public var note: CasePaths.AnyCasePath<Post, String> {
+              ._$embed(Post.note) {
+                guard case let .note(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Post>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Post>] = []
+              allCasePaths.append(\.note)
+              return allCasePaths.makeIterator()
+            }
+          }
+
+          public static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
@@ -2934,6 +3084,9 @@ extension SnapshotTests {
             }
           }
         }
+
+        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        }
         """#
       }
     }
@@ -2941,7 +3094,7 @@ extension SnapshotTests {
     @Test func enumCustomRepresentation() {
       assertMacro {
         """
-        @CasePathable @Table
+        @Table
         enum Post {
           @Column(as: Date.UnixTimeRepresentation.self)
           case timestamp(Date)
@@ -2949,7 +3102,6 @@ extension SnapshotTests {
         """
       } expansion: {
         #"""
-        @CasePathable
         enum Post {
           case timestamp(Date)
 
@@ -2982,6 +3134,32 @@ extension SnapshotTests {
               return Self(allColumns: allColumns)
             }
           }
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
+              if root.is(\.timestamp) {
+                return \.timestamp
+              }
+              return \.never
+            }
+            public var timestamp: CasePaths.AnyCasePath<Post, Date> {
+              ._$embed(Post.timestamp) {
+                guard case let .timestamp(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Post>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Post>] = []
+              allCasePaths.append(\.timestamp)
+              return allCasePaths.makeIterator()
+            }
+          }
+
+          public static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
@@ -3007,7 +3185,28 @@ extension SnapshotTests {
             }
           }
         }
+
+        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        }
         """#
+      }
+    }
+  #else
+    @Test func enumRequiresCasePathsTrait() {
+      assertMacro {
+        """
+        @Table enum Post {
+          case photo(String)
+        }
+        """
+      } diagnostics: {
+        """
+        @Table enum Post {
+               ┬───
+               ╰─ 🛑 '@Table' can only be applied to enum types when the 'CasePaths' package trait is enabled
+          case photo(String)
+        }
+        """
       }
     }
   #endif

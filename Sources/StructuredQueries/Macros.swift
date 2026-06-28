@@ -1,34 +1,69 @@
 public import StructuredQueriesCore
 
+#if CasePaths
+  import CasePaths
+#endif
+
 /// Defines and implements a conformance to the ``/StructuredQueriesCore/Table`` protocol.
 ///
 /// - Parameters
 ///   - name: The table's name. Defaults to a lower-camel-case pluralization of the type,
 ///     _e.g._ `RemindersList` becomes `"remindersLists"`.
 ///   - schemaName: The table's schema name.
-@attached(
-  extension,
-  conformances: Table,
-  PartialSelectStatement,
-  PrimaryKeyedTable,
-  names: named(From),
-  named(columns),
-  named(_columnWidth),
-  named(init(_:)),
-  named(init(decoder:)),
-  named(QueryValue),
-  named(schemaName),
-  named(tableName)
-)
-@attached(
-  member,
-  conformances: Table,
-  PartialSelectStatement,
-  PrimaryKeyedTable,
-  names: named(Draft),
-  named(Selection),
-  named(TableColumns)
-)
+#if CasePaths
+  @attached(
+    extension,
+    conformances: Table,
+    PartialSelectStatement,
+    PrimaryKeyedTable,
+    CasePathable,
+    CasePathIterable,
+    names: named(From),
+    named(columns),
+    named(_columnWidth),
+    named(init(_:)),
+    named(init(decoder:)),
+    named(QueryValue),
+    named(schemaName),
+    named(tableName)
+  )
+  @attached(
+    member,
+    conformances: Table,
+    PartialSelectStatement,
+    PrimaryKeyedTable,
+    names: named(Draft),
+    named(Selection),
+    named(TableColumns),
+    named(AllCasePaths),
+    named(allCasePaths),
+    named(_$Element)
+  )
+#else
+  @attached(
+    extension,
+    conformances: Table,
+    PartialSelectStatement,
+    PrimaryKeyedTable,
+    names: named(From),
+    named(columns),
+    named(_columnWidth),
+    named(init(_:)),
+    named(init(decoder:)),
+    named(QueryValue),
+    named(schemaName),
+    named(tableName)
+  )
+  @attached(
+    member,
+    conformances: Table,
+    PartialSelectStatement,
+    PrimaryKeyedTable,
+    names: named(Draft),
+    named(Selection),
+    named(TableColumns)
+  )
+#endif
 @attached(memberAttribute)
 public macro Table(
   _ name: String = "",
@@ -71,31 +106,64 @@ public macro Table(
 ///
 /// - Parameter name: The selection's name, _i.e._ for a common table expression. Defaults to a
 ///   lower-camel-case pluralization of the type, _e.g._ `RemindersList` becomes `"remindersLists"`.
-@attached(
-  extension,
-  conformances: _Selection,
-  Table,
-  PartialSelectStatement,
-  PrimaryKeyedTable,
-  names: named(From),
-  named(columns),
-  named(_columnWidth),
-  named(init(_:)),
-  named(init(decoder:)),
-  named(QueryValue),
-  named(schemaName),
-  named(tableName)
-)
-@attached(
-  member,
-  conformances: _Selection,
-  Table,
-  PartialSelectStatement,
-  PrimaryKeyedTable,
-  names: named(Draft),
-  named(Selection),
-  named(TableColumns)
-)
+#if CasePaths
+  @attached(
+    extension,
+    conformances: _Selection,
+    Table,
+    PartialSelectStatement,
+    PrimaryKeyedTable,
+    CasePathable,
+    CasePathIterable,
+    names: named(From),
+    named(columns),
+    named(_columnWidth),
+    named(init(_:)),
+    named(init(decoder:)),
+    named(QueryValue),
+    named(schemaName),
+    named(tableName)
+  )
+  @attached(
+    member,
+    conformances: _Selection,
+    Table,
+    PartialSelectStatement,
+    PrimaryKeyedTable,
+    names: named(Draft),
+    named(Selection),
+    named(TableColumns),
+    named(AllCasePaths),
+    named(allCasePaths),
+    named(_$Element)
+  )
+#else
+  @attached(
+    extension,
+    conformances: _Selection,
+    Table,
+    PartialSelectStatement,
+    PrimaryKeyedTable,
+    names: named(From),
+    named(columns),
+    named(_columnWidth),
+    named(init(_:)),
+    named(init(decoder:)),
+    named(QueryValue),
+    named(schemaName),
+    named(tableName)
+  )
+  @attached(
+    member,
+    conformances: _Selection,
+    Table,
+    PartialSelectStatement,
+    PrimaryKeyedTable,
+    names: named(Draft),
+    named(Selection),
+    named(TableColumns)
+  )
+#endif
 @attached(memberAttribute)
 public macro Selection(
   _ name: String = ""
