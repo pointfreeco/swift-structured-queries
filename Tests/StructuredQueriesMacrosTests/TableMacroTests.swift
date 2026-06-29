@@ -2977,7 +2977,7 @@ extension SnapshotTests {
             if let photo {
               self = .photo(photo)
             } else if let note {
-              self = .note(note)
+              self = .note(text: note)
             } else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
