@@ -3078,7 +3078,7 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let note = try decoder.decode(String.self)
             if let note {
-              self = .note(note)
+              self = .note(text: note)
             } else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }

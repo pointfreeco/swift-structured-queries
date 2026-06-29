@@ -574,10 +574,16 @@ extension TableMacro: ExtensionMacro {
           let \(identifier) = try decoder.decode(\(decodedType).self)
           """
         )
+        let caseArgumentLabel: String
+        if let firstName = parameter.firstName, firstName.tokenKind != .wildcard {
+          caseArgumentLabel = "\(firstName.text.trimmingBackticks()): "
+        } else {
+          caseArgumentLabel = ""
+        }
         decodingAssignments.append(
           """
           if let \(identifier) {
-          self = .\(identifier)(\(identifier))
+          self = .\(identifier)(\(caseArgumentLabel)\(identifier))
           }
           """
         )
