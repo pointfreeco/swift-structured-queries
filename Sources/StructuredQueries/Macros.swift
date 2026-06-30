@@ -182,12 +182,15 @@ public macro Selection(
 ///   - generated: Allows to declare the column as a read-only database computed column, making it
 ///     available for queries but not for updates.
 ///   - primaryKey: The column is its table's primary key.
+///   - lazyInitializable: Optionalize this column in the generated `Draft` type so it can be
+///     initialized later (by you, or by the database on insert).
 @attached(peer)
 public macro Column(
   _ name: String = "",
   as representableType: (any QueryRepresentable.Type)? = nil,
   generated: GeneratedColumnStorage? = nil,
-  primaryKey: Bool = false
+  primaryKey: Bool = false,
+  lazyInitializable: Bool? = nil
 ) =
   #externalMacro(
     module: "StructuredQueriesMacros",

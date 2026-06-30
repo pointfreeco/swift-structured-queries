@@ -41,6 +41,10 @@ let package = Package(
   ],
   traits: [
     .trait(
+      name: "LazyInitializableByDefault",
+      description: "Optionalize draft properties that have no default."
+    ),
+    .trait(
       name: "CasePaths",
       description: "Introduce enum table support to StructuredQueries."
     ),
