@@ -950,7 +950,7 @@ extension TableMacro: MemberMacro {
           #endif
           let isLazyInitializableColumn =
             isLazyInitializable
-            ?? (lazyInitializableByDefault && defaultValue == nil && !isColumnGroup)
+            ?? (lazyInitializableByDefault && defaultValue == nil)
           if let primaryKey, primaryKey.identifier == identifier {
             var property = property
             for attributeIndex in property.attributes.indices {
@@ -1018,7 +1018,6 @@ extension TableMacro: MemberMacro {
               )
             )
           } else if isLazyInitializableColumn,
-            !isColumnGroup,
             let optionalType = binding.typeAnnotation?.type.asOptionalType()
           {
             var property = property
@@ -1026,21 +1025,26 @@ extension TableMacro: MemberMacro {
               guard
                 var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self)?
                   .trimmed,
-                attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "Column",
-                case .argumentList(var arguments) = attribute.arguments
+                let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name
+                  .text,
+                ["Column", "Columns"].contains(attributeName)
               else { continue }
-              for argumentIndex in arguments.indices {
-                var argument = arguments[argumentIndex]
-                defer { arguments[argumentIndex] = argument }
-                if argument.label?.text == "as",
-                  var expression = argument.expression.as(MemberAccessExprSyntax.self)
-                {
-                  expression.base = "\(expression.base)?"
-                  argument.expression = ExprSyntax(expression)
+              if case .argumentList(var arguments) = attribute.arguments {
+                for argumentIndex in arguments.indices {
+                  var argument = arguments[argumentIndex]
+                  defer { arguments[argumentIndex] = argument }
+                  if argument.label?.text == "as",
+                    var expression = argument.expression.as(MemberAccessExprSyntax.self)
+                  {
+                    expression.base = "\(expression.base)?"
+                    argument.expression = ExprSyntax(expression)
+                  }
                 }
+                attribute.arguments = .argumentList(arguments)
               }
-              attribute.arguments = .argumentList(arguments)
-              property.attributes[attributeIndex] = .attribute(attribute)
+              property.attributes[attributeIndex] = .attribute(
+                attribute.with(\.trailingTrivia, .space)
+              )
             }
             property = property.trimmed
             var binding = binding
