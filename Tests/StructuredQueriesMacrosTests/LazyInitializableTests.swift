@@ -648,6 +648,164 @@ extension SnapshotTests {
       }
     }
 
+    @Test func doesNotDoubleOptionalizeOptionalRepresentationColumns() {
+      assertMacro {
+        """
+        @Table
+        struct Record {
+          let id: Int
+          @Column(as: CKRecord?.SystemFieldsRepresentation.self)
+          var systemFields: CKRecord?
+        }
+        """
+      } expansion: {
+        #"""
+        struct Record {
+          @StructuredQueries._ColumnCheck(Int.self)
+          let id: Int
+          var systemFields: CKRecord?
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Record
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let systemFields = StructuredQueriesCore.TableColumn<QueryValue, CKRecord?.SystemFieldsRepresentation>("systemFields", keyPath: \QueryValue.systemFields)
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.systemFields._allColumns)
+              return allColumns
+            }
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.systemFields._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id), \(self.systemFields)"
+            }
+          }
+
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Record
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              systemFields: some StructuredQueriesCore.QueryExpression<CKRecord?.SystemFieldsRepresentation>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: systemFields._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+          struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
+            public typealias PrimaryTable = Record
+            @StructuredQueries._ColumnCheck(Int?.self)
+            var id: Int?
+            var systemFields: CKRecord?
+
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let systemFields = StructuredQueriesCore.TableColumn<QueryValue, CKRecord?.SystemFieldsRepresentation>("systemFields", keyPath: \QueryValue.systemFields)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.systemFields._allColumns)
+                return allColumns
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.systemFields._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.systemFields)"
+              }
+            }
+
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                systemFields: some StructuredQueriesCore.QueryExpression<CKRecord?.SystemFieldsRepresentation>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: systemFields._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Swift.Int {
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += CKRecord?.SystemFieldsRepresentation._columnWidth
+              return columnWidth
+            }
+          }
+        }
+
+        nonisolated extension Draft {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.id = try decoder.decode() ?? nil
+            let systemFields = try decoder.decode(CKRecord?.SystemFieldsRepresentation.self)
+            guard let systemFields else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.systemFields = systemFields
+          }
+          nonisolated init(_ other: PrimaryTable) {
+            self.id = other.id
+            self.systemFields = other.systemFields
+          }
+        }
+
+        nonisolated extension Record: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += CKRecord?.SystemFieldsRepresentation._columnWidth
+            return columnWidth
+          }
+          public nonisolated static var tableName: String {
+            "records"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(\QueryValue.id)
+            let systemFields = try decoder.decode(CKRecord?.SystemFieldsRepresentation.self)
+            guard let id else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let systemFields else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.systemFields = systemFields
+          }
+        }
+        """#
+      }
+    }
+
     #if LazyInitializableByDefault
       @Test func doesNotDoubleOptionalizeOptionalColumns() {
         assertMacro {

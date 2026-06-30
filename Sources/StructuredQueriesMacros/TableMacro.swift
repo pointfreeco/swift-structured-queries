@@ -1018,7 +1018,8 @@ extension TableMacro: MemberMacro {
               )
             )
           } else if isLazyInitializableColumn,
-            let optionalType = binding.typeAnnotation?.type.asOptionalType()
+            let type = binding.typeAnnotation?.type,
+            !type.isOptionalType
           {
             var property = property
             for attributeIndex in property.attributes.indices {
@@ -1048,7 +1049,7 @@ extension TableMacro: MemberMacro {
             }
             property = property.trimmed
             var binding = binding
-            binding.typeAnnotation?.type = optionalType
+            binding.typeAnnotation?.type = type.asOptionalType()
             property.bindings = [binding]
             draftProperties.append(
               DeclSyntax(
