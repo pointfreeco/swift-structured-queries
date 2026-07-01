@@ -1396,6 +1396,15 @@ extension TableMacro: MemberAttributeMacro {
     } else {
       checkAttribute = []
     }
+    let lazyInitializableHint: String
+    #if LazyInitializableByDefault
+      lazyInitializableHint =
+        binding.initializer == nil && binding.typeAnnotation?.type.isOptionalType == false
+        ? ", lazyInitializable: true"
+        : ""
+    #else
+      lazyInitializableHint = ""
+    #endif
     if identifier == "id" {
       for member in declaration.memberBlock.members {
         guard
@@ -1419,7 +1428,7 @@ extension TableMacro: MemberAttributeMacro {
           else { continue }
           return [
             """
-            @Column("\(raw: identifier)")
+            @Column("\(raw: identifier)"\(raw: lazyInitializableHint))
             """
           ] + checkAttribute
         }
@@ -1427,7 +1436,7 @@ extension TableMacro: MemberAttributeMacro {
     }
     return [
       """
-      @Column("\(raw: identifier)"\(raw: identifier == "id" ? ", primaryKey: true" : ""))
+      @Column("\(raw: identifier)"\(raw: identifier == "id" ? ", primaryKey: true" : lazyInitializableHint))
       """
     ] + checkAttribute
   }

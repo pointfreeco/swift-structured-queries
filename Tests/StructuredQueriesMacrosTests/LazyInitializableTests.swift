@@ -807,6 +807,204 @@ extension SnapshotTests {
     }
 
     #if LazyInitializableByDefault
+      @Test func lazyInitializableHint() {
+        assertMacro([
+          "Table": TableMacro.self,
+          "_Draft": TableMacro.self,
+        ]) {
+          """
+          @Table
+          struct Place {
+            let id: Int
+            var latitude: Double
+            var name = ""
+            var note: String?
+          }
+          """
+        } expansion: {
+          #"""
+          struct Place {
+            @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int.self)
+            let id: Int
+            @Column("latitude", lazyInitializable: true) @StructuredQueries._ColumnCheck(Double.self)
+            var latitude: Double
+            @Column("name") @StructuredQueries._ColumnCheck(Swift.String.self)
+            var name = ""
+            @Column("note") @StructuredQueries._ColumnCheck(String?.self)
+            var note: String?
+
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+              public typealias QueryValue = Place
+              public typealias PrimaryKey = Int
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+              @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+              public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
+              public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
+              public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: nil)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.latitude._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+                return allColumns
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.latitude._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.latitude), \(self.name), \(self.note)"
+              }
+            }
+
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Place
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int>,
+                latitude: some StructuredQueriesCore.QueryExpression<Double>,
+                name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
+                note: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: latitude._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                allColumns.append(contentsOf: note._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
+              public typealias PrimaryTable = Place
+              @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int?.self)
+              var id: Int?
+              @Column("latitude") @StructuredQueries._ColumnCheck(Double?.self)
+              var latitude: Double?
+              @Column("name") @StructuredQueries._ColumnCheck(Swift.String.self)
+              var name = ""
+              @Column("note") @StructuredQueries._ColumnCheck(String?.self)
+              var note: String?
+
+              public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+                public typealias QueryValue = Draft
+                public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+                public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double?>.for("latitude", keyPath: \QueryValue.latitude, default: nil)
+                public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
+                public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: nil)
+                public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                  var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                  allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                  allColumns.append(contentsOf: QueryValue.columns.latitude._allColumns)
+                  allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                  allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+                  return allColumns
+                }
+                public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                  var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                  writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                  writableColumns.append(contentsOf: QueryValue.columns.latitude._writableColumns)
+                  writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                  writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+                  return writableColumns
+                }
+                public var queryFragment: QueryFragment {
+                  "\(self.id), \(self.latitude), \(self.name), \(self.note)"
+                }
+              }
+
+              public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+                public typealias QueryValue = Draft
+                public let allColumns: [any StructuredQueriesCore.QueryExpression]
+                public init(
+                  id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                  latitude: some StructuredQueriesCore.QueryExpression<Double?> = Double?(queryOutput: nil),
+                  name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
+                  note: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil)
+                ) {
+                  var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                  allColumns.append(contentsOf: id._allColumns)
+                  allColumns.append(contentsOf: latitude._allColumns)
+                  allColumns.append(contentsOf: name._allColumns)
+                  allColumns.append(contentsOf: note._allColumns)
+                  self.allColumns = allColumns
+                }
+              }
+
+              public typealias QueryValue = Self
+
+              public typealias From = Swift.Never
+
+              public nonisolated static var columns: TableColumns {
+                TableColumns()
+              }
+
+              public nonisolated static var _columnWidth: Swift.Int {
+                var columnWidth = 0
+                columnWidth += Int?._columnWidth
+                columnWidth += Double?._columnWidth
+                columnWidth += Swift.String._columnWidth
+                columnWidth += String?._columnWidth
+                return columnWidth
+              }
+            }
+          }
+
+          nonisolated extension Draft {
+            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode() ?? nil
+              self.latitude = try decoder.decode() ?? nil
+              self.name = try decoder.decode() ?? ""
+              self.note = try decoder.decode() ?? nil
+            }
+            nonisolated init(_ other: PrimaryTable) {
+              self.id = other.id
+              self.latitude = other.latitude
+              self.name = other.name
+              self.note = other.note
+            }
+          }
+
+          nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+            public typealias QueryValue = Self
+            public typealias From = Swift.Never
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+            public nonisolated static var _columnWidth: Int {
+              var columnWidth = 0
+              columnWidth += Int._columnWidth
+              columnWidth += Double._columnWidth
+              columnWidth += Swift.String._columnWidth
+              columnWidth += String?._columnWidth
+              return columnWidth
+            }
+            public nonisolated static var tableName: String {
+              "places"
+            }
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              let id = try decoder.decode(\QueryValue.id)
+              let latitude = try decoder.decode(\QueryValue.latitude)
+              self.name = try decoder.decode() ?? ""
+              self.note = try decoder.decode() ?? nil
+              guard let id else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              guard let latitude else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              self.id = id
+              self.latitude = latitude
+            }
+          }
+          """#
+        }
+      }
+
       @Test func doesNotDoubleOptionalizeOptionalColumns() {
         assertMacro {
           """
@@ -2136,6 +2334,208 @@ extension SnapshotTests {
         }
       }
     #else
+      @Test func lazyInitializableHint() {
+        assertMacro([
+          "Table": TableMacro.self,
+          "_Draft": TableMacro.self,
+        ]) {
+          """
+          @Table
+          struct Place {
+            let id: Int
+            var latitude: Double
+            var name = ""
+            var note: String?
+          }
+          """
+        } expansion: {
+          #"""
+          struct Place {
+            @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int.self)
+            let id: Int
+            @Column("latitude") @StructuredQueries._ColumnCheck(Double.self)
+            var latitude: Double
+            @Column("name") @StructuredQueries._ColumnCheck(Swift.String.self)
+            var name = ""
+            @Column("note") @StructuredQueries._ColumnCheck(String?.self)
+            var note: String?
+
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+              public typealias QueryValue = Place
+              public typealias PrimaryKey = Int
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+              @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+              public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
+              public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
+              public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: nil)
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.latitude._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+                return allColumns
+              }
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.latitude._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.latitude), \(self.name), \(self.note)"
+              }
+            }
+
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Place
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int>,
+                latitude: some StructuredQueriesCore.QueryExpression<Double>,
+                name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
+                note: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: latitude._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                allColumns.append(contentsOf: note._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+            struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
+              public typealias PrimaryTable = Place
+              @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int?.self)
+              var id: Int?
+              @Column("latitude") @StructuredQueries._ColumnCheck(Double.self)
+              var latitude: Double
+              @Column("name") @StructuredQueries._ColumnCheck(Swift.String.self)
+              var name = ""
+              @Column("note") @StructuredQueries._ColumnCheck(String?.self)
+              var note: String?
+
+              public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+                public typealias QueryValue = Draft
+                public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+                public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
+                public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
+                public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: nil)
+                public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                  var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                  allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                  allColumns.append(contentsOf: QueryValue.columns.latitude._allColumns)
+                  allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                  allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
+                  return allColumns
+                }
+                public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                  var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                  writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                  writableColumns.append(contentsOf: QueryValue.columns.latitude._writableColumns)
+                  writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                  writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
+                  return writableColumns
+                }
+                public var queryFragment: QueryFragment {
+                  "\(self.id), \(self.latitude), \(self.name), \(self.note)"
+                }
+              }
+
+              public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+                public typealias QueryValue = Draft
+                public let allColumns: [any StructuredQueriesCore.QueryExpression]
+                public init(
+                  id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                  latitude: some StructuredQueriesCore.QueryExpression<Double>,
+                  name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
+                  note: some StructuredQueriesCore.QueryExpression<String?> = String?(queryOutput: nil)
+                ) {
+                  var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                  allColumns.append(contentsOf: id._allColumns)
+                  allColumns.append(contentsOf: latitude._allColumns)
+                  allColumns.append(contentsOf: name._allColumns)
+                  allColumns.append(contentsOf: note._allColumns)
+                  self.allColumns = allColumns
+                }
+              }
+
+              public typealias QueryValue = Self
+
+              public typealias From = Swift.Never
+
+              public nonisolated static var columns: TableColumns {
+                TableColumns()
+              }
+
+              public nonisolated static var _columnWidth: Swift.Int {
+                var columnWidth = 0
+                columnWidth += Int?._columnWidth
+                columnWidth += Double._columnWidth
+                columnWidth += Swift.String._columnWidth
+                columnWidth += String?._columnWidth
+                return columnWidth
+              }
+            }
+          }
+
+          nonisolated extension Draft {
+            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              self.id = try decoder.decode() ?? nil
+              let latitude = try decoder.decode(\QueryValue.latitude)
+              self.name = try decoder.decode() ?? ""
+              self.note = try decoder.decode() ?? nil
+              guard let latitude else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              self.latitude = latitude
+            }
+            nonisolated init(_ other: PrimaryTable) {
+              self.id = other.id
+              self.latitude = other.latitude
+              self.name = other.name
+              self.note = other.note
+            }
+          }
+
+          nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+            public typealias QueryValue = Self
+            public typealias From = Swift.Never
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+            public nonisolated static var _columnWidth: Int {
+              var columnWidth = 0
+              columnWidth += Int._columnWidth
+              columnWidth += Double._columnWidth
+              columnWidth += Swift.String._columnWidth
+              columnWidth += String?._columnWidth
+              return columnWidth
+            }
+            public nonisolated static var tableName: String {
+              "places"
+            }
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+              let id = try decoder.decode(\QueryValue.id)
+              let latitude = try decoder.decode(\QueryValue.latitude)
+              self.name = try decoder.decode() ?? ""
+              self.note = try decoder.decode() ?? nil
+              guard let id else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              guard let latitude else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
+              self.id = id
+              self.latitude = latitude
+            }
+          }
+          """#
+        }
+      }
+
       @Test func doesNotDoubleOptionalizeOptionalColumns() {
         assertMacro {
           """
