@@ -130,6 +130,50 @@
         }
       }
 
+      @Test func isOperator() {
+        assertQuery(
+          Attachment.where { $0.kind.is(\.note) }
+        ) {
+          """
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          FROM "attachments"
+          WHERE (("attachments"."note" IS NOT NULL))
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────┐
+          │ Attachment(                           │
+          │   id: 2,                              │
+          │   kind: .note("Today was a good day") │
+          │ )                                     │
+          └───────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Attachment.where { $0.kind.is(\.video) }
+        ) {
+          """
+          SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
+          FROM "attachments"
+          WHERE (("attachments"."videoURL" IS NOT NULL) OR ("attachments"."videoKind" IS NOT NULL))
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────────────┐
+          │ Attachment(                                         │
+          │   id: 3,                                            │
+          │   kind: .video(                                     │
+          │     Attachment.Video(                               │
+          │       url: URL(https://www.youtube.com/video/1234), │
+          │       kind: .youtube                                │
+          │     )                                               │
+          │   )                                                 │
+          │ )                                                   │
+          └─────────────────────────────────────────────────────┘
+          """
+        }
+      }
+
       @Test func dynamicMemberLookup_CasePath() {
         assertQuery(
           Attachment.select(\.kind.image)
