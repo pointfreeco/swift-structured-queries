@@ -150,6 +150,58 @@ ReminderForm(
 )
 ```
 
+### Lazy initializable drafts
+
+It is possible to mark some fields of a draft as being "lazy initializable". Such fields will be
+optional in the generated `Draft` type, allowing their value to be set at a later time. The 
+canonical example of this is created/updated timestamps for a record:
+
+```swift
+@Table
+struct User {
+  let id: UUID
+  var name = ""
+  let createdAt: Date
+  let updatedAt: Date
+}
+```
+
+It is not appropriate to assign these values when creating or updating the record, and instead it
+is best to leave that logic to the database (via default values and triggers). To make it so that
+you can omit those fields when creating drafts, use the `@Column` macro with the 
+`lazyInitializable` option:
+
+```swift
+@Table struct User {
+  let id: UUID
+  var name = ""
+  @Column(lazyInitializable: true)
+  let createdAt: Date
+  @Column(lazyInitializable: true)
+  let updatedAt: Date
+}
+  
+let draft = Draft(name: "Blob")
+```
+
+Another use for lazy initializable properties in drafts comes from foreign keys. You typically
+want foreign keys to be lazy initialized so that you can create the parent record first, and then
+set the foreign key on the child:
+
+```swift
+@Table struct Reminder {
+  let id: UUID 
+  var name = ""
+  @Column(lazyInitializable: true)
+  var remindersListID: RemindersList.ID
+}
+```
+
+> Note: In a future version of StructuredQueries, `lazyInitializable: true` will be the default
+> behavior for all fields without a default value, and if you want to opt out of it you will
+> provide `lazyInitializable: false`. To prepare for that future release you can enable the
+> `LazyInitializableByDefault` in your dependence on StructuredQueries today.
+
 ### Selects, updates, upserts, and deletions
 
 Primary-keyed tables are also given special APIs for selecting, updating and deleting existing rows
