@@ -150,11 +150,12 @@ ReminderForm(
 )
 ```
 
-### Lazy initializable drafts
+### Lazy initialization
 
-It is possible to mark some fields of a draft as being "lazy initializable". Such fields will be
-optional in the generated `Draft` type, allowing their value to be set at a later time. The 
-canonical example of this is created/updated timestamps for a record:
+It is possible to mark some fields of a draft as being "lazy initializable." Such fields will be
+optional in the generated `Draft` type, allowing their value to be set at a later time, matching
+the lazy initialization of the draft's primary key. A canonical example of this is created/updated
+timestamps for a record:
 
 ```swift
 @Table
