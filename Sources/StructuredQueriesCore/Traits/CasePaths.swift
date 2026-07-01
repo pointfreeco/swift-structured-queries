@@ -12,14 +12,9 @@
     /// - Parameter keyPath: A key path from enum columns to a case.
     /// - Returns: A Boolean query expression
     public func `is`<V>(
-      _ keyPath: KeyPath<QueryValue.TableColumns, TableColumn<Values.QueryOutput, V>>
+      _ keyPath: KeyPath<Values.TableColumns, TableColumn<Values.QueryOutput, V>>
     ) -> some QueryExpression<Bool> {
-      SQLQueryExpression(
-        self[dynamicMember: keyPath]._allColumns.map {
-          "(\($0.queryFragment) IS NOT NULL)"
-        }
-        .joined(separator: " OR ")
-      )
+      self[dynamicMember: keyPath].isNot(nil)
     }
 
     /// A Boolean query expression that checks if the given enum columns will be decoded for the
@@ -28,14 +23,9 @@
     /// - Parameter keyPath: A key path from enum columns to a case.
     /// - Returns: A Boolean query expression
     public func `is`<V>(
-      _ keyPath: KeyPath<QueryValue.TableColumns, ColumnGroup<Values.QueryOutput, V>>
+      _ keyPath: KeyPath<Values.TableColumns, ColumnGroup<Values.QueryOutput, V>>
     ) -> some QueryExpression<Bool> {
-      return SQLQueryExpression(
-        self[dynamicMember: keyPath]._allColumns.map {
-          "(\($0.queryFragment) IS NOT NULL)"
-        }
-        .joined(separator: " OR ")
-      )
+      self[dynamicMember: keyPath].isNot(nil)
     }
   }
 #endif

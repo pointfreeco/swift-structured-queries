@@ -137,7 +137,7 @@
           """
           SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
-          WHERE (("attachments"."note" IS NOT NULL))
+          WHERE (("attachments"."note") IS NOT (NULL))
           """
         } results: {
           """
@@ -155,7 +155,7 @@
           """
           SELECT "attachments"."id", "attachments"."link", "attachments"."note", "attachments"."videoURL", "attachments"."videoKind", "attachments"."imageCaption", "attachments"."imageURL"
           FROM "attachments"
-          WHERE (("attachments"."videoURL" IS NOT NULL) OR ("attachments"."videoKind" IS NOT NULL))
+          WHERE (("attachments"."videoURL", "attachments"."videoKind") IS NOT (NULL, NULL))
           """
         } results: {
           """
@@ -170,6 +170,26 @@
           │   )                                                 │
           │ )                                                   │
           └─────────────────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Attachment
+            .select { $0.kind.video }
+            .where { $0.kind.video.isNot(nil) }
+        ) {
+          """
+          SELECT "attachments"."videoURL", "attachments"."videoKind"
+          FROM "attachments"
+          WHERE (("attachments"."videoURL", "attachments"."videoKind") IS NOT (NULL, NULL))
+          """
+        } results: {
+          """
+          ┌─────────────────────────────────────────────────┐
+          │ Attachment.Video(                               │
+          │   url: URL(https://www.youtube.com/video/1234), │
+          │   kind: .youtube                                │
+          │ )                                               │
+          └─────────────────────────────────────────────────┘
           """
         }
       }
