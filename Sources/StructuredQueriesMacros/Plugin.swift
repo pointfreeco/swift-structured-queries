@@ -5,6 +5,9 @@ import SwiftSyntaxMacros
 struct StructuredQueriesPlugin: CompilerPlugin {
   let providingMacros: [any Macro.Type] = [
     BindMacro.self,
+    ColumnCheckFailJSONMacro.self,
+    ColumnCheckFailMacro.self,
+    ColumnCheckPassMacro.self,
     ColumnMacro.self,
     ColumnsMacro.self,
     EphemeralMacro.self,

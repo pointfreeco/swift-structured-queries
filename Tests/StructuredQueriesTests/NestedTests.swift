@@ -6,7 +6,7 @@ import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite
 
-#if StructuredQueriesCasePaths
+#if CasePaths
   import CasePaths
 #endif
 
@@ -527,7 +527,7 @@ extension SnapshotTests {
       }
     }
 
-    #if StructuredQueriesCasePaths
+    #if CasePaths
       @Test func `enum`() throws {
         try db.execute(
           #sql(
@@ -713,14 +713,14 @@ private struct Note {
   let body: String
 }
 
-#if StructuredQueriesCasePaths
-  @CasePathable @Table
+#if CasePaths
+  @Table
   private enum Post {
     case photo(Photo)
     case note(String = "")
   }
 
-  @CasePathable @Table
+  @Table
   private enum Notes {
     @Column(as: [String].JSONRepresentation.self)
     case list([String])

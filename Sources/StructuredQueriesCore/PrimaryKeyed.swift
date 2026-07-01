@@ -40,6 +40,10 @@ extension TableDraft {
   public static var all: SelectOf<Self> {
     unsafeBitCast(PrimaryTable.all.asSelect(), to: SelectOf<Self>.self)
   }
+
+  public static var schemaName: String? { PrimaryTable.schemaName }
+
+  public static var tableName: String { PrimaryTable.tableName }
 }
 
 /// A type representing a database table's columns.

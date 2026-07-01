@@ -269,15 +269,15 @@ With that you can insert reminders with notes like so:
 
 The [Tagged](https://github.com/pointfreeco/swift-tagged) library provides lightweight syntax for
 introducing type-safe identifiers (and more) to your models. StructuredQueries ships support for
-Tagged with a `StructuredQueriesTagged` package trait, which is available starting from Swift 6.1.
+Tagged with a `Tagged` package trait, which is available starting from Swift 6.1.
 
 To enable the trait, specify it in the Package.swift file that depends on StructuredQueries:
 
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.22.0",
-+  traits: ["StructuredQueriesTagged"]
+   from: "0.32.0",
++  traits: ["Tagged"]
  ),
 +.package(
 +  url: "https://github.com/pointfreeco/swift-tagged",
@@ -504,7 +504,7 @@ attachments supported, annotated with the `@Selection` macro:
   let id: Int
   let kind: Kind
 
-  @CasePathable @Selection
+  @Selection
   enum Kind {
     case link(URL)
     case note(String)
@@ -513,11 +513,11 @@ attachments supported, annotated with the `@Selection` macro:
 }
 ```
 
-> Important: It is required to apply the `@CasePathable` macro in order to define columns from an
-> enum. This macro comes from our [Case Paths] library and is automatically included with the
-> library when the `StructuredQueriesCasePaths` trait is enabled.
+> Important: It is required to enable the `CasePaths` trait in order to define columns from an enum.
+> This trait uses our [CasePaths] library to enhance enumerations with key path-like functionality
+> needed to work with enum columns in the abstract.
 
-[Case Paths]: http://github.com/pointfreeco/swift-case-paths
+[CasePaths]: http://github.com/pointfreeco/swift-case-paths
 
 To create a SQL table that represents this data type you simply flatten all of the fields into
 a single list of columns where each column is nullable:
@@ -631,7 +631,7 @@ can be defined for that data and used in the `image` case:
   let id: Int
   let kind: Kind
 
-  @CasePathable @Selection
+  @Selection
   enum Kind {
     case link(URL)
     case note(String)

@@ -4,6 +4,10 @@ public import SwiftSyntax
 import SwiftSyntaxBuilder
 public import SwiftSyntaxMacros
 
+#if CasePaths
+  import CasePathsMacrosSupport
+#endif
+
 public enum TableMacro {}
 
 extension TableMacro: ExtensionMacro {
@@ -56,46 +60,13 @@ extension TableMacro: ExtensionMacro {
           message: MacroExpansionErrorMessage(
             declaration.is(EnumDeclSyntax.self)
               ? """
-              '@Table' can only be applied to enum types when the 'StructuredQueriesCasePaths' \
+              '@Table' can only be applied to enum types when the 'CasePaths' \
               package trait is enabled
               """
               : """
               '@Table' can only be applied to struct types (and enum types with the \
-              'StructuredQueriesCasePaths' package trait enabled)
+              'CasePaths' package trait enabled)
               """
-          )
-        )
-      )
-      return []
-    }
-    if declaration.is(EnumDeclSyntax.self), !declaration.hasMacroApplication("CasePathable") {
-      var newAttributes: AttributeListSyntax = declaration.attributes
-      newAttributes.insert(
-        .attribute(
-          AttributeSyntax(
-            atSign: .atSignToken(),
-            attributeName: IdentifierTypeSyntax(name: "CasePathable"),
-            trailingTrivia: .space
-          )
-        ),
-        at: newAttributes.startIndex
-      )
-      context.diagnose(
-        Diagnostic(
-          node: node,
-          message: MacroExpansionErrorMessage(
-            """
-            '@Table' enum type missing required '@CasePathable' macro application
-            """
-          ),
-          fixIt: .replace(
-            message: MacroExpansionFixItMessage(
-              """
-              Insert '@CasePathable'
-              """
-            ),
-            oldNode: declaration.attributes,
-            newNode: newAttributes
           )
         )
       )
@@ -107,12 +78,6 @@ extension TableMacro: ExtensionMacro {
     var columnWidths: [ExprSyntax] = []
     var diagnostics: [Diagnostic] = []
 
-    // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-    var draftBindings: [(PatternBindingSyntax, queryOutputType: TypeSyntax?, optionalize: Bool)] =
-      []
-    // NB: End of workaround
-
-    var draftProperties: [DeclSyntax] = []
     var draftTableType: TypeSyntax?
     var primaryKey:
       (
@@ -138,9 +103,7 @@ extension TableMacro: ExtensionMacro {
         case nil:
           if node.attributeName.identifier == "_Draft" {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-            let base = memberAccess.base!.trimmed
-            draftTableType = TypeSyntax("\(base)")
-            tableName = "\(base).tableName"
+            draftTableType = TypeSyntax("\(memberAccess.base!.trimmed)")
           } else {
             if !argument.expression.isNonEmptyStringLiteral {
               diagnostics.append(
@@ -154,28 +117,26 @@ extension TableMacro: ExtensionMacro {
           }
 
         case .some(let label) where label.text == "schema":
-          if node.attributeName.identifier == "_Draft" {
-            let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-            let base = memberAccess.base!.trimmed
-            draftTableType = TypeSyntax("\(base)")
-            schemaName = "\(base).schemaName"
-          } else {
-            if !argument.expression.isNonEmptyStringLiteral {
-              diagnostics.append(
-                Diagnostic(
-                  node: argument.expression,
-                  message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
-                )
+          if !argument.expression.isNonEmptyStringLiteral {
+            diagnostics.append(
+              Diagnostic(
+                node: argument.expression,
+                message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
               )
-            }
-            schemaName = argument.expression.trimmed
+            )
           }
+          schemaName = argument.expression.trimmed
 
         case let argument?:
           fatalError("Unexpected argument: \(argument)")
         }
       }
     }
+
+    let initAccess =
+      draftTableType != nil
+      ? declaration.accessLevelModifier.map { "\($0.name.text) " } ?? ""
+      : "public "
 
     var initDecoder: DeclSyntax?
     if declaration.is(StructDeclSyntax.self) {
@@ -220,6 +181,7 @@ extension TableMacro: ExtensionMacro {
         var isEphemeral = false
         var isExplicitColumn = false
         var isGenerated = false
+        var hasRepresentation = false
 
         for attribute in property.attributes {
           guard
@@ -268,6 +230,7 @@ extension TableMacro: ExtensionMacro {
 
               columnQueryValueType = "\(raw: base.rewritten(selfRewriter).trimmedDescription)"
               columnQueryOutputType = "\(columnQueryValueType).QueryOutput"
+              hasRepresentation = true
 
             case .some(let label) where label.text == "primaryKey":
               guard
@@ -342,6 +305,39 @@ extension TableMacro: ExtensionMacro {
               }
               isGenerated = true
 
+            case .some(let label) where label.text == "lazyInitializable":
+              guard
+                draftTableType == nil,
+                binding.typeAnnotation?.type.isOptionalType == true
+              else { break }
+              var newAttribute = attribute
+              var newArguments = arguments
+              newArguments.remove(at: argumentIndex)
+              if newArguments.isEmpty {
+                newAttribute.leftParen = nil
+                newAttribute.arguments = nil
+                newAttribute.rightParen = nil
+              } else {
+                newArguments[newArguments.index(before: newArguments.endIndex)].trailingComma = nil
+                newAttribute.arguments = .argumentList(newArguments)
+              }
+              context.diagnose(
+                Diagnostic(
+                  node: argument,
+                  message: MacroExpansionWarningMessage(
+                    """
+                    Argument 'lazyInitializable' has no effect on optional column \
+                    '\(identifier.text)'
+                    """
+                  ),
+                  fixIt: .replace(
+                    message: MacroExpansionFixItMessage("Remove 'lazyInitializable'"),
+                    oldNode: Syntax(attribute),
+                    newNode: Syntax(newAttribute)
+                  )
+                )
+              )
+
             case let argument?:
               fatalError("Unexpected argument: \(argument)")
             }
@@ -360,15 +356,10 @@ extension TableMacro: ExtensionMacro {
           )
         }
 
-        if !isGenerated {
-          // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-          draftBindings.append(
-            (binding, columnQueryOutputType, identifier == primaryKey?.identifier)
-          )
-          // NB: End of workaround
-        }
-
-        columnWidths.append("\(columnQueryValueType)._columnWidth")
+        columnWidths.append(
+          columnQueryValueType.map { "\($0)._columnWidth" as ExprSyntax }
+            ?? "\(moduleName)._columnWidth(\\QueryValue.\(identifier))"
+        )
 
         let defaultValue =
           binding.initializer?.value.rewritten(selfRewriter)
@@ -390,7 +381,7 @@ extension TableMacro: ExtensionMacro {
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            \(raw: primaryKey ? "@StructuredQueries._PrimaryKeyDefault public var" : "public let") \
+            \(raw: primaryKey ? "@\(macrosModuleName)._PrimaryKeyDefault public var" : "public let") \
             \(primaryKey ? "primaryKey" : identifier) = \
             \(moduleName).\(raw: tableColumnType)<\
             QueryValue, \
@@ -409,23 +400,26 @@ extension TableMacro: ExtensionMacro {
         }
         allColumns.append(identifier)
         let decodedType = columnQueryValueType?.asNonOptionalType()
+        let decodeArgument = hasRepresentation ? (decodedType.map { "\($0).self" } ?? "") : ""
         if let defaultValue {
           decodings.append(
             """
-            self.\(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? "")) \
+            self.\(identifier) = try decoder.decode(\(decodeArgument)) \
             ?? \(defaultValue)
             """
           )
         } else if columnQueryValueType.map({ $0.isOptionalType }) ?? false {
           decodings.append(
             """
-            self.\(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? ""))
+            self.\(identifier) = try decoder.decode(\(decodeArgument))
             """
           )
         } else {
+          let requiredArgument =
+            hasRepresentation ? decodeArgument : "\\QueryValue.\(identifier)"
           decodings.append(
             """
-            let \(identifier) = try decoder.decode(\(decodedType.map { "\($0).self" } ?? ""))
+            let \(identifier) = try decoder.decode(\(requiredArgument))
             """
           )
           decodingUnwrappings.append(
@@ -442,87 +436,10 @@ extension TableMacro: ExtensionMacro {
           )
         }
 
-        if !isGenerated {
-          if let primaryKey, primaryKey.identifier == identifier {
-            var property = property
-            for attributeIndex in property.attributes.indices {
-              guard
-                var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self)?
-                  .trimmed,
-                let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name
-                  .text,
-                ["Column", "Columns"].contains(attributeName)
-              else { continue }
-              var hasPrimaryKeyArgument = false
-              var arguments: LabeledExprListSyntax = []
-              if case .argumentList(let list) = attribute.arguments { arguments = list }
-              for argumentIndex in arguments.indices {
-                var argument = arguments[argumentIndex]
-                defer { arguments[argumentIndex] = argument }
-                switch argument.label?.text {
-                case "as":
-                  if var expression = argument.expression.as(MemberAccessExprSyntax.self) {
-                    expression.base = "\(expression.base)?"
-                    argument.expression = ExprSyntax(expression)
-                  }
-
-                case "primaryKey":
-                  hasPrimaryKeyArgument = true
-                  argument.expression = ExprSyntax(BooleanLiteralExprSyntax(false))
-
-                default:
-                  break
-                }
-              }
-              if !hasPrimaryKeyArgument {
-                if !arguments.isEmpty {
-                  arguments[arguments.index(before: arguments.endIndex)].trailingComma =
-                    .commaToken(
-                      trailingTrivia: .space
-                    )
-                }
-                arguments.append(
-                  LabeledExprSyntax(
-                    label: "primaryKey",
-                    expression: BooleanLiteralExprSyntax(false)
-                  )
-                )
-              }
-              if !arguments.isEmpty {
-                attribute.leftParen = TokenSyntax.leftParenToken()
-                attribute.arguments = .argumentList(arguments)
-                attribute.rightParen = TokenSyntax.rightParenToken()
-                property.attributes[attributeIndex] = .attribute(attribute)
-              }
-            }
-            var binding = binding
-            if let type = binding.typeAnnotation?.type.asOptionalType() {
-              binding.typeAnnotation?.type = type
-            }
-            property.bindings = [binding]
-            draftProperties.append(
-              DeclSyntax(
-                property.trimmed
-                  .with(\.bindingSpecifier.leadingTrivia, "")
-                  .removingAccessors()
-                  .rewritten(selfRewriter)
-              )
-            )
-          } else {
-            draftProperties.append(
-              DeclSyntax(
-                property.trimmed
-                  .with(\.bindingSpecifier.leadingTrivia, "")
-                  .removingAccessors()
-                  .rewritten(selfRewriter)
-              )
-            )
-          }
-        }
       }
       initDecoder = """
 
-        public \(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws {
+        \(raw: initAccess)\(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws {
         \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
         }
         """
@@ -647,6 +564,17 @@ extension TableMacro: ExtensionMacro {
               )
               continue
 
+            case .some(let label) where label.text == "lazyInitializable":
+              diagnostics.append(
+                Diagnostic(
+                  node: argument.expression,
+                  message: MacroExpansionErrorMessage(
+                    "Argument 'lazyInitializable' is not supported on enum table columns"
+                  )
+                )
+              )
+              continue
+
             case let argument?:
               fatalError("Unexpected argument: \(argument)")
             }
@@ -690,10 +618,16 @@ extension TableMacro: ExtensionMacro {
           let \(identifier) = try decoder.decode(\(decodedType).self)
           """
         )
+        let caseArgumentLabel: String
+        if let firstName = parameter.firstName, firstName.tokenKind != .wildcard {
+          caseArgumentLabel = "\(firstName.text.trimmingBackticks()): "
+        } else {
+          caseArgumentLabel = ""
+        }
         decodingAssignments.append(
           """
           if let \(identifier) {
-          self = .\(identifier)(\(identifier))
+          self = .\(identifier)(\(caseArgumentLabel)\(identifier))
           }
           """
         )
@@ -709,118 +643,23 @@ extension TableMacro: ExtensionMacro {
         """
     }
 
-    var draft: DeclSyntax?
     var initFromOther: DeclSyntax?
-    if let draftTableType {
+    if draftTableType != nil {
       initFromOther = """
 
-        public \(nonisolated)init(_ other: \(draftTableType)) {
+        \(raw: initAccess)\(nonisolated)init(_ other: PrimaryTable) {
         \(allColumns.map { "self.\($0) = other.\($0)" as ExprSyntax }, separator: "\n")
         }
         """
-    } else if primaryKey != nil {
-      draft = """
-
-        @_Draft(\(type).self)
-        public struct Draft {
-        \(draftProperties, separator: "\n")
-        }
-        """
-
-      // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-      var memberBlocks = try expansion(
-        of: "@_Draft(\(type).self)",
-        providingMembersOf: StructDeclSyntax("\(draft)"),
-        conformingTo: [],
-        in: context
-      )
-      .compactMap(\.trimmed)
-      memberBlocks.append(
-        contentsOf: try expansion(
-          of: "@_Draft(\(type).self)",
-          attachedTo: StructDeclSyntax("\(draft)"),
-          providingExtensionsOf: TypeSyntax("\(type).Draft"),
-          conformingTo: [],
-          in: context
-        )
-        .flatMap {
-          $0.memberBlock.members.trimmed.map(\.decl)
-        }
-      )
-      var memberwiseArguments: [PatternBindingSyntax] = []
-      var memberwiseAssignments: [TokenSyntax] = []
-      for (binding, queryOutputType, optionalize) in draftBindings {
-        var argument = binding.trimmed
-        if optionalize {
-          argument = argument.optionalized()
-        }
-        argument = argument.annotated(queryOutputType).rewritten(selfRewriter)
-        if argument.typeAnnotation == nil {
-          let identifier =
-            (argument.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmedDescription)
-            .map { "'\($0)'" }
-            ?? "field"
-          diagnostics.append(
-            Diagnostic(
-              node: binding,
-              message: MacroExpansionErrorMessage(
-                """
-                '@Table' requires \(identifier) to have a type annotation in order to generate a \
-                memberwise initializer
-                """
-              ),
-              fixIt: .replace(
-                message: MacroExpansionFixItMessage(
-                  """
-                  Insert ': <#Type#>'
-                  """
-                ),
-                oldNode: binding,
-                newNode:
-                  binding
-                  .with(\.pattern.trailingTrivia, "")
-                  .with(
-                    \.typeAnnotation,
-                    TypeAnnotationSyntax(
-                      colon: .colonToken(trailingTrivia: .space),
-                      type: IdentifierTypeSyntax(name: "<#Type#>"),
-                      trailingTrivia: .space
-                    )
-                  )
-              )
-            )
-          )
-          continue
-        }
-        memberwiseArguments.append(argument)
-        memberwiseAssignments.append(
-          argument.trimmed.pattern.cast(IdentifierPatternSyntax.self).identifier
-        )
-      }
-      let memberwiseInit: DeclSyntax = """
-        public init(
-        \(memberwiseArguments, separator: ",\n")
-        ) {
-        \(memberwiseAssignments.map { "self.\($0) = \($0)" as ExprSyntax }, separator: "\n")
-        }
-        """
-      draft = """
-
-        public struct Draft: \(moduleName).TableDraft {
-        public typealias PrimaryTable = \(type)
-        \(draftProperties, separator: "\n")
-        \(memberBlocks, separator: "\n")
-        \(memberwiseInit)
-        }
-        """
-      // NB: End of workaround
     }
 
     var conformances: [TypeSyntax] = []
     var protocolNames: [TokenSyntax] =
-      primaryKey != nil
-      ? ["Table", "PrimaryKeyedTable"]
-      : ["Table"]
+      draftTableType != nil
+      ? []
+      : primaryKey != nil
+        ? ["Table", "PrimaryKeyedTable"]
+        : ["Table"]
     if node.attributeName.identifier == "Selection" {
       protocolNames.append("_Selection")
     }
@@ -866,7 +705,9 @@ extension TableMacro: ExtensionMacro {
         public \(nonisolated)static let schemaName: Swift.String? = \(schemaName)
         """
     }
-    conformances.append("\(moduleName).PartialSelectStatement")
+    if draftTableType == nil {
+      conformances.append("\(moduleName).PartialSelectStatement")
+    }
     statics.append(contentsOf: [
       """
 
@@ -882,21 +723,50 @@ extension TableMacro: ExtensionMacro {
       return columnWidth
       """
 
-    return [
+    var extensionMembers: [DeclSyntax] = []
+    if draftTableType == nil {
+      extensionMembers.append(contentsOf: statics)
+      extensionMembers.append(
+        "public \(nonisolated)static var columns: TableColumns { TableColumns() }"
+      )
+      extensionMembers.append(
+        "public \(nonisolated)static var _columnWidth: Int { \(raw: columnWidth) }"
+      )
+      extensionMembers.append("public \(nonisolated)static var tableName: String { \(tableName) }")
+      if let letSchemaName {
+        extensionMembers.append(letSchemaName)
+      }
+    }
+    if let initDecoder {
+      extensionMembers.append(initDecoder)
+    }
+    if let initFromOther {
+      extensionMembers.append(initFromOther)
+    }
+
+    var extensions: [ExtensionDeclSyntax] = [
       DeclSyntax(
         """
         \(declaration.attributes.availability)\(nonisolated)extension \(type)\
-        \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {\
-        \(statics, separator: "\n")
-        public \(nonisolated)static var columns: TableColumns { TableColumns() }
-        public \(nonisolated)static var _columnWidth: Int { \(raw: columnWidth) }
-        public \(nonisolated)static var tableName: String { \(tableName) }\
-        \(letSchemaName)\(initDecoder)\(initFromOther)
+        \(conformances.isEmpty ? "" : ": \(conformances, separator: ", ")") {
+        \(raw: extensionMembers.map(\.trimmedDescription).joined(separator: "\n"))
         }
         """
       )
       .cast(ExtensionDeclSyntax.self)
     ]
+    #if CasePaths
+      if declaration.is(EnumDeclSyntax.self) {
+        extensions += try CasePathableMacro.expansion(
+          of: node,
+          attachedTo: declaration,
+          providingExtensionsOf: type,
+          conformingTo: protocols,
+          in: context
+        )
+      }
+    #endif
+    return extensions
   }
 }
 
@@ -923,12 +793,8 @@ extension TableMacro: MemberMacro {
     var writableColumns: [TokenSyntax] = []
     var selectedColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
     var columnsProperties: [DeclSyntax] = []
+    var columnWidths: [ExprSyntax] = []
     var expansionFailed = false
-
-    // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-    var draftBindings: [(PatternBindingSyntax, queryOutputType: TypeSyntax?, optionalize: Bool)] =
-      []
-    // NB: End of workaround
 
     var draftProperties: [DeclSyntax] = []
     var primaryKey:
@@ -968,6 +834,7 @@ extension TableMacro: MemberMacro {
         var isEphemeral = false
         var isExplicitColumn = false
         var isGenerated = false
+        var isLazyInitializable: Bool?
 
         for attribute in property.attributes {
           guard
@@ -1035,6 +902,11 @@ extension TableMacro: MemberMacro {
               else { continue }
               isGenerated = true
 
+            case .some(let label) where label.text == "lazyInitializable":
+              isLazyInitializable =
+                argument.expression.as(BooleanLiteralExprSyntax.self)?.literal.tokenKind
+                == .keyword(.true)
+
             case let argument?:
               fatalError("Unexpected argument: \(argument)")
             }
@@ -1054,14 +926,10 @@ extension TableMacro: MemberMacro {
         }
 
         selectedColumns.append((identifier, columnQueryValueType))
-
-        if !isGenerated {
-          // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-          draftBindings.append(
-            (binding, columnQueryOutputType, identifier == primaryKey?.identifier)
-          )
-          // NB: End of workaround
-        }
+        columnWidths.append(
+          columnQueryValueType.map { "\($0)._columnWidth" as ExprSyntax }
+            ?? "\(moduleName)._columnWidth(\\QueryValue.\(identifier))"
+        )
 
         let defaultValue =
           binding.initializer?.value.rewritten(selfRewriter)
@@ -1083,7 +951,7 @@ extension TableMacro: MemberMacro {
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            \(raw: primaryKey ? "@StructuredQueries._PrimaryKeyDefault public var" : "public let") \
+            \(raw: primaryKey ? "@\(macrosModuleName)._PrimaryKeyDefault public var" : "public let") \
             \(primaryKey ? "primaryKey" : identifier) = \
             \(moduleName).\(raw: tableColumnType)<\
             QueryValue, \
@@ -1104,6 +972,15 @@ extension TableMacro: MemberMacro {
         allColumnNames.append(identifier)
         if !isGenerated {
           writableColumns.append(identifier)
+          let lazyInitializableByDefault: Bool
+          #if LazyInitializableByDefault
+            lazyInitializableByDefault = true
+          #else
+            lazyInitializableByDefault = false
+          #endif
+          let isLazyInitializableColumn =
+            isLazyInitializable
+            ?? (lazyInitializableByDefault && defaultValue == nil)
           if let primaryKey, primaryKey.identifier == identifier {
             var property = property
             for attributeIndex in property.attributes.indices {
@@ -1165,7 +1042,49 @@ extension TableMacro: MemberMacro {
             draftProperties.append(
               DeclSyntax(
                 property
-                  .with(\.bindingSpecifier.leadingTrivia, "")
+                  .with(\.bindingSpecifier, .keyword(.var, trailingTrivia: .space))
+                  .removingAccessors()
+                  .rewritten(selfRewriter)
+              )
+            )
+          } else if isLazyInitializableColumn,
+            let type = binding.typeAnnotation?.type,
+            !type.isOptionalType
+          {
+            var property = property
+            for attributeIndex in property.attributes.indices {
+              guard
+                var attribute = property.attributes[attributeIndex].as(AttributeSyntax.self)?
+                  .trimmed,
+                let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name
+                  .text,
+                ["Column", "Columns"].contains(attributeName)
+              else { continue }
+              if case .argumentList(var arguments) = attribute.arguments {
+                for argumentIndex in arguments.indices {
+                  var argument = arguments[argumentIndex]
+                  defer { arguments[argumentIndex] = argument }
+                  if argument.label?.text == "as",
+                    var expression = argument.expression.as(MemberAccessExprSyntax.self)
+                  {
+                    expression.base = "\(expression.base)?"
+                    argument.expression = ExprSyntax(expression)
+                  }
+                }
+                attribute.arguments = .argumentList(arguments)
+              }
+              property.attributes[attributeIndex] = .attribute(
+                attribute.with(\.trailingTrivia, .space)
+              )
+            }
+            property = property.trimmed
+            var binding = binding
+            binding.typeAnnotation?.type = type.asOptionalType()
+            property.bindings = [binding]
+            draftProperties.append(
+              DeclSyntax(
+                property
+                  .with(\.bindingSpecifier, .keyword(.var, trailingTrivia: .space))
                   .removingAccessors()
                   .rewritten(selfRewriter)
               )
@@ -1271,6 +1190,9 @@ extension TableMacro: MemberMacro {
             case .some(let label) where label.text == "generated":
               expansionFailed = true
 
+            case .some(let label) where label.text == "lazyInitializable":
+              expansionFailed = true
+
             case let argument?:
               fatalError("Unexpected argument: \(argument)")
             }
@@ -1343,68 +1265,23 @@ extension TableMacro: MemberMacro {
 
     var draft: DeclSyntax?
     if primaryKey != nil {
+      let draftAccess: String
+      switch declaration.accessLevelModifier?.name.tokenKind {
+      case .keyword(.private), .keyword(.fileprivate):
+        draftAccess = "fileprivate "
+      case nil, .keyword(.internal):
+        draftAccess = ""
+      default:
+        draftAccess = "\(declaration.accessLevelModifier?.name.text ?? "") "
+      }
       draft = """
 
         @_Draft(\(type).self)
-        public struct Draft {
-        \(draftProperties, separator: "\n")
-        }
-        """
-
-      // NB: A compiler bug prevents us from applying the '@_Draft' macro directly
-      var memberBlocks = try expansion(
-        of: "@_Draft(\(type).self)",
-        providingMembersOf: StructDeclSyntax("\(draft)"),
-        conformingTo: [],
-        in: context
-      )
-      .compactMap(\.trimmed)
-      memberBlocks.append(
-        contentsOf: try expansion(
-          of: "@_Draft(\(type).self)",
-          attachedTo: StructDeclSyntax("\(draft)"),
-          providingExtensionsOf: TypeSyntax("\(type).Draft"),
-          conformingTo: [],
-          in: context
-        )
-        .flatMap {
-          $0.memberBlock.members.trimmed.map(\.decl)
-        }
-      )
-      var memberwiseArguments: [PatternBindingSyntax] = []
-      var memberwiseAssignments: [TokenSyntax] = []
-      for (binding, queryOutputType, optionalize) in draftBindings {
-        var argument = binding.trimmed
-        if optionalize {
-          argument = argument.optionalized()
-        }
-        argument = argument.annotated(queryOutputType).rewritten(selfRewriter)
-        if argument.typeAnnotation == nil {
-          expansionFailed = true
-          continue
-        }
-        memberwiseArguments.append(argument)
-        memberwiseAssignments.append(
-          argument.trimmed.pattern.cast(IdentifierPatternSyntax.self).identifier
-        )
-      }
-      let memberwiseInit: DeclSyntax = """
-        public init(
-        \(memberwiseArguments, separator: ",\n")
-        ) {
-        \(memberwiseAssignments.map { "self.\($0) = \($0)" as ExprSyntax }, separator: "\n")
-        }
-        """
-      draft = """
-
-        public struct Draft: \(moduleName).TableDraft {
+        \(raw: draftAccess)struct Draft: \(moduleName).TableDraft, \(moduleName).PartialSelectStatement {
         public typealias PrimaryTable = \(type)
         \(draftProperties, separator: "\n")
-        \(memberBlocks, separator: "\n")
-        \(memberwiseInit)
         }
         """
-      // NB: End of workaround
     }
 
     var conformances: [TypeSyntax] = []
@@ -1463,35 +1340,57 @@ extension TableMacro: MemberMacro {
       writableColumns
       .map { "writableColumns.append(contentsOf: QueryValue.columns.\($0)._writableColumns)\n" }
       .joined()
+    let columnWidth = """
+      var columnWidth = 0
+      columnWidth += \(columnWidths.map(\.description).joined(separator: "\ncolumnWidth += "))
+      return columnWidth
+      """
 
-    return [
-      """
-      public \(nonisolated)struct TableColumns: \(schemaConformances, separator: ", ") {
-      public typealias QueryValue = \(type.trimmed)\(primaryKeyTypealias)
-      \(columnsProperties, separator: "\n")
-      public static var allColumns: [any \(moduleName).TableColumnExpression] {
-      var allColumns: [any \(moduleName).TableColumnExpression] = []
-      \(raw: allColumnsAssignment)return allColumns
+    var members =
+      [
+        """
+        public \(nonisolated)struct TableColumns: \(schemaConformances, separator: ", ") {
+        public typealias QueryValue = \(type.trimmed)\(primaryKeyTypealias)
+        \(columnsProperties, separator: "\n")
+        public static var allColumns: [any \(moduleName).TableColumnExpression] {
+        var allColumns: [any \(moduleName).TableColumnExpression] = []
+        \(raw: allColumnsAssignment)return allColumns
+        }
+        public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] {
+        var writableColumns: [any \(moduleName).WritableTableColumnExpression] = []
+        \(raw: writableColumnsAssignment)return writableColumns
+        }
+        public var queryFragment: QueryFragment {
+        "\(raw: selectedColumns.map { c, _ in #"\(self.\#(c))"# }.joined(separator: ", "))"
+        }
+        }
+        """,
+        """
+        public \(nonisolated)struct Selection: \(moduleName).TableExpression {
+        public typealias QueryValue = \(type.trimmed)
+        public let allColumns: [any \(moduleName).QueryExpression]
+        \(selectionInitializers, separator: "\n")
+        }
+        """,
+        draft,
+      ]
+      .compactMap { $0 }
+      + (node.attributeName.identifier == "_Draft"
+        ? typeAliases + [
+          "public \(nonisolated)static var columns: TableColumns { TableColumns() }",
+          "public \(nonisolated)static var _columnWidth: Swift.Int { \(raw: columnWidth) }",
+        ]
+        : [])
+    #if CasePaths
+      if declaration.is(EnumDeclSyntax.self) {
+        members += try CasePathableMacro.expansion(
+          of: node,
+          providingMembersOf: declaration,
+          in: context
+        )
       }
-      public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] {
-      var writableColumns: [any \(moduleName).WritableTableColumnExpression] = []
-      \(raw: writableColumnsAssignment)return writableColumns
-      }
-      public var queryFragment: QueryFragment {
-      "\(raw: selectedColumns.map { c, _ in #"\(self.\#(c))"# }.joined(separator: ", "))"
-      }
-      }
-      """,
-      """
-      public \(nonisolated)struct Selection: \(moduleName).TableExpression {
-      public typealias QueryValue = \(type.trimmed)
-      public let allColumns: [any \(moduleName).QueryExpression]
-      \(selectionInitializers, separator: "\n")
-      }
-      """,
-      draft,
-    ]
-    .compactMap { $0 }
+    #endif
+    return members
   }
 }
 
@@ -1518,6 +1417,24 @@ extension TableMacro: MemberAttributeMacro {
       let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
         .trimmingBackticks()
     else { return [] }
+    let columnType = binding.typeAnnotation?.type.trimmed ?? binding.initializer?.value.literalType
+    let checkAttribute: [AttributeSyntax]
+    if let columnType {
+      checkAttribute = ["@\(macrosModuleName)._ColumnCheck(\(columnType.trimmed).self)"]
+    } else if let initializer = binding.initializer {
+      checkAttribute = ["@\(macrosModuleName)._ColumnCheck(\(initializer.value.trimmed))"]
+    } else {
+      checkAttribute = []
+    }
+    let lazyInitializableHint: String
+    #if LazyInitializableByDefault
+      lazyInitializableHint =
+        binding.initializer == nil && binding.typeAnnotation?.type.isOptionalType == false
+        ? ", lazyInitializable: true"
+        : ""
+    #else
+      lazyInitializableHint = ""
+    #endif
     if identifier == "id" {
       for member in declaration.memberBlock.members {
         guard
@@ -1541,16 +1458,16 @@ extension TableMacro: MemberAttributeMacro {
           else { continue }
           return [
             """
-            @Column("\(raw: identifier)")
+            @Column("\(raw: identifier)"\(raw: lazyInitializableHint))
             """
-          ]
+          ] + checkAttribute
         }
       }
     }
     return [
       """
-      @Column("\(raw: identifier)"\(raw: identifier == "id" ? ", primaryKey: true" : ""))
+      @Column("\(raw: identifier)"\(raw: identifier == "id" ? ", primaryKey: true" : lazyInitializableHint))
       """
-    ]
+    ] + checkAttribute
   }
 }

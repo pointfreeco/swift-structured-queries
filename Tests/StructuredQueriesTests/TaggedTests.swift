@@ -1,4 +1,4 @@
-#if StructuredQueriesTagged
+#if Tagged
   import Dependencies
   import Foundation
   import InlineSnapshotTesting

@@ -41,16 +41,30 @@ let package = Package(
   ],
   traits: [
     .trait(
-      name: "StructuredQueriesCasePaths",
+      name: "LazyInitializableByDefault",
+      description: "Optionalize draft properties that have no default."
+    ),
+    .trait(
+      name: "CasePaths",
       description: "Introduce enum table support to StructuredQueries."
     ),
     .trait(
-      name: "StructuredQueriesTagged",
+      name: "Tagged",
       description: "Introduce StructuredQueries conformances to the swift-tagged package."
+    ),
+    .trait(
+      name: "StructuredQueriesCasePaths",
+      description: "A deprecated alias for the 'CasePaths' trait.",
+      enabledTraits: ["CasePaths"]
+    ),
+    .trait(
+      name: "StructuredQueriesTagged",
+      description: "A deprecated alias for the 'Tagged' trait.",
+      enabledTraits: ["Tagged"]
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.0.0"),
+    .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.8.0"),
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
     .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.1"),
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
@@ -65,6 +79,11 @@ let package = Package(
       dependencies: [
         "StructuredQueriesCore",
         "StructuredQueriesMacros",
+        .product(
+          name: "CasePaths",
+          package: "swift-case-paths",
+          condition: .when(traits: ["CasePaths"])
+        ),
       ]
     ),
     .target(
@@ -74,12 +93,12 @@ let package = Package(
         .product(
           name: "CasePaths",
           package: "swift-case-paths",
-          condition: .when(traits: ["StructuredQueriesCasePaths"])
+          condition: .when(traits: ["CasePaths"])
         ),
         .product(
           name: "Tagged",
           package: "swift-tagged",
-          condition: .when(traits: ["StructuredQueriesTagged"])
+          condition: .when(traits: ["Tagged"])
         ),
       ],
       exclude: ["Symbolic Links/README.md"]
@@ -87,6 +106,11 @@ let package = Package(
     .macro(
       name: "StructuredQueriesMacros",
       dependencies: [
+        .product(
+          name: "CasePathsMacrosSupport",
+          package: "swift-case-paths",
+          condition: .when(traits: ["CasePaths"])
+        ),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
       ],
@@ -156,16 +180,13 @@ let package = Package(
   swiftLanguageModes: [.v6]
 )
 
-if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil
-  || (ProcessInfo.processInfo.environment["GITHUB_ACTION_REPOSITORY"] ?? "").contains(
-    "swift-structured-queries"
-  )  // || true  // NB: Uncomment for local testing in Xcode
+if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil  // || true  // NB: Uncomment for local testing in Xcode
 {
   package.traits.insert(
     .default(
       enabledTraits: [
-        "StructuredQueriesCasePaths",
-        "StructuredQueriesTagged",
+        "CasePaths",
+        "Tagged",
       ]
     )
   )
