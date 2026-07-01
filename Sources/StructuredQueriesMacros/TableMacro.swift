@@ -1346,17 +1346,25 @@ extension TableMacro: MemberMacro {
       return columnWidth
       """
 
+    // NB: Workaround for https://github.com/pointfreeco/swift-structured-queries/issues/296
+    let optimizeNoneWorkaround = """
+      #if compiler(>=6.4)
+      @_optimize(none)
+      #endif
+
+      """
+
     var members =
       [
         """
         public \(nonisolated)struct TableColumns: \(schemaConformances, separator: ", ") {
         public typealias QueryValue = \(type.trimmed)\(primaryKeyTypealias)
         \(columnsProperties, separator: "\n")
-        public static var allColumns: [any \(moduleName).TableColumnExpression] {
+        \(raw: optimizeNoneWorkaround)public static var allColumns: [any \(moduleName).TableColumnExpression] {
         var allColumns: [any \(moduleName).TableColumnExpression] = []
         \(raw: allColumnsAssignment)return allColumns
         }
-        public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] {
+        \(raw: optimizeNoneWorkaround)public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] {
         var writableColumns: [any \(moduleName).WritableTableColumnExpression] = []
         \(raw: writableColumnsAssignment)return writableColumns
         }

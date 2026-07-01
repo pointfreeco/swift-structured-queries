@@ -32,6 +32,9 @@ extension SnapshotTests {
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("latitude", keyPath: \QueryValue.latitude)
             public let longitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("longitude", keyPath: \QueryValue.longitude)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -39,6 +42,9 @@ extension SnapshotTests {
               allColumns.append(contentsOf: QueryValue.columns.longitude._allColumns)
               return allColumns
             }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
               var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -78,6 +84,9 @@ extension SnapshotTests {
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
               public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double?>("latitude", keyPath: \QueryValue.latitude, default: nil)
               public let longitude = StructuredQueriesCore.TableColumn<QueryValue, Double?>("longitude", keyPath: \QueryValue.longitude, default: nil)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -85,6 +94,9 @@ extension SnapshotTests {
                 allColumns.append(contentsOf: QueryValue.columns.longitude._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -205,12 +217,18 @@ extension SnapshotTests {
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("latitude", keyPath: \QueryValue.latitude)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.latitude._allColumns)
               return allColumns
             }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
               var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -245,12 +263,18 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
               public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("latitude", keyPath: \QueryValue.latitude)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.latitude._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -363,12 +387,18 @@ extension SnapshotTests {
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             public let startsAt = StructuredQueriesCore.TableColumn<QueryValue, Date.ISO8601Representation>("startsAt", keyPath: \QueryValue.startsAt)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.startsAt._allColumns)
               return allColumns
             }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
               var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -403,12 +433,18 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
               public let startsAt = StructuredQueriesCore.TableColumn<QueryValue, Date.ISO8601Representation?>("startsAt", keyPath: \QueryValue.startsAt, default: nil)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.startsAt._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -517,12 +553,18 @@ extension SnapshotTests {
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             public let coordinate = StructuredQueriesCore.ColumnGroup<QueryValue, Coordinate>(keyPath: \QueryValue.coordinate)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.coordinate._allColumns)
               return allColumns
             }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
               var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -557,12 +599,18 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
               public let coordinate = StructuredQueriesCore.ColumnGroup<QueryValue, Coordinate?>(keyPath: \QueryValue.coordinate)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.coordinate._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -671,12 +719,18 @@ extension SnapshotTests {
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             public let systemFields = StructuredQueriesCore.TableColumn<QueryValue, CKRecord?.SystemFieldsRepresentation>("systemFields", keyPath: \QueryValue.systemFields)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.systemFields._allColumns)
               return allColumns
             }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
               var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -711,12 +765,18 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
               public let systemFields = StructuredQueriesCore.TableColumn<QueryValue, CKRecord?.SystemFieldsRepresentation>("systemFields", keyPath: \QueryValue.systemFields)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.systemFields._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -869,6 +929,9 @@ extension SnapshotTests {
             public let a = StructuredQueriesCore.TableColumn<QueryValue, String?>("a", keyPath: \QueryValue.a, default: nil)
             public let b = StructuredQueriesCore.TableColumn<QueryValue, Int?>("b", keyPath: \QueryValue.b, default: nil)
             public let c = StructuredQueriesCore.TableColumn<QueryValue, Double>("c", keyPath: \QueryValue.c)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
               var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -877,6 +940,9 @@ extension SnapshotTests {
               allColumns.append(contentsOf: QueryValue.columns.c._allColumns)
               return allColumns
             }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
             public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
               var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -921,6 +987,9 @@ extension SnapshotTests {
               public let a = StructuredQueriesCore.TableColumn<QueryValue, String?>("a", keyPath: \QueryValue.a, default: nil)
               public let b = StructuredQueriesCore.TableColumn<QueryValue, Int?>("b", keyPath: \QueryValue.b, default: nil)
               public let c = StructuredQueriesCore.TableColumn<QueryValue, Double?>("c", keyPath: \QueryValue.c, default: nil)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -929,6 +998,9 @@ extension SnapshotTests {
                 allColumns.append(contentsOf: QueryValue.columns.c._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -2592,6 +2664,9 @@ extension SnapshotTests {
               public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
               public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
               public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: nil)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -2600,6 +2675,9 @@ extension SnapshotTests {
                 allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -2647,6 +2725,9 @@ extension SnapshotTests {
                 public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
                 public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
                 public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: nil)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -2655,6 +2736,9 @@ extension SnapshotTests {
                   allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -2787,6 +2871,9 @@ extension SnapshotTests {
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
               public let quantity = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("quantity", keyPath: \QueryValue.quantity)
               public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: nil)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -2794,6 +2881,9 @@ extension SnapshotTests {
                 allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -2835,6 +2925,9 @@ extension SnapshotTests {
                 public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
                 public let quantity = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("quantity", keyPath: \QueryValue.quantity)
                 public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: nil)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -2842,6 +2935,9 @@ extension SnapshotTests {
                   allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -2972,6 +3068,9 @@ extension SnapshotTests {
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
               public let email = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("email", keyPath: \QueryValue.email, default: "")
               public let age = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("age", keyPath: \QueryValue.age)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -2979,6 +3078,9 @@ extension SnapshotTests {
                 allColumns.append(contentsOf: QueryValue.columns.age._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3020,6 +3122,9 @@ extension SnapshotTests {
                 public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
                 public let email = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("email", keyPath: \QueryValue.email, default: "")
                 public let age = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("age", keyPath: \QueryValue.age)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -3027,6 +3132,9 @@ extension SnapshotTests {
                   allColumns.append(contentsOf: QueryValue.columns.age._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3150,6 +3258,9 @@ extension SnapshotTests {
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
               public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
               public let generated = StructuredQueriesCore.GeneratedColumn<QueryValue, Int>("generated", keyPath: \QueryValue.generated)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
@@ -3157,6 +3268,9 @@ extension SnapshotTests {
                 allColumns.append(contentsOf: QueryValue.columns.generated._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3194,12 +3308,18 @@ extension SnapshotTests {
                 public typealias QueryValue = Draft
                 public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
                 public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                   allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3320,12 +3440,18 @@ extension SnapshotTests {
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
               public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3361,12 +3487,18 @@ extension SnapshotTests {
                 public typealias QueryValue = Draft
                 public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
                 public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                   allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3487,12 +3619,18 @@ extension SnapshotTests {
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
               public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3528,12 +3666,18 @@ extension SnapshotTests {
                 public typealias QueryValue = Draft
                 public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
                 public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                   allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3650,6 +3794,9 @@ extension SnapshotTests {
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore.TableColumn<QueryValue, Reminder.ID>("reminderID", keyPath: \QueryValue.reminderID)
               public let reminderTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("reminderTitle", keyPath: \QueryValue.reminderTitle)
               public let remindersListTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("remindersListTitle", keyPath: \QueryValue.remindersListTitle)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.reminderID._allColumns)
@@ -3657,6 +3804,9 @@ extension SnapshotTests {
                 allColumns.append(contentsOf: QueryValue.columns.remindersListTitle._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.reminderID._writableColumns)
@@ -3697,6 +3847,9 @@ extension SnapshotTests {
                 public let reminderID = StructuredQueriesCore.TableColumn<QueryValue, Reminder.ID?>("reminderID", keyPath: \QueryValue.reminderID, default: nil)
                 public let reminderTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("reminderTitle", keyPath: \QueryValue.reminderTitle)
                 public let remindersListTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("remindersListTitle", keyPath: \QueryValue.remindersListTitle)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.reminderID._allColumns)
@@ -3704,6 +3857,9 @@ extension SnapshotTests {
                   allColumns.append(contentsOf: QueryValue.columns.remindersListTitle._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.reminderID._writableColumns)
@@ -3832,12 +3988,18 @@ extension SnapshotTests {
               public let id = StructuredQueriesCore._TableColumn<QueryValue, MetadataID>.for("id", keyPath: \QueryValue.id)
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, MetadataID>.for("id", keyPath: \QueryValue.id)
               public let userModificationDate = StructuredQueriesCore._TableColumn<QueryValue, Date>.for("userModificationDate", keyPath: \QueryValue.userModificationDate)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.userModificationDate._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3873,12 +4035,18 @@ extension SnapshotTests {
                 public typealias QueryValue = Draft
                 public let id = StructuredQueriesCore._TableColumn<QueryValue, MetadataID?>.for("id", keyPath: \QueryValue.id, default: nil)
                 public let userModificationDate = StructuredQueriesCore._TableColumn<QueryValue, Date>.for("userModificationDate", keyPath: \QueryValue.userModificationDate)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                   allColumns.append(contentsOf: QueryValue.columns.userModificationDate._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -3990,12 +4158,18 @@ extension SnapshotTests {
               public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID>.for("id", keyPath: \QueryValue.id)
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, UUID>.for("id", keyPath: \QueryValue.id)
               public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                 var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.timestamps._allColumns)
                 return allColumns
               }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
               public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                 var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -4030,12 +4204,18 @@ extension SnapshotTests {
                 public typealias QueryValue = Draft
                 public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID?>.for("id", keyPath: \QueryValue.id, default: nil)
                 public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
                   var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                   allColumns.append(contentsOf: QueryValue.columns.timestamps._allColumns)
                   return allColumns
                 }
+                #if compiler(>=6.4)
+                @_optimize(none)
+                #endif
                 public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
                   var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
