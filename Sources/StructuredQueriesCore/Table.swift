@@ -8,6 +8,11 @@ public protocol Table: QueryRepresentable, PartialSelectStatement {
 
   associatedtype From = Never
 
+  /// A type that represents this type, but with lazily initializable data.
+  ///
+  /// This type can be used to stage an inserted row.
+  associatedtype Draft = Never
+
   /// A type that describes this table's columns.
   associatedtype TableColumns: TableDefinition<Self>
 

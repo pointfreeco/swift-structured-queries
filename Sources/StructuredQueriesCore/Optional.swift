@@ -79,6 +79,8 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
 }
 
 extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {
+  public typealias Draft = Wrapped.Draft?
+
   public static var tableName: String {
     Wrapped.tableName
   }
@@ -185,13 +187,11 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
 
 extension Optional: _Selection where Wrapped: _Selection {}
 
-extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {
-  public typealias Draft = Wrapped.Draft?
-}
+extension Optional: PrimaryKeyedTable where Wrapped: PrimaryKeyedTable {}
 
 extension Optional: TableDraft where Wrapped: TableDraft {
-  public typealias PrimaryTable = Wrapped.PrimaryTable?
-  public init(_ primaryTable: Wrapped.PrimaryTable?) {
+  public typealias SourceTable = Wrapped.SourceTable?
+  public init(_ primaryTable: Wrapped.SourceTable?) {
     self = primaryTable.map(Wrapped.init)
   }
 }

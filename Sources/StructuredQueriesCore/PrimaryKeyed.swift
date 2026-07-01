@@ -1,49 +1,50 @@
 /// A type representing a database table with a primary key.
 public protocol PrimaryKeyedTable<PrimaryKey>: Table
-where TableColumns: PrimaryKeyedTableDefinition<PrimaryKey> {
+where
+  TableColumns: PrimaryKeyedTableDefinition<PrimaryKey>,
+  Draft: TableDraft,
+  Draft.SourceTable == Self
+{
   /// A type representing this table's primary key.
   ///
   /// For auto-incrementing tables, this is typically `Int`.
   associatedtype PrimaryKey: QueryRepresentable & QueryExpression
   where PrimaryKey.QueryValue == PrimaryKey
-
-  /// A type that represents this type, but with an optional primary key.
-  ///
-  /// This type can be used to stage an inserted row.
-  associatedtype Draft: TableDraft where Draft.PrimaryTable == Self
 }
 
-// A type representing a draft to be saved to a table with a primary key.
+// A type representing a draft to be saved to a table.
 public protocol TableDraft: Table {
-  /// A type that represents the table with a primary key.
-  associatedtype PrimaryTable: PrimaryKeyedTable where PrimaryTable.Draft == Self
+  /// A type that represents the table this draft stages a row for.
+  associatedtype SourceTable: Table where SourceTable.Draft == Self
 
-  typealias PrimaryKey = PrimaryTable.PrimaryKey
+  /// Creates a draft from a persisted table row.
+  init(_ source: SourceTable)
+}
 
-  /// Creates a draft from a primary-keyed table.
-  init(_ primaryTable: PrimaryTable)
+extension TableDraft where SourceTable: PrimaryKeyedTable {
+  public typealias PrimaryKey = SourceTable.PrimaryKey
 }
 
 extension TableDraft {
   public static subscript(
-    dynamicMember keyPath: KeyPath<PrimaryTable.Type, some Statement<PrimaryTable>>
+    dynamicMember keyPath: KeyPath<SourceTable.Type, some Statement<SourceTable>>
   ) -> some Statement<Self> {
-    SQLQueryExpression("\(PrimaryTable.self[keyPath: keyPath])")
+    SQLQueryExpression("\(SourceTable.self[keyPath: keyPath])")
   }
 
   public static subscript(
-    dynamicMember keyPath: KeyPath<PrimaryTable.Type, some SelectStatementOf<PrimaryTable>>
+    dynamicMember keyPath: KeyPath<SourceTable.Type, some SelectStatementOf<SourceTable>>
   ) -> SelectOf<Self> {
-    unsafeBitCast(PrimaryTable.self[keyPath: keyPath].asSelect(), to: SelectOf<Self>.self)
+    unsafeBitCast(SourceTable.self[keyPath: keyPath].asSelect(), to: SelectOf<Self>.self)
   }
 
   public static var all: SelectOf<Self> {
-    unsafeBitCast(PrimaryTable.all.asSelect(), to: SelectOf<Self>.self)
+    unsafeBitCast(SourceTable.all.asSelect(), to: SelectOf<Self>.self)
   }
 
-  public static var schemaName: String? { PrimaryTable.schemaName }
+  public static var schemaName: String? { SourceTable.schemaName }
 
-  public static var tableName: String { PrimaryTable.tableName }
+  public static var tableName: String { SourceTable.tableName }
 }
 
 /// A type representing a database table's columns.
@@ -66,9 +67,9 @@ where QueryValue: PrimaryKeyedTable {
 
 extension TableDefinition where QueryValue: TableDraft {
   public subscript<Member>(
-    dynamicMember keyPath: KeyPath<QueryValue.PrimaryTable.TableColumns, Member>
+    dynamicMember keyPath: KeyPath<QueryValue.SourceTable.TableColumns, Member>
   ) -> Member {
-    QueryValue.PrimaryTable.columns[keyPath: keyPath]
+    QueryValue.SourceTable.columns[keyPath: keyPath]
   }
 }
 
@@ -114,13 +115,13 @@ extension PrimaryKeyedTable {
   }
 }
 
-extension TableDraft {
+extension TableDraft where SourceTable: PrimaryKeyedTable {
   /// A where clause filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A `WHERE` clause.
   public static func find(
-    _ primaryKey: some QueryExpression<PrimaryKey>
+    _ primaryKey: some QueryExpression<SourceTable.PrimaryKey>
   ) -> Where<Self> {
     find([primaryKey])
   }
@@ -130,7 +131,7 @@ extension TableDraft {
   /// - Parameter primaryKeys: Primary keys identifying table rows.
   /// - Returns: A `WHERE` clause.
   public static func find(
-    _ primaryKeys: some Sequence<some QueryExpression<PrimaryKey>>
+    _ primaryKeys: some Sequence<some QueryExpression<SourceTable.PrimaryKey>>
   ) -> Where<Self> {
     Self.where { $0.primaryKey.in(primaryKeys) }
   }
@@ -156,12 +157,12 @@ extension Where where From: PrimaryKeyedTable {
   }
 }
 
-extension Where where From: TableDraft {
+extension Where where From: TableDraft, From.SourceTable: PrimaryKeyedTable {
   /// Adds a primary key condition to a where clause.
   ///
   /// - Parameter primaryKey: A primary key.
   /// - Returns: A where clause with the added primary key.
-  public func find(_ primaryKey: some QueryExpression<From.PrimaryKey>)
+  public func find(_ primaryKey: some QueryExpression<From.SourceTable.PrimaryKey>)
     -> Self
   {
     find([primaryKey])
@@ -172,7 +173,7 @@ extension Where where From: TableDraft {
   /// - Parameter primaryKeys: A sequence of primary keys.
   /// - Returns: A where clause with the added primary keys condition.
   public func find(
-    _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
+    _ primaryKeys: some Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
   ) -> Self {
     self.where { $0.primaryKey.in(primaryKeys) }
   }
@@ -198,13 +199,13 @@ extension Select where From: PrimaryKeyedTable {
   }
 }
 
-extension Select where From: TableDraft {
+extension Select where From: TableDraft, From.SourceTable: PrimaryKeyedTable {
   /// A select statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A select statement filtered by the given key.
   public func find(
-    _ primaryKey: some QueryExpression<From.PrimaryKey>
+    _ primaryKey: some QueryExpression<From.SourceTable.PrimaryKey>
   ) -> Self {
     and(From.find(primaryKey))
   }
@@ -214,7 +215,7 @@ extension Select where From: TableDraft {
   /// - Parameter primaryKeys: A sequence of primary keys.
   /// - Returns: A select statement filtered by the given keys.
   public func find(
-    _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
+    _ primaryKeys: some Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
   ) -> Self {
     and(From.find(primaryKeys))
   }
@@ -240,12 +241,12 @@ extension Update where From: PrimaryKeyedTable {
   }
 }
 
-extension Update where From: TableDraft {
+extension Update where From: TableDraft, From.SourceTable: PrimaryKeyedTable {
   /// An update statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: An update statement filtered by the given key.
-  public func find(_ primaryKey: some QueryExpression<From.PrimaryKey>)
+  public func find(_ primaryKey: some QueryExpression<From.SourceTable.PrimaryKey>)
     -> Self
   {
     find([primaryKey])
@@ -256,7 +257,7 @@ extension Update where From: TableDraft {
   /// - Parameter primaryKeys: A sequence of primary keys.
   /// - Returns: An update statement filtered by the given keys.
   public func find(
-    _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
+    _ primaryKeys: some Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
   ) -> Self {
     self.where { $0.primaryKey.in(primaryKeys) }
   }
@@ -282,12 +283,12 @@ extension Delete where From: PrimaryKeyedTable {
   }
 }
 
-extension Delete where From: TableDraft {
+extension Delete where From: TableDraft, From.SourceTable: PrimaryKeyedTable {
   /// A delete statement filtered by a primary key.
   ///
   /// - Parameter primaryKey: A primary key identifying a table row.
   /// - Returns: A delete statement filtered by the given key.
-  public func find(_ primaryKey: some QueryExpression<From.PrimaryKey>)
+  public func find(_ primaryKey: some QueryExpression<From.SourceTable.PrimaryKey>)
     -> Self
   {
     find([primaryKey])
@@ -298,7 +299,7 @@ extension Delete where From: TableDraft {
   /// - Parameter primaryKeys: A sequence of primary keys.
   /// - Returns: A delete statement filtered by the given keys.
   public func find(
-    _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
+    _ primaryKeys: some Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
   ) -> Self {
     self.where { $0.primaryKey.in(primaryKeys) }
   }

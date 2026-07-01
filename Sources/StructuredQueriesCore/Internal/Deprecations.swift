@@ -1,5 +1,12 @@
 import Foundation
 
+// NB: Deprecated after 0.32.0:
+
+extension TableDraft {
+  @available(*, deprecated, renamed: "SourceTable")
+  public typealias PrimaryTable = SourceTable
+}
+
 // NB: Deprecated after 0.6.0:
 
 extension QueryFragment {

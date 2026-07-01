@@ -1375,7 +1375,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = User
+            public typealias SourceTable = User
             var id: ID<User, UUID>?
             var referrerID: ID<User, UUID>?
 
@@ -1442,7 +1442,7 @@ extension SnapshotTests {
             self.id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
             self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.referrerID = other.referrerID
           }
@@ -1614,7 +1614,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = SyncUp
+            public typealias SourceTable = SyncUp
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             @StructuredQueries._ColumnCheck(60 * 5)
@@ -1683,7 +1683,7 @@ extension SnapshotTests {
             self.id = try decoder.decode() ?? nil
             self.seconds = try decoder.decode() ?? 60 * 5
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.seconds = other.seconds
           }
@@ -1785,7 +1785,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = RemindersList
+            public typealias SourceTable = RemindersList
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
@@ -1862,7 +1862,7 @@ extension SnapshotTests {
             self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
             self.name = try decoder.decode() ?? ""
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.color = other.color
             self.name = other.name
@@ -2922,7 +2922,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Foo
+            public typealias SourceTable = Foo
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
 
@@ -2982,7 +2982,7 @@ extension SnapshotTests {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode() ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
           }
         }
@@ -3121,7 +3121,7 @@ extension SnapshotTests {
             }
             self.id = id
           }
-          public nonisolated init(_ other: PrimaryTable) {
+          public nonisolated init(_ other: SourceTable) {
             self.id = other.id
           }
         }
@@ -3205,7 +3205,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Reminder
+            public typealias SourceTable = Reminder
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             @StructuredQueries._ColumnCheck(Swift.String.self)
@@ -3291,7 +3291,7 @@ extension SnapshotTests {
             self.date = try decoder.decode(Date.UnixTimeRepresentation.self) ?? nil
             self.priority = try decoder.decode() ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.title = other.title
             self.date = other.date
@@ -3383,7 +3383,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Reminder
+            public typealias SourceTable = Reminder
             var id: UUID?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3442,7 +3442,7 @@ extension SnapshotTests {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(UUID.BytesRepresentation.self) ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
           }
         }
@@ -3610,7 +3610,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Reminder
+            public typealias SourceTable = Reminder
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?  // TODO: Migrate to UUID
             @StructuredQueries._ColumnCheck(Swift.String.self)
@@ -3679,7 +3679,7 @@ extension SnapshotTests {
             self.id = try decoder.decode() ?? nil
             self.title = try decoder.decode() ?? ""
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.title = other.title
           }
@@ -3761,7 +3761,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = ReminderTag
+            public typealias SourceTable = ReminderTag
             var id: ReminderTagID?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3820,7 +3820,7 @@ extension SnapshotTests {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode() ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
           }
         }

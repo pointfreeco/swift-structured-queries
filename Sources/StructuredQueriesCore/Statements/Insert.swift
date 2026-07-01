@@ -923,7 +923,7 @@ public enum InsertValuesBuilder<Value> {
 
   @_disfavoredOverload
   public static func buildExpression(_ expression: [Value.Draft]) -> [[QueryFragment]]
-  where Value: PrimaryKeyedTable {
+  where Value: Table, Value.Draft: TableDraft {
     var valueFragments: [[QueryFragment]] = []
     for value in expression {
       var valueFragment: [QueryFragment] = []
@@ -965,7 +965,7 @@ public enum InsertValuesBuilder<Value> {
   }
 
   public static func buildExpression(_ expression: Value.Draft) -> [[QueryFragment]]
-  where Value: PrimaryKeyedTable {
+  where Value: Table, Value.Draft: TableDraft {
     buildExpression([expression])
   }
 

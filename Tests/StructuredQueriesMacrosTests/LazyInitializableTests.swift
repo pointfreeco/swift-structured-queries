@@ -73,7 +73,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Place
+            public typealias SourceTable = Place
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             var latitude: Double?
@@ -149,7 +149,7 @@ extension SnapshotTests {
             self.latitude = try decoder.decode() ?? nil
             self.longitude = try decoder.decode() ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.latitude = other.latitude
             self.longitude = other.longitude
@@ -254,7 +254,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Place
+            public typealias SourceTable = Place
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             var latitude: Double
@@ -326,7 +326,7 @@ extension SnapshotTests {
             }
             self.latitude = latitude
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.latitude = other.latitude
           }
@@ -424,7 +424,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Event
+            public typealias SourceTable = Event
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             var startsAt: Date?
@@ -492,7 +492,7 @@ extension SnapshotTests {
             self.id = try decoder.decode() ?? nil
             self.startsAt = try decoder.decode(Date.ISO8601Representation.self) ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.startsAt = other.startsAt
           }
@@ -590,7 +590,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Place
+            public typealias SourceTable = Place
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             var coordinate: Coordinate?
@@ -658,7 +658,7 @@ extension SnapshotTests {
             self.id = try decoder.decode() ?? nil
             self.coordinate = try decoder.decode() ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.coordinate = other.coordinate
           }
@@ -756,7 +756,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Record
+            public typealias SourceTable = Record
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             var systemFields: CKRecord?
@@ -828,7 +828,7 @@ extension SnapshotTests {
             }
             self.systemFields = systemFields
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.systemFields = other.systemFields
           }
@@ -974,7 +974,7 @@ extension SnapshotTests {
             }
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-            public typealias PrimaryTable = Record
+            public typealias SourceTable = Record
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
             var a: String?
@@ -1058,7 +1058,7 @@ extension SnapshotTests {
             self.b = try decoder.decode() ?? nil
             self.c = try decoder.decode() ?? nil
           }
-          nonisolated init(_ other: PrimaryTable) {
+          nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.a = other.a
             self.b = other.b
@@ -1096,6 +1096,197 @@ extension SnapshotTests {
             }
             self.id = id
             self.c = c
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func nonPrimaryKeyedTableWithLazyColumnGeneratesDraft() {
+      assertMacro {
+        """
+        @Table
+        struct Location {
+          @Column(lazyInitializable: true)
+          var latitude: Double
+          @Column(lazyInitializable: true)
+          var longitude: Double
+          var name: String
+        }
+        """
+      } expansion: {
+        #"""
+        struct Location {
+          var latitude: Double
+          var longitude: Double
+          @StructuredQueries._ColumnCheck(String.self)
+          var name: String
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+            public typealias QueryValue = Location
+            public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("latitude", keyPath: \QueryValue.latitude)
+            public let longitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("longitude", keyPath: \QueryValue.longitude)
+            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.latitude._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.longitude._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+              return allColumns
+            }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.latitude._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.longitude._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.latitude), \(self.longitude), \(self.name)"
+            }
+          }
+
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Location
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              latitude: some StructuredQueriesCore.QueryExpression<Double>,
+              longitude: some StructuredQueriesCore.QueryExpression<Double>,
+              name: some StructuredQueriesCore.QueryExpression<String>
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: latitude._allColumns)
+              allColumns.append(contentsOf: longitude._allColumns)
+              allColumns.append(contentsOf: name._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+          struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
+            public typealias SourceTable = Location
+            var latitude: Double?
+            var longitude: Double?
+            @StructuredQueries._ColumnCheck(String.self)
+            var name: String
+
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double?>("latitude", keyPath: \QueryValue.latitude, default: nil)
+              public let longitude = StructuredQueriesCore.TableColumn<QueryValue, Double?>("longitude", keyPath: \QueryValue.longitude, default: nil)
+              public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.latitude._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.longitude._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
+                return allColumns
+              }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.latitude._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.longitude._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.latitude), \(self.longitude), \(self.name)"
+              }
+            }
+
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                latitude: some StructuredQueriesCore.QueryExpression<Double?> = Double?(queryOutput: nil),
+                longitude: some StructuredQueriesCore.QueryExpression<Double?> = Double?(queryOutput: nil),
+                name: some StructuredQueriesCore.QueryExpression<String>
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: latitude._allColumns)
+                allColumns.append(contentsOf: longitude._allColumns)
+                allColumns.append(contentsOf: name._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Swift.Int {
+              var columnWidth = 0
+              columnWidth += Double?._columnWidth
+              columnWidth += Double?._columnWidth
+              columnWidth += String._columnWidth
+              return columnWidth
+            }
+          }
+        }
+
+        nonisolated extension Draft {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.latitude = try decoder.decode() ?? nil
+            self.longitude = try decoder.decode() ?? nil
+            let name = try decoder.decode(\QueryValue.name)
+            guard let name else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.name = name
+          }
+          nonisolated init(_ other: SourceTable) {
+            self.latitude = other.latitude
+            self.longitude = other.longitude
+            self.name = other.name
+          }
+        }
+
+        nonisolated extension Location: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
+          public typealias QueryValue = Self
+          public typealias From = Swift.Never
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+          public nonisolated static var _columnWidth: Int {
+            var columnWidth = 0
+            columnWidth += Double._columnWidth
+            columnWidth += Double._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
+          }
+          public nonisolated static var tableName: String {
+            "locations"
+          }
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let latitude = try decoder.decode(\QueryValue.latitude)
+            let longitude = try decoder.decode(\QueryValue.longitude)
+            let name = try decoder.decode(\QueryValue.name)
+            guard let latitude else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let longitude else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let name else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.latitude = latitude
+            self.longitude = longitude
+            self.name = name
           }
         }
         """#
@@ -1182,7 +1373,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Place
+              public typealias SourceTable = Place
               @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @Column("latitude") @StructuredQueries._ColumnCheck(Double?.self)
@@ -1269,7 +1460,7 @@ extension SnapshotTests {
               self.name = try decoder.decode() ?? ""
               self.note = try decoder.decode() ?? nil
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.latitude = other.latitude
               self.name = other.name
@@ -1381,7 +1572,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Item
+              public typealias SourceTable = Item
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @StructuredQueries._ColumnCheck(Int?.self)
@@ -1459,7 +1650,7 @@ extension SnapshotTests {
               self.quantity = try decoder.decode() ?? nil
               self.note = try decoder.decode() ?? nil
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.quantity = other.quantity
               self.note = other.note
@@ -1574,7 +1765,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = User
+              public typealias SourceTable = User
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: /* TODO: UUID */ Int? // Primary key
               @StructuredQueries._ColumnCheck(String?.self)
@@ -1652,7 +1843,7 @@ extension SnapshotTests {
               self.email = try decoder.decode() ?? ""
               self.age = try decoder.decode() ?? nil
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.email = other.email
               self.age = other.age
@@ -1759,7 +1950,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = User
+              public typealias SourceTable = User
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @StructuredQueries._ColumnCheck(String?.self)
@@ -1828,7 +2019,7 @@ extension SnapshotTests {
               self.id = try decoder.decode() ?? nil
               self.name = try decoder.decode() ?? nil
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
             }
@@ -1934,7 +2125,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = SyncUp
+              public typealias SourceTable = SyncUp
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @StructuredQueries._ColumnCheck(String?.self)
@@ -2003,7 +2194,7 @@ extension SnapshotTests {
               self.id = try decoder.decode() ?? nil
               self.name = try decoder.decode() ?? nil
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
             }
@@ -2109,7 +2300,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Foo
+              public typealias SourceTable = Foo
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @StructuredQueries._ColumnCheck(String?.self)
@@ -2178,7 +2369,7 @@ extension SnapshotTests {
               self.id = try decoder.decode() ?? nil
               self.name = try decoder.decode() ?? nil
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
             }
@@ -2284,7 +2475,7 @@ extension SnapshotTests {
               }
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = ReminderWithList
+              public typealias SourceTable = ReminderWithList
               var reminderID: Reminder.ID?
               @StructuredQueries._ColumnCheck(String?.self)
               var reminderTitle: String?
@@ -2361,7 +2552,7 @@ extension SnapshotTests {
               self.reminderTitle = try decoder.decode() ?? nil
               self.remindersListTitle = try decoder.decode() ?? nil
             }
-            fileprivate nonisolated init(_ other: PrimaryTable) {
+            fileprivate nonisolated init(_ other: SourceTable) {
               self.reminderID = other.reminderID
               self.reminderTitle = other.reminderTitle
               self.remindersListTitle = other.remindersListTitle
@@ -2466,7 +2657,7 @@ extension SnapshotTests {
               }
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Metadata
+              public typealias SourceTable = Metadata
               @StructuredQueries._ColumnCheck(MetadataID?.self)
               var id: MetadataID?
               @StructuredQueries._ColumnCheck(Date?.self)
@@ -2535,7 +2726,7 @@ extension SnapshotTests {
               self.id = try decoder.decode() ?? nil
               self.userModificationDate = try decoder.decode() ?? nil
             }
-            fileprivate nonisolated init(_ other: PrimaryTable) {
+            fileprivate nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.userModificationDate = other.userModificationDate
             }
@@ -2632,7 +2823,7 @@ extension SnapshotTests {
               }
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Row
+              public typealias SourceTable = Row
               @StructuredQueries._ColumnCheck(UUID?.self)
               var id: UUID?
               var timestamps: Timestamps?
@@ -2700,7 +2891,7 @@ extension SnapshotTests {
               self.id = try decoder.decode() ?? nil
               self.timestamps = try decoder.decode() ?? nil
             }
-            fileprivate nonisolated init(_ other: PrimaryTable) {
+            fileprivate nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.timestamps = other.timestamps
             }
@@ -2817,7 +3008,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Place
+              public typealias SourceTable = Place
               @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @Column("latitude") @StructuredQueries._ColumnCheck(Double.self)
@@ -2908,7 +3099,7 @@ extension SnapshotTests {
               }
               self.latitude = latitude
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.latitude = other.latitude
               self.name = other.name
@@ -3020,7 +3211,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Item
+              public typealias SourceTable = Item
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @StructuredQueries._ColumnCheck(Int.self)
@@ -3102,7 +3293,7 @@ extension SnapshotTests {
               }
               self.quantity = quantity
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.quantity = other.quantity
               self.note = other.note
@@ -3217,7 +3408,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = User
+              public typealias SourceTable = User
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: /* TODO: UUID */ Int? // Primary key
               @StructuredQueries._ColumnCheck(String?.self)
@@ -3299,7 +3490,7 @@ extension SnapshotTests {
               }
               self.age = age
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.email = other.email
               self.age = other.age
@@ -3406,7 +3597,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = User
+              public typealias SourceTable = User
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @StructuredQueries._ColumnCheck(String.self)
@@ -3479,7 +3670,7 @@ extension SnapshotTests {
               }
               self.name = name
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
             }
@@ -3585,7 +3776,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = SyncUp
+              public typealias SourceTable = SyncUp
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @StructuredQueries._ColumnCheck(String.self)
@@ -3658,7 +3849,7 @@ extension SnapshotTests {
               }
               self.name = name
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
             }
@@ -3764,7 +3955,7 @@ extension SnapshotTests {
               }
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Foo
+              public typealias SourceTable = Foo
               @StructuredQueries._ColumnCheck(Int?.self)
               var id: Int?
               @StructuredQueries._ColumnCheck(String.self)
@@ -3837,7 +4028,7 @@ extension SnapshotTests {
               }
               self.name = name
             }
-            nonisolated init(_ other: PrimaryTable) {
+            nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
             }
@@ -3943,7 +4134,7 @@ extension SnapshotTests {
               }
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = ReminderWithList
+              public typealias SourceTable = ReminderWithList
               var reminderID: Reminder.ID?
               @StructuredQueries._ColumnCheck(String.self)
               let reminderTitle: String
@@ -4028,7 +4219,7 @@ extension SnapshotTests {
               self.reminderTitle = reminderTitle
               self.remindersListTitle = remindersListTitle
             }
-            fileprivate nonisolated init(_ other: PrimaryTable) {
+            fileprivate nonisolated init(_ other: SourceTable) {
               self.reminderID = other.reminderID
               self.reminderTitle = other.reminderTitle
               self.remindersListTitle = other.remindersListTitle
@@ -4133,7 +4324,7 @@ extension SnapshotTests {
               }
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Metadata
+              public typealias SourceTable = Metadata
               @StructuredQueries._ColumnCheck(MetadataID?.self)
               var id: MetadataID?
               @StructuredQueries._ColumnCheck(Date.self)
@@ -4206,7 +4397,7 @@ extension SnapshotTests {
               }
               self.userModificationDate = userModificationDate
             }
-            fileprivate nonisolated init(_ other: PrimaryTable) {
+            fileprivate nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.userModificationDate = other.userModificationDate
             }
@@ -4303,7 +4494,7 @@ extension SnapshotTests {
               }
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
-              public typealias PrimaryTable = Row
+              public typealias SourceTable = Row
               @StructuredQueries._ColumnCheck(UUID?.self)
               var id: UUID?
               var timestamps: Timestamps
@@ -4375,7 +4566,7 @@ extension SnapshotTests {
               }
               self.timestamps = timestamps
             }
-            fileprivate nonisolated init(_ other: PrimaryTable) {
+            fileprivate nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.timestamps = other.timestamps
             }

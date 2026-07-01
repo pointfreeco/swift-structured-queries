@@ -647,7 +647,7 @@ extension TableMacro: ExtensionMacro {
     if draftTableType != nil {
       initFromOther = """
 
-        \(raw: initAccess)\(nonisolated)init(_ other: PrimaryTable) {
+        \(raw: initAccess)\(nonisolated)init(_ other: SourceTable) {
         \(allColumns.map { "self.\($0) = other.\($0)" as ExprSyntax }, separator: "\n")
         }
         """
@@ -797,6 +797,7 @@ extension TableMacro: MemberMacro {
     var expansionFailed = false
 
     var draftProperties: [DeclSyntax] = []
+    var draftHasLazyColumn = false
     var primaryKey:
       (
         identifier: TokenSyntax,
@@ -1051,6 +1052,7 @@ extension TableMacro: MemberMacro {
             let type = binding.typeAnnotation?.type,
             !type.isOptionalType
           {
+            draftHasLazyColumn = true
             var property = property
             for attributeIndex in property.attributes.indices {
               guard
@@ -1264,7 +1266,7 @@ extension TableMacro: MemberMacro {
     }
 
     var draft: DeclSyntax?
-    if primaryKey != nil {
+    if node.attributeName.identifier != "_Draft", primaryKey != nil || draftHasLazyColumn {
       let draftAccess: String
       switch declaration.accessLevelModifier?.name.tokenKind {
       case .keyword(.private), .keyword(.fileprivate):
@@ -1278,7 +1280,7 @@ extension TableMacro: MemberMacro {
 
         @_Draft(\(type).self)
         \(raw: draftAccess)struct Draft: \(moduleName).TableDraft, \(moduleName).PartialSelectStatement {
-        public typealias PrimaryTable = \(type)
+        public typealias SourceTable = \(type)
         \(draftProperties, separator: "\n")
         }
         """

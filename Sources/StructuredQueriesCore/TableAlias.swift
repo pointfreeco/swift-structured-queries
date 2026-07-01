@@ -86,9 +86,22 @@ extension Table {
 ///
 /// This type is returned from ``Table/as(_:)``.
 public struct TableAlias<
-  Base: Table,
+  Base,
   Name: AliasName  // We should use a value generic here when it's possible.
->: _OptionalPromotable, Table {
+>: _OptionalPromotable {
+  let base: Base
+
+  subscript<Member: QueryRepresentable>(
+    member _: KeyPath<Member, Member>,
+    column keyPath: KeyPath<Base, Member.QueryOutput>
+  ) -> Member.QueryOutput {
+    base[keyPath: keyPath]
+  }
+}
+
+extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table {
+  public typealias Draft = TableAlias<Base.Draft, Name>
+
   public static var columns: TableColumns {
     TableColumns()
   }
@@ -115,15 +128,6 @@ public struct TableAlias<
     select.clauses.order = select.clauses.order
       .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
     return select
-  }
-
-  let base: Base
-
-  subscript<Member: QueryRepresentable>(
-    member _: KeyPath<Member, Member>,
-    column keyPath: KeyPath<Base, Member.QueryOutput>
-  ) -> Member.QueryOutput {
-    base[keyPath: keyPath]
   }
 
   @dynamicMemberLookup
@@ -200,13 +204,11 @@ public struct TableAlias<
 
 extension TableAlias: _Selection where Base: _Selection {}
 
-extension TableAlias: PrimaryKeyedTable where Base: PrimaryKeyedTable {
-  public typealias Draft = TableAlias<Base.Draft, Name>
-}
+extension TableAlias: PrimaryKeyedTable where Base: PrimaryKeyedTable {}
 
 extension TableAlias: TableDraft where Base: TableDraft {
-  public typealias PrimaryTable = TableAlias<Base.PrimaryTable, Name>
-  public init(_ primaryTable: TableAlias<Base.PrimaryTable, Name>) {
+  public typealias SourceTable = TableAlias<Base.SourceTable, Name>
+  public init(_ primaryTable: TableAlias<Base.SourceTable, Name>) {
     self.init(base: Base(primaryTable.base))
   }
 }
