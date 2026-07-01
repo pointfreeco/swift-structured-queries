@@ -1,6 +1,6 @@
 #if CasePaths
   #if EXCLUDE_EXPORTS
-    import CasePaths
+    public import CasePaths
   #else
     @_exported import CasePaths
   #endif
