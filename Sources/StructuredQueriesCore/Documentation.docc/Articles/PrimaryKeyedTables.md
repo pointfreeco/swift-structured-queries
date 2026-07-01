@@ -169,7 +169,7 @@ struct User {
 
 It is not appropriate to assign these values when creating or updating the record, and instead it
 is best to leave that logic to the database (via default values and triggers). To make it so that
-you can omit those fields when creating drafts, use the `@Column` macro with the 
+you can omit those fields when creating drafts, use the `@Column` macro with the
 `lazyInitializable` option:
 
 ```swift
@@ -181,7 +181,7 @@ you can omit those fields when creating drafts, use the `@Column` macro with the
   @Column(lazyInitializable: true)
   let updatedAt: Date
 }
-  
+
 let draft = Draft(name: "Blob")
 ```
 
@@ -191,7 +191,7 @@ set the foreign key on the child:
 
 ```swift
 @Table struct Reminder {
-  let id: UUID 
+  let id: UUID
   var name = ""
   @Column(lazyInitializable: true)
   var remindersListID: RemindersList.ID
