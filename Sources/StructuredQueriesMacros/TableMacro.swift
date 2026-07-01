@@ -306,7 +306,37 @@ extension TableMacro: ExtensionMacro {
               isGenerated = true
 
             case .some(let label) where label.text == "lazyInitializable":
-              break
+              guard
+                draftTableType == nil,
+                binding.typeAnnotation?.type.isOptionalType == true
+              else { break }
+              var newAttribute = attribute
+              var newArguments = arguments
+              newArguments.remove(at: argumentIndex)
+              if newArguments.isEmpty {
+                newAttribute.leftParen = nil
+                newAttribute.arguments = nil
+                newAttribute.rightParen = nil
+              } else {
+                newArguments[newArguments.index(before: newArguments.endIndex)].trailingComma = nil
+                newAttribute.arguments = .argumentList(newArguments)
+              }
+              context.diagnose(
+                Diagnostic(
+                  node: argument,
+                  message: MacroExpansionWarningMessage(
+                    """
+                    Argument 'lazyInitializable' has no effect on optional column \
+                    '\(identifier.text)'
+                    """
+                  ),
+                  fixIt: .replace(
+                    message: MacroExpansionFixItMessage("Remove 'lazyInitializable'"),
+                    oldNode: Syntax(attribute),
+                    newNode: Syntax(newAttribute)
+                  )
+                )
+              )
 
             case let argument?:
               fatalError("Unexpected argument: \(argument)")
