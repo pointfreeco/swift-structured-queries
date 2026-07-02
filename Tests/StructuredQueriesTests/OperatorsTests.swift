@@ -269,6 +269,14 @@ extension SnapshotTests {
         SET "string" = ("rows"."string") || ('!')
         """
       }
+      assertInlineSnapshot(
+        of: #sql("'hello'", as: String?.self).map { $0.contains("el") },
+        as: .sql
+      ) {
+        """
+        CASE 'hello' IS NULL WHEN 1 THEN NULL ELSE ('hello' LIKE '%el%') END
+        """
+      }
     }
 
     @Test func collectionIn() async throws {
