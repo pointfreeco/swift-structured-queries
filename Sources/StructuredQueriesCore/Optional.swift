@@ -276,11 +276,11 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   /// - Parameter transform: A closure that takes an unwrapped version of this expression.
   /// - Returns: The result of the transform function, optionalized.
   public func map<T>(
-    _ transform: (SQLQueryExpression<QueryValue.Wrapped>) -> some QueryExpression<T>
+    _ transform: (_UnwrapExpression<Self>) -> some QueryExpression<T>
   ) -> some QueryExpression<T?> {
     Case(SQLQueryExpression("\(self) IS NULL"))
       .when(SQLQueryExpression("1"), then: SQLQueryExpression("NULL"))
-      .else(SQLQueryExpression(transform(SQLQueryExpression(queryFragment)).queryFragment))
+      .else(SQLQueryExpression(transform(_UnwrapExpression(base: self)).queryFragment))
   }
 
   /// Creates a new optional expression from this one by applying an unwrapped version of this
@@ -297,8 +297,18 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   /// - Parameter transform: A closure that takes an unwrapped version of this expression.
   /// - Returns: The result of the transform function.
   public func flatMap<T>(
-    _ transform: (SQLQueryExpression<QueryValue.Wrapped>) -> some QueryExpression<T?>
+    _ transform: (_UnwrapExpression<Self>) -> some QueryExpression<T?>
   ) -> some QueryExpression<T?> {
-    SQLQueryExpression(transform(SQLQueryExpression(queryFragment)).queryFragment)
+    SQLQueryExpression(transform(_UnwrapExpression(base: self)).queryFragment)
   }
+}
+
+public struct _UnwrapExpression<Base: QueryExpression>: QueryExpression
+where Base.QueryValue: _OptionalProtocol {
+  public typealias QueryValue = Base.QueryValue.Wrapped
+  public typealias From = Never
+
+  let base: Base
+
+  public var queryFragment: QueryFragment { base.queryFragment}
 }
