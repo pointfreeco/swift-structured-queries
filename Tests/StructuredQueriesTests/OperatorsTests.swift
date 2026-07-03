@@ -274,7 +274,7 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        CASE 'hello' IS NULL WHEN 1 THEN NULL ELSE ('hello' LIKE '%el%') END
+        CASE ('hello') IS (NULL) WHEN 1 THEN NULL ELSE ('hello' LIKE '%el%') END
         """
       }
     }

@@ -19,11 +19,13 @@ extension SnapshotTests {
         CREATE TABLE "optionalIntegers" (
           "value" INTEGER
         ) STRICT
-        """)
+        """
+      )
       try database.execute(
         """
         INSERT INTO "optionalIntegers" ("value") VALUES (1), (NULL), (3)
-        """)
+        """
+      )
 
       assertQuery(
         OptionalInteger.select {
@@ -31,7 +33,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT CASE "optionalIntegers"."value" IS NULL WHEN 1 THEN NULL ELSE "increment"("optionalIntegers"."value") END
+        SELECT CASE ("optionalIntegers"."value") IS (NULL) WHEN 1 THEN NULL ELSE "increment"("optionalIntegers"."value") END
         FROM "optionalIntegers"
         """
       } results: {
@@ -57,7 +59,7 @@ extension SnapshotTests {
     @Test func selectionMap() {
       assertInlineSnapshot(of: Item.select { $0.group.map { _ in true } ?? false }, as: .sql) {
         """
-        SELECT coalesce(CASE "items"."a", "items"."b" IS NULL WHEN 1 THEN NULL ELSE 1 END, 0)
+        SELECT coalesce(CASE ("items"."a", "items"."b") IS (NULL, NULL) WHEN 1 THEN NULL ELSE 1 END, 0)
         FROM "items"
         """
       }
