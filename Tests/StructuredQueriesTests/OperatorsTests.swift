@@ -231,6 +231,27 @@ extension SnapshotTests {
         ("rows"."string" LIKE 'a%' ESCAPE '\')
         """#
       }
+      assertInlineSnapshot(of: Row.update { $0.string += "!" }, as: .sql) {
+        """
+        UPDATE "rows"
+        SET "string" = ("rows"."string") || ('!')
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.string.append("!") }, as: .sql) {
+        """
+        UPDATE "rows"
+        SET "string" = ("rows"."string") || ('!')
+        """
+      }
+      assertInlineSnapshot(of: Row.update { $0.string.append(contentsOf: "!") }, as: .sql) {
+        """
+        UPDATE "rows"
+        SET "string" = ("rows"."string") || ('!')
+        """
+      }
+    }
+    @available(*, deprecated)
+    @Test func stringDeprecations() {
       assertInlineSnapshot(of: Row.columns.string.hasPrefix("a"), as: .sql) {
         """
         ("rows"."string" LIKE 'a%')
@@ -249,24 +270,6 @@ extension SnapshotTests {
       assertInlineSnapshot(of: Row.columns.string.contains("a"[...]), as: .sql) {
         """
         ("rows"."string" LIKE '%a%')
-        """
-      }
-      assertInlineSnapshot(of: Row.update { $0.string += "!" }, as: .sql) {
-        """
-        UPDATE "rows"
-        SET "string" = ("rows"."string") || ('!')
-        """
-      }
-      assertInlineSnapshot(of: Row.update { $0.string.append("!") }, as: .sql) {
-        """
-        UPDATE "rows"
-        SET "string" = ("rows"."string") || ('!')
-        """
-      }
-      assertInlineSnapshot(of: Row.update { $0.string.append(contentsOf: "!") }, as: .sql) {
-        """
-        UPDATE "rows"
-        SET "string" = ("rows"."string") || ('!')
         """
       }
       assertInlineSnapshot(
@@ -297,6 +300,10 @@ extension SnapshotTests {
         FROM "rows"))
         """
       }
+    }
+
+    @available(*, deprecated)
+    @Test func collectionContains() {
       assertInlineSnapshot(
         of: [1, 2, 3].contains(Row.columns.c),
         as: .sql
@@ -316,6 +323,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(*, deprecated)
     @Test func rangeContains() async throws {
       assertInlineSnapshot(
         of: (0...10).contains(Row.columns.c),
@@ -444,6 +452,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(*, deprecated)
     @Test func containsCollectionElement() {
       assertQuery(
         Reminder.select { $0.id }.where { [1, 2].contains($0.id) }

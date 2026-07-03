@@ -100,7 +100,9 @@ extension QueryExpression where QueryValue: QueryRepresentable {
   }
 
   @available(
-    *, unavailable, message: "Use 'neq' or (or 'isNot') instead."
+    *,
+    unavailable,
+    message: "Use 'neq' or (or 'isNot') instead."
   )
   public static func != (
     lhs: Self,
@@ -110,7 +112,9 @@ extension QueryExpression where QueryValue: QueryRepresentable {
   }
 
   @available(
-    *, unavailable, message: "Use 'neq' or (or 'isNot') instead."
+    *,
+    unavailable,
+    message: "Use 'neq' or (or 'isNot') instead."
   )
   public static func != (
     lhs: Self,
@@ -120,7 +124,9 @@ extension QueryExpression where QueryValue: QueryRepresentable {
   }
 
   @available(
-    *, unavailable, message: "Use 'neq' or (or 'isNot') instead."
+    *,
+    unavailable,
+    message: "Use 'neq' or (or 'isNot') instead."
   )
   public static func != (
     lhs: Self,
@@ -712,6 +718,7 @@ extension QueryExpression where QueryValue == String {
   ///
   /// - Parameter other: A string expression describing the prefix.
   /// - Returns: A predicate expression.
+  @available(*, deprecated, message: "Prefer 'like(\"\\(other)%\")' instead")
   public func hasPrefix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
     like("\(other)%")
   }
@@ -726,6 +733,7 @@ extension QueryExpression where QueryValue == String {
   ///
   /// - Parameter other: A string expression describing the suffix.
   /// - Returns: A predicate expression.
+  @available(*, deprecated, message: "Prefer 'like(\"%\\(other)\")' instead")
   public func hasSuffix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
     like("%\(other)")
   }
@@ -741,8 +749,9 @@ extension QueryExpression where QueryValue == String {
   /// - Parameter other: A string expression describing the infix.
   /// - Returns: A predicate expression.
   @_disfavoredOverload
+  @available(*, deprecated, message: "Prefer 'like(\"%\\(other)%\")' instead")
   public func contains(_ other: some StringProtocol) -> some QueryExpression<Bool> {
-    like("%\(other)%")
+    return like("%\(other)%")
   }
 }
 
@@ -853,6 +862,7 @@ extension Sequence where Element: QueryBindable {
   ///
   /// - Parameter element: An element.
   /// - Returns: A predicate expression indicating whether the expression is in this sequence
+  @available(*, deprecated, message: "Prefer 'element.in(self)' instead")
   public func contains(
     _ element: some QueryExpression<Element.QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -869,6 +879,11 @@ extension ClosedRange where Bound: QueryBindable {
   /// - Parameter element: An element.
   /// - Returns: A predicate expression indicating whether the given element is between this range's
   ///   bounds.
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'element.between(lowerBound, and: upperBound)' instead"
+  )
   public func contains(
     _ element: some QueryExpression<Bound.QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -883,6 +898,7 @@ extension Statement where QueryValue: QueryBindable {
   ///
   /// - Parameter element: An element.
   /// - Returns: A predicate expression indicating whether this expression is in the given subquery.
+  @available(*, deprecated, message: "Prefer 'element.in(self)' instead")
   public func contains(
     _ element: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {

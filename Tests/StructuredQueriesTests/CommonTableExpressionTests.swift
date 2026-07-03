@@ -68,7 +68,7 @@ extension SnapshotTests {
             .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
         } query: {
           IncompleteReminder
-            .where { $0.title.collate(.nocase).contains("groceries") }
+            .where { $0.title.collate(.nocase).like("%groceries%") }
         }
       ) {
         """
@@ -336,7 +336,7 @@ extension SnapshotTests {
             .select { IncompleteReminder.Columns(isFlagged: $0.isFlagged, title: $0.title) }
         } query: {
           IncompleteReminder
-            .where { $0.title.collate(.nocase).contains("groceries") }
+            .where { $0.title.collate(.nocase).like("%groceries%") }
             .select { $0.isFlagged }
         }
       ) {

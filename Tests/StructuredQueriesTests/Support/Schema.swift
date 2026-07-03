@@ -31,8 +31,8 @@ struct Reminder: Codable, Equatable, Identifiable {
   var updatedAt: Date = Date(timeIntervalSinceReferenceDate: 1_234_567_890)
   static func searching(_ text: String) -> Where<Reminder> {
     Self.where {
-      $0.title.collate(.nocase).contains(text)
-        || $0.notes.collate(.nocase).contains(text)
+      $0.title.collate(.nocase).like("%\(text)%")
+        || $0.notes.collate(.nocase).like("%\(text)%")
     }
   }
 }
