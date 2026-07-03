@@ -306,7 +306,6 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
 public struct _UnwrapExpression<Base: QueryExpression>: QueryExpression
 where Base.QueryValue: _OptionalProtocol {
   public typealias QueryValue = Base.QueryValue.Wrapped
-  public typealias From = Never
 
   let base: Base
 
