@@ -277,8 +277,9 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
   /// - Returns: The result of the transform function, optionalized.
   public func map<T>(
     _ transform: (_UnwrapExpression<Self>) -> some QueryExpression<T>
-  ) -> some QueryExpression<T?> {
-    Case(SQLQueryExpression("\(self) IS NULL"))
+  ) -> some QueryExpression<T?>
+  where QueryValue: QueryRepresentable & QueryExpression {
+    Case(self.is(nil))
       .when(SQLQueryExpression("1"), then: SQLQueryExpression("NULL"))
       .else(SQLQueryExpression(transform(_UnwrapExpression(base: self)).queryFragment))
   }

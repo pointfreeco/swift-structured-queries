@@ -44,6 +44,24 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Table
+    struct Item {
+      @Selection
+      struct Group {
+        var a: Int
+        var b: Int
+      }
+      var group: Group?
+    }
+    @Test func selectionMap() {
+      assertInlineSnapshot(of: Item.select { $0.group.map { _ in true } ?? false }, as: .sql) {
+        """
+        SELECT coalesce(CASE "items"."a", "items"."b" IS NULL WHEN 1 THEN NULL ELSE 1 END, 0)
+        FROM "items"
+        """
+      }
+    }
   }
 }
 
