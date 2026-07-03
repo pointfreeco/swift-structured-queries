@@ -44,3 +44,13 @@ extension DeclGroupSyntax {
     }
   }
 }
+
+extension SyntaxProtocol {
+  var declGroupAccessLevelModifier: DeclModifierSyntax? {
+    self.as(StructDeclSyntax.self)?.accessLevelModifier
+      ?? self.as(EnumDeclSyntax.self)?.accessLevelModifier
+      ?? self.as(ClassDeclSyntax.self)?.accessLevelModifier
+      ?? self.as(ActorDeclSyntax.self)?.accessLevelModifier
+      ?? self.as(ExtensionDeclSyntax.self)?.accessLevelModifier
+  }
+}

@@ -2256,6 +2256,25 @@ extension SnapshotTests {
             }
           }
 
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Photo._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "posts"
+          }
+
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
               if root.is(\.photo) {
@@ -2296,20 +2315,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Photo._columnWidth
-            columnWidth += String._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "posts"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let photo = try decoder.decode(Photo.self)
             let note = try decoder.decode(String.self)
@@ -2392,6 +2397,25 @@ extension SnapshotTests {
             }
           }
 
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Photo._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "posts"
+          }
+
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
               if root.is(\.photo) {
@@ -2432,20 +2456,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Photo._columnWidth
-            columnWidth += String._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "posts"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let photo = try decoder.decode(Photo.self)
             let note = try decoder.decode(String.self)
@@ -2527,6 +2537,25 @@ extension SnapshotTests {
             }
           }
 
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Photo._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "posts"
+          }
+
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
               if root.is(\.photo) {
@@ -2567,20 +2596,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Photo._columnWidth
-            columnWidth += String._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "posts"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let photo = try decoder.decode(Photo.self)
             let note = try decoder.decode(String.self)
@@ -2663,6 +2678,25 @@ extension SnapshotTests {
             }
           }
 
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Photo._columnWidth
+            columnWidth += String._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "posts"
+          }
+
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
               if root.is(\.photo) {
@@ -2703,20 +2737,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Photo._columnWidth
-            columnWidth += String._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "posts"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let photo = try decoder.decode(Photo.self)
             let note = try decoder.decode(String.self)
@@ -2786,6 +2806,24 @@ extension SnapshotTests {
             }
           }
 
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += String._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "posts"
+          }
+
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
               if root.is(\.note) {
@@ -2814,19 +2852,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += String._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "posts"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let note = try decoder.decode(String.self)
             if let note {
@@ -2893,6 +2918,24 @@ extension SnapshotTests {
             }
           }
 
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Date.UnixTimeRepresentation._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "posts"
+          }
+
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Post) -> CasePaths.PartialCaseKeyPath<Post> {
               if root.is(\.timestamp) {
@@ -2921,19 +2964,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Post: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Date.UnixTimeRepresentation._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "posts"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let timestamp = try decoder.decode(Date.UnixTimeRepresentation.self)
             if let timestamp {

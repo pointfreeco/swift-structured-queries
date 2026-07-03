@@ -1198,6 +1198,7 @@ extension TableMacro: MemberMacro {
           )
         }
         appendColumnProperty()
+        columnWidths.append("\(columnQueryValueType)._columnWidth")
         allColumns.append(
           (identifier, parameter.firstName ?? "_", columnQueryValueType, defaultValue?.trimmed)
         )
@@ -1234,14 +1235,23 @@ extension TableMacro: MemberMacro {
 
     var draft: DeclSyntax?
     if node.attributeName.identifier != "_Draft", primaryKey != nil || draftHasLazyColumn {
+      func isReducedVisibility(_ tokenKind: TokenKind?) -> Bool {
+        tokenKind == .keyword(.private) || tokenKind == .keyword(.fileprivate)
+      }
       let draftAccess: String
-      switch declaration.accessLevelModifier?.name.tokenKind {
-      case .keyword(.private), .keyword(.fileprivate):
+      if isReducedVisibility(declaration.accessLevelModifier?.name.tokenKind)
+        || context.lexicalContext.contains(where: {
+          isReducedVisibility($0.declGroupAccessLevelModifier?.name.tokenKind)
+        })
+      {
         draftAccess = "fileprivate "
-      case nil, .keyword(.internal):
-        draftAccess = ""
-      default:
-        draftAccess = "\(declaration.accessLevelModifier?.name.text ?? "") "
+      } else {
+        switch declaration.accessLevelModifier?.name.tokenKind {
+        case nil, .keyword(.internal):
+          draftAccess = ""
+        default:
+          draftAccess = "\(declaration.accessLevelModifier?.name.text ?? "") "
+        }
       }
       draft = """
 
