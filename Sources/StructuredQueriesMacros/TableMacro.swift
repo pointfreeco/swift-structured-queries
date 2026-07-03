@@ -52,7 +52,7 @@ extension TableMacro: ExtensionMacro {
     }
     guard
       declaration.isTableMacroSupported,
-      let declarationName = declaration.declarationName
+      declaration.declarationName != nil
     else {
       context.diagnose(
         Diagnostic(
@@ -75,7 +75,6 @@ extension TableMacro: ExtensionMacro {
 
     var allColumns: [TokenSyntax] = []
     var columnsProperties: [DeclSyntax] = []
-    var columnWidths: [ExprSyntax] = []
     var diagnostics: [Diagnostic] = []
 
     var draftTableType: TypeSyntax?
@@ -90,12 +89,6 @@ extension TableMacro: ExtensionMacro {
     let selfRewriter = SelfRewriter(
       selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
     )
-    var schemaName: ExprSyntax?
-    var tableName = ExprSyntax(
-      StringLiteralExprSyntax(
-        content: declarationName.trimmed.text.lowerCamelCased().pluralized()
-      )
-    )
     if case .argumentList(let arguments) = node.arguments {
       for argumentIndex in arguments.indices {
         let argument = arguments[argumentIndex]
@@ -104,16 +97,13 @@ extension TableMacro: ExtensionMacro {
           if node.attributeName.identifier == "_Draft" {
             let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
             draftTableType = TypeSyntax("\(memberAccess.base!.trimmed)")
-          } else {
-            if !argument.expression.isNonEmptyStringLiteral {
-              diagnostics.append(
-                Diagnostic(
-                  node: argument.expression,
-                  message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
-                )
+          } else if !argument.expression.isNonEmptyStringLiteral {
+            diagnostics.append(
+              Diagnostic(
+                node: argument.expression,
+                message: MacroExpansionErrorMessage("Argument must be a non-empty string literal")
               )
-            }
-            tableName = argument.expression.trimmed
+            )
           }
 
         case .some(let label) where label.text == "schema":
@@ -125,7 +115,6 @@ extension TableMacro: ExtensionMacro {
               )
             )
           }
-          schemaName = argument.expression.trimmed
 
         case let argument?:
           fatalError("Unexpected argument: \(argument)")
@@ -356,11 +345,6 @@ extension TableMacro: ExtensionMacro {
           )
         }
 
-        columnWidths.append(
-          columnQueryValueType.map { "\($0)._columnWidth" as ExprSyntax }
-            ?? "\(moduleName)._columnWidth(\\QueryValue.\(identifier))"
-        )
-
         let defaultValue =
           binding.initializer?.value.rewritten(selfRewriter)
           ?? (columnQueryValueType?.isOptionalType == true
@@ -581,8 +565,6 @@ extension TableMacro: ExtensionMacro {
           }
         }
 
-        columnWidths.append("\(columnQueryValueType)._columnWidth")
-
         let defaultValue = parameter.defaultValue?.value.rewritten(selfRewriter)
         let tableColumnType =
           isColumnGroup
@@ -697,46 +679,11 @@ extension TableMacro: ExtensionMacro {
       return []
     }
 
-    var statics: [DeclSyntax] = []
-    var letSchemaName: DeclSyntax?
-    if let schemaName {
-      letSchemaName = """
-
-        public \(nonisolated)static let schemaName: Swift.String? = \(schemaName)
-        """
-    }
     if draftTableType == nil {
       conformances.append("\(moduleName).PartialSelectStatement")
     }
-    statics.append(contentsOf: [
-      """
-
-      public typealias QueryValue = Self
-      """,
-      """
-      public typealias From = Swift.Never
-      """,
-    ])
-    let columnWidth = """
-      var columnWidth = 0
-      columnWidth += \(columnWidths.map(\.description).joined(separator: "\ncolumnWidth += "))
-      return columnWidth
-      """
 
     var extensionMembers: [DeclSyntax] = []
-    if draftTableType == nil {
-      extensionMembers.append(contentsOf: statics)
-      extensionMembers.append(
-        "public \(nonisolated)static var columns: TableColumns { TableColumns() }"
-      )
-      extensionMembers.append(
-        "public \(nonisolated)static var _columnWidth: Int { \(raw: columnWidth) }"
-      )
-      extensionMembers.append("public \(nonisolated)static var tableName: String { \(tableName) }")
-      if let letSchemaName {
-        extensionMembers.append(letSchemaName)
-      }
-    }
     if let initDecoder {
       extensionMembers.append(initDecoder)
     }
@@ -808,6 +755,26 @@ extension TableMacro: MemberMacro {
       )?
     let selfRewriter = SelfRewriter(selfEquivalent: type.name)
     var selectionInitializers: [DeclSyntax] = []
+    var schemaName: ExprSyntax?
+    var tableName = ExprSyntax(
+      StringLiteralExprSyntax(
+        content: declarationName.trimmed.text.lowerCamelCased().pluralized()
+      )
+    )
+    if node.attributeName.identifier != "_Draft",
+      case .argumentList(let arguments) = node.arguments
+    {
+      for argument in arguments {
+        switch argument.label {
+        case nil:
+          tableName = argument.expression.trimmed
+        case .some(let label) where label.text == "schema":
+          schemaName = argument.expression.trimmed
+        default:
+          break
+        }
+      }
+    }
     if declaration.is(StructDeclSyntax.self) {
       for member in declaration.memberBlock.members {
         guard
@@ -1356,6 +1323,18 @@ extension TableMacro: MemberMacro {
 
       """
 
+    var tableMembers: [DeclSyntax] = []
+    if node.attributeName.identifier != "_Draft" {
+      tableMembers.append(
+        "public \(nonisolated)static var tableName: Swift.String { \(tableName) }"
+      )
+      if let schemaName {
+        tableMembers.append(
+          "public \(nonisolated)static let schemaName: Swift.String? = \(schemaName)"
+        )
+      }
+    }
+
     var members =
       [
         """
@@ -1385,12 +1364,12 @@ extension TableMacro: MemberMacro {
         draft,
       ]
       .compactMap { $0 }
-      + (node.attributeName.identifier == "_Draft"
-        ? typeAliases + [
-          "public \(nonisolated)static var columns: TableColumns { TableColumns() }",
-          "public \(nonisolated)static var _columnWidth: Swift.Int { \(raw: columnWidth) }",
-        ]
-        : [])
+      + typeAliases
+      + [
+        "public \(nonisolated)static var columns: TableColumns { TableColumns() }",
+        "public \(nonisolated)static var _columnWidth: Swift.Int { \(raw: columnWidth) }",
+      ]
+      + tableMembers
     #if CasePaths
       if declaration.is(EnumDeclSyntax.self) {
         members += try CasePathableMacro.expansion(

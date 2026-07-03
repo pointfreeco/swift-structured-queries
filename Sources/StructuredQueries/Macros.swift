@@ -18,14 +18,8 @@ public import StructuredQueriesCore
     PrimaryKeyedTable,
     CasePathable,
     CasePathIterable,
-    names: named(From),
-    named(columns),
-    named(_columnWidth),
-    named(init(_:)),
-    named(init(decoder:)),
-    named(QueryValue),
-    named(schemaName),
-    named(tableName)
+    names: named(init(_:)),
+    named(init(decoder:))
   )
   @attached(
     member,
@@ -33,8 +27,14 @@ public import StructuredQueriesCore
     PartialSelectStatement,
     PrimaryKeyedTable,
     names: named(Draft),
+    named(From),
+    named(QueryValue),
     named(Selection),
     named(TableColumns),
+    named(_columnWidth),
+    named(columns),
+    named(schemaName),
+    named(tableName),
     named(AllCasePaths),
     named(allCasePaths),
     named(_$Element)
@@ -45,14 +45,8 @@ public import StructuredQueriesCore
     conformances: Table,
     PartialSelectStatement,
     PrimaryKeyedTable,
-    names: named(From),
-    named(columns),
-    named(_columnWidth),
-    named(init(_:)),
-    named(init(decoder:)),
-    named(QueryValue),
-    named(schemaName),
-    named(tableName)
+    names: named(init(_:)),
+    named(init(decoder:))
   )
   @attached(
     member,
@@ -60,8 +54,14 @@ public import StructuredQueriesCore
     PartialSelectStatement,
     PrimaryKeyedTable,
     names: named(Draft),
+    named(From),
+    named(QueryValue),
     named(Selection),
-    named(TableColumns)
+    named(TableColumns),
+    named(_columnWidth),
+    named(columns),
+    named(schemaName),
+    named(tableName)
   )
 #endif
 @attached(memberAttribute)
@@ -115,14 +115,8 @@ public macro Table(
     PrimaryKeyedTable,
     CasePathable,
     CasePathIterable,
-    names: named(From),
-    named(columns),
-    named(_columnWidth),
-    named(init(_:)),
-    named(init(decoder:)),
-    named(QueryValue),
-    named(schemaName),
-    named(tableName)
+    names: named(init(_:)),
+    named(init(decoder:))
   )
   @attached(
     member,
@@ -131,8 +125,14 @@ public macro Table(
     PartialSelectStatement,
     PrimaryKeyedTable,
     names: named(Draft),
+    named(From),
+    named(QueryValue),
     named(Selection),
     named(TableColumns),
+    named(_columnWidth),
+    named(columns),
+    named(schemaName),
+    named(tableName),
     named(AllCasePaths),
     named(allCasePaths),
     named(_$Element)
@@ -144,14 +144,8 @@ public macro Table(
     Table,
     PartialSelectStatement,
     PrimaryKeyedTable,
-    names: named(From),
-    named(columns),
-    named(_columnWidth),
-    named(init(_:)),
-    named(init(decoder:)),
-    named(QueryValue),
-    named(schemaName),
-    named(tableName)
+    names: named(init(_:)),
+    named(init(decoder:))
   )
   @attached(
     member,
@@ -160,8 +154,14 @@ public macro Table(
     PartialSelectStatement,
     PrimaryKeyedTable,
     names: named(Draft),
+    named(From),
+    named(QueryValue),
     named(Selection),
-    named(TableColumns)
+    named(TableColumns),
+    named(_columnWidth),
+    named(columns),
+    named(schemaName),
+    named(tableName)
   )
 #endif
 @attached(memberAttribute)

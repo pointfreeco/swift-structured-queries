@@ -95,3 +95,14 @@ private func functionWithLotsOfArguments(
   a12: Foo?
 ) {
 }
+
+// NB: Nested access control mismatch
+@Table
+fileprivate struct Item {
+  @Selection
+  struct Group {
+    var a: Int
+    var b: Int
+  }
+  var group: Group?
+}

@@ -54,22 +54,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(\QueryValue.bar)
             guard let bar else {
@@ -131,22 +136,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore._Selection, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore._Selection, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(\QueryValue.bar)
             guard let bar else {
@@ -246,22 +256,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foo"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(\QueryValue.bar)
             guard let bar else {
@@ -363,23 +378,29 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Bar: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "bar"
           }
+
           public nonisolated static let schemaName: Swift.String? = "foo"
+        }
+
+        nonisolated extension Bar: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let baz = try decoder.decode(\QueryValue.baz)
             guard let baz else {
@@ -505,15 +526,16 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Swift.Bool._columnWidth
             columnWidth += Swift.Int._columnWidth
@@ -521,9 +543,13 @@ extension SnapshotTests {
             columnWidth += Swift.String._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.c1 = try decoder.decode() ?? true
             self.c2 = try decoder.decode() ?? 1
@@ -584,22 +610,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(\QueryValue.bar)
             guard let bar else {
@@ -705,22 +736,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Date.UnixTimeRepresentation._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(Date.UnixTimeRepresentation.self)
             guard let bar else {
@@ -788,23 +824,28 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += String._columnWidth
             columnWidth += String._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "users"
           }
+        }
+
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(\QueryValue.name)
             let generated = try decoder.decode(\QueryValue.generated)
@@ -896,23 +937,28 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += String._columnWidth
             columnWidth += String._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "users"
           }
+        }
+
+        nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(\QueryValue.name)
             let generated = try decoder.decode(\QueryValue.generated)
@@ -981,22 +1027,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(\QueryValue.bar)
             guard let bar else {
@@ -1060,22 +1111,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(\QueryValue.bar)
             guard let bar else {
@@ -1137,22 +1193,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let `bar` = try decoder.decode(\QueryValue.`bar`)
             guard let `bar` else {
@@ -1214,22 +1275,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += ID<Foo>._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let bar = try decoder.decode(\QueryValue.bar)
             guard let bar else {
@@ -1291,22 +1357,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += StructuredQueriesCore._columnWidth(\QueryValue.bar)
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "foos"
           }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.bar = try decoder.decode() ?? ID<Foo>()
           }
@@ -1435,6 +1506,25 @@ extension SnapshotTests {
               return columnWidth
             }
           }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += ID<User, UUID.BytesRepresentation>._columnWidth
+            columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "users"
+          }
         }
 
         nonisolated extension Draft {
@@ -1449,20 +1539,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += ID<User, UUID.BytesRepresentation>._columnWidth
-            columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "users"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(ID<User, UUID.BytesRepresentation>.self)
             self.referrerID = try decoder.decode(ID<User, UUID.BytesRepresentation>.self) ?? nil
@@ -1527,22 +1603,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += String._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "syncUps"
           }
+        }
+
+        nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let name = try decoder.decode(\QueryValue.name)
             guard let name else {
@@ -1676,6 +1757,25 @@ extension SnapshotTests {
               return columnWidth
             }
           }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += StructuredQueriesCore._columnWidth(\QueryValue.seconds)
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "syncUps"
+          }
         }
 
         nonisolated extension Draft {
@@ -1690,20 +1790,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Int._columnWidth
-            columnWidth += StructuredQueriesCore._columnWidth(\QueryValue.seconds)
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "syncUps"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(\QueryValue.id)
             self.seconds = try decoder.decode() ?? 60 * 5
@@ -1854,6 +1940,26 @@ extension SnapshotTests {
               return columnWidth
             }
           }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += Color.HexRepresentation._columnWidth
+            columnWidth += Swift.String._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "remindersLists"
+          }
         }
 
         nonisolated extension Draft {
@@ -1870,21 +1976,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Int._columnWidth
-            columnWidth += Color.HexRepresentation._columnWidth
-            columnWidth += Swift.String._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "remindersLists"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(\QueryValue.id)
             self.color = try decoder.decode(Color.HexRepresentation.self) ?? Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
@@ -1971,22 +2062,27 @@ extension SnapshotTests {
             self.allColumns = allColumns
           }
         }
-      }
 
-      nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
         public typealias QueryValue = Self
+
         public typealias From = Swift.Never
+
         public nonisolated static var columns: TableColumns {
           TableColumns()
         }
-        public nonisolated static var _columnWidth: Int {
+
+        public nonisolated static var _columnWidth: Swift.Int {
           var columnWidth = 0
           columnWidth += String._columnWidth
           return columnWidth
         }
-        public nonisolated static var tableName: String {
+
+        public nonisolated static var tableName: Swift.String {
           "foos"
         }
+      }
+
+      nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
         public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
           let name = try decoder.decode(\QueryValue.name)
           guard let name else {
@@ -2056,23 +2152,28 @@ extension SnapshotTests {
             self.allColumns = allColumns
           }
         }
-      }
 
-      nonisolated extension RemindersListAliasAndReminderCount: StructuredQueriesCore.Table, StructuredQueriesCore._Selection, StructuredQueriesCore.PartialSelectStatement {
         public typealias QueryValue = Self
+
         public typealias From = Swift.Never
+
         public nonisolated static var columns: TableColumns {
           TableColumns()
         }
-        public nonisolated static var _columnWidth: Int {
+
+        public nonisolated static var _columnWidth: Swift.Int {
           var columnWidth = 0
           columnWidth += TableAlias<RemindersList, RL>._columnWidth
           columnWidth += Int._columnWidth
           return columnWidth
         }
-        public nonisolated static var tableName: String {
+
+        public nonisolated static var tableName: Swift.String {
           "remindersListAliasAndReminderCounts"
         }
+      }
+
+      nonisolated extension RemindersListAliasAndReminderCount: StructuredQueriesCore.Table, StructuredQueriesCore._Selection, StructuredQueriesCore.PartialSelectStatement {
         public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
           let remindersList = try decoder.decode(TableAlias<RemindersList, RL>.self)
           let remindersCount = try decoder.decode(\QueryValue.remindersCount)
@@ -2976,6 +3077,24 @@ extension SnapshotTests {
               return columnWidth
             }
           }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "foos"
+          }
         }
 
         nonisolated extension Draft {
@@ -2988,19 +3107,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Int._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "foos"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(\QueryValue.id)
             guard let id else {
@@ -3282,6 +3388,27 @@ extension SnapshotTests {
               return columnWidth
             }
           }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += Swift.String._columnWidth
+            columnWidth += Date.UnixTimeRepresentation?._columnWidth
+            columnWidth += Priority?._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "reminders"
+          }
         }
 
         nonisolated extension Draft {
@@ -3300,22 +3427,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Int._columnWidth
-            columnWidth += Swift.String._columnWidth
-            columnWidth += Date.UnixTimeRepresentation?._columnWidth
-            columnWidth += Priority?._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "reminders"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(\QueryValue.id)
             self.title = try decoder.decode() ?? ""
@@ -3436,6 +3547,24 @@ extension SnapshotTests {
               return columnWidth
             }
           }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += UUID.BytesRepresentation._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "reminders"
+          }
         }
 
         nonisolated extension Draft {
@@ -3448,19 +3577,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += UUID.BytesRepresentation._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "reminders"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(UUID.BytesRepresentation.self)
             guard let id else {
@@ -3522,22 +3638,27 @@ extension SnapshotTests {
               self.allColumns = allColumns
             }
           }
-        }
 
-        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public typealias QueryValue = Self
+
           public typealias From = Swift.Never
+
           public nonisolated static var columns: TableColumns {
             TableColumns()
           }
-          public nonisolated static var _columnWidth: Int {
+
+          public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             return columnWidth
           }
-          public nonisolated static var tableName: String {
+
+          public nonisolated static var tableName: Swift.String {
             "reminders"
           }
+        }
+
+        nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(\QueryValue.id)
             guard let id else {
@@ -3672,6 +3793,25 @@ extension SnapshotTests {
               return columnWidth
             }
           }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Int?._columnWidth
+            columnWidth += Swift.String._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "reminders"
+          }
         }
 
         nonisolated extension Draft {
@@ -3686,20 +3826,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += Int?._columnWidth
-            columnWidth += Swift.String._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "reminders"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode() ?? nil
             self.title = try decoder.decode() ?? ""
@@ -3814,6 +3940,24 @@ extension SnapshotTests {
               return columnWidth
             }
           }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += ReminderTagID._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "remindersTags"
+          }
         }
 
         nonisolated extension Draft {
@@ -3826,19 +3970,6 @@ extension SnapshotTests {
         }
 
         nonisolated extension ReminderTag: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public typealias QueryValue = Self
-          public typealias From = Swift.Never
-          public nonisolated static var columns: TableColumns {
-            TableColumns()
-          }
-          public nonisolated static var _columnWidth: Int {
-            var columnWidth = 0
-            columnWidth += ReminderTagID._columnWidth
-            return columnWidth
-          }
-          public nonisolated static var tableName: String {
-            "remindersTags"
-          }
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(\QueryValue.id)
             guard let id else {
