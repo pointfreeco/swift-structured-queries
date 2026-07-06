@@ -420,21 +420,20 @@ extension SnapshotTests {
 @Selection struct NestedFields {
   var honestCount: Int = 0
   var optionalCount: Int?
-
-  @Column(as: String.Test?.self)
+  @Column(as: String.TestRepresentation?.self)
   var string: String?
 }
 
 extension String {
-    struct Test: QueryRepresentable, QueryBindable, QueryDecodable {
-        var queryOutput: String
-        var queryBinding: QueryBinding { .text(queryOutput) }
+  struct TestRepresentation: QueryRepresentable, QueryBindable, QueryDecodable {
+    var queryOutput: String
+    var queryBinding: QueryBinding { .text(queryOutput) }
 
-        init(queryOutput: String) {
-            self.queryOutput = queryOutput
-        }
-        init(decoder: inout some QueryDecoder) throws {
-            self.queryOutput = try String(decoder: &decoder)
-        }
+    init(queryOutput: String) {
+      self.queryOutput = queryOutput
     }
+    init(decoder: inout some QueryDecoder) throws {
+      self.queryOutput = try String(decoder: &decoder)
+    }
+  }
 }

@@ -71,7 +71,12 @@ public struct Updates<Base: Table> {
       func open<Root, V>(
         _ column: some WritableTableColumnExpression<Root, V>
       ) -> QueryFragment {
-        Value(queryOutput: newValue)[keyPath: column.keyPath as! KeyPath<Value, V>].queryFragment
+        V(
+          queryOutput: Value(queryOutput: newValue)[
+            keyPath: column.keyPath as! KeyPath<Value, V.QueryOutput>
+          ]
+        )
+        .queryFragment
       }
       updates.append(
         contentsOf: Value.TableColumns.writableColumns.map { column in
