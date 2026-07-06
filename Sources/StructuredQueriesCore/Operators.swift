@@ -114,7 +114,7 @@ extension QueryExpression where QueryValue: QueryRepresentable {
   @available(
     *,
     unavailable,
-    message: "Use 'neq' or (or 'isNot') instead."
+    message: "Use 'neq' or 'isNot' instead."
   )
   public static func != (
     lhs: Self,
