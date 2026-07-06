@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 /// A type that can decode values from a database connection into in-memory representations.
 public protocol QueryDecoder {
@@ -94,6 +94,14 @@ extension QueryDecoder {
     _ columnType: T.Type = T.self
   ) throws -> T? {
     try T?(decoder: &self)?.queryOutput
+  }
+
+  @inlinable
+  @inline(__always)
+  public mutating func decode<Root, Value: QueryRepresentable<Value>>(
+    _ keyPath: KeyPath<Root, Value>
+  ) throws -> Value? {
+    try decode(Value.self)
   }
 }
 

@@ -39,19 +39,18 @@ public struct Updates<Base: Table> {
   }
 
   @_disfavoredOverload
+  @available(
+    *,
+    unavailable,
+    message: """
+      Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+      """
+  )
   public subscript<Value: QueryExpression>(
-    dynamicMember keyPath: KeyPath<
-      Base.TableColumns,
-      some WritableTableColumnExpression<Base, Value>
-    >
+    dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Value>>
   ) -> Value.QueryOutput {
-    @available(*, unavailable)
     get { fatalError() }
-    set {
-      updates.append(
-        (Base.columns[keyPath: keyPath].name, Value(queryOutput: newValue).queryFragment)
-      )
-    }
+    set {}
   }
 
   public subscript<Value: QueryExpression>(
@@ -65,7 +64,13 @@ public struct Updates<Base: Table> {
   public subscript<Value: QueryExpression>(
     dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Value>>
   ) -> Value.QueryOutput {
-    @available(*, unavailable)
+    @available(
+      *,
+      unavailable,
+      message: """
+        Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+        """
+    )
     get { fatalError() }
     set {
       func open<Root, V>(

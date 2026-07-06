@@ -1,7 +1,7 @@
 import SwiftDiagnostics
-import SwiftSyntax
+public import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
+public import SwiftSyntaxMacros
 
 public enum SQLMacro: ExpressionMacro {
   public static func expansion<N: FreestandingMacroExpansionSyntax, C: MacroExpansionContext>(

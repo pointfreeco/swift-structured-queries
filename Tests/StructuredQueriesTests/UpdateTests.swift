@@ -40,7 +40,7 @@ extension SnapshotTests {
       }
       assertQuery(
         Reminder
-          .where { $0.priority == nil }
+          .where { $0.priority.is(nil) }
           .update { $0.isCompleted = true }
           .returning { ($0.title, $0.priority, $0.isCompleted) }
       ) {
@@ -307,7 +307,7 @@ extension SnapshotTests {
         .find(1)
         .update {
           $0.dueDate = Case()
-            .when($0.dueDate == nil, then: #sql("'2018-01-29 00:08:00.000'"))
+            .when($0.dueDate.is(nil), then: #sql("'2018-01-29 00:08:00.000'"))
         }
 
       assertQuery(

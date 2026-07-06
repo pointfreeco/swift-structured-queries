@@ -1,4 +1,4 @@
-import Foundation
+public import Foundation
 
 extension Date {
   package var iso8601String: String {

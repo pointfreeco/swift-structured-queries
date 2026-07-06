@@ -1,46 +1,4 @@
 extension QueryExpression where QueryValue: QueryRepresentable {
-  /// A predicate expression indicating whether two query expressions are equal.
-  ///
-  /// ```swift
-  /// Reminder.where { $0.title == "Buy milk" }
-  /// // SELECT … FROM "reminders" WHERE "reminders"."title" = 'Buy milk'
-  /// ```
-  ///
-  /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``eq(_:)``, instead.
-  ///
-  /// - Parameters:
-  ///   - lhs: An expression to compare.
-  ///   - rhs: Another expression to compare.
-  /// - Returns: A predicate expression.
-  public static func == (
-    lhs: Self,
-    rhs: some QueryExpression<QueryValue>
-  ) -> some QueryExpression<Bool> {
-    lhs.eq(rhs)
-  }
-
-  /// A predicate expression indicating whether two query expressions are not equal.
-  ///
-  /// ```swift
-  /// Reminder.where { $0.title != "Buy milk" }
-  /// // SELECT … FROM "reminders" WHERE "reminders"."title" <> 'Buy milk'
-  /// ```
-  ///
-  /// > Important: Overloaded operators can strain the Swift compiler's type checking ability.
-  /// > Consider using ``neq(_:)``, instead.
-  ///
-  /// - Parameters:
-  ///   - lhs: An expression to compare.
-  ///   - rhs: Another expression to compare.
-  /// - Returns: A predicate expression.
-  public static func != (
-    lhs: Self,
-    rhs: some QueryExpression<QueryValue>
-  ) -> some QueryExpression<Bool> {
-    lhs.neq(rhs)
-  }
-
   /// Returns a predicate expression indicating whether two query expressions are equal.
   ///
   /// ```swift
@@ -100,10 +58,98 @@ extension QueryExpression where QueryValue: QueryRepresentable {
   where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
     BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
   }
-}
 
-private func isNull<Value>(_ expression: some QueryExpression<Value>) -> Bool {
-  (expression as? any _OptionalProtocol).map { $0._wrapped == nil } ?? false
+  @available(*, unavailable, message: "Use 'eq' (or 'is') instead.")
+  public static func == (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: lhs, operator: "=", rhs: rhs)
+  }
+
+  @available(*, unavailable, message: "Use 'eq' (or 'is') instead.")
+  public static func == (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue?>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: lhs, operator: "=", rhs: rhs)
+  }
+
+  @available(*, unavailable, message: "Use 'eq' (or 'is') instead.")
+  public static func == (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> where QueryValue: _OptionalProtocol {
+    BinaryOperator(lhs: lhs, operator: "=", rhs: rhs)
+  }
+
+  @available(*, deprecated, message: "Use 'is' instead.")
+  public static func == (
+    lhs: Self,
+    rhs: _Null<QueryValue>
+  ) -> some QueryExpression<Bool> where QueryValue: _OptionalProtocol {
+    BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
+  }
+
+  @available(*, deprecated, message: "Use 'is' instead.")
+  public static func == (
+    lhs: _Null<QueryValue>,
+    rhs: Self
+  ) -> some QueryExpression<Bool> where QueryValue: _OptionalProtocol {
+    BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
+  }
+
+  @available(
+    *,
+    unavailable,
+    message: "Use 'neq' or 'isNot' instead."
+  )
+  public static func != (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
+  }
+
+  @available(
+    *,
+    unavailable,
+    message: "Use 'neq' or 'isNot' instead."
+  )
+  public static func != (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue?>
+  ) -> some QueryExpression<Bool> {
+    BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
+  }
+
+  @available(
+    *,
+    unavailable,
+    message: "Use 'neq' or 'isNot' instead."
+  )
+  public static func != (
+    lhs: Self,
+    rhs: some QueryExpression<QueryValue.Wrapped>
+  ) -> some QueryExpression<Bool> where QueryValue: _OptionalProtocol {
+    BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
+  }
+
+  @available(*, deprecated, message: "Use 'isNot' instead.")
+  public static func != (
+    lhs: Self,
+    rhs: _Null<QueryValue>
+  ) -> some QueryExpression<Bool> where QueryValue: _OptionalProtocol {
+    BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
+  }
+
+  @available(*, deprecated, message: "Use 'isNot' instead.")
+  public static func != (
+    lhs: _Null<QueryValue>,
+    rhs: Self
+  ) -> some QueryExpression<Bool> where QueryValue: _OptionalProtocol {
+    BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
+  }
 }
 
 extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression {
@@ -168,82 +214,6 @@ extension QueryExpression where QueryValue: QueryRepresentable & _OptionalProtoc
   ) -> some QueryExpression<Bool> {
     BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
   }
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_disfavoredOverload
-@_documentation(visibility: private)
-public func == <QueryValue>(
-  lhs: any QueryExpression<QueryValue>,
-  rhs: some QueryExpression<QueryValue?>
-) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS" : "=", rhs: rhs)
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_disfavoredOverload
-@_documentation(visibility: private)
-public func != <QueryValue>(
-  lhs: any QueryExpression<QueryValue>,
-  rhs: some QueryExpression<QueryValue?>
-) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: isNull(rhs) ? "IS NOT" : "<>", rhs: rhs)
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-@_disfavoredOverload
-public func == <QueryValue: _OptionalProtocol>(
-  lhs: any QueryExpression<QueryValue>,
-  rhs: some QueryExpression<QueryValue.Wrapped>
-) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-@_disfavoredOverload
-public func != <QueryValue: _OptionalProtocol>(
-  lhs: any QueryExpression<QueryValue>,
-  rhs: some QueryExpression<QueryValue.Wrapped>
-) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-public func == <QueryValue: _OptionalProtocol>(
-  lhs: any QueryExpression<QueryValue>,
-  rhs: some QueryExpression<QueryValue>
-) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: "IS", rhs: rhs)
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-public func != <QueryValue: _OptionalProtocol>(
-  lhs: any QueryExpression<QueryValue>,
-  rhs: some QueryExpression<QueryValue>
-) -> some QueryExpression<Bool> {
-  BinaryOperator(lhs: lhs, operator: "IS NOT", rhs: rhs)
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-public func == <QueryValue: QueryBindable>(
-  lhs: any QueryExpression<QueryValue>,
-  rhs: _Null<QueryValue>
-) -> some QueryExpression<Bool> {
-  SQLQueryExpression(lhs).is(rhs)
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-public func != <QueryValue: QueryBindable>(
-  lhs: any QueryExpression<QueryValue>,
-  rhs: _Null<QueryValue>
-) -> some QueryExpression<Bool> {
-  SQLQueryExpression(lhs).isNot(rhs)
 }
 
 extension QueryExpression where QueryValue: _OptionalPromotable {
@@ -748,6 +718,7 @@ extension QueryExpression where QueryValue == String {
   ///
   /// - Parameter other: A string expression describing the prefix.
   /// - Returns: A predicate expression.
+  @available(*, deprecated, message: "Prefer 'like(\"\\(other)%\")' instead")
   public func hasPrefix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
     like("\(other)%")
   }
@@ -762,6 +733,7 @@ extension QueryExpression where QueryValue == String {
   ///
   /// - Parameter other: A string expression describing the suffix.
   /// - Returns: A predicate expression.
+  @available(*, deprecated, message: "Prefer 'like(\"%\\(other)\")' instead")
   public func hasSuffix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
     like("%\(other)")
   }
@@ -777,8 +749,9 @@ extension QueryExpression where QueryValue == String {
   /// - Parameter other: A string expression describing the infix.
   /// - Returns: A predicate expression.
   @_disfavoredOverload
+  @available(*, deprecated, message: "Prefer 'like(\"%\\(other)%\")' instead")
   public func contains(_ other: some StringProtocol) -> some QueryExpression<Bool> {
-    like("%\(other)%")
+    return like("%\(other)%")
   }
 }
 
@@ -889,6 +862,7 @@ extension Sequence where Element: QueryBindable {
   ///
   /// - Parameter element: An element.
   /// - Returns: A predicate expression indicating whether the expression is in this sequence
+  @available(*, deprecated, message: "Prefer 'element.in(self)' instead")
   public func contains(
     _ element: some QueryExpression<Element.QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -905,6 +879,11 @@ extension ClosedRange where Bound: QueryBindable {
   /// - Parameter element: An element.
   /// - Returns: A predicate expression indicating whether the given element is between this range's
   ///   bounds.
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'element.between(lowerBound, and: upperBound)' instead"
+  )
   public func contains(
     _ element: some QueryExpression<Bound.QueryValue>
   ) -> some QueryExpression<Bool> {
@@ -919,6 +898,7 @@ extension Statement where QueryValue: QueryBindable {
   ///
   /// - Parameter element: An element.
   /// - Returns: A predicate expression indicating whether this expression is in the given subquery.
+  @available(*, deprecated, message: "Prefer 'element.in(self)' instead")
   public func contains(
     _ element: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {

@@ -43,7 +43,7 @@ extension SnapshotTests {
     }
 
     @Test func deleteID1() {
-      assertQuery(Reminder.delete().where { $0.id == 1 }.returning(\.self)) {
+      assertQuery(Reminder.delete().where { $0.id.eq(1) }.returning(\.self)) {
         """
         DELETE FROM "reminders"
         WHERE (("reminders"."id") = (1))
@@ -129,7 +129,7 @@ extension SnapshotTests {
       enum R: AliasName {}
       assertQuery(
         RemindersList.as(R.self)
-          .where { $0.id == 1 }
+          .where { $0.id.eq(1) }
           .delete()
           .returning(\.self)
       ) {

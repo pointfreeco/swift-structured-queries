@@ -85,10 +85,10 @@ public struct Where<From: Table>: Sendable {
     }
 
     public subscript(
-      dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Where<From.PrimaryTable>>
+      dynamicMember keyPath: KeyPath<From.SourceTable.Type, Where<From.SourceTable>>
     ) -> Self
     where From: TableDraft {
-      self + unsafeBitCast(From.PrimaryTable.self[keyPath: keyPath], to: Self.self)
+      self + unsafeBitCast(From.SourceTable.self[keyPath: keyPath], to: Self.self)
     }
   #endif
 }

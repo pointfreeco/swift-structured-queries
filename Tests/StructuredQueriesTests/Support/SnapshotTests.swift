@@ -1,4 +1,4 @@
 import SnapshotTesting
 import Testing
 
-@MainActor @Suite(.serialized, .snapshots(record: .failed)) struct SnapshotTests {}
+@MainActor @Suite(.serialized, .snapshots(record: .missing)) struct SnapshotTests {}

@@ -13,17 +13,21 @@ used for string concatenation, not `||`:
 
 | Swift                       | SQL equivalent   |
 | --------------------------- | ---------------- |
-| `==`                        | `=`, `IS`        |
-| `!=`                        | `<>`, `IS NOT`   |
 | `&&`                        | `AND`            |
 | `\|\|`                      | `OR`             |
 | `!`                         | `NOT`            |
 | `+` (string concatenation)  | `\|\|`           |
 | `??`                        | `coalesce(_, _)` |
 
-> Tip: Heavily overloaded Swift operators can tax the compiler, and so the library often provides
-> method equivalents to alleviate this. For example, `==` is aliased to `eq`. See
-> <doc:CompilerPerformance#Method-operators> for a full list and more.
+> `==` and `!=` are _not_ overloaded in Swift for a couple reasons:
+>
+>  1. Equality in SQL involves "three-valued logic": true, false, and null. Because of this there
+>     is more than one equality operation: `=` and `IS`, along with their negations, `<>` and
+>     `IS NOT`. To best preserve the intent of the generated SQL, StructuredQueries provides `eq`
+>     and `is`, along with their negations, `neq` and `isNot`.
+>
+>  2. These operators are the most heavily overloaded in Swift and can strain the compiler in
+>     complex queries.
 
 Other SQL operators are translated to method equivalents in Swift:
 
@@ -56,8 +60,8 @@ Explore the full list of operators below.
 
 ### Equality
 
-- ``QueryExpression/==(_:_:)``
-- ``QueryExpression/!=(_:_:)``
+- ``QueryExpression/eq(_:)``
+- ``QueryExpression/neq(_:)``
 - ``QueryExpression/is(_:)``
 - ``QueryExpression/isNot(_:)``
 

@@ -7,5 +7,5 @@ builder:
         - StructuredQueriesSQLiteCore
         - StructuredQueriesSQLite
       custom_documentation_parameters:
-        - '--enable-experimental-overloaded-symbol-presentation'
+        - "--enable-experimental-overloaded-symbol-presentation"
         # - '--enable-experimental-combined-documentation'

@@ -1,5 +1,6 @@
 # StructuredQueries
 
+[![](https://img.shields.io/badge/documentation-gray?logo=swift&logoColor=white)](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/main/documentation/structuredqueriescore)
 [![CI](https://github.com/pointfreeco/swift-structured-queries/actions/workflows/ci.yml/badge.svg)](https://github.com/pointfreeco/swift-structured-queries/actions/workflows/ci.yml)
 [![Slack](https://img.shields.io/badge/slack-chat-informational.svg?label=Slack&logo=slack)](https://www.pointfree.co/slack-invite)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-structured-queries%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/swift-structured-queries)
@@ -220,7 +221,7 @@ it's as simple as adding it to your `Package.swift`:
 
 ``` swift
 dependencies: [
-  .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.22.0"),
+  .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.32.0"),
 ]
 ```
 
@@ -233,10 +234,10 @@ And then adding the product to any target that needs access to the library:
 If you are on Swift 6.1 or greater, you can enable package traits that extend the library with
 support for other libraries:
 
-  * `StructuredQueriesCasePaths`: Adds support for single-table inheritance _via_ "enum" tables by
+  * `CasePaths`: Adds support for single-table inheritance _via_ "enum" tables by
     leveraging the [CasePaths](https://github.com/pointfreeco/swift-case-paths) library.
 
-  * `StructuredQueriesTagged`: Adds support for type-safe identifiers _via_
+  * `Tagged`: Adds support for type-safe identifiers _via_
     the [Tagged](https://github.com/pointfreeco/swift-tagged) library.
 
 ```diff
@@ -245,8 +246,8 @@ support for other libraries:
      url: "https://github.com/pointfreeco/swift-structured-queries",
      from: "0.28.0",
 +    traits: [
-+      "StructuredQueriesCasePaths",
-+      "StructuredQueriesTagged",
++      "CasePaths",
++      "Tagged",
 +    ],
    ),
 +  .package(

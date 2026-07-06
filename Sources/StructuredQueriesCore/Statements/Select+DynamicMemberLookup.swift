@@ -192,14 +192,14 @@
     public subscript<
       each C: QueryRepresentable,
       each J: Table,
-      S: SelectStatement<(), From.PrimaryTable, ()>
+      S: SelectStatement<(), From.SourceTable, ()>
     >(
-      dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, S>
+      dynamicMember keyPath: KeyPath<From.SourceTable.Type, S>
     ) -> Select<(repeat each C), From, (repeat each J)>
     where Columns == (repeat each C), Joins == (repeat each J) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath].asSelect(),
+          From.SourceTable.self[keyPath: keyPath].asSelect(),
           to: Select<(), From, ()>.self
         )
     }
@@ -209,12 +209,12 @@
       C2: QueryRepresentable,
       each J: Table
     >(
-      dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Select<C2, From.PrimaryTable, ()>>
+      dynamicMember keyPath: KeyPath<From.SourceTable.Type, Select<C2, From.SourceTable, ()>>
     ) -> Select<(repeat each C1, C2), From, (repeat each J)>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<C2, From, ()>.self
         )
     }
@@ -226,13 +226,13 @@
       each J: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3), From.PrimaryTable, ()>
+        From.SourceTable.Type, Select<(C2, C3), From.SourceTable, ()>
       >
     ) -> Select<(repeat each C1, C2, C3), From, (repeat each J)>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3), From, ()>.self
         )
     }
@@ -245,13 +245,13 @@
       each J: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3, C4), From.PrimaryTable, ()>
+        From.SourceTable.Type, Select<(C2, C3, C4), From.SourceTable, ()>
       >
     ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J)>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3, C4), From, ()>.self
         )
     }
@@ -265,13 +265,13 @@
       each J: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3, C4, C5), From.PrimaryTable, ()>
+        From.SourceTable.Type, Select<(C2, C3, C4, C5), From.SourceTable, ()>
       >
     ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J)>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3, C4, C5), From, ()>.self
         )
     }
@@ -282,12 +282,12 @@
       each J1: Table,
       J2: Table
     >(
-      dynamicMember keyPath: KeyPath<From.PrimaryTable.Type, Select<C2, From.PrimaryTable, J2>>
+      dynamicMember keyPath: KeyPath<From.SourceTable.Type, Select<C2, From.SourceTable, J2>>
     ) -> Select<(repeat each C1, C2), From, (repeat each J1, J2)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<C2, From, J2>.self
         )
     }
@@ -300,13 +300,13 @@
       J2: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3), From.PrimaryTable, J2>
+        From.SourceTable.Type, Select<(C2, C3), From.SourceTable, J2>
       >
     ) -> Select<(repeat each C1, C2, C3), From, (repeat each J1, J2)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3), From, J2>.self
         )
     }
@@ -320,13 +320,13 @@
       J2: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3, C4), From.PrimaryTable, J2>
+        From.SourceTable.Type, Select<(C2, C3, C4), From.SourceTable, J2>
       >
     ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J1, J2)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3, C4), From, J2>.self
         )
     }
@@ -341,13 +341,13 @@
       J2: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3, C4, C5), From.PrimaryTable, J2>
+        From.SourceTable.Type, Select<(C2, C3, C4, C5), From.SourceTable, J2>
       >
     ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J1, J2)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3, C4, C5), From, J2>.self
         )
     }
@@ -359,13 +359,13 @@
       J3: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(), From.PrimaryTable, (J2, J3)>
+        From.SourceTable.Type, Select<(), From.SourceTable, (J2, J3)>
       >
     ) -> Select<(repeat each C), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(), From, (J2, J3)>.self
         )
     }
@@ -378,13 +378,13 @@
       J3: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<C2, From.PrimaryTable, (J2, J3)>
+        From.SourceTable.Type, Select<C2, From.SourceTable, (J2, J3)>
       >
     ) -> Select<(repeat each C1, C2), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<C2, From, (J2, J3)>.self
         )
     }
@@ -398,13 +398,13 @@
       J3: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3), From.PrimaryTable, (J2, J3)>
+        From.SourceTable.Type, Select<(C2, C3), From.SourceTable, (J2, J3)>
       >
     ) -> Select<(repeat each C1, C2, C3), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3), From, (J2, J3)>.self
         )
     }
@@ -419,13 +419,13 @@
       J3: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3, C4), From.PrimaryTable, (J2, J3)>
+        From.SourceTable.Type, Select<(C2, C3, C4), From.SourceTable, (J2, J3)>
       >
     ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3, C4), From, (J2, J3)>.self
         )
     }
@@ -441,13 +441,13 @@
       J3: Table
     >(
       dynamicMember keyPath: KeyPath<
-        From.PrimaryTable.Type, Select<(C2, C3, C4, C5), From.PrimaryTable, (J2, J3)>
+        From.SourceTable.Type, Select<(C2, C3, C4, C5), From.SourceTable, (J2, J3)>
       >
     ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
       self
         + unsafeBitCast(
-          From.PrimaryTable.self[keyPath: keyPath],
+          From.SourceTable.self[keyPath: keyPath],
           to: Select<(C2, C3, C4, C5), From, (J2, J3)>.self
         )
     }

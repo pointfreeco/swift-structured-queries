@@ -1,3 +1,5 @@
+public import StructuredQueriesCore
+
 extension QueryExpression where QueryValue: QueryBindable {
   public func cast<Other: SQLiteType>(
     as _: Other.Type = Other.self
@@ -105,8 +107,8 @@ extension _CodableJSONRepresentation: SQLiteType {
   }
 }
 
-#if StructuredQueriesTagged
-  import Tagged
+#if Tagged
+  public import Tagged
 
   extension Tagged: SQLiteType where RawValue: SQLiteType {
     public static var typeAffinity: SQLiteTypeAffinity {

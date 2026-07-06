@@ -239,7 +239,7 @@ extension SnapshotTests {
       assertQuery(
         RemindersList.where {
           for term in terms {
-            $0.title.contains(term)
+            $0.title.like("%\(term)%")
           }
         }
       ) {
