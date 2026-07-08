@@ -106,5 +106,9 @@ extension QueryDecoder {
 }
 
 public enum QueryDecodingError: Error {
+  /// A required column was `NULL`.
   case missingRequiredColumn
+
+  /// A column's value could not be decoded as the given type.
+  case typeMismatch(Any.Type)
 }
