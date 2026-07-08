@@ -150,6 +150,35 @@ ReminderForm(
 )
 ```
 
+> Tip: Due to a [Swift limitation](https://github.com/swiftlang/swift/issues/90519) it is not
+> currently possible to extend drafts with a public initializer that collides with the synthesized
+> memberwise initializer:
+>
+> ```swift
+> @Table public struct Todo {
+>   let id: UUID
+>   var description = ""
+>   // ...
+> }
+>
+> extension Todo.Draft {
+>   public init(id: UUID? = nil, description: String = "") {  // 🛑
+>     self.id = id
+>     self.description = description
+>   }
+> }
+> ```
+>
+> To work around the issue, define a static function, instead:
+>
+> ```swift
+> extension Todo.Draft {
+>   public static func create(id: UUID? = nil, description: String = "") -> Self {
+>     Self(id: id, description: description)
+>   }
+> }
+> ```
+
 ### Lazy initialization
 
 It is possible to mark some fields of a draft as being "lazy initializable." Such fields will be
@@ -201,7 +230,7 @@ set the foreign key on the child:
 > Note: In a future version of StructuredQueries, `lazyInitializable: true` will be the default
 > behavior for all fields without a default value, and if you want to opt out of it you will
 > provide `lazyInitializable: false`. To prepare for that future release you can enable the
-> `LazyInitializableByDefault` in your dependence on StructuredQueries today.
+> `LazyInitializableByDefault` trait in your dependence on StructuredQueries today.
 
 ### Selects, updates, upserts, and deletions
 
