@@ -98,10 +98,19 @@ extension QueryDecoder {
 
   @inlinable
   @inline(__always)
-  public mutating func decode<Root, Value: QueryRepresentable<Value>>(
-    _ keyPath: KeyPath<Root, Value>
-  ) throws -> Value? {
-    try decode(Value.self)
+  public mutating func decode<Column: _TableColumnExpression>(
+    _ column: @autoclosure () -> Column
+  ) throws -> Column.Value.QueryOutput? {
+    try Column.Value?(decoder: &self)?.queryOutput
+  }
+
+  @inlinable
+  @inline(__always)
+  public mutating func decode<Column: _TableColumnExpression, Value>(
+    _ column: @autoclosure () -> Column
+  ) throws -> Value.QueryOutput?
+  where Column.Value == Value? {
+    try Value?(decoder: &self)?.queryOutput
   }
 }
 

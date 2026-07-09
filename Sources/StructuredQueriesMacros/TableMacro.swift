@@ -170,7 +170,6 @@ extension TableMacro: ExtensionMacro {
         var isEphemeral = false
         var isExplicitColumn = false
         var isGenerated = false
-        var hasRepresentation = false
 
         for attribute in property.attributes {
           guard
@@ -219,7 +218,6 @@ extension TableMacro: ExtensionMacro {
 
               columnQueryValueType = "\(raw: base.rewritten(selfRewriter).trimmedDescription)"
               columnQueryOutputType = "\(columnQueryValueType).QueryOutput"
-              hasRepresentation = true
 
             case .some(let label) where label.text == "primaryKey":
               guard
@@ -359,9 +357,7 @@ extension TableMacro: ExtensionMacro {
               : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
         let defaultParameter =
-          isColumnGroup
-          ? ""
-          : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
+          defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
@@ -383,29 +379,37 @@ extension TableMacro: ExtensionMacro {
           appendColumnProperty(primaryKey: true)
         }
         allColumns.append(identifier)
-        let decodedType = columnQueryValueType?.asNonOptionalType()
-        let decodeArgument = hasRepresentation ? (decodedType.map { "\($0).self" } ?? "") : ""
-        if let defaultValue {
-          decodings.append(
-            """
-            self.\(identifier) = try decoder.decode(\(decodeArgument)) \
-            ?? \(defaultValue)
-            """
-          )
-        } else if columnQueryValueType.map({ $0.isOptionalType }) ?? false {
+        let decodeArgument = "Self.columns.\(identifier)"
+        if columnQueryValueType.map(\.isOptionalType) ?? false {
           decodings.append(
             """
             self.\(identifier) = try decoder.decode(\(decodeArgument))
             """
           )
+          if binding.initializer != nil {
+            decodings.append(
+              """
+              if self.\(identifier) == nil {
+              self.\(identifier) = \(decodeArgument).defaultValue ?? nil
+              }
+              """
+            )
+          }
         } else {
-          let requiredArgument =
-            hasRepresentation ? decodeArgument : "\\QueryValue.\(identifier)"
-          decodings.append(
-            """
-            let \(identifier) = try decoder.decode(\(requiredArgument))
-            """
-          )
+          if binding.initializer != nil {
+            decodings.append(
+              """
+              let \(identifier) = try decoder.decode(\(decodeArgument)) \
+              ?? \(decodeArgument).defaultValue
+              """
+            )
+          } else {
+            decodings.append(
+              """
+              let \(identifier) = try decoder.decode(\(decodeArgument))
+              """
+            )
+          }
           decodingUnwrappings.append(
             """
             guard let \(identifier) else {
@@ -419,7 +423,6 @@ extension TableMacro: ExtensionMacro {
             """
           )
         }
-
       }
       initDecoder = """
 
@@ -574,9 +577,7 @@ extension TableMacro: ExtensionMacro {
             : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
         let defaultParameter =
-          isColumnGroup
-          ? ""
-          : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
+          defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
@@ -594,10 +595,9 @@ extension TableMacro: ExtensionMacro {
         }
         appendColumnProperty()
         allColumns.append(identifier)
-        let decodedType = columnQueryValueType.asNonOptionalType()
         decodings.append(
           """
-          let \(identifier) = try decoder.decode(\(decodedType).self)
+          let \(identifier) = try decoder.decode(Self.columns.\(identifier)) ?? nil
           """
         )
         let caseArgumentLabel: String
@@ -913,9 +913,7 @@ extension TableMacro: MemberMacro {
               : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
         let defaultParameter =
-          isColumnGroup
-          ? ""
-          : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
+          defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
@@ -1179,9 +1177,7 @@ extension TableMacro: MemberMacro {
             : "_TableColumn"
         let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
         let defaultParameter =
-          isColumnGroup
-          ? ""
-          : defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
+          defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """

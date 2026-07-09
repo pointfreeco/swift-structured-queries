@@ -226,6 +226,10 @@ where Base.TableColumns: PrimaryKeyedTableDefinition {
       Base.columns.primaryKey._names
     }
 
+    public var defaultValue: Base.PrimaryKey.QueryOutput? {
+      Base.columns.primaryKey.defaultValue
+    }
+
     public var keyPath: KeyPath<TableAlias, Base.PrimaryKey.QueryOutput> {
       \.[member: \Base.PrimaryKey.self, column: Base.columns.primaryKey.keyPath]
     }
@@ -246,10 +250,6 @@ extension TableAlias.TableColumns.PrimaryColumn: TableColumnExpression
 where Base.TableColumns.PrimaryColumn: TableColumnExpression {
   public var name: String {
     Base.columns.primaryKey.name
-  }
-
-  public var defaultValue: Base.PrimaryKey.QueryOutput? {
-    Base.columns.primaryKey.defaultValue
   }
 
   public func _aliased<N: AliasName>(

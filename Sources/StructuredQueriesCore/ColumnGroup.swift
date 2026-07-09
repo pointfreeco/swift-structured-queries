@@ -11,9 +11,15 @@ where Values.QueryOutput: Table {
 
   public typealias QueryValue = Values
 
+  public let defaultValue: Values.QueryOutput?
+
   public let keyPath: KeyPath<Root, Values.QueryOutput>
 
-  public init(keyPath: KeyPath<Root, Values.QueryOutput>) {
+  public init(
+    keyPath: KeyPath<Root, Values.QueryOutput>,
+    default defaultValue: Values.QueryOutput? = nil
+  ) {
+    self.defaultValue = defaultValue
     self.keyPath = keyPath
   }
 
@@ -48,7 +54,8 @@ where Values.QueryOutput: Table {
   ) -> ColumnGroup<Root, Member> {
     let column = Values.columns[keyPath: keyPath]
     return ColumnGroup<Root, Member>(
-      keyPath: self.keyPath.appending(path: column.keyPath)
+      keyPath: self.keyPath.appending(path: column.keyPath),
+      default: column.defaultValue
     )
   }
 
