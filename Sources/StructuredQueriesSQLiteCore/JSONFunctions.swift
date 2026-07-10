@@ -13,16 +13,19 @@ extension QueryExpression {
     QueryFunction("json_patch", self, other)
   }
 
-  /// Passes this expression and the given one to the `jsonb_patch` function.
-  ///
-  /// - Parameter other: A JSON object to patch this object with.
-  /// - Returns: A JSONB expression of the result of invoking the `jsonb_patch` function.
-  public func jsonbPatch<QueryOutput: Codable>(
-    _ other: some QueryExpression<QueryValue>
-  ) -> some QueryExpression<QueryValue>
-  where QueryValue == _CodableJSONBRepresentation<QueryOutput> {
-    QueryFunction("jsonb_patch", self, other)
-  }
+  #if compiler(>=6.2)
+    /// Passes this expression and the given one to the `jsonb_patch` function.
+    ///
+    /// - Parameter other: A JSON object to patch this object with.
+    /// - Returns: A JSONB expression of the result of invoking the `jsonb_patch` function.
+    @available(iOS 26, macOS 26, tvOS 26, visionOS 26, watchOS 26, *)
+    public func jsonbPatch<QueryOutput: Codable>(
+      _ other: some QueryExpression<QueryValue>
+    ) -> some QueryExpression<QueryValue>
+    where QueryValue == _CodableJSONBRepresentation<QueryOutput> {
+      QueryFunction("jsonb_patch", self, other)
+    }
+  #endif
 
   /// Wraps this expression with the `json_array_length` function.
   ///
@@ -37,13 +40,17 @@ extension QueryExpression {
     QueryFunction("json_array_length", self)
   }
 
-  /// Wraps this expression with the `json_array_length` function.
-  ///
-  /// - Returns: An integer expression of the `json_array_length` function wrapping this expression.
-  public func jsonArrayLength<Element: Codable>() -> some QueryExpression<Int>
-  where QueryValue == [Element].JSONBRepresentation {
-    QueryFunction("json_array_length", self)
-  }
+  #if compiler(>=6.2)
+    /// Wraps this expression with the `json_array_length` function.
+    ///
+    /// - Returns: An integer expression of the `json_array_length` function wrapping this
+    ///   expression.
+    @available(iOS 26, macOS 26, tvOS 26, visionOS 26, watchOS 26, *)
+    public func jsonArrayLength<Element: Codable>() -> some QueryExpression<Int>
+    where QueryValue == [Element].JSONBRepresentation {
+      QueryFunction("json_array_length", self)
+    }
+  #endif
 }
 
 extension QueryExpression where QueryValue: Codable & QueryBindable {
@@ -235,11 +242,29 @@ extension TableDefinition where QueryValue: Codable {
         if let optionalType = T.self as? any _OptionalProtocol.Type {
           return isOptionalJSONRepresentation(optionalType)
         } else if isOptional {
-          return TableColumn.QueryValue.self == T.JSONRepresentation?.self
-            || TableColumn.QueryValue.self == T.JSONBRepresentation?.self
+          if TableColumn.QueryValue.self == T.JSONRepresentation?.self {
+            return true
+          }
+          #if compiler(>=6.2)
+            if #available(iOS 26, macOS 26, tvOS 26, visionOS 26, watchOS 26, *),
+              TableColumn.QueryValue.self == T.JSONBRepresentation?.self
+            {
+              return true
+            }
+          #endif
+          return false
         } else {
-          return Value.self == T.JSONRepresentation.self
-            || Value.self == T.JSONBRepresentation.self
+          if Value.self == T.JSONRepresentation.self {
+            return true
+          }
+          #if compiler(>=6.2)
+            if #available(iOS 26, macOS 26, tvOS 26, visionOS 26, watchOS 26, *),
+              Value.self == T.JSONBRepresentation.self
+            {
+              return true
+            }
+          #endif
+          return false
         }
       }
 

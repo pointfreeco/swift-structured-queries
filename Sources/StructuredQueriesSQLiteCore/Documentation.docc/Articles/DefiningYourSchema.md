@@ -154,5 +154,7 @@ are converted to JSONB as they are written. To convert an entire table at once, 
 #sql(#"UPDATE "reminders" SET "notes" = jsonb("notes")"#)
 ```
 
-> Important: The JSONB format requires SQLite 3.45.0 or higher (bundled with iOS 18, macOS 15,
-> tvOS 18, and watchOS 11).
+> Important: `JSONBRepresentation` is available on iOS 26, macOS 26, tvOS 26, visionOS 26, and
+> watchOS 26, and requires a Swift 6.2 toolchain. The JSONB format itself requires SQLite 3.45.0
+> or higher, which is always satisfied by the SQLite that ships with these OS versions, but may
+> be relevant if you bundle your own copy of SQLite.
