@@ -60,13 +60,13 @@ extension Table {
   /// // ON "users"."referrerID" = "referrers"."id"
   /// ```
   ///
-  /// Table aliases are representable in selections by providing the type to the `@Columns` macro:
+  /// Table aliases are representable in selections by providing the type to the `@Column` macro:
   ///
   /// ```swift
   /// @Selection
   /// struct UserWithReferrer {
   ///   let user: User
-  ///   @Columns(as: TableAlias<User, Referrer>.self)
+  ///   @Column(as: TableAlias<User, Referrer>.self)
   ///   let referrer: User
   /// }
   ///

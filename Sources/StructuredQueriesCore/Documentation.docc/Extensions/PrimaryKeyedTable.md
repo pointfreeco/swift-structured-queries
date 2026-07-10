@@ -39,8 +39,7 @@ struct Reminder {
 }
 ```
 
-To define a composite primary key, group them together into a `@Selection` type and annotate the
-field with the `@Columns` macro:
+To define a composite primary key, group the fields together into a `@Selection` type:
 
 ```swift
 @Table
@@ -51,7 +50,6 @@ struct Enrollment {
     var studentID: StudentID
   }
 
-  // Automatically inferred as '@Columns(primaryKey: True)
   let id: ID
   // ...
 }

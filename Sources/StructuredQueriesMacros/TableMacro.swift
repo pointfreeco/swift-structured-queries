@@ -83,8 +83,7 @@ extension TableMacro: ExtensionMacro {
         identifier: TokenSyntax,
         label: TokenSyntax?,
         queryOutputType: TypeSyntax?,
-        queryValueType: TypeSyntax?,
-        isColumnGroup: Bool
+        queryValueType: TypeSyntax?
       )?
     let selfRewriter = SelfRewriter(
       selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
@@ -139,7 +138,6 @@ extension TableMacro: ExtensionMacro {
           !property.isComputed
         else { continue }
         guard
-          // TODO: Support multi-binding variables where '@Column{,s}' macro is omitted?
           property.bindings.count == 1,
           let binding = property.bindings.first,
           let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.trimmed
@@ -166,7 +164,6 @@ extension TableMacro: ExtensionMacro {
           .map { $0.rewritten(selfRewriter) }
         var columnQueryOutputType = columnQueryValueType
         var isPrimaryKey = primaryKey == nil && identifier.text == "id"
-        var isColumnGroup = false
         var isEphemeral = false
         var isExplicitColumn = false
         var isGenerated = false
@@ -176,11 +173,11 @@ extension TableMacro: ExtensionMacro {
             let attribute = attribute.as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
           else { continue }
-          isColumnGroup = isColumnGroup || attributeName == "Columns"
           isEphemeral = isEphemeral || attributeName == "Ephemeral"
-          isExplicitColumn = isExplicitColumn || attributeName == "Column"
+          isExplicitColumn =
+            isExplicitColumn || attributeName == "Column" || attributeName == "Columns"
           guard
-            isExplicitColumn || isEphemeral || isColumnGroup,
+            isExplicitColumn || isEphemeral,
             case .argumentList(let arguments) = attribute.arguments
           else { continue }
 
@@ -230,12 +227,14 @@ extension TableMacro: ExtensionMacro {
               if let primaryKey, let originalLabel = primaryKey.label {
                 var newArguments = arguments
                 newArguments.remove(at: argumentIndex)
-                // TODO: Update to suggest using '@Columns' to specify a composite primary key
                 diagnostics.append(
                   Diagnostic(
                     node: label,
                     message: MacroExpansionErrorMessage(
-                      "'@Table' only supports a single primary key"
+                      """
+                      '@Table' only supports a single primary key field; use '@Selection' to \
+                      define a type representing a composite primary key
+                      """
                     ),
                     notes: [
                       Note(
@@ -248,8 +247,8 @@ extension TableMacro: ExtensionMacro {
                     ],
                     fixIt: .replace(
                       message: MacroExpansionFixItMessage("Remove 'primaryKey: true'"),
-                      oldNode: Syntax(attribute),
-                      newNode: Syntax(attribute.with(\.arguments, .argumentList(newArguments)))
+                      oldNode: attribute,
+                      newNode: attribute.with(\.arguments, .argumentList(newArguments))
                     )
                   )
                 )
@@ -259,8 +258,7 @@ extension TableMacro: ExtensionMacro {
                 identifier: identifier,
                 label: label,
                 queryOutputType: columnQueryOutputType,
-                queryValueType: columnQueryValueType,
-                isColumnGroup: isColumnGroup
+                queryValueType: columnQueryValueType
               )
 
             case .some(let label) where label.text == "generated":
@@ -338,8 +336,7 @@ extension TableMacro: ExtensionMacro {
             identifier: identifier,
             label: nil,
             queryOutputType: columnQueryOutputType,
-            queryValueType: columnQueryValueType,
-            isColumnGroup: isColumnGroup
+            queryValueType: columnQueryValueType
           )
         }
 
@@ -347,15 +344,8 @@ extension TableMacro: ExtensionMacro {
           binding.initializer?.value.rewritten(selfRewriter)
           ?? (columnQueryValueType?.isOptionalType == true
             ? ExprSyntax(NilLiteralExprSyntax()) : nil)
-        let tableColumnType =
-          isGenerated
-          ? "GeneratedColumn"
-          : isColumnGroup
-            ? "ColumnGroup"
-            : isExplicitColumn
-              ? "TableColumn"
-              : "_TableColumn"
-        let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        let tableColumnType = isGenerated ? "GeneratedColumn" : "_TableColumn"
+        let tableColumnInitializer = isGenerated ? "" : ".for"
         let defaultParameter =
           defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
@@ -367,7 +357,7 @@ extension TableMacro: ExtensionMacro {
             QueryValue, \
             \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
             >\(raw: tableColumnInitializer)(\
-            \(raw: isColumnGroup ? "" : "\(columnName), ")\
+            \(columnName), \
             keyPath: \\QueryValue.\(identifier)\
             \(raw: defaultParameter)\
             )
@@ -464,7 +454,6 @@ extension TableMacro: ExtensionMacro {
           StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
         )
         var columnQueryValueType = parameter.type.trimmed.rewritten(selfRewriter)
-        var isColumnGroup = false
         var isExplicitColumn = false
 
         for attribute in caseDecl.attributes {
@@ -488,10 +477,10 @@ extension TableMacro: ExtensionMacro {
             )
             continue
           }
-          isColumnGroup = isColumnGroup || attributeName == "Columns"
-          isExplicitColumn = isExplicitColumn || attributeName == "Column"
+          isExplicitColumn =
+            isExplicitColumn || attributeName == "Column" || attributeName == "Columns"
           guard
-            isExplicitColumn || isColumnGroup,
+            isExplicitColumn,
             case .argumentList(let arguments) = attribute.arguments
           else { continue }
 
@@ -569,24 +558,17 @@ extension TableMacro: ExtensionMacro {
         }
 
         let defaultValue = parameter.defaultValue?.value.rewritten(selfRewriter)
-        let tableColumnType =
-          isColumnGroup
-          ? "ColumnGroup"
-          : isExplicitColumn
-            ? "TableColumn"
-            : "_TableColumn"
-        let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
         let defaultParameter =
           defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
             public let \(primaryKey ? "primaryKey" : identifier) = \
-            \(moduleName).\(raw: tableColumnType)<\
+            \(moduleName)._TableColumn<\
             QueryValue, \
             \(raw: columnQueryValueType.trimmedDescription)?\
-            >\(raw: tableColumnInitializer)(\
-            \(raw: isColumnGroup ? "" : "\(columnName), ")\
+            >.for(\
+            \(columnName), \
             keyPath: \\QueryValue.\(identifier)\
             \(raw: defaultParameter)\
             )
@@ -750,8 +732,7 @@ extension TableMacro: MemberMacro {
         identifier: TokenSyntax,
         label: TokenSyntax?,
         queryOutputType: TypeSyntax?,
-        queryValueType: TypeSyntax?,
-        isColumnGroup: Bool
+        queryValueType: TypeSyntax?
       )?
     let selfRewriter = SelfRewriter(selfEquivalent: type.name)
     var selectionInitializers: [DeclSyntax] = []
@@ -798,7 +779,6 @@ extension TableMacro: MemberMacro {
           primaryKey == nil
           && identifier.text == "id"
           && node.attributeName.identifier != "_Draft"
-        var isColumnGroup = false
         var isEphemeral = false
         var isExplicitColumn = false
         var isGenerated = false
@@ -809,11 +789,11 @@ extension TableMacro: MemberMacro {
             let attribute = attribute.as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
           else { continue }
-          isColumnGroup = isColumnGroup || attributeName == "Columns"
           isEphemeral = isEphemeral || attributeName == "Ephemeral"
-          isExplicitColumn = isExplicitColumn || attributeName == "Column"
+          isExplicitColumn =
+            isExplicitColumn || attributeName == "Column" || attributeName == "Columns"
           guard
-            isExplicitColumn || isEphemeral || isColumnGroup,
+            isExplicitColumn || isEphemeral,
             case .argumentList(let arguments) = attribute.arguments
           else { continue }
 
@@ -858,8 +838,7 @@ extension TableMacro: MemberMacro {
                 identifier: identifier,
                 label: label,
                 queryOutputType: columnQueryOutputType,
-                queryValueType: columnQueryValueType,
-                isColumnGroup: isColumnGroup
+                queryValueType: columnQueryValueType
               )
 
             case .some(let label) where label.text == "generated":
@@ -888,8 +867,7 @@ extension TableMacro: MemberMacro {
             identifier: identifier,
             label: nil,
             queryOutputType: columnQueryOutputType,
-            queryValueType: columnQueryValueType,
-            isColumnGroup: isColumnGroup
+            queryValueType: columnQueryValueType
           )
         }
 
@@ -903,15 +881,8 @@ extension TableMacro: MemberMacro {
           binding.initializer?.value.rewritten(selfRewriter)
           ?? (columnQueryValueType?.isOptionalType == true
             ? ExprSyntax(NilLiteralExprSyntax()) : nil)
-        let tableColumnType =
-          isGenerated
-          ? "GeneratedColumn"
-          : isColumnGroup
-            ? "ColumnGroup"
-            : isExplicitColumn
-              ? "TableColumn"
-              : "_TableColumn"
-        let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
+        let tableColumnType = isGenerated ? "GeneratedColumn" : "_TableColumn"
+        let tableColumnInitializer = isGenerated ? "" : ".for"
         let defaultParameter =
           defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
@@ -923,7 +894,7 @@ extension TableMacro: MemberMacro {
             QueryValue, \
             \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
             >\(raw: tableColumnInitializer)(\
-            \(raw: isColumnGroup ? "" : "\(columnName), ")\
+            \(columnName), \
             keyPath: \\QueryValue.\(identifier)\
             \(raw: defaultParameter)\
             )
@@ -1114,7 +1085,6 @@ extension TableMacro: MemberMacro {
           StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
         )
         var columnQueryValueType = parameter.type.trimmed.rewritten(selfRewriter)
-        var isColumnGroup = false
         var isExplicitColumn = false
 
         for attribute in caseDecl.attributes {
@@ -1122,10 +1092,10 @@ extension TableMacro: MemberMacro {
             let attribute = attribute.as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
           else { continue }
-          isExplicitColumn = isExplicitColumn || attributeName == "Column"
-          isColumnGroup = isColumnGroup || attributeName == "Columns"
+          isExplicitColumn =
+            isExplicitColumn || attributeName == "Column" || attributeName == "Columns"
           guard
-            isExplicitColumn || isColumnGroup,
+            isExplicitColumn,
             case .argumentList(let arguments) = attribute.arguments
           else { continue }
 
@@ -1169,24 +1139,17 @@ extension TableMacro: MemberMacro {
         selectedColumns.append((identifier, columnQueryValueType))
 
         let defaultValue = parameter.defaultValue?.value.rewritten(selfRewriter)
-        let tableColumnType =
-          isColumnGroup
-          ? "ColumnGroup"
-          : isExplicitColumn
-            ? "TableColumn"
-            : "_TableColumn"
-        let tableColumnInitializer = tableColumnType == "_TableColumn" ? ".for" : ""
         let defaultParameter =
           defaultValue.map { ", default: \($0.trimmedDescription)" } ?? ""
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
             public let \(primaryKey ? "primaryKey" : identifier) = \
-            \(moduleName).\(raw: tableColumnType)<\
+            \(moduleName)._TableColumn<\
             QueryValue, \
             \(raw: columnQueryValueType.trimmedDescription)?\
-            >\(raw: tableColumnInitializer)(\
-            \(raw: isColumnGroup ? "" : "\(columnName), ")\
+            >.for(\
+            \(columnName), \
             keyPath: \\QueryValue.\(identifier)\
             \(raw: defaultParameter)\
             )
@@ -1404,15 +1367,37 @@ extension TableMacro: MemberAttributeMacro {
       let property = member.as(VariableDeclSyntax.self),
       !property.isStatic,
       !property.isComputed,
-      !property.hasMacroApplication("Column"),
-      !property.hasMacroApplication("Columns"),
       !property.hasMacroApplication("Ephemeral"),
       property.bindings.count == 1,
       let binding = property.bindings.first,
       let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
         .trimmingBackticks()
     else { return [] }
-    let columnType = binding.typeAnnotation?.type.trimmed ?? binding.initializer?.value.literalType
+
+    var columnAttribute: AttributeSyntax?
+    for attribute in property.attributes {
+      guard
+        let attribute = attribute.as(AttributeSyntax.self),
+        let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
+        attributeName == "Column" || attributeName == "Columns"
+      else { continue }
+      columnAttribute = attribute
+      break
+    }
+
+    var columnType = binding.typeAnnotation?.type.trimmed ?? binding.initializer?.value.literalType
+    if let columnAttribute, case .argumentList(let arguments) = columnAttribute.arguments {
+      for argument in arguments {
+        guard
+          argument.label?.text == "as",
+          let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
+          memberAccess.declName.baseName.tokenKind == .keyword(.self),
+          let base = memberAccess.base
+        else { continue }
+        columnType = "\(raw: base.trimmedDescription)"
+      }
+    }
+
     let checkAttribute: [AttributeSyntax]
     if let columnType {
       checkAttribute = ["@\(macrosModuleName)._ColumnCheck(\(columnType.trimmed).self)"]
@@ -1420,6 +1405,9 @@ extension TableMacro: MemberAttributeMacro {
       checkAttribute = ["@\(macrosModuleName)._ColumnCheck(\(initializer.value.trimmed))"]
     } else {
       checkAttribute = []
+    }
+    if columnAttribute != nil {
+      return checkAttribute
     }
     let lazyInitializableHint: String
     #if LazyInitializableByDefault
@@ -1441,7 +1429,7 @@ extension TableMacro: MemberAttributeMacro {
           guard
             let attribute = attribute.as(AttributeSyntax.self),
             let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
-            attributeName == "Column",
+            attributeName == "Column" || attributeName == "Columns",
             case .argumentList(let arguments) = attribute.arguments,
             arguments.contains(
               where: {
