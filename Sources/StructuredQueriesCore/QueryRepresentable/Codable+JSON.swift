@@ -45,12 +45,13 @@ extension _CodableJSONRepresentation: QueryBindable {
 
 extension _CodableJSONRepresentation: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
-    self.init(
-      queryOutput: try jsonDecoder.decode(
-        QueryOutput.self,
-        from: Data(String(decoder: &decoder).utf8)
-      )
-    )
+    try self.init(json: String(decoder: &decoder))
+  }
+}
+
+extension _CodableJSONRepresentation {
+  package init(json: String) throws {
+    self.init(queryOutput: try jsonDecoder.decode(QueryOutput.self, from: Data(json.utf8)))
   }
 }
 

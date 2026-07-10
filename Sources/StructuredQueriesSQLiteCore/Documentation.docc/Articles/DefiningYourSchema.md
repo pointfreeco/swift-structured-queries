@@ -103,3 +103,56 @@ Reminder.where { $0.id != #bind(reminder.id) }
 > ```swift
 > Reminder.where { $0.id != reminder.id }
 > ```
+
+### Binary JSON (JSONB)
+
+The core library's `JSONRepresentation` stores a codable value as JSON text. SQLite additionally
+supports [JSONB](https://sqlite.org/jsonb.html), a binary representation of JSON that is more
+compact and faster for SQLite to process. To store a codable value in this format, use
+``Swift/Decodable/JSONBRepresentation``, instead:
+
+```swift
+@Table struct Reminder {
+  let id: Int
+  var title = ""
+  @Column(as: [String].JSONBRepresentation.self)
+  var notes: [String] = []
+}
+```
+
+Values are encoded to JSON and passed through SQLite's `jsonb` function when they are bound to a
+statement, so SQLite stores its canonical binary representation in a `BLOB` column:
+
+@Row {
+  @Column {
+    ```swift
+    Reminder.insert {
+      Reminder.Draft(
+        title: "Get groceries",
+        notes: ["Milk", "Eggs", "Bananas"]
+      )
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    INSERT INTO "reminders"
+      ("title", "notes")
+    VALUES
+      ('Get groceries',
+       jsonb('["Milk","Eggs","Bananas"]'))
+    ```
+  }
+}
+
+Values are decoded directly from the binary representation, with a fallback to JSON text for
+columns that contain text. This means an existing column that holds `JSONRepresentation` JSON text
+can be migrated to `JSONBRepresentation` in place: existing rows will continue to decode, and rows
+are converted to JSONB as they are written. To convert an entire table at once, instead:
+
+```swift
+#sql(#"UPDATE "reminders" SET "notes" = jsonb("notes")"#)
+```
+
+> Important: The JSONB format requires SQLite 3.45.0 or higher (bundled with iOS 18, macOS 15,
+> tvOS 18, and watchOS 11).
