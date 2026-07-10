@@ -41,7 +41,7 @@ struct Reminder {
 }
 ```
 
-> Note: At most one column can be designated as a primary key.
+> Note: At most one field can be designated as a primary key.
 
 ### Drafts
 
@@ -188,6 +188,94 @@ key:
     ```sql
     DELETE "reminders"
     WHERE "id" = 1
+    ```
+  }
+}
+
+### Composite primary keys
+
+Tables whose primary key spans multiple columns are also supported. To define a composite primary
+key, group the key's fields together into a `@Selection` type and use it for the table's `id`
+field:
+
+```swift
+@Table
+struct Enrollment {
+  @Selection
+  struct ID: Hashable {
+    let courseID: Int
+    let studentID: Int
+  }
+
+  // Automatically inferred as '@Columns(primaryKey: true)'
+  let id: ID
+  var grade: String?
+}
+```
+
+As with single-column primary keys, a field named `id` is automatically inferred to be the primary
+key. For any other field name, use the `@Columns` macro (note the plural) to designate the group
+as the primary key:
+
+```swift
+@Columns(primaryKey: true)
+let enrollmentID: ID
+```
+
+The group's fields are flattened into the table's columns ("courseID" and "studentID" above), and
+all of the tools described in this article work with the entire group of columns. For example,
+``PrimaryKeyedTable/find(_:)`` matches a row against every column of the key:
+
+@Row {
+  @Column {
+    ```swift
+    Enrollment.find(
+      Enrollment.ID(
+        courseID: 42,
+        studentID: 1729
+      )
+    )
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT
+      "enrollments"."courseID",
+      "enrollments"."studentID",
+      "enrollments"."grade"
+    FROM "enrollments"
+    WHERE (("enrollments"."courseID",
+            "enrollments"."studentID")
+           = ((42, 1729)))
+    ```
+  }
+}
+
+And ``PrimaryKeyedTable/upsert(values:)`` targets every column of the key in its conflict clause:
+
+@Row {
+  @Column {
+    ```swift
+    Enrollment.upsert {
+      Enrollment(
+        id: Enrollment.ID(
+          courseID: 42,
+          studentID: 1729
+        ),
+        grade: "A"
+      )
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    INSERT INTO "enrollments"
+      ("courseID", "studentID", "grade")
+    VALUES
+      (42, 1729, 'A')
+    ON CONFLICT ("courseID", "studentID")
+    DO UPDATE SET
+      "grade" = "excluded"."grade"
     ```
   }
 }
