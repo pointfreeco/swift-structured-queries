@@ -113,6 +113,7 @@ reading to learn more about building SQL with StructuredQueries.
 - <doc:GettingStarted>
 - <doc:DefiningYourSchema>
 - <doc:PrimaryKeyedTables>
+- <doc:TableDrafts>
 - <doc:SafeSQLStrings>
 - <doc:QueryCookbook>
 - <doc:CompilerPerformance>
