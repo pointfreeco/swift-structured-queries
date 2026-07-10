@@ -1,4 +1,4 @@
-import Foundation
+package import Foundation
 
 public struct _CodableJSONRepresentation<QueryOutput: Codable>: Codable, QueryRepresentable {
   public var queryOutput: QueryOutput
@@ -51,7 +51,11 @@ extension _CodableJSONRepresentation: QueryDecodable {
 
 extension _CodableJSONRepresentation {
   package init(json: String) throws {
-    self.init(queryOutput: try jsonDecoder.decode(QueryOutput.self, from: Data(json.utf8)))
+    try self.init(json: Data(json.utf8))
+  }
+
+  package init(json: Data) throws {
+    self.init(queryOutput: try jsonDecoder.decode(QueryOutput.self, from: json))
   }
 }
 

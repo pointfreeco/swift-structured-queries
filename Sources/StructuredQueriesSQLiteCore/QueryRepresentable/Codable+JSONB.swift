@@ -1,3 +1,4 @@
+import Foundation
 public import StructuredQueriesCore
 
 public struct _CodableJSONBRepresentation<QueryOutput: Codable>: QueryRepresentable {
@@ -56,11 +57,11 @@ extension _CodableJSONBRepresentation: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
     guard let blob = try decoder.decode([UInt8].self)
     else { throw QueryDecodingError.missingRequiredColumn }
-    let json: String
+    let json: Data
     do {
-      json = try JSONB.json(from: blob)
+      json = Data(try JSONB.json(from: blob))
     } catch {
-      json = String(decoding: blob, as: UTF8.self)
+      json = Data(blob)
     }
     self.init(queryOutput: try _CodableJSONRepresentation(json: json).queryOutput)
   }

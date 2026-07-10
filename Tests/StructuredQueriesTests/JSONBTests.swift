@@ -315,71 +315,75 @@ extension SnapshotTests {
 
 @Suite struct JSONBDecoderTests {
   @Test func primitives() throws {
-    #expect(try JSONB.json(from: [0x00]) == "null")
-    #expect(try JSONB.json(from: [0x01]) == "true")
-    #expect(try JSONB.json(from: [0x02]) == "false")
-    #expect(try JSONB.json(from: element(3, "123")) == "123")
-    #expect(try JSONB.json(from: element(5, "2.5")) == "2.5")
-    #expect(try JSONB.json(from: element(7, "hello")) == #""hello""#)
-    #expect(try JSONB.json(from: [0x0b]) == "[]")
-    #expect(try JSONB.json(from: [0x0c]) == "{}")
+    #expect(try transcodedJSON(from: [0x00]) == "null")
+    #expect(try transcodedJSON(from: [0x01]) == "true")
+    #expect(try transcodedJSON(from: [0x02]) == "false")
+    #expect(try transcodedJSON(from: element(3, "123")) == "123")
+    #expect(try transcodedJSON(from: element(5, "2.5")) == "2.5")
+    #expect(try transcodedJSON(from: element(7, "hello")) == #""hello""#)
+    #expect(try transcodedJSON(from: [0x0b]) == "[]")
+    #expect(try transcodedJSON(from: [0x0c]) == "{}")
   }
 
   @Test func int5() throws {
-    #expect(try JSONB.json(from: element(4, "0x1A")) == "26")
-    #expect(try JSONB.json(from: element(4, "-0xff")) == "-255")
-    #expect(try JSONB.json(from: element(4, "+12")) == "12")
+    #expect(try transcodedJSON(from: element(4, "0x1A")) == "26")
+    #expect(try transcodedJSON(from: element(4, "-0xff")) == "-255")
+    #expect(try transcodedJSON(from: element(4, "+12")) == "12")
   }
 
   @Test func float5() throws {
-    #expect(try JSONB.json(from: element(6, ".5")) == "0.5")
-    #expect(try JSONB.json(from: element(6, "5.")) == "5.0")
-    #expect(try JSONB.json(from: element(6, "-.5e2")) == "-0.5e2")
-    #expect(try JSONB.json(from: element(6, "Infinity")) == "9e999")
-    #expect(try JSONB.json(from: element(6, "-Infinity")) == "-9e999")
-    #expect(try JSONB.json(from: element(6, "NaN")) == "null")
+    #expect(try transcodedJSON(from: element(6, ".5")) == "0.5")
+    #expect(try transcodedJSON(from: element(6, "5.")) == "5.0")
+    #expect(try transcodedJSON(from: element(6, "-.5e2")) == "-0.5e2")
+    #expect(try transcodedJSON(from: element(6, "Infinity")) == "9e999")
+    #expect(try transcodedJSON(from: element(6, "-Infinity")) == "-9e999")
+    #expect(try transcodedJSON(from: element(6, "NaN")) == "null")
   }
 
   @Test func text5() throws {
-    #expect(try JSONB.json(from: element(9, #"\x41\'\v\0"#)) == ##""\u0041'\u000b\u0000""##)
-    #expect(try JSONB.json(from: element(9, #"\n\tA"#)) == #""\n\tA""#)
-    #expect(try JSONB.json(from: element(9, "a\\\nb")) == #""ab""#)
-    #expect(try JSONB.json(from: element(9, "a\\\r\nb")) == #""ab""#)
+    #expect(try transcodedJSON(from: element(9, #"\x41\'\v\0"#)) == ##""\u0041'\u000b\u0000""##)
+    #expect(try transcodedJSON(from: element(9, #"\n\tA"#)) == #""\n\tA""#)
+    #expect(try transcodedJSON(from: element(9, "a\\\nb")) == #""ab""#)
+    #expect(try transcodedJSON(from: element(9, "a\\\r\nb")) == #""ab""#)
   }
 
   @Test func textRaw() throws {
     #expect(
-      try JSONB.json(from: element(10, "it's a \"test\"\n\u{01}"))
+      try transcodedJSON(from: element(10, "it's a \"test\"\n\u{01}"))
         == ##""it's a \"test\"\n\u0001""##
     )
   }
 
   @Test func multiByteSizeHeaders() throws {
     let text = String(repeating: "a", count: 300)
-    #expect(try JSONB.json(from: [0xd7, 0x01, 0x2c] + Array(text.utf8)) == "\"\(text)\"")
+    #expect(try transcodedJSON(from: [0xd7, 0x01, 0x2c] + Array(text.utf8)) == "\"\(text)\"")
     #expect(
-      try JSONB.json(from: [0xe7, 0x00, 0x00, 0x01, 0x2c] + Array(text.utf8)) == "\"\(text)\"")
+      try transcodedJSON(from: [0xe7, 0x00, 0x00, 0x01, 0x2c] + Array(text.utf8)) == "\"\(text)\"")
   }
 
   @Test func containers() throws {
-    #expect(try JSONB.json(from: element(11, "\u{13}1\u{13}2")) == "[1,2]")
-    #expect(try JSONB.json(from: element(12, "\u{17}a\u{13}1")) == #"{"a":1}"#)
+    #expect(try transcodedJSON(from: element(11, "\u{13}1\u{13}2")) == "[1,2]")
+    #expect(try transcodedJSON(from: element(12, "\u{17}a\u{13}1")) == #"{"a":1}"#)
   }
 
   @Test func malformedBlobs() {
-    #expect(throws: JSONB.DecodingError.self) { try JSONB.json(from: []) }
-    #expect(throws: JSONB.DecodingError.self) { try JSONB.json(from: [0x0d]) }
-    #expect(throws: JSONB.DecodingError.self) { try JSONB.json(from: [0x13]) }
-    #expect(throws: JSONB.DecodingError.self) { try JSONB.json(from: [0x00, 0x00]) }
-    #expect(throws: JSONB.DecodingError.self) { try JSONB.json(from: [0xc7]) }
+    #expect(throws: JSONB.DecodingError.self) { try transcodedJSON(from: []) }
+    #expect(throws: JSONB.DecodingError.self) { try transcodedJSON(from: [0x0d]) }
+    #expect(throws: JSONB.DecodingError.self) { try transcodedJSON(from: [0x13]) }
+    #expect(throws: JSONB.DecodingError.self) { try transcodedJSON(from: [0x00, 0x00]) }
+    #expect(throws: JSONB.DecodingError.self) { try transcodedJSON(from: [0xc7]) }
     #expect(throws: JSONB.DecodingError.self) {
       // An object with a non-text key.
-      try JSONB.json(from: element(12, "\u{13}1\u{13}2"))
+      try transcodedJSON(from: element(12, "\u{13}1\u{13}2"))
     }
     #expect(throws: JSONB.DecodingError.self) {
       // An object with a key and no value.
-      try JSONB.json(from: element(12, "\u{17}a"))
+      try transcodedJSON(from: element(12, "\u{17}a"))
     }
+  }
+
+  private func transcodedJSON(from blob: [UInt8]) throws -> String {
+    String(decoding: try JSONB.json(from: blob), as: UTF8.self)
   }
 
   private func element(_ type: UInt8, _ payload: String) -> [UInt8] {
