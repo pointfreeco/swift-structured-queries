@@ -165,9 +165,9 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
-            self.latitude = try decoder.decode(Self.columns.latitude)
-            self.longitude = try decoder.decode(Self.columns.longitude)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
+            self.latitude = try decoder.decode(Self.columns.latitude) ?? nil
+            self.longitude = try decoder.decode(Self.columns.longitude) ?? nil
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -343,7 +343,7 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
             let latitude = try decoder.decode(Self.columns.latitude)
             guard let latitude else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -518,8 +518,8 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
-            self.startsAt = try decoder.decode(Self.columns.startsAt)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
+            self.startsAt = try decoder.decode(Self.columns.startsAt) ?? nil
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -689,8 +689,8 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
-            self.coordinate = try decoder.decode(Self.columns.coordinate)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
+            self.coordinate = try decoder.decode(Self.columns.coordinate) ?? nil
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -860,7 +860,7 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
             let systemFields = try decoder.decode(Self.columns.systemFields)
             guard let systemFields else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -1099,10 +1099,10 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
-            self.a = try decoder.decode(Self.columns.a)
-            self.b = try decoder.decode(Self.columns.b)
-            self.c = try decoder.decode(Self.columns.c)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
+            self.a = try decoder.decode(Self.columns.a) ?? nil
+            self.b = try decoder.decode(Self.columns.b) ?? nil
+            self.c = try decoder.decode(Self.columns.c) ?? nil
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -1115,8 +1115,8 @@ extension SnapshotTests {
         nonisolated extension Record: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Self.columns.id)
-            self.a = try decoder.decode(Self.columns.a)
-            self.b = try decoder.decode(Self.columns.b)
+            self.a = try decoder.decode(Self.columns.a) ?? nil
+            self.b = try decoder.decode(Self.columns.b) ?? nil
             let c = try decoder.decode(Self.columns.c)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -1290,8 +1290,8 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.latitude = try decoder.decode(Self.columns.latitude)
-            self.longitude = try decoder.decode(Self.columns.longitude)
+            self.latitude = try decoder.decode(Self.columns.latitude) ?? nil
+            self.longitude = try decoder.decode(Self.columns.longitude) ?? nil
             let name = try decoder.decode(Self.columns.name)
             guard let name else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -3191,10 +3191,10 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Self.columns.id)
+              self.id = try decoder.decode(Self.columns.id) ?? nil
               let latitude = try decoder.decode(Self.columns.latitude)
               let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
-              self.note = try decoder.decode(Self.columns.note)
+              self.note = try decoder.decode(Self.columns.note) ?? nil
               guard let latitude else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3217,7 +3217,7 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let latitude = try decoder.decode(Self.columns.latitude)
               let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
-              self.note = try decoder.decode(Self.columns.note)
+              self.note = try decoder.decode(Self.columns.note) ?? nil
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3398,9 +3398,9 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Self.columns.id)
+              self.id = try decoder.decode(Self.columns.id) ?? nil
               let quantity = try decoder.decode(Self.columns.quantity)
-              self.note = try decoder.decode(Self.columns.note)
+              self.note = try decoder.decode(Self.columns.note) ?? nil
               guard let quantity else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3417,7 +3417,7 @@ extension SnapshotTests {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               let id = try decoder.decode(Self.columns.id)
               let quantity = try decoder.decode(Self.columns.quantity)
-              self.note = try decoder.decode(Self.columns.note)
+              self.note = try decoder.decode(Self.columns.note) ?? nil
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3600,8 +3600,8 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Self.columns.id)
-              self.email = try decoder.decode(Self.columns.email)
+              self.id = try decoder.decode(Self.columns.id) ?? nil
+              self.email = try decoder.decode(Self.columns.email) ?? nil
               if self.email == nil {
                 self.email = Self.columns.email.defaultValue ?? nil
               }
@@ -3621,7 +3621,7 @@ extension SnapshotTests {
           nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               let id = try decoder.decode(Self.columns.id)
-              self.email = try decoder.decode(Self.columns.email)
+              self.email = try decoder.decode(Self.columns.email) ?? nil
               if self.email == nil {
                 self.email = Self.columns.email.defaultValue ?? nil
               }
@@ -3792,7 +3792,7 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Self.columns.id)
+              self.id = try decoder.decode(Self.columns.id) ?? nil
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -3975,7 +3975,7 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Self.columns.id)
+              self.id = try decoder.decode(Self.columns.id) ?? nil
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -4159,7 +4159,7 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Self.columns.id)
+              self.id = try decoder.decode(Self.columns.id) ?? nil
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -4351,7 +4351,7 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.reminderID = try decoder.decode(Self.columns.reminderID)
+              self.reminderID = try decoder.decode(Self.columns.reminderID) ?? nil
               let reminderTitle = try decoder.decode(Self.columns.reminderTitle)
               let remindersListTitle = try decoder.decode(Self.columns.remindersListTitle)
               guard let reminderTitle else {
@@ -4538,7 +4538,7 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Self.columns.id)
+              self.id = try decoder.decode(Self.columns.id) ?? nil
               let userModificationDate = try decoder.decode(Self.columns.userModificationDate)
               guard let userModificationDate else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -4712,7 +4712,7 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode(Self.columns.id)
+              self.id = try decoder.decode(Self.columns.id) ?? nil
               let timestamps = try decoder.decode(Self.columns.timestamps)
               guard let timestamps else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn

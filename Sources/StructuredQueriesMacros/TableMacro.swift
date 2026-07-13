@@ -383,7 +383,7 @@ extension TableMacro: ExtensionMacro {
         if columnQueryValueType.map(\.isOptionalType) ?? false {
           decodings.append(
             """
-            self.\(identifier) = try decoder.decode(\(decodeArgument))
+            self.\(identifier) = try decoder.decode(\(decodeArgument)) ?? nil
             """
           )
           if binding.initializer != nil {

@@ -1549,8 +1549,8 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
-            self.referrerID = try decoder.decode(Self.columns.referrerID)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
+            self.referrerID = try decoder.decode(Self.columns.referrerID) ?? nil
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -1561,7 +1561,7 @@ extension SnapshotTests {
         nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Self.columns.id)
-            self.referrerID = try decoder.decode(Self.columns.referrerID)
+            self.referrerID = try decoder.decode(Self.columns.referrerID) ?? nil
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -1800,7 +1800,7 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
             let seconds = try decoder.decode(Self.columns.seconds) ?? Self.columns.seconds.defaultValue
             guard let seconds else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -1992,7 +1992,7 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
             let color = try decoder.decode(Self.columns.color) ?? Self.columns.color.defaultValue
             let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
             guard let color else {
@@ -3173,7 +3173,7 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -3487,10 +3487,10 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
             let title = try decoder.decode(Self.columns.title) ?? Self.columns.title.defaultValue
-            self.date = try decoder.decode(Self.columns.date)
-            self.priority = try decoder.decode(Self.columns.priority)
+            self.date = try decoder.decode(Self.columns.date) ?? nil
+            self.priority = try decoder.decode(Self.columns.priority) ?? nil
             guard let title else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -3508,8 +3508,8 @@ extension SnapshotTests {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Self.columns.id)
             let title = try decoder.decode(Self.columns.title) ?? Self.columns.title.defaultValue
-            self.date = try decoder.decode(Self.columns.date)
-            self.priority = try decoder.decode(Self.columns.priority)
+            self.date = try decoder.decode(Self.columns.date) ?? nil
+            self.priority = try decoder.decode(Self.columns.priority) ?? nil
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -3651,7 +3651,7 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -3898,7 +3898,7 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
             let title = try decoder.decode(Self.columns.title) ?? Self.columns.title.defaultValue
             guard let title else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -3913,7 +3913,7 @@ extension SnapshotTests {
 
         nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
             let title = try decoder.decode(Self.columns.title) ?? Self.columns.title.defaultValue
             guard let title else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -4052,7 +4052,7 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode(Self.columns.id)
+            self.id = try decoder.decode(Self.columns.id) ?? nil
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
