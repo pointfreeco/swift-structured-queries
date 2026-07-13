@@ -41,31 +41,14 @@ struct Reminder {
 }
 ```
 
-> Note: At most one column can be designated as a primary key.
+> Note: At most one field can be designated as a primary key.
 
 ### Drafts
 
 Once a primary key has been specified for a type, the `@Table` macro generates a special `Draft`
 type nested inside your type. This type has all of the same fields as your type, except its primary
-key field is made optional:
-
-```swift
-let draft = Reminder.Draft(title: "Get groceries")
-```
-
-> Note: While the draft type is generated with all of the same fields as your type, it is _not_
-> generated with all the same conformances. If your `@Table` type conforms to `Equatable`,
-> `Hashable`, `Codable`, `Sendable`, or any other protocol that you wish for the `Draft` type to
-> conform to, you must specify this conformance manually _via_ extension. For example:
->
-> ```swift
-> extension Reminder.Draft: Equatable {}
-> ```
-
-The `id` is not necessary to provide because it is optional. This allows you to insert rows into
-your database without specifying the id. The library comes with a special
-``PrimaryKeyedTable/insert(_:onConflict:)`` method that allows you to insert a row into the database
-by providing only a draft:
+key field is made optional, allowing you to insert new rows without specifying the primary key so
+that the database can initialize it for you:
 
 @Row {
   @Column {
@@ -85,152 +68,8 @@ by providing only a draft:
   }
 }
 
-Since the "id" column is not specified in this query it allows the database to initialize it for us.
-This `Draft` type is appropriate to use in any features that needs to build up a value without
-specifying an ID.
-
-Further, using the ``Insert/returning(_:)`` method you can get back the ID of the newly inserted
-row:
-
-@Row {
-  @Column {
-    ```swift
-    Reminder
-      .insert { Reminder.Draft(title: "Get groceries") }
-      .returning(\.id)
-    ```
-  }
-  @Column {
-    ```sql
-    INSERT INTO "reminders"
-      ("title")
-    VALUES
-      ('Get groceries')
-    RETURNING
-      "id"
-    ```
-  }
-}
-
-Or even get back the entire newly inserted row:
-
-@Row {
-  @Column {
-    ```swift
-    Reminder
-      .insert { Reminder.Draft(title: "Get groceries") }
-      .returning(\.self)
-    ```
-  }
-  @Column {
-    ```sql
-    INSERT INTO "reminders"
-      ("title")
-    VALUES
-      ('Get groceries')
-    RETURNING
-      "id", "title", "isCompleted"
-    ```
-  }
-}
-
-At times your application may want to provide the same business logic for creating a new record and
-editing an existing one. Your primary-keyed table's `Draft` type can be used for these kinds of
-flows, and it is possible to create a draft from an existing value using ``TableDraft/init(_:)``:
-
-```swift
-// Render a form for a new record
-ReminderForm(
-  draft: Reminder.Draft(remindersListID: remindersList.id)
-)
-
-// Render a form for an existing record by converting it to a draft
-ReminderForm(
-  draft: Reminder.Draft(reminder)
-)
-```
-
-> Tip: Due to a [Swift limitation](https://github.com/swiftlang/swift/issues/90519) it is not
-> currently possible to extend drafts with a public initializer that collides with the synthesized
-> memberwise initializer:
->
-> ```swift
-> @Table public struct Todo {
->   let id: UUID
->   var description = ""
->   // ...
-> }
->
-> extension Todo.Draft {
->   public init(id: UUID? = nil, description: String = "") {  // 🛑
->     self.id = id
->     self.description = description
->   }
-> }
-> ```
->
-> To work around the issue, define a static function, instead:
->
-> ```swift
-> extension Todo.Draft {
->   public static func create(id: UUID? = nil, description: String = "") -> Self {
->     Self(id: id, description: description)
->   }
-> }
-> ```
-
-### Lazy initialization
-
-It is possible to mark some fields of a draft as being "lazy initializable." Such fields will be
-optional in the generated `Draft` type, allowing their value to be set at a later time, matching
-the lazy initialization of the draft's primary key. A canonical example of this is created/updated
-timestamps for a record:
-
-```swift
-@Table
-struct User {
-  let id: UUID
-  var name = ""
-  let createdAt: Date
-  let updatedAt: Date
-}
-```
-
-It is not appropriate to assign these values when creating or updating the record, and instead it
-is best to leave that logic to the database (via default values and triggers). To make it so that
-you can omit those fields when creating drafts, use the `@Column` macro with the
-`lazyInitializable` option:
-
-```swift
-@Table struct User {
-  let id: UUID
-  var name = ""
-  @Column(lazyInitializable: true)
-  let createdAt: Date
-  @Column(lazyInitializable: true)
-  let updatedAt: Date
-}
-
-let draft = Draft(name: "Blob")
-```
-
-Another use for lazy initializable properties in drafts comes from foreign keys. You typically
-want foreign keys to be lazy initialized so that you can create the parent record first, and then
-set the foreign key on the child:
-
-```swift
-@Table struct Reminder {
-  let id: UUID
-  var name = ""
-  @Column(lazyInitializable: true)
-  var remindersListID: RemindersList.ID
-}
-```
-
-> Note: In a future version of StructuredQueries, `lazyInitializable: true` will be the default
-> behavior for all fields without a default value, and if you want to opt out of it you will
-> provide `lazyInitializable: false`. To prepare for that future release you can enable the
-> `LazyInitializableByDefault` trait in your dependence on StructuredQueries today.
+See <doc:TableDrafts> for more information on drafts, including how to lazily initialize columns
+beyond the primary key, and how to generate drafts for tables without primary keys.
 
 ### Selects, updates, upserts, and deletions
 
@@ -353,6 +192,94 @@ key:
   }
 }
 
+### Composite primary keys
+
+Tables whose primary key spans multiple columns are also supported. To define a composite primary
+key, group the key's fields together into a `@Selection` type and use it for the table's `id`
+field:
+
+```swift
+@Table
+struct Enrollment {
+  @Selection
+  struct ID: Hashable {
+    let courseID: Int
+    let studentID: Int
+  }
+
+  // Automatically inferred as '@Columns(primaryKey: true)'
+  let id: ID
+  var grade: String?
+}
+```
+
+As with single-column primary keys, a field named `id` is automatically inferred to be the primary
+key. For any other field name, use the `@Columns` macro (note the plural) to designate the group
+as the primary key:
+
+```swift
+@Columns(primaryKey: true)
+let enrollmentID: ID
+```
+
+The group's fields are flattened into the table's columns ("courseID" and "studentID" above), and
+all of the tools described in this article work with the entire group of columns. For example,
+``PrimaryKeyedTable/find(_:)`` matches a row against every column of the key:
+
+@Row {
+  @Column {
+    ```swift
+    Enrollment.find(
+      Enrollment.ID(
+        courseID: 42,
+        studentID: 1729
+      )
+    )
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT
+      "enrollments"."courseID",
+      "enrollments"."studentID",
+      "enrollments"."grade"
+    FROM "enrollments"
+    WHERE (("enrollments"."courseID",
+            "enrollments"."studentID")
+           = ((42, 1729)))
+    ```
+  }
+}
+
+And ``PrimaryKeyedTable/upsert(values:)`` targets every column of the key in its conflict clause:
+
+@Row {
+  @Column {
+    ```swift
+    Enrollment.upsert {
+      Enrollment(
+        id: Enrollment.ID(
+          courseID: 42,
+          studentID: 1729
+        ),
+        grade: "A"
+      )
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    INSERT INTO "enrollments"
+      ("courseID", "studentID", "grade")
+    VALUES
+      (42, 1729, 'A')
+    ON CONFLICT ("courseID", "studentID")
+    DO UPDATE SET
+      "grade" = "excluded"."grade"
+    ```
+  }
+}
+
 ## Topics
 
 ### Primary keys
@@ -362,4 +289,4 @@ key:
 
 ### Drafts
 
-- ``TableDraft``
+- <doc:TableDrafts>
