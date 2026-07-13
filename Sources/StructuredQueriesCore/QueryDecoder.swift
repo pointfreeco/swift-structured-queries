@@ -104,6 +104,7 @@ extension QueryDecoder {
     try Column.Value?(decoder: &self)?.queryOutput
   }
 
+  @_disfavoredOverload
   @inlinable
   @inline(__always)
   public mutating func decode<Column: _TableColumnExpression, Value>(
