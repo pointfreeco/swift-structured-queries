@@ -35,6 +35,62 @@ package enum ColumnCheckFailJSONMacro: PeerMacro {
   }
 }
 
+package enum ColumnCheckGroupMacro: PeerMacro {
+  package static func expansion(
+    of node: AttributeSyntax,
+    providingPeersOf declaration: some DeclSyntaxProtocol,
+    in context: some MacroExpansionContext
+  ) throws -> [DeclSyntax] {
+    guard let property = declaration.as(VariableDeclSyntax.self) else { return [] }
+    for attribute in property.attributes {
+      guard
+        let attribute = attribute.as(AttributeSyntax.self),
+        let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
+        attributeName == "Column" || attributeName == "Columns",
+        case .argumentList(let arguments) = attribute.arguments
+      else { continue }
+
+      for argumentIndex in arguments.indices {
+        let argument = arguments[argumentIndex]
+        let message: String
+        switch argument.label?.text {
+        case nil:
+          message = "Column name cannot be applied to a column group"
+        case "generated":
+          message = "Argument 'generated' cannot be applied to a column group"
+        default:
+          continue
+        }
+        var newAttribute = attribute
+        var newArguments = arguments
+        newArguments.remove(at: argumentIndex)
+        if newArguments.isEmpty {
+          newAttribute.leftParen = nil
+          newAttribute.arguments = nil
+          newAttribute.rightParen = nil
+        } else {
+          newArguments[newArguments.index(before: newArguments.endIndex)].trailingComma = nil
+          newAttribute.arguments = .argumentList(newArguments)
+        }
+        context.diagnose(
+          Diagnostic(
+            node: argument,
+            message: MacroExpansionErrorMessage(message),
+            fixIt: .replace(
+              message: MacroExpansionFixItMessage(
+                "Remove '\(argument.trimmed.with(\.trailingComma, nil))'"
+              ),
+              oldNode: attribute,
+              newNode: newAttribute
+            )
+          )
+        )
+      }
+    }
+    return []
+  }
+}
+
 private func diagnoseUnrepresentableColumn(
   of node: AttributeSyntax,
   on declaration: some DeclSyntaxProtocol,
@@ -109,7 +165,7 @@ extension DeclSyntaxProtocol {
       var filtered = Array(attributes).filter { element in
         guard case .attribute(let attribute) = element else { return true }
         let name = attribute.attributeName.trimmedDescription
-        return name != "_ColumnCheck" && name != "Column"
+        return name != "_ColumnCheck" && name != "Column" && name != "Columns"
       }
       filtered.insert(.attribute(attribute), at: filtered.startIndex)
       return AttributeListSyntax(filtered)

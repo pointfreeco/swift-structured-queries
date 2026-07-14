@@ -209,6 +209,10 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
       Wrapped.columns.primaryKey._names
     }
 
+    public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
+      Wrapped.columns.primaryKey.defaultValue
+    }
+
     public var keyPath: KeyPath<Wrapped?, Wrapped.PrimaryKey.QueryOutput?> {
       \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
     }
@@ -227,10 +231,6 @@ extension Optional.TableColumns.PrimaryColumn: TableColumnExpression
 where Wrapped.TableColumns.PrimaryColumn: TableColumnExpression {
   public var name: String {
     Wrapped.columns.primaryKey.name
-  }
-
-  public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
-    Wrapped.columns.primaryKey.defaultValue
   }
 
   public func _aliased<Name: AliasName>(

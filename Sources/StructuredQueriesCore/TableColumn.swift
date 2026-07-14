@@ -4,6 +4,9 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
 
   var _names: [String] { get }
 
+  /// The default value of the table column.
+  var defaultValue: Value.QueryOutput? { get }
+
   /// The table model key path associated with this table column.
   var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 }
@@ -16,9 +19,6 @@ public protocol TableColumnExpression<Root, Value>: _TableColumnExpression
 where Value: QueryBindable {
   /// The name of the table column.
   var name: String { get }
-
-  /// The default value of the table column.
-  var defaultValue: Value.QueryOutput? { get }
 
   func _aliased<Name: AliasName>(
     _ alias: Name.Type
@@ -122,11 +122,11 @@ public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
 
   public static func `for`(
     _: String,
-    keyPath: KeyPath<Root, Value>,
-    default _: Value? = nil
+    keyPath: KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: Value.QueryOutput? = nil
   ) -> ColumnGroup<Root, Value>
-  where Value: Table, Value == Value.QueryOutput {
-    ColumnGroup(keyPath: keyPath)
+  where Value: Table, Value.QueryOutput: Table {
+    ColumnGroup(keyPath: keyPath, default: defaultValue)
   }
 }
 

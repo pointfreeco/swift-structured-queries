@@ -1,7 +1,7 @@
 /// A group of table columns.
 ///
-/// Don't create instances of this value directly. Instead, use the `@Table` and `@Columns` macros
-/// to generate values of this type.
+/// Don't create instances of this value directly. Instead, use the `@Table` macro to generate
+/// values of this type for table properties whose types are `@Selection`s.
 @dynamicMemberLookup
 public struct ColumnGroup<Root: Table, Values: Table>: _TableColumnExpression
 where Values.QueryOutput: Table {
@@ -11,9 +11,15 @@ where Values.QueryOutput: Table {
 
   public typealias QueryValue = Values
 
+  public let defaultValue: Values.QueryOutput?
+
   public let keyPath: KeyPath<Root, Values.QueryOutput>
 
-  public init(keyPath: KeyPath<Root, Values.QueryOutput>) {
+  public init(
+    keyPath: KeyPath<Root, Values.QueryOutput>,
+    default defaultValue: Values.QueryOutput? = nil
+  ) {
+    self.defaultValue = defaultValue
     self.keyPath = keyPath
   }
 
@@ -48,7 +54,8 @@ where Values.QueryOutput: Table {
   ) -> ColumnGroup<Root, Member> {
     let column = Values.columns[keyPath: keyPath]
     return ColumnGroup<Root, Member>(
-      keyPath: self.keyPath.appending(path: column.keyPath)
+      keyPath: self.keyPath.appending(path: column.keyPath),
+      default: column.defaultValue
     )
   }
 

@@ -117,6 +117,107 @@ extension SnapshotTests {
       }
     }
 
+    @Test func groupWithName() {
+      assertMacro([
+        "_ColumnCheck": ColumnCheckGroupMacro.self
+      ]) {
+        """
+        struct Row {
+          @Column("addr")
+          @_ColumnCheck(Address.self)
+          var address: Address
+        }
+        """
+      } diagnostics: {
+        """
+        struct Row {
+          @Column("addr")
+                  ┬─────
+                  ╰─ 🛑 Column name cannot be applied to a column group
+                     ✏️ Remove '"addr"'
+          @_ColumnCheck(Address.self)
+          var address: Address
+        }
+        """
+      } fixes: {
+        """
+        struct Row {
+          @Column
+          @_ColumnCheck(Address.self)
+          var address: Address
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          @Column
+          var address: Address
+        }
+        """
+      }
+    }
+
+    @Test func groupWithGenerated() {
+      assertMacro([
+        "_ColumnCheck": ColumnCheckGroupMacro.self
+      ]) {
+        """
+        struct Row {
+          @Column(generated: .stored, primaryKey: true)
+          @_ColumnCheck(Address.self)
+          let address: Address
+        }
+        """
+      } diagnostics: {
+        """
+        struct Row {
+          @Column(generated: .stored, primaryKey: true)
+                  ┬──────────────────
+                  ╰─ 🛑 Argument 'generated' cannot be applied to a column group
+                     ✏️ Remove 'generated: .stored'
+          @_ColumnCheck(Address.self)
+          let address: Address
+        }
+        """
+      } fixes: {
+        """
+        struct Row {
+          @Column(primaryKey: true)
+          @_ColumnCheck(Address.self)
+          let address: Address
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          @Column(primaryKey: true)
+          let address: Address
+        }
+        """
+      }
+    }
+
+    @Test func groupPass() {
+      assertMacro([
+        "_ColumnCheck": ColumnCheckGroupMacro.self
+      ]) {
+        """
+        struct Row {
+          @Column(as: Address.self, primaryKey: true)
+          @_ColumnCheck(Address.self)
+          var address: Address
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          @Column(as: Address.self, primaryKey: true)
+          var address: Address
+        }
+        """
+      }
+    }
+
     @Test func pass() {
       assertMacro([
         "_ColumnCheck": ColumnCheckPassMacro.self

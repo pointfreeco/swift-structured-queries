@@ -84,7 +84,7 @@ supports basic control flow statements:
 ### Inserting drafts
 
 If your table has a [primary key](<doc:PrimaryKeyedTables>) that is initialized by the database,
-you can insert its associated ``PrimaryKeyedTable/Draft`` type, instead, which allows you to omit
+you can insert its associated [draft](<doc:TableDrafts>) type, instead, which allows you to omit
 specifying this identifier. Using result builder syntax:
 
 @Row {

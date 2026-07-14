@@ -22,7 +22,9 @@ extension SnapshotTests {
         struct Place {
           @StructuredQueries._ColumnCheck(Int.self)
           let id: Int
+          @StructuredQueries._ColumnCheck(Double.self)
           var latitude: Double
+          @StructuredQueries._ColumnCheck(Double.self)
           var longitude: Double
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -30,8 +32,8 @@ extension SnapshotTests {
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("latitude", keyPath: \QueryValue.latitude)
-            public let longitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("longitude", keyPath: \QueryValue.longitude)
+            public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
+            public let longitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("longitude", keyPath: \QueryValue.longitude)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -76,14 +78,14 @@ extension SnapshotTests {
             public typealias SourceTable = Place
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
-            var latitude: Double?
-            var longitude: Double?
+            @StructuredQueries._ColumnCheck(Double?.self) var latitude: Double?
+            @StructuredQueries._ColumnCheck(Double?.self) var longitude: Double?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double?>("latitude", keyPath: \QueryValue.latitude, default: nil)
-              public let longitude = StructuredQueriesCore.TableColumn<QueryValue, Double?>("longitude", keyPath: \QueryValue.longitude, default: nil)
+              public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double?>.for("latitude", keyPath: \QueryValue.latitude, default: nil)
+              public let longitude = StructuredQueriesCore._TableColumn<QueryValue, Double?>.for("longitude", keyPath: \QueryValue.longitude, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -165,9 +167,9 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode() ?? nil
-            self.latitude = try decoder.decode() ?? nil
-            self.longitude = try decoder.decode() ?? nil
+            self.id = try decoder.decode(Self.columns.id)
+            self.latitude = try decoder.decode(Self.columns.latitude)
+            self.longitude = try decoder.decode(Self.columns.longitude)
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -178,9 +180,9 @@ extension SnapshotTests {
 
         nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let id = try decoder.decode(\QueryValue.id)
-            let latitude = try decoder.decode(\QueryValue.latitude)
-            let longitude = try decoder.decode(\QueryValue.longitude)
+            let id = try decoder.decode(Self.columns.id)
+            let latitude = try decoder.decode(Self.columns.latitude)
+            let longitude = try decoder.decode(Self.columns.longitude)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -214,6 +216,7 @@ extension SnapshotTests {
         struct Place {
           @StructuredQueries._ColumnCheck(Int.self)
           let id: Int
+          @StructuredQueries._ColumnCheck(Double.self)
           var latitude: Double
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -221,7 +224,7 @@ extension SnapshotTests {
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("latitude", keyPath: \QueryValue.latitude)
+            public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -262,12 +265,12 @@ extension SnapshotTests {
             public typealias SourceTable = Place
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
-            var latitude: Double
+            @StructuredQueries._ColumnCheck(Double.self) var latitude: Double
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("latitude", keyPath: \QueryValue.latitude)
+              public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -343,8 +346,8 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode() ?? nil
-            let latitude = try decoder.decode(\QueryValue.latitude)
+            self.id = try decoder.decode(Self.columns.id)
+            let latitude = try decoder.decode(Self.columns.latitude)
             guard let latitude else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -358,8 +361,8 @@ extension SnapshotTests {
 
         nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let id = try decoder.decode(\QueryValue.id)
-            let latitude = try decoder.decode(\QueryValue.latitude)
+            let id = try decoder.decode(Self.columns.id)
+            let latitude = try decoder.decode(Self.columns.latitude)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -389,6 +392,7 @@ extension SnapshotTests {
         struct Event {
           @StructuredQueries._ColumnCheck(Int.self)
           let id: Int
+          @StructuredQueries._ColumnCheck(Date.ISO8601Representation.self)
           var startsAt: Date
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -396,7 +400,7 @@ extension SnapshotTests {
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let startsAt = StructuredQueriesCore.TableColumn<QueryValue, Date.ISO8601Representation>("startsAt", keyPath: \QueryValue.startsAt)
+            public let startsAt = StructuredQueriesCore._TableColumn<QueryValue, Date.ISO8601Representation>.for("startsAt", keyPath: \QueryValue.startsAt)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -437,12 +441,12 @@ extension SnapshotTests {
             public typealias SourceTable = Event
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
-            var startsAt: Date?
+            @StructuredQueries._ColumnCheck(Date.ISO8601Representation?.self) var startsAt: Date?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let startsAt = StructuredQueriesCore.TableColumn<QueryValue, Date.ISO8601Representation?>("startsAt", keyPath: \QueryValue.startsAt, default: nil)
+              public let startsAt = StructuredQueriesCore._TableColumn<QueryValue, Date.ISO8601Representation?>.for("startsAt", keyPath: \QueryValue.startsAt, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -518,8 +522,8 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode() ?? nil
-            self.startsAt = try decoder.decode(Date.ISO8601Representation.self) ?? nil
+            self.id = try decoder.decode(Self.columns.id)
+            self.startsAt = try decoder.decode(Self.columns.startsAt)
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -529,8 +533,8 @@ extension SnapshotTests {
 
         nonisolated extension Event: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let id = try decoder.decode(\QueryValue.id)
-            let startsAt = try decoder.decode(Date.ISO8601Representation.self)
+            let id = try decoder.decode(Self.columns.id)
+            let startsAt = try decoder.decode(Self.columns.startsAt)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -560,6 +564,7 @@ extension SnapshotTests {
         struct Place {
           @StructuredQueries._ColumnCheck(Int.self)
           let id: Int
+          @StructuredQueries._ColumnCheck(Coordinate.self)
           var coordinate: Coordinate
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -567,7 +572,7 @@ extension SnapshotTests {
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let coordinate = StructuredQueriesCore.ColumnGroup<QueryValue, Coordinate>(keyPath: \QueryValue.coordinate)
+            public let coordinate = StructuredQueriesCore._TableColumn<QueryValue, Coordinate>.for("coordinate", keyPath: \QueryValue.coordinate)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -608,12 +613,12 @@ extension SnapshotTests {
             public typealias SourceTable = Place
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
-            var coordinate: Coordinate?
+            @StructuredQueries._ColumnCheck(Coordinate?.self) var coordinate: Coordinate?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let coordinate = StructuredQueriesCore.ColumnGroup<QueryValue, Coordinate?>(keyPath: \QueryValue.coordinate)
+              public let coordinate = StructuredQueriesCore._TableColumn<QueryValue, Coordinate?>.for("coordinate", keyPath: \QueryValue.coordinate, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -689,8 +694,8 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode() ?? nil
-            self.coordinate = try decoder.decode() ?? nil
+            self.id = try decoder.decode(Self.columns.id)
+            self.coordinate = try decoder.decode(Self.columns.coordinate)
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -700,8 +705,8 @@ extension SnapshotTests {
 
         nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let id = try decoder.decode(\QueryValue.id)
-            let coordinate = try decoder.decode(\QueryValue.coordinate)
+            let id = try decoder.decode(Self.columns.id)
+            let coordinate = try decoder.decode(Self.columns.coordinate)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -731,6 +736,7 @@ extension SnapshotTests {
         struct Record {
           @StructuredQueries._ColumnCheck(Int.self)
           let id: Int
+          @StructuredQueries._ColumnCheck(CKRecord?.SystemFieldsRepresentation.self)
           var systemFields: CKRecord?
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -738,7 +744,7 @@ extension SnapshotTests {
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let systemFields = StructuredQueriesCore.TableColumn<QueryValue, CKRecord?.SystemFieldsRepresentation>("systemFields", keyPath: \QueryValue.systemFields)
+            public let systemFields = StructuredQueriesCore._TableColumn<QueryValue, CKRecord?.SystemFieldsRepresentation>.for("systemFields", keyPath: \QueryValue.systemFields)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -779,12 +785,12 @@ extension SnapshotTests {
             public typealias SourceTable = Record
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
-            var systemFields: CKRecord?
+            @StructuredQueries._ColumnCheck(CKRecord?.SystemFieldsRepresentation.self) var systemFields: CKRecord?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let systemFields = StructuredQueriesCore.TableColumn<QueryValue, CKRecord?.SystemFieldsRepresentation>("systemFields", keyPath: \QueryValue.systemFields)
+              public let systemFields = StructuredQueriesCore._TableColumn<QueryValue, CKRecord?.SystemFieldsRepresentation>.for("systemFields", keyPath: \QueryValue.systemFields)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -860,8 +866,8 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode() ?? nil
-            let systemFields = try decoder.decode(CKRecord?.SystemFieldsRepresentation.self)
+            self.id = try decoder.decode(Self.columns.id)
+            let systemFields = try decoder.decode(Self.columns.systemFields)
             guard let systemFields else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -875,8 +881,8 @@ extension SnapshotTests {
 
         nonisolated extension Record: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let id = try decoder.decode(\QueryValue.id)
-            let systemFields = try decoder.decode(CKRecord?.SystemFieldsRepresentation.self)
+            let id = try decoder.decode(Self.columns.id)
+            let systemFields = try decoder.decode(Self.columns.systemFields)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -942,8 +948,11 @@ extension SnapshotTests {
         struct Record {
           @StructuredQueries._ColumnCheck(Int.self)
           let id: Int
+          @StructuredQueries._ColumnCheck(String?.self)
           var a: String?
+          @StructuredQueries._ColumnCheck(Int?.self)
           var b: Int?
+          @StructuredQueries._ColumnCheck(Double.self)
           var c: Double
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -951,9 +960,9 @@ extension SnapshotTests {
             public typealias PrimaryKey = Int
             public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let a = StructuredQueriesCore.TableColumn<QueryValue, String?>("a", keyPath: \QueryValue.a, default: nil)
-            public let b = StructuredQueriesCore.TableColumn<QueryValue, Int?>("b", keyPath: \QueryValue.b, default: nil)
-            public let c = StructuredQueriesCore.TableColumn<QueryValue, Double>("c", keyPath: \QueryValue.c)
+            public let a = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("a", keyPath: \QueryValue.a, default: nil)
+            public let b = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("b", keyPath: \QueryValue.b, default: nil)
+            public let c = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("c", keyPath: \QueryValue.c)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -1002,16 +1011,16 @@ extension SnapshotTests {
             public typealias SourceTable = Record
             @StructuredQueries._ColumnCheck(Int?.self)
             var id: Int?
-            var a: String?
-            var b: Int?
-            var c: Double?
+            @StructuredQueries._ColumnCheck(String?.self) var a: String?
+            @StructuredQueries._ColumnCheck(Int?.self) var b: Int?
+            @StructuredQueries._ColumnCheck(Double?.self) var c: Double?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
               public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let a = StructuredQueriesCore.TableColumn<QueryValue, String?>("a", keyPath: \QueryValue.a, default: nil)
-              public let b = StructuredQueriesCore.TableColumn<QueryValue, Int?>("b", keyPath: \QueryValue.b, default: nil)
-              public let c = StructuredQueriesCore.TableColumn<QueryValue, Double?>("c", keyPath: \QueryValue.c, default: nil)
+              public let a = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("a", keyPath: \QueryValue.a, default: nil)
+              public let b = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("b", keyPath: \QueryValue.b, default: nil)
+              public let c = StructuredQueriesCore._TableColumn<QueryValue, Double?>.for("c", keyPath: \QueryValue.c, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -1099,10 +1108,10 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.id = try decoder.decode() ?? nil
-            self.a = try decoder.decode() ?? nil
-            self.b = try decoder.decode() ?? nil
-            self.c = try decoder.decode() ?? nil
+            self.id = try decoder.decode(Self.columns.id)
+            self.a = try decoder.decode(Self.columns.a)
+            self.b = try decoder.decode(Self.columns.b)
+            self.c = try decoder.decode(Self.columns.c)
           }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -1114,10 +1123,10 @@ extension SnapshotTests {
 
         nonisolated extension Record: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let id = try decoder.decode(\QueryValue.id)
-            self.a = try decoder.decode() ?? nil
-            self.b = try decoder.decode() ?? nil
-            let c = try decoder.decode(\QueryValue.c)
+            let id = try decoder.decode(Self.columns.id)
+            self.a = try decoder.decode(Self.columns.a)
+            self.b = try decoder.decode(Self.columns.b)
+            let c = try decoder.decode(Self.columns.c)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -1147,15 +1156,17 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Location {
+          @StructuredQueries._ColumnCheck(Double.self)
           var latitude: Double
+          @StructuredQueries._ColumnCheck(Double.self)
           var longitude: Double
           @StructuredQueries._ColumnCheck(String.self)
           var name: String
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Location
-            public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("latitude", keyPath: \QueryValue.latitude)
-            public let longitude = StructuredQueriesCore.TableColumn<QueryValue, Double>("longitude", keyPath: \QueryValue.longitude)
+            public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("latitude", keyPath: \QueryValue.latitude)
+            public let longitude = StructuredQueriesCore._TableColumn<QueryValue, Double>.for("longitude", keyPath: \QueryValue.longitude)
             public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
             #if compiler(>=6.4)
             @_optimize(none)
@@ -1199,15 +1210,15 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Location
-            var latitude: Double?
-            var longitude: Double?
+            @StructuredQueries._ColumnCheck(Double?.self) var latitude: Double?
+            @StructuredQueries._ColumnCheck(Double?.self) var longitude: Double?
             @StructuredQueries._ColumnCheck(String.self)
             var name: String
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let latitude = StructuredQueriesCore.TableColumn<QueryValue, Double?>("latitude", keyPath: \QueryValue.latitude, default: nil)
-              public let longitude = StructuredQueriesCore.TableColumn<QueryValue, Double?>("longitude", keyPath: \QueryValue.longitude, default: nil)
+              public let latitude = StructuredQueriesCore._TableColumn<QueryValue, Double?>.for("latitude", keyPath: \QueryValue.latitude, default: nil)
+              public let longitude = StructuredQueriesCore._TableColumn<QueryValue, Double?>.for("longitude", keyPath: \QueryValue.longitude, default: nil)
               public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
               #if compiler(>=6.4)
               @_optimize(none)
@@ -1290,9 +1301,9 @@ extension SnapshotTests {
 
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            self.latitude = try decoder.decode() ?? nil
-            self.longitude = try decoder.decode() ?? nil
-            let name = try decoder.decode(\QueryValue.name)
+            self.latitude = try decoder.decode(Self.columns.latitude)
+            self.longitude = try decoder.decode(Self.columns.longitude)
+            let name = try decoder.decode(Self.columns.name)
             guard let name else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -1307,9 +1318,9 @@ extension SnapshotTests {
 
         nonisolated extension Location: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let latitude = try decoder.decode(\QueryValue.latitude)
-            let longitude = try decoder.decode(\QueryValue.longitude)
-            let name = try decoder.decode(\QueryValue.name)
+            let latitude = try decoder.decode(Self.columns.latitude)
+            let longitude = try decoder.decode(Self.columns.longitude)
+            let name = try decoder.decode(Self.columns.name)
             guard let latitude else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -3191,14 +3202,18 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode() ?? nil
-              let latitude = try decoder.decode(\QueryValue.latitude)
-              self.name = try decoder.decode() ?? ""
-              self.note = try decoder.decode() ?? nil
+              self.id = try decoder.decode(Self.columns.id)
+              let latitude = try decoder.decode(Self.columns.latitude)
+              let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
+              self.note = try decoder.decode(Self.columns.note)
               guard let latitude else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
+              guard let name else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
               self.latitude = latitude
+              self.name = name
             }
             nonisolated init(_ other: SourceTable) {
               self.id = other.id
@@ -3210,18 +3225,22 @@ extension SnapshotTests {
 
           nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let id = try decoder.decode(\QueryValue.id)
-              let latitude = try decoder.decode(\QueryValue.latitude)
-              self.name = try decoder.decode() ?? ""
-              self.note = try decoder.decode() ?? nil
+              let id = try decoder.decode(Self.columns.id)
+              let latitude = try decoder.decode(Self.columns.latitude)
+              let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
+              self.note = try decoder.decode(Self.columns.note)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
               guard let latitude else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
+              guard let name else {
+                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              }
               self.id = id
               self.latitude = latitude
+              self.name = name
             }
           }
           """#
@@ -3390,9 +3409,9 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode() ?? nil
-              let quantity = try decoder.decode(\QueryValue.quantity)
-              self.note = try decoder.decode() ?? nil
+              self.id = try decoder.decode(Self.columns.id)
+              let quantity = try decoder.decode(Self.columns.quantity)
+              self.note = try decoder.decode(Self.columns.note)
               guard let quantity else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3407,9 +3426,9 @@ extension SnapshotTests {
 
           nonisolated extension Item: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let id = try decoder.decode(\QueryValue.id)
-              let quantity = try decoder.decode(\QueryValue.quantity)
-              self.note = try decoder.decode() ?? nil
+              let id = try decoder.decode(Self.columns.id)
+              let quantity = try decoder.decode(Self.columns.quantity)
+              self.note = try decoder.decode(Self.columns.note)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3592,9 +3611,12 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode() ?? nil
-              self.email = try decoder.decode() ?? ""
-              let age = try decoder.decode(\QueryValue.age)
+              self.id = try decoder.decode(Self.columns.id)
+              self.email = try decoder.decode(Self.columns.email)
+              if self.email == nil {
+                self.email = Self.columns.email.defaultValue ?? nil
+              }
+              let age = try decoder.decode(Self.columns.age)
               guard let age else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3609,9 +3631,12 @@ extension SnapshotTests {
 
           nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let id = try decoder.decode(\QueryValue.id)
-              self.email = try decoder.decode() ?? ""  // TODO: Should this be non-optional?
-              let age = try decoder.decode(\QueryValue.age)
+              let id = try decoder.decode(Self.columns.id)
+              self.email = try decoder.decode(Self.columns.email)
+              if self.email == nil {
+                self.email = Self.columns.email.defaultValue ?? nil
+              }
+              let age = try decoder.decode(Self.columns.age)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3643,6 +3668,7 @@ extension SnapshotTests {
             let id: Int
             @StructuredQueries._ColumnCheck(String.self)
             var name: String
+            @StructuredQueries._ColumnCheck(Int.self)
             let generated: Int
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -3778,8 +3804,8 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode() ?? nil
-              let name = try decoder.decode(\QueryValue.name)
+              self.id = try decoder.decode(Self.columns.id)
+              let name = try decoder.decode(Self.columns.name)
               guard let name else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3793,9 +3819,9 @@ extension SnapshotTests {
 
           nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let id = try decoder.decode(\QueryValue.id)
-              let name = try decoder.decode(\QueryValue.name)
-              let generated = try decoder.decode(\QueryValue.generated)
+              let id = try decoder.decode(Self.columns.id)
+              let name = try decoder.decode(Self.columns.name)
+              let generated = try decoder.decode(Self.columns.generated)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3961,8 +3987,8 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode() ?? nil
-              let name = try decoder.decode(\QueryValue.name)
+              self.id = try decoder.decode(Self.columns.id)
+              let name = try decoder.decode(Self.columns.name)
               guard let name else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -3976,8 +4002,8 @@ extension SnapshotTests {
 
           nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let id = try decoder.decode(\QueryValue.id)
-              let name = try decoder.decode(\QueryValue.name)
+              let id = try decoder.decode(Self.columns.id)
+              let name = try decoder.decode(Self.columns.name)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -4145,8 +4171,8 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode() ?? nil
-              let name = try decoder.decode(\QueryValue.name)
+              self.id = try decoder.decode(Self.columns.id)
+              let name = try decoder.decode(Self.columns.name)
               guard let name else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -4160,8 +4186,8 @@ extension SnapshotTests {
 
           nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let id = try decoder.decode(\QueryValue.id)
-              let name = try decoder.decode(\QueryValue.name)
+              let id = try decoder.decode(Self.columns.id)
+              let name = try decoder.decode(Self.columns.name)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -4190,6 +4216,7 @@ extension SnapshotTests {
         } expansion: {
           #"""
           private struct ReminderWithList {
+            @StructuredQueries._ColumnCheck(Reminder.ID.self)
             let reminderID: Reminder.ID
             @StructuredQueries._ColumnCheck(String.self)
             let reminderTitle: String
@@ -4199,8 +4226,8 @@ extension SnapshotTests {
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
               public typealias QueryValue = ReminderWithList
               public typealias PrimaryKey = Reminder.ID
-              public let reminderID = StructuredQueriesCore.TableColumn<QueryValue, Reminder.ID>("reminderID", keyPath: \QueryValue.reminderID)
-              @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore.TableColumn<QueryValue, Reminder.ID>("reminderID", keyPath: \QueryValue.reminderID)
+              public let reminderID = StructuredQueriesCore._TableColumn<QueryValue, Reminder.ID>.for("reminderID", keyPath: \QueryValue.reminderID)
+              @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Reminder.ID>.for("reminderID", keyPath: \QueryValue.reminderID)
               public let reminderTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("reminderTitle", keyPath: \QueryValue.reminderTitle)
               public let remindersListTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("remindersListTitle", keyPath: \QueryValue.remindersListTitle)
               #if compiler(>=6.4)
@@ -4245,7 +4272,7 @@ extension SnapshotTests {
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = ReminderWithList
-              var reminderID: Reminder.ID?
+              @StructuredQueries._ColumnCheck(Reminder.ID?.self) var reminderID: Reminder.ID?
               @StructuredQueries._ColumnCheck(String.self)
               let reminderTitle: String
               @StructuredQueries._ColumnCheck(String.self)
@@ -4253,7 +4280,7 @@ extension SnapshotTests {
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
                 public typealias QueryValue = Draft
-                public let reminderID = StructuredQueriesCore.TableColumn<QueryValue, Reminder.ID?>("reminderID", keyPath: \QueryValue.reminderID, default: nil)
+                public let reminderID = StructuredQueriesCore._TableColumn<QueryValue, Reminder.ID?>.for("reminderID", keyPath: \QueryValue.reminderID, default: nil)
                 public let reminderTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("reminderTitle", keyPath: \QueryValue.reminderTitle)
                 public let remindersListTitle = StructuredQueriesCore._TableColumn<QueryValue, String>.for("remindersListTitle", keyPath: \QueryValue.remindersListTitle)
                 #if compiler(>=6.4)
@@ -4337,9 +4364,9 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.reminderID = try decoder.decode() ?? nil
-              let reminderTitle = try decoder.decode(\QueryValue.reminderTitle)
-              let remindersListTitle = try decoder.decode(\QueryValue.remindersListTitle)
+              self.reminderID = try decoder.decode(Self.columns.reminderID)
+              let reminderTitle = try decoder.decode(Self.columns.reminderTitle)
+              let remindersListTitle = try decoder.decode(Self.columns.remindersListTitle)
               guard let reminderTitle else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -4358,9 +4385,9 @@ extension SnapshotTests {
 
           nonisolated extension ReminderWithList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let reminderID = try decoder.decode(\QueryValue.reminderID)
-              let reminderTitle = try decoder.decode(\QueryValue.reminderTitle)
-              let remindersListTitle = try decoder.decode(\QueryValue.remindersListTitle)
+              let reminderID = try decoder.decode(Self.columns.reminderID)
+              let reminderTitle = try decoder.decode(Self.columns.reminderTitle)
+              let remindersListTitle = try decoder.decode(Self.columns.remindersListTitle)
               guard let reminderID else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -4524,8 +4551,8 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode() ?? nil
-              let userModificationDate = try decoder.decode(\QueryValue.userModificationDate)
+              self.id = try decoder.decode(Self.columns.id)
+              let userModificationDate = try decoder.decode(Self.columns.userModificationDate)
               guard let userModificationDate else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -4539,8 +4566,8 @@ extension SnapshotTests {
 
           nonisolated extension Metadata: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let id = try decoder.decode(\QueryValue.id)
-              let userModificationDate = try decoder.decode(\QueryValue.userModificationDate)
+              let id = try decoder.decode(Self.columns.id)
+              let userModificationDate = try decoder.decode(Self.columns.userModificationDate)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -4569,6 +4596,7 @@ extension SnapshotTests {
           private struct Row {
             @StructuredQueries._ColumnCheck(UUID.self)
             let id: UUID
+            @StructuredQueries._ColumnCheck(Timestamps.self)
             var timestamps: Timestamps
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -4576,7 +4604,7 @@ extension SnapshotTests {
               public typealias PrimaryKey = UUID
               public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID>.for("id", keyPath: \QueryValue.id)
               @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, UUID>.for("id", keyPath: \QueryValue.id)
-              public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
+              public let timestamps = StructuredQueriesCore._TableColumn<QueryValue, Timestamps>.for("timestamps", keyPath: \QueryValue.timestamps)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -4617,12 +4645,12 @@ extension SnapshotTests {
               public typealias SourceTable = Row
               @StructuredQueries._ColumnCheck(UUID?.self)
               var id: UUID?
-              var timestamps: Timestamps
+              @StructuredQueries._ColumnCheck(Timestamps.self) var timestamps: Timestamps
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
                 public typealias QueryValue = Draft
                 public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID?>.for("id", keyPath: \QueryValue.id, default: nil)
-                public let timestamps = StructuredQueriesCore.ColumnGroup<QueryValue, Timestamps>(keyPath: \QueryValue.timestamps)
+                public let timestamps = StructuredQueriesCore._TableColumn<QueryValue, Timestamps>.for("timestamps", keyPath: \QueryValue.timestamps)
                 #if compiler(>=6.4)
                 @_optimize(none)
                 #endif
@@ -4698,8 +4726,8 @@ extension SnapshotTests {
 
           nonisolated extension Draft {
             fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              self.id = try decoder.decode() ?? nil
-              let timestamps = try decoder.decode(\QueryValue.timestamps)
+              self.id = try decoder.decode(Self.columns.id)
+              let timestamps = try decoder.decode(Self.columns.timestamps)
               guard let timestamps else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }
@@ -4713,8 +4741,8 @@ extension SnapshotTests {
 
           nonisolated extension Row: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-              let id = try decoder.decode(\QueryValue.id)
-              let timestamps = try decoder.decode(\QueryValue.timestamps)
+              let id = try decoder.decode(Self.columns.id)
+              let timestamps = try decoder.decode(Self.columns.timestamps)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
               }

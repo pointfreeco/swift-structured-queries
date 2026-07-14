@@ -414,7 +414,7 @@ extension SnapshotTests {
 }
 
 @Table private struct Root {
-  @Columns var fields: NestedFields
+  @Column var fields: NestedFields
 }
 
 @Selection struct NestedFields {

@@ -12,7 +12,10 @@ where
   where PrimaryKey.QueryValue == PrimaryKey
 }
 
-// A type representing a draft to be saved to a table.
+/// A type representing a draft to be saved to a table.
+///
+/// Don't conform to this protocol directly. Instead, use the `@Table` and `@Column` macros to
+/// generate a conformance. See <doc:TableDrafts> for more information.
 public protocol TableDraft: Table {
   /// A type that represents the table this draft stages a row for.
   associatedtype SourceTable: Table where SourceTable.Draft == Self
