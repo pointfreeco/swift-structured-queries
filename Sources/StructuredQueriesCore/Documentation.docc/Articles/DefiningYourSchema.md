@@ -265,6 +265,9 @@ With that you can insert reminders with notes like so:
   }
 }
 
+> Tip: If you are using SQLite and would like to store your field as a `BLOB` of JSONB, you can
+> annotate this field with `JSONBRepresentation`, instead.
+
 #### Tagged identifiers
 
 The [Tagged](https://github.com/pointfreeco/swift-tagged) library provides lightweight syntax for

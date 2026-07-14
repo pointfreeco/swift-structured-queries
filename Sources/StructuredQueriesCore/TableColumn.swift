@@ -27,6 +27,10 @@ where Value: QueryBindable {
 
 extension TableColumnExpression {
   public var _names: [String] { [name] }
+
+  var returningFragment: QueryFragment {
+    Value.queryFragment(decoding: "\(quote: name)")
+  }
 }
 
 /// A type representing a _writable_ table column, _i.e._ not a generated column.
@@ -84,7 +88,8 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
   }
 
   public var queryFragment: QueryFragment {
-    "\(Root.self).\(quote: name)"
+    let column: QueryFragment = "\(Root.self).\(quote: name)"
+    return _isSelecting ? Value.queryFragment(decoding: column) : column
   }
 
   public func _aliased<Name>(
@@ -182,7 +187,8 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
   }
 
   public var queryFragment: QueryFragment {
-    "\(Root.self).\(quote: name)"
+    let column: QueryFragment = "\(Root.self).\(quote: name)"
+    return _isSelecting ? Value.queryFragment(decoding: column) : column
   }
 
   public func _aliased<Name>(

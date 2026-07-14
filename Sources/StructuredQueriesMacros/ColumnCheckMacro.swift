@@ -125,7 +125,10 @@ private func diagnoseUnrepresentableColumn(
       Diagnostic(
         node: Syntax(declaration),
         message: MacroExpansionErrorMessage(
-          "\(defaultValue.map { "'\($0)'" } ?? "Type") is not representable as a column"
+          """
+          \(defaultValue.map { "'\($0)'" } ?? "Type") is not a '@Selection' or representable as a \
+          column
+          """
         ),
         fixIts: fixIts
       )
@@ -136,15 +139,27 @@ private func diagnoseUnrepresentableColumn(
 
   if suggestingJSON {
     fixIts.insert(
-      .replace(
-        message: MacroExpansionFixItMessage(
-          "Apply '@Column(as: \(type).JSONRepresentation.self)' to store as JSON"
+      contentsOf: [
+        .replace(
+          message: MacroExpansionFixItMessage(
+            "Apply '@Column(as: \(type).JSONRepresentation.self)' to store as JSON"
+          ),
+          oldNode: declaration,
+          newNode: declaration.applyingColumnFixIt(
+            "@Column(as: \(raw: type).JSONRepresentation.self)"
+          )
         ),
-        oldNode: declaration,
-        newNode: declaration.applyingColumnFixIt(
-          "@Column(as: \(raw: type).JSONRepresentation.self)"
-        )
-      ),
+        // TODO: Hide behind 'SQLite' trait when introduced in the future
+        .replace(
+          message: MacroExpansionFixItMessage(
+            "Apply '@Column(as: \(type).JSONBRepresentation.self)' to store as JSONB"
+          ),
+          oldNode: declaration,
+          newNode: declaration.applyingColumnFixIt(
+            "@Column(as: \(raw: type).JSONBRepresentation.self)"
+          )
+        ),
+      ],
       at: 0
     )
   }

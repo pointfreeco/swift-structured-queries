@@ -105,12 +105,12 @@ public struct Delete<From: Table, Returning> {
   ) -> Delete<From, (repeat each QueryValue)> {
     var returning: [QueryFragment] = []
     for resultColumn in repeat each selection(From.columns) {
-      returning.append("\(quote: resultColumn.name)")
+      returning.append(resultColumn.returningFragment)
     }
     return Delete<From, (repeat each QueryValue)>(
       isEmpty: isEmpty,
       where: `where`,
-      returning: Array(repeat each selection(From.columns))
+      returning: returning
     )
   }
 
@@ -125,7 +125,7 @@ public struct Delete<From: Table, Returning> {
   ) -> Delete<From, From> {
     var returning: [QueryFragment] = []
     for resultColumn in From.TableColumns.allColumns {
-      returning.append("\(quote: resultColumn.name)")
+      returning.append(resultColumn.returningFragment)
     }
     return Delete<From, From>(
       isEmpty: isEmpty,
