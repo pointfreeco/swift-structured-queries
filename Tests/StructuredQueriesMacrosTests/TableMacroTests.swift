@@ -2058,6 +2058,24 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func `@Selection with empty struct`() {
+      assertMacro {
+        """
+        @Selection
+        struct Foo {
+        }
+        """
+      } diagnostics: {
+        """
+        @Selection
+        ┬─────────
+        ╰─ 🛑 '@Selection' requires at least one stored column property to be defined on 'Foo'
+        struct Foo {
+        }
+        """
+      }
+    }
   }
 
   @Test func willSet() {
@@ -3044,6 +3062,24 @@ extension SnapshotTests {
         @Table enum Post {
                ┬───
                ╰─ 🛑 '@Table' can only be applied to enum types when the 'CasePaths' package trait is enabled
+          case photo(String)
+        }
+        """
+      }
+    }
+
+    @Test func `selection enum requires CasePaths trait`() {
+      assertMacro {
+        """
+        @Selection enum Post {
+          case photo(String)
+        }
+        """
+      } diagnostics: {
+        """
+        @Selection enum Post {
+                   ┬───
+                   ╰─ 🛑 '@Selection' can only be applied to enum types when the 'CasePaths' package trait is enabled
           case photo(String)
         }
         """

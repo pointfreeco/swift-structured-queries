@@ -18,6 +18,7 @@ extension TableMacro: ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: C
   ) throws -> [ExtensionDeclSyntax] {
+    let attributeName = node.attributeName.identifier ?? "Table"
     if node.attributeName.identifier == "Selection",
       let tableNode = declaration.macroApplication(for: "Table")
     {
@@ -60,11 +61,11 @@ extension TableMacro: ExtensionMacro {
           message: MacroExpansionErrorMessage(
             declaration.is(EnumDeclSyntax.self)
               ? """
-              '@Table' can only be applied to enum types when the 'CasePaths' \
+              '@\(attributeName)' can only be applied to enum types when the 'CasePaths' \
               package trait is enabled
               """
               : """
-              '@Table' can only be applied to struct types (and enum types with the \
+              '@\(attributeName)' can only be applied to struct types (and enum types with the \
               'CasePaths' package trait enabled)
               """
           )
@@ -646,10 +647,11 @@ extension TableMacro: ExtensionMacro {
           message: MacroExpansionErrorMessage(
             declaration.is(EnumDeclSyntax.self)
               ? """
-              '@Table' requires at least one case to be defined on '\(type)'
+              '@\(attributeName)' requires at least one case to be defined on '\(type)'
               """
               : """
-              '@Table' requires at least one stored column property to be defined on '\(type)'
+              '@\(attributeName)' requires at least one stored column property to be defined \
+              on '\(type)'
               """
           )
         )
