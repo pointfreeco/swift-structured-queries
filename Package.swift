@@ -180,7 +180,7 @@ let package = Package(
   swiftLanguageModes: [.v6]
 )
 
-if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil  // || true  // NB: Uncomment for local testing in Xcode
+if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil   || true  // NB: Uncomment for local testing in Xcode
 {
   package.traits.insert(
     .default(

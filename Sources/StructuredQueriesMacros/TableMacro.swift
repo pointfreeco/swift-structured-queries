@@ -377,21 +377,11 @@ extension TableMacro: ExtensionMacro {
             self.\(identifier) = try decoder.decode(\(decodeArgument))
             """
           )
-          if binding.initializer != nil {
-            decodings.append(
-              """
-              if self.\(identifier) == nil {
-              self.\(identifier) = \(decodeArgument).defaultValue ?? nil
-              }
-              """
-            )
-          }
         } else {
           if binding.initializer != nil {
             decodings.append(
               """
-              let \(identifier) = try decoder.decode(\(decodeArgument)) \
-              ?? \(decodeArgument).defaultValue
+              let \(identifier) = try decoder.decode(\(decodeArgument))
               """
             )
           } else {

@@ -551,10 +551,10 @@ extension SnapshotTests {
 
         nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let c1 = try decoder.decode(Self.columns.c1) ?? Self.columns.c1.defaultValue
-            let c2 = try decoder.decode(Self.columns.c2) ?? Self.columns.c2.defaultValue
-            let c3 = try decoder.decode(Self.columns.c3) ?? Self.columns.c3.defaultValue
-            let c4 = try decoder.decode(Self.columns.c4) ?? Self.columns.c4.defaultValue
+            let c1 = try decoder.decode(Self.columns.c1)
+            let c2 = try decoder.decode(Self.columns.c2)
+            let c3 = try decoder.decode(Self.columns.c3)
+            let c4 = try decoder.decode(Self.columns.c4)
             guard let c1 else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -1399,7 +1399,7 @@ extension SnapshotTests {
 
         nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-            let bar = try decoder.decode(Self.columns.bar) ?? Self.columns.bar.defaultValue
+            let bar = try decoder.decode(Self.columns.bar)
             guard let bar else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -1807,7 +1807,7 @@ extension SnapshotTests {
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Self.columns.id)
-            let seconds = try decoder.decode(Self.columns.seconds) ?? Self.columns.seconds.defaultValue
+            let seconds = try decoder.decode(Self.columns.seconds)
             guard let seconds else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -1822,7 +1822,7 @@ extension SnapshotTests {
         nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Self.columns.id)
-            let seconds = try decoder.decode(Self.columns.seconds) ?? Self.columns.seconds.defaultValue
+            let seconds = try decoder.decode(Self.columns.seconds)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -2000,8 +2000,8 @@ extension SnapshotTests {
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Self.columns.id)
-            let color = try decoder.decode(Self.columns.color) ?? Self.columns.color.defaultValue
-            let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
+            let color = try decoder.decode(Self.columns.color)
+            let name = try decoder.decode(Self.columns.name)
             guard let color else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -2021,8 +2021,8 @@ extension SnapshotTests {
         nonisolated extension RemindersList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Self.columns.id)
-            let color = try decoder.decode(Self.columns.color) ?? Self.columns.color.defaultValue
-            let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
+            let color = try decoder.decode(Self.columns.color)
+            let name = try decoder.decode(Self.columns.name)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -3534,7 +3534,7 @@ extension SnapshotTests {
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Self.columns.id)
-            let title = try decoder.decode(Self.columns.title) ?? Self.columns.title.defaultValue
+            let title = try decoder.decode(Self.columns.title)
             self.date = try decoder.decode(Self.columns.date)
             self.priority = try decoder.decode(Self.columns.priority)
             guard let title else {
@@ -3553,7 +3553,7 @@ extension SnapshotTests {
         nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Self.columns.id)
-            let title = try decoder.decode(Self.columns.title) ?? Self.columns.title.defaultValue
+            let title = try decoder.decode(Self.columns.title)
             self.date = try decoder.decode(Self.columns.date)
             self.priority = try decoder.decode(Self.columns.priority)
             guard let id else {
@@ -3947,7 +3947,7 @@ extension SnapshotTests {
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Self.columns.id)
-            let title = try decoder.decode(Self.columns.title) ?? Self.columns.title.defaultValue
+            let title = try decoder.decode(Self.columns.title)
             guard let title else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -3962,7 +3962,7 @@ extension SnapshotTests {
         nonisolated extension Reminder: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Self.columns.id)
-            let title = try decoder.decode(Self.columns.title) ?? Self.columns.title.defaultValue
+            let title = try decoder.decode(Self.columns.title)
             guard let title else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }

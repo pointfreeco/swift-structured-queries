@@ -3204,7 +3204,7 @@ extension SnapshotTests {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Self.columns.id)
               let latitude = try decoder.decode(Self.columns.latitude)
-              let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
+              let name = try decoder.decode(Self.columns.name)
               self.note = try decoder.decode(Self.columns.note)
               guard let latitude else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -3227,7 +3227,7 @@ extension SnapshotTests {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               let id = try decoder.decode(Self.columns.id)
               let latitude = try decoder.decode(Self.columns.latitude)
-              let name = try decoder.decode(Self.columns.name) ?? Self.columns.name.defaultValue
+              let name = try decoder.decode(Self.columns.name)
               self.note = try decoder.decode(Self.columns.note)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -3613,9 +3613,6 @@ extension SnapshotTests {
             nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               self.id = try decoder.decode(Self.columns.id)
               self.email = try decoder.decode(Self.columns.email)
-              if self.email == nil {
-                self.email = Self.columns.email.defaultValue ?? nil
-              }
               let age = try decoder.decode(Self.columns.age)
               guard let age else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
@@ -3633,9 +3630,6 @@ extension SnapshotTests {
             public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
               let id = try decoder.decode(Self.columns.id)
               self.email = try decoder.decode(Self.columns.email)
-              if self.email == nil {
-                self.email = Self.columns.email.defaultValue ?? nil
-              }
               let age = try decoder.decode(Self.columns.age)
               guard let id else {
                 throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
