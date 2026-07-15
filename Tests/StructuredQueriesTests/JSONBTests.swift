@@ -43,6 +43,22 @@ extension SnapshotTests {
           Comment.Draft(postID: 1, moderation: ["approved"])
         }
       )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "tracks" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "track_name" TEXT NOT NULL,
+            "track_tags" BLOB NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        Track.insert {
+          Track.Draft(trackName: "Blob's Blues", trackTags: ["blues", "rnb"])
+        }
+      )
     }
 
     @Test func insertReturning() {
@@ -302,6 +318,32 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonGroupArrayWithRenamedColumns() {
+      assertQuery(
+        Track.select { $0.jsonGroupArray() }
+      ) {
+        """
+        SELECT json_group_array(json_object('id', json_quote("tracks"."id"), 'track_name', json_quote("tracks"."track_name"), 'track_tags', json("tracks"."track_tags")))
+        FROM "tracks"
+        """
+      } results: {
+        #"""
+        ┌─────────────────────────────────┐
+        │ [                               │
+        │   [0]: Track(                   │
+        │     id: 1,                      │
+        │     trackName: "Blob\'s Blues", │
+        │     trackTags: [                │
+        │       [0]: "blues",             │
+        │       [1]: "rnb"                │
+        │     ]                           │
+        │   )                             │
+        │ ]                               │
+        └─────────────────────────────────┘
+        """#
+      }
+    }
+
     @Test func join() {
       assertQuery(
         Post
@@ -347,4 +389,13 @@ private struct Comment: Codable, Equatable {
   var postID: Int
   @Column(as: [String].JSONBRepresentation?.self)
   var moderation: [String]?
+}
+
+@Table
+private struct Track: Codable, Equatable {
+  let id: Int
+  @Column("track_name")
+  var trackName = ""
+  @Column("track_tags", as: [String].JSONBRepresentation.self)
+  var trackTags: [String] = []
 }

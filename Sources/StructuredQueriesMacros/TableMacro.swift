@@ -1,5 +1,6 @@
 import SwiftBasicFormat
 import SwiftDiagnostics
+import SwiftParser
 public import SwiftSyntax
 import SwiftSyntaxBuilder
 public import SwiftSyntaxMacros
@@ -721,6 +722,7 @@ extension TableMacro: MemberMacro {
     var allColumns:
       [(name: TokenSyntax, firstName: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] = []
     var allColumnNames: [TokenSyntax] = []
+    var codingKeys: [(identifier: TokenSyntax, rawValue: ExprSyntax?)] = []
     var writableColumns: [TokenSyntax] = []
     var selectedColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
     var columnsProperties: [DeclSyntax] = []
@@ -861,6 +863,12 @@ extension TableMacro: MemberMacro {
             }
           }
         }
+        let isRenamedColumn =
+          !isEphemeral
+          && columnName.as(StringLiteralExprSyntax.self)?.representedLiteralValue
+            != identifier.text.trimmingBackticks()
+        codingKeys.append((identifier: identifier, rawValue: isRenamedColumn ? columnName : nil))
+
         guard !isEphemeral
         else { continue }
 
@@ -1294,6 +1302,33 @@ extension TableMacro: MemberMacro {
 
       """
 
+    var codingKeysDecl: DeclSyntax?
+    if declaration.is(StructDeclSyntax.self),
+      codingKeys.contains(where: { $0.rawValue != nil }),
+      declaration.inheritanceClause?.inheritedTypes.contains(where: {
+        ["Codable", "Decodable", "Encodable"].contains(
+          $0.type.trimmedDescription.hasPrefix("Swift.")
+            ? String($0.type.trimmedDescription.dropFirst("Swift.".count))
+            : $0.type.trimmedDescription
+        )
+      }) == true,
+      !declaration.memberBlock.members.contains(where: {
+        $0.decl.as(EnumDeclSyntax.self)?.name.text == "CodingKeys"
+          || $0.decl.as(StructDeclSyntax.self)?.name.text == "CodingKeys"
+          || $0.decl.as(TypeAliasDeclSyntax.self)?.name.text == "CodingKeys"
+      })
+    {
+      let codingKeysCases: [DeclSyntax] = codingKeys.map { identifier, rawValue in
+        rawValue.map { "case \(identifier) = \($0)" } ?? "case \(identifier)"
+      }
+      codingKeysDecl = """
+
+        private enum CodingKeys: Swift.String, Swift.CodingKey {
+        \(codingKeysCases, separator: "\n")
+        }
+        """
+    }
+
     var tableMembers: [DeclSyntax] = []
     if node.attributeName.identifier != "_Draft" {
       tableMembers.append(
@@ -1341,6 +1376,9 @@ extension TableMacro: MemberMacro {
         "public \(nonisolated)static var _columnWidth: Swift.Int { \(raw: columnWidth) }",
       ]
       + tableMembers
+    if let codingKeysDecl {
+      members.append(codingKeysDecl)
+    }
     #if CasePaths
       if declaration.is(EnumDeclSyntax.self) {
         members += try CasePathableMacro.expansion(

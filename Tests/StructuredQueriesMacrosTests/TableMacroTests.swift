@@ -577,6 +577,375 @@ extension SnapshotTests {
       }
     }
 
+    @Test func codableCodingKeys() {
+      assertMacro {
+        """
+        @Table
+        struct Foo: Codable {
+          let id: Int
+          @Column("is_completed")
+          var isCompleted = false
+          @Ephemeral
+          var scratch = ""
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo: Codable {
+          @StructuredQueries._ColumnCheck(Int.self)
+          let id: Int
+          @StructuredQueries._ColumnCheck(Swift.Bool.self)
+          var isCompleted = false
+          var scratch = ""
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Foo
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let isCompleted = StructuredQueriesCore._TableColumn<QueryValue, Swift.Bool>.for("is_completed", keyPath: \QueryValue.isCompleted, default: false)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.isCompleted._allColumns)
+              return allColumns
+            }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.isCompleted._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id), \(self.isCompleted)"
+            }
+          }
+
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              isCompleted: some StructuredQueriesCore.QueryExpression<Swift.Bool> = Swift.Bool(queryOutput: false)
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: isCompleted._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+          struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
+            public typealias SourceTable = Foo
+            @StructuredQueries._ColumnCheck(Int?.self)
+            var id: Int?
+            @StructuredQueries._ColumnCheck(Swift.Bool.self) var isCompleted = false
+
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let isCompleted = StructuredQueriesCore._TableColumn<QueryValue, Swift.Bool>.for("is_completed", keyPath: \QueryValue.isCompleted, default: false)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.isCompleted._allColumns)
+                return allColumns
+              }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.isCompleted._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.isCompleted)"
+              }
+            }
+
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                isCompleted: some StructuredQueriesCore.QueryExpression<Swift.Bool> = Swift.Bool(queryOutput: false)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: isCompleted._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Swift.Int {
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += Swift.Bool._columnWidth
+              return columnWidth
+            }
+          }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += Swift.Bool._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "foos"
+          }
+
+          private enum CodingKeys: Swift.String, Swift.CodingKey {
+            case id
+            case isCompleted = "is_completed"
+            case scratch
+          }
+        }
+
+        nonisolated extension Draft {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.id = try decoder.decode(Self.columns.id)
+            let isCompleted = try decoder.decode(Self.columns.isCompleted) ?? Self.columns.isCompleted.defaultValue
+            guard let isCompleted else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.isCompleted = isCompleted
+          }
+          nonisolated init(_ other: SourceTable) {
+            self.id = other.id
+            self.isCompleted = other.isCompleted
+          }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(Self.columns.id)
+            let isCompleted = try decoder.decode(Self.columns.isCompleted) ?? Self.columns.isCompleted.defaultValue
+            guard let id else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let isCompleted else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.isCompleted = isCompleted
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func codableCodingKeysExplicit() {
+      assertMacro {
+        """
+        @Table
+        struct Foo: Codable {
+          let id: Int
+          @Column("is_completed")
+          var isCompleted = false
+          private enum CodingKeys: String, CodingKey {
+            case id
+            case isCompleted
+          }
+        }
+        """
+      } expansion: {
+        #"""
+        struct Foo: Codable {
+          @StructuredQueries._ColumnCheck(Int.self)
+          let id: Int
+          @StructuredQueries._ColumnCheck(Swift.Bool.self)
+          var isCompleted = false
+          private enum CodingKeys: String, CodingKey {
+            case id
+            case isCompleted
+          }
+
+          public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
+            public typealias QueryValue = Foo
+            public typealias PrimaryKey = Int
+            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            public let isCompleted = StructuredQueriesCore._TableColumn<QueryValue, Swift.Bool>.for("is_completed", keyPath: \QueryValue.isCompleted, default: false)
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
+            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+              allColumns.append(contentsOf: QueryValue.columns.isCompleted._allColumns)
+              return allColumns
+            }
+            #if compiler(>=6.4)
+            @_optimize(none)
+            #endif
+            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+              writableColumns.append(contentsOf: QueryValue.columns.isCompleted._writableColumns)
+              return writableColumns
+            }
+            public var queryFragment: QueryFragment {
+              "\(self.id), \(self.isCompleted)"
+            }
+          }
+
+          public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+            public typealias QueryValue = Foo
+            public let allColumns: [any StructuredQueriesCore.QueryExpression]
+            public init(
+              id: some StructuredQueriesCore.QueryExpression<Int>,
+              isCompleted: some StructuredQueriesCore.QueryExpression<Swift.Bool> = Swift.Bool(queryOutput: false)
+            ) {
+              var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+              allColumns.append(contentsOf: id._allColumns)
+              allColumns.append(contentsOf: isCompleted._allColumns)
+              self.allColumns = allColumns
+            }
+          }
+          struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
+            public typealias SourceTable = Foo
+            @StructuredQueries._ColumnCheck(Int?.self)
+            var id: Int?
+            @StructuredQueries._ColumnCheck(Swift.Bool.self) var isCompleted = false
+
+            public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
+              public typealias QueryValue = Draft
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let isCompleted = StructuredQueriesCore._TableColumn<QueryValue, Swift.Bool>.for("is_completed", keyPath: \QueryValue.isCompleted, default: false)
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
+              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
+                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+                allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                allColumns.append(contentsOf: QueryValue.columns.isCompleted._allColumns)
+                return allColumns
+              }
+              #if compiler(>=6.4)
+              @_optimize(none)
+              #endif
+              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
+                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+                writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
+                writableColumns.append(contentsOf: QueryValue.columns.isCompleted._writableColumns)
+                return writableColumns
+              }
+              public var queryFragment: QueryFragment {
+                "\(self.id), \(self.isCompleted)"
+              }
+            }
+
+            public nonisolated struct Selection: StructuredQueriesCore.TableExpression {
+              public typealias QueryValue = Draft
+              public let allColumns: [any StructuredQueriesCore.QueryExpression]
+              public init(
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                isCompleted: some StructuredQueriesCore.QueryExpression<Swift.Bool> = Swift.Bool(queryOutput: false)
+              ) {
+                var allColumns: [any StructuredQueriesCore.QueryExpression] = []
+                allColumns.append(contentsOf: id._allColumns)
+                allColumns.append(contentsOf: isCompleted._allColumns)
+                self.allColumns = allColumns
+              }
+            }
+
+            public typealias QueryValue = Self
+
+            public typealias From = Swift.Never
+
+            public nonisolated static var columns: TableColumns {
+              TableColumns()
+            }
+
+            public nonisolated static var _columnWidth: Swift.Int {
+              var columnWidth = 0
+              columnWidth += Int?._columnWidth
+              columnWidth += Swift.Bool._columnWidth
+              return columnWidth
+            }
+          }
+
+          public typealias QueryValue = Self
+
+          public typealias From = Swift.Never
+
+          public nonisolated static var columns: TableColumns {
+            TableColumns()
+          }
+
+          public nonisolated static var _columnWidth: Swift.Int {
+            var columnWidth = 0
+            columnWidth += Int._columnWidth
+            columnWidth += Swift.Bool._columnWidth
+            return columnWidth
+          }
+
+          public nonisolated static var tableName: Swift.String {
+            "foos"
+          }
+        }
+
+        nonisolated extension Draft {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            self.id = try decoder.decode(Self.columns.id)
+            let isCompleted = try decoder.decode(Self.columns.isCompleted) ?? Self.columns.isCompleted.defaultValue
+            guard let isCompleted else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.isCompleted = isCompleted
+          }
+          nonisolated init(_ other: SourceTable) {
+            self.id = other.id
+            self.isCompleted = other.isCompleted
+          }
+        }
+
+        nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            let id = try decoder.decode(Self.columns.id)
+            let isCompleted = try decoder.decode(Self.columns.isCompleted) ?? Self.columns.isCompleted.defaultValue
+            guard let id else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            guard let isCompleted else {
+              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+            }
+            self.id = id
+            self.isCompleted = isCompleted
+          }
+        }
+        """#
+      }
+    }
+
     @Test func columnName() {
       assertMacro {
         """
