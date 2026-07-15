@@ -1,4 +1,5 @@
 import Foundation
+public import StructuredQueriesCore
 
 public struct _CodableJSONBRepresentation<QueryOutput: Codable>: Codable, QueryRepresentable {
   public var queryOutput: QueryOutput
