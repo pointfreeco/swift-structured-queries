@@ -72,6 +72,7 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this expression.
+  @_disfavoredOverload
   public func jsonGroupArray(
     distinct isDistinct: Bool = false,
     order: (some QueryExpression)? = Bool?.none,
@@ -81,6 +82,102 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
       "json_group_array",
       isDistinct: isDistinct,
       [queryFragment],
+      order: order?.queryFragment,
+      filter: filter?.queryFragment
+    )
+  }
+}
+
+extension QueryExpression {
+  /// A JSON array aggregate of this JSON expression.
+  ///
+  /// Concatenates all of the JSON documents in a group into a JSON array.
+  ///
+  /// ```swift
+  /// Reminder.select { $0.tags.jsonGroupArray() }
+  /// // SELECT json_group_array(json("reminders"."tags")) FROM "reminders"
+  /// // => [[String]].JSONRepresentation
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray<QueryOutput: Codable>(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryOutput].JSONRepresentation>
+  where QueryValue == _CodableJSONRepresentation<QueryOutput> {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+
+  /// A JSON array aggregate of this JSON expression.
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray<QueryOutput: Codable>(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryOutput?].JSONRepresentation>
+  where QueryValue == _CodableJSONRepresentation<QueryOutput>? {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+
+  /// A JSON array aggregate of this JSONB expression.
+  ///
+  /// Concatenates all of the JSONB documents in a group into a JSON array.
+  ///
+  /// ```swift
+  /// Reminder.select { $0.tags.jsonGroupArray() }
+  /// // SELECT json_group_array(json("reminders"."tags")) FROM "reminders"
+  /// // => [[String]].JSONRepresentation
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray<QueryOutput: Codable>(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryOutput].JSONRepresentation>
+  where QueryValue == _CodableJSONBRepresentation<QueryOutput> {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+
+  /// A JSON array aggregate of this JSONB expression.
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray<QueryOutput: Codable>(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryOutput?].JSONRepresentation>
+  where QueryValue == _CodableJSONBRepresentation<QueryOutput>? {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+
+  private func _jsonGroupArray<Result>(
+    isDistinct: Bool,
+    order: (some QueryExpression)?,
+    filter: (some QueryExpression<Bool>)?
+  ) -> AggregateFunctionExpression<Result> {
+    AggregateFunctionExpression(
+      "json_group_array",
+      isDistinct: isDistinct,
+      ["json(\($_isSelecting.withValue(false) { queryFragment }))"],
       order: order?.queryFragment,
       filter: filter?.queryFragment
     )

@@ -280,6 +280,28 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonGroupArrayOfColumns() {
+      assertQuery(
+        Post.select { ($0.notes.jsonGroupArray(), $0.optionalTags.jsonGroupArray()) }
+      ) {
+        """
+        SELECT json_group_array(json("posts"."notes")), json_group_array(json("posts"."optionalTags"))
+        FROM "posts"
+        """
+      } results: {
+        """
+        ┌────────────────────────┬──────────────────┐
+        │ [                      │ [                │
+        │   [0]: [               │   [0]: [         │
+        │     [0]: "First post", │     [0]: "swift" │
+        │     [1]: "An update"   │   ]              │
+        │   ]                    │ ]                │
+        │ ]                      │                  │
+        └────────────────────────┴──────────────────┘
+        """
+      }
+    }
+
     @Test func join() {
       assertQuery(
         Post

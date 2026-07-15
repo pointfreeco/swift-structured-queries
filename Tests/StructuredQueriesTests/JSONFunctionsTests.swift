@@ -492,6 +492,50 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonGroupArrayOfJSONColumns() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "docs" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "tags" TEXT NOT NULL,
+            "optionalTags" TEXT
+          )
+          """
+        )
+      )
+      try db.execute(
+        Doc.insert {
+          [
+            Doc.Draft(tags: ["a", "b"], optionalTags: ["c"]),
+            Doc.Draft(tags: ["d"]),
+          ]
+        }
+      )
+      assertQuery(
+        Doc.select { ($0.tags.jsonGroupArray(), $0.optionalTags.jsonGroupArray()) }
+      ) {
+        """
+        SELECT json_group_array(json("docs"."tags")), json_group_array(json("docs"."optionalTags"))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌───────────────┬──────────────┐
+        │ [             │ [            │
+        │   [0]: [      │   [0]: [     │
+        │     [0]: "a", │     [0]: "c" │
+        │     [1]: "b"  │   ],         │
+        │   ],          │   [1]: nil   │
+        │   [1]: [      │ ]            │
+        │     [0]: "d"  │              │
+        │   ]           │              │
+        │ ]             │              │
+        └───────────────┴──────────────┘
+        """
+      }
+    }
+
     @Test func codableJSONGroup() throws {
       try db.execute(
         #sql(
@@ -575,6 +619,15 @@ private struct RemindersListRow {
 private struct Item: Codable {
   var bucket: Int
   var value: Int
+}
+
+@Table
+private struct Doc: Codable, Equatable {
+  let id: Int
+  @Column(as: [String].JSONRepresentation.self)
+  var tags: [String] = []
+  @Column(as: [String].JSONRepresentation?.self)
+  var optionalTags: [String]?
 }
 
 @Selection
