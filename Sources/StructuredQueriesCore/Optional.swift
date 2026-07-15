@@ -98,12 +98,12 @@ struct _NullTrackingDecoder<Base: QueryDecoder>: QueryDecoder {
   }
 
   @usableFromInline
-  mutating func decode(_ columnType: Foundation.Date.Type) throws -> Foundation.Date? {
+  mutating func decode(_ columnType: Date.Type) throws -> Date? {
     try track(base.decode(columnType))
   }
 
   @usableFromInline
-  mutating func decode(_ columnType: Foundation.UUID.Type) throws -> Foundation.UUID? {
+  mutating func decode(_ columnType: UUID.Type) throws -> UUID? {
     try track(base.decode(columnType))
   }
 
