@@ -20,6 +20,10 @@ extension Date {
     public init(queryOutput: Date) {
       self.queryOutput = queryOutput
     }
+
+    public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+      "datetime(\(queryFragment), 'julianday')"
+    }
   }
 }
 

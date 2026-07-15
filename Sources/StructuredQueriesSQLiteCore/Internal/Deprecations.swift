@@ -1,6 +1,29 @@
 public import Foundation
 public import StructuredQueriesCore
 
+// NB: Deprecated after 0.33.2:
+
+extension QueryExpression where QueryValue: _JSONRepresentable {
+  @available(*, deprecated, message: "Use 'jsonSet', 'jsonReplace', 'jsonRemove', and 'jsonAppend' to update JSON documents, instead")
+  public func jsonPatch<Value: Codable>(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue>
+  where QueryValue.QueryOutput == [String: Value] {
+    QueryFunction("json_patch", self, other)
+  }
+}
+
+extension QueryExpression where QueryValue: _JSONBRepresentable {
+  @_disfavoredOverload
+  @available(*, deprecated, message: "Use 'jsonbSet', 'jsonbReplace', 'jsonbRemove', and 'jsonbAppend' to update JSONB documents, instead")
+  public func jsonbPatch<Value: Codable>(
+    _ other: some QueryExpression<QueryValue>
+  ) -> some QueryExpression<QueryValue>
+  where QueryValue.QueryOutput == [String: Value] {
+    QueryFunction("jsonb_patch", self, other)
+  }
+}
+
 // NB: Deprecated after 0.24.0:
 
 extension Table {

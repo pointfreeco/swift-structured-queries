@@ -81,6 +81,16 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   public static func queryFragment(decoding queryFragment: QueryFragment) -> QueryFragment {
     Wrapped.queryFragment(decoding: queryFragment)
   }
+
+  @inlinable
+  public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+    Wrapped._queryFragment(jsonEncoding: queryFragment)
+  }
+
+  @inlinable
+  public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+    Wrapped._queryFragment(jsonDecoding: queryFragment)
+  }
 }
 
 extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {

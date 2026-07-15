@@ -79,6 +79,10 @@ extension UInt64: QueryBindable {
 
 extension UUID: QueryBindable {
   public var queryBinding: QueryBinding { .uuid(self) }
+
+  public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+    "(\(queryFragment) COLLATE NOCASE)"
+  }
 }
 
 extension DefaultStringInterpolation {
