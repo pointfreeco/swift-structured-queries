@@ -426,7 +426,8 @@
         assertQuery(
           Values(
             Attachment.Kind.Selection.image(
-              Attachment.Image(caption: "Blob", url: URL(string: "https://pointfree.co")!))
+              Attachment.Image(caption: "Blob", url: URL(string: "https://pointfree.co")!)
+            )
           )
         ) {
           """
@@ -442,6 +443,47 @@
           │   )                                │
           │ )                                  │
           └────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func `insert image and return`() {
+        assertQuery(
+          Attachment.upsert {
+            Attachment
+              .Draft(
+                kind: .image(
+                  Attachment.Image(
+                    caption: "Hello",
+                    url: URL(filePath: "")
+                  )
+                )
+              )
+          }
+          .returning(\.self)
+        ) {
+          """
+          INSERT INTO "attachments"
+          ("id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL")
+          VALUES
+          (NULL, NULL, NULL, NULL, NULL, 'Hello', 'file:///private/tmp/')
+          ON CONFLICT ("id")
+          DO UPDATE SET "link" = "excluded"."link", "note" = "excluded"."note", "videoURL" = "excluded"."videoURL", "videoKind" = "excluded"."videoKind", "imageCaption" = "excluded"."imageCaption", "imageURL" = "excluded"."imageURL"
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌──────────────────────────────────────┐
+          │ Attachment(                          │
+          │   id: 5,                             │
+          │   kind: .image(                      │
+          │     Attachment.Image(                │
+          │       caption: "Hello",              │
+          │       url: URL(file:///private/tmp/) │
+          │     )                                │
+          │   )                                  │
+          │ )                                    │
+          └──────────────────────────────────────┘
           """
         }
       }
@@ -462,9 +504,9 @@
 
     @Selection fileprivate struct Video {
       @Column("videoURL")
-      let url: URL
+      var url: URL = URL(filePath: "video")
       @Column("videoKind")
-      var kind: Kind
+      var kind: Kind = .youtube
       fileprivate enum Kind: String, QueryBindable { case youtube, vimeo }
     }
     @Selection fileprivate struct Image {

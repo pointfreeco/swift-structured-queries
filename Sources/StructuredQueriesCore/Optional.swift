@@ -1,3 +1,5 @@
+public import Foundation
+
 public protocol _OptionalProtocol<Wrapped> {
   associatedtype Wrapped
   var _wrapped: Wrapped? { get }
@@ -33,10 +35,82 @@ extension Optional: QueryDecodable where Wrapped: QueryDecodable {
   @inlinable
   public init(decoder: inout some QueryDecoder) throws {
     do {
-      self = try Wrapped(decoder: &decoder)
+      if Wrapped.self is any Table.Type {
+        var tracking = _NullTrackingDecoder(base: decoder)
+        defer { decoder = tracking.base }
+        let wrapped = try Wrapped(decoder: &tracking)
+        self = tracking.hasNonNullColumn ? wrapped : nil
+      } else {
+        self = try Wrapped(decoder: &decoder)
+      }
     } catch QueryDecodingError.missingRequiredColumn {
       self = nil
     }
+  }
+}
+
+@usableFromInline
+struct _NullTrackingDecoder<Base: QueryDecoder>: QueryDecoder {
+  @usableFromInline
+  var base: Base
+
+  @usableFromInline
+  var hasNonNullColumn = false
+
+  @usableFromInline
+  init(base: Base) {
+    self.base = base
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: Double.Type) throws -> Double? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: Int64.Type) throws -> Int64? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: UInt64.Type) throws -> UInt64? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: String.Type) throws -> String? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: Bool.Type) throws -> Bool? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: Int.Type) throws -> Int? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: Foundation.Date.Type) throws -> Foundation.Date? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func decode(_ columnType: Foundation.UUID.Type) throws -> Foundation.UUID? {
+    try track(base.decode(columnType))
+  }
+
+  @usableFromInline
+  mutating func track<Value>(_ value: Value?) -> Value? {
+    hasNonNullColumn = hasNonNullColumn || value != nil
+    return value
   }
 }
 
