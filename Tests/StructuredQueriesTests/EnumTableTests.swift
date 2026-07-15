@@ -447,7 +447,7 @@
         }
       }
 
-      @Test func `insert image and return`() {
+      @Test func `enum case with defaults isn't always decoded successfully`() {
         assertQuery(
           Attachment.upsert {
             Attachment
@@ -455,7 +455,7 @@
                 kind: .image(
                   Attachment.Image(
                     caption: "Hello",
-                    url: URL(filePath: "")
+                    url: URL(string: "https://image.com")!
                   )
                 )
               )
@@ -466,24 +466,24 @@
           INSERT INTO "attachments"
           ("id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL")
           VALUES
-          (NULL, NULL, NULL, NULL, NULL, 'Hello', 'file:///private/tmp/')
+          (NULL, NULL, NULL, NULL, NULL, 'Hello', 'https://image.com')
           ON CONFLICT ("id")
           DO UPDATE SET "link" = "excluded"."link", "note" = "excluded"."note", "videoURL" = "excluded"."videoURL", "videoKind" = "excluded"."videoKind", "imageCaption" = "excluded"."imageCaption", "imageURL" = "excluded"."imageURL"
           RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
           """
         } results: {
           """
-          ┌──────────────────────────────────────┐
-          │ Attachment(                          │
-          │   id: 5,                             │
-          │   kind: .image(                      │
-          │     Attachment.Image(                │
-          │       caption: "Hello",              │
-          │       url: URL(file:///private/tmp/) │
-          │     )                                │
-          │   )                                  │
-          │ )                                    │
-          └──────────────────────────────────────┘
+          ┌───────────────────────────────────┐
+          │ Attachment(                       │
+          │   id: 5,                          │
+          │   kind: .image(                   │
+          │     Attachment.Image(             │
+          │       caption: "Hello",           │
+          │       url: URL(https://image.com) │
+          │     )                             │
+          │   )                               │
+          │ )                                 │
+          └───────────────────────────────────┘
           """
         }
       }
@@ -504,7 +504,7 @@
 
     @Selection fileprivate struct Video {
       @Column("videoURL")
-      var url: URL = URL(filePath: "video")
+      var url: URL = URL(string: "https://youtube.com")!
       @Column("videoKind")
       var kind: Kind = .youtube
       fileprivate enum Kind: String, QueryBindable { case youtube, vimeo }
