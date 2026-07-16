@@ -292,6 +292,41 @@ where QueryValue: _AnyJSONRepresentable & _JSONArrayRepresentation {
   }
 }
 
+extension QueryExpression where QueryValue: _AnyJSONRepresentable {
+  /// Wraps this expression with the `json_array_length` function for an array at a given path.
+  ///
+  /// ```swift
+  /// Profile.select { $0.author.jsonArrayLength(\.pastLinks) }
+  /// // SELECT json_array_length("profiles"."author", '$."pastLinks"') FROM "profiles"
+  /// ```
+  ///
+  /// - Parameter path: A key path from the JSON expression to an array.
+  /// - Returns: An integer expression of the `json_array_length` function.
+  public func jsonArrayLength<Context, Member: _JSONArrayRepresentation>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Int> {
+    _jsonArrayLength(path)
+  }
+
+  @_documentation(visibility: private)
+  public func jsonArrayLength<
+    Context: _OptionalJSONPathContext,
+    Member: _JSONArrayRepresentation
+  >(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Int?> {
+    _jsonArrayLength(path)
+  }
+
+  @_documentation(visibility: private)
+  public func jsonArrayLength<Context, Member: _OptionalProtocol>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Int?>
+  where Member.Wrapped: _JSONArrayRepresentation {
+    _jsonArrayLength(path)
+  }
+}
+
 extension QueryExpression
 where QueryValue: _JSONRepresentable & _JSONArrayRepresentation {
   @_documentation(visibility: private)
@@ -543,6 +578,24 @@ where QueryValue: _OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable {
     _jsonbExtract(path)
   }
 
+  /// Wraps this expression with the `json_array_length` function for an array at a given path.
+  ///
+  /// - Parameter path: A key path from the JSON expression to an array.
+  /// - Returns: An integer expression of the `json_array_length` function.
+  public func jsonArrayLength<Context, Member: _JSONArrayRepresentation>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Int?> {
+    _jsonArrayLength(path)
+  }
+
+  @_documentation(visibility: private)
+  public func jsonArrayLength<Context, Member: _OptionalProtocol>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Int?>
+  where Member.Wrapped: _JSONArrayRepresentation {
+    _jsonArrayLength(path)
+  }
+
   /// A JSON array aggregate of this JSON expression.
   ///
   /// - Parameters:
@@ -576,6 +629,19 @@ extension QueryExpression {
     JSONFunctionExpression(
       base: _jsonExtract("jsonb_extract", path),
       decode: Member.queryFragment(decoding:)
+    )
+  }
+
+  private func _jsonArrayLength<Root, Context, Member, Result>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>
+  ) -> SQLQueryExpression<Result> {
+    SQLQueryExpression(
+      """
+      json_array_length(\
+      \(argumentFragment), \
+      \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text)\
+      )
+      """
     )
   }
 

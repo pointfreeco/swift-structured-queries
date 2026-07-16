@@ -312,6 +312,43 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonArrayLengthPath() {
+      assertQuery(
+        Profile.select {
+          (
+            $0.author.jsonArrayLength(\.pastLinks),
+            $0.editor.jsonArrayLength(\.pastLinks)
+          )
+        }
+      ) {
+        """
+        SELECT json_array_length("profiles"."author", '$."pastLinks"'), json_array_length("profiles"."editor", '$."pastLinks"')
+        FROM "profiles"
+        """
+      } results: {
+        """
+        ┌───┬───┐
+        │ 1 │ 0 │
+        └───┴───┘
+        """
+      }
+      assertQuery(
+        Bio.select { $0.resume.jsonArrayLength(\.author.pastLinks) }
+      ) {
+        """
+        SELECT json_array_length("bios"."resume", '$."author"."pastLinks"')
+        FROM "bios"
+        """
+      } results: {
+        """
+        ┌─────┐
+        │ 0   │
+        │ nil │
+        └─────┘
+        """
+      }
+    }
+
     @Test func jsonGroupArray() {
       assertQuery(
         Post.select { $0.jsonGroupArray() }
