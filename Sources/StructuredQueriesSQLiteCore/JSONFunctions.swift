@@ -2,18 +2,18 @@ import Foundation
 public import StructuredQueriesCore
 
 extension QueryExpression where QueryValue: _AnyJSONRepresentable {
-  /// Extracts a value from this JSON expression using the `->>` operator.
+  /// Extracts a value from this JSON expression using the `json_extract` function.
   ///
   /// ```swift
   /// Profile.select { $0.author.jsonExtract(\.name) }
-  /// // SELECT ("profiles"."author" ->> '$."name"') FROM "profiles"
+  /// // SELECT json_extract("profiles"."author", '$."name"') FROM "profiles"
   /// ```
   ///
   /// Nested values can be extracted by chaining further:
   ///
   /// ```swift
   /// Profile.select { $0.author.jsonExtract(\.links[0].homepage) }
-  /// // SELECT ("profiles"."author" ->> '$."links"[0]."homepage"') FROM "profiles"
+  /// // SELECT json_extract("profiles"."author", '$."links"[0]."homepage"') FROM "profiles"
   /// ```
   ///
   /// - Parameter path: A key path from the JSON expression to a field to extract.
@@ -397,7 +397,7 @@ where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
 
 extension QueryExpression
 where QueryValue: _OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable {
-  /// Extracts a value from this JSON expression using the `->>` operator.
+  /// Extracts a value from this JSON expression using the `json_extract` function.
   ///
   /// - Parameter path: A key path from the document's columns.
   /// - Returns: An expression of the value extracted.
@@ -434,7 +434,10 @@ extension QueryExpression {
     SQLQueryExpression(
       Member._queryFragment(
         jsonDecoding: """
-          (\(argumentFragment) ->> \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text))
+          json_extract(\
+          \(argumentFragment), \
+          \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text)\
+          )
           """
       )
     )
@@ -447,9 +450,11 @@ extension QueryExpression {
   ) -> JSONMutationExpression<Result> {
     JSONMutationExpression(
       """
-      \(function)(\(argumentFragment), \
+      \(function)(\
+      \(argumentFragment), \
       \(quote: JSONPath()[keyPath: path].pathString + "[#]", delimiter: .text), \
-      \(value))
+      \(value)\
+      )
       """
     )
   }
@@ -460,8 +465,10 @@ extension QueryExpression {
   ) -> JSONMutationExpression<Result> {
     JSONMutationExpression(
       """
-      \(function)(\(argumentFragment), \
-      \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text))
+      \(function)(\
+      \(argumentFragment), \
+      \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text)\
+      )
       """
     )
   }
@@ -473,9 +480,11 @@ extension QueryExpression {
   ) -> JSONMutationExpression<Result> {
     JSONMutationExpression(
       """
-      \(function)(\(argumentFragment), \
+      \(function)(\
+      \(argumentFragment), \
       \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text), \
-      \(value))
+      \(value)\
+      )
       """
     )
   }

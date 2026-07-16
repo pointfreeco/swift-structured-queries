@@ -400,7 +400,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT ("profiles"."author" ->> '$."name"'), ("profiles"."author" ->> '$."is_verified"'), ("profiles"."author" ->> '$."joinedAt"'), (("profiles"."author" ->> '$."externalID"') COLLATE NOCASE)
+        SELECT json_extract("profiles"."author", '$."name"'), json_extract("profiles"."author", '$."is_verified"'), json_extract("profiles"."author", '$."joinedAt"'), (json_extract("profiles"."author", '$."externalID"') COLLATE NOCASE)
         FROM "profiles"
         """
       } results: {
@@ -424,7 +424,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT ("profiles"."author" ->> '$."links"."homepage"'), ("profiles"."author" ->> '$."links"."updatedAt"'), ("profiles"."author" ->> '$."pastLinks"[0]."homepage"'), ("profiles"."editor" ->> '$."name"')
+        SELECT json_extract("profiles"."author", '$."links"."homepage"'), json_extract("profiles"."author", '$."links"."updatedAt"'), json_extract("profiles"."author", '$."pastLinks"[0]."homepage"'), json_extract("profiles"."editor", '$."name"')
         FROM "profiles"
         """
       } results: {
@@ -441,7 +441,7 @@ extension SnapshotTests {
         Profile.select { $0.author.jsonExtract(\.self) }
       ) {
         """
-        SELECT ("profiles"."author" ->> '$')
+        SELECT json_extract("profiles"."author", '$')
         FROM "profiles"
         """
       } results: {
@@ -476,7 +476,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT ("posts"."notes" ->> '$[0]'), ("posts"."notes" ->> '$[#-1]')
+        SELECT json_extract("posts"."notes", '$[0]'), json_extract("posts"."notes", '$[#-1]')
         FROM "posts"
         """
       } results: {
@@ -749,7 +749,7 @@ extension SnapshotTests {
         }
       ) {
         """
-        SELECT ("bios"."resume" ->> '$."author"."name"'), ("bios"."resume" ->> '$."author"."links"."homepage"')
+        SELECT json_extract("bios"."resume", '$."author"."name"'), json_extract("bios"."resume", '$."author"."links"."homepage"')
         FROM "bios"
         """
       } results: {
@@ -836,7 +836,7 @@ extension SnapshotTests {
         """
         SELECT "profiles"."id"
         FROM "profiles"
-        WHERE (((("profiles"."author" ->> '$."externalID"') COLLATE NOCASE)) = ('deadbeef-dead-beef-dead-beefdeadbeef'))
+        WHERE (((json_extract("profiles"."author", '$."externalID"') COLLATE NOCASE)) = ('deadbeef-dead-beef-dead-beefdeadbeef'))
         """
       } results: {
         """
@@ -892,7 +892,7 @@ extension SnapshotTests {
         """
         SELECT "profiles"."id"
         FROM "profiles"
-        WHERE ((("profiles"."author" ->> '$."name"')) = ('Blob'))
+        WHERE ((json_extract("profiles"."author", '$."name"')) = ('Blob'))
         """
       } results: {
         """
