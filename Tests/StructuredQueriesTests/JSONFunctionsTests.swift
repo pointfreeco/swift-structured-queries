@@ -558,12 +558,16 @@ extension SnapshotTests {
       }
       assertQuery(
         Doc
-          .update { $0.tags = $0.tags.jsonAppend("c") }
+          .update {
+            $0.tags = $0.tags
+              .jsonAppend("c")
+              .jsonAppend("d")
+          }
           .returning(\.tags)
       ) {
         """
         UPDATE "docs"
-        SET "tags" = json_insert("docs"."tags", '$[#]', 'c')
+        SET "tags" = json_insert("docs"."tags", '$[#]', 'c', '$[#]', 'd')
         RETURNING "tags"
         """
       } results: {
@@ -571,10 +575,78 @@ extension SnapshotTests {
         ┌─────────────┐
         │ [           │
         │   [0]: "z", │
-        │   [1]: "b", │
+        │   [1]: "y", │
+        │   [2]: "c", │
+        │   [3]: "d"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func jsonRemoveAndReplace() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "docs" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "tags" TEXT NOT NULL,
+            "optionalTags" TEXT
+          )
+          """
+        )
+      )
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b", "c"])
+        }
+      )
+      assertQuery(
+        Doc
+          .update {
+            $0.tags = $0.tags
+              .jsonReplace(\.[0], "z")
+              .jsonReplace(\.[1], "y")
+          }
+          .returning(\.tags)
+      ) {
+        """
+        UPDATE "docs"
+        SET "tags" = json_replace("docs"."tags", '$[0]', 'z', '$[1]', 'y')
+        RETURNING "tags"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "z", │
+        │   [1]: "y", │
         │   [2]: "c"  │
         │ ]           │
         └─────────────┘
+        """
+      }
+      assertQuery(
+        Doc
+          .update {
+            $0.tags = $0.tags
+              .jsonRemove(\.[0])
+              .jsonRemove(\.[0])
+          }
+          .returning(\.tags)
+      ) {
+        """
+        UPDATE "docs"
+        SET "tags" = json_remove("docs"."tags", '$[0]', '$[0]')
+        RETURNING "tags"
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ [          │
+        │   [0]: "c" │
+        │ ]          │
+        └────────────┘
         """
       }
     }

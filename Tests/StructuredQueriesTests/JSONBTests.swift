@@ -677,12 +677,16 @@ extension SnapshotTests {
       }
       assertQuery(
         Post
-          .update { $0.notes = $0.notes.jsonbReplace(\.[0], "Rewritten") }
+          .update {
+            $0.notes = $0.notes
+              .jsonbReplace(\.[0], "Rewritten")
+              .jsonbReplace(\.[1], "Revised")
+          }
           .returning(\.notes)
       ) {
         """
         UPDATE "posts"
-        SET "notes" = jsonb_replace("posts"."notes", '$[0]', 'Rewritten')
+        SET "notes" = jsonb_replace("posts"."notes", '$[0]', 'Rewritten', '$[1]', 'Revised')
         RETURNING json("notes")
         """
       } results: {
@@ -690,7 +694,7 @@ extension SnapshotTests {
         ┌─────────────────────┐
         │ [                   │
         │   [0]: "Rewritten", │
-        │   [1]: "An update"  │
+        │   [1]: "Revised"    │
         │ ]                   │
         └─────────────────────┘
         """
@@ -700,12 +704,16 @@ extension SnapshotTests {
     @Test func jsonbAppend() {
       assertQuery(
         Post
-          .update { $0.notes = $0.notes.jsonbAppend("Appended") }
+          .update {
+            $0.notes = $0.notes
+              .jsonbAppend("Appended")
+              .jsonbAppend("Amended")
+          }
           .returning(\.notes)
       ) {
         """
         UPDATE "posts"
-        SET "notes" = jsonb_insert("posts"."notes", '$[#]', 'Appended')
+        SET "notes" = jsonb_insert("posts"."notes", '$[#]', 'Appended', '$[#]', 'Amended')
         RETURNING json("notes")
         """
       } results: {
@@ -714,7 +722,8 @@ extension SnapshotTests {
         │ [                    │
         │   [0]: "First post", │
         │   [1]: "An update",  │
-        │   [2]: "Appended"    │
+        │   [2]: "Appended",   │
+        │   [3]: "Amended"     │
         │ ]                    │
         └──────────────────────┘
         """
@@ -722,16 +731,18 @@ extension SnapshotTests {
       assertQuery(
         Profile
           .update {
-            $0.author = $0.author.jsonbAppend(
-              \.pastLinks,
-              #bind(Link(homepage: "blob.example", updatedAt: Date(timeIntervalSince1970: 0)))
-            )
+            $0.author = $0.author
+              .jsonbInsert(\.nickname, "Blobby")
+              .jsonbAppend(
+                \.pastLinks,
+                #bind(Link(homepage: "blob.example", updatedAt: Date(timeIntervalSince1970: 0)))
+              )
           }
           .returning(\.author)
       ) {
         """
         UPDATE "profiles"
-        SET "author" = jsonb_insert("profiles"."author", '$."pastLinks"[#]', jsonb('{
+        SET "author" = jsonb_insert("profiles"."author", '$."nickname"', 'Blobby', '$."pastLinks"[#]', jsonb('{
           "homepage" : "blob.example",
           "updatedAt" : "1970-01-01 00:00:00.000"
         }'))
@@ -743,7 +754,7 @@ extension SnapshotTests {
         │ Author(                                                   │
         │   name: "Blob",                                           │
         │   isVerified: true,                                       │
-        │   nickname: nil,                                          │
+        │   nickname: "Blobby",                                     │
         │   joinedAt: Date(1970-01-02T00:00:00.000Z),               │
         │   externalID: UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF), │
         │   links: Link(                                            │
@@ -769,21 +780,23 @@ extension SnapshotTests {
     @Test func jsonbRemove() {
       assertQuery(
         Post
-          .update { $0.notes = $0.notes.jsonbRemove(\.[0]) }
+          .update {
+            $0.notes = $0.notes
+              .jsonbRemove(\.[0])
+              .jsonbRemove(\.[0])
+          }
           .returning(\.notes)
       ) {
         """
         UPDATE "posts"
-        SET "notes" = jsonb_remove("posts"."notes", '$[0]')
+        SET "notes" = jsonb_remove("posts"."notes", '$[0]', '$[0]')
         RETURNING json("notes")
         """
       } results: {
         """
-        ┌────────────────────┐
-        │ [                  │
-        │   [0]: "An update" │
-        │ ]                  │
-        └────────────────────┘
+        ┌────┐
+        │ [] │
+        └────┘
         """
       }
       assertQuery(
