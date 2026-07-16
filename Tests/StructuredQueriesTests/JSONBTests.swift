@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueriesSQLite
+import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite
 
@@ -345,6 +346,58 @@ extension SnapshotTests {
         │ 0   │
         │ nil │
         └─────┘
+        """
+      }
+    }
+
+    @Test func jsonbGroupArray() {
+      assertQuery(
+        Post
+          .update { $0.notes = Track.select { $0.trackName.jsonbGroupArray() } }
+          .returning(\.notes)
+      ) {
+        """
+        UPDATE "posts"
+        SET "notes" = (
+          SELECT jsonb_group_array("tracks"."track_name")
+          FROM "tracks"
+        )
+        RETURNING json("notes")
+        """
+      } results: {
+        """
+        ┌────────────────────────┐
+        │ [                      │
+        │   [0]: "Blob\\'s Blues" │
+        │ ]                      │
+        └────────────────────────┘
+        """
+      }
+      assertQuery(
+        Post.select { _ in #sql("typeof(\"notes\")", as: String.self) }
+      ) {
+        """
+        SELECT typeof("notes")
+        FROM "posts"
+        """
+      } results: {
+        """
+        ┌────────┐
+        │ "blob" │
+        └────────┘
+        """
+      }
+    }
+
+    @Test func jsonbObject() {
+      assertInlineSnapshot(of: Track.columns.jsonbObject(), as: .sql) {
+        """
+        jsonb_object('id', "tracks"."id", 'track_name', "tracks"."track_name", 'track_tags', "tracks"."track_tags")
+        """
+      }
+      assertInlineSnapshot(of: Track.columns.jsonbGroupArray(), as: .sql) {
+        """
+        jsonb_group_array(jsonb_object('id', "tracks"."id", 'track_name', "tracks"."track_name", 'track_tags', "tracks"."track_tags"))
         """
       }
     }

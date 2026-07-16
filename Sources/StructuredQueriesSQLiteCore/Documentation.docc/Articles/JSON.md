@@ -18,7 +18,9 @@ Type-safe tools for encoding, decoding, extracting, and updating data stored as 
 - ``StructuredQueriesCore/QueryExpression/jsonArrayLength()``
 - ``StructuredQueriesCore/QueryExpression/jsonArrayLength(_:)``
 - ``StructuredQueriesCore/TableDefinition/jsonObject()``
+- ``StructuredQueriesCore/TableDefinition/jsonbObject()``
 - ``StructuredQueriesCore/QueryExpression/jsonGroupArray(distinct:order:filter:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbGroupArray(distinct:order:filter:)``
 - ``StructuredQueriesCore/QueryExpression/jsonInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonAppend(_:_:)``
