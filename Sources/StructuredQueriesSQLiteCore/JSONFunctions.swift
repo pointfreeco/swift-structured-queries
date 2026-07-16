@@ -573,48 +573,6 @@ where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
 
 extension QueryExpression
 where QueryValue: _OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable {
-  /// Extracts a value from this JSON expression using the `json_extract` function.
-  ///
-  /// - Parameter path: A key path.
-  /// - Returns: An expression of the value extracted.
-  public func jsonExtract<Context, Member: QueryRepresentable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
-  ) -> some QueryExpression<Member._Optionalized> {
-    _jsonExtract(path)
-  }
-
-  /// Extracts a value from this JSON expression using the `jsonb_extract` function.
-  ///
-  /// Works like `jsonExtract`, except JSON objects and arrays are extracted in SQLite's binary
-  /// JSONB format, making the result appropriate for storage contexts, like an `UPDATE`
-  /// statement's `SET` clause.
-  ///
-  /// - Parameter path: A key path.
-  /// - Returns: An expression of the value extracted.
-  public func jsonbExtract<Context, Member: QueryRepresentable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
-  ) -> some QueryExpression<Member._Optionalized> {
-    _jsonbExtract(path)
-  }
-
-  /// Wraps this expression with the `json_array_length` function for an array at a given path.
-  ///
-  /// - Parameter path: A key path from the JSON expression to an array.
-  /// - Returns: An integer expression of the `json_array_length` function.
-  public func jsonArrayLength<Context, Member: _JSONArrayRepresentation>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
-  ) -> some QueryExpression<Int?> {
-    _jsonArrayLength(path)
-  }
-
-  @_documentation(visibility: private)
-  public func jsonArrayLength<Context, Member: _OptionalProtocol>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
-  ) -> some QueryExpression<Int?>
-  where Member.Wrapped: _JSONArrayRepresentation {
-    _jsonArrayLength(path)
-  }
-
   /// A JSON array aggregate of this JSON expression.
   ///
   /// - Parameters:

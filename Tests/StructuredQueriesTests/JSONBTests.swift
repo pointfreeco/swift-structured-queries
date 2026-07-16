@@ -318,12 +318,12 @@ extension SnapshotTests {
         Profile.select {
           (
             $0.author.jsonArrayLength(\.pastLinks),
-            $0.editor.jsonArrayLength(\.pastLinks)
+            $0.editor.map { $0.jsonArrayLength(\.pastLinks) }
           )
         }
       ) {
         """
-        SELECT json_array_length("profiles"."author", '$."pastLinks"'), json_array_length("profiles"."editor", '$."pastLinks"')
+        SELECT json_array_length("profiles"."author", '$."pastLinks"'), CASE (json("profiles"."editor")) IS (NULL) WHEN 1 THEN NULL ELSE json_array_length("profiles"."editor", '$."pastLinks"') END
         FROM "profiles"
         """
       } results: {
@@ -509,12 +509,12 @@ extension SnapshotTests {
             $0.author.jsonExtract(\.links.homepage),
             $0.author.jsonExtract(\.links.updatedAt),
             $0.author.jsonExtract(\.pastLinks[0].homepage),
-            $0.editor.jsonExtract(\.name)
+            $0.editor.map { $0.jsonExtract(\.name) }
           )
         }
       ) {
         """
-        SELECT json_extract("profiles"."author", '$."links"."homepage"'), json_extract("profiles"."author", '$."links"."updatedAt"'), json_extract("profiles"."author", '$."pastLinks"[0]."homepage"'), json_extract("profiles"."editor", '$."name"')
+        SELECT json_extract("profiles"."author", '$."links"."homepage"'), json_extract("profiles"."author", '$."links"."updatedAt"'), json_extract("profiles"."author", '$."pastLinks"[0]."homepage"'), CASE (json("profiles"."editor")) IS (NULL) WHEN 1 THEN NULL ELSE json_extract("profiles"."editor", '$."name"') END
         FROM "profiles"
         """
       } results: {
@@ -586,12 +586,12 @@ extension SnapshotTests {
             $0.author.jsonbExtract(\.isVerified),
             $0.author.jsonbExtract(\.joinedAt),
             $0.author.jsonbExtract(\.externalID),
-            $0.editor.jsonbExtract(\.name)
+            $0.editor.map { $0.jsonbExtract(\.name) }
           )
         }
       ) {
         """
-        SELECT jsonb_extract("profiles"."author", '$."name"'), jsonb_extract("profiles"."author", '$."is_verified"'), jsonb_extract("profiles"."author", '$."joinedAt"'), (jsonb_extract("profiles"."author", '$."externalID"') COLLATE NOCASE), jsonb_extract("profiles"."editor", '$."name"')
+        SELECT jsonb_extract("profiles"."author", '$."name"'), jsonb_extract("profiles"."author", '$."is_verified"'), jsonb_extract("profiles"."author", '$."joinedAt"'), (jsonb_extract("profiles"."author", '$."externalID"') COLLATE NOCASE), CASE (json("profiles"."editor")) IS (NULL) WHEN 1 THEN NULL ELSE jsonb_extract("profiles"."editor", '$."name"') END
         FROM "profiles"
         """
       } results: {
