@@ -694,12 +694,16 @@ extension SnapshotTests {
               .jsonbSet(\.name, "Blob, Esq.")
               .jsonbSet(\.isVerified, false)
               .jsonbSet(\.links.homepage, "pointfree.co/blog")
+              .jsonbSet(\.pastLinks[0], #bind(Link(homepage: "example.org")))
           }
           .returning(\.author)
       ) {
         """
         UPDATE "profiles"
-        SET "author" = jsonb_set("profiles"."author", '$."name"', 'Blob, Esq.', '$."is_verified"', json(CASE 0 WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), '$."links"."homepage"', 'pointfree.co/blog')
+        SET "author" = jsonb_set("profiles"."author", '$."name"', 'Blob, Esq.', '$."is_verified"', json(CASE 0 WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), '$."links"."homepage"', 'pointfree.co/blog', '$."pastLinks"[0]', jsonb('{
+          "homepage" : "example.org",
+          "updatedAt" : "1970-01-01 00:00:00.000"
+        }'))
         RETURNING json("author")
         """
       } results: {
@@ -717,8 +721,8 @@ extension SnapshotTests {
         │   ),                                                      │
         │   pastLinks: [                                            │
         │     [0]: Link(                                            │
-        │       homepage: "example.com",                            │
-        │       updatedAt: Date(1970-01-01T12:00:00.000Z)           │
+        │       homepage: "example.org",                            │
+        │       updatedAt: Date(1970-01-01T00:00:00.000Z)           │
         │     )                                                     │
         │   ]                                                       │
         │ )                                                         │
