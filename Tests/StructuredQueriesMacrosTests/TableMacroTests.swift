@@ -732,7 +732,7 @@ extension SnapshotTests {
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Self.columns.id)
-            let isCompleted = try decoder.decode(Self.columns.isCompleted) ?? Self.columns.isCompleted.defaultValue
+            let isCompleted = try decoder.decode(Self.columns.isCompleted)
             guard let isCompleted else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -747,7 +747,7 @@ extension SnapshotTests {
         nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Self.columns.id)
-            let isCompleted = try decoder.decode(Self.columns.isCompleted) ?? Self.columns.isCompleted.defaultValue
+            let isCompleted = try decoder.decode(Self.columns.isCompleted)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -916,7 +916,7 @@ extension SnapshotTests {
         nonisolated extension Draft {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             self.id = try decoder.decode(Self.columns.id)
-            let isCompleted = try decoder.decode(Self.columns.isCompleted) ?? Self.columns.isCompleted.defaultValue
+            let isCompleted = try decoder.decode(Self.columns.isCompleted)
             guard let isCompleted else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
@@ -931,7 +931,7 @@ extension SnapshotTests {
         nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
           public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
             let id = try decoder.decode(Self.columns.id)
-            let isCompleted = try decoder.decode(Self.columns.isCompleted) ?? Self.columns.isCompleted.defaultValue
+            let isCompleted = try decoder.decode(Self.columns.isCompleted)
             guard let id else {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
