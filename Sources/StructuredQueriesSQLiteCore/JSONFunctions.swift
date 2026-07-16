@@ -107,8 +107,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   public func jsonSet<Context: _RequiredJSONPathContext, Member: QueryBindable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member>
-  ) -> some QueryExpression<QueryValue> {
-    _jsonMutate("json_set", path, .jsonEncoded(value))
+  ) -> JSONSetExpression<QueryValue> {
+    JSONSetExpression(
+      function: "json_set",
+      base: argumentFragment,
+      arguments: [.jsonSetArguments(path, .jsonEncoded(value))]
+    )
   }
 
   /// Inserts a value at a given path in this JSON expression using the `json_insert` function.
@@ -284,8 +288,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   public func jsonbSet<Context: _RequiredJSONPathContext, Member: QueryBindable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member>
-  ) -> some QueryExpression<QueryValue> {
-    _jsonMutate("jsonb_set", path, .jsonEncoded(value))
+  ) -> JSONSetExpression<QueryValue> {
+    JSONSetExpression(
+      function: "jsonb_set",
+      base: argumentFragment,
+      arguments: [.jsonSetArguments(path, .jsonEncoded(value))]
+    )
   }
 
   /// Inserts a value at a given path in this JSONB expression using the `jsonb_insert` function.
@@ -578,6 +586,44 @@ private struct JSONFunctionExpression<QueryValue>: QueryExpression {
 extension JSONFunctionExpression where QueryValue: QueryRepresentable {
   init(_ base: QueryFragment) {
     self.init(base: base, decode: QueryValue.queryFragment(decoding:))
+  }
+}
+
+public struct JSONSetExpression<QueryValue: QueryRepresentable>: QueryExpression {
+  let function: QueryFragment
+  let base: QueryFragment
+  let arguments: [QueryFragment]
+
+  public var queryFragment: QueryFragment {
+    let fragment: QueryFragment =
+      "\(function)(\(base), \(arguments.joined(separator: ", ")))"
+    return _isSelecting ? QueryValue.queryFragment(decoding: fragment) : fragment
+  }
+}
+
+extension JSONSetExpression where QueryValue: _JSONRepresentable {
+  public func jsonSet<Context: _RequiredJSONPathContext, Member: QueryBindable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ value: some QueryExpression<Member>
+  ) -> JSONSetExpression<QueryValue> {
+    JSONSetExpression(
+      function: function,
+      base: base,
+      arguments: arguments + [.jsonSetArguments(path, .jsonEncoded(value))]
+    )
+  }
+}
+
+extension JSONSetExpression where QueryValue: _JSONBRepresentable {
+  public func jsonbSet<Context: _RequiredJSONPathContext, Member: QueryBindable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ value: some QueryExpression<Member>
+  ) -> JSONSetExpression<QueryValue> {
+    JSONSetExpression(
+      function: function,
+      base: base,
+      arguments: arguments + [.jsonSetArguments(path, .jsonEncoded(value))]
+    )
   }
 }
 
@@ -953,6 +999,13 @@ extension QueryFragment {
     _ value: some QueryExpression<V>
   ) -> QueryFragment {
     V._queryFragment(jsonEncoding: value.argumentFragment)
+  }
+
+  fileprivate static func jsonSetArguments<Root, Context, Member>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>,
+    _ value: QueryFragment
+  ) -> QueryFragment {
+    "\(quote: JSONPath()[keyPath: path].pathString, delimiter: .text), \(value)"
   }
 }
 

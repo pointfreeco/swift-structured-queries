@@ -534,12 +534,16 @@ extension SnapshotTests {
       )
       assertQuery(
         Doc
-          .update { $0.tags = $0.tags.jsonSet(\.[0], "z") }
+          .update {
+            $0.tags = $0.tags
+              .jsonSet(\.[0], "z")
+              .jsonSet(\.[1], "y")
+          }
           .returning(\.tags)
       ) {
         """
         UPDATE "docs"
-        SET "tags" = json_set("docs"."tags", '$[0]', 'z')
+        SET "tags" = json_set("docs"."tags", '$[0]', 'z', '$[1]', 'y')
         RETURNING "tags"
         """
       } results: {
@@ -547,7 +551,7 @@ extension SnapshotTests {
         ┌─────────────┐
         │ [           │
         │   [0]: "z", │
-        │   [1]: "b"  │
+        │   [1]: "y"  │
         │ ]           │
         └─────────────┘
         """
