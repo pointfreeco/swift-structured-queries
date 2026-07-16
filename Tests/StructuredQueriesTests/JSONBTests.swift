@@ -959,7 +959,7 @@ private struct Profile: Codable, Equatable {
   var editor: Author?
 }
 
-@Table
+@Selection
 private struct Author: Codable, Equatable {
   var name = ""
   @Column("is_verified")
@@ -975,7 +975,7 @@ private struct Author: Codable, Equatable {
   var pastLinks: [Link] = []
 }
 
-@Table
+@Selection
 private struct Link: Codable, Equatable {
   var homepage = ""
   var updatedAt = Date(timeIntervalSince1970: 0)
@@ -990,7 +990,7 @@ private struct Track: Codable, Equatable {
   var trackTags: [String] = []
 }
 
-@Table
+@Selection
 private struct Resume: Codable, Equatable {
   @Column(as: Author.JSONBRepresentation?.self)
   var author: Author?
