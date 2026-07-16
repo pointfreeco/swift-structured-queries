@@ -501,7 +501,7 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "profiles"
-        SET "author" = jsonb_set(jsonb_set(jsonb_set("profiles"."author", '$."name"', 'Blob, Esq.'), '$."is_verified"', json(CASE 0 WHEN 0 THEN 'false' WHEN 1 THEN 'true' END)), '$."links"."homepage"', 'pointfree.co/blog')
+        SET "author" = jsonb_set("profiles"."author", '$."name"', 'Blob, Esq.', '$."is_verified"', json(CASE 0 WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), '$."links"."homepage"', 'pointfree.co/blog')
         RETURNING json("author")
         """
       } results: {
