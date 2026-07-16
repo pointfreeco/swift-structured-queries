@@ -34,9 +34,43 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
     _jsonExtract(path)
   }
 
+  /// Extracts a value from this JSON expression using the `jsonb_extract` function.
+  ///
+  /// Works like `jsonExtract`, except JSON objects and arrays are extracted in SQLite's binary
+  /// JSONB format, making the result appropriate for storage contexts, like an `UPDATE`
+  /// statement's `SET` clause:
+  ///
+  /// ```swift
+  /// Profile.update {
+  ///   $0.author = $0.author.jsonbSet(\.links, $0.author.jsonbExtract(\.pastLinks[0]))
+  /// }
+  /// // UPDATE "profiles"
+  /// // SET "author" = jsonb_set(
+  /// //   "profiles"."author", '$."links"', jsonb_extract("profiles"."author", '$."pastLinks"[0]')
+  /// // )
+  /// ```
+  ///
+  /// - Parameter path: A key path from the JSON expression to a field to extract.
+  /// - Returns: An expression of the value extracted.
+  public func jsonbExtract<Context, Member: QueryRepresentable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Member> {
+    _jsonbExtract(path)
+  }
+
+  @_documentation(visibility: private)
+  public func jsonbExtract<
+    Context: _OptionalJSONPathContext,
+    Member: QueryRepresentable
+  >(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Member._Optionalized> {
+    _jsonbExtract(path)
+  }
+
   /// A JSON array aggregate of this JSON expression.
   ///
-  /// Concatenates all of the JSON documents in a group into a JSON array.
+  /// Concatenates all of the JSON values in a group into a JSON array.
   ///
   /// ```swift
   /// Reminder.select { $0.tags.jsonGroupArray() }
@@ -328,7 +362,7 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   /// Removes an array element at a given path from this JSONB expression using the `jsonb_remove`
   /// function.
   ///
-  /// - Parameter path: A key path to an array element of the document.
+  /// - Parameter path: A key path to an array element.
   /// - Returns: A JSONB expression with the element removed.
   public func jsonbRemove<Context: _JSONPathElementContext, Member>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
@@ -399,12 +433,26 @@ extension QueryExpression
 where QueryValue: _OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable {
   /// Extracts a value from this JSON expression using the `json_extract` function.
   ///
-  /// - Parameter path: A key path from the document's columns.
+  /// - Parameter path: A key path.
   /// - Returns: An expression of the value extracted.
   public func jsonExtract<Context, Member: QueryRepresentable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
   ) -> some QueryExpression<Member._Optionalized> {
     _jsonExtract(path)
+  }
+
+  /// Extracts a value from this JSON expression using the `jsonb_extract` function.
+  ///
+  /// Works like `jsonExtract`, except JSON objects and arrays are extracted in SQLite's binary
+  /// JSONB format, making the result appropriate for storage contexts, like an `UPDATE`
+  /// statement's `SET` clause.
+  ///
+  /// - Parameter path: A key path.
+  /// - Returns: An expression of the value extracted.
+  public func jsonbExtract<Context, Member: QueryRepresentable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Member._Optionalized> {
+    _jsonbExtract(path)
   }
 
   /// A JSON array aggregate of this JSON expression.
@@ -431,15 +479,29 @@ extension QueryExpression {
   private func _jsonExtract<Root, Context, Member: QueryRepresentable, Result>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>
   ) -> SQLQueryExpression<Result> {
-    SQLQueryExpression(
-      Member._queryFragment(
-        jsonDecoding: """
-          json_extract(\
-          \(argumentFragment), \
-          \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text)\
-          )
-          """
-      )
+    SQLQueryExpression(_jsonExtract("json_extract", path))
+  }
+
+  private func _jsonbExtract<Root, Context, Member: QueryRepresentable, Result>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>
+  ) -> JSONFunctionExpression<Result> {
+    JSONFunctionExpression(
+      base: _jsonExtract("jsonb_extract", path),
+      decode: Member.queryFragment(decoding:)
+    )
+  }
+
+  private func _jsonExtract<Root, Context, Member: QueryRepresentable>(
+    _ function: QueryFragment,
+    _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>
+  ) -> QueryFragment {
+    Member._queryFragment(
+      jsonDecoding: """
+        \(function)(\
+        \(argumentFragment), \
+        \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text)\
+        )
+        """
     )
   }
 
@@ -447,8 +509,8 @@ extension QueryExpression {
     _ function: QueryFragment,
     _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>,
     _ value: QueryFragment
-  ) -> JSONMutationExpression<Result> {
-    JSONMutationExpression(
+  ) -> JSONFunctionExpression<Result> {
+    JSONFunctionExpression(
       """
       \(function)(\
       \(argumentFragment), \
@@ -462,8 +524,8 @@ extension QueryExpression {
   private func _jsonRemove<Root, Context, Member, Result: QueryRepresentable>(
     _ function: QueryFragment,
     _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>
-  ) -> JSONMutationExpression<Result> {
-    JSONMutationExpression(
+  ) -> JSONFunctionExpression<Result> {
+    JSONFunctionExpression(
       """
       \(function)(\
       \(argumentFragment), \
@@ -477,8 +539,8 @@ extension QueryExpression {
     _ function: QueryFragment,
     _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>,
     _ value: QueryFragment
-  ) -> JSONMutationExpression<Result> {
-    JSONMutationExpression(
+  ) -> JSONFunctionExpression<Result> {
+    JSONFunctionExpression(
       """
       \(function)(\
       \(argumentFragment), \
@@ -504,15 +566,18 @@ extension QueryExpression {
   }
 }
 
-private struct JSONMutationExpression<QueryValue: QueryRepresentable>: QueryExpression {
+private struct JSONFunctionExpression<QueryValue>: QueryExpression {
   let base: QueryFragment
-
-  init(_ base: QueryFragment) {
-    self.base = base
-  }
+  let decode: (QueryFragment) -> QueryFragment
 
   var queryFragment: QueryFragment {
-    _isSelecting ? QueryValue.queryFragment(decoding: base) : base
+    _isSelecting ? decode(base) : base
+  }
+}
+
+extension JSONFunctionExpression where QueryValue: QueryRepresentable {
+  init(_ base: QueryFragment) {
+    self.init(base: base, decode: QueryValue.queryFragment(decoding:))
   }
 }
 

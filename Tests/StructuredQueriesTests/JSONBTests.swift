@@ -488,6 +488,114 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonbExtract() {
+      assertQuery(
+        Profile.select {
+          (
+            $0.author.jsonbExtract(\.name),
+            $0.author.jsonbExtract(\.isVerified),
+            $0.author.jsonbExtract(\.joinedAt),
+            $0.author.jsonbExtract(\.externalID),
+            $0.editor.jsonbExtract(\.name)
+          )
+        }
+      ) {
+        """
+        SELECT jsonb_extract("profiles"."author", '$."name"'), jsonb_extract("profiles"."author", '$."is_verified"'), jsonb_extract("profiles"."author", '$."joinedAt"'), (jsonb_extract("profiles"."author", '$."externalID"') COLLATE NOCASE), jsonb_extract("profiles"."editor", '$."name"')
+        FROM "profiles"
+        """
+      } results: {
+        """
+        ┌────────┬──────┬────────────────────────────────┬────────────────────────────────────────────┬───────────┐
+        │ "Blob" │ true │ Date(1970-01-02T00:00:00.000Z) │ UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF) │ "Blob Jr" │
+        └────────┴──────┴────────────────────────────────┴────────────────────────────────────────────┴───────────┘
+        """
+      }
+    }
+
+    @Test func jsonbExtractDocument() {
+      assertQuery(
+        Profile.select {
+          ($0.author.jsonbExtract(\.links), $0.author.jsonbExtract(\.pastLinks[0]))
+        }
+      ) {
+        """
+        SELECT json(jsonb_extract("profiles"."author", '$."links"')), json(jsonb_extract("profiles"."author", '$."pastLinks"[0]'))
+        FROM "profiles"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┬─────────────────────────────────────────────┐
+        │ Link(                                       │ Link(                                       │
+        │   homepage: "pointfree.co",                 │   homepage: "example.com",                  │
+        │   updatedAt: Date(1970-01-02T12:00:00.000Z) │   updatedAt: Date(1970-01-01T12:00:00.000Z) │
+        │ )                                           │ )                                           │
+        └─────────────────────────────────────────────┴─────────────────────────────────────────────┘
+        """
+      }
+    }
+
+    @Test func jsonbExtractThroughOptional() {
+      assertQuery(
+        Bio.select {
+          (
+            $0.resume.jsonbExtract(\.author.name),
+            $0.resume.jsonbExtract(\.author.links.homepage)
+          )
+        }
+      ) {
+        """
+        SELECT jsonb_extract("bios"."resume", '$."author"."name"'), jsonb_extract("bios"."resume", '$."author"."links"."homepage"')
+        FROM "bios"
+        """
+      } results: {
+        """
+        ┌───────────┬─────┐
+        │ "Blob Sr" │ ""  │
+        │ nil       │ nil │
+        └───────────┴─────┘
+        """
+      }
+    }
+
+    @Test func jsonbGetSet() {
+      assertQuery(
+        Profile
+          .update {
+            $0.author = $0.author.jsonbSet(\.links, $0.author.jsonbExtract(\.pastLinks[0]))
+          }
+          .returning(\.author)
+      ) {
+        """
+        UPDATE "profiles"
+        SET "author" = jsonb_set("profiles"."author", '$."links"', jsonb_extract("profiles"."author", '$."pastLinks"[0]'))
+        RETURNING json("author")
+        """
+      } results: {
+        """
+        ┌───────────────────────────────────────────────────────────┐
+        │ Author(                                                   │
+        │   name: "Blob",                                           │
+        │   isVerified: true,                                       │
+        │   nickname: nil,                                          │
+        │   joinedAt: Date(1970-01-02T00:00:00.000Z),               │
+        │   externalID: UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF), │
+        │   links: Link(                                            │
+        │     homepage: "example.com",                              │
+        │     updatedAt: Date(1970-01-01T12:00:00.000Z)             │
+        │   ),                                                      │
+        │   pastLinks: [                                            │
+        │     [0]: Link(                                            │
+        │       homepage: "example.com",                            │
+        │       updatedAt: Date(1970-01-01T12:00:00.000Z)           │
+        │     )                                                     │
+        │   ]                                                       │
+        │ )                                                         │
+        └───────────────────────────────────────────────────────────┘
+        """
+      }
+    }
+
     @Test func jsonbSet() {
       assertQuery(
         Profile
@@ -927,6 +1035,65 @@ extension SnapshotTests {
         │   ]                    │                     │
         │ )                      │                     │
         └────────────────────────┴─────────────────────┘
+        """
+      }
+    }
+
+    @Test func jsonGetSet() {
+      assertQuery(
+        Profile.update {
+          $0.author = $0.author.jsonbSet(
+            \.pastLinks,
+            Profile.select { $0.author.jsonExtract(\.pastLinks) }.limit(1)
+          )
+        }
+        .returning(\.self)
+      ) {
+        """
+        UPDATE "profiles"
+        SET "author" = jsonb_set("profiles"."author", '$."pastLinks"', (
+          SELECT json_extract("profiles"."author", '$."pastLinks"')
+          FROM "profiles"
+          LIMIT 1
+        ))
+        RETURNING "id", json("author"), json("editor")
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────────────────────┐
+        │ Profile(                                                    │
+        │   id: 1,                                                    │
+        │   author: Author(                                           │
+        │     name: "Blob",                                           │
+        │     isVerified: true,                                       │
+        │     nickname: nil,                                          │
+        │     joinedAt: Date(1970-01-02T00:00:00.000Z),               │
+        │     externalID: UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF), │
+        │     links: Link(                                            │
+        │       homepage: "pointfree.co",                             │
+        │       updatedAt: Date(1970-01-02T12:00:00.000Z)             │
+        │     ),                                                      │
+        │     pastLinks: [                                            │
+        │       [0]: Link(                                            │
+        │         homepage: "example.com",                            │
+        │         updatedAt: Date(1970-01-01T12:00:00.000Z)           │
+        │       )                                                     │
+        │     ]                                                       │
+        │   ),                                                        │
+        │   editor: Author(                                           │
+        │     name: "Blob Jr",                                        │
+        │     isVerified: false,                                      │
+        │     nickname: nil,                                          │
+        │     joinedAt: Date(1970-01-01T00:00:00.000Z),               │
+        │     externalID: UUID(00000000-0000-0000-0000-000000000000), │
+        │     links: Link(                                            │
+        │       homepage: "",                                         │
+        │       updatedAt: Date(1970-01-01T00:00:00.000Z)             │
+        │     ),                                                      │
+        │     pastLinks: []                                           │
+        │   )                                                         │
+        │ )                                                           │
+        └─────────────────────────────────────────────────────────────┘
         """
       }
     }

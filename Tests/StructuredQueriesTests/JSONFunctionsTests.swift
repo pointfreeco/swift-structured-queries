@@ -575,6 +575,39 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonbExtract() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "docs" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "tags" TEXT NOT NULL,
+            "optionalTags" TEXT
+          )
+          """
+        )
+      )
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { ($0.tags.jsonExtract(\.[0]), $0.tags.jsonbExtract(\.[1])) }
+      ) {
+        """
+        SELECT json_extract("docs"."tags", '$[0]'), jsonb_extract("docs"."tags", '$[1]')
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────┬─────┐
+        │ "a" │ "b" │
+        └─────┴─────┘
+        """
+      }
+    }
+
     @Test func codableJSONGroup() throws {
       try db.execute(
         #sql(
