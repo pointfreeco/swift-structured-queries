@@ -1364,11 +1364,10 @@ extension TableMacro: MemberMacro {
               let container = try decoder.container(keyedBy: CodingKeys.self)
               guard container.allKeys.count == 1, let key = container.allKeys.first
               else {
-              throw Swift.DecodingError.typeMismatch(
-              Self.self,
+              throw Swift.DecodingError.dataCorrupted(
               Swift.DecodingError.Context(
               codingPath: container.codingPath,
-              debugDescription: "Invalid number of keys found, expected one."
+              debugDescription: "Invalid number of keys found."
               )
               )
               }
