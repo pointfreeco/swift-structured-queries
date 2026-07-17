@@ -11,12 +11,13 @@ where Values.QueryOutput: Table {
 
   public typealias QueryValue = Values
 
-  public let name: String
+  package let name: String
 
   public let defaultValue: Values.QueryOutput?
 
   public let keyPath: KeyPath<Root, Values.QueryOutput>
 
+  // TODO: Reconsider access control level for 1.0.
   public init(
     _ name: String,
     keyPath: KeyPath<Root, Values.QueryOutput>,
