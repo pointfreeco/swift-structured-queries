@@ -490,6 +490,77 @@
     }
   }
 
+  #if ColumnCoding
+    extension SnapshotTests.EnumTableTests {
+      @Test func jsonGroupArrayDecoding() throws {
+        try db.execute(
+          """
+          CREATE TABLE "medias" (
+            "note" TEXT,
+            "video_preview" TEXT,
+            "image_caption" TEXT,
+            "image_url" TEXT
+          )
+          """
+        )
+        try db.execute(
+          """
+          INSERT INTO "medias"
+          ("note", "video_preview", "image_caption", "image_url")
+          VALUES
+          ('Hello', NULL, NULL, NULL),
+          (NULL, 'https://www.pointfree.co/preview.mov', NULL, NULL),
+          (NULL, NULL, 'Blob', 'https://www.pointfree.co/blob.jpg')
+          """
+        )
+        assertQuery(
+          Media.select { MediaList.Columns(medias: $0.jsonGroupArray()) }
+        ) {
+          """
+          SELECT json_group_array(CASE WHEN "medias"."note" IS NOT NULL THEN json_object('note', "medias"."note") WHEN "medias"."video_preview" IS NOT NULL THEN json_object('video_preview', "medias"."video_preview") WHEN ("medias"."image_caption" IS NOT NULL OR "medias"."image_url" IS NOT NULL) THEN json_object('image', json_object('image_caption', "medias"."image_caption", 'image_url', "medias"."image_url")) END) AS "medias"
+          FROM "medias"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────────────────────────────────────┐
+          │ MediaList(                                                         │
+          │   medias: [                                                        │
+          │     [0]: .note("Hello"),                                           │
+          │     [1]: .videoPreview(URL(https://www.pointfree.co/preview.mov)), │
+          │     [2]: .image(                                                   │
+          │       MediaImage(                                                  │
+          │         caption: "Blob",                                           │
+          │         url: URL(https://www.pointfree.co/blob.jpg)                │
+          │       )                                                            │
+          │     )                                                              │
+          │   ]                                                                │
+          │ )                                                                  │
+          └────────────────────────────────────────────────────────────────────┘
+          """
+        }
+      }
+    }
+
+    @Table private enum Media: Codable {
+      case note(String)
+      @Column("video_preview")
+      case videoPreview(URL)
+      case image(MediaImage)
+    }
+
+    @Selection private struct MediaImage: Codable {
+      @Column("image_caption")
+      var caption = ""
+      @Column("image_url")
+      let url: URL
+    }
+
+    @Selection private struct MediaList {
+      @Column(as: [Media].JSONRepresentation.self)
+      let medias: [Media]
+    }
+  #endif
+
   @Table private struct Attachment {
     let id: Int
     let kind: Kind

@@ -452,6 +452,7 @@ extension SnapshotTests {
       }
     }
 
+    #if ColumnCoding
     @Test func jsonGroupArrayWithRenamedColumns() {
       assertQuery(
         Track.select { $0.jsonGroupArray() }
@@ -477,7 +478,9 @@ extension SnapshotTests {
         """#
       }
     }
+    #endif
 
+    #if ColumnCoding
     @Test func jsonExtract() {
       assertQuery(
         Profile.select {
@@ -501,6 +504,7 @@ extension SnapshotTests {
         """
       }
     }
+    #endif
 
     @Test func jsonExtractNested() {
       assertQuery(
@@ -578,6 +582,7 @@ extension SnapshotTests {
       }
     }
 
+    #if ColumnCoding
     @Test func jsonbExtract() {
       assertQuery(
         Profile.select {
@@ -602,6 +607,7 @@ extension SnapshotTests {
         """
       }
     }
+    #endif
 
     @Test func jsonbExtractDocument() {
       assertQuery(
@@ -686,6 +692,7 @@ extension SnapshotTests {
       }
     }
 
+    #if ColumnCoding
     @Test func jsonbSet() {
       assertQuery(
         Profile
@@ -730,6 +737,7 @@ extension SnapshotTests {
         """
       }
     }
+    #endif
 
     @Test func jsonbInsertAndReplace() {
       assertQuery(
