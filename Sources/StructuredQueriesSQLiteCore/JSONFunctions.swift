@@ -13,21 +13,6 @@ extension QueryExpression {
     QueryFunction("json_patch", self, other)
   }
 
-  /// Passes this expression and the given one to the `jsonb_patch` function.
-  ///
-  /// The result is in SQLite's binary JSONB format, making it appropriate for storage contexts,
-  /// like an `UPDATE` statement's `SET` clause.
-  ///
-  /// - Parameter other: A JSON object to patch this object with.
-  /// - Returns: A JSONB expression of the result of invoking the `jsonb_patch` function.
-  @_disfavoredOverload
-  public func jsonbPatch<QueryOutput: Codable>(
-    _ other: some QueryExpression<QueryValue>
-  ) -> some QueryExpression<QueryValue>
-  where QueryValue == _CodableJSONBRepresentation<QueryOutput> {
-    QueryFunction("jsonb_patch", self, other)
-  }
-
   /// Wraps this expression with the `json_array_length` function.
   ///
   /// ```swift
