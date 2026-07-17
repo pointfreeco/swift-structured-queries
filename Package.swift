@@ -53,6 +53,10 @@ let package = Package(
       description: "Introduce StructuredQueries conformances to the swift-tagged package."
     ),
     .trait(
+      name: "ColumnCoding",
+      description: "Align the Codable coding of tables and selections with their column names."
+    ),
+    .trait(
       name: "StructuredQueriesCasePaths",
       description: "A deprecated alias for the 'CasePaths' trait.",
       enabledTraits: ["CasePaths"]
@@ -129,6 +133,11 @@ let package = Package(
       name: "StructuredQueriesSQLiteCore",
       dependencies: [
         "StructuredQueriesCore",
+        .product(
+          name: "CasePaths",
+          package: "swift-case-paths",
+          condition: .when(traits: ["CasePaths"])
+        ),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
@@ -186,6 +195,7 @@ if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil  // || true  
     .default(
       enabledTraits: [
         "CasePaths",
+        "ColumnCoding",
         "Tagged",
       ]
     )

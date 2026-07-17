@@ -1,6 +1,10 @@
 import Foundation
 public import StructuredQueriesCore
 
+#if CasePaths && ColumnCoding
+  public import CasePaths
+#endif
+
 extension QueryExpression {
   /// Passes this expression and the given one to the `json_patch` function.
   ///
@@ -250,7 +254,7 @@ extension TableDefinition where QueryValue: Codable {
   }
 }
 
-extension TableDefinition where QueryValue: _OptionalProtocol & Codable {
+extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProtocol & Codable {
   /// A JSON array representation of the aggregation of a table's columns.
   ///
   /// Constructs a JSON array of JSON objects with a field for each column of the table. This can be
@@ -329,54 +333,163 @@ extension TableDefinition where QueryValue: Codable {
   ///
   /// Useful for referencing a table row in a larger JSON selection.
   public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<QueryValue>> {
-    func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
-      typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
-
-      func isJSONRepresentation<T: Codable>(_: T.Type, isOptional: Bool = false) -> Bool {
-        func isOptionalJSONRepresentation<U: _OptionalProtocol>(_: U.Type) -> Bool {
-          if let codableType = U.Wrapped.self as? any Codable.Type {
-            return isJSONRepresentation(codableType, isOptional: true)
-          } else {
-            return false
-          }
-        }
-        if let optionalType = T.self as? any _OptionalProtocol.Type {
-          return isOptionalJSONRepresentation(optionalType)
-        } else if isOptional {
-          return TableColumn.QueryValue.self == T.JSONRepresentation?.self
-            || TableColumn.QueryValue.self == T.JSONBRepresentation?.self
-        } else {
-          return Value.self == T.JSONRepresentation.self
-            || Value.self == T.JSONBRepresentation.self
-        }
-      }
-
-      if Value.self == Bool.self {
-        return """
-          \(quote: column.name, delimiter: .text), \
-          json(CASE \(column) WHEN 0 THEN 'false' WHEN 1 THEN 'true' END)
-          """
-      } else if Value.self == Date.UnixTimeRepresentation.self {
-        return "\(quote: column.name, delimiter: .text), datetime(\(column), 'unixepoch')"
-      } else if Value.self == Date.JulianDayRepresentation.self {
-        return "\(quote: column.name, delimiter: .text), datetime(\(column), 'julianday')"
-      } else if let codableType = TableColumn.QueryValue.QueryOutput.self
-        as? any Codable.Type,
-        isJSONRepresentation(codableType)
-      {
-        return "\(quote: column.name, delimiter: .text), json(\(column))"
-      } else {
-        return "\(quote: column.name, delimiter: .text), json_quote(\(column))"
-      }
-    }
     let fragment: QueryFragment = $_isSelecting.withValue(false) {
       Self.allColumns
-        .map { open($0) }
+        .map { "\(quote: $0.name, delimiter: .text), \(_jsonObjectValue($0))" }
         .joined(separator: ", ")
     }
     return QueryFunction("json_object", SQLQueryExpression(fragment))
   }
 }
+
+private func _jsonObjectValue<TableColumn: TableColumnExpression>(
+  _ column: TableColumn
+) -> QueryFragment {
+  typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
+
+  func isJSONRepresentation<T: Codable>(_: T.Type, isOptional: Bool = false) -> Bool {
+    func isOptionalJSONRepresentation<U: StructuredQueriesCore._OptionalProtocol>(_: U.Type) -> Bool
+    {
+      if let codableType = U.Wrapped.self as? any Codable.Type {
+        return isJSONRepresentation(codableType, isOptional: true)
+      } else {
+        return false
+      }
+    }
+    if let optionalType = T.self as? any StructuredQueriesCore._OptionalProtocol.Type {
+      return isOptionalJSONRepresentation(optionalType)
+    } else if isOptional {
+      return TableColumn.QueryValue.self == T.JSONRepresentation?.self
+        || TableColumn.QueryValue.self == T.JSONBRepresentation?.self
+    } else {
+      return Value.self == T.JSONRepresentation.self
+        || Value.self == T.JSONBRepresentation.self
+    }
+  }
+
+  if Value.self == Bool.self {
+    return "json(CASE \(column) WHEN 0 THEN 'false' WHEN 1 THEN 'true' END)"
+  } else if Value.self == Date.UnixTimeRepresentation.self {
+    return "datetime(\(column), 'unixepoch')"
+  } else if Value.self == Date.JulianDayRepresentation.self {
+    return "datetime(\(column), 'julianday')"
+  } else if let codableType = TableColumn.QueryValue.QueryOutput.self
+    as? any Codable.Type,
+    isJSONRepresentation(codableType)
+  {
+    return "json(\(column))"
+  } else {
+    return "json_quote(\(column))"
+  }
+}
+
+#if CasePaths && ColumnCoding
+  extension TableDefinition where QueryValue: Codable & CasePathable {
+    /// A JSON representation of an enum table's columns.
+    ///
+    /// Produces a single-key JSON object for the table's active case, matching the JSON coding
+    /// generated for Codable enum tables.
+    public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<QueryValue>> {
+      let branches: [QueryFragment] = $_isSelecting.withValue(false) {
+        var branches: [QueryFragment] = []
+        for child in Mirror(reflecting: self).children {
+          guard let label = child.label else { continue }
+          if let column = child.value as? any TableColumnExpression {
+            branches.append(
+              """
+              WHEN \(column) IS NOT NULL \
+              THEN json_object(\(quote: column.name, delimiter: .text), \(_jsonObjectValue(column)))
+              """
+            )
+          } else if let group = child.value as? any _JSONColumnGroup {
+            let groupColumns = group._jsonGroupColumns
+            guard !groupColumns.isEmpty else { continue }
+            let condition: QueryFragment =
+              groupColumns
+              .map { "\($0) IS NOT NULL" }
+              .joined(separator: " OR ")
+            let object: QueryFragment =
+              groupColumns
+              .map { "\(quote: $0.name, delimiter: .text), \(_jsonObjectValue($0))" }
+              .joined(separator: ", ")
+            branches.append(
+              """
+              WHEN (\(condition)) \
+              THEN json_object(\(quote: label, delimiter: .text), json_object(\(object)))
+              """
+            )
+          }
+        }
+        return branches
+      }
+      return SQLQueryExpression("CASE \(branches.joined(separator: " ")) END")
+    }
+
+    /// A JSON array representation of the aggregation of an enum table's columns.
+    ///
+    /// - Parameters:
+    ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+    ///   - order: An `ORDER BY` clause to apply to the aggregation.
+    ///   - filter: A `FILTER` clause to apply to the aggregation.
+    /// - Returns: A JSON array aggregate of this table.
+    public func jsonGroupArray(
+      distinct isDistinct: Bool = false,
+      order: (some QueryExpression)? = Bool?.none,
+      filter: (some QueryExpression<Bool>)? = Bool?.none
+    ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
+      AggregateFunctionExpression(
+        "json_group_array",
+        isDistinct: isDistinct,
+        [jsonObject().queryFragment],
+        order: order?.queryFragment,
+        filter: filter?.queryFragment
+      )
+    }
+  }
+
+  extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProtocol & Codable {
+    @_documentation(visibility: private)
+    public func jsonGroupArray<Wrapped: Codable & CasePathable>(
+      distinct isDistinct: Bool = false,
+      order: (some QueryExpression)? = Bool?.none,
+      filter: (some QueryExpression<Bool>)? = Bool?.none
+    ) -> some QueryExpression<[Wrapped].JSONRepresentation>
+    where QueryValue == Wrapped? {
+      let rowFilter = rowid.isNot(nil)
+      let filterQueryFragment =
+        if let filter {
+          rowFilter.and(filter).queryFragment
+        } else {
+          rowFilter.queryFragment
+        }
+      return AggregateFunctionExpression(
+        "json_group_array",
+        isDistinct: isDistinct,
+        [QueryValue.columns.jsonObject().queryFragment],
+        order: order?.queryFragment,
+        filter: filterQueryFragment
+      )
+    }
+  }
+
+  extension Optional.TableColumns where QueryValue: Codable, Wrapped: CasePathable {
+    /// A JSON representation of an enum table's columns.
+    ///
+    /// Produces a single-key JSON object for the table's active case, matching the JSON coding
+    /// generated for Codable enum tables.
+    public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<Wrapped>?> {
+      Case().when(rowid.isNot(nil), then: Wrapped.columns.jsonObject())
+    }
+  }
+
+  private protocol _JSONColumnGroup {
+    var _jsonGroupColumns: [any TableColumnExpression] { get }
+  }
+
+  extension ColumnGroup: _JSONColumnGroup {
+    fileprivate var _jsonGroupColumns: [any TableColumnExpression] { _allColumns }
+  }
+#endif
 
 extension Optional.TableColumns where QueryValue: Codable {
   /// A JSON representation of a table's columns.

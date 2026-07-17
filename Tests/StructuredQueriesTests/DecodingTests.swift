@@ -1,3 +1,4 @@
+import Dependencies
 import Foundation
 import StructuredQueries
 import Testing
@@ -241,6 +242,35 @@ extension SnapshotTests {
         .first
       )
     }
+
+    @Test func `NULL value in optional column does not decode as default`() throws {
+      try withDependencies {
+        $0.defaultDatabase = db
+      } operation: {
+        try db.execute(
+          """
+          CREATE TABLE "rowWithOptionals" ("value" INTEGER) STRICT
+          """
+        )
+        try db.execute(
+          """
+          INSERT INTO "rowWithOptionals" ("value") VALUES (NULL)
+          """
+        )
+        assertQuery(RowWithOptional.all) {
+          """
+          SELECT "rowWithOptionals"."value"
+          FROM "rowWithOptionals"
+          """
+        } results: {
+          """
+          ┌─────────────────────────────┐
+          │ RowWithOptional(value: nil) │
+          └─────────────────────────────┘
+          """
+        }
+      }
+    }
   }
 }
 
@@ -248,4 +278,8 @@ extension SnapshotTests {
 @Table
 private struct Row {
   var data = Int(42)
+}
+
+@Table private struct RowWithOptional {
+  var value: Int? = 42
 }

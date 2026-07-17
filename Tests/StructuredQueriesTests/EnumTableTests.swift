@@ -426,7 +426,8 @@
         assertQuery(
           Values(
             Attachment.Kind.Selection.image(
-              Attachment.Image(caption: "Blob", url: URL(string: "https://pointfree.co")!))
+              Attachment.Image(caption: "Blob", url: URL(string: "https://pointfree.co")!)
+            )
           )
         ) {
           """
@@ -445,8 +446,120 @@
           """
         }
       }
+
+      @Test func `enum case with defaults isn't always decoded successfully`() {
+        assertQuery(
+          Attachment.upsert {
+            Attachment
+              .Draft(
+                kind: .image(
+                  Attachment.Image(
+                    caption: "Hello",
+                    url: URL(string: "https://image.com")!
+                  )
+                )
+              )
+          }
+          .returning(\.self)
+        ) {
+          """
+          INSERT INTO "attachments"
+          ("id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL")
+          VALUES
+          (NULL, NULL, NULL, NULL, NULL, 'Hello', 'https://image.com')
+          ON CONFLICT ("id")
+          DO UPDATE SET "link" = "excluded"."link", "note" = "excluded"."note", "videoURL" = "excluded"."videoURL", "videoKind" = "excluded"."videoKind", "imageCaption" = "excluded"."imageCaption", "imageURL" = "excluded"."imageURL"
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────┐
+          │ Attachment(                       │
+          │   id: 5,                          │
+          │   kind: .image(                   │
+          │     Attachment.Image(             │
+          │       caption: "Hello",           │
+          │       url: URL(https://image.com) │
+          │     )                             │
+          │   )                               │
+          │ )                                 │
+          └───────────────────────────────────┘
+          """
+        }
+      }
     }
   }
+
+  #if ColumnCoding
+    extension SnapshotTests.EnumTableTests {
+      @Test func jsonGroupArrayDecoding() throws {
+        try db.execute(
+          """
+          CREATE TABLE "medias" (
+            "note" TEXT,
+            "video_preview" TEXT,
+            "image_caption" TEXT,
+            "image_url" TEXT
+          )
+          """
+        )
+        try db.execute(
+          """
+          INSERT INTO "medias"
+          ("note", "video_preview", "image_caption", "image_url")
+          VALUES
+          ('Hello', NULL, NULL, NULL),
+          (NULL, 'https://www.pointfree.co/preview.mov', NULL, NULL),
+          (NULL, NULL, 'Blob', 'https://www.pointfree.co/blob.jpg')
+          """
+        )
+        assertQuery(
+          Media.select { MediaList.Columns(medias: $0.jsonGroupArray()) }
+        ) {
+          """
+          SELECT json_group_array(CASE WHEN "medias"."note" IS NOT NULL THEN json_object('note', json_quote("medias"."note")) WHEN "medias"."video_preview" IS NOT NULL THEN json_object('video_preview', json_quote("medias"."video_preview")) WHEN ("medias"."image_caption" IS NOT NULL OR "medias"."image_url" IS NOT NULL) THEN json_object('image', json_object('image_caption', json_quote("medias"."image_caption"), 'image_url', json_quote("medias"."image_url"))) END) AS "medias"
+          FROM "medias"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────────────────────────────────────────┐
+          │ MediaList(                                                         │
+          │   medias: [                                                        │
+          │     [0]: .note("Hello"),                                           │
+          │     [1]: .videoPreview(URL(https://www.pointfree.co/preview.mov)), │
+          │     [2]: .image(                                                   │
+          │       MediaImage(                                                  │
+          │         caption: "Blob",                                           │
+          │         url: URL(https://www.pointfree.co/blob.jpg)                │
+          │       )                                                            │
+          │     )                                                              │
+          │   ]                                                                │
+          │ )                                                                  │
+          └────────────────────────────────────────────────────────────────────┘
+          """
+        }
+      }
+    }
+
+    @Table private enum Media: Codable {
+      case note(String)
+      @Column("video_preview")
+      case videoPreview(URL)
+      case image(MediaImage)
+    }
+
+    @Selection private struct MediaImage: Codable {
+      @Column("image_caption")
+      var caption = ""
+      @Column("image_url")
+      let url: URL
+    }
+
+    @Selection private struct MediaList {
+      @Column(as: [Media].JSONRepresentation.self)
+      let medias: [Media]
+    }
+  #endif
 
   @Table private struct Attachment {
     let id: Int
@@ -462,9 +575,9 @@
 
     @Selection fileprivate struct Video {
       @Column("videoURL")
-      let url: URL
+      var url: URL = URL(string: "https://youtube.com")!
       @Column("videoKind")
-      var kind: Kind
+      var kind: Kind = .youtube
       fileprivate enum Kind: String, QueryBindable { case youtube, vimeo }
     }
     @Selection fileprivate struct Image {

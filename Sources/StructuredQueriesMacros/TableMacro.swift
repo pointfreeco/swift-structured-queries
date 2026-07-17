@@ -1,5 +1,6 @@
 import SwiftBasicFormat
 import SwiftDiagnostics
+import SwiftParser
 public import SwiftSyntax
 import SwiftSyntaxBuilder
 public import SwiftSyntaxMacros
@@ -377,21 +378,11 @@ extension TableMacro: ExtensionMacro {
             self.\(identifier) = try decoder.decode(\(decodeArgument))
             """
           )
-          if binding.initializer != nil {
-            decodings.append(
-              """
-              if self.\(identifier) == nil {
-              self.\(identifier) = \(decodeArgument).defaultValue ?? nil
-              }
-              """
-            )
-          }
         } else {
           if binding.initializer != nil {
             decodings.append(
               """
-              let \(identifier) = try decoder.decode(\(decodeArgument)) \
-              ?? \(decodeArgument).defaultValue
+              let \(identifier) = try decoder.decode(\(decodeArgument))
               """
             )
           } else {
@@ -721,6 +712,9 @@ extension TableMacro: MemberMacro {
     var allColumns:
       [(name: TokenSyntax, firstName: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] = []
     var allColumnNames: [TokenSyntax] = []
+    var codingKeys: [(identifier: TokenSyntax, rawValue: ExprSyntax?)] = []
+    var codableEnumCases:
+      [(identifier: TokenSyntax, label: TokenSyntax?, payloadType: TypeSyntax)] = []
     var writableColumns: [TokenSyntax] = []
     var selectedColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
     var columnsProperties: [DeclSyntax] = []
@@ -861,6 +855,12 @@ extension TableMacro: MemberMacro {
             }
           }
         }
+        let isRenamedColumn =
+          !isEphemeral
+          && columnName.as(StringLiteralExprSyntax.self)?.representedLiteralValue
+            != identifier.text.trimmingBackticks()
+        codingKeys.append((identifier: identifier, rawValue: isRenamedColumn ? columnName : nil))
+
         guard !isEphemeral
         else { continue }
 
@@ -1138,6 +1138,18 @@ extension TableMacro: MemberMacro {
           }
         }
 
+        let isRenamedColumn =
+          columnName.as(StringLiteralExprSyntax.self)?.representedLiteralValue
+          != identifier.text.trimmingBackticks()
+        codingKeys.append((identifier: identifier, rawValue: isRenamedColumn ? columnName : nil))
+        codableEnumCases.append(
+          (
+            identifier: identifier,
+            label: parameter.firstName?.tokenKind == .wildcard ? nil : parameter.firstName,
+            payloadType: parameter.type.trimmed.rewritten(selfRewriter)
+          )
+        )
+
         selectedColumns.append((identifier, columnQueryValueType))
 
         let defaultValue = parameter.defaultValue?.value.rewritten(selfRewriter)
@@ -1294,6 +1306,103 @@ extension TableMacro: MemberMacro {
 
       """
 
+    var codingKeysDecl: DeclSyntax?
+    var codableDecls: [DeclSyntax] = []
+    #if ColumnCoding
+      let codableConformances: Set<String> = Set(
+        declaration.inheritanceClause?.inheritedTypes.compactMap { inheritedType -> String? in
+          let name =
+            inheritedType.type.trimmedDescription.hasPrefix("Swift.")
+            ? String(inheritedType.type.trimmedDescription.dropFirst("Swift.".count))
+            : inheritedType.type.trimmedDescription
+          return ["Codable", "Decodable", "Encodable"].contains(name) ? name : nil
+        } ?? []
+      )
+      if !codableConformances.isEmpty,
+        declaration.is(StructDeclSyntax.self)
+          ? codingKeys.contains(where: { $0.rawValue != nil })
+          : declaration.is(EnumDeclSyntax.self),
+        !declaration.memberBlock.members.contains(where: {
+          $0.decl.as(EnumDeclSyntax.self)?.name.text == "CodingKeys"
+            || $0.decl.as(StructDeclSyntax.self)?.name.text == "CodingKeys"
+            || $0.decl.as(TypeAliasDeclSyntax.self)?.name.text == "CodingKeys"
+        })
+      {
+        let codingKeysCases: [DeclSyntax] = codingKeys.map { identifier, rawValue in
+          rawValue.map { "case \(identifier) = \($0)" } ?? "case \(identifier)"
+        }
+        codingKeysDecl = """
+
+          private enum CodingKeys: Swift.String, Swift.CodingKey {
+          \(codingKeysCases, separator: "\n")
+          }
+          """
+        if declaration.is(EnumDeclSyntax.self) {
+          let hasManualDecode = declaration.memberBlock.members.contains {
+            $0.decl.as(InitializerDeclSyntax.self)?
+              .signature.parameterClause.parameters.first?.firstName.text == "from"
+          }
+          let hasManualEncode = declaration.memberBlock.members.contains {
+            guard let function = $0.decl.as(FunctionDeclSyntax.self) else { return false }
+            return function.name.text == "encode"
+              && function.signature.parameterClause.parameters.first?.firstName.text == "to"
+          }
+          if !hasManualDecode,
+            codableConformances.contains("Codable") || codableConformances.contains("Decodable")
+          {
+            let decodeCases: [DeclSyntax] = codableEnumCases.map { identifier, label, payloadType in
+              """
+              case .\(identifier):
+              self = .\(identifier)(\
+              \(raw: label.map { "\($0.text): " } ?? "")\
+              try container.decode(\(payloadType).self, forKey: .\(identifier)))
+              """
+            }
+            codableDecls.append(
+              """
+              public \(nonisolated)init(from decoder: any Swift.Decoder) throws {
+              let container = try decoder.container(keyedBy: CodingKeys.self)
+              guard container.allKeys.count == 1, let key = container.allKeys.first
+              else {
+              throw Swift.DecodingError.typeMismatch(
+              Self.self,
+              Swift.DecodingError.Context(
+              codingPath: container.codingPath,
+              debugDescription: "Invalid number of keys found, expected one."
+              )
+              )
+              }
+              switch key {
+              \(decodeCases, separator: "\n")
+              }
+              }
+              """
+            )
+          }
+          if !hasManualEncode,
+            codableConformances.contains("Codable") || codableConformances.contains("Encodable")
+          {
+            let encodeCases: [DeclSyntax] = codableEnumCases.map { identifier, _, _ in
+              """
+              case .\(identifier)(let value):
+              try container.encode(value, forKey: .\(identifier))
+              """
+            }
+            codableDecls.append(
+              """
+              public \(nonisolated)func encode(to encoder: any Swift.Encoder) throws {
+              var container = encoder.container(keyedBy: CodingKeys.self)
+              switch self {
+              \(encodeCases, separator: "\n")
+              }
+              }
+              """
+            )
+          }
+        }
+      }
+    #endif
+
     var tableMembers: [DeclSyntax] = []
     if node.attributeName.identifier != "_Draft" {
       tableMembers.append(
@@ -1341,6 +1450,10 @@ extension TableMacro: MemberMacro {
         "public \(nonisolated)static var _columnWidth: Swift.Int { \(raw: columnWidth) }",
       ]
       + tableMembers
+    if let codingKeysDecl {
+      members.append(codingKeysDecl)
+    }
+    members.append(contentsOf: codableDecls)
     #if CasePaths
       if declaration.is(EnumDeclSyntax.self) {
         members += try CasePathableMacro.expansion(
