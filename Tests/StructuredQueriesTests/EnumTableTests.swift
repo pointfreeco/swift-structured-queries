@@ -554,6 +554,12 @@
             [
               Take(id: 1, media: .note("Hello")),
               Take(id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)),
+              Take(
+                id: 3,
+                media: .image(
+                  MediaImage(caption: "Blob", url: URL(string: "https://www.pointfree.co/blob.jpg")!)
+                )
+              ),
             ]
           }
         )
@@ -571,7 +577,31 @@
           ┌─────────┬───────────────────────────────────────────┐
           │ "Hello" │ nil                                       │
           │ nil     │ URL(https://www.pointfree.co/preview.mov) │
+          │ nil     │ nil                                       │
           └─────────┴───────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Take.select {
+            ($0.media.jsonExtract(\.image), $0.media.jsonExtract(\.image.caption))
+          }
+        ) {
+          """
+          SELECT json_extract("takes"."media", '$."image"'), json_extract("takes"."media", '$."image"."image_caption"')
+          FROM "takes"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────┬────────┐
+          │ nil                                           │ nil    │
+          ├───────────────────────────────────────────────┼────────┤
+          │ nil                                           │ nil    │
+          ├───────────────────────────────────────────────┼────────┤
+          │ MediaImage(                                   │ "Blob" │
+          │   caption: "Blob",                            │        │
+          │   url: URL(https://www.pointfree.co/blob.jpg) │        │
+          │ )                                             │        │
+          └───────────────────────────────────────────────┴────────┘
           """
         }
       }

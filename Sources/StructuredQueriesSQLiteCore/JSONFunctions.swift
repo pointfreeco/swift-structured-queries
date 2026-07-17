@@ -993,7 +993,6 @@ extension TableDefinition where QueryValue: Codable {
       let branches: [QueryFragment] = $_isSelecting.withValue(false) {
         var branches: [QueryFragment] = []
         for child in Mirror(reflecting: self).children {
-          guard let label = child.label else { continue }
           if let column = child.value as? any TableColumnExpression {
             branches.append(
               """
@@ -1015,7 +1014,7 @@ extension TableDefinition where QueryValue: Codable {
             branches.append(
               """
               WHEN (\(condition)) \
-              THEN json_object(\(quote: label, delimiter: .text), json_object(\(object)))
+              THEN json_object(\(quote: group._jsonGroupName, delimiter: .text), json_object(\(object)))
               """
             )
           }
@@ -1083,10 +1082,12 @@ extension TableDefinition where QueryValue: Codable {
   }
 
   private protocol _JSONColumnGroup {
+    var _jsonGroupName: String { get }
     var _jsonGroupColumns: [any TableColumnExpression] { get }
   }
 
   extension ColumnGroup: _JSONColumnGroup {
+    fileprivate var _jsonGroupName: String { name }
     fileprivate var _jsonGroupColumns: [any TableColumnExpression] { _allColumns }
   }
 #endif
@@ -1202,6 +1203,58 @@ public struct JSONPath<Context, QueryValue> {
   {
     JSONPath<_JSONPathElement?, QueryValue.Wrapped._Element>(
       components: components + [.index(index)]
+    )
+  }
+
+  public subscript<Object: Table & Codable, Member: Table & Codable>(
+    dynamicMember keyPath: KeyPath<Object.TableColumns, ColumnGroup<Object, Member>>
+  ) -> JSONPath<Context._Member, _CodableJSONRepresentation<Member>>
+  where
+    Context: _JSONPathContext,
+    QueryValue == _CodableJSONRepresentation<Object>,
+    Member.QueryOutput == Member
+  {
+    JSONPath<Context._Member, _CodableJSONRepresentation<Member>>(
+      components: components + [.member(Object.columns[keyPath: keyPath].name)]
+    )
+  }
+
+  public subscript<Object: Table & Codable, Member: Table & Codable>(
+    dynamicMember keyPath: KeyPath<Object.TableColumns, ColumnGroup<Object, Member?>>
+  ) -> JSONPath<Context._Member, _CodableJSONRepresentation<Member>?>
+  where
+    Context: _JSONPathContext,
+    QueryValue == _CodableJSONRepresentation<Object>,
+    Member.QueryOutput == Member
+  {
+    JSONPath<Context._Member, _CodableJSONRepresentation<Member>?>(
+      components: components + [.member(Object.columns[keyPath: keyPath].name)]
+    )
+  }
+
+  public subscript<Object: Table & Codable, Member: Table & Codable>(
+    dynamicMember keyPath: KeyPath<Object.TableColumns, ColumnGroup<Object, Member>>
+  ) -> JSONPath<Context._Member, _CodableJSONBRepresentation<Member>>
+  where
+    Context: _JSONPathContext,
+    QueryValue == _CodableJSONBRepresentation<Object>,
+    Member.QueryOutput == Member
+  {
+    JSONPath<Context._Member, _CodableJSONBRepresentation<Member>>(
+      components: components + [.member(Object.columns[keyPath: keyPath].name)]
+    )
+  }
+
+  public subscript<Object: Table & Codable, Member: Table & Codable>(
+    dynamicMember keyPath: KeyPath<Object.TableColumns, ColumnGroup<Object, Member?>>
+  ) -> JSONPath<Context._Member, _CodableJSONBRepresentation<Member>?>
+  where
+    Context: _JSONPathContext,
+    QueryValue == _CodableJSONBRepresentation<Object>,
+    Member.QueryOutput == Member
+  {
+    JSONPath<Context._Member, _CodableJSONBRepresentation<Member>?>(
+      components: components + [.member(Object.columns[keyPath: keyPath].name)]
     )
   }
 }

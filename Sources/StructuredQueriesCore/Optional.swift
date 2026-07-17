@@ -178,8 +178,10 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, ColumnGroup<Wrapped, Member>>
     ) -> ColumnGroup<Optional, Member?> {
-      ColumnGroup<Optional, Member?>(
-        keyPath: \.[member: \Member.self, column: Wrapped.columns[keyPath: keyPath].keyPath]
+      let column = Wrapped.columns[keyPath: keyPath]
+      return ColumnGroup<Optional, Member?>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column.keyPath]
       )
     }
 
