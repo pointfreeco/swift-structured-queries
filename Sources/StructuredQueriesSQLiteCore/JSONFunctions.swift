@@ -2,10 +2,6 @@ import Foundation
 import IssueReporting
 public import StructuredQueriesCore
 
-#if CasePaths && ColumnCoding
-  public import CasePaths
-#endif
-
 extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// Extracts a value from this JSON expression using the `json_extract` function.
   ///
@@ -1005,123 +1001,6 @@ extension TableDefinition where QueryValue: Codable {
   }
 }
 
-#if CasePaths && ColumnCoding
-  extension TableDefinition where QueryValue: Codable & CasePathable {
-    /// A JSON representation of an enum table's columns.
-    ///
-    /// Produces a single-key JSON object for the table's active case, matching the JSON coding
-    /// generated for Codable enum tables.
-    public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<QueryValue>> {
-      func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
-        TableColumn.QueryValue._queryFragment(jsonEncoding: "\(column)")
-      }
-      let branches: [QueryFragment] = $_isSelecting.withValue(false) {
-        var branches: [QueryFragment] = []
-        for child in Mirror(reflecting: self).children {
-          if let column = child.value as? any TableColumnExpression {
-            branches.append(
-              """
-              WHEN \(column) IS NOT NULL \
-              THEN json_object(\(quote: column.name, delimiter: .text), \(open(column)))
-              """
-            )
-          } else if let group = child.value as? any _JSONColumnGroup {
-            let groupColumns = group._jsonGroupColumns
-            guard !groupColumns.isEmpty else { continue }
-            let condition: QueryFragment =
-              groupColumns
-              .map { "\($0) IS NOT NULL" }
-              .joined(separator: " OR ")
-            let object: QueryFragment =
-              groupColumns
-              .map { "\(quote: $0.name, delimiter: .text), \(open($0))" }
-              .joined(separator: ", ")
-            branches.append(
-              """
-              WHEN (\(condition)) \
-              THEN json_object(\(quote: group._jsonGroupName, delimiter: .text), json_object(\(object)))
-              """
-            )
-          }
-        }
-        return branches
-      }
-      return SQLQueryExpression("CASE \(branches.joined(separator: " ")) END")
-    }
-
-    /// A JSON array representation of the aggregation of an enum table's columns.
-    ///
-    /// - Parameters:
-    ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
-    ///   - order: An `ORDER BY` clause to apply to the aggregation.
-    ///   - filter: A `FILTER` clause to apply to the aggregation.
-    /// - Returns: A JSON array aggregate of this table.
-    public func jsonGroupArray(
-      distinct isDistinct: Bool = false,
-      order: (some QueryExpression)? = Bool?.none,
-      filter: (some QueryExpression<Bool>)? = Bool?.none
-    ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
-      AggregateFunctionExpression(
-        "json_group_array",
-        isDistinct: isDistinct,
-        [jsonObject().queryFragment],
-        order: order?.queryFragment,
-        filter: filter?.queryFragment
-      )
-    }
-  }
-
-  extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProtocol & Codable {
-    @_documentation(visibility: private)
-    public func jsonGroupArray<Wrapped: Codable & CasePathable>(
-      distinct isDistinct: Bool = false,
-      order: (some QueryExpression)? = Bool?.none,
-      filter: (some QueryExpression<Bool>)? = Bool?.none
-    ) -> some QueryExpression<[Wrapped].JSONRepresentation>
-    where QueryValue == Wrapped? {
-      let rowFilter = rowid.isNot(nil)
-      let filterQueryFragment =
-        if let filter {
-          rowFilter.and(filter).queryFragment
-        } else {
-          rowFilter.queryFragment
-        }
-      return AggregateFunctionExpression(
-        "json_group_array",
-        isDistinct: isDistinct,
-        [QueryValue.columns.jsonObject().queryFragment],
-        order: order?.queryFragment,
-        filter: filterQueryFragment
-      )
-    }
-  }
-
-  extension Optional.TableColumns where QueryValue: Codable, Wrapped: CasePathable {
-    /// A JSON representation of an enum table's columns.
-    ///
-    /// Produces a single-key JSON object for the table's active case, matching the JSON coding
-    /// generated for Codable enum tables.
-    public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<Wrapped>?> {
-      Case().when(rowid.isNot(nil), then: Wrapped.columns.jsonObject())
-    }
-  }
-
-  private protocol _JSONColumnGroup {
-    var _jsonGroupName: String { get }
-    var _jsonGroupColumns: [any TableColumnExpression] { get }
-  }
-
-  extension ColumnGroup: _JSONColumnGroup {
-    fileprivate var _jsonGroupName: String { name }
-    fileprivate var _jsonGroupColumns: [any TableColumnExpression] { _allColumns }
-  }
-
-  extension CaseColumnGroup: _JSONColumnGroup {
-    fileprivate var _jsonGroupName: String { name }
-    fileprivate var _jsonGroupColumns: [any TableColumnExpression] { _allColumns }
-  }
-#endif
-
 extension Optional.TableColumns where QueryValue: Codable {
   /// A JSON representation of a table's columns.
   ///
@@ -1720,7 +1599,6 @@ public protocol _JSONPathMemberContext {}
 extension _JSONPathMember: _JSONPathMemberContext {}
 extension _JSONPathCase: _JSONPathMemberContext {}
 extension Optional: _JSONPathMemberContext where Wrapped == _JSONPathMember {}
-
 
 public protocol _JSONPathElementContext {}
 extension _JSONPathElement: _JSONPathElementContext {}
