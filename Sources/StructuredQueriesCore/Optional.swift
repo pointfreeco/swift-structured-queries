@@ -108,7 +108,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
     TableColumns()
   }
 
-  fileprivate subscript<Member: QueryRepresentable>(
+  subscript<Member: QueryRepresentable>(
     member _: KeyPath<Member, Member>,
     column keyPath: KeyPath<Wrapped, Member.QueryOutput>
   ) -> Member.QueryOutput? {
@@ -182,6 +182,26 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
       return ColumnGroup<Optional, Member?>(
         column.name,
         keyPath: \.[member: \Member.self, column: column.keyPath]
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumn<Wrapped, Member>>
+    ) -> TableColumn<Optional, Member??> {
+      let column = Wrapped.columns[keyPath: keyPath].base
+      return TableColumn<Optional, Member??>(
+        column.name,
+        keyPath: \.[member: \Member?.self, column: column.keyPath]
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumnGroup<Wrapped, Member>>
+    ) -> ColumnGroup<Optional, Member??> {
+      let column = Wrapped.columns[keyPath: keyPath].base
+      return ColumnGroup<Optional, Member??>(
+        column.name,
+        keyPath: \.[member: \Member?.self, column: column.keyPath]
       )
     }
 

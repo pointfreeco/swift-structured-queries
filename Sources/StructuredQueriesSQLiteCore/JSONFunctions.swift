@@ -1,4 +1,5 @@
 import Foundation
+import IssueReporting
 public import StructuredQueriesCore
 
 #if CasePaths && ColumnCoding
@@ -134,7 +135,19 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
     _JSONSetExpression(
       function: "json_set",
       base: argumentFragment,
-      arguments: [.jsonArguments(path, .jsonEncoded(value))]
+      arguments: [.jsonSetArguments("json_object", path, .jsonEncoded(value))]
+    )
+  }
+
+  @_documentation(visibility: private)
+  public func jsonSet<Member: QueryBindable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathCase, Member>>,
+    _ value: some QueryExpression<Member>
+  ) -> _JSONSetExpression<QueryValue> {
+    _JSONSetExpression(
+      function: "json_set",
+      base: argumentFragment,
+      arguments: [.jsonSetArguments("json_object", path, .jsonEncoded(value))]
     )
   }
 
@@ -390,7 +403,19 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
     _JSONSetExpression(
       function: "jsonb_set",
       base: argumentFragment,
-      arguments: [.jsonArguments(path, .jsonEncoded(value))]
+      arguments: [.jsonSetArguments("jsonb_object", path, .jsonEncoded(value))]
+    )
+  }
+
+  @_documentation(visibility: private)
+  public func jsonbSet<Member: QueryBindable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathCase, Member>>,
+    _ value: some QueryExpression<Member>
+  ) -> _JSONSetExpression<QueryValue> {
+    _JSONSetExpression(
+      function: "jsonb_set",
+      base: argumentFragment,
+      arguments: [.jsonSetArguments("jsonb_object", path, .jsonEncoded(value))]
     )
   }
 
@@ -1090,6 +1115,11 @@ extension TableDefinition where QueryValue: Codable {
     fileprivate var _jsonGroupName: String { name }
     fileprivate var _jsonGroupColumns: [any TableColumnExpression] { _allColumns }
   }
+
+  extension CaseColumnGroup: _JSONColumnGroup {
+    fileprivate var _jsonGroupName: String { name }
+    fileprivate var _jsonGroupColumns: [any TableColumnExpression] { _allColumns }
+  }
 #endif
 
 extension Optional.TableColumns where QueryValue: Codable {
@@ -1113,6 +1143,7 @@ extension Optional.TableColumns where QueryValue: Codable {
 @dynamicMemberLookup
 public struct JSONPath<Context, QueryValue> {
   var components: [String] = []
+  var caseName: String?
 
   var pathString: String {
     "$\(components.joined())"
@@ -1212,7 +1243,8 @@ public struct JSONPath<Context, QueryValue> {
   where
     Context: _JSONPathContext,
     QueryValue == _CodableJSONRepresentation<Object>,
-    Member.QueryOutput == Member
+    Member.QueryOutput == Member,
+    Member._Optionalized == Member?
   {
     JSONPath<Context._Member, _CodableJSONRepresentation<Member>>(
       components: components + [.member(Object.columns[keyPath: keyPath].name)]
@@ -1238,7 +1270,8 @@ public struct JSONPath<Context, QueryValue> {
   where
     Context: _JSONPathContext,
     QueryValue == _CodableJSONBRepresentation<Object>,
-    Member.QueryOutput == Member
+    Member.QueryOutput == Member,
+    Member._Optionalized == Member?
   {
     JSONPath<Context._Member, _CodableJSONBRepresentation<Member>>(
       components: components + [.member(Object.columns[keyPath: keyPath].name)]
@@ -1255,6 +1288,99 @@ public struct JSONPath<Context, QueryValue> {
   {
     JSONPath<Context._Member, _CodableJSONBRepresentation<Member>?>(
       components: components + [.member(Object.columns[keyPath: keyPath].name)]
+    )
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<
+      QueryValue._Object.TableColumns, CaseColumn<QueryValue._Object, Member>
+    >
+  ) -> JSONPath<Context._Case, Member>
+  where Context: _JSONPathContext, QueryValue: _JSONObjectRepresentation {
+    let name = QueryValue._Object.columns[keyPath: keyPath].name
+    return JSONPath<Context._Case, Member>(
+      components: components + [.member(name)],
+      caseName: name
+    )
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<
+      QueryValue._Object.TableColumns, CaseColumn<QueryValue._Object, Member>
+    >
+  ) -> JSONPath<Context._Case, Member.QueryOutput>
+  where
+    Context: _JSONPathContext,
+    QueryValue: _JSONObjectRepresentation,
+    Member.QueryOutput: QueryBindable
+  {
+    let name = QueryValue._Object.columns[keyPath: keyPath].name
+    return JSONPath<Context._Case, Member.QueryOutput>(
+      components: components + [.member(name)],
+      caseName: name
+    )
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<
+      QueryValue.Wrapped._Object.TableColumns, CaseColumn<QueryValue.Wrapped._Object, Member>
+    >
+  ) -> JSONPath<_JSONPathCase?, Member>
+  where
+    QueryValue: StructuredQueriesCore._OptionalProtocol,
+    QueryValue.Wrapped: _JSONObjectRepresentation
+  {
+    let name = QueryValue.Wrapped._Object.columns[keyPath: keyPath].name
+    return JSONPath<_JSONPathCase?, Member>(
+      components: components + [.member(name)],
+      caseName: name
+    )
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<
+      QueryValue.Wrapped._Object.TableColumns, CaseColumn<QueryValue.Wrapped._Object, Member>
+    >
+  ) -> JSONPath<_JSONPathCase?, Member.QueryOutput>
+  where
+    QueryValue: StructuredQueriesCore._OptionalProtocol,
+    QueryValue.Wrapped: _JSONObjectRepresentation,
+    Member.QueryOutput: QueryBindable
+  {
+    let name = QueryValue.Wrapped._Object.columns[keyPath: keyPath].name
+    return JSONPath<_JSONPathCase?, Member.QueryOutput>(
+      components: components + [.member(name)],
+      caseName: name
+    )
+  }
+
+  public subscript<Object: Table & Codable, Member: Table & Codable>(
+    dynamicMember keyPath: KeyPath<Object.TableColumns, CaseColumnGroup<Object, Member>>
+  ) -> JSONPath<Context._Case, _CodableJSONRepresentation<Member>>
+  where
+    Context: _JSONPathContext,
+    QueryValue == _CodableJSONRepresentation<Object>,
+    Member.QueryOutput == Member
+  {
+    let name = Object.columns[keyPath: keyPath].name
+    return JSONPath<Context._Case, _CodableJSONRepresentation<Member>>(
+      components: components + [.member(name)],
+      caseName: name
+    )
+  }
+
+  public subscript<Object: Table & Codable, Member: Table & Codable>(
+    dynamicMember keyPath: KeyPath<Object.TableColumns, CaseColumnGroup<Object, Member>>
+  ) -> JSONPath<Context._Case, _CodableJSONBRepresentation<Member>>
+  where
+    Context: _JSONPathContext,
+    QueryValue == _CodableJSONBRepresentation<Object>,
+    Member.QueryOutput == Member
+  {
+    let name = Object.columns[keyPath: keyPath].name
+    return JSONPath<Context._Case, _CodableJSONBRepresentation<Member>>(
+      components: components + [.member(name)],
+      caseName: name
     )
   }
 }
@@ -1525,7 +1651,15 @@ extension _JSONSetExpression where QueryValue: _JSONRepresentable {
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member>
   ) -> _JSONSetExpression<QueryValue> {
-    appending(.jsonArguments(path, .jsonEncoded(value)))
+    appending(.jsonSetArguments("json_object", path, .jsonEncoded(value)))
+  }
+
+  @_documentation(visibility: private)
+  public func jsonSet<Member: QueryBindable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathCase, Member>>,
+    _ value: some QueryExpression<Member>
+  ) -> _JSONSetExpression<QueryValue> {
+    appending(.jsonSetArguments("json_object", path, .jsonEncoded(value)))
   }
 }
 
@@ -1534,30 +1668,48 @@ extension _JSONSetExpression where QueryValue: _JSONBRepresentable {
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member>
   ) -> _JSONSetExpression<QueryValue> {
-    appending(.jsonArguments(path, .jsonEncoded(value)))
+    appending(.jsonSetArguments("jsonb_object", path, .jsonEncoded(value)))
+  }
+
+  @_documentation(visibility: private)
+  public func jsonbSet<Member: QueryBindable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathCase, Member>>,
+    _ value: some QueryExpression<Member>
+  ) -> _JSONSetExpression<QueryValue> {
+    appending(.jsonSetArguments("jsonb_object", path, .jsonEncoded(value)))
   }
 }
 
 public enum _JSONPathRoot {}
 public enum _JSONPathMember {}
 public enum _JSONPathElement {}
+public enum _JSONPathCase {}
 
 public protocol _JSONPathContext {
   associatedtype _Member = _JSONPathMember
   associatedtype _Element = _JSONPathElement
+  associatedtype _Case = _JSONPathCase
 }
 
 extension _JSONPathRoot: _JSONPathContext {}
 extension _JSONPathMember: _JSONPathContext {}
 extension _JSONPathElement: _JSONPathContext {}
 
+extension _JSONPathCase: _JSONPathContext {
+  public typealias _Member = _JSONPathMember?
+  public typealias _Element = _JSONPathElement?
+  public typealias _Case = _JSONPathCase?
+}
+
 extension Optional: _JSONPathContext {
   public typealias _Member = _JSONPathMember?
   public typealias _Element = _JSONPathElement?
+  public typealias _Case = _JSONPathCase?
 }
 
 public protocol _OptionalJSONPathContext {}
 extension Optional: _OptionalJSONPathContext {}
+extension _JSONPathCase: _OptionalJSONPathContext {}
 
 public protocol _RequiredJSONPathContext {}
 extension _JSONPathRoot: _RequiredJSONPathContext {}
@@ -1566,7 +1718,9 @@ extension _JSONPathElement: _RequiredJSONPathContext {}
 
 public protocol _JSONPathMemberContext {}
 extension _JSONPathMember: _JSONPathMemberContext {}
+extension _JSONPathCase: _JSONPathMemberContext {}
 extension Optional: _JSONPathMemberContext where Wrapped == _JSONPathMember {}
+
 
 public protocol _JSONPathElementContext {}
 extension _JSONPathElement: _JSONPathElementContext {}
@@ -1614,6 +1768,22 @@ extension QueryFragment {
     _ value: some QueryExpression<V>
   ) -> QueryFragment {
     V._queryFragment(jsonEncoding: value.argumentFragment)
+  }
+
+  fileprivate static func jsonSetArguments<Root, Context, Member>(
+    _ objectFunction: QueryFragment,
+    _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>,
+    _ value: QueryFragment
+  ) -> QueryFragment {
+    let path = JSONPath()[keyPath: path]
+    guard let caseName = path.caseName
+    else {
+      return "\(quote: path.pathString, delimiter: .text), \(value)"
+    }
+    return """
+      \(quote: "$" + path.components.dropLast().joined(), delimiter: .text), \
+      \(objectFunction)(\(quote: caseName, delimiter: .text), \(value))
+      """
   }
 
   fileprivate static func jsonArguments<Root, Context, Member>(
