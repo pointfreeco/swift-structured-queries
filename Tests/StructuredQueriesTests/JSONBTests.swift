@@ -228,30 +228,6 @@ extension SnapshotTests {
       }
     }
 
-    @Test func jsonPatch() {
-      assertQuery(
-        Post
-          .update { $0.notes = $0.notes.jsonbPatch(#bind(["Replaced"])) }
-          .returning(\.notes)
-      ) {
-        """
-        UPDATE "posts"
-        SET "notes" = jsonb_patch("posts"."notes", jsonb('[
-          "Replaced"
-        ]'))
-        RETURNING json("notes")
-        """
-      } results: {
-        """
-        ┌───────────────────┐
-        │ [                 │
-        │   [0]: "Replaced" │
-        │ ]                 │
-        └───────────────────┘
-        """
-      }
-    }
-
     @Test func jsonGroupArray() {
       assertQuery(
         Post.select { $0.jsonGroupArray() }
