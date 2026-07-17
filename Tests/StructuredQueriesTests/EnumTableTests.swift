@@ -539,6 +539,42 @@
           """
         }
       }
+
+      @Test func jsonExtractCases() throws {
+        try db.execute(
+          """
+          CREATE TABLE "takes" (
+            "id" INTEGER PRIMARY KEY,
+            "media" BLOB NOT NULL
+          )
+          """
+        )
+        try db.execute(
+          Take.insert {
+            [
+              Take(id: 1, media: .note("Hello")),
+              Take(id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)),
+            ]
+          }
+        )
+        assertQuery(
+          Take.select {
+            ($0.media.jsonExtract(\.note), $0.media.jsonbExtract(\.videoPreview))
+          }
+        ) {
+          """
+          SELECT json_extract("takes"."media", '$."note"'), jsonb_extract("takes"."media", '$."video_preview"')
+          FROM "takes"
+          """
+        } results: {
+          """
+          ┌─────────┬───────────────────────────────────────────┐
+          │ "Hello" │ nil                                       │
+          │ nil     │ URL(https://www.pointfree.co/preview.mov) │
+          └─────────┴───────────────────────────────────────────┘
+          """
+        }
+      }
     }
 
     @Table private enum Media: Codable {
@@ -558,6 +594,12 @@
     @Selection private struct MediaList {
       @Column(as: [Media].JSONRepresentation.self)
       let medias: [Media]
+    }
+
+    @Table private struct Take {
+      let id: Int
+      @Column(as: Media.JSONBRepresentation.self)
+      var media: Media
     }
   #endif
 
