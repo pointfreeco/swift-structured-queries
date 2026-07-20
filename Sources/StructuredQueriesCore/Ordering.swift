@@ -40,8 +40,7 @@ public struct OrderingTerm<Value>: QueryExpression, Sendable {
     let queryFragment: QueryFragment
   }
 
-  public let base: QueryFragment
-
+  let base: QueryFragment
   let direction: Direction
   let nullOrdering: NullOrdering?
 
