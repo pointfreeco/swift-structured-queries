@@ -3,16 +3,16 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// - Parameter nullOrdering: `NULL`-specific ordering.
   /// - Returns: An ascending ordering of this expression.
-  public func asc(nulls nullOrdering: NullOrdering? = nil) -> OrderingTerm<QueryValue> {
-    OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
+  public func asc(nulls nullOrdering: NullOrdering? = nil) -> _OrderingTerm<QueryValue> {
+    _OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
   }
 
   /// This expression with a descending ordering term.
   ///
   /// - Parameter nullOrdering: `NULL`-specific ordering.
   /// - Returns: A descending ordering of this expression.
-  public func desc(nulls nullOrdering: NullOrdering? = nil) -> OrderingTerm<QueryValue> {
-    OrderingTerm(base: self, direction: .desc, nullOrdering: nullOrdering)
+  public func desc(nulls nullOrdering: NullOrdering? = nil) -> _OrderingTerm<QueryValue> {
+    _OrderingTerm(base: self, direction: .desc, nullOrdering: nullOrdering)
   }
 }
 
@@ -31,7 +31,7 @@ public struct NullOrdering: RawRepresentable, Sendable {
   }
 }
 
-public struct OrderingTerm<Value>: QueryExpression, Sendable {
+public struct _OrderingTerm<Value>: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
   struct Direction {
