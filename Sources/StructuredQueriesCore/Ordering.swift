@@ -3,7 +3,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// - Parameter nullOrdering: `NULL`-specific ordering.
   /// - Returns: An ascending ordering of this expression.
-  public func asc(nulls nullOrdering: NullOrdering? = nil) -> some QueryExpression {
+  public func asc(nulls nullOrdering: NullOrdering? = nil) -> OrderingTerm<QueryValue> {
     OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
   }
 
@@ -11,7 +11,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   ///
   /// - Parameter nullOrdering: `NULL`-specific ordering.
   /// - Returns: A descending ordering of this expression.
-  public func desc(nulls nullOrdering: NullOrdering? = nil) -> some QueryExpression {
+  public func desc(nulls nullOrdering: NullOrdering? = nil) -> OrderingTerm<QueryValue> {
     OrderingTerm(base: self, direction: .desc, nullOrdering: nullOrdering)
   }
 }
@@ -31,26 +31,27 @@ public struct NullOrdering: RawRepresentable, Sendable {
   }
 }
 
-private struct OrderingTerm: QueryExpression {
-  typealias QueryValue = Never
+public struct OrderingTerm<Value>: QueryExpression, Sendable {
+  public typealias QueryValue = Never
 
   struct Direction {
-    static let asc = Self(queryFragment: "ASC")
-    static let desc = Self(queryFragment: "DESC")
+    static var asc: Self { Self(queryFragment: "ASC") }
+    static var desc: Self { Self(queryFragment: "DESC") }
     let queryFragment: QueryFragment
   }
 
-  let base: QueryFragment
+  public let base: QueryFragment
+
   let direction: Direction
   let nullOrdering: NullOrdering?
 
-  init(base: some QueryExpression, direction: Direction, nullOrdering: NullOrdering?) {
+  init(base: some QueryExpression<Value>, direction: Direction, nullOrdering: NullOrdering?) {
     self.base = base.queryFragment
     self.direction = direction
     self.nullOrdering = nullOrdering
   }
 
-  var queryFragment: QueryFragment {
+  public var queryFragment: QueryFragment {
     var query: QueryFragment = "\(base) \(direction.queryFragment)"
     if let nullOrdering {
       query.append(" NULLS \(nullOrdering.rawValue)")
