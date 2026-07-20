@@ -31,16 +31,23 @@ struct SQLiteFunctionDecoder: QueryDecoder {
 
   @inlinable
   mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
-    defer { currentIndex += 1 }
     precondition(argumentCount > currentIndex)
     let value = arguments?[Int(currentIndex)]
-    guard sqlite3_value_type(value) != SQLITE_NULL else { return nil }
-    if let blob = sqlite3_value_blob(value) {
-      let count = Int(sqlite3_value_bytes(value))
-      let buffer = UnsafeRawBufferPointer(start: blob, count: count)
-      return [UInt8](buffer)
-    } else {
-      return []
+    switch sqlite3_value_type(value) {
+    case SQLITE_NULL:
+      currentIndex += 1
+      return nil
+    case SQLITE_BLOB:
+      defer { currentIndex += 1 }
+      if let blob = sqlite3_value_blob(value) {
+        let count = Int(sqlite3_value_bytes(value))
+        let buffer = UnsafeRawBufferPointer(start: blob, count: count)
+        return [UInt8](buffer)
+      } else {
+        return []
+      }
+    default:
+      throw QueryDecodingError.typeMismatch([UInt8].self)
     }
   }
 
@@ -57,11 +64,18 @@ struct SQLiteFunctionDecoder: QueryDecoder {
 
   @inlinable
   mutating func decode(_ columnType: Double.Type) throws -> Double? {
-    defer { currentIndex += 1 }
     precondition(argumentCount > currentIndex)
     let value = arguments?[Int(currentIndex)]
-    guard sqlite3_value_type(value) != SQLITE_NULL else { return nil }
-    return sqlite3_value_double(value)
+    switch sqlite3_value_type(value) {
+    case SQLITE_NULL:
+      currentIndex += 1
+      return nil
+    case SQLITE_FLOAT:
+      defer { currentIndex += 1 }
+      return sqlite3_value_double(value)
+    default:
+      throw QueryDecodingError.typeMismatch(Double.self)
+    }
   }
 
   @inlinable
@@ -71,20 +85,34 @@ struct SQLiteFunctionDecoder: QueryDecoder {
 
   @inlinable
   mutating func decode(_ columnType: Int64.Type) throws -> Int64? {
-    defer { currentIndex += 1 }
     precondition(argumentCount > currentIndex)
     let value = arguments?[Int(currentIndex)]
-    guard sqlite3_value_type(value) != SQLITE_NULL else { return nil }
-    return sqlite3_value_int64(value)
+    switch sqlite3_value_type(value) {
+    case SQLITE_NULL:
+      currentIndex += 1
+      return nil
+    case SQLITE_INTEGER:
+      defer { currentIndex += 1 }
+      return sqlite3_value_int64(value)
+    default:
+      throw QueryDecodingError.typeMismatch(Int64.self)
+    }
   }
 
   @inlinable
   mutating func decode(_ columnType: String.Type) throws -> String? {
-    defer { currentIndex += 1 }
     precondition(argumentCount > currentIndex)
     let value = arguments?[Int(currentIndex)]
-    guard sqlite3_value_type(value) != SQLITE_NULL else { return nil }
-    return String(cString: sqlite3_value_text(value))
+    switch sqlite3_value_type(value) {
+    case SQLITE_NULL:
+      currentIndex += 1
+      return nil
+    case SQLITE_TEXT:
+      defer { currentIndex += 1 }
+      return String(cString: sqlite3_value_text(value))
+    default:
+      throw QueryDecodingError.typeMismatch(String.self)
+    }
   }
 
   @inlinable

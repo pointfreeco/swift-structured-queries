@@ -182,8 +182,8 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   public func total(
     distinct isDistinct: Bool = false,
     filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<QueryValue> {
-    AggregateFunctionExpression(
+  ) -> some QueryExpression<Double> {
+    AggregateFunctionExpression<Double>(
       "total",
       isDistinct: isDistinct,
       [queryFragment],
