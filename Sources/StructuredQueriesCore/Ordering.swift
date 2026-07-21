@@ -40,15 +40,18 @@ public struct _OrderingTerm<Value>: QueryExpression, Sendable {
     let queryFragment: QueryFragment
   }
 
-  public let base: QueryFragment
-
+  let baseQueryFragment: QueryFragment
   let direction: Direction
   let nullOrdering: NullOrdering?
 
   init(base: some QueryExpression<Value>, direction: Direction, nullOrdering: NullOrdering?) {
-    self.base = base.queryFragment
+    self.baseQueryFragment = base.queryFragment
     self.direction = direction
     self.nullOrdering = nullOrdering
+  }
+
+  public var base: some QueryExpression<Value> & Sendable {
+    SQLQueryExpression(queryFragment)
   }
 
   public var queryFragment: QueryFragment {
