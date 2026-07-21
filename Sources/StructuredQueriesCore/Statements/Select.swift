@@ -1604,7 +1604,7 @@ extension Select {
   /// - Returns: A new select statement that selects `count(*)`.
   public func count<each J: Table>(
     filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
-  ) -> Select<Int, From, (repeat each J)>
+  ) -> Select<Int, From, Joins>
   where Columns == (), Joins == (repeat each J) {
     let filter = filter?(From.columns, repeat (each J).columns)
     return select { _ in .count(filter: filter) }
