@@ -213,6 +213,22 @@ and will decode data from the database using the `RawRepresentable` conformance 
   }
 }
 
+If you would rather not conform the type to ``QueryBindable`` directly, you can instead store it as
+its raw value by applying `@Column(as:)` with its `RawRepresentation`:
+
+```swift
+@Table
+struct Reminder {
+  let id: Int
+  var title = ""
+  @Column(as: Priority.RawRepresentation.self)
+  var priority: Priority
+}
+enum Priority: Int {
+  case low, medium, high
+}
+```
+
 #### JSON
 
 To store complex data types in a column of a SQLite table you can serialize values to JSON. For
