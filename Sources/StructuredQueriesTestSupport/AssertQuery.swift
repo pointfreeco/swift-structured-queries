@@ -181,7 +181,7 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
 ///   - column: The source `#column` associated with the assertion.
 public func assertQuery<S: SelectStatement, each J: Table>(
   _ query: S,
-  execute: (Select<(S.From, repeat each J), S.From, S.Joins>) throws -> [(
+  execute: (Select<(S.From, repeat each J), S.From, (repeat each J)>) throws -> [(
     S.From.QueryOutput, repeat (each J).QueryOutput
   )],
   sql: (() -> String)? = nil,
