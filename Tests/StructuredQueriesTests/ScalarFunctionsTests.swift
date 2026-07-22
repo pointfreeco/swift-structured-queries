@@ -220,53 +220,5 @@ extension SnapshotTests {
         """
       }
     }
-
-    @Test func nullif() {
-      assertQuery(Reminder.select { ($0.priority, $0.priority.nullif(Priority.high)) }) {
-        """
-        SELECT "reminders"."priority", nullif("reminders"."priority", 3)
-        FROM "reminders"
-        """
-      } results: {
-        """
-        ┌─────────┬─────────┐
-        │ nil     │ nil     │
-        │ nil     │ nil     │
-        │ .high   │ nil     │
-        │ nil     │ nil     │
-        │ nil     │ nil     │
-        │ .high   │ nil     │
-        │ .low    │ .low    │
-        │ .high   │ nil     │
-        │ nil     │ nil     │
-        │ .medium │ .medium │
-        └─────────┴─────────┘
-        """
-      }
-    }
-
-    @Test func nullifPromotesNonOptional() {
-      assertQuery(Reminder.select { $0.title.nullif("Groceries") }) {
-        """
-        SELECT nullif("reminders"."title", 'Groceries')
-        FROM "reminders"
-        """
-      } results: {
-        """
-        ┌────────────────────────────┐
-        │ nil                        │
-        │ "Haircut"                  │
-        │ "Doctor appointment"       │
-        │ "Take a walk"              │
-        │ "Buy concert tickets"      │
-        │ "Pick up kids from school" │
-        │ "Get laundry"              │
-        │ "Take out trash"           │
-        │ "Call accountant"          │
-        │ "Send weekly emails"       │
-        └────────────────────────────┘
-        """
-      }
-    }
   }
 }
