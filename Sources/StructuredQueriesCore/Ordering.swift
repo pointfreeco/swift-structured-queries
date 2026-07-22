@@ -51,7 +51,7 @@ public struct _OrderingTerm<Value>: QueryExpression, Sendable {
   }
 
   public var base: some QueryExpression<Value> & Sendable {
-    SQLQueryExpression(queryFragment)
+    SQLQueryExpression(baseQueryFragment)
   }
 
   public var queryFragment: QueryFragment {
