@@ -16,7 +16,8 @@
 - ``group(by:)``
 - ``having(_:)``
 - ``order(by:)``
-- ``limit(_:offset:)``
+- ``limit(_:)``
+- ``offset(_:)``
 - ``count(filter:)``
 - ``find(_:)``
 
