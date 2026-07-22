@@ -67,6 +67,30 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   }
 }
 
+extension QueryExpression where QueryValue: _OptionalPromotable {
+  /// Wraps this query expression with the `nullif` function.
+  ///
+  /// ```swift
+  /// Reminder
+  ///   .select { $0.title.nullif("") }
+  /// // SELECT nullif("reminders"."title", '')
+  /// // FROM "reminders"
+  /// ```
+  ///
+  /// - Parameter other: An expression to compare against this expression.
+  /// - Returns: An optional expression of the `nullif` function wrapping this expression, which is
+  ///   `NULL` when both expressions are equal.
+  public func nullif<Other: QueryExpression>(
+    _ other: Other
+  ) -> some QueryExpression<QueryValue._Optionalized>
+  where
+    Other.QueryValue: _OptionalPromotable,
+    Other.QueryValue._Optionalized == QueryValue._Optionalized
+  {
+    QueryFunction("nullif", self, other)
+  }
+}
+
 extension QueryExpression where QueryValue: _OptionalProtocol {
   /// Wraps this optional query expression with the `ifnull` function.
   ///
