@@ -453,57 +453,57 @@ extension SnapshotTests {
     }
 
     #if ColumnCoding
-    @Test func jsonGroupArrayWithRenamedColumns() {
-      assertQuery(
-        Track.select { $0.jsonGroupArray() }
-      ) {
-        """
-        SELECT json_group_array(json_object('id', "tracks"."id", 'track_name', "tracks"."track_name", 'track_tags', "tracks"."track_tags"))
-        FROM "tracks"
-        """
-      } results: {
-        #"""
-        ┌─────────────────────────────────┐
-        │ [                               │
-        │   [0]: Track(                   │
-        │     id: 1,                      │
-        │     trackName: "Blob\'s Blues", │
-        │     trackTags: [                │
-        │       [0]: "blues",             │
-        │       [1]: "rnb"                │
-        │     ]                           │
-        │   )                             │
-        │ ]                               │
-        └─────────────────────────────────┘
-        """#
+      @Test func jsonGroupArrayWithRenamedColumns() {
+        assertQuery(
+          Track.select { $0.jsonGroupArray() }
+        ) {
+          """
+          SELECT json_group_array(json_object('id', "tracks"."id", 'track_name', "tracks"."track_name", 'track_tags', "tracks"."track_tags"))
+          FROM "tracks"
+          """
+        } results: {
+          #"""
+          ┌─────────────────────────────────┐
+          │ [                               │
+          │   [0]: Track(                   │
+          │     id: 1,                      │
+          │     trackName: "Blob\'s Blues", │
+          │     trackTags: [                │
+          │       [0]: "blues",             │
+          │       [1]: "rnb"                │
+          │     ]                           │
+          │   )                             │
+          │ ]                               │
+          └─────────────────────────────────┘
+          """#
+        }
       }
-    }
     #endif
 
     #if ColumnCoding
-    @Test func jsonExtract() {
-      assertQuery(
-        Profile.select {
-          (
-            $0.author.jsonExtract(\.name),
-            $0.author.jsonExtract(\.isVerified),
-            $0.author.jsonExtract(\.joinedAt),
-            $0.author.jsonExtract(\.externalID)
-          )
+      @Test func jsonExtract() {
+        assertQuery(
+          Profile.select {
+            (
+              $0.author.jsonExtract(\.name),
+              $0.author.jsonExtract(\.isVerified),
+              $0.author.jsonExtract(\.joinedAt),
+              $0.author.jsonExtract(\.externalID)
+            )
+          }
+        ) {
+          """
+          SELECT json_extract("profiles"."author", '$."name"'), json_extract("profiles"."author", '$."is_verified"'), json_extract("profiles"."author", '$."joinedAt"'), (json_extract("profiles"."author", '$."externalID"') COLLATE NOCASE)
+          FROM "profiles"
+          """
+        } results: {
+          """
+          ┌────────┬──────┬────────────────────────────────┬────────────────────────────────────────────┐
+          │ "Blob" │ true │ Date(1970-01-02T00:00:00.000Z) │ UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF) │
+          └────────┴──────┴────────────────────────────────┴────────────────────────────────────────────┘
+          """
         }
-      ) {
-        """
-        SELECT json_extract("profiles"."author", '$."name"'), json_extract("profiles"."author", '$."is_verified"'), json_extract("profiles"."author", '$."joinedAt"'), (json_extract("profiles"."author", '$."externalID"') COLLATE NOCASE)
-        FROM "profiles"
-        """
-      } results: {
-        """
-        ┌────────┬──────┬────────────────────────────────┬────────────────────────────────────────────┐
-        │ "Blob" │ true │ Date(1970-01-02T00:00:00.000Z) │ UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF) │
-        └────────┴──────┴────────────────────────────────┴────────────────────────────────────────────┘
-        """
       }
-    }
     #endif
 
     @Test func jsonExtractNested() {
@@ -583,30 +583,30 @@ extension SnapshotTests {
     }
 
     #if ColumnCoding
-    @Test func jsonbExtract() {
-      assertQuery(
-        Profile.select {
-          (
-            $0.author.jsonbExtract(\.name),
-            $0.author.jsonbExtract(\.isVerified),
-            $0.author.jsonbExtract(\.joinedAt),
-            $0.author.jsonbExtract(\.externalID),
-            $0.editor.map { $0.jsonbExtract(\.name) }
-          )
+      @Test func jsonbExtract() {
+        assertQuery(
+          Profile.select {
+            (
+              $0.author.jsonbExtract(\.name),
+              $0.author.jsonbExtract(\.isVerified),
+              $0.author.jsonbExtract(\.joinedAt),
+              $0.author.jsonbExtract(\.externalID),
+              $0.editor.map { $0.jsonbExtract(\.name) }
+            )
+          }
+        ) {
+          """
+          SELECT jsonb_extract("profiles"."author", '$."name"'), jsonb_extract("profiles"."author", '$."is_verified"'), jsonb_extract("profiles"."author", '$."joinedAt"'), (jsonb_extract("profiles"."author", '$."externalID"') COLLATE NOCASE), CASE (json("profiles"."editor")) IS (NULL) WHEN 1 THEN NULL ELSE jsonb_extract("profiles"."editor", '$."name"') END
+          FROM "profiles"
+          """
+        } results: {
+          """
+          ┌────────┬──────┬────────────────────────────────┬────────────────────────────────────────────┬───────────┐
+          │ "Blob" │ true │ Date(1970-01-02T00:00:00.000Z) │ UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF) │ "Blob Jr" │
+          └────────┴──────┴────────────────────────────────┴────────────────────────────────────────────┴───────────┘
+          """
         }
-      ) {
-        """
-        SELECT jsonb_extract("profiles"."author", '$."name"'), jsonb_extract("profiles"."author", '$."is_verified"'), jsonb_extract("profiles"."author", '$."joinedAt"'), (jsonb_extract("profiles"."author", '$."externalID"') COLLATE NOCASE), CASE (json("profiles"."editor")) IS (NULL) WHEN 1 THEN NULL ELSE jsonb_extract("profiles"."editor", '$."name"') END
-        FROM "profiles"
-        """
-      } results: {
-        """
-        ┌────────┬──────┬────────────────────────────────┬────────────────────────────────────────────┬───────────┐
-        │ "Blob" │ true │ Date(1970-01-02T00:00:00.000Z) │ UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF) │ "Blob Jr" │
-        └────────┴──────┴────────────────────────────────┴────────────────────────────────────────────┴───────────┘
-        """
       }
-    }
     #endif
 
     @Test func jsonbExtractDocument() {
@@ -693,50 +693,50 @@ extension SnapshotTests {
     }
 
     #if ColumnCoding
-    @Test func jsonbSet() {
-      assertQuery(
-        Profile
-          .update {
-            $0.author = $0.author
-              .jsonbSet(\.name, "Blob, Esq.")
-              .jsonbSet(\.isVerified, false)
-              .jsonbSet(\.links.homepage, "pointfree.co/blog")
-              .jsonbSet(\.pastLinks[0], #bind(Link(homepage: "example.org")))
-          }
-          .returning(\.author)
-      ) {
-        """
-        UPDATE "profiles"
-        SET "author" = jsonb_set("profiles"."author", '$."name"', 'Blob, Esq.', '$."is_verified"', json(CASE 0 WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), '$."links"."homepage"', 'pointfree.co/blog', '$."pastLinks"[0]', jsonb('{
-          "homepage" : "example.org",
-          "updatedAt" : "1970-01-01 00:00:00.000"
-        }'))
-        RETURNING json("author")
-        """
-      } results: {
-        """
-        ┌───────────────────────────────────────────────────────────┐
-        │ Author(                                                   │
-        │   name: "Blob, Esq.",                                     │
-        │   isVerified: false,                                      │
-        │   nickname: nil,                                          │
-        │   joinedAt: Date(1970-01-02T00:00:00.000Z),               │
-        │   externalID: UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF), │
-        │   links: Link(                                            │
-        │     homepage: "pointfree.co/blog",                        │
-        │     updatedAt: Date(1970-01-02T12:00:00.000Z)             │
-        │   ),                                                      │
-        │   pastLinks: [                                            │
-        │     [0]: Link(                                            │
-        │       homepage: "example.org",                            │
-        │       updatedAt: Date(1970-01-01T00:00:00.000Z)           │
-        │     )                                                     │
-        │   ]                                                       │
-        │ )                                                         │
-        └───────────────────────────────────────────────────────────┘
-        """
+      @Test func jsonbSet() {
+        assertQuery(
+          Profile
+            .update {
+              $0.author = $0.author
+                .jsonbSet(\.name, "Blob, Esq.")
+                .jsonbSet(\.isVerified, false)
+                .jsonbSet(\.links.homepage, "pointfree.co/blog")
+                .jsonbSet(\.pastLinks[0], #bind(Link(homepage: "example.org")))
+            }
+            .returning(\.author)
+        ) {
+          """
+          UPDATE "profiles"
+          SET "author" = jsonb_set("profiles"."author", '$."name"', 'Blob, Esq.', '$."is_verified"', json(CASE 0 WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), '$."links"."homepage"', 'pointfree.co/blog', '$."pastLinks"[0]', jsonb('{
+            "homepage" : "example.org",
+            "updatedAt" : "1970-01-01 00:00:00.000"
+          }'))
+          RETURNING json("author")
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────────────┐
+          │ Author(                                                   │
+          │   name: "Blob, Esq.",                                     │
+          │   isVerified: false,                                      │
+          │   nickname: nil,                                          │
+          │   joinedAt: Date(1970-01-02T00:00:00.000Z),               │
+          │   externalID: UUID(DEADBEEF-DEAD-BEEF-DEAD-BEEFDEADBEEF), │
+          │   links: Link(                                            │
+          │     homepage: "pointfree.co/blog",                        │
+          │     updatedAt: Date(1970-01-02T12:00:00.000Z)             │
+          │   ),                                                      │
+          │   pastLinks: [                                            │
+          │     [0]: Link(                                            │
+          │       homepage: "example.org",                            │
+          │       updatedAt: Date(1970-01-01T00:00:00.000Z)           │
+          │     )                                                     │
+          │   ]                                                       │
+          │ )                                                         │
+          └───────────────────────────────────────────────────────────┘
+          """
+        }
       }
-    }
     #endif
 
     @Test func jsonbInsertAndReplace() {

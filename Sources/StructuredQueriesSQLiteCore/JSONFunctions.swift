@@ -202,7 +202,9 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   }
 
   @_documentation(visibility: private)
-  public func jsonAppend<Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonAppend<
+    Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member.Wrapped._Element>
   ) -> _JSONInsertExpression<QueryValue>
@@ -215,7 +217,9 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   }
 
   @_documentation(visibility: private)
-  public func jsonAppend<Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonAppend<
+    Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member.Wrapped._ElementRepresentation>
   ) -> _JSONInsertExpression<QueryValue>
@@ -232,7 +236,9 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   ///
   /// - Parameter path: A key path to an optional.
   /// - Returns: A JSON expression with the member removed.
-  public func jsonRemove<Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonRemove<
+    Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
   ) -> _JSONRemoveExpression<QueryValue> {
     _JSONRemoveExpression(
@@ -470,7 +476,9 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   }
 
   @_documentation(visibility: private)
-  public func jsonbAppend<Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonbAppend<
+    Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member.Wrapped._Element>
   ) -> _JSONInsertExpression<QueryValue>
@@ -483,7 +491,9 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   }
 
   @_documentation(visibility: private)
-  public func jsonbAppend<Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonbAppend<
+    Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member.Wrapped._ElementRepresentation>
   ) -> _JSONInsertExpression<QueryValue>
@@ -500,7 +510,9 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   ///
   /// - Parameter path: A key path to an optional.
   /// - Returns: A JSONB expression with the member removed.
-  public func jsonbRemove<Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonbRemove<
+    Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
   ) -> _JSONRemoveExpression<QueryValue> {
     _JSONRemoveExpression(
@@ -597,7 +609,8 @@ where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
 }
 
 extension QueryExpression
-where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable {
+where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable
+{
   /// A JSON array aggregate of this JSON expression.
   ///
   /// - Parameters:
@@ -1059,7 +1072,10 @@ public struct JSONPath<Context, QueryValue> {
       QueryValue.Wrapped._Object.TableColumns, TableColumn<QueryValue.Wrapped._Object, Member>
     >
   ) -> JSONPath<_JSONPathMember?, Member>
-  where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _JSONObjectRepresentation {
+  where
+    QueryValue: StructuredQueriesCore._OptionalProtocol,
+    QueryValue.Wrapped: _JSONObjectRepresentation
+  {
     JSONPath<_JSONPathMember?, Member>(
       components: components + [.member(QueryValue.Wrapped._Object.columns[keyPath: keyPath].name)]
     )
@@ -1099,7 +1115,10 @@ public struct JSONPath<Context, QueryValue> {
   public subscript(
     _ index: Int
   ) -> JSONPath<_JSONPathElement?, QueryValue.Wrapped._ElementRepresentation>
-  where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _JSONArrayRepresentation {
+  where
+    QueryValue: StructuredQueriesCore._OptionalProtocol,
+    QueryValue.Wrapped: _JSONArrayRepresentation
+  {
     JSONPath<_JSONPathElement?, QueryValue.Wrapped._ElementRepresentation>(
       components: components + [.index(index)]
     )
@@ -1170,98 +1189,100 @@ public struct JSONPath<Context, QueryValue> {
     )
   }
 
-  public subscript<Member>(
-    dynamicMember keyPath: KeyPath<
-      QueryValue._Object.TableColumns, CaseColumn<QueryValue._Object, Member>
-    >
-  ) -> JSONPath<Context._Case, Member>
-  where Context: _JSONPathContext, QueryValue: _JSONObjectRepresentation {
-    let name = QueryValue._Object.columns[keyPath: keyPath].name
-    return JSONPath<Context._Case, Member>(
-      components: components + [.member(name)],
-      caseName: name
-    )
-  }
+  #if CasePaths
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        QueryValue._Object.TableColumns, CaseColumn<QueryValue._Object, Member>
+      >
+    ) -> JSONPath<Context._Case, Member>
+    where Context: _JSONPathContext, QueryValue: _JSONObjectRepresentation {
+      let name = QueryValue._Object.columns[keyPath: keyPath].name
+      return JSONPath<Context._Case, Member>(
+        components: components + [.member(name)],
+        caseName: name
+      )
+    }
 
-  public subscript<Member>(
-    dynamicMember keyPath: KeyPath<
-      QueryValue._Object.TableColumns, CaseColumn<QueryValue._Object, Member>
-    >
-  ) -> JSONPath<Context._Case, Member.QueryOutput>
-  where
-    Context: _JSONPathContext,
-    QueryValue: _JSONObjectRepresentation,
-    Member.QueryOutput: QueryBindable
-  {
-    let name = QueryValue._Object.columns[keyPath: keyPath].name
-    return JSONPath<Context._Case, Member.QueryOutput>(
-      components: components + [.member(name)],
-      caseName: name
-    )
-  }
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        QueryValue._Object.TableColumns, CaseColumn<QueryValue._Object, Member>
+      >
+    ) -> JSONPath<Context._Case, Member.QueryOutput>
+    where
+      Context: _JSONPathContext,
+      QueryValue: _JSONObjectRepresentation,
+      Member.QueryOutput: QueryBindable
+    {
+      let name = QueryValue._Object.columns[keyPath: keyPath].name
+      return JSONPath<Context._Case, Member.QueryOutput>(
+        components: components + [.member(name)],
+        caseName: name
+      )
+    }
 
-  public subscript<Member>(
-    dynamicMember keyPath: KeyPath<
-      QueryValue.Wrapped._Object.TableColumns, CaseColumn<QueryValue.Wrapped._Object, Member>
-    >
-  ) -> JSONPath<_JSONPathCase?, Member>
-  where
-    QueryValue: StructuredQueriesCore._OptionalProtocol,
-    QueryValue.Wrapped: _JSONObjectRepresentation
-  {
-    let name = QueryValue.Wrapped._Object.columns[keyPath: keyPath].name
-    return JSONPath<_JSONPathCase?, Member>(
-      components: components + [.member(name)],
-      caseName: name
-    )
-  }
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        QueryValue.Wrapped._Object.TableColumns, CaseColumn<QueryValue.Wrapped._Object, Member>
+      >
+    ) -> JSONPath<_JSONPathCase?, Member>
+    where
+      QueryValue: StructuredQueriesCore._OptionalProtocol,
+      QueryValue.Wrapped: _JSONObjectRepresentation
+    {
+      let name = QueryValue.Wrapped._Object.columns[keyPath: keyPath].name
+      return JSONPath<_JSONPathCase?, Member>(
+        components: components + [.member(name)],
+        caseName: name
+      )
+    }
 
-  public subscript<Member>(
-    dynamicMember keyPath: KeyPath<
-      QueryValue.Wrapped._Object.TableColumns, CaseColumn<QueryValue.Wrapped._Object, Member>
-    >
-  ) -> JSONPath<_JSONPathCase?, Member.QueryOutput>
-  where
-    QueryValue: StructuredQueriesCore._OptionalProtocol,
-    QueryValue.Wrapped: _JSONObjectRepresentation,
-    Member.QueryOutput: QueryBindable
-  {
-    let name = QueryValue.Wrapped._Object.columns[keyPath: keyPath].name
-    return JSONPath<_JSONPathCase?, Member.QueryOutput>(
-      components: components + [.member(name)],
-      caseName: name
-    )
-  }
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        QueryValue.Wrapped._Object.TableColumns, CaseColumn<QueryValue.Wrapped._Object, Member>
+      >
+    ) -> JSONPath<_JSONPathCase?, Member.QueryOutput>
+    where
+      QueryValue: StructuredQueriesCore._OptionalProtocol,
+      QueryValue.Wrapped: _JSONObjectRepresentation,
+      Member.QueryOutput: QueryBindable
+    {
+      let name = QueryValue.Wrapped._Object.columns[keyPath: keyPath].name
+      return JSONPath<_JSONPathCase?, Member.QueryOutput>(
+        components: components + [.member(name)],
+        caseName: name
+      )
+    }
 
-  public subscript<Object: Table & Codable, Member: Table & Codable>(
-    dynamicMember keyPath: KeyPath<Object.TableColumns, CaseColumnGroup<Object, Member>>
-  ) -> JSONPath<Context._Case, _CodableJSONRepresentation<Member>>
-  where
-    Context: _JSONPathContext,
-    QueryValue == _CodableJSONRepresentation<Object>,
-    Member.QueryOutput == Member
-  {
-    let name = Object.columns[keyPath: keyPath].name
-    return JSONPath<Context._Case, _CodableJSONRepresentation<Member>>(
-      components: components + [.member(name)],
-      caseName: name
-    )
-  }
+    public subscript<Object: Table & Codable, Member: Table & Codable>(
+      dynamicMember keyPath: KeyPath<Object.TableColumns, CaseColumnGroup<Object, Member>>
+    ) -> JSONPath<Context._Case, _CodableJSONRepresentation<Member>>
+    where
+      Context: _JSONPathContext,
+      QueryValue == _CodableJSONRepresentation<Object>,
+      Member.QueryOutput == Member
+    {
+      let name = Object.columns[keyPath: keyPath].name
+      return JSONPath<Context._Case, _CodableJSONRepresentation<Member>>(
+        components: components + [.member(name)],
+        caseName: name
+      )
+    }
 
-  public subscript<Object: Table & Codable, Member: Table & Codable>(
-    dynamicMember keyPath: KeyPath<Object.TableColumns, CaseColumnGroup<Object, Member>>
-  ) -> JSONPath<Context._Case, _CodableJSONBRepresentation<Member>>
-  where
-    Context: _JSONPathContext,
-    QueryValue == _CodableJSONBRepresentation<Object>,
-    Member.QueryOutput == Member
-  {
-    let name = Object.columns[keyPath: keyPath].name
-    return JSONPath<Context._Case, _CodableJSONBRepresentation<Member>>(
-      components: components + [.member(name)],
-      caseName: name
-    )
-  }
+    public subscript<Object: Table & Codable, Member: Table & Codable>(
+      dynamicMember keyPath: KeyPath<Object.TableColumns, CaseColumnGroup<Object, Member>>
+    ) -> JSONPath<Context._Case, _CodableJSONBRepresentation<Member>>
+    where
+      Context: _JSONPathContext,
+      QueryValue == _CodableJSONBRepresentation<Object>,
+      Member.QueryOutput == Member
+    {
+      let name = Object.columns[keyPath: keyPath].name
+      return JSONPath<Context._Case, _CodableJSONBRepresentation<Member>>(
+        components: components + [.member(name)],
+        caseName: name
+      )
+    }
+  #endif
 }
 
 private struct JSONFunctionExpression<QueryValue>: QueryExpression {
@@ -1325,7 +1346,9 @@ extension _JSONInsertExpression where QueryValue: _JSONRepresentable {
   }
 
   @_documentation(visibility: private)
-  public func jsonAppend<Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonAppend<
+    Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member.Wrapped._Element>
   ) -> _JSONInsertExpression<QueryValue>
@@ -1334,7 +1357,9 @@ extension _JSONInsertExpression where QueryValue: _JSONRepresentable {
   }
 
   @_documentation(visibility: private)
-  public func jsonAppend<Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonAppend<
+    Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member.Wrapped._ElementRepresentation>
   ) -> _JSONInsertExpression<QueryValue>
@@ -1387,7 +1412,9 @@ extension _JSONInsertExpression where QueryValue: _JSONBRepresentable {
   }
 
   @_documentation(visibility: private)
-  public func jsonbAppend<Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonbAppend<
+    Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member.Wrapped._Element>
   ) -> _JSONInsertExpression<QueryValue>
@@ -1396,7 +1423,9 @@ extension _JSONInsertExpression where QueryValue: _JSONBRepresentable {
   }
 
   @_documentation(visibility: private)
-  public func jsonbAppend<Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonbAppend<
+    Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member.Wrapped._ElementRepresentation>
   ) -> _JSONInsertExpression<QueryValue>
@@ -1430,7 +1459,9 @@ public struct _JSONRemoveExpression<QueryValue: QueryRepresentable>: _JSONMutati
 }
 
 extension _JSONRemoveExpression where QueryValue: _JSONRepresentable {
-  public func jsonRemove<Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonRemove<
+    Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
   ) -> _JSONRemoveExpression<QueryValue> {
     appending(.jsonArguments(path))
@@ -1444,7 +1475,9 @@ extension _JSONRemoveExpression where QueryValue: _JSONRepresentable {
 }
 
 extension _JSONRemoveExpression where QueryValue: _JSONBRepresentable {
-  public func jsonbRemove<Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol>(
+  public func jsonbRemove<
+    Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol
+  >(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
   ) -> _JSONRemoveExpression<QueryValue> {
     appending(.jsonArguments(path))

@@ -619,11 +619,15 @@
           Take.insert {
             [
               Take(id: 1, media: .note("Hello")),
-              Take(id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
               Take(
                 id: 3,
                 media: .image(
-                  MediaImage(caption: "Blob", url: URL(string: "https://www.pointfree.co/blob.jpg")!)
+                  MediaImage(
+                    caption: "Blob", url: URL(string: "https://www.pointfree.co/blob.jpg")!
+                  )
                 )
               ),
             ]
@@ -685,7 +689,9 @@
           Take.insert {
             [
               Take(id: 1, media: .note("Hello")),
-              Take(id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
             ]
           }
         )
@@ -722,7 +728,9 @@
           Take.insert {
             [
               Take(id: 1, media: .note("Hello")),
-              Take(id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
             ]
           }
         )
