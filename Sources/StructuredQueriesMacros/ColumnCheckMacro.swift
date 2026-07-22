@@ -54,8 +54,6 @@ package enum ColumnCheckGroupMacro: PeerMacro {
         let argument = arguments[argumentIndex]
         let message: String
         switch argument.label?.text {
-        case nil:
-          message = "Column name cannot be applied to a column group"
         case "generated":
           message = "Argument 'generated' cannot be applied to a column group"
         default:
