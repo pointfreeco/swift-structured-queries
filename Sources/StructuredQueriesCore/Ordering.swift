@@ -51,6 +51,10 @@ public struct _OrderingTerm<Value>: QueryExpression, Sendable {
     self.nullOrdering = nullOrdering
   }
 
+  public var base: some QueryExpression<Value> & Sendable {
+    SQLQueryExpression(baseQueryFragment)
+  }
+
   public var queryFragment: QueryFragment {
     var query: QueryFragment = "\(baseQueryFragment) \(direction.queryFragment)"
     if let nullOrdering {
