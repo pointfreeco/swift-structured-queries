@@ -18,7 +18,7 @@ jobs:
     name: macOS
     strategy:
       matrix:
-        xcode: ["26.2"]
+        xcode: ["26.6"]
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
