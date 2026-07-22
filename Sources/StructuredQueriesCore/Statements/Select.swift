@@ -262,27 +262,44 @@ extension Table {
     Where().order(by: ordering)
   }
 
-  /// A select statement for this table with a limit and optional offset.
+  /// A select statement for this table with the given limit.
   ///
-  /// - Parameters:
-  ///   - maxLength: A closure that produces a `LIMIT` expression from the filtered table's columns.
-  ///   - offset: A closure that produces an `OFFSET` expression from the filtered table's columns.
-  /// - Returns: A select statement with a limit and optional offset.
-  public static func limit(
-    _ maxLength: (TableColumns) -> some QueryExpression<Int>,
-    offset: ((TableColumns) -> some QueryExpression<Int>)? = nil
-  ) -> SelectOf<Self> {
-    Where().limit(maxLength, offset: offset)
+  /// - Parameter maxLength: An expression for the select's `LIMIT` clause, or `nil` for no limit.
+  /// - Returns: A select statement with the given limit.
+  public static func limit(_ maxLength: (any QueryExpression<Int>)?) -> SelectOf<Self> {
+    Where().limit(maxLength)
   }
 
-  /// A select statement for this table with a limit and optional offset.
+  /// A select statement for this table with the given limit.
   ///
-  /// - Parameters:
-  ///   - maxLength: An integer limit for the select's `LIMIT` clause.
-  ///   - offset: An optional integer offset of the select's `OFFSET` clause.
-  /// - Returns: A select statement with a limit and optional offset.
-  public static func limit(_ maxLength: Int, offset: Int? = nil) -> SelectOf<Self> {
-    Where().limit(maxLength, offset: offset)
+  /// - Parameter maxLength: A result builder closure that returns an expression for the select's
+  ///   `LIMIT` clause from this table's columns.
+  /// - Returns: A select statement with the given limit.
+  public static func limit(
+    @QueryFragmentBuilder<Int>
+    _ maxLength: (TableColumns) -> [QueryFragment]
+  ) -> SelectOf<Self> {
+    Where().limit(maxLength)
+  }
+
+  /// A select statement for this table with the given offset.
+  ///
+  /// - Parameter offset: An expression for the select's `OFFSET` clause, or `nil` for no offset.
+  /// - Returns: A select statement with the given offset.
+  public static func offset(_ offset: (any QueryExpression<Int>)?) -> SelectOf<Self> {
+    Where().offset(offset)
+  }
+
+  /// A select statement for this table with the given offset.
+  ///
+  /// - Parameter offset: A result builder closure that returns an expression for the select's
+  ///   `OFFSET` clause from this table's columns.
+  /// - Returns: A select statement with the given offset.
+  public static func offset(
+    @QueryFragmentBuilder<Int>
+    _ offset: (TableColumns) -> [QueryFragment]
+  ) -> SelectOf<Self> {
+    Where().offset(offset)
   }
 
   /// A select statement for this table's row count.
@@ -1543,58 +1560,105 @@ extension Select {
     return select
   }
 
-  /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
+  /// Creates a new select statement from this one by overriding its `LIMIT` clause.
   ///
-  /// - Parameters:
-  ///   - maxLength: A closure that produces a `LIMIT` expression from this select's tables.
-  ///   - offset: A closure that produces an `OFFSET` expression from this select's tables.
-  /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
-  @_disfavoredOverload
-  public func limit<each J: Table>(
-    _ maxLength: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Int>,
-    offset: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Int>)? = nil
-  ) -> Self
+  /// Passing `nil` will leave this select's `LIMIT` clause untouched.
+  ///
+  /// - Parameter maxLength: An expression for the select's `LIMIT` clause, or `nil` to leave the
+  ///   clause untouched.
+  /// - Returns: A new select statement that overrides this one's `LIMIT` clause.
+  public func limit<each J: Table>(_ maxLength: (any QueryExpression<Int>)?) -> Self
   where Joins == (repeat each J) {
-    var select = self
-    select.limit = _LimitClause(
-      maxLength: maxLength(From.columns, repeat (each J).columns).queryFragment,
-      offset: offset?(From.columns, repeat (each J).columns).queryFragment ?? select.limit?.offset
-    )
-    return select
+    _limit(maxLength?.queryFragment)
   }
 
-  /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
+  /// Creates a new select statement from this one by overriding its `LIMIT` clause.
   ///
-  /// - Parameters:
-  ///   - maxLength: A closure that produces a `LIMIT` expression from this select's tables.
-  ///   - offset: A closure that produces an `OFFSET` expression from this select's tables.
-  /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
+  /// A result builder closure that produces no expression will leave this select's `LIMIT` clause
+  /// untouched.
+  ///
+  /// - Parameter maxLength: A result builder closure that returns an expression for the select's
+  ///   `LIMIT` clause from this select's tables.
+  /// - Returns: A new select statement that overrides this one's `LIMIT` clause.
+  public func limit<each J: Table>(
+    @QueryFragmentBuilder<Int>
+    _ maxLength: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
+  ) -> Self
+  where Joins == (repeat each J) {
+    _limit(maxLength(From.columns, repeat (each J).columns).last)
+  }
+
+  /// Creates a new select statement from this one by overriding its `LIMIT` clause.
+  ///
+  /// A result builder closure that produces no expression will leave this select's `LIMIT` clause
+  /// untouched.
+  ///
+  /// - Parameter maxLength: A result builder closure that returns an expression for the select's
+  ///   `LIMIT` clause from this select's tables.
+  /// - Returns: A new select statement that overrides this one's `LIMIT` clause.
   public func limit(
-    _ maxLength: (From.TableColumns, Joins.TableColumns) -> some QueryExpression<Int>,
-    offset: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Int>)? = nil
+    @QueryFragmentBuilder<Int>
+    _ maxLength: (From.TableColumns, Joins.TableColumns) -> [QueryFragment]
   ) -> Self
   where Joins: Table {
+    _limit(maxLength(From.columns, Joins.columns).last)
+  }
+
+  /// Creates a new select statement from this one by overriding its `OFFSET` clause.
+  ///
+  /// Passing `nil` will leave this select's `OFFSET` clause untouched.
+  ///
+  /// - Parameter offset: An expression for the select's `OFFSET` clause, or `nil` to leave the
+  ///   clause untouched.
+  /// - Returns: A new select statement that overrides this one's `OFFSET` clause.
+  public func offset<each J: Table>(_ offset: (any QueryExpression<Int>)?) -> Self
+  where Joins == (repeat each J) {
+    _offset(offset?.queryFragment)
+  }
+
+  /// Creates a new select statement from this one by overriding its `OFFSET` clause.
+  ///
+  /// A result builder closure that produces no expression will leave this select's `OFFSET` clause
+  /// untouched.
+  ///
+  /// - Parameter offset: A result builder closure that returns an expression for the select's
+  ///   `OFFSET` clause from this select's tables.
+  /// - Returns: A new select statement that overrides this one's `OFFSET` clause.
+  public func offset<each J: Table>(
+    @QueryFragmentBuilder<Int>
+    _ offset: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
+  ) -> Self
+  where Joins == (repeat each J) {
+    _offset(offset(From.columns, repeat (each J).columns).last)
+  }
+
+  /// Creates a new select statement from this one by overriding its `OFFSET` clause.
+  ///
+  /// A result builder closure that produces no expression will leave this select's `OFFSET` clause
+  /// untouched.
+  ///
+  /// - Parameter offset: A result builder closure that returns an expression for the select's
+  ///   `OFFSET` clause from this select's tables.
+  /// - Returns: A new select statement that overrides this one's `OFFSET` clause.
+  public func offset(
+    @QueryFragmentBuilder<Int>
+    _ offset: (From.TableColumns, Joins.TableColumns) -> [QueryFragment]
+  ) -> Self
+  where Joins: Table {
+    _offset(offset(From.columns, Joins.columns).last)
+  }
+
+  private func _limit(_ maxLength: QueryFragment?) -> Self {
+    guard let maxLength else { return self }
     var select = self
-    select.limit = _LimitClause(
-      maxLength: maxLength(From.columns, Joins.columns).queryFragment,
-      offset: offset?(From.columns, Joins.columns).queryFragment ?? select.limit?.offset
-    )
+    select.limit = _LimitClause(maxLength: maxLength, offset: select.limit?.offset)
     return select
   }
 
-  /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
-  ///
-  /// - Parameters:
-  ///   - maxLength: An integer limit for the select's `LIMIT` clause.
-  ///   - offset: An optional integer offset of the select's `OFFSET` clause.
-  /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
-  public func limit<each J: Table>(_ maxLength: Int, offset: Int? = nil) -> Self
-  where Joins == (repeat each J) {
+  private func _offset(_ offset: QueryFragment?) -> Self {
+    guard let offset else { return self }
     var select = self
-    select.limit = _LimitClause(
-      maxLength: maxLength.queryFragment,
-      offset: offset?.queryFragment ?? select.limit?.offset
-    )
+    select.limit = _LimitClause(maxLength: select.limit?.maxLength, offset: offset)
     return select
   }
 
@@ -1838,11 +1902,11 @@ public struct _JoinClause: QueryExpression, Sendable {
 public struct _LimitClause: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
-  let maxLength: QueryFragment
+  let maxLength: QueryFragment?
   let offset: QueryFragment?
 
   public var queryFragment: QueryFragment {
-    var query: QueryFragment = "LIMIT \(maxLength)"
+    var query: QueryFragment = "LIMIT \(maxLength ?? "-1")"
     if let offset {
       query.append(" OFFSET \(offset)")
     }

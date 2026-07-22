@@ -254,8 +254,8 @@ Notice that you can return any number of orders for the query as a tuple, and yo
 which orders are in a descending versus ascending fashion.
 
 And finally, suppose we wanted to further customize the above query by limiting the results to 10
-rows and selecting the 2nd page of results. This can be done using the ``Table/limit(_:offset:)``
-method:
+rows and selecting the 2nd page of results. This can be done using the ``Table/limit(_:)``
+and ``Table/offset(_:)`` methods:
 
 @Row {
   @Column {
@@ -272,7 +272,8 @@ method:
          $0.priority.desc(),
          $0.title)
       }
-      .limit(10, offset: 10)
+      .limit(10)
+      .offset(10)
     // => [String]
     ```
   }
