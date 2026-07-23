@@ -11,3 +11,4 @@
 ### Conformances
 
 - ``Swift/Decodable/JSONRepresentation``
+- ``Swift/RawRepresentable/RawRepresentation``

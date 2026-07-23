@@ -217,5 +217,118 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func rawRepresentable() {
+      assertMacro([
+        "_ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
+      ]) {
+        """
+        struct Row {
+          @_ColumnCheck(Priority.self)
+          var priority: Priority
+        }
+        """
+      } diagnostics: {
+        """
+        struct Row {
+          @_ColumnCheck(Priority.self)
+          ╰─ 🛑 'Priority' is not representable as a column; conform it to 'QueryBindable' to store it as its raw value
+             ✏️ Apply '@Column(as: Priority.RawRepresentation.self)' to store as its raw value
+             ✏️ Apply '@Column(as:)' to specify a representation
+             ✏️ Apply '@Ephemeral' to exclude from table
+          var priority: Priority
+        }
+        """
+      } fixes: {
+        """
+        struct Row {
+          @Column(as: Priority.RawRepresentation.self) 
+          var priority: Priority
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          @Column(as: Priority.RawRepresentation.self)
+          var priority: Priority
+        }
+        """
+      }
+    }
+
+    @Test func rawRepresentableOptional() {
+      assertMacro([
+        "_ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
+      ]) {
+        """
+        struct Row {
+          @_ColumnCheck(Priority?.self)
+          var priority: Priority?
+        }
+        """
+      } diagnostics: {
+        """
+        struct Row {
+          @_ColumnCheck(Priority?.self)
+          ╰─ 🛑 'Priority?' is not representable as a column; conform it to 'QueryBindable' to store it as its raw value
+             ✏️ Apply '@Column(as: Priority?.RawRepresentation.self)' to store as its raw value
+             ✏️ Apply '@Column(as:)' to specify a representation
+             ✏️ Apply '@Ephemeral' to exclude from table
+          var priority: Priority?
+        }
+        """
+      } fixes: {
+        """
+        struct Row {
+          @Column(as: Priority?.RawRepresentation.self) 
+          var priority: Priority?
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          @Column(as: Priority?.RawRepresentation.self)
+          var priority: Priority?
+        }
+        """
+      }
+    }
+
+    @Test func rawRepresentableInferred() {
+      assertMacro([
+        "_ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
+      ]) {
+        """
+        struct Row {
+          @_ColumnCheck(Priority.high)
+          var priority = Priority.high
+        }
+        """
+      } diagnostics: {
+        """
+        struct Row {
+          @_ColumnCheck(Priority.high)
+          ╰─ 🛑 'Priority.high' is not representable as a column; conform it to 'QueryBindable' to store it as its raw value
+             ✏️ Apply '@Column(as:)' to specify a representation
+             ✏️ Apply '@Ephemeral' to exclude from table
+          var priority = Priority.high
+        }
+        """
+      } fixes: {
+        """
+        struct Row {
+          @Column(as: <#QueryRepresentable.Type#>) 
+          var priority = Priority.high
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          @Column(as: <#QueryRepresentable.Type#>)
+          var priority = Priority.high
+        }
+        """
+      }
+    }
   }
 }

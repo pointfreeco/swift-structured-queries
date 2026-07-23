@@ -305,6 +305,50 @@ public macro _ColumnCheck<T: QueryBindable & Codable>(_ type: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
 
 @attached(peer)
+public macro _ColumnCheck<T: RawRepresentable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailRawRepresentableMacro")
+where T.RawValue: QueryBindable
+
+@attached(peer)
+public macro _ColumnCheck<T: RawRepresentable & Codable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailRawRepresentableMacro")
+where T.RawValue: QueryBindable
+
+@attached(peer)
+public macro _ColumnCheck<T: QueryBindable & RawRepresentable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+where T.RawValue: QueryBindable
+
+@attached(peer)
+public macro _ColumnCheck<T: QueryBindable & RawRepresentable & Codable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+where T.RawValue: QueryBindable
+
+@attached(peer)
+public macro _ColumnCheck<T: StructuredQueriesCore._OptionalProtocol>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailRawRepresentableMacro")
+where T.Wrapped: RawRepresentable, T.Wrapped.RawValue: QueryBindable
+
+@attached(peer)
+public macro _ColumnCheck<T: StructuredQueriesCore._OptionalProtocol & Codable>(_ type: T.Type) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailRawRepresentableMacro")
+where T.Wrapped: RawRepresentable, T.Wrapped.RawValue: QueryBindable
+
+@attached(peer)
+public macro _ColumnCheck<T: StructuredQueriesCore._OptionalProtocol & QueryBindable>(
+  _ type: T.Type
+) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+where T.Wrapped: RawRepresentable, T.Wrapped.RawValue: QueryBindable
+
+@attached(peer)
+public macro _ColumnCheck<T: StructuredQueriesCore._OptionalProtocol & QueryBindable & Codable>(
+  _ type: T.Type
+) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+where T.Wrapped: RawRepresentable, T.Wrapped.RawValue: QueryBindable
+
+@attached(peer)
 public macro _ColumnCheck<T: Table>(_ type: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckGroupMacro")
 
@@ -319,6 +363,16 @@ public macro _ColumnCheck<T>(_ value: T) =
 @attached(peer)
 public macro _ColumnCheck<T: QueryBindable>(_ value: T) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+@attached(peer)
+public macro _ColumnCheck<T: RawRepresentable>(_ value: T) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailRawRepresentableMacro")
+where T.RawValue: QueryBindable
+
+@attached(peer)
+public macro _ColumnCheck<T: QueryBindable & RawRepresentable>(_ value: T) =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+where T.RawValue: QueryBindable
 
 @attached(peer)
 public macro _ColumnCheck<T: Table>(_ value: T) =
