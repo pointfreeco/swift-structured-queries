@@ -1354,6 +1354,43 @@ extension TableMacro: MemberAttributeMacro {
     if node.attributeName.identifier == "Selection", declaration.hasMacroApplication("Table") {
       return []
     }
+    #if CasePaths
+      if declaration.is(EnumDeclSyntax.self) {
+        guard
+          let caseDecl = member.as(EnumCaseDeclSyntax.self),
+          caseDecl.elements.count == 1,
+          let element = caseDecl.elements.first,
+          let parameters = element.parameterClause?.parameters,
+          parameters.count == 1,
+          let parameter = parameters.first
+        else { return [] }
+
+        let payloadType = parameter.type.trimmed
+        var columnType: TypeSyntax = payloadType
+        for attribute in caseDecl.attributes {
+          guard
+            let attribute = attribute.as(AttributeSyntax.self),
+            let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text,
+            attributeName == "Column" || attributeName == "Columns",
+            case .argumentList(let arguments) = attribute.arguments
+          else { continue }
+          for argument in arguments {
+            guard
+              argument.label?.text == "as",
+              let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
+              memberAccess.declName.baseName.tokenKind == .keyword(.self),
+              let base = memberAccess.base
+            else { continue }
+            columnType = "\(raw: base.trimmedDescription)"
+          }
+        }
+
+        return [
+          "@\(macrosModuleName)._CaseCheck(\(payloadType).self)",
+          "@\(macrosModuleName)._ColumnCheck(\(columnType).self)",
+        ]
+      }
+    #endif
     guard
       declaration.is(StructDeclSyntax.self),
       let property = member.as(VariableDeclSyntax.self),
