@@ -65,9 +65,11 @@ private enum CodableEnum: Int, Codable, QueryBindable { case a, b }
 
   private enum UserIDTag {}
 
-  // Q & R & C, via Tagged's `RawRepresentable`/`QueryBindable` conformances.
   @Table private struct TaggedMatrix {
+    // Q & R & C
     var id: Tagged<UserIDTag, Int>
+
+    // (Q & R & C)?
     var optID: Tagged<UserIDTag, Int>?
   }
 #endif
