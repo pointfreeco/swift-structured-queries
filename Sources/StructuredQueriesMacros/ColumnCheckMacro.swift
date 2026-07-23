@@ -48,6 +48,50 @@ package enum ColumnCheckFailRawRepresentableMacro: PeerMacro {
   }
 }
 
+#if CasePaths
+  package enum CaseCheckFailMacro: PeerMacro {
+    package static func expansion(
+      of node: AttributeSyntax,
+      providingPeersOf declaration: some DeclSyntaxProtocol,
+      in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+      var fixIts: [FixIt] = []
+      if let optionalType = declaration.as(EnumCaseDeclSyntax.self)?
+        .elements.first?
+        .parameterClause?.parameters.first?
+        .type.as(OptionalTypeSyntax.self)
+      {
+        let wrappedType = optionalType.wrappedType.trimmed
+        fixIts.append(
+          .replace(
+            message: MacroExpansionFixItMessage(
+              "Replace '\(optionalType.trimmed)' with '\(wrappedType)'"
+            ),
+            oldNode: optionalType,
+            newNode: wrappedType
+          )
+        )
+      }
+      context.diagnose(
+        Diagnostic(
+          node: Syntax(declaration),
+          message: MacroExpansionErrorMessage("Associated value must not be optional"),
+          notes: [
+            Note(
+              node: Syntax(declaration),
+              message: MacroExpansionNoteMessage(
+                "A 'nil' value is indistinguishable from an absent case"
+              )
+            )
+          ],
+          fixIts: fixIts
+        )
+      )
+      return []
+    }
+  }
+#endif
+
 package enum ColumnCheckGroupMacro: PeerMacro {
   package static func expansion(
     of node: AttributeSyntax,
@@ -125,13 +169,18 @@ private func diagnoseUnrepresentableColumn(
       message: MacroExpansionFixItMessage("Apply '@Column(as:)' to specify a representation"),
       oldNode: declaration,
       newNode: declaration.applyingColumnFixIt("@Column(as: <#QueryRepresentable.Type#>)")
-    ),
-    .replace(
-      message: MacroExpansionFixItMessage("Apply '@Ephemeral' to exclude from table"),
-      oldNode: declaration,
-      newNode: declaration.applyingColumnFixIt("@Ephemeral")
-    ),
+    )
   ]
+
+  if !declaration.is(EnumCaseDeclSyntax.self) {
+    fixIts.append(
+      .replace(
+        message: MacroExpansionFixItMessage("Apply '@Ephemeral' to exclude from table"),
+        oldNode: declaration,
+        newNode: declaration.applyingColumnFixIt("@Ephemeral")
+      )
+    )
+  }
 
   guard
     let memberAccess = argument.as(MemberAccessExprSyntax.self),
@@ -211,7 +260,8 @@ extension DeclSyntaxProtocol {
       var filtered = Array(attributes).filter { element in
         guard case .attribute(let attribute) = element else { return true }
         let name = attribute.attributeName.trimmedDescription
-        return name != "_ColumnCheck" && name != "Column" && name != "Columns"
+        return name != "_ColumnCheck" && name != "_CaseCheck" && name != "Column"
+          && name != "Columns"
       }
       filtered.insert(.attribute(attribute), at: filtered.startIndex)
       return AttributeListSyntax(filtered)
@@ -222,6 +272,15 @@ extension DeclSyntaxProtocol {
       return DeclSyntax(
         variable
           .with(\.attributes, rebuilt(variable.attributes))
+          .with(\.leadingTrivia, leading)
+      )
+    }
+    if let caseDecl = self.as(EnumCaseDeclSyntax.self) {
+      let leading = caseDecl.leadingTrivia
+      let caseDecl = caseDecl.with(\.leadingTrivia, [])
+      return DeclSyntax(
+        caseDecl
+          .with(\.attributes, rebuilt(caseDecl.attributes))
           .with(\.leadingTrivia, leading)
       )
     }

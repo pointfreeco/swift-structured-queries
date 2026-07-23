@@ -383,3 +383,13 @@ where T.RawValue: QueryBindable
 @attached(peer)
 public macro _ColumnCheck<T: Table>(_ value: T) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckGroupMacro")
+
+#if CasePaths
+  @attached(peer)
+  public macro _CaseCheck<T>(_ type: T.Type) =
+    #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+  @attached(peer)
+  public macro _CaseCheck<T: StructuredQueriesCore._OptionalProtocol>(_ type: T.Type) =
+    #externalMacro(module: "StructuredQueriesMacros", type: "CaseCheckFailMacro")
+#endif

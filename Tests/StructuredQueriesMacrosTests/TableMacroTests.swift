@@ -2275,7 +2275,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries._CaseCheck(Photo.self) @StructuredQueries._ColumnCheck(Photo.self)
           case photo(Photo)
+          @StructuredQueries._CaseCheck(String.self) @StructuredQueries._ColumnCheck(String.self)
           case note(String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2416,7 +2418,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries._CaseCheck(Photo.self) @StructuredQueries._ColumnCheck(Photo.self)
           case photo(Photo)
+          @StructuredQueries._CaseCheck(String.self) @StructuredQueries._ColumnCheck(String.self)
           case note(String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2556,7 +2560,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries._CaseCheck(Photo.self) @StructuredQueries._ColumnCheck(Photo.self)
           case photo(Photo)
+          @StructuredQueries._CaseCheck(String.self) @StructuredQueries._ColumnCheck(String.self)
           case note(String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2697,7 +2703,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries._CaseCheck(Photo.self) @StructuredQueries._ColumnCheck(Photo.self)
           case photo(Photo)
+          @StructuredQueries._CaseCheck(String.self) @StructuredQueries._ColumnCheck(String.self)
           case note(text: String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2838,6 +2846,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries._CaseCheck(String.self) @StructuredQueries._ColumnCheck(String.self)
           case note(text: String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2950,6 +2959,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries._CaseCheck(Date.self) @StructuredQueries._ColumnCheck(Date.UnixTimeRepresentation.self)
           case timestamp(Date)
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {

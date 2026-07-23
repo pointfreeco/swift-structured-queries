@@ -349,5 +349,73 @@ extension SnapshotTests {
         """
       }
     }
+
+    #if CasePaths
+      @Test func caseCheckOptional() {
+        assertMacro([
+          "_CaseCheck": CaseCheckFailMacro.self
+        ]) {
+          """
+          enum Post {
+            @_CaseCheck(Int?.self)
+            case draft(Int?)
+          }
+          """
+        } diagnostics: {
+          """
+          enum Post {
+            @_CaseCheck(Int?.self)
+            ╰─ 🛑 Associated value must not be optional
+               ✏️ Replace 'Int?' with 'Int'
+            case draft(Int?)
+          }
+          """
+        } fixes: {
+          """
+          enum Post {
+            @_CaseCheck(Int?.self)
+            case draft(Int)
+          }
+          """
+        }
+      }
+    #endif
+
+    @Test func caseRepresentability() {
+      assertMacro([
+        "_ColumnCheck": ColumnCheckFailJSONMacro.self
+      ]) {
+        """
+        enum Post {
+          @_ColumnCheck([String].self)
+          case tags([String])
+        }
+        """
+      } diagnostics: {
+        """
+        enum Post {
+          @_ColumnCheck([String].self)
+          ╰─ 🛑 '[String]' is not representable as a column
+             ✏️ Apply '@Column(as: [String].JSONRepresentation.self)' to store as JSON
+             ✏️ Apply '@Column(as:)' to specify a representation
+          case tags([String])
+        }
+        """
+      } fixes: {
+        """
+        enum Post {
+          @Column(as: [String].JSONRepresentation.self) 
+          case tags([String])
+        }
+        """
+      } expansion: {
+        """
+        enum Post {
+          @Column(as: [String].JSONRepresentation.self)
+          case tags([String])
+        }
+        """
+      }
+    }
   }
 }
