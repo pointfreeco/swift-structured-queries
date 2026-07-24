@@ -250,6 +250,44 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func nilBuilder() {
+      assertQuery(
+        RemindersList.where { _ in
+          nil
+        }
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position"
+        FROM "remindersLists"
+        """
+      } results: {
+        """
+        ┌──────────────────────┐
+        │ RemindersList(       │
+        │   id: 1,             │
+        │   color: 4889071,    │
+        │   title: "Personal", │
+        │   position: 0        │
+        │ )                    │
+        ├──────────────────────┤
+        │ RemindersList(       │
+        │   id: 2,             │
+        │   color: 15567157,   │
+        │   title: "Family",   │
+        │   position: 0        │
+        │ )                    │
+        ├──────────────────────┤
+        │ RemindersList(       │
+        │   id: 3,             │
+        │   color: 11689427,   │
+        │   title: "Business", │
+        │   position: 0        │
+        │ )                    │
+        └──────────────────────┘
+        """
+      }
+    }
   }
 
   @Test func multipleWheres() {
