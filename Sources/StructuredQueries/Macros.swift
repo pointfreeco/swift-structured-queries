@@ -35,6 +35,9 @@ public import StructuredQueriesCore
     named(columns),
     named(schemaName),
     named(tableName),
+    named(CodingKeys),
+    named(init(from:)),
+    named(encode(to:)),
     named(AllCasePaths),
     named(allCasePaths),
     named(_$Element)
@@ -61,7 +64,8 @@ public import StructuredQueriesCore
     named(_columnWidth),
     named(columns),
     named(schemaName),
-    named(tableName)
+    named(tableName),
+    named(CodingKeys)
   )
 #endif
 @attached(memberAttribute)
@@ -133,6 +137,9 @@ public macro Table(
     named(columns),
     named(schemaName),
     named(tableName),
+    named(CodingKeys),
+    named(init(from:)),
+    named(encode(to:)),
     named(AllCasePaths),
     named(allCasePaths),
     named(_$Element)
@@ -161,7 +168,8 @@ public macro Table(
     named(_columnWidth),
     named(columns),
     named(schemaName),
-    named(tableName)
+    named(tableName),
+    named(CodingKeys)
   )
 #endif
 @attached(memberAttribute)
