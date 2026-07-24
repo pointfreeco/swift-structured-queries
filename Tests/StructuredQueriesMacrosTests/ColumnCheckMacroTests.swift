@@ -129,29 +129,10 @@ extension SnapshotTests {
           var address: Address
         }
         """
-      } diagnostics: {
-        """
-        struct Row {
-          @Column("addr")
-                  ┬─────
-                  ╰─ 🛑 Column name cannot be applied to a column group
-                     ✏️ Remove '"addr"'
-          @_ColumnCheck(Address.self)
-          var address: Address
-        }
-        """
-      } fixes: {
-        """
-        struct Row {
-          @Column
-          @_ColumnCheck(Address.self)
-          var address: Address
-        }
-        """
       } expansion: {
         """
         struct Row {
-          @Column
+          @Column("addr")
           var address: Address
         }
         """

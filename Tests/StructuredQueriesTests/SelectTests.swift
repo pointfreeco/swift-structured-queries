@@ -861,7 +861,117 @@ extension SnapshotTests {
         └───┘
         """
       }
+      assertQuery(Reminder.select(\.id).limit(2).offset(2)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        │ 4 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit(2).limit(nil).offset(nil)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        └───┘
+        """
+      }
+    }
+
+    @Test func offsetWithoutLimit() {
+      assertQuery(Reminder.select(\.id).offset(8)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT -1 OFFSET 8
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 9  │
+        │ 10 │
+        └────┘
+        """
+      }
+    }
+
+    @Test func limitAndOffsetBuilders() {
+      enum PerPage { case none, `default` }
+      let perPage = PerPage.default
+      let offset: Int? = nil
+      assertQuery(
+        Reminder
+          .select(\.id)
+          .limit { _ in
+            switch perPage {
+            case .none: nil
+            case .default: 2
+            }
+          }
+          .offset { _ in
+            if let offset {
+              offset
+            }
+          }
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        └───┘
+        """
+      }
+    }
+
+    @available(*, deprecated)
+    @Test func deprecatedLimit() {
       assertQuery(Reminder.select(\.id).limit(2, offset: 2)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        │ 4 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit(2, offset: 2).limit(1, offset: nil)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 1 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit({ _ in 2 }, offset: { _ in 2 })) {
         """
         SELECT "reminders"."id"
         FROM "reminders"
@@ -1435,6 +1545,10 @@ extension SnapshotTests {
       _ = base.order { r, _ in r.isCompleted }
       _ = base.limit { r, _ in r.title.length() }
       _ = base.limit(1)
+      _ = base.limit(nil)
+      _ = base.offset { r, _ in r.title.length() }
+      _ = base.offset(1)
+      _ = base.offset(nil)
       _ = base.count()
       _ = base.count { r, _ in r.isCompleted }
       _ = base.map {}

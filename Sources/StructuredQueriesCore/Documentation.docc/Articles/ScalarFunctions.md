@@ -40,6 +40,7 @@ Explore the full list of available functions below.
 
 - ``QueryExpression/??(_:_:)``
 - ``QueryExpression/ifnull(_:)``
+- ``QueryExpression/nullif(_:)``
 
 ### Bytes
 

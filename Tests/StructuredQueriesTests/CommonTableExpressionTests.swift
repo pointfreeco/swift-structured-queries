@@ -504,7 +504,8 @@ extension SnapshotTests {
         } query: {
           Fibonacci
             .select { $0.fib.cast(as: Double.self) / $0.prevFib.cast() }
-            .limit(1, offset: 30)
+            .limit(1)
+            .offset(30)
         }
       ) {
         """

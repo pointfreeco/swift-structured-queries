@@ -707,52 +707,6 @@ extension QueryExpression where QueryValue == String {
   ) -> some QueryExpression<Bool> {
     LikeOperator(string: self, pattern: "\(pattern)", escape: escape)
   }
-
-  /// A predicate expression from this string expression matched against another _via_ the `LIKE`
-  /// operator given a prefix.
-  ///
-  /// ```swift
-  /// Reminder.where { $0.title.hasPrefix("get") }
-  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE 'get%')
-  /// ```
-  ///
-  /// - Parameter other: A string expression describing the prefix.
-  /// - Returns: A predicate expression.
-  @available(*, deprecated, message: "Prefer 'like(\"\\(other)%\")' instead")
-  public func hasPrefix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
-    like("\(other)%")
-  }
-
-  /// A predicate expression from this string expression matched against another _via_ the `LIKE`
-  /// operator given a suffix.
-  ///
-  /// ```swift
-  /// Reminder.where { $0.title.hasSuffix("get") }
-  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE '%get')
-  /// ```
-  ///
-  /// - Parameter other: A string expression describing the suffix.
-  /// - Returns: A predicate expression.
-  @available(*, deprecated, message: "Prefer 'like(\"%\\(other)\")' instead")
-  public func hasSuffix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
-    like("%\(other)")
-  }
-
-  /// A predicate expression from this string expression matched against another _via_ the `LIKE`
-  /// operator given an infix.
-  ///
-  /// ```swift
-  /// Reminder.where { $0.title.contains("get") }
-  /// // SELECT … FROM "reminders" WHERE ("reminders"."title" LIKE '%get%')
-  /// ```
-  ///
-  /// - Parameter other: A string expression describing the infix.
-  /// - Returns: A predicate expression.
-  @_disfavoredOverload
-  @available(*, deprecated, message: "Prefer 'like(\"%\\(other)%\")' instead")
-  public func contains(_ other: some StringProtocol) -> some QueryExpression<Bool> {
-    return like("%\(other)%")
-  }
 }
 
 extension SQLQueryExpression<String> {
@@ -852,42 +806,6 @@ extension QueryExpression where QueryValue: QueryExpression {
     and upperBound: some QueryExpression<QueryValue>
   ) -> some QueryExpression<Bool> {
     SQLQueryExpression("\(self) BETWEEN \(lowerBound) AND \(upperBound)")
-  }
-}
-
-extension Sequence where Element: QueryBindable {
-  /// Returns a predicate expression indicating whether the sequence contains the given expression.
-  ///
-  /// An alias for ``QueryExpression/in(_:)``, flipped.
-  ///
-  /// - Parameter element: An element.
-  /// - Returns: A predicate expression indicating whether the expression is in this sequence
-  @available(*, deprecated, message: "Prefer 'element.in(self)' instead")
-  public func contains(
-    _ element: some QueryExpression<Element.QueryValue>
-  ) -> some QueryExpression<Bool> {
-    element.in(self)
-  }
-}
-
-extension ClosedRange where Bound: QueryBindable {
-  /// Returns a predicate expression indicating whether the given expression is contained within
-  /// this range.
-  ///
-  /// An alias for ``QueryExpression/between(_:and:)``, flipped.
-  ///
-  /// - Parameter element: An element.
-  /// - Returns: A predicate expression indicating whether the given element is between this range's
-  ///   bounds.
-  @available(
-    *,
-    deprecated,
-    message: "Prefer 'element.between(lowerBound, and: upperBound)' instead"
-  )
-  public func contains(
-    _ element: some QueryExpression<Bound.QueryValue>
-  ) -> some QueryExpression<Bool> {
-    element.between(lowerBound, and: upperBound)
   }
 }
 
