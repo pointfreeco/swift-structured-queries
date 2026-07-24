@@ -434,7 +434,22 @@ extension TableMacro: ExtensionMacro {
               message: MacroExpansionErrorMessage(
                 """
                 Table case must contain a single associated value representing one or more \
-                optional columns
+                columns
+                """
+              )
+            )
+          )
+          continue
+        }
+
+        if parameter.type.isOptionalType {
+          diagnostics.append(
+            Diagnostic(
+              node: parameter.type,
+              message: MacroExpansionErrorMessage(
+                """
+                Table case value must not be optional; a 'nil' value is indistinguishable from \
+                an inactive case
                 """
               )
             )
@@ -557,9 +572,9 @@ extension TableMacro: ExtensionMacro {
           columnsProperties.append(
             """
             public let \(primaryKey ? "primaryKey" : identifier) = \
-            \(moduleName)._TableColumn<\
+            \(moduleName)._CaseColumn<\
             QueryValue, \
-            \(raw: columnQueryValueType.trimmedDescription)?\
+            \(raw: columnQueryValueType.trimmedDescription)\
             >.for(\
             \(columnName), \
             keyPath: \\QueryValue.\(identifier)\
@@ -1160,9 +1175,9 @@ extension TableMacro: MemberMacro {
           columnsProperties.append(
             """
             public let \(primaryKey ? "primaryKey" : identifier) = \
-            \(moduleName)._TableColumn<\
+            \(moduleName)._CaseColumn<\
             QueryValue, \
-            \(raw: columnQueryValueType.trimmedDescription)?\
+            \(raw: columnQueryValueType.trimmedDescription)\
             >.for(\
             \(columnName), \
             keyPath: \\QueryValue.\(identifier)\

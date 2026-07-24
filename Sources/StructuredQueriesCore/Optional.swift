@@ -81,6 +81,16 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   public static func queryFragment(decoding queryFragment: QueryFragment) -> QueryFragment {
     Wrapped.queryFragment(decoding: queryFragment)
   }
+
+  @inlinable
+  public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+    Wrapped._queryFragment(jsonEncoding: queryFragment)
+  }
+
+  @inlinable
+  public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+    Wrapped._queryFragment(jsonDecoding: queryFragment)
+  }
 }
 
 extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {
@@ -98,7 +108,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
     TableColumns()
   }
 
-  fileprivate subscript<Member: QueryRepresentable>(
+  subscript<Member: QueryRepresentable>(
     member _: KeyPath<Member, Member>,
     column keyPath: KeyPath<Wrapped, Member.QueryOutput>
   ) -> Member.QueryOutput? {
@@ -168,10 +178,34 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, ColumnGroup<Wrapped, Member>>
     ) -> ColumnGroup<Optional, Member?> {
-      ColumnGroup<Optional, Member?>(
-        keyPath: \.[member: \Member.self, column: Wrapped.columns[keyPath: keyPath].keyPath]
+      let column = Wrapped.columns[keyPath: keyPath]
+      return ColumnGroup<Optional, Member?>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column.keyPath]
       )
     }
+
+    #if CasePaths
+      public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumn<Wrapped, Member>>
+      ) -> TableColumn<Optional, Member??> {
+        let column = Wrapped.columns[keyPath: keyPath].base
+        return TableColumn<Optional, Member??>(
+          column.name,
+          keyPath: \.[member: \Member?.self, column: column.keyPath]
+        )
+      }
+
+      public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumnGroup<Wrapped, Member>>
+      ) -> ColumnGroup<Optional, Member??> {
+        let column = Wrapped.columns[keyPath: keyPath].base
+        return ColumnGroup<Optional, Member??>(
+          column.name,
+          keyPath: \.[member: \Member?.self, column: column.keyPath]
+        )
+      }
+    #endif
 
     public subscript<Member: QueryExpression>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, Member>

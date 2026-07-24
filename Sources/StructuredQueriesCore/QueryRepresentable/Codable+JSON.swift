@@ -6,6 +6,10 @@ public struct _CodableJSONRepresentation<QueryOutput: Codable>: Codable, QueryRe
   public init(queryOutput: QueryOutput) {
     self.queryOutput = queryOutput
   }
+
+  public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+    "json(\(queryFragment))"
+  }
 }
 
 extension _CodableJSONRepresentation: Equatable where QueryOutput: Equatable {}

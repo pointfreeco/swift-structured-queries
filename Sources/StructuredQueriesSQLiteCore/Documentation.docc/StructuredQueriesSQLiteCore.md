@@ -18,6 +18,7 @@ custom database functions, and more.
 - <doc:Triggers>
 - <doc:Views>
 - <doc:FullTextSearch>
+- <doc:JSON>
 
 ### Query representations
 

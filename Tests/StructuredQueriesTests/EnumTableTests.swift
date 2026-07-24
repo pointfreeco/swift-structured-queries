@@ -407,6 +407,68 @@
         }
       }
 
+      @Test func updateCase() {
+        assertQuery(
+          Attachment
+            .find(1)
+            .update {
+              $0.kind.note = #bind("Hello, world!")
+            }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "attachments"
+          SET "note" = 'Hello, world!', "link" = NULL, "videoURL" = NULL, "videoKind" = NULL, "imageCaption" = NULL, "imageURL" = NULL
+          WHERE (("attachments"."id") IN ((1)))
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────┐
+          │ Attachment(                    │
+          │   id: 1,                       │
+          │   kind: .note("Hello, world!") │
+          │ )                              │
+          └────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func updateCaseGroup() {
+        assertQuery(
+          Attachment
+            .find(2)
+            .update {
+              $0.kind.image = Attachment.Image(
+                caption: "Blob",
+                url: URL(string: "https://www.pointfree.co/blob.jpg")!
+              )
+            }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "attachments"
+          SET "imageCaption" = 'Blob', "imageURL" = 'https://www.pointfree.co/blob.jpg', "link" = NULL, "note" = NULL, "videoURL" = NULL, "videoKind" = NULL
+          WHERE (("attachments"."id") IN ((2)))
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────┐
+          │ Attachment(                                       │
+          │   id: 2,                                          │
+          │   kind: .image(                                   │
+          │     Attachment.Image(                             │
+          │       caption: "Blob",                            │
+          │       url: URL(https://www.pointfree.co/blob.jpg) │
+          │     )                                             │
+          │   )                                               │
+          │ )                                                 │
+          └───────────────────────────────────────────────────┘
+          """
+        }
+      }
+
       @Test func selection() {
         assertQuery(
           Values(
@@ -520,7 +582,7 @@
             Media.select { MediaList.Columns(medias: $0.jsonGroupArray()) }
           ) {
             """
-            SELECT json_group_array(json_object('note', json_quote("medias"."note"), 'video_preview', json_quote("medias"."video_preview"), 'image_caption', json_quote("medias"."image_caption"), 'image_url', json_quote("medias"."image_url"))) AS "medias"
+            SELECT json_group_array(json_object('note', "medias"."note", 'video_preview', "medias"."video_preview", 'image_caption', "medias"."image_caption", 'image_url', "medias"."image_url")) AS "medias"
             FROM "medias"
             """
           } results: {
@@ -543,6 +605,199 @@
           }
         }
       }
+
+      @Test func jsonExtractCases() throws {
+        try db.execute(
+          """
+          CREATE TABLE "takes" (
+            "id" INTEGER PRIMARY KEY,
+            "media" BLOB NOT NULL
+          )
+          """
+        )
+        try db.execute(
+          Take.insert {
+            [
+              Take(id: 1, media: .note("Hello")),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
+              Take(
+                id: 3,
+                media: .image(
+                  MediaImage(
+                    caption: "Blob", url: URL(string: "https://www.pointfree.co/blob.jpg")!
+                  )
+                )
+              ),
+            ]
+          }
+        )
+        assertQuery(
+          Take.select {
+            ($0.media.jsonExtract(\.note), $0.media.jsonbExtract(\.videoPreview))
+          }
+        ) {
+          """
+          SELECT json_extract("takes"."media", '$."note"'), jsonb_extract("takes"."media", '$."video_preview"')
+          FROM "takes"
+          """
+        } results: {
+          """
+          ┌─────────┬───────────────────────────────────────────┐
+          │ "Hello" │ nil                                       │
+          │ nil     │ URL(https://www.pointfree.co/preview.mov) │
+          │ nil     │ nil                                       │
+          └─────────┴───────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Take.select {
+            ($0.media.jsonExtract(\.image), $0.media.jsonExtract(\.image.caption))
+          }
+        ) {
+          """
+          SELECT json_extract("takes"."media", '$."image"'), json_extract("takes"."media", '$."image"."image_caption"')
+          FROM "takes"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────┬────────┐
+          │ nil                                           │ nil    │
+          ├───────────────────────────────────────────────┼────────┤
+          │ nil                                           │ nil    │
+          ├───────────────────────────────────────────────┼────────┤
+          │ MediaImage(                                   │ "Blob" │
+          │   caption: "Blob",                            │        │
+          │   url: URL(https://www.pointfree.co/blob.jpg) │        │
+          │ )                                             │        │
+          └───────────────────────────────────────────────┴────────┘
+          """
+        }
+      }
+
+      @Test func jsonbSetCase() throws {
+        try db.execute(
+          """
+          CREATE TABLE "takes" (
+            "id" INTEGER PRIMARY KEY,
+            "media" BLOB NOT NULL
+          )
+          """
+        )
+        try db.execute(
+          Take.insert {
+            [
+              Take(id: 1, media: .note("Hello")),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
+            ]
+          }
+        )
+        assertQuery(
+          Take
+            .update { $0.media = $0.media.jsonbSet(\.note, "Switched") }
+            .returning(\.media)
+        ) {
+          """
+          UPDATE "takes"
+          SET "media" = jsonb_set("takes"."media", '$', jsonb_object('note', 'Switched'))
+          RETURNING json("media")
+          """
+        } results: {
+          """
+          ┌────────────────────────┐
+          │ Media.note("Switched") │
+          │ Media.note("Switched") │
+          └────────────────────────┘
+          """
+        }
+      }
+
+      @Test func jsonbReplaceCase() throws {
+        try db.execute(
+          """
+          CREATE TABLE "takes" (
+            "id" INTEGER PRIMARY KEY,
+            "media" BLOB NOT NULL
+          )
+          """
+        )
+        try db.execute(
+          Take.insert {
+            [
+              Take(id: 1, media: .note("Hello")),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
+            ]
+          }
+        )
+        assertQuery(
+          Take
+            .update {
+              $0.media = $0.media.jsonbReplace(
+                \.videoPreview, URL(string: "https://www.pointfree.co/preview.mp4")!
+              )
+            }
+            .returning(\.media)
+        ) {
+          """
+          UPDATE "takes"
+          SET "media" = jsonb_replace("takes"."media", '$."video_preview"', 'https://www.pointfree.co/preview.mp4')
+          RETURNING json("media")
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────────────────┐
+          │ Media.note("Hello")                                           │
+          │ Media.videoPreview(URL(https://www.pointfree.co/preview.mp4)) │
+          └───────────────────────────────────────────────────────────────┘
+          """
+        }
+      }
+      @Test func replaceIfActive() throws {
+        try db.execute(
+          """
+          CREATE TABLE "abcRows" (
+            "id" INTEGER PRIMARY KEY,
+            "doc" BLOB NOT NULL
+          )
+          """
+        )
+        try db.execute(
+          ABCRow.insert {
+            [
+              ABCRow(id: 1, doc: ABCDoc(abc: .a(CaseA(d: 1)))),
+              ABCRow(id: 2, doc: ABCDoc(abc: .b(CaseB(e: 2, f: 3)))),
+            ]
+          }
+        )
+        assertQuery(
+          ABCRow.update { $0.doc = $0.doc.jsonbReplace(\.abc.b.e, 99) }
+        ) {
+          """
+          UPDATE "abcRows"
+          SET "doc" = jsonb_replace("abcRows"."doc", '$."abc"."b"."e"', 99)
+          """
+        }
+        assertQuery(
+          ABCRow.select { _ in #sql("json(\"doc\")", as: String.self) }
+        ) {
+          """
+          SELECT json("doc")
+          FROM "abcRows"
+          """
+        } results: {
+          """
+          ┌──────────────────────────────────┐
+          │ #"{"abc":{"a":{"d":1}}}"#        │
+          │ #"{"abc":{"b":{"e":99,"f":3}}}"# │
+          └──────────────────────────────────┘
+          """
+        }
+      }
     }
 
     @Table private enum Media: Codable {
@@ -562,6 +817,49 @@
     @Selection private struct MediaList {
       @Column(as: [Media].JSONRepresentation.self)
       let medias: [Media]
+    }
+
+    @Table private struct Take {
+      let id: Int
+      @Column(as: Media.JSONBRepresentation.self)
+      var media: Media
+    }
+
+    @Table private enum ABC: Codable {
+      case a(CaseA)
+      case b(CaseB)
+      case c(String)
+    }
+
+    @Selection private struct CaseA: Codable {
+      var d = 0
+    }
+
+    @Selection private struct CaseB: Codable {
+      var e = 0
+      var f = 0
+    }
+
+    @Selection private struct ABCDoc: Codable {
+      var abc: ABC
+    }
+
+    @Table private enum Feed: Codable {
+      case title(String)
+      @Column(as: [String].JSONRepresentation.self)
+      case tags([String])
+    }
+
+    @Table private struct FeedRow {
+      let id: Int
+      @Column(as: Feed.JSONBRepresentation.self)
+      var feed: Feed
+    }
+
+    @Table("abcRows") private struct ABCRow {
+      let id: Int
+      @Column(as: ABCDoc.JSONBRepresentation.self)
+      var doc: ABCDoc
     }
   #endif
 
