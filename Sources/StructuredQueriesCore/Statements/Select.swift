@@ -1815,7 +1815,8 @@ extension Select: SelectStatement {
     var query: QueryFragment = "SELECT"
     let columns =
       columns.isEmpty
-      ? [From.columns.queryFragment] + joins.map { $0.tableColumns }
+      ? $_isSelecting.withValue(true) { [From.columns.queryFragment] }
+        + joins.map { $0.tableColumns }
       : columns
     if distinct {
       query.append(" DISTINCT")
@@ -1881,7 +1882,7 @@ public struct _JoinClause: QueryExpression, Sendable {
     self.constraint = constraint.queryFragment
     self.operator = `operator`?.queryFragment
     tableAlias = table.tableAlias
-    tableColumns = table.columns.queryFragment
+    tableColumns = $_isSelecting.withValue(true) { table.columns.queryFragment }
     tableName = table.tableFragment
   }
 

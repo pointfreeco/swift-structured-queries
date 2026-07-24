@@ -76,6 +76,11 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   public var queryOutput: Wrapped.QueryOutput? {
     self?.queryOutput
   }
+
+  @inlinable
+  public static func queryFragment(decoding queryFragment: QueryFragment) -> QueryFragment {
+    Wrapped.queryFragment(decoding: queryFragment)
+  }
 }
 
 extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {

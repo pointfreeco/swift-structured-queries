@@ -10,7 +10,7 @@ extension SnapshotTests {
       assertQuery(Reminder.delete().returning(\.id)) {
         """
         DELETE FROM "reminders"
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -112,7 +112,7 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders"
         WHERE ("reminders"."isCompleted")
-        RETURNING "reminders"."title"
+        RETURNING "title"
         """
       } results: {
         """

@@ -23,5 +23,9 @@
     public init(queryOutput: QueryOutput) {
       self.init(rawValue: RawValue(queryOutput: queryOutput.rawValue))
     }
+
+    public static func queryFragment(decoding queryFragment: QueryFragment) -> QueryFragment {
+      RawValue.queryFragment(decoding: queryFragment)
+    }
   }
 #endif
