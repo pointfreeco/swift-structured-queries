@@ -317,6 +317,7 @@ public struct _SelectClauses: Sendable {
   var isEmpty = false
   var distinct = false
   var columns: [QueryFragment] = []
+  var from: QueryFragment?
   var joins: [_JoinClause] = []
   var `where`: [QueryFragment] = []
   var group: [QueryFragment] = []
@@ -353,6 +354,11 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     set { clauses.columns = newValue }
     _modify { yield &clauses.columns }
   }
+  fileprivate var from: QueryFragment? {
+    get { clauses.from }
+    set { clauses.from = newValue }
+    _modify { yield &clauses.from }
+  }
   fileprivate var joins: [_JoinClause] {
     get { clauses.joins }
     set { clauses.joins = newValue }
@@ -388,6 +394,7 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     isEmpty: Bool,
     distinct: Bool,
     columns: [QueryFragment],
+    from: QueryFragment? = nil,
     joins: [_JoinClause],
     where: [QueryFragment],
     group: [QueryFragment],
@@ -398,6 +405,7 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     self.isEmpty = isEmpty
     self.columns = columns
     self.distinct = distinct
+    self.from = from
     self.joins = joins
     self.where = `where`
     self.group = group
@@ -408,6 +416,16 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
 
   init(clauses: _SelectClauses) {
     self.clauses = clauses
+  }
+
+  /// A value-level `FROM` clause override.
+  ///
+  /// When non-`nil`, this fragment is rendered in place of `From.tableFragment`, allowing a
+  /// statement to select from a table-valued function (_e.g._ SQLite's `json_each`), whose
+  /// arguments are not statically known.
+  package var _from: QueryFragment? {
+    get { clauses.from }
+    set { clauses.from = newValue }
   }
 }
 
@@ -590,6 +608,7 @@ extension Select {
         + $_isSelecting.withValue(true) {
           Array(repeat each selection((From.columns, repeat (each J).columns)))
         },
+      from: from,
       joins: joins,
       where: `where`,
       group: group,
@@ -645,6 +664,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -686,6 +706,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -723,6 +744,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -753,6 +775,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -806,6 +829,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -855,6 +879,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -894,6 +919,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -925,6 +951,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -978,6 +1005,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1027,6 +1055,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1066,6 +1095,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1097,6 +1127,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1150,6 +1181,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1199,6 +1231,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1238,6 +1271,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1269,6 +1303,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1735,6 +1770,7 @@ extension Select {
       isEmpty: isEmpty,
       distinct: distinct,
       columns: Array(repeat each transform(repeat { _ in next() }((each C1).self))),
+      from: from,
       joins: joins,
       where: `where`,
       group: group,
@@ -1792,6 +1828,7 @@ public func + <
     isEmpty: lhs.isEmpty || rhs.isEmpty,
     distinct: lhs.distinct || rhs.distinct,
     columns: lhs.columns + rhs.columns,
+    from: rhs.from ?? lhs.from,
     joins: lhs.joins + rhs.joins,
     where: (lhs.where + rhs.where).removingDuplicates(),
     group: (lhs.group + rhs.group).removingDuplicates(),
@@ -1823,10 +1860,14 @@ extension Select: SelectStatement {
     }
     query.append(" \(columns.joined(separator: ", "))")
     query.append("\(.newlineOrSpace)FROM ")
-    if let schemaName = From.schemaName {
-      query.append("\(quote: schemaName).")
+    if let from = clauses.from {
+      query.append(from)
+    } else {
+      if let schemaName = From.schemaName {
+        query.append("\(quote: schemaName).")
+      }
+      query.append(From.tableFragment)
     }
-    query.append(From.tableFragment)
     if let tableAlias = From.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }
