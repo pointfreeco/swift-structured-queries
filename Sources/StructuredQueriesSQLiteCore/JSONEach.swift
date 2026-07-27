@@ -65,9 +65,10 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
 /// A table representing SQLite's `json_each` table-valued function iterating over a JSON array
 /// of `Element` values.
 ///
-/// Statements of this table are created by applying ``StructuredQueriesCore/QueryExpression/jsonEach()``
-/// to a JSON array expression. Its columns are derived from `Element`'s columns, with each member
-/// rendered as a `json_extract` of the current array element.
+/// Statements of this table are created by applying
+/// ``StructuredQueriesCore/QueryExpression/jsonEach()`` to a JSON array expression. Its columns
+/// are derived from `Element`'s columns, with each member rendered as a `json_extract` of the
+/// current array element.
 ///
 /// > Note: This table has no meaning independent of a JSON array expression, so avoid using its
 /// > static entry points (`all`, `where`, etc.) directly. Always derive statements from
