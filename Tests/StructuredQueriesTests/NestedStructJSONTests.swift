@@ -16,6 +16,12 @@ import _StructuredQueriesSQLite
   var dimensions: Dimensions
 }
 
+@Table private struct Album: Codable {
+  let id: Int
+  @Column(as: [Photo].JSONRepresentation.self)
+  var photos: [Photo] = []
+}
+
 extension SnapshotTests {
   @MainActor
   @Suite struct NestedStructJSONTests {
@@ -47,6 +53,46 @@ extension SnapshotTests {
           """
           SELECT json_object('id', json_quote("photos"."id"), json_object('dimensions', 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height")))
           FROM "photos"
+          """
+        } results: {
+          """
+          ┌───────────────────────────┐
+          │ Photo(                    │
+          │   id: 1,                  │
+          │   dimensions: Dimensions( │
+          │     width: 800,           │
+          │     height: 600           │
+          │   )                       │
+          │ )                         │
+          └───────────────────────────┘
+          """
+        }
+      }
+    }
+
+    // TODO: 'json_each' should nest column groups to match their 'Codable' conformances.
+    @Test func jsonEachExtractsColumnGroups() throws {
+      try db.execute(
+        """
+        CREATE TABLE "albums" (
+          "id" INTEGER PRIMARY KEY,
+          "photos" TEXT NOT NULL
+        )
+        """
+      )
+      try db.execute(
+        Album.insert {
+          Album(id: 1, photos: [Photo(id: 1, dimensions: Dimensions(width: 800, height: 600))])
+        }
+      )
+      withKnownIssue {
+        assertQuery(
+          Album.join(Album.columns.photos.jsonEach()) { _, _ in true }.select { $1 }
+        ) {
+          """
+          SELECT json_extract("json_each"."value", '$."id"'), json_extract("json_each"."value", '$."dimensions"."width"'), json_extract("json_each"."value", '$."dimensions"."height"')
+          FROM "albums"
+          JOIN json_each("albums"."photos") ON 1
           """
         } results: {
           """
