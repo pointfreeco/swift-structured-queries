@@ -44,33 +44,29 @@ extension SnapshotTests {
       )
     }
 
-    // TODO: 'json_object' should nest column groups to match their 'Codable' conformances.
     @Test func jsonObjectDecodes() {
-      withKnownIssue {
-        assertQuery(
-          Photo.select { $0.jsonObject() }
-        ) {
-          """
-          SELECT json_object('id', json_quote("photos"."id"), json_object('dimensions', 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height")))
-          FROM "photos"
-          """
-        } results: {
-          """
-          ┌───────────────────────────┐
-          │ Photo(                    │
-          │   id: 1,                  │
-          │   dimensions: Dimensions( │
-          │     width: 800,           │
-          │     height: 600           │
-          │   )                       │
-          │ )                         │
-          └───────────────────────────┘
-          """
-        }
+      assertQuery(
+        Photo.select { $0.jsonObject() }
+      ) {
+        """
+        SELECT json_object('id', "photos"."id", 'dimensions', json_object('width', "photos"."width", 'height', "photos"."height"))
+        FROM "photos"
+        """
+      } results: {
+        """
+        ┌───────────────────────────┐
+        │ Photo(                    │
+        │   id: 1,                  │
+        │   dimensions: Dimensions( │
+        │     width: 800,           │
+        │     height: 600           │
+        │   )                       │
+        │ )                         │
+        └───────────────────────────┘
+        """
       }
     }
 
-    // TODO: 'json_each' should nest column groups to match their 'Codable' conformances.
     @Test func jsonEachExtractsColumnGroups() throws {
       try db.execute(
         """
@@ -85,56 +81,51 @@ extension SnapshotTests {
           Album(id: 1, photos: [Photo(id: 1, dimensions: Dimensions(width: 800, height: 600))])
         }
       )
-      withKnownIssue {
-        assertQuery(
-          Album.join(Album.columns.photos.jsonEach()) { _, _ in true }.select { $1 }
-        ) {
-          """
-          SELECT json_extract("json_each"."value", '$."id"'), json_extract("json_each"."value", '$."dimensions"."width"'), json_extract("json_each"."value", '$."dimensions"."height"')
-          FROM "albums"
-          JOIN json_each("albums"."photos") ON 1
-          """
-        } results: {
-          """
-          ┌───────────────────────────┐
-          │ Photo(                    │
-          │   id: 1,                  │
-          │   dimensions: Dimensions( │
-          │     width: 800,           │
-          │     height: 600           │
-          │   )                       │
-          │ )                         │
-          └───────────────────────────┘
-          """
-        }
+      assertQuery(
+        Album.join(Album.columns.photos.jsonEach()) { _, _ in true }.select { $1 }
+      ) {
+        """
+        SELECT json_extract("json_each"."value", '$."id"'), json_extract("json_each"."value", '$."dimensions"."width"'), json_extract("json_each"."value", '$."dimensions"."height"')
+        FROM "albums"
+        JOIN json_each("albums"."photos") ON 1
+        """
+      } results: {
+        """
+        ┌───────────────────────────┐
+        │ Photo(                    │
+        │   id: 1,                  │
+        │   dimensions: Dimensions( │
+        │     width: 800,           │
+        │     height: 600           │
+        │   )                       │
+        │ )                         │
+        └───────────────────────────┘
+        """
       }
     }
 
-    // TODO: 'json_object' should nest column groups to match their 'Codable' conformances.
     @Test func jsonGroupArrayDecodes() {
-      withKnownIssue {
-        assertQuery(
-          Photo.select { $0.jsonGroupArray() }
-        ) {
-          """
-          SELECT json_group_array(json_object('id', json_quote("photos"."id"), json_object('dimensions', 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height"))))
-          FROM "photos"
-          """
-        } results: {
-          """
-          ┌─────────────────────────────┐
-          │ [                           │
-          │   [0]: Photo(               │
-          │     id: 1,                  │
-          │     dimensions: Dimensions( │
-          │       width: 800,           │
-          │       height: 600           │
-          │     )                       │
-          │   )                         │
-          │ ]                           │
-          └─────────────────────────────┘
-          """
-        }
+      assertQuery(
+        Photo.select { $0.jsonGroupArray() }
+      ) {
+        """
+        SELECT json_group_array(json_object('id', "photos"."id", 'dimensions', json_object('width', "photos"."width", 'height', "photos"."height")))
+        FROM "photos"
+        """
+      } results: {
+        """
+        ┌─────────────────────────────┐
+        │ [                           │
+        │   [0]: Photo(               │
+        │     id: 1,                  │
+        │     dimensions: Dimensions( │
+        │       width: 800,           │
+        │       height: 600           │
+        │     )                       │
+        │   )                         │
+        │ ]                           │
+        └─────────────────────────────┘
+        """
       }
     }
   }

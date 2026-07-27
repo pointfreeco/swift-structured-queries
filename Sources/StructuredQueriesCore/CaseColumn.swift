@@ -27,9 +27,9 @@
 
     public var queryFragment: QueryFragment { base.queryFragment }
 
-    public var _allColumns: [any TableColumnExpression] { [self] }
+    public var _allColumns: TableColumnList<any TableColumnExpression> { [self] }
 
-    public var _writableColumns: [any WritableTableColumnExpression] { [self] }
+    public var _writableColumns: TableColumnList<any WritableTableColumnExpression> { [self] }
 
     public func _aliased<Name: AliasName>(
       _ alias: Name.Type
@@ -64,9 +64,9 @@
 
     public var queryFragment: QueryFragment { base.queryFragment }
 
-    public var _allColumns: [any TableColumnExpression] { base._allColumns }
+    public var _allColumns: TableColumnList<any TableColumnExpression> { base._allColumns }
 
-    public var _writableColumns: [any WritableTableColumnExpression] { base._writableColumns }
+    public var _writableColumns: TableColumnList<any WritableTableColumnExpression> { base._writableColumns }
 
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<

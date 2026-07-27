@@ -152,13 +152,14 @@ public struct JSONEach<Key: QueryRepresentable, Element: QueryRepresentable & Co
   public struct TableColumns: TableDefinition, Sendable {
     public typealias QueryValue = JSONEach
 
-    public static var allColumns: [any TableColumnExpression] {
-      func openTable<T: Table>(_: T.Type) -> [any TableColumnExpression] {
+    public static var allColumns: TableColumnList<any TableColumnExpression> {
+      func openTable<T: Table>(_: T.Type) -> TableColumnList<any TableColumnExpression> {
         func open<Column: TableColumnExpression>(
-          _ column: Column
+          _ column: Column,
+          _ path: [String]
         ) -> any TableColumnExpression {
           _JSONEachColumn<JSONEach, Column.Value>(
-            column.name,
+            path,
             keyPath:
               \.[
                 member: \Column.Value.self,
@@ -166,10 +167,25 @@ public struct JSONEach<Key: QueryRepresentable, Element: QueryRepresentable & Co
               ]
           )
         }
-        return T.TableColumns.allColumns.map { open($0) }
+        func extract(
+          _ columns: TableColumnList<any TableColumnExpression>,
+          _ prefix: [String]
+        ) -> TableColumnList<any TableColumnExpression> {
+          TableColumnList(
+            nodes: columns.nodes.map { node in
+              switch node {
+              case .column(let column):
+                .column(open(column, prefix + [column.name]))
+              case .group(let name, let columns):
+                .group(name: name, extract(columns, prefix + [name]))
+              }
+            }
+          )
+        }
+        return extract(T.TableColumns.allColumns, [])
       }
       func openScalar<V: QueryRepresentable & QueryBindable>(_: V.Type)
-        -> [any TableColumnExpression]
+        -> TableColumnList<any TableColumnExpression>
       {
         [
           _JSONEachValueColumn<JSONEach, V>(
@@ -187,7 +203,7 @@ public struct JSONEach<Key: QueryRepresentable, Element: QueryRepresentable & Co
       }
     }
 
-    public static var writableColumns: [any WritableTableColumnExpression] { [] }
+    public static var writableColumns: TableColumnList<any WritableTableColumnExpression> { [] }
 
     /// The key of the current element in the JSON collection.
     public var key: SQLQueryExpression<Key> {
@@ -217,7 +233,7 @@ extension JSONEach.TableColumns where Element: Table {
   ) -> _JSONEachColumn<JSONEach, Member> {
     let column = Element.columns[keyPath: keyPath]
     return _JSONEachColumn(
-      column.name,
+      [column.name],
       keyPath: \.[member: \Member.self, column: column.keyPath]
     )
   }
@@ -261,16 +277,19 @@ public struct _JSONEachColumn<Root: Table, Value: QueryRepresentable & QueryBind
 
   public let name: String
 
+  public let path: [String]
+
   public let defaultValue: Value.QueryOutput?
 
   public let keyPath: KeyPath<Root, Value.QueryOutput>
 
   init(
-    _ name: String,
+    _ path: [String],
     keyPath: KeyPath<Root, Value.QueryOutput>,
     default defaultValue: Value.QueryOutput? = nil
   ) {
-    self.name = name
+    self.name = path.last ?? ""
+    self.path = path
     self.keyPath = keyPath
     self.defaultValue = defaultValue
   }
@@ -285,18 +304,23 @@ public struct _JSONEachColumn<Root: Table, Value: QueryRepresentable & QueryBind
   }
 
   private var jsonPath: String {
-    let escapedName =
-      name
-      .replacingOccurrences(of: "\\", with: "\\\\")
-      .replacingOccurrences(of: "\"", with: "\\\"")
-    return "$.\"\(escapedName)\""
+    "$"
+      + path
+      .map { component in
+        let escaped =
+          component
+          .replacingOccurrences(of: "\\", with: "\\\\")
+          .replacingOccurrences(of: "\"", with: "\\\"")
+        return ".\"\(escaped)\""
+      }
+      .joined()
   }
 
   public func _aliased<Name: AliasName>(
     _ alias: Name.Type
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value> {
     _JSONEachColumn<TableAlias<Root, Name>, Value>(
-      name,
+      path,
       keyPath: \.[member: \Value.self, column: keyPath]
     )
   }
