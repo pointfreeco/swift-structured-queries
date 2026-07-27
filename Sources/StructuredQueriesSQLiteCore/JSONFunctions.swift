@@ -1657,37 +1657,45 @@ extension _CodableJSONBRepresentation: _JSONObjectRepresentation where QueryOutp
   public typealias _Object = QueryOutput
 }
 
-public protocol _JSONCollectionRepresentation<_Key, _ElementRepresentation> {
+public protocol _JSONArrayRepresentation<_Element, _ElementRepresentation> {
+  associatedtype _Element: Codable
+  associatedtype _ElementRepresentation: QueryRepresentable
+}
+
+public protocol _JSONDictionaryRepresentation<_Key, _ElementRepresentation> {
   associatedtype _Key: QueryRepresentable
   associatedtype _ElementRepresentation: QueryRepresentable
 }
 
-public protocol _JSONArrayRepresentation<_Element, _ElementRepresentation>:
-  _JSONCollectionRepresentation
-where _Key == Int {
-  associatedtype _Element: Codable
+public protocol _DictionaryProtocol<Key, Value> {
+  associatedtype Key: Hashable
+  associatedtype Value
 }
 
-extension _CodableJSONRepresentation: _JSONCollectionRepresentation
-where QueryOutput: RangeReplaceableCollection, QueryOutput.Element: Codable {
-  public typealias _Key = Int
-  public typealias _ElementRepresentation = _CodableJSONRepresentation<QueryOutput.Element>
-}
+extension Dictionary: _DictionaryProtocol {}
 
 extension _CodableJSONRepresentation: _JSONArrayRepresentation
 where QueryOutput: RangeReplaceableCollection, QueryOutput.Element: Codable {
   public typealias _Element = QueryOutput.Element
-}
-
-extension _CodableJSONBRepresentation: _JSONCollectionRepresentation
-where QueryOutput: RangeReplaceableCollection, QueryOutput.Element: Codable {
-  public typealias _Key = Int
-  public typealias _ElementRepresentation = _CodableJSONBRepresentation<QueryOutput.Element>
+  public typealias _ElementRepresentation = _CodableJSONRepresentation<QueryOutput.Element>
 }
 
 extension _CodableJSONBRepresentation: _JSONArrayRepresentation
 where QueryOutput: RangeReplaceableCollection, QueryOutput.Element: Codable {
   public typealias _Element = QueryOutput.Element
+  public typealias _ElementRepresentation = _CodableJSONBRepresentation<QueryOutput.Element>
+}
+
+extension _CodableJSONRepresentation: _JSONDictionaryRepresentation
+where QueryOutput: _DictionaryProtocol, QueryOutput.Key == String, QueryOutput.Value: Codable {
+  public typealias _Key = String
+  public typealias _ElementRepresentation = _CodableJSONRepresentation<QueryOutput.Value>
+}
+
+extension _CodableJSONBRepresentation: _JSONDictionaryRepresentation
+where QueryOutput: _DictionaryProtocol, QueryOutput.Key == String, QueryOutput.Value: Codable {
+  public typealias _Key = String
+  public typealias _ElementRepresentation = _CodableJSONBRepresentation<QueryOutput.Value>
 }
 
 extension QueryFragment {

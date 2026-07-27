@@ -1,7 +1,7 @@
 import Foundation
 public import StructuredQueriesCore
 
-extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONCollectionRepresentation {
+extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRepresentation {
   /// A select statement that iterates over the elements of this JSON array expression using the
   /// `json_each` table-valued function.
   ///
@@ -22,6 +22,35 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONCollect
   /// ```
   ///
   /// - Returns: A select statement over the elements of this JSON array.
+  public func jsonEach<Element: Codable>() -> SelectOf<JSONEach<Int, Element>>
+  where QueryValue._ElementRepresentation: _JSONObjectRepresentation<Element> {
+    JSONEach.select(from: "json_each(\(argumentFragment))")
+  }
+}
+
+extension QueryExpression
+where QueryValue: _AnyJSONRepresentable & _JSONDictionaryRepresentation {
+  /// A select statement that iterates over the values of this JSON object expression using the
+  /// `json_each` table-valued function.
+  ///
+  /// Works like ``jsonEach()-(())`` over a JSON array, except each row's ``JSONEach/TableColumns/key``
+  /// is the object's member name rather than an array index:
+  ///
+  /// ```swift
+  /// Product.where {
+  ///   $0.inventory.jsonEach()
+  ///     .where { $0.key.eq("SFO") && $0.onHand.eq(0) }
+  ///     .exists()
+  /// }
+  /// // SELECT … FROM "products"
+  /// // WHERE EXISTS (
+  /// //   SELECT … FROM json_each("products"."inventory")
+  /// //   WHERE (("json_each"."key") = ('SFO'))
+  /// //     AND ((json_extract("json_each"."value", '$."onHand"')) = (0))
+  /// // )
+  /// ```
+  ///
+  /// - Returns: A select statement over the values of this JSON object.
   public func jsonEach<Element: Codable>() -> SelectOf<JSONEach<QueryValue._Key, Element>>
   where QueryValue._ElementRepresentation: _JSONObjectRepresentation<Element> {
     JSONEach.select(from: "json_each(\(argumentFragment))")
@@ -47,7 +76,26 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   ///
   /// - Parameter path: A key path from the JSON expression to an array of objects.
   /// - Returns: A select statement over the elements of the JSON array at the given path.
-  public func jsonEach<Context, Member: _JSONCollectionRepresentation, Element: Codable>(
+  public func jsonEach<Context, Member: _JSONArrayRepresentation, Element: Codable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> SelectOf<JSONEach<Int, Element>>
+  where Member._ElementRepresentation: _JSONObjectRepresentation<Element> {
+    JSONEach.select(
+      from: """
+        json_each(\
+        \(argumentFragment), \
+        \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text)\
+        )
+        """
+    )
+  }
+
+  /// A select statement that iterates over the values of a JSON object at the given path in this
+  /// JSON expression using the `json_each` table-valued function.
+  ///
+  /// - Parameter path: A key path from the JSON expression to an object of values.
+  /// - Returns: A select statement over the values of the JSON object at the given path.
+  public func jsonEach<Context, Member: _JSONDictionaryRepresentation, Element: Codable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
   ) -> SelectOf<JSONEach<Member._Key, Element>>
   where Member._ElementRepresentation: _JSONObjectRepresentation<Element> {

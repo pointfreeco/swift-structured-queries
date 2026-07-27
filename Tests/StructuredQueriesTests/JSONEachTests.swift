@@ -231,6 +231,85 @@ extension SnapshotTests {
       }
     }
 
+    @Test func dictionaryKeys() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "products" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "inventory" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        Product.insert {
+          [
+            Product.Draft(inventory: ["SFO": Stock(onHand: 0), "JFK": Stock(onHand: 4)]),
+            Product.Draft(inventory: ["SFO": Stock(onHand: 7)]),
+          ]
+        }
+      )
+      assertQuery(
+        Product
+          .where {
+            $0.inventory.jsonEach()
+              .where { $0.key.eq("SFO") && $0.onHand.eq(0) }
+              .exists()
+          }
+          .select(\.id)
+      ) {
+        """
+        SELECT "products"."id"
+        FROM "products"
+        WHERE (EXISTS (
+          SELECT json_extract("json_each"."value", '$."onHand"')
+          FROM json_each("products"."inventory")
+          WHERE ((("json_each"."key") = ('SFO')) AND ((json_extract("json_each"."value", '$."onHand"')) = (0)))
+        ))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        └───┘
+        """
+      }
+    }
+
+    @Test func dictionaryKeyAndValue() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "products" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "inventory" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        Product.insert { Product.Draft(inventory: ["JFK": Stock(onHand: 4)]) }
+      )
+      assertQuery(
+        Product
+          .join(Product.columns.inventory.jsonEach()) { _, _ in true }
+          .select { ($1.key, $1.onHand) }
+      ) {
+        """
+        SELECT "json_each"."key", json_extract("json_each"."value", '$."onHand"')
+        FROM "products"
+        JOIN json_each("products"."inventory") ON 1
+        """
+      } results: {
+        """
+        ┌───────┬───┐
+        │ "JFK" │ 4 │
+        └───────┴───┘
+        """
+      }
+    }
+
     @Test func nestedPath() throws {
       try db.execute(
         #sql(
@@ -327,4 +406,16 @@ private struct Author: Codable, Equatable {
 private struct Link: Codable, Equatable {
   var homepage = ""
   var isActive = false
+}
+
+@Table
+private struct Product: Codable, Equatable {
+  let id: Int
+  @Column(as: [String: Stock].JSONRepresentation.self)
+  var inventory: [String: Stock] = [:]
+}
+
+@Selection
+private struct Stock: Codable, Equatable {
+  var onHand = 0
 }
