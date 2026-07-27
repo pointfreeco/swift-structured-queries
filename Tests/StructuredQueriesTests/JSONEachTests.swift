@@ -231,6 +231,84 @@ extension SnapshotTests {
       }
     }
 
+    @Test func scalarElements() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "taggedItems" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "title" TEXT NOT NULL,
+            "tags" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        TaggedItem.insert {
+          [
+            TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"]),
+            TaggedItem.Draft(title: "Taxes", tags: ["work"]),
+          ]
+        }
+      )
+      assertQuery(
+        TaggedItem
+          .where { $0.tags.jsonEach().where { $0.value.eq("urgent") }.exists() }
+          .select(\.title)
+      ) {
+        """
+        SELECT "taggedItems"."title"
+        FROM "taggedItems"
+        WHERE (EXISTS (
+          SELECT "json_each"."value"
+          FROM json_each("taggedItems"."tags")
+          WHERE (("json_each"."value") = ('urgent'))
+        ))
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ "Groceries" │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func scalarElementsJoin() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "taggedItems" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "title" TEXT NOT NULL,
+            "tags" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        TaggedItem.insert { TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"]) }
+      )
+      assertQuery(
+        TaggedItem
+          .join(TaggedItem.columns.tags.jsonEach()) { _, _ in true }
+          .select { ($0.title, $1.key, $1.value) }
+      ) {
+        """
+        SELECT "taggedItems"."title", "json_each"."key", "json_each"."value"
+        FROM "taggedItems"
+        JOIN json_each("taggedItems"."tags") ON 1
+        """
+      } results: {
+        """
+        ┌─────────────┬───┬──────────┐
+        │ "Groceries" │ 0 │ "home"   │
+        │ "Groceries" │ 1 │ "urgent" │
+        └─────────────┴───┴──────────┘
+        """
+      }
+    }
+
     @Test func dictionaryKeys() throws {
       try db.execute(
         #sql(
@@ -418,4 +496,12 @@ private struct Product: Codable, Equatable {
 @Selection
 private struct Stock: Codable, Equatable {
   var onHand = 0
+}
+
+@Table
+private struct TaggedItem: Codable, Equatable {
+  let id: Int
+  var title = ""
+  @Column(as: [String].JSONRepresentation.self)
+  var tags: [String] = []
 }
