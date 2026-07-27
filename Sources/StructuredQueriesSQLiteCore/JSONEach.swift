@@ -182,6 +182,7 @@ public struct JSONEach<Key: QueryRepresentable, Element: QueryRepresentable & Co
       } else if let elementType = Element.self as? any (QueryRepresentable & QueryBindable).Type {
         return openScalar(elementType)
       } else {
+        // TODO: Report issue?
         return []
       }
     }
