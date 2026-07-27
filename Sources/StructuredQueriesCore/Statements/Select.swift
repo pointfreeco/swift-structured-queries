@@ -418,12 +418,7 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     self.clauses = clauses
   }
 
-  /// A value-level `FROM` clause override.
-  ///
-  /// When non-`nil`, this fragment is rendered in place of `From.tableFragment`, allowing a
-  /// statement to select from a table-valued function (_e.g._ SQLite's `json_each`), whose
-  /// arguments are not statically known.
-  package var _from: QueryFragment? {
+  package var _tableReference: QueryFragment? {
     get { clauses.from }
     set { clauses.from = newValue }
   }
@@ -655,6 +650,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -697,6 +693,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -735,6 +732,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -766,6 +764,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -816,6 +815,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -866,6 +866,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -910,6 +911,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -942,6 +944,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -992,6 +995,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -1042,6 +1046,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -1086,6 +1091,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -1118,6 +1124,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -1168,6 +1175,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -1218,6 +1226,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -1262,6 +1271,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -1294,6 +1304,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -1860,8 +1871,8 @@ extension Select: SelectStatement {
     }
     query.append(" \(columns.joined(separator: ", "))")
     query.append("\(.newlineOrSpace)FROM ")
-    if let from = clauses.from {
-      query.append(from)
+    if let tableReference = clauses.from {
+      query.append(tableReference)
     } else {
       if let schemaName = From.schemaName {
         query.append("\(quote: schemaName).")
@@ -1913,10 +1924,11 @@ public struct _JoinClause: QueryExpression, Sendable {
   let `operator`: QueryFragment?
   let tableAlias: String?
   let tableColumns: QueryFragment
-  let tableName: QueryFragment
+  let tableReference: QueryFragment
 
   init(
     operator: Operator?,
+    tableReference: QueryFragment? = nil,
     table: any Table.Type,
     constraint: some QueryExpression<Bool>
   ) {
@@ -1924,7 +1936,7 @@ public struct _JoinClause: QueryExpression, Sendable {
     self.operator = `operator`?.queryFragment
     tableAlias = table.tableAlias
     tableColumns = $_isSelecting.withValue(true) { table.columns.queryFragment }
-    tableName = table.tableFragment
+    self.tableReference = tableReference ?? table.tableFragment
   }
 
   public var queryFragment: QueryFragment {
@@ -1932,7 +1944,7 @@ public struct _JoinClause: QueryExpression, Sendable {
     if let `operator` {
       query.append("\(`operator`) ")
     }
-    query.append("JOIN \(tableName) ")
+    query.append("JOIN \(tableReference) ")
     if let tableAlias = tableAlias {
       query.append("AS \(quote: tableAlias) ")
     }

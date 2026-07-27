@@ -89,9 +89,9 @@ public struct JSONEach<Element: Table & Codable>: Table {
     element[keyPath: keyPath]
   }
 
-  fileprivate static func select(from: QueryFragment) -> SelectOf<JSONEach> {
+  fileprivate static func select(from tableReference: QueryFragment) -> SelectOf<JSONEach> {
     var select = all.asSelect()
-    select._from = from
+    select._tableReference = tableReference
     return select
   }
 

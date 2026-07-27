@@ -184,6 +184,53 @@ extension SnapshotTests {
       }
     }
 
+    @Test func join() {
+      assertQuery(
+        Trip
+          .join(Trip.columns.geofence.jsonEach()) { _, _ in true }
+          .select { ($0.title, $1.label) }
+      ) {
+        """
+        SELECT "trips"."title", json_extract("json_each"."value", '$."label"')
+        FROM "trips"
+        JOIN json_each("trips"."geofence") ON 1
+        """
+      } results: {
+        """
+        ┌────────────┬────────┐
+        │ "Northern" │ "home" │
+        │ "Northern" │ "away" │
+        │ "Mixed"    │ "home" │
+        │ "Mixed"    │ "away" │
+        └────────────┴────────┘
+        """
+      }
+    }
+
+    @Test func leftJoin() {
+      assertQuery(
+        Trip
+          .leftJoin(Trip.columns.geofence.jsonEach()) { _, _ in true }
+          .select { ($0.title, $1.label) }
+      ) {
+        """
+        SELECT "trips"."title", json_extract("json_each"."value", '$."label"')
+        FROM "trips"
+        LEFT JOIN json_each("trips"."geofence") ON 1
+        """
+      } results: {
+        """
+        ┌────────────┬────────┐
+        │ "Northern" │ "home" │
+        │ "Northern" │ "away" │
+        │ "Mixed"    │ "home" │
+        │ "Mixed"    │ "away" │
+        │ "Empty"    │ nil    │
+        └────────────┴────────┘
+        """
+      }
+    }
+
     @Test func nestedPath() throws {
       try db.execute(
         #sql(
