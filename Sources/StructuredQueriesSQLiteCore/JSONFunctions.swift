@@ -1239,19 +1239,29 @@ extension TableDefinition where QueryValue: Codable {
   ///
   /// Useful for referencing a table row in a larger JSON selection.
   public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<QueryValue>> {
-    QueryFunction("json_object", SQLQueryExpression(_jsonObjectArguments))
+    QueryFunction("json_object", SQLQueryExpression(_jsonObjectArguments("json_object")))
   }
 
-  fileprivate var _jsonObjectArguments: QueryFragment {
+  fileprivate func _jsonObjectArguments(_ objectFunction: QueryFragment) -> QueryFragment {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       let value = TableColumn.QueryValue._queryFragment(jsonEncoding: "\(column)")
       return "\(quote: column.name, delimiter: .text), \(value)"
     }
-    return $_isSelecting.withValue(false) {
-      Self.allColumns
-        .map { open($0) }
+    func arguments(_ columns: TableColumnList<any TableColumnExpression>) -> QueryFragment {
+      columns.nodes
+        .map { node -> QueryFragment in
+          switch node {
+          case .column(let column):
+            return open(column)
+          case .group(let name, let columns):
+            return """
+              \(quote: name, delimiter: .text), \(objectFunction)(\(arguments(columns)))
+              """
+          }
+        }
         .joined(separator: ", ")
     }
+    return $_isSelecting.withValue(false) { arguments(Self.allColumns) }
   }
 }
 
@@ -1264,7 +1274,7 @@ extension TableDefinition where QueryValue: Codable {
   /// Works like ``jsonObject()``, except the object is in SQLite's binary JSONB format, making it
   /// appropriate for storage contexts, like assignment to a JSONB column.
   public func jsonbObject() -> some QueryExpression<_CodableJSONBRepresentation<QueryValue>> {
-    QueryFunction("jsonb_object", SQLQueryExpression(_jsonObjectArguments))
+    QueryFunction("jsonb_object", SQLQueryExpression(_jsonObjectArguments("jsonb_object")))
   }
 }
 

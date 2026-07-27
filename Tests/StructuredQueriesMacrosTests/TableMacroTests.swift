@@ -25,16 +25,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -107,16 +107,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -227,16 +227,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -349,16 +349,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.baz._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.baz._writableColumns)
               return writableColumns
             }
@@ -485,8 +485,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.c1._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.c2._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.c3._allColumns)
@@ -496,8 +496,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.c1._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.c2._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.c3._writableColumns)
@@ -1379,16 +1379,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -1506,16 +1506,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -1592,8 +1592,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.generated._allColumns)
               return allColumns
@@ -1601,8 +1601,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
               return writableColumns
             }
@@ -1706,8 +1706,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.generated._allColumns)
               return allColumns
@@ -1715,8 +1715,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
               return writableColumns
             }
@@ -1799,16 +1799,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -1883,16 +1883,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -1965,16 +1965,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.`bar`._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.`bar`._writableColumns)
               return writableColumns
             }
@@ -2047,16 +2047,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -2129,16 +2129,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.bar._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.bar._writableColumns)
               return writableColumns
             }
@@ -2219,8 +2219,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.referrerID._allColumns)
               return allColumns
@@ -2228,8 +2228,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.referrerID._writableColumns)
               return writableColumns
@@ -2264,8 +2264,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.referrerID._allColumns)
                 return allColumns
@@ -2273,8 +2273,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 writableColumns.append(contentsOf: QueryValue.columns.referrerID._writableColumns)
                 return writableColumns
@@ -2381,16 +2381,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
               return writableColumns
             }
@@ -2468,8 +2468,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.seconds._allColumns)
               return allColumns
@@ -2477,8 +2477,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.seconds._writableColumns)
               return writableColumns
@@ -2515,8 +2515,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.seconds._allColumns)
                 return allColumns
@@ -2524,8 +2524,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 writableColumns.append(contentsOf: QueryValue.columns.seconds._writableColumns)
                 return writableColumns
@@ -2649,8 +2649,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.color._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
@@ -2659,8 +2659,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.color._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
@@ -2702,8 +2702,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.color._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
@@ -2712,8 +2712,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 writableColumns.append(contentsOf: QueryValue.columns.color._writableColumns)
                 writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
@@ -2883,16 +2883,16 @@ extension SnapshotTests {
           #if compiler(>=6.4)
           @_optimize(none)
           #endif
-          public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-            var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+          public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+            var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
             allColumns.append(contentsOf: QueryValue.columns.name._allColumns)
             return allColumns
           }
           #if compiler(>=6.4)
           @_optimize(none)
           #endif
-          public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-            var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+          public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+            var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
             writableColumns.append(contentsOf: QueryValue.columns.name._writableColumns)
             return writableColumns
           }
@@ -2970,8 +2970,8 @@ extension SnapshotTests {
           #if compiler(>=6.4)
           @_optimize(none)
           #endif
-          public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-            var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+          public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+            var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
             allColumns.append(contentsOf: QueryValue.columns.remindersList._allColumns)
             allColumns.append(contentsOf: QueryValue.columns.remindersCount._allColumns)
             return allColumns
@@ -2979,8 +2979,8 @@ extension SnapshotTests {
           #if compiler(>=6.4)
           @_optimize(none)
           #endif
-          public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-            var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+          public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+            var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
             writableColumns.append(contentsOf: QueryValue.columns.remindersList._writableColumns)
             writableColumns.append(contentsOf: QueryValue.columns.remindersCount._writableColumns)
             return writableColumns
@@ -3068,8 +3068,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
               return allColumns
@@ -3077,8 +3077,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
               return writableColumns
@@ -3211,8 +3211,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
               return allColumns
@@ -3220,8 +3220,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
               return writableColumns
@@ -3353,8 +3353,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
               return allColumns
@@ -3362,8 +3362,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
               return writableColumns
@@ -3522,8 +3522,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.photo._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
               return allColumns
@@ -3531,8 +3531,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.photo._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
               return writableColumns
@@ -3662,16 +3662,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.note._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.note._writableColumns)
               return writableColumns
             }
@@ -3775,16 +3775,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.timestamp._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.timestamp._writableColumns)
               return writableColumns
             }
@@ -4106,16 +4106,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               return writableColumns
             }
@@ -4146,16 +4146,16 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 return allColumns
               }
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 return writableColumns
               }
@@ -4282,16 +4282,16 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 return allColumns
               }
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 return writableColumns
               }
@@ -4384,8 +4384,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.date._allColumns)
@@ -4395,8 +4395,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.date._writableColumns)
@@ -4444,8 +4444,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.date._allColumns)
@@ -4455,8 +4455,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
                 writableColumns.append(contentsOf: QueryValue.columns.date._writableColumns)
@@ -4588,16 +4588,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               return writableColumns
             }
@@ -4627,16 +4627,16 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 return allColumns
               }
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 return writableColumns
               }
@@ -4734,16 +4734,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               return writableColumns
             }
@@ -4822,8 +4822,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
               return allColumns
@@ -4831,8 +4831,8 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
               return writableColumns
@@ -4869,8 +4869,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 allColumns.append(contentsOf: QueryValue.columns.title._allColumns)
                 return allColumns
@@ -4878,8 +4878,8 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 writableColumns.append(contentsOf: QueryValue.columns.title._writableColumns)
                 return writableColumns
@@ -4991,16 +4991,16 @@ extension SnapshotTests {
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-              var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+            public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+              var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
               allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
               return allColumns
             }
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
-            public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-              var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+            public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+              var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
               writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
               return writableColumns
             }
@@ -5030,16 +5030,16 @@ extension SnapshotTests {
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var allColumns: [any StructuredQueriesCore.TableColumnExpression] {
-                var allColumns: [any StructuredQueriesCore.TableColumnExpression] = []
+              public static var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> {
+                var allColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.TableColumnExpression> = []
                 allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                 return allColumns
               }
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
-              public static var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] {
-                var writableColumns: [any StructuredQueriesCore.WritableTableColumnExpression] = []
+              public static var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> {
+                var writableColumns: StructuredQueriesCore.TableColumnList<any StructuredQueriesCore.WritableTableColumnExpression> = []
                 writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                 return writableColumns
               }

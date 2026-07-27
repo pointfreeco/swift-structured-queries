@@ -101,9 +101,9 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
     )
   }
 
-  public var _allColumns: [any TableColumnExpression] { [self] }
+  public var _allColumns: TableColumnList<any TableColumnExpression> { [self] }
 
-  public var _writableColumns: [any WritableTableColumnExpression] { [self] }
+  public var _writableColumns: TableColumnList<any WritableTableColumnExpression> { [self] }
 }
 
 public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
@@ -210,5 +210,5 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
     )
   }
 
-  public var _allColumns: [any TableColumnExpression] { [self] }
+  public var _allColumns: TableColumnList<any TableColumnExpression> { [self] }
 }
