@@ -382,6 +382,95 @@ extension SnapshotTests {
       }
     }
 
+    @Test func scalarDictionaryValues() throws {
+      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
+      try db.execute(
+        Post.insert {
+          Post.Draft(reactions: ["🎉": 12], writer: Writer())
+          Post.Draft(reactions: ["👍": 3], writer: Writer())
+        }
+      )
+      assertQuery(Post.where { $0.reactions.jsonEach().where { $0.value > 10 }.exists() }.select(\.id)) {
+        """
+        SELECT "posts"."id"
+        FROM "posts"
+        WHERE (EXISTS (
+          SELECT "json_each"."value"
+          FROM json_each("posts"."reactions")
+          WHERE (("json_each"."value") > (10))
+        ))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        └───┘
+        """
+      }
+    }
+
+    @Test func scalarArrayAtPath() throws {
+      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
+      try db.execute(
+        Post.insert {
+          Post.Draft(writer: Writer(tags: ["swift", "sql"]))
+          Post.Draft(writer: Writer(tags: ["ruby"]))
+        }
+      )
+      assertQuery(
+        Post.where { $0.writer.jsonEach(\.tags).where { $0.value.eq("swift") }.exists() }.select(\.id)
+      ) {
+        """
+        SELECT "posts"."id"
+        FROM "posts"
+        WHERE (EXISTS (
+          SELECT "json_each"."value"
+          FROM json_each("posts"."writer", '$."tags"')
+          WHERE (("json_each"."value") = ('swift'))
+        ))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        └───┘
+        """
+      }
+    }
+
+    @Test func scalarDictionaryAtPath() throws {
+      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
+      try db.execute(
+        Post.insert {
+          Post.Draft(writer: Writer(scores: ["swift": 9]))
+          Post.Draft(writer: Writer(scores: ["swift": 2]))
+        }
+      )
+      assertQuery(
+        Post
+          .where {
+            $0.writer.jsonEach(\.scores).where { $0.key.eq("swift") && $0.value > 5 }.exists()
+          }
+          .select(\.id)
+      ) {
+        """
+        SELECT "posts"."id"
+        FROM "posts"
+        WHERE (EXISTS (
+          SELECT "json_each"."value"
+          FROM json_each("posts"."writer", '$."scores"')
+          WHERE ((("json_each"."key") = ('swift')) AND (("json_each"."value") > (5)))
+        ))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        └───┘
+        """
+      }
+    }
+
     @Test func nestedPath() throws {
       try db.execute(
         #sql(
@@ -496,4 +585,22 @@ private struct TaggedItem: Codable, Equatable {
   var title = ""
   @Column(as: [String].JSONRepresentation.self)
   var tags: [String] = []
+}
+
+@Table
+private struct Post: Codable, Equatable {
+  let id: Int
+  @Column(as: [String: Int].JSONRepresentation.self)
+  var reactions: [String: Int] = [:]
+  @Column(as: Writer.JSONRepresentation.self)
+  var writer = Writer()
+}
+
+@Selection
+private struct Writer: Codable, Equatable {
+  var name = ""
+  @Column(as: [String].JSONRepresentation.self)
+  var tags: [String] = []
+  @Column(as: [String: Int].JSONRepresentation.self)
+  var scores: [String: Int] = [:]
 }
