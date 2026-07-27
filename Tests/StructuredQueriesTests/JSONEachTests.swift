@@ -24,23 +24,21 @@ extension SnapshotTests {
       )
       try db.execute(
         Trip.insert {
-          [
-            Trip.Draft(
-              title: "Northern",
-              geofence: [
-                Coordinate(latitude: 40.7, longitude: -74.0, label: "home"),
-                Coordinate(latitude: 51.5, longitude: -0.1, label: "away"),
-              ]
-            ),
-            Trip.Draft(
-              title: "Mixed",
-              geofence: [
-                Coordinate(latitude: 40.7, longitude: -74.0, label: "home"),
-                Coordinate(latitude: -33.9, longitude: 151.2, label: "away"),
-              ]
-            ),
-            Trip.Draft(title: "Empty"),
-          ]
+          Trip.Draft(
+            title: "Northern",
+            geofence: [
+              Coordinate(latitude: 40.7, longitude: -74.0, label: "home"),
+              Coordinate(latitude: 51.5, longitude: -0.1, label: "away"),
+            ]
+          )
+          Trip.Draft(
+            title: "Mixed",
+            geofence: [
+              Coordinate(latitude: 40.7, longitude: -74.0, label: "home"),
+              Coordinate(latitude: -33.9, longitude: 151.2, label: "away"),
+            ]
+          )
+          Trip.Draft(title: "Empty")
         }
       )
     }
@@ -245,10 +243,8 @@ extension SnapshotTests {
       )
       try db.execute(
         TaggedItem.insert {
-          [
-            TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"]),
-            TaggedItem.Draft(title: "Taxes", tags: ["work"]),
-          ]
+          TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"])
+          TaggedItem.Draft(title: "Taxes", tags: ["work"])
         }
       )
       assertQuery(
@@ -322,10 +318,8 @@ extension SnapshotTests {
       )
       try db.execute(
         Product.insert {
-          [
-            Product.Draft(inventory: ["SFO": Stock(onHand: 0), "JFK": Stock(onHand: 4)]),
-            Product.Draft(inventory: ["SFO": Stock(onHand: 7)]),
-          ]
+          Product.Draft(inventory: ["SFO": Stock(onHand: 0), "JFK": Stock(onHand: 4)])
+          Product.Draft(inventory: ["SFO": Stock(onHand: 7)])
         }
       )
       assertQuery(
@@ -401,25 +395,23 @@ extension SnapshotTests {
       )
       try db.execute(
         Profile.insert {
-          [
-            Profile.Draft(
-              author: Author(
-                name: "Blob",
-                links: [
-                  Link(homepage: "https://pointfree.co", isActive: true),
-                  Link(homepage: "https://example.com", isActive: false),
-                ]
-              )
-            ),
-            Profile.Draft(
-              author: Author(
-                name: "Blob Jr.",
-                links: [
-                  Link(homepage: "https://example.org", isActive: false)
-                ]
-              )
-            ),
-          ]
+          Profile.Draft(
+            author: Author(
+              name: "Blob",
+              links: [
+                Link(homepage: "https://pointfree.co", isActive: true),
+                Link(homepage: "https://example.com", isActive: false),
+              ]
+            )
+          )
+          Profile.Draft(
+            author: Author(
+              name: "Blob Jr.",
+              links: [
+                Link(homepage: "https://example.org", isActive: false)
+              ]
+            )
+          )
         }
       )
       assertQuery(
