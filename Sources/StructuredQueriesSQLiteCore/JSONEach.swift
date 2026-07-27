@@ -1,7 +1,7 @@
 import Foundation
 public import StructuredQueriesCore
 
-extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRepresentation {
+extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONCollectionRepresentation {
   /// A select statement that iterates over the elements of this JSON array expression using the
   /// `json_each` table-valued function.
   ///
@@ -22,7 +22,7 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRe
   /// ```
   ///
   /// - Returns: A select statement over the elements of this JSON array.
-  public func jsonEach<Element: Codable>() -> SelectOf<JSONEach<Element>>
+  public func jsonEach<Element: Codable>() -> SelectOf<JSONEach<QueryValue._Key, Element>>
   where QueryValue._ElementRepresentation: _JSONObjectRepresentation<Element> {
     JSONEach.select(from: "json_each(\(argumentFragment))")
   }
@@ -47,9 +47,9 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   ///
   /// - Parameter path: A key path from the JSON expression to an array of objects.
   /// - Returns: A select statement over the elements of the JSON array at the given path.
-  public func jsonEach<Context, Member: _JSONArrayRepresentation, Element: Codable>(
+  public func jsonEach<Context, Member: _JSONCollectionRepresentation, Element: Codable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
-  ) -> SelectOf<JSONEach<Element>>
+  ) -> SelectOf<JSONEach<Member._Key, Element>>
   where Member._ElementRepresentation: _JSONObjectRepresentation<Element> {
     JSONEach.select(
       from: """
@@ -73,7 +73,7 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
 /// > Note: This table has no meaning independent of a JSON array expression, so avoid using its
 /// > static entry points (`all`, `where`, etc.) directly. Always derive statements from
 /// > `jsonEach()`.
-public struct JSONEach<Element: Table & Codable>: Table {
+public struct JSONEach<Key: QueryRepresentable, Element: Table & Codable>: Table {
   public static var tableName: String { "json_each" }
 
   public static var columns: TableColumns { TableColumns() }
@@ -117,8 +117,8 @@ public struct JSONEach<Element: Table & Codable>: Table {
 
     public static var writableColumns: [any WritableTableColumnExpression] { [] }
 
-    /// The index of the current element in the JSON array.
-    public var key: SQLQueryExpression<Int> {
+    /// The key of the current element in the JSON collection.
+    public var key: SQLQueryExpression<Key> {
       SQLQueryExpression("\(JSONEach.self).\(quote: "key")")
     }
 
@@ -167,7 +167,7 @@ extension JSONEach: QueryDecodable {
   }
 }
 
-extension JSONEach: Sendable where Element: Sendable {}
+extension JSONEach: Sendable where Key: Sendable, Element: Sendable {}
 
 /// A column of a ``JSONEach`` table.
 ///
