@@ -210,22 +210,19 @@ public struct JSONEach<
     public typealias QueryValue = JSONEach
 
     public static var allColumns: [any TableColumnExpression] {
-      [
-        _JSONEachColumn<JSONEach, Key>("key", keyPath: \JSONEach.key),
-        _JSONEachColumn<JSONEach, Value>("value", keyPath: \JSONEach.value),
-      ]
+      [TableColumns().key, TableColumns().value]
     }
 
     public static var writableColumns: [any WritableTableColumnExpression] { [] }
 
     /// The key of the current element: its index in a JSON array, or its name in a JSON object.
-    public var key: SQLQueryExpression<Key> {
-      SQLQueryExpression("\(JSONEach.self).\(quote: "key")")
+    public var key: GeneratedColumn<JSONEach, Key> {
+      GeneratedColumn("key", keyPath: \JSONEach.key)
     }
 
     /// The current element of the JSON collection.
-    public var value: SQLQueryExpression<Value> {
-      SQLQueryExpression("\(JSONEach.self).\(quote: "value")")
+    public var value: GeneratedColumn<JSONEach, Value> {
+      GeneratedColumn("value", keyPath: \JSONEach.value)
     }
   }
 
@@ -254,45 +251,6 @@ extension JSONEach: QueryDecodable {
 extension JSONEach: Sendable where Key.QueryOutput: Sendable, Value.QueryOutput: Sendable {}
 
 extension JSONEach: Equatable where Key.QueryOutput: Equatable, Value.QueryOutput: Equatable {}
-
-/// A column of a ``JSONEach`` table.
-///
-/// Renders as the `key` or `value` column of the current row.
-public struct _JSONEachColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
-  TableColumnExpression
-{
-  public typealias QueryValue = Value
-
-  public let name: String
-
-  public let defaultValue: Value.QueryOutput?
-
-  public let keyPath: KeyPath<Root, Value.QueryOutput>
-
-  init(
-    _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput>,
-    default defaultValue: Value.QueryOutput? = nil
-  ) {
-    self.name = name
-    self.keyPath = keyPath
-    self.defaultValue = defaultValue
-  }
-
-  public var queryFragment: QueryFragment {
-    let column: QueryFragment = "\(Root.self).\(quote: name)"
-    return _isSelecting ? Value.queryFragment(decoding: column) : column
-  }
-
-  public func _aliased<Name: AliasName>(
-    _ alias: Name.Type
-  ) -> any TableColumnExpression<TableAlias<Root, Name>, Value> {
-    _JSONEachColumn<TableAlias<Root, Name>, Value>(
-      name,
-      keyPath: \.[member: \Value.self, column: keyPath]
-    )
-  }
-}
 
 extension QueryExpression {
   fileprivate var argumentFragment: QueryFragment {
