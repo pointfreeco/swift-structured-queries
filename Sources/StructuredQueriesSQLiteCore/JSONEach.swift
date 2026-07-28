@@ -178,8 +178,8 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRe
   /// A select statement that iterates over the object elements of this JSON array expression
   /// using the `jsonb_each` table-valued function.
   ///
-  /// Works like ``jsonEach()-(())``, except each element is decoded from SQLite's binary JSONB
-  /// format instead of text JSON, avoiding a parse of the element's JSON.
+  /// Works like `json_each`, except each element is decoded from SQLite's binary JSONB format
+  /// instead of text JSON, avoiding a parse of the element's JSON.
   ///
   /// - Returns: A select statement over the elements of this JSON array.
   @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
