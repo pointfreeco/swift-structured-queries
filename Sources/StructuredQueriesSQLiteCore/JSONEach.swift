@@ -113,34 +113,31 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   }
 }
 
-/// A table representing SQLite's `json_each` table-valued function iterating over a JSON array
-/// of `Element` values.
+/// A table representing SQLite's `json_each` table-valued function iterating over a JSON
+/// collection.
 ///
 /// Statements of this table are created by applying
-/// ``StructuredQueriesCore/QueryExpression/jsonEach()`` to a JSON array expression. Its columns
-/// are derived from `Element`'s columns, with each member rendered as a `json_extract` of the
-/// current array element.
+/// ``StructuredQueriesCore/QueryExpression/jsonEach()`` to a JSON expression. It has the two
+/// columns `json_each` exposes: ``TableColumns/key`` and ``TableColumns/value``. Reach into the
+/// fields of an object element with `jsonExtract` on ``TableColumns/value``.
 ///
-/// > Note: This table has no meaning independent of a JSON array expression, so avoid using its
-/// > static entry points (`all`, `where`, etc.) directly. Always derive statements from
-/// > `jsonEach()`.
-public struct JSONEach<Key: QueryRepresentable, Element: QueryRepresentable & Codable>: Table {
+/// > Note: This table has no meaning independent of a JSON expression, so avoid using its static
+/// > entry points (`all`, `where`, etc.) directly. Always derive statements from `jsonEach()`.
+public struct JSONEach<
+  Key: QueryRepresentable & QueryBindable,
+  Element: QueryRepresentable & Codable
+>: Table {
   public static var tableName: String { "json_each" }
 
   public static var columns: TableColumns { TableColumns() }
 
-  public static var _columnWidth: Int {
-    (Element.self as? any Table.Type)?._columnWidth ?? 1
-  }
+  public static var _columnWidth: Int { 2 }
 
-  let element: Element
+  /// The key of the current element: its index in a JSON array, or its name in a JSON object.
+  public let key: Key.QueryOutput
 
-  package subscript<Member: QueryRepresentable>(
-    member _: KeyPath<Member, Member>,
-    column keyPath: KeyPath<Element, Member.QueryOutput>
-  ) -> Member.QueryOutput {
-    element[keyPath: keyPath]
-  }
+  /// The current element of the JSON collection.
+  public let value: Element
 
   fileprivate static func select(from tableReference: QueryFragment) -> SelectOf<JSONEach> {
     var select = all.asSelect()
@@ -148,48 +145,25 @@ public struct JSONEach<Key: QueryRepresentable, Element: QueryRepresentable & Co
     return select
   }
 
-  @dynamicMemberLookup
   public struct TableColumns: TableDefinition, Sendable {
     public typealias QueryValue = JSONEach
 
     public static var allColumns: [any TableColumnExpression] {
-      func openTable<T: Table>(_: T.Type) -> [any TableColumnExpression] {
-        func open<Column: TableColumnExpression>(
-          _ column: Column
-        ) -> any TableColumnExpression {
-          _JSONEachColumn<JSONEach, Column.Value>(
-            column.name,
-            keyPath:
-              \.[
-                member: \Column.Value.self,
-                column: column.keyPath as! KeyPath<Element, Column.Value.QueryOutput>
-              ]
-          )
+      func openValue<V: QueryRepresentable & QueryBindable>(_: V.Type) -> any TableColumnExpression {
+        _JSONEachColumn<JSONEach, V>("value", keyPath: \JSONEach.value as! KeyPath<JSONEach, V.QueryOutput>)
+      }
+      let value: any TableColumnExpression =
+        if let elementType = Element.self as? any (QueryRepresentable & QueryBindable).Type {
+          openValue(elementType)
+        } else {
+          openValue(_CodableJSONRepresentation<Element>.self)
         }
-        return T.TableColumns.allColumns.map { open($0) }
-      }
-      func openScalar<V: QueryRepresentable & QueryBindable>(_: V.Type)
-        -> [any TableColumnExpression]
-      {
-        [
-          _JSONEachValueColumn<JSONEach, V>(
-            keyPath: \JSONEach.element as! KeyPath<JSONEach, V.QueryOutput>
-          )
-        ]
-      }
-      if let elementType = Element.self as? any Table.Type {
-        return openTable(elementType)
-      } else if let elementType = Element.self as? any (QueryRepresentable & QueryBindable).Type {
-        return openScalar(elementType)
-      } else {
-        // TODO: Report issue?
-        return []
-      }
+      return [_JSONEachColumn<JSONEach, Key>("key", keyPath: \JSONEach.key), value]
     }
 
     public static var writableColumns: [any WritableTableColumnExpression] { [] }
 
-    /// The key of the current element in the JSON collection.
+    /// The key of the current element: its index in a JSON array, or its name in a JSON object.
     public var key: SQLQueryExpression<Key> {
       SQLQueryExpression("\(JSONEach.self).\(quote: "key")")
     }
@@ -211,16 +185,6 @@ extension JSONEach.TableColumns where Element: Table {
   public var value: SQLQueryExpression<_CodableJSONRepresentation<Element>> {
     SQLQueryExpression("\(JSONEach.self).\(quote: "value")")
   }
-
-  public subscript<Member>(
-    dynamicMember keyPath: KeyPath<Element.TableColumns, TableColumn<Element, Member>>
-  ) -> _JSONEachColumn<JSONEach, Member> {
-    let column = Element.columns[keyPath: keyPath]
-    return _JSONEachColumn(
-      column.name,
-      keyPath: \.[member: \Member.self, column: column.keyPath]
-    )
-  }
 }
 
 extension JSONEach.TableColumns where Element: QueryBindable, Element.QueryOutput == Element {
@@ -231,29 +195,28 @@ extension JSONEach.TableColumns where Element: QueryBindable, Element.QueryOutpu
 }
 
 extension JSONEach: QueryRepresentable {
-  public typealias QueryOutput = Element
-
-  public init(queryOutput: Element) {
-    self.element = queryOutput
-  }
-
-  public var queryOutput: Element {
-    element
-  }
+  public typealias QueryOutput = JSONEach
 }
 
 extension JSONEach: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
-    try self.init(queryOutput: Element(decoder: &decoder))
+    self.key = try Key(decoder: &decoder).queryOutput
+    self.value =
+      if Element.self is any QueryBindable.Type {
+        try Element(decoder: &decoder)
+      } else {
+        try _CodableJSONRepresentation<Element>(decoder: &decoder).queryOutput
+      }
   }
 }
 
-extension JSONEach: Sendable where Key: Sendable, Element: Sendable {}
+extension JSONEach: Sendable where Key.QueryOutput: Sendable, Element: Sendable {}
+
+extension JSONEach: Equatable where Key.QueryOutput: Equatable, Element: Equatable {}
 
 /// A column of a ``JSONEach`` table.
 ///
-/// A value of this type is returned from dynamic member lookup on ``JSONEach/TableColumns``. It
-/// renders as a `json_extract` of the corresponding field of the current JSON array element.
+/// Renders as the `key` or `value` column of the current row.
 public struct _JSONEachColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
   TableColumnExpression
 {
@@ -276,20 +239,8 @@ public struct _JSONEachColumn<Root: Table, Value: QueryRepresentable & QueryBind
   }
 
   public var queryFragment: QueryFragment {
-    let column: QueryFragment = Value._queryFragment(
-      jsonDecoding: """
-        json_extract(\(Root.self).\(quote: "value"), \(quote: jsonPath, delimiter: .text))
-        """
-    )
+    let column: QueryFragment = "\(Root.self).\(quote: name)"
     return _isSelecting ? Value.queryFragment(decoding: column) : column
-  }
-
-  private var jsonPath: String {
-    let escapedName =
-      name
-      .replacingOccurrences(of: "\\", with: "\\\\")
-      .replacingOccurrences(of: "\"", with: "\\\"")
-    return "$.\"\(escapedName)\""
   }
 
   public func _aliased<Name: AliasName>(
@@ -297,38 +248,6 @@ public struct _JSONEachColumn<Root: Table, Value: QueryRepresentable & QueryBind
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value> {
     _JSONEachColumn<TableAlias<Root, Name>, Value>(
       name,
-      keyPath: \.[member: \Value.self, column: keyPath]
-    )
-  }
-}
-
-/// A column of a ``JSONEach`` table over scalar elements.
-///
-/// A value of this type renders as the `value` column of the current row, decoded as `Value`.
-public struct _JSONEachValueColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
-  TableColumnExpression
-{
-  public typealias QueryValue = Value
-
-  public let name = "value"
-
-  public let defaultValue: Value.QueryOutput? = nil
-
-  public let keyPath: KeyPath<Root, Value.QueryOutput>
-
-  init(keyPath: KeyPath<Root, Value.QueryOutput>) {
-    self.keyPath = keyPath
-  }
-
-  public var queryFragment: QueryFragment {
-    let column: QueryFragment = "\(Root.self).\(quote: "value")"
-    return _isSelecting ? Value.queryFragment(decoding: column) : column
-  }
-
-  public func _aliased<Name: AliasName>(
-    _ alias: Name.Type
-  ) -> any TableColumnExpression<TableAlias<Root, Name>, Value> {
-    _JSONEachValueColumn<TableAlias<Root, Name>, Value>(
       keyPath: \.[member: \Value.self, column: keyPath]
     )
   }

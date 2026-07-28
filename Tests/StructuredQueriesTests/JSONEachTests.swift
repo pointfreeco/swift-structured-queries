@@ -48,7 +48,7 @@ extension SnapshotTests {
         Trip
           .where {
             !$0.geofence.jsonEach()
-              .where { $0.latitude < 0 }
+              .where { $0.value.jsonExtract(\.latitude) < 0 }
               .exists()
           }
           .select(\.title)
@@ -57,7 +57,7 @@ extension SnapshotTests {
         SELECT "trips"."title"
         FROM "trips"
         WHERE (NOT (EXISTS (
-          SELECT json_extract("json_each"."value", '$."latitude"'), json_extract("json_each"."value", '$."longitude"'), json_extract("json_each"."value", '$."label"')
+          SELECT "json_each"."key", "json_each"."value"
           FROM json_each("trips"."geofence")
           WHERE ((json_extract("json_each"."value", '$."latitude"')) < (0.0))
         )))
@@ -96,7 +96,7 @@ extension SnapshotTests {
 
     @Test func aggregateOfElements() {
       assertQuery(
-        Trip.select { ($0.title, $0.geofence.jsonEach().select { $0.latitude.max() }) }
+        Trip.select { ($0.title, $0.geofence.jsonEach().select { $0.value.jsonExtract(\.latitude).max() }) }
       ) {
         """
         SELECT "trips"."title", (
@@ -124,8 +124,8 @@ extension SnapshotTests {
             (
               $0.title,
               $0.geofence.jsonEach()
-                .select(\.label)
-                .order { $0.latitude.desc() }
+                .select { $0.value.jsonExtract(\.label) }
+                .order { $0.value.jsonExtract(\.latitude).desc() }
                 .limit(1)
             )
           }
@@ -186,7 +186,7 @@ extension SnapshotTests {
       assertQuery(
         Trip
           .join(Trip.columns.geofence.jsonEach()) { _, _ in true }
-          .select { ($0.title, $1.label) }
+          .select { ($0.title, $1.value.jsonExtract(\.label)) }
       ) {
         """
         SELECT "trips"."title", json_extract("json_each"."value", '$."label"')
@@ -209,7 +209,7 @@ extension SnapshotTests {
       assertQuery(
         Trip
           .leftJoin(Trip.columns.geofence.jsonEach()) { _, _ in true }
-          .select { ($0.title, $1.label) }
+          .select { ($0.title, $1.value.jsonExtract(\.label)) }
       ) {
         """
         SELECT "trips"."title", json_extract("json_each"."value", '$."label"')
@@ -256,7 +256,7 @@ extension SnapshotTests {
         SELECT "taggedItems"."title"
         FROM "taggedItems"
         WHERE (EXISTS (
-          SELECT "json_each"."value"
+          SELECT "json_each"."key", "json_each"."value"
           FROM json_each("taggedItems"."tags")
           WHERE (("json_each"."value") = ('urgent'))
         ))
@@ -326,7 +326,7 @@ extension SnapshotTests {
         Product
           .where {
             $0.inventory.jsonEach()
-              .where { $0.key.eq("SFO") && $0.onHand.eq(0) }
+              .where { $0.key.eq("SFO") && $0.value.jsonExtract(\.onHand).eq(0) }
               .exists()
           }
           .select(\.id)
@@ -335,7 +335,7 @@ extension SnapshotTests {
         SELECT "products"."id"
         FROM "products"
         WHERE (EXISTS (
-          SELECT json_extract("json_each"."value", '$."onHand"')
+          SELECT "json_each"."key", "json_each"."value"
           FROM json_each("products"."inventory")
           WHERE ((("json_each"."key") = ('SFO')) AND ((json_extract("json_each"."value", '$."onHand"')) = (0)))
         ))
@@ -366,7 +366,7 @@ extension SnapshotTests {
       assertQuery(
         Product
           .join(Product.columns.inventory.jsonEach()) { _, _ in true }
-          .select { ($1.key, $1.onHand) }
+          .select { ($1.key, $1.value.jsonExtract(\.onHand)) }
       ) {
         """
         SELECT "json_each"."key", json_extract("json_each"."value", '$."onHand"')
@@ -395,7 +395,7 @@ extension SnapshotTests {
         SELECT "posts"."id"
         FROM "posts"
         WHERE (EXISTS (
-          SELECT "json_each"."value"
+          SELECT "json_each"."key", "json_each"."value"
           FROM json_each("posts"."reactions")
           WHERE (("json_each"."value") > (10))
         ))
@@ -424,7 +424,7 @@ extension SnapshotTests {
         SELECT "posts"."id"
         FROM "posts"
         WHERE (EXISTS (
-          SELECT "json_each"."value"
+          SELECT "json_each"."key", "json_each"."value"
           FROM json_each("posts"."writer", '$."tags"')
           WHERE (("json_each"."value") = ('swift'))
         ))
@@ -457,7 +457,7 @@ extension SnapshotTests {
         SELECT "posts"."id"
         FROM "posts"
         WHERE (EXISTS (
-          SELECT "json_each"."value"
+          SELECT "json_each"."key", "json_each"."value"
           FROM json_each("posts"."writer", '$."scores"')
           WHERE ((("json_each"."key") = ('swift')) AND (("json_each"."value") > (5)))
         ))
@@ -467,6 +467,44 @@ extension SnapshotTests {
         ┌───┐
         │ 1 │
         └───┘
+        """
+      }
+    }
+
+    @Test func decodesKeyAndValueRow() {
+      assertQuery(
+        Trip
+          .where { $0.title.eq("Northern") }
+          .join(Trip.columns.geofence.jsonEach()) { _, _ in true }
+          .select { $1 }
+      ) {
+        """
+        SELECT "json_each"."key", "json_each"."value"
+        FROM "trips"
+        JOIN json_each("trips"."geofence") ON 1
+        WHERE (("trips"."title") = ('Northern'))
+        """
+      } results: {
+        """
+        ┌───────────────────────┐
+        │ JSONEach(             │
+        │   key: 0,             │
+        │   value: Coordinate(  │
+        │     latitude: 40.7,   │
+        │     longitude: -74.0, │
+        │     label: "home"     │
+        │   )                   │
+        │ )                     │
+        ├───────────────────────┤
+        │ JSONEach(             │
+        │   key: 1,             │
+        │   value: Coordinate(  │
+        │     latitude: 51.5,   │
+        │     longitude: -0.1,  │
+        │     label: "away"     │
+        │   )                   │
+        │ )                     │
+        └───────────────────────┘
         """
       }
     }
@@ -507,7 +545,7 @@ extension SnapshotTests {
         Profile
           .where {
             $0.author.jsonEach(\.links)
-              .where { $0.isActive }
+              .where { $0.value.jsonExtract(\.isActive) }
               .exists()
           }
           .select { $0.author.jsonExtract(\.name) }
@@ -516,7 +554,7 @@ extension SnapshotTests {
         SELECT json_extract("profiles"."author", '$."name"')
         FROM "profiles"
         WHERE (EXISTS (
-          SELECT json_extract("json_each"."value", '$."homepage"'), json_extract("json_each"."value", '$."isActive"')
+          SELECT "json_each"."key", "json_each"."value"
           FROM json_each("profiles"."author", '$."links"')
           WHERE (json_extract("json_each"."value", '$."isActive"'))
         ))
