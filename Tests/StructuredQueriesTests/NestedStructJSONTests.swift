@@ -70,7 +70,6 @@ extension SnapshotTests {
       }
     }
 
-    // TODO: 'json_each' should nest column groups to match their 'Codable' conformances.
     @Test func jsonEachExtractsColumnGroups() throws {
       try db.execute(
         """
@@ -85,28 +84,29 @@ extension SnapshotTests {
           Album(id: 1, photos: [Photo(id: 1, dimensions: Dimensions(width: 800, height: 600))])
         }
       )
-      withKnownIssue {
-        assertQuery(
-          Album.join(Album.columns.photos.jsonEach()) { _, _ in true }.select { $1 }
-        ) {
-          """
-          SELECT json_extract("json_each"."value", '$."id"'), json_extract("json_each"."value", '$."dimensions"."width"'), json_extract("json_each"."value", '$."dimensions"."height"')
-          FROM "albums"
-          JOIN json_each("albums"."photos") ON 1
-          """
-        } results: {
-          """
-          ┌───────────────────────────┐
-          │ Photo(                    │
-          │   id: 1,                  │
-          │   dimensions: Dimensions( │
-          │     width: 800,           │
-          │     height: 600           │
-          │   )                       │
-          │ )                         │
-          └───────────────────────────┘
-          """
-        }
+      assertQuery(
+        Album.join(Album.columns.photos.jsonEach()) { _, _ in true }.select { $1 }
+      ) {
+        """
+        SELECT "json_each"."key", "json_each"."value"
+        FROM "albums"
+        JOIN json_each("albums"."photos") ON 1
+        """
+      } results: {
+        """
+        ┌─────────────────────────────┐
+        │ JSONEach(                   │
+        │   key: 0,                   │
+        │   value: Photo(             │
+        │     id: 1,                  │
+        │     dimensions: Dimensions( │
+        │       width: 800,           │
+        │       height: 600           │
+        │     )                       │
+        │   )                         │
+        │ )                           │
+        └─────────────────────────────┘
+        """
       }
     }
 
