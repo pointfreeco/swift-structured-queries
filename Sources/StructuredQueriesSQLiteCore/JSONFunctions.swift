@@ -1688,6 +1688,7 @@ public protocol _JSONArrayRepresentation<_Element, _ElementRepresentation> {
 public protocol _JSONDictionaryRepresentation<_Key, _Value> {
   associatedtype _Key: QueryRepresentable
   associatedtype _Value: Codable
+  associatedtype _ValueRepresentation: QueryRepresentable
 }
 
 public protocol _DictionaryProtocol<Key, Value> {
@@ -1713,12 +1714,14 @@ extension _CodableJSONRepresentation: _JSONDictionaryRepresentation
 where QueryOutput: _DictionaryProtocol, QueryOutput.Key == String, QueryOutput.Value: Codable {
   public typealias _Key = String
   public typealias _Value = QueryOutput.Value
+  public typealias _ValueRepresentation = _CodableJSONRepresentation<QueryOutput.Value>
 }
 
 extension _CodableJSONBRepresentation: _JSONDictionaryRepresentation
 where QueryOutput: _DictionaryProtocol, QueryOutput.Key == String, QueryOutput.Value: Codable {
   public typealias _Key = String
   public typealias _Value = QueryOutput.Value
+  public typealias _ValueRepresentation = _CodableJSONBRepresentation<QueryOutput.Value>
 }
 
 extension QueryFragment {
