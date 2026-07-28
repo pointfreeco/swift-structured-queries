@@ -611,6 +611,29 @@ where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
 extension QueryExpression
 where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable
 {
+  /// Extracts a value from this optional JSON expression using the `json_extract` function.
+  ///
+  /// Works like ``jsonExtract(_:)``, except the extracted value is optional-promoted, since the
+  /// JSON expression itself may be `NULL`.
+  ///
+  /// - Parameter path: A key path from the JSON expression to a field to extract.
+  /// - Returns: An optional expression of the value extracted.
+  public func jsonExtract<Context, Member: QueryRepresentable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Member._Optionalized> {
+    _jsonExtract(path)
+  }
+
+  /// Extracts a value from this optional JSON expression using the `jsonb_extract` function.
+  ///
+  /// - Parameter path: A key path from the JSON expression to a field to extract.
+  /// - Returns: An optional expression of the value extracted.
+  public func jsonbExtract<Context, Member: QueryRepresentable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Member._Optionalized> {
+    _jsonbExtract(path)
+  }
+
   /// A JSON array aggregate of this JSON expression.
   ///
   /// - Parameters:
