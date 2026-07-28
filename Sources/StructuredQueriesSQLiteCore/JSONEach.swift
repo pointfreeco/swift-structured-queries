@@ -61,6 +61,70 @@ where QueryValue: _AnyJSONRepresentable & _JSONDictionaryRepresentation {
   }
 }
 
+extension QueryExpression
+where
+  QueryValue: StructuredQueriesCore._OptionalProtocol,
+  QueryValue.Wrapped: _JSONArrayRepresentation
+{
+  /// A select statement that iterates over the object elements of this optional JSON array
+  /// expression using the `json_each` table-valued function.
+  ///
+  /// A `NULL` JSON expression iterates as an empty collection.
+  ///
+  /// - Returns: A select statement over the elements of this JSON array.
+  public func jsonEach() -> SelectOf<JSONEach<Int, QueryValue.Wrapped._ElementRepresentation>>
+  where QueryValue.Wrapped._ElementRepresentation: _JSONObjectRepresentation & QueryBindable {
+    JSONEach.select(from: "json_each(\(argumentFragment))")
+  }
+
+  /// A select statement that iterates over the scalar elements of this optional JSON array
+  /// expression using the `json_each` table-valued function.
+  ///
+  /// A `NULL` JSON expression iterates as an empty collection.
+  ///
+  /// - Returns: A select statement over the elements of this JSON array.
+  public func jsonEach() -> SelectOf<JSONEach<Int, QueryValue.Wrapped._Element>>
+  where QueryValue.Wrapped._Element: QueryRepresentable & QueryBindable {
+    JSONEach.select(from: "json_each(\(argumentFragment))")
+  }
+}
+
+extension QueryExpression
+where
+  QueryValue: StructuredQueriesCore._OptionalProtocol,
+  QueryValue.Wrapped: _JSONDictionaryRepresentation
+{
+  /// A select statement that iterates over the object values of this optional JSON object
+  /// expression using the `json_each` table-valued function.
+  ///
+  /// A `NULL` JSON expression iterates as an empty collection.
+  ///
+  /// - Returns: A select statement over the values of this JSON object.
+  public func jsonEach()
+    -> SelectOf<JSONEach<QueryValue.Wrapped._Key, QueryValue.Wrapped._ValueRepresentation>>
+  where
+    QueryValue.Wrapped._Key: QueryBindable,
+    QueryValue.Wrapped._ValueRepresentation: _JSONObjectRepresentation & QueryBindable
+  {
+    JSONEach.select(from: "json_each(\(argumentFragment))")
+  }
+
+  /// A select statement that iterates over the scalar values of this optional JSON object
+  /// expression using the `json_each` table-valued function.
+  ///
+  /// A `NULL` JSON expression iterates as an empty collection.
+  ///
+  /// - Returns: A select statement over the values of this JSON object.
+  public func jsonEach()
+    -> SelectOf<JSONEach<QueryValue.Wrapped._Key, QueryValue.Wrapped._Value>>
+  where
+    QueryValue.Wrapped._Key: QueryBindable,
+    QueryValue.Wrapped._Value: QueryRepresentable & QueryBindable
+  {
+    JSONEach.select(from: "json_each(\(argumentFragment))")
+  }
+}
+
 extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// A select statement that iterates over the object elements of a JSON array at the given path.
   ///

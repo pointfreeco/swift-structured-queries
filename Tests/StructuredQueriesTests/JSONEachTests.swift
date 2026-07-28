@@ -509,6 +509,43 @@ extension SnapshotTests {
       }
     }
 
+    @Test func optionalColumn() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "routes" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "waypoints" TEXT
+          )
+          """
+        )
+      )
+      try db.execute(
+        Route.insert {
+          Route.Draft(waypoints: [Coordinate(latitude: 1, longitude: 2, label: "a")])
+          Route.Draft(waypoints: nil)
+        }
+      )
+      assertQuery(
+        Route.select { ($0.id, $0.waypoints.jsonEach().count()) }
+      ) {
+        """
+        SELECT "routes"."id", (
+          SELECT count(*)
+          FROM json_each("routes"."waypoints")
+        )
+        FROM "routes"
+        """
+      } results: {
+        """
+        ┌───┬───┐
+        │ 1 │ 1 │
+        │ 2 │ 0 │
+        └───┴───┘
+        """
+      }
+    }
+
     @Test func nestedPath() throws {
       try db.execute(
         #sql(
@@ -641,4 +678,12 @@ private struct Writer: Codable, Equatable {
   var tags: [String] = []
   @Column(as: [String: Int].JSONRepresentation.self)
   var scores: [String: Int] = [:]
+}
+
+
+@Table
+private struct Route: Codable, Equatable {
+  let id: Int
+  @Column(as: [Coordinate].JSONRepresentation?.self)
+  var waypoints: [Coordinate]?
 }
