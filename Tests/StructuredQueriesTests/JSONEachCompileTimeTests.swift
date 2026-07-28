@@ -45,6 +45,13 @@ private enum ArrayOfObjects {
   private func arrayObjectKey() {
     _ = MTrip.where { $0.geofence.jsonEach().where { $0.key.eq(0) }.exists() }
   }
+
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  private func jsonbEachArrayOfObjects() {
+    _ = MTrip.where {
+      $0.geofence.jsonbEach().where { $0.value.jsonExtract(\.latitude) < 0 }.exists()
+    }
+  }
 }
 
 private enum ArrayOfScalars {
@@ -65,6 +72,11 @@ private enum DictionaryOfObjects {
     _ = MTrip.where {
       $0.inventory.jsonEach().where { $0.key.eq("SFO") }.exists()
     }
+  }
+
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  private func jsonbEachDictionaryOfObjects() {
+    _ = MTrip.where { $0.inventory.jsonbEach().where { $0.key.eq("SFO") }.exists() }
   }
 }
 
@@ -147,5 +159,12 @@ private enum JoinsAndOptionality {
     let a: any QueryExpression<String> = required.jsonExtract(\.label)
     let b: any QueryExpression<String?> = optional.jsonExtract(\.label)
     _ = (a, b)
+  }
+
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  private func jsonbEachAtPath() {
+    _ = MTrip
+      .join(MTrip.columns.geofence.jsonbEach()) { _, _ in true }
+      .select { ($0.title, $1.value.jsonExtract(\.label)) }
   }
 }

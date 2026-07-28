@@ -174,6 +174,107 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   }
 }
 
+extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRepresentation {
+  /// A select statement that iterates over the object elements of this JSON array expression
+  /// using the `jsonb_each` table-valued function.
+  ///
+  /// Works like ``jsonEach()-(())``, except each element is decoded from SQLite's binary JSONB
+  /// format instead of text JSON, avoiding a parse of the element's JSON.
+  ///
+  /// - Returns: A select statement over the elements of this JSON array.
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  public func jsonbEach<Element: Table & Codable>()
+    -> SelectOf<JSONEach<Int, _CodableJSONBRepresentation<Element>>>
+  where QueryValue._ElementRepresentation: _JSONObjectRepresentation<Element> {
+    JSONEach.select(from: "jsonb_each(\(argumentFragment))")
+  }
+}
+
+extension QueryExpression
+where QueryValue: _AnyJSONRepresentable & _JSONDictionaryRepresentation {
+  /// A select statement that iterates over the object values of this JSON object expression using
+  /// the `jsonb_each` table-valued function.
+  ///
+  /// - Returns: A select statement over the values of this JSON object.
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  public func jsonbEach<Element: Table & Codable>()
+    -> SelectOf<JSONEach<QueryValue._Key, _CodableJSONBRepresentation<Element>>>
+  where
+    QueryValue._Key: QueryBindable,
+    QueryValue._ValueRepresentation: _JSONObjectRepresentation<Element>
+  {
+    JSONEach.select(from: "jsonb_each(\(argumentFragment))")
+  }
+}
+
+extension QueryExpression
+where
+  QueryValue: StructuredQueriesCore._OptionalProtocol,
+  QueryValue.Wrapped: _JSONArrayRepresentation
+{
+  /// A select statement that iterates over the object elements of this optional JSON array
+  /// expression using the `jsonb_each` table-valued function.
+  ///
+  /// - Returns: A select statement over the elements of this JSON array.
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  public func jsonbEach<Element: Table & Codable>()
+    -> SelectOf<JSONEach<Int, _CodableJSONBRepresentation<Element>>>
+  where QueryValue.Wrapped._ElementRepresentation: _JSONObjectRepresentation<Element> {
+    JSONEach.select(from: "jsonb_each(\(argumentFragment))")
+  }
+}
+
+extension QueryExpression
+where
+  QueryValue: StructuredQueriesCore._OptionalProtocol,
+  QueryValue.Wrapped: _JSONDictionaryRepresentation
+{
+  /// A select statement that iterates over the object values of this optional JSON object
+  /// expression using the `jsonb_each` table-valued function.
+  ///
+  /// - Returns: A select statement over the values of this JSON object.
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  public func jsonbEach<Element: Table & Codable>()
+    -> SelectOf<JSONEach<QueryValue.Wrapped._Key, _CodableJSONBRepresentation<Element>>>
+  where
+    QueryValue.Wrapped._Key: QueryBindable,
+    QueryValue.Wrapped._ValueRepresentation: _JSONObjectRepresentation<Element>
+  {
+    JSONEach.select(from: "jsonb_each(\(argumentFragment))")
+  }
+}
+
+extension QueryExpression where QueryValue: _AnyJSONRepresentable {
+  /// A select statement that iterates over the object elements of a JSON array at the given path
+  /// using the `jsonb_each` table-valued function.
+  ///
+  /// - Parameter path: A key path from the JSON expression to an array.
+  /// - Returns: A select statement over the elements of the JSON array at the given path.
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  public func jsonbEach<Context, Member: _JSONArrayRepresentation, Element: Table & Codable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> SelectOf<JSONEach<Int, _CodableJSONBRepresentation<Element>>>
+  where Member._ElementRepresentation: _JSONObjectRepresentation<Element> {
+    JSONEach.select(from: jsonbEachFragment(path))
+  }
+
+  /// A select statement that iterates over the object values of a JSON object at the given path
+  /// using the `jsonb_each` table-valued function.
+  ///
+  /// - Parameter path: A key path from the JSON expression to an object.
+  /// - Returns: A select statement over the values of the JSON object at the given path.
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  public func jsonbEach<Context, Member: _JSONDictionaryRepresentation, Element: Table & Codable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> SelectOf<JSONEach<Member._Key, _CodableJSONBRepresentation<Element>>>
+  where
+    Member._Key: QueryBindable,
+    Member._ValueRepresentation: _JSONObjectRepresentation<Element>
+  {
+    JSONEach.select(from: jsonbEachFragment(path))
+  }
+}
+
 /// A table representing SQLite's `json_each` table-valued function iterating over a JSON
 /// collection.
 ///
@@ -260,8 +361,21 @@ extension QueryExpression {
   fileprivate func jsonEachFragment<Root, Context, Member>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>
   ) -> QueryFragment {
+    eachFragment("json_each", path)
+  }
+
+  fileprivate func jsonbEachFragment<Root, Context, Member>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>
+  ) -> QueryFragment {
+    eachFragment("jsonb_each", path)
+  }
+
+  private func eachFragment<Root, Context, Member>(
+    _ function: QueryFragment,
+    _ path: KeyPath<JSONPath<_JSONPathRoot, Root>, JSONPath<Context, Member>>
+  ) -> QueryFragment {
     """
-    json_each(\
+    \(function)(\
     \(argumentFragment), \
     \(quote: JSONPath()[keyPath: path].pathString, delimiter: .text)\
     )
