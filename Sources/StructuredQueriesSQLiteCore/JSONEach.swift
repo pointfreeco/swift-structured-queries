@@ -211,6 +211,8 @@ where
   /// A select statement that iterates over the elements of this JSON array expression using the
   /// `jsonb_each` table-valued function.
   ///
+  /// A `NULL` JSON expression iterates as an empty collection.
+  ///
   /// - Returns: A select statement over the elements of this JSON array.
   public func jsonbEach<Element: Table & Codable>()
     -> SelectOf<JSONBEach<Int, _CodableJSONBRepresentation<Element>>>
@@ -224,10 +226,12 @@ where
   QueryValue: StructuredQueriesCore._OptionalProtocol,
   QueryValue.Wrapped: _JSONDictionaryRepresentation
 {
-  /// A select statement that iterates over the object values of this optional JSON object
-  /// expression using the `jsonb_each` table-valued function.
+  /// A select statement that iterates over the key value pairs of this JSON object expression using
+  /// the `jsonb_each` table-valued function.
   ///
-  /// - Returns: A select statement over the values of this JSON object.
+  /// A `NULL` JSON expression iterates as an empty collection.
+  ///
+  /// - Returns: A select statement over the key value pairs of this JSON object.
   public func jsonbEach<Element: Table & Codable>()
     -> SelectOf<JSONBEach<QueryValue.Wrapped._Key, _CodableJSONBRepresentation<Element>>>
   where
@@ -239,8 +243,8 @@ where
 }
 
 extension QueryExpression where QueryValue: _AnyJSONRepresentable {
-  /// A select statement that iterates over the object elements of a JSON array at the given path
-  /// using the `jsonb_each` table-valued function.
+  /// A select statement that iterates over the elements of a JSON array at the given path using the
+  /// `jsonb_each` table-valued function.
   ///
   /// - Parameter path: A key path from the JSON expression to an array.
   /// - Returns: A select statement over the elements of the JSON array at the given path.
@@ -251,11 +255,11 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
     JSONBEach.select(from: jsonbEachFragment(path))
   }
 
-  /// A select statement that iterates over the object values of a JSON object at the given path
+  /// A select statement that iterates over the key value pairs of a JSON object at the given path
   /// using the `jsonb_each` table-valued function.
   ///
   /// - Parameter path: A key path from the JSON expression to an object.
-  /// - Returns: A select statement over the values of the JSON object at the given path.
+  /// - Returns: A select statement over the key value pairs of the JSON object at the given path.
   public func jsonbEach<Context, Member: _JSONDictionaryRepresentation, Element: Table & Codable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
   ) -> SelectOf<JSONBEach<Member._Key, _CodableJSONBRepresentation<Element>>>
@@ -346,8 +350,11 @@ extension JSONEach: Equatable where Key.QueryOutput: Equatable, Value.QueryOutpu
 /// collection.
 ///
 /// Statements of this table are created by applying
-/// ``StructuredQueriesCore/QueryExpression/jsonbEach()`` to a JSON expression. It works like
-/// ``JSONEach``, except ``TableColumns/value`` is SQLite's binary JSONB format rather than text
+/// ``StructuredQueriesCore/QueryExpression/jsonbEach()`` to a JSON expression. It has the two
+/// columns `jsonb_each` exposes: ``TableColumns/key`` and ``TableColumns/value``. Reach into the
+/// fields of an object element with `jsonExtract` on ``TableColumns/value``.
+///
+/// Unlike ``JSONEach``, ``TableColumns/value`` is SQLite's binary JSONB format rather than text
 /// JSON.
 public struct JSONBEach<
   Key: QueryRepresentable & QueryBindable,
