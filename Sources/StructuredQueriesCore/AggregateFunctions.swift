@@ -11,21 +11,13 @@ extension QueryExpression where QueryValue: QueryBindable {
   /// // SELECT count(DISTINCT "reminders"."title") FROM "reminders"
   /// ```
   ///
-  /// - Parameters:
-  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
-  ///     the aggregation.
-  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Parameter isDistinct: Whether or not to include a `DISTINCT` clause, which filters
+  ///   duplicates from the aggregation.
   /// - Returns: A count aggregate of this expression.
   public func count(
-    distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    distinct isDistinct: Bool = false
   ) -> some QueryExpression<Int> {
-    AggregateFunctionExpression(
-      "count",
-      isDistinct: isDistinct,
-      [queryFragment],
-      filter: filter?.queryFragment
-    )
+    AggregateFunctionExpression("count", isDistinct: isDistinct, [queryFragment])
   }
 }
 
@@ -40,47 +32,29 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
   /// // SELECT group_concat("reminders"."title") FROM "reminders"
   /// ```
   ///
-  /// - Parameters:
-  ///   - separator: A string to insert between each of the results in a group. The default
-  ///     separator is a comma.
-  ///   - order: An `ORDER BY` clause to apply to the aggregation.
-  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Parameter separator: A string to insert between each of the results in a group. The default
+  ///   separator is a comma.
   /// - Returns: A string concatenation aggregate of this expression.
   public func groupConcat(
-    _ separator: (some QueryExpression)? = String?.none,
-    order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    _ separator: (some QueryExpression)? = String?.none
   ) -> some QueryExpression<String?> {
     AggregateFunctionExpression(
       "group_concat",
-      separator.map { [queryFragment, $0.queryFragment] } ?? [queryFragment],
-      order: order?.queryFragment,
-      filter: filter?.queryFragment
+      separator.map { [queryFragment, $0.queryFragment] } ?? [queryFragment]
     )
   }
 
   /// A string concatenation aggregate of this expression.
   ///
-  /// See ``groupConcat(_:order:filter:)`` for more.
+  /// See ``groupConcat(_:)`` for more.
   ///
-  /// - Parameters:
-  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
-  ///     the aggregation.
-  ///   - order: An `ORDER BY` clause to apply to the aggregation.
-  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Parameter isDistinct: Whether or not to include a `DISTINCT` clause, which filters
+  ///   duplicates from the aggregation.
   /// - Returns: A string concatenation aggregate of this expression.
   public func groupConcat(
-    distinct isDistinct: Bool,
-    order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    distinct isDistinct: Bool
   ) -> some QueryExpression<String?> {
-    AggregateFunctionExpression(
-      "group_concat",
-      isDistinct: isDistinct,
-      [queryFragment],
-      order: order?.queryFragment,
-      filter: filter?.queryFragment
-    )
+    AggregateFunctionExpression("group_concat", isDistinct: isDistinct, [queryFragment])
   }
 }
 
@@ -92,12 +66,9 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable 
   /// // SELECT max("reminders"."date") FROM "reminders"
   /// ```
   ///
-  /// - Parameters filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A maximum aggregate of this expression.
-  public func max(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
-    AggregateFunctionExpression("max", [queryFragment], filter: filter?.queryFragment)
+  public func max() -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
+    AggregateFunctionExpression("max", [queryFragment])
   }
 
   /// A minimum aggregate of this expression.
@@ -107,12 +78,9 @@ extension QueryExpression where QueryValue: QueryBindable & _OptionalPromotable 
   /// // SELECT min("reminders"."date") FROM "reminders"
   /// ```
   ///
-  /// - Parameters filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A minimum aggregate of this expression.
-  public func min(
-    filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
-    AggregateFunctionExpression("min", [queryFragment], filter: filter?.queryFragment)
+  public func min() -> some QueryExpression<QueryValue._Optionalized.Wrapped?> {
+    AggregateFunctionExpression("min", [queryFragment])
   }
 }
 
@@ -125,17 +93,13 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   /// // SELECT avg("items"."price") FROM "items"
   /// ```
   ///
-  /// - Parameters:
-  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
-  ///     the aggregation.
-  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Parameter isDistinct: Whether or not to include a `DISTINCT` clause, which filters
+  ///   duplicates from the aggregation.
   /// - Returns: An average aggregate of this expression.
   public func avg(
-    distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    distinct isDistinct: Bool = false
   ) -> some QueryExpression<Double?> {
-    AggregateFunctionExpression(
-      "avg", isDistinct: isDistinct, [queryFragment], filter: filter?.queryFragment)
+    AggregateFunctionExpression("avg", isDistinct: isDistinct, [queryFragment])
   }
 
   /// A sum aggregate of this expression.
@@ -145,14 +109,11 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   /// // SELECT sum("items"."quantity") FROM "items"
   /// ```
   ///
-  /// - Parameters:
-  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
-  ///     the aggregation.
-  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Parameter isDistinct: Whether or not to include a `DISTINCT` clause, which filters
+  ///   duplicates from the aggregation.
   /// - Returns: A sum aggregate of this expression.
   public func sum(
-    distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    distinct isDistinct: Bool = false
   ) -> SQLQueryExpression<QueryValue._Optionalized> {
     // NB: We must explicitly erase here to avoid a runtime crash with opaque return types
     // TODO: Report issue to Swift team.
@@ -160,8 +121,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
       AggregateFunctionExpression<QueryValue._Optionalized>(
         "sum",
         isDistinct: isDistinct,
-        [queryFragment],
-        filter: filter?.queryFragment
+        [queryFragment]
       )
       .queryFragment
     )
@@ -174,21 +134,13 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   /// // SELECT total("items"."price") FROM "items"
   /// ```
   ///
-  /// - Parameters:
-  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
-  ///     the aggregation.
-  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Parameter isDistinct: Whether or not to include a `DISTINCT` clause, which filters
+  ///   duplicates from the aggregation.
   /// - Returns: A total aggregate of this expression.
   public func total(
-    distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    distinct isDistinct: Bool = false
   ) -> some QueryExpression<QueryValue> {
-    AggregateFunctionExpression(
-      "total",
-      isDistinct: isDistinct,
-      [queryFragment],
-      filter: filter?.queryFragment
-    )
+    AggregateFunctionExpression("total", isDistinct: isDistinct, [queryFragment])
   }
 }
 
@@ -200,12 +152,9 @@ extension QueryExpression where Self == AggregateFunctionExpression<Int> {
   /// // SELECT count(*) FROM "reminders"
   /// ```
   ///
-  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A `count(*)` aggregate.
-  public static func count(
-    filter: (any QueryExpression<Bool>)? = nil
-  ) -> Self {
-    AggregateFunctionExpression("count", ["*"], filter: filter?.queryFragment)
+  public static func count() -> Self {
+    AggregateFunctionExpression("count", ["*"])
   }
 }
 

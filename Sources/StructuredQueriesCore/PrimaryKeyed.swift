@@ -79,16 +79,13 @@ extension TableDefinition where QueryValue: TableDraft {
 extension PrimaryKeyedTableDefinition where PrimaryColumn: TableColumnExpression {
   /// A query expression representing the number of rows in this table.
   ///
-  /// - Parameters:
-  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
-  ///     the aggregation.
-  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Parameter isDistinct: Whether or not to include a `DISTINCT` clause, which filters
+  ///   duplicates from the aggregation.
   /// - Returns: An expression representing the number of rows in this table.
   public func count(
-    distinct isDistinct: Bool = false,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
+    distinct isDistinct: Bool = false
   ) -> some QueryExpression<Int> {
-    primaryKey.count(distinct: isDistinct, filter: filter)
+    primaryKey.count(distinct: isDistinct)
   }
 }
 

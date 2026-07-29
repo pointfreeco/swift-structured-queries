@@ -22,19 +22,16 @@ Explore the full list of available functions below.
 - ``QueryExpression/length()``
 - ``QueryExpression/lower()``
 - ``QueryExpression/ltrim(_:)``
-- ``QueryExpression/octetLength()``
 - ``QueryExpression/quote()``
 - ``QueryExpression/replace(_:_:)``
 - ``QueryExpression/rtrim(_:)``
 - ``QueryExpression/trim(_:)``
-- ``QueryExpression/unhex(_:)``
 - ``QueryExpression/upper()``
 
 ### Numeric
 
 - ``QueryExpression/abs()``
 - ``QueryExpression/round(_:)``
-- ``QueryExpression/sign()``
 
 ### Optionality
 

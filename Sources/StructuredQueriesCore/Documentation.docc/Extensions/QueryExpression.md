@@ -11,18 +11,17 @@
 ### Scalar functions
 
 - ``length()``
-- ``octetLength()``
 - ````
 
 ### Aggregate functions
 
 - ``count(distinct:filter:)``
-- ``count(filter:)``
+- ``count(distinct:)``
 - ``avg(distinct:filter:)``
 - ``sum(distinct:filter:)``
 - ``total(distinct:filter:)``
-- ``groupConcat(_:order:filter:)``
-- ``groupConcat(distinct:order:filter:)``
+- ``groupConcat(_:)``
+- ``groupConcat(distinct:)``
 
 ### Optionality
 

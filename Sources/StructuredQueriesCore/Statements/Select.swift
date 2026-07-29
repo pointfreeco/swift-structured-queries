@@ -304,12 +304,9 @@ extension Table {
 
   /// A select statement for this table's row count.
   ///
-  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A select statement that selects `count(*)`.
-  public static func count(
-    filter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
-  ) -> Select<Int, Self, ()> {
-    Where().count(filter: filter)
+  public static func count() -> Select<Int, Self, ()> {
+    Where().count()
   }
 }
 
@@ -1710,54 +1707,38 @@ extension Select {
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
-  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
-  public func count<each J: Table>(
-    filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
-  ) -> Select<Int, From, Joins>
+  public func count<each J: Table>() -> Select<Int, From, Joins>
   where Columns == (), Joins == (repeat each J) {
-    let filter = filter?(From.columns, repeat (each J).columns)
-    return select { _ in .count(filter: filter) }
+    select { _ in .count() }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
-  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
-  public func count<each C: QueryRepresentable, each J: Table>(
-    filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
-  ) -> Select<
+  public func count<each C: QueryRepresentable, each J: Table>() -> Select<
     (repeat each C, Int), From, (repeat each J)
   >
   where Columns == (repeat each C), Joins == (repeat each J) {
-    let filter = filter?(From.columns, repeat (each J).columns)
-    return select { _ in .count(filter: filter) }
+    select { _ in .count() }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
-  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
-  public func count(
-    filter: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Bool>)? = nil
-  ) -> Select<Int, From, Joins>
+  public func count() -> Select<Int, From, Joins>
   where Columns == (), Joins: Table {
-    let filter = filter?(From.columns, Joins.columns)
-    return select { _, _ in .count(filter: filter) }
+    select { _, _ in .count() }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
-  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
-  public func count<each C: QueryRepresentable>(
-    filter: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Bool>)? = nil
-  ) -> Select<
+  public func count<each C: QueryRepresentable>() -> Select<
     (repeat each C, Int), From, Joins
   >
   where Columns == (repeat each C), Joins: Table {
-    let filter = filter?(From.columns, Joins.columns)
-    return select { _, _ in .count(filter: filter) }
+    select { _, _ in .count() }
   }
 
   /// Creates a new select statement from this one by transforming its selected columns to a new

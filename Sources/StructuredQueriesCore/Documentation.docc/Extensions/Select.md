@@ -18,7 +18,7 @@
 - ``order(by:)``
 - ``limit(_:)``
 - ``offset(_:)``
-- ``count(filter:)``
+- ``count()``
 - ``find(_:)``
 
 ### Transforming queries

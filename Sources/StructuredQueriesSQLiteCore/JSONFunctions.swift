@@ -45,14 +45,43 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// // => [[String]].JSONRepresentation
   /// ```
   ///
+  /// - Parameter isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[QueryValue.QueryOutput].JSONRepresentation> {
+    _jsonGroupArray(isDistinct: isDistinct, order: Bool?.none, filter: Bool?.none)
+  }
+
+  /// A JSON array aggregate of this JSON expression.
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
+  #endif
+  public func jsonGroupArray(
+    distinct isDistinct: Bool = false,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[QueryValue.QueryOutput].JSONRepresentation> {
+    _jsonGroupArray(isDistinct: isDistinct, order: Bool?.none, filter: filter)
+  }
+
+  /// A JSON array aggregate of this JSON expression.
+  ///
   /// - Parameters:
   ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this expression.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
   public func jsonGroupArray(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue.QueryOutput].JSONRepresentation> {
     _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
@@ -109,8 +138,21 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSONB array aggregate of this expression.
   public func jsonbGroupArray(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[QueryValue.QueryOutput].JSONBRepresentation> {
+    _jsonbGroupArray(isDistinct: isDistinct, order: Bool?.none, filter: Bool?.none)
+  }
+
+  public func jsonbGroupArray(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[QueryValue.QueryOutput].JSONBRepresentation> {
+    _jsonbGroupArray(isDistinct: isDistinct, order: Bool?.none, filter: filter)
+  }
+
+  public func jsonbGroupArray(
+    distinct isDistinct: Bool = false,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue.QueryOutput].JSONBRepresentation> {
     _jsonbGroupArray(isDistinct: isDistinct, order: order, filter: filter)
@@ -643,8 +685,27 @@ where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this expression.
   public func jsonGroupArray(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[QueryValue.Wrapped.QueryOutput?].JSONRepresentation> {
+    _jsonGroupArray(isDistinct: isDistinct, order: Bool?.none, filter: Bool?.none)
+  }
+
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
+  #endif
+  public func jsonGroupArray(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[QueryValue.Wrapped.QueryOutput?].JSONRepresentation> {
+    _jsonGroupArray(isDistinct: isDistinct, order: Bool?.none, filter: filter)
+  }
+
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
+  public func jsonGroupArray(
+    distinct isDistinct: Bool = false,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue.Wrapped.QueryOutput?].JSONRepresentation> {
     _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
@@ -679,8 +740,21 @@ where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSONB array aggregate of this expression.
   public func jsonbGroupArray(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[QueryValue.Wrapped.QueryOutput?].JSONBRepresentation> {
+    _jsonbGroupArray(isDistinct: isDistinct, order: Bool?.none, filter: Bool?.none)
+  }
+
+  public func jsonbGroupArray(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[QueryValue.Wrapped.QueryOutput?].JSONBRepresentation> {
+    _jsonbGroupArray(isDistinct: isDistinct, order: Bool?.none, filter: filter)
+  }
+
+  public func jsonbGroupArray(
+    distinct isDistinct: Bool = false,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue.Wrapped.QueryOutput?].JSONBRepresentation> {
     _jsonbGroupArray(isDistinct: isDistinct, order: order, filter: filter)
@@ -780,15 +854,46 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
   /// - Returns: A JSON array aggregate of this expression.
   @_disfavoredOverload
   public func jsonGroupArray(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
+    AggregateFunctionExpression(
+      "json_group_array",
+      isDistinct: isDistinct,
+      [queryFragment],
+      order: nil,
+      filter: nil
+    )
+  }
+
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
+  #endif
+  public func jsonGroupArray(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
+    AggregateFunctionExpression(
+      "json_group_array",
+      isDistinct: isDistinct,
+      [queryFragment],
+      order: nil,
+      filter: filter.queryFragment
+    )
+  }
+
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
+  public func jsonGroupArray(
+    distinct isDistinct: Bool = false,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
     AggregateFunctionExpression(
       "json_group_array",
       isDistinct: isDistinct,
       [queryFragment],
-      order: order?.queryFragment,
+      order: order.queryFragment,
       filter: filter?.queryFragment
     )
   }
@@ -819,15 +924,40 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
   /// - Returns: A JSONB array aggregate of this expression.
   @_disfavoredOverload
   public func jsonbGroupArray(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[QueryValue].JSONBRepresentation> {
+    AggregateFunctionExpression(
+      "jsonb_group_array",
+      isDistinct: isDistinct,
+      [queryFragment],
+      order: nil,
+      filter: nil
+    )
+  }
+
+  public func jsonbGroupArray(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[QueryValue].JSONBRepresentation> {
+    AggregateFunctionExpression(
+      "jsonb_group_array",
+      isDistinct: isDistinct,
+      [queryFragment],
+      order: nil,
+      filter: filter.queryFragment
+    )
+  }
+
+  public func jsonbGroupArray(
+    distinct isDistinct: Bool = false,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONBRepresentation> {
     AggregateFunctionExpression(
       "jsonb_group_array",
       isDistinct: isDistinct,
       [queryFragment],
-      order: order?.queryFragment,
+      order: order.queryFragment,
       filter: filter?.queryFragment
     )
   }
@@ -884,16 +1014,50 @@ extension TableDefinition where QueryValue: Codable {
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
+  @_disfavoredOverload
+  public func jsonGroupArray(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
+    AggregateFunctionExpression(
+      "json_group_array",
+      isDistinct: isDistinct,
+      [jsonObject().queryFragment],
+      order: nil,
+      filter: nil
+    )
+  }
+
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
+  #endif
+  @_disfavoredOverload
   public func jsonGroupArray(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
+    AggregateFunctionExpression(
+      "json_group_array",
+      isDistinct: isDistinct,
+      [jsonObject().queryFragment],
+      order: nil,
+      filter: filter.queryFragment
+    )
+  }
+
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
+  @_disfavoredOverload
+  public func jsonGroupArray(
+    distinct isDistinct: Bool = false,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONRepresentation> {
     AggregateFunctionExpression(
       "json_group_array",
       isDistinct: isDistinct,
       [jsonObject().queryFragment],
-      order: order?.queryFragment,
+      order: order.queryFragment,
       filter: filter?.queryFragment
     )
   }
@@ -914,16 +1078,44 @@ extension TableDefinition where QueryValue: Codable {
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSONB array aggregate of this table.
+  @_disfavoredOverload
+  public func jsonbGroupArray(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[QueryValue].JSONBRepresentation> {
+    AggregateFunctionExpression(
+      "jsonb_group_array",
+      isDistinct: isDistinct,
+      [jsonbObject().queryFragment],
+      order: nil,
+      filter: nil
+    )
+  }
+
+  @_disfavoredOverload
   public func jsonbGroupArray(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[QueryValue].JSONBRepresentation> {
+    AggregateFunctionExpression(
+      "jsonb_group_array",
+      isDistinct: isDistinct,
+      [jsonbObject().queryFragment],
+      order: nil,
+      filter: filter.queryFragment
+    )
+  }
+
+  @_disfavoredOverload
+  public func jsonbGroupArray(
+    distinct isDistinct: Bool = false,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue].JSONBRepresentation> {
     AggregateFunctionExpression(
       "jsonb_group_array",
       isDistinct: isDistinct,
       [jsonbObject().queryFragment],
-      order: order?.queryFragment,
+      order: order.queryFragment,
       filter: filter?.queryFragment
     )
   }
@@ -975,14 +1167,49 @@ extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProto
   ///   }
   /// }
   ///
+  /// - Parameter isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this table.
+  public func jsonGroupArray<Wrapped: Codable>(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[Wrapped].JSONRepresentation>
+  where QueryValue == Wrapped? {
+    _jsonGroupArray(isDistinct: isDistinct, order: nil, filter: rowid.isNot(nil).queryFragment)
+  }
+
+  /// A JSON array representation of the aggregation of a table's columns.
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this table.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
+  #endif
+  public func jsonGroupArray<Wrapped: Codable>(
+    distinct isDistinct: Bool = false,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[Wrapped].JSONRepresentation>
+  where QueryValue == Wrapped? {
+    _jsonGroupArray(
+      isDistinct: isDistinct,
+      order: nil,
+      filter: rowid.isNot(nil).and(filter).queryFragment
+    )
+  }
+
+  /// A JSON array representation of the aggregation of a table's columns.
+  ///
   /// - Parameters:
   ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
   public func jsonGroupArray<Wrapped: Codable>(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[Wrapped].JSONRepresentation>
   where QueryValue == Wrapped? {
@@ -993,12 +1220,25 @@ extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProto
       } else {
         rowFilter.queryFragment
       }
-    return AggregateFunctionExpression(
+    return _jsonGroupArray(
+      isDistinct: isDistinct,
+      order: order.queryFragment,
+      filter: filterQueryFragment
+    )
+  }
+
+  fileprivate func _jsonGroupArray<Wrapped: Codable>(
+    isDistinct: Bool,
+    order: QueryFragment?,
+    filter: QueryFragment?
+  ) -> AggregateFunctionExpression<[Wrapped].JSONRepresentation>
+  where QueryValue == Wrapped? {
+    AggregateFunctionExpression(
       "json_group_array",
       isDistinct: isDistinct,
       [QueryValue.columns.jsonObject().queryFragment],
-      order: order?.queryFragment,
-      filter: filterQueryFragment
+      order: order,
+      filter: filter
     )
   }
 }
@@ -1013,6 +1253,35 @@ extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProto
   /// it appropriate for storage contexts, like assignment to a JSONB column. To select and decode
   /// an aggregate directly, use `jsonGroupArray`, instead.
   ///
+  /// - Parameter isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  /// - Returns: A JSONB array aggregate of this table.
+  public func jsonbGroupArray<Wrapped: Codable>(
+    distinct isDistinct: Bool = false
+  ) -> some QueryExpression<[Wrapped].JSONBRepresentation>
+  where QueryValue == Wrapped? {
+    _jsonbGroupArray(isDistinct: isDistinct, order: nil, filter: rowid.isNot(nil).queryFragment)
+  }
+
+  /// A JSONB array representation of the aggregation of a table's columns.
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSONB array aggregate of this table.
+  public func jsonbGroupArray<Wrapped: Codable>(
+    distinct isDistinct: Bool = false,
+    filter: some QueryExpression<Bool>
+  ) -> some QueryExpression<[Wrapped].JSONBRepresentation>
+  where QueryValue == Wrapped? {
+    _jsonbGroupArray(
+      isDistinct: isDistinct,
+      order: nil,
+      filter: rowid.isNot(nil).and(filter).queryFragment
+    )
+  }
+
+  /// A JSONB array representation of the aggregation of a table's columns.
+  ///
   /// - Parameters:
   ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
@@ -1020,7 +1289,7 @@ extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProto
   /// - Returns: A JSONB array aggregate of this table.
   public func jsonbGroupArray<Wrapped: Codable>(
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[Wrapped].JSONBRepresentation>
   where QueryValue == Wrapped? {
@@ -1031,12 +1300,25 @@ extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProto
       } else {
         rowFilter.queryFragment
       }
-    return AggregateFunctionExpression(
+    return _jsonbGroupArray(
+      isDistinct: isDistinct,
+      order: order.queryFragment,
+      filter: filterQueryFragment
+    )
+  }
+
+  fileprivate func _jsonbGroupArray<Wrapped: Codable>(
+    isDistinct: Bool,
+    order: QueryFragment?,
+    filter: QueryFragment?
+  ) -> AggregateFunctionExpression<[Wrapped].JSONBRepresentation>
+  where QueryValue == Wrapped? {
+    AggregateFunctionExpression(
       "jsonb_group_array",
       isDistinct: isDistinct,
       [QueryValue.columns.jsonbObject().queryFragment],
-      order: order?.queryFragment,
-      filter: filterQueryFragment
+      order: order,
+      filter: filter
     )
   }
 }

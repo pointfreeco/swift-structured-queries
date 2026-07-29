@@ -58,16 +58,6 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   public func abs() -> some QueryExpression<QueryValue> {
     QueryFunction("abs", self)
   }
-
-  /// Wraps this numeric query expression with the `sign` function.
-  ///
-  /// - Returns: An expression wrapped with the `sign` function.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-  #endif
-  public func sign() -> some QueryExpression<QueryValue> {
-    QueryFunction("sign", self)
-  }
 }
 
 extension QueryExpression where QueryValue: _OptionalPromotable {
@@ -204,16 +194,6 @@ extension QueryExpression where QueryValue == String {
       return QueryFunction("ltrim", self)
     }
   }
-
-  /// Creates an expression invoking the `octet_length` function with the given string expression.
-  ///
-  /// - Returns: An integer expression of the `octet_length` function wrapping the given string.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
-  #endif
-  public func octetLength() -> some QueryExpression<Int> {
-    QueryFunction("octet_length", self)
-  }
 }
 
 extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
@@ -288,22 +268,6 @@ extension QueryExpression where QueryValue == String {
 }
 
 extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
-  /// Wraps this string query expression with the `unhex` function.
-  ///
-  /// - Parameter characters: Non-hexadecimal characters to skip.
-  /// - Returns: An optional blob expression of the `unhex` function wrapping this expression.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
-  #endif
-  public func unhex(
-    _ characters: (some QueryExpression<String>)? = String?.none
-  ) -> some QueryExpression<[UInt8]?> {
-    if let characters {
-      return QueryFunction("unhex", self, characters)
-    } else {
-      return QueryFunction("unhex", self)
-    }
-  }
 
   /// Wraps this string expression with the `upper` function.
   ///

@@ -73,11 +73,11 @@ Explore the full list below.
 ### Aggregating values
 
 - ``QueryExpression/avg(distinct:filter:)``
-- ``AggregateFunction/count(filter:)``
+- ``AggregateFunction/count()``
 - ``QueryExpression/count(distinct:filter:)``
-- ``QueryExpression/groupConcat(_:order:filter:)``
-- ``QueryExpression/groupConcat(distinct:order:filter:)``
-- ``QueryExpression/max(filter:)``
-- ``QueryExpression/min(filter:)``
+- ``QueryExpression/groupConcat(_:)``
+- ``QueryExpression/groupConcat(distinct:)``
+- ``QueryExpression/max()``
+- ``QueryExpression/min()``
 - ``QueryExpression/sum(distinct:filter:)``
 - ``QueryExpression/total(distinct:filter:)``
