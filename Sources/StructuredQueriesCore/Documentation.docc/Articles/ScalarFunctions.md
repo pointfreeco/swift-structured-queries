@@ -22,6 +22,7 @@ Explore the full list of available functions below.
 - ``QueryExpression/length()``
 - ``QueryExpression/lower()``
 - ``QueryExpression/ltrim(_:)``
+- ``QueryExpression/octetLength()``
 - ``QueryExpression/quote()``
 - ``QueryExpression/replace(_:_:)``
 - ``QueryExpression/rtrim(_:)``

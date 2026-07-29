@@ -92,18 +92,6 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   }
 }
 
-extension QueryExpression where QueryValue == String {
-  /// Creates an expression invoking the `octet_length` function with the given string expression.
-  ///
-  /// - Returns: An integer expression of the `octet_length` function wrapping the given string.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
-  #endif
-  public func octetLength() -> some QueryExpression<Int> {
-    QueryFunction("octet_length", self)
-  }
-}
-
 extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
   /// Wraps this string query expression with the `unhex` function.
   ///

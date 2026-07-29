@@ -6,7 +6,6 @@ Apply SQLite functions to SQL expressions.
 
 ### Strings
 
-- ``StructuredQueriesCore/QueryExpression/octetLength()``
 - ``StructuredQueriesCore/QueryExpression/unhex(_:)``
 - ``StructuredQueriesCore/QueryExpression/unicode()``
 
