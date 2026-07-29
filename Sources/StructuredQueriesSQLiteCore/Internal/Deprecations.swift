@@ -393,11 +393,38 @@ extension Table {
     deprecated,
     message: "Prefer 'createTemporaryTrigger(after: .update(touch:))', instead"
   )
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
+  #endif
   public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterUpdateTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
-    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      afterUpdateTouch: dateColumn,
+      date: SQLQueryExpression<D>("datetime('subsec')"),
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'createTemporaryTrigger(after: .update(touch:))', instead"
+  )
+  public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterUpdateTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
+    date dateFunction: any QueryExpression<D>,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column
@@ -446,11 +473,38 @@ extension Table {
     deprecated,
     message: "Prefer 'createTemporaryTrigger(after: .insert(touch:))', instead"
   )
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
+  #endif
   public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
     _ name: String? = nil,
     ifNotExists: Bool = false,
     afterInsertTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
-    date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+    fileID: StaticString = #fileID,
+    line: UInt = #line,
+    column: UInt = #column
+  ) -> TemporaryTrigger<Self> {
+    Self.createTemporaryTrigger(
+      name,
+      ifNotExists: ifNotExists,
+      afterInsertTouch: dateColumn,
+      date: SQLQueryExpression<D>("datetime('subsec')"),
+      fileID: fileID,
+      line: line,
+      column: column
+    )
+  }
+
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'createTemporaryTrigger(after: .insert(touch:))', instead"
+  )
+  public static func createTemporaryTrigger<D: _OptionalPromotable<Date?>>(
+    _ name: String? = nil,
+    ifNotExists: Bool = false,
+    afterInsertTouch dateColumn: KeyPath<TableColumns, TableColumn<Self, D>>,
+    date dateFunction: any QueryExpression<D>,
     fileID: StaticString = #fileID,
     line: UInt = #line,
     column: UInt = #column

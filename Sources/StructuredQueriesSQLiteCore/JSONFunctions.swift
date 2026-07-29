@@ -35,6 +35,34 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
     _jsonExtract(path)
   }
 
+  /// A JSON array aggregate of this JSON expression.
+  ///
+  /// Concatenates all of the JSON values in a group into a JSON array.
+  ///
+  /// ```swift
+  /// Reminder.select { $0.tags.jsonGroupArray() }
+  /// // SELECT json_group_array(json("reminders"."tags")) FROM "reminders"
+  /// // => [[String]].JSONRepresentation
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryValue.QueryOutput].JSONRepresentation> {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
+extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// Extracts a value from this JSON expression using the `jsonb_extract` function.
   ///
   /// Works like `jsonExtract`, except JSON objects and arrays are extracted in SQLite's binary
@@ -67,29 +95,6 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
   ) -> some QueryExpression<Member._Optionalized> {
     _jsonbExtract(path)
-  }
-
-  /// A JSON array aggregate of this JSON expression.
-  ///
-  /// Concatenates all of the JSON values in a group into a JSON array.
-  ///
-  /// ```swift
-  /// Reminder.select { $0.tags.jsonGroupArray() }
-  /// // SELECT json_group_array(json("reminders"."tags")) FROM "reminders"
-  /// // => [[String]].JSONRepresentation
-  /// ```
-  ///
-  /// - Parameters:
-  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
-  ///   - order: An `ORDER BY` clause to apply to the aggregation.
-  ///   - filter: A `FILTER` clause to apply to the aggregation.
-  /// - Returns: A JSON array aggregate of this expression.
-  public func jsonGroupArray(
-    distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
-    filter: (some QueryExpression<Bool>)? = Bool?.none
-  ) -> some QueryExpression<[QueryValue.QueryOutput].JSONRepresentation> {
-    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
   }
 
   /// A JSONB array aggregate of this JSON expression.
@@ -383,6 +388,9 @@ where QueryValue: _JSONRepresentable & _JSONArrayRepresentation {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension QueryExpression where QueryValue: _JSONBRepresentable {
   /// Sets a value at a given path in this JSONB expression using the `jsonb_set` function.
   ///
@@ -590,6 +598,9 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension QueryExpression
 where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
   @_documentation(visibility: private)
@@ -624,16 +635,6 @@ where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _
     _jsonExtract(path)
   }
 
-  /// Extracts a value from this optional JSON expression using the `jsonb_extract` function.
-  ///
-  /// - Parameter path: A key path from the JSON expression to a field to extract.
-  /// - Returns: An optional expression of the value extracted.
-  public func jsonbExtract<Context, Member: QueryRepresentable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
-  ) -> some QueryExpression<Member._Optionalized> {
-    _jsonbExtract(path)
-  }
-
   /// A JSON array aggregate of this JSON expression.
   ///
   /// - Parameters:
@@ -647,6 +648,23 @@ where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<[QueryValue.Wrapped.QueryOutput?].JSONRepresentation> {
     _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
+extension QueryExpression
+where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable
+{
+  /// Extracts a value from this optional JSON expression using the `jsonb_extract` function.
+  ///
+  /// - Parameter path: A key path from the JSON expression to a field to extract.
+  /// - Returns: An optional expression of the value extracted.
+  public func jsonbExtract<Context, Member: QueryRepresentable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Member._Optionalized> {
+    _jsonbExtract(path)
   }
 
   /// A JSONB array aggregate of this JSON expression.
@@ -774,7 +792,12 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
       filter: filter?.queryFragment
     )
   }
+}
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
+extension QueryExpression where QueryValue: Codable & QueryBindable {
   /// A JSONB array aggregate of this expression.
   ///
   /// Works like `jsonGroupArray`, except the aggregate is in SQLite's binary JSONB format, making
@@ -874,7 +897,12 @@ extension TableDefinition where QueryValue: Codable {
       filter: filter?.queryFragment
     )
   }
+}
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
+extension TableDefinition where QueryValue: Codable {
   /// A JSONB array representation of the aggregation of a table's columns.
   ///
   /// Works like `jsonGroupArray`, except the aggregate is in SQLite's binary JSONB format, making
@@ -973,7 +1001,12 @@ extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProto
       filter: filterQueryFragment
     )
   }
+}
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
+extension TableDefinition where QueryValue: StructuredQueriesCore._OptionalProtocol & Codable {
   /// A JSONB array representation of the aggregation of a table's columns.
   ///
   /// Works like `jsonGroupArray`, except the aggregate is in SQLite's binary JSONB format, making
@@ -1016,14 +1049,6 @@ extension TableDefinition where QueryValue: Codable {
     QueryFunction("json_object", SQLQueryExpression(_jsonObjectArguments))
   }
 
-  /// A JSONB representation of a table's columns.
-  ///
-  /// Works like ``jsonObject()``, except the object is in SQLite's binary JSONB format, making it
-  /// appropriate for storage contexts, like assignment to a JSONB column.
-  public func jsonbObject() -> some QueryExpression<_CodableJSONBRepresentation<QueryValue>> {
-    QueryFunction("jsonb_object", SQLQueryExpression(_jsonObjectArguments))
-  }
-
   fileprivate var _jsonObjectArguments: QueryFragment {
     func open<TableColumn: TableColumnExpression>(_ column: TableColumn) -> QueryFragment {
       let value = TableColumn.QueryValue._queryFragment(jsonEncoding: "\(column)")
@@ -1037,6 +1062,19 @@ extension TableDefinition where QueryValue: Codable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
+extension TableDefinition where QueryValue: Codable {
+  /// A JSONB representation of a table's columns.
+  ///
+  /// Works like ``jsonObject()``, except the object is in SQLite's binary JSONB format, making it
+  /// appropriate for storage contexts, like assignment to a JSONB column.
+  public func jsonbObject() -> some QueryExpression<_CodableJSONBRepresentation<QueryValue>> {
+    QueryFunction("jsonb_object", SQLQueryExpression(_jsonObjectArguments))
+  }
+}
+
 extension Optional.TableColumns where QueryValue: Codable {
   /// A JSON representation of a table's columns.
   ///
@@ -1044,7 +1082,12 @@ extension Optional.TableColumns where QueryValue: Codable {
   public func jsonObject() -> some QueryExpression<_CodableJSONRepresentation<Wrapped>?> {
     Case().when(rowid.isNot(nil), then: Wrapped.columns.jsonObject())
   }
+}
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
+extension Optional.TableColumns where QueryValue: Codable {
   /// A JSONB representation of a table's columns.
   ///
   /// Works like ``jsonObject()``, except the object is in SQLite's binary JSONB format, making it
@@ -1185,6 +1228,9 @@ public struct JSONPath<Context, QueryValue> {
     )
   }
 
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
   public subscript<Object: Table & Codable, Member: Table & Codable>(
     dynamicMember keyPath: KeyPath<Object.TableColumns, ColumnGroup<Object, Member>>
   ) -> JSONPath<Context._Member, _CodableJSONBRepresentation<Member>>
@@ -1199,6 +1245,9 @@ public struct JSONPath<Context, QueryValue> {
     )
   }
 
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
   public subscript<Object: Table & Codable, Member: Table & Codable>(
     dynamicMember keyPath: KeyPath<Object.TableColumns, ColumnGroup<Object, Member?>>
   ) -> JSONPath<Context._Member, _CodableJSONBRepresentation<Member>?>
@@ -1291,6 +1340,9 @@ public struct JSONPath<Context, QueryValue> {
       )
     }
 
+    #if !SuppressPlatformSQLiteAvailability
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+    #endif
     public subscript<Object: Table & Codable, Member: Table & Codable>(
       dynamicMember keyPath: KeyPath<Object.TableColumns, CaseColumnGroup<Object, Member>>
     ) -> JSONPath<Context._Case, _CodableJSONBRepresentation<Member>>
@@ -1409,6 +1461,9 @@ where QueryValue: _JSONRepresentable & _JSONArrayRepresentation {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _JSONInsertExpression where QueryValue: _JSONBRepresentable {
   public func jsonbInsert<Member: QueryBindable & StructuredQueriesCore._OptionalProtocol>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathMember, Member>>,
@@ -1457,6 +1512,9 @@ extension _JSONInsertExpression where QueryValue: _JSONBRepresentable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _JSONInsertExpression
 where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
   @_documentation(visibility: private)
@@ -1497,6 +1555,9 @@ extension _JSONRemoveExpression where QueryValue: _JSONRepresentable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _JSONRemoveExpression where QueryValue: _JSONBRepresentable {
   public func jsonbRemove<
     Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol
@@ -1547,6 +1608,9 @@ extension _JSONReplaceExpression where QueryValue: _JSONRepresentable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _JSONReplaceExpression where QueryValue: _JSONBRepresentable {
   public func jsonbReplace<Context: _JSONPathMemberContext, Member: QueryBindable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
@@ -1598,6 +1662,9 @@ extension _JSONSetExpression where QueryValue: _JSONRepresentable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _JSONSetExpression where QueryValue: _JSONBRepresentable {
   public func jsonbSet<Context: _RequiredJSONPathContext, Member: QueryBindable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
@@ -1670,12 +1737,19 @@ public protocol _JSONRepresentable: _AnyJSONRepresentable {}
 extension _CodableJSONRepresentation: _JSONRepresentable {}
 
 public protocol _JSONBRepresentable: _AnyJSONRepresentable {}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: _JSONBRepresentable {}
 
 extension _CodableJSONRepresentation: _JSONObjectRepresentation where QueryOutput: Table {
   public typealias _Object = QueryOutput
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: _JSONObjectRepresentation where QueryOutput: Table {
   public typealias _Object = QueryOutput
 }
@@ -1704,6 +1778,9 @@ where QueryOutput: RangeReplaceableCollection, QueryOutput.Element: Codable {
   public typealias _ElementRepresentation = _CodableJSONRepresentation<QueryOutput.Element>
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: _JSONArrayRepresentation
 where QueryOutput: RangeReplaceableCollection, QueryOutput.Element: Codable {
   public typealias _Element = QueryOutput.Element
@@ -1717,6 +1794,9 @@ where QueryOutput: _DictionaryProtocol, QueryOutput.Key == String, QueryOutput.V
   public typealias _ValueRepresentation = _CodableJSONRepresentation<QueryOutput.Value>
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: _JSONDictionaryRepresentation
 where QueryOutput: _DictionaryProtocol, QueryOutput.Key == String, QueryOutput.Value: Codable {
   public typealias _Key = String

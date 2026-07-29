@@ -57,6 +57,13 @@ let package = Package(
       description: "Align the Codable coding of tables and selections with their column names."
     ),
     .trait(
+      name: "SuppressPlatformSQLiteAvailability",
+      description: """
+        Suppress '@available' checks on APIs that depend on a newer version of SQLite than the one \
+        bundled with the platform.
+        """
+    ),
+    .trait(
       name: "StructuredQueriesCasePaths",
       description: "A deprecated alias for the 'CasePaths' trait.",
       enabledTraits: ["CasePaths"]
