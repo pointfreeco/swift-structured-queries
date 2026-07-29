@@ -64,14 +64,6 @@ extension SnapshotTests {
           └───────────────────────────┘
           """
         }
-      } matching: { issue in
-        issue.description.hasSuffix("The data couldn’t be read because it is missing.")
-          || issue.description.hasSuffix(
-            """
-              +SELECT json_object('id', json_quote("photos"."id"), 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height"))
-               FROM "photos"
-            """
-          )
       }
     }
 
@@ -103,14 +95,6 @@ extension SnapshotTests {
           └─────────────────────────────┘
           """
         }
-      } matching: { issue in
-        issue.description.hasSuffix("The data couldn’t be read because it is missing.")
-          || issue.description.hasSuffix(
-            """
-              +SELECT json_group_array(json_object('id', json_quote("photos"."id"), 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height")))
-               FROM "photos"
-            """
-          )
       }
     }
   }
