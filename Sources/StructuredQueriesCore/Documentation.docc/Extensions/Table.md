@@ -18,6 +18,7 @@
 - ``limit(_:)``
 - ``offset(_:)``
 - ``count()``
+- ``count(filter:)``
 - ``insert(_:values:onConflict:where:doUpdate:where:)``
 - ``insert(_:select:onConflict:where:doUpdate:where:)``
 - ``insert()``

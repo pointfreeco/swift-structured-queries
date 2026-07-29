@@ -609,7 +609,7 @@ The `order(by:)` function is used to add an ordering term to a query's `ORDER BY
 }
 
 Any number of ordering terms can be specified in a call to `order`, and
-`asc(nulls:)` and `desc(nulls:)` can be used to specify the
+``QueryExpression/asc(nulls:)`` and ``QueryExpression/desc(nulls:)`` can be used to specify the
 direction.
 
 @Row {

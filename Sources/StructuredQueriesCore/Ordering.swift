@@ -12,6 +12,28 @@ extension QueryExpression where QueryValue: QueryBindable {
   public func desc() -> _OrderingTerm<QueryValue> {
     _OrderingTerm(base: self, direction: .desc, nullOrdering: nil)
   }
+
+  /// This expression with an ascending ordering term and `NULL`-specific ordering.
+  ///
+  /// - Parameter nullOrdering: `NULL`-specific ordering.
+  /// - Returns: An ascending ordering of this expression.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
+  #endif
+  public func asc(nulls nullOrdering: NullOrdering) -> _OrderingTerm<QueryValue> {
+    _OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
+  }
+
+  /// This expression with a descending ordering term and `NULL`-specific ordering.
+  ///
+  /// - Parameter nullOrdering: `NULL`-specific ordering.
+  /// - Returns: A descending ordering of this expression.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
+  #endif
+  public func desc(nulls nullOrdering: NullOrdering) -> _OrderingTerm<QueryValue> {
+    _OrderingTerm(base: self, direction: .desc, nullOrdering: nullOrdering)
+  }
 }
 
 /// `NULL`-specific ordering for an ordering term.
@@ -32,9 +54,9 @@ public struct NullOrdering: RawRepresentable, Sendable {
 public struct _OrderingTerm<Value>: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
-  package struct Direction {
-    package static var asc: Self { Self(queryFragment: "ASC") }
-    package static var desc: Self { Self(queryFragment: "DESC") }
+  struct Direction {
+    static var asc: Self { Self(queryFragment: "ASC") }
+    static var desc: Self { Self(queryFragment: "DESC") }
     let queryFragment: QueryFragment
   }
 
@@ -43,11 +65,7 @@ public struct _OrderingTerm<Value>: QueryExpression, Sendable {
   let direction: Direction
   let nullOrdering: NullOrdering?
 
-  package init(
-    base: some QueryExpression<Value>,
-    direction: Direction,
-    nullOrdering: NullOrdering?
-  ) {
+  init(base: some QueryExpression<Value>, direction: Direction, nullOrdering: NullOrdering?) {
     self.baseQueryFragment = base.queryFragment
     self.direction = direction
     self.nullOrdering = nullOrdering

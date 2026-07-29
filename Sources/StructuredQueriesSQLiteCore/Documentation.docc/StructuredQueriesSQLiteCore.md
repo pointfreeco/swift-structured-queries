@@ -48,5 +48,3 @@ custom database functions, and more.
 - ``StructuredQueriesCore/Delete/returning(_:)``
 - ``StructuredQueriesCore/Insert/returning(_:)``
 - ``StructuredQueriesCore/Update/returning(_:)``
-- ``StructuredQueriesCore/QueryExpression/asc(nulls:)``
-- ``StructuredQueriesCore/QueryExpression/desc(nulls:)``

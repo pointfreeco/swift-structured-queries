@@ -17,11 +17,14 @@
 
 - ``count(distinct:filter:)``
 - ``count(distinct:)``
+- ``count(distinct:filter:)``
 - ``avg(distinct:filter:)``
 - ``sum(distinct:filter:)``
 - ``total(distinct:filter:)``
 - ``groupConcat(_:)``
+- ``groupConcat(_:order:filter:)``
 - ``groupConcat(distinct:)``
+- ``groupConcat(distinct:order:filter:)``
 
 ### Optionality
 

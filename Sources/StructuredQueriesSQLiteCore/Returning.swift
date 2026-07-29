@@ -113,27 +113,3 @@ extension Update {
     return _returning(returning)
   }
 }
-
-extension QueryExpression where QueryValue: QueryBindable {
-  /// This expression with an ascending ordering term and `NULL`-specific ordering.
-  ///
-  /// - Parameter nullOrdering: `NULL`-specific ordering.
-  /// - Returns: An ascending ordering of this expression.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
-  #endif
-  public func asc(nulls nullOrdering: NullOrdering) -> _OrderingTerm<QueryValue> {
-    _OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
-  }
-
-  /// This expression with a descending ordering term and `NULL`-specific ordering.
-  ///
-  /// - Parameter nullOrdering: `NULL`-specific ordering.
-  /// - Returns: A descending ordering of this expression.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
-  #endif
-  public func desc(nulls nullOrdering: NullOrdering) -> _OrderingTerm<QueryValue> {
-    _OrderingTerm(base: self, direction: .desc, nullOrdering: nullOrdering)
-  }
-}
