@@ -65,6 +65,11 @@ private enum ArrayOfScalars {
       .join(MTrip.columns.tags.jsonEach()) { _, _ in true }
       .select { ($0.title, $1.value) }
   }
+
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  private func jsonbEachArrayOfScalars() {
+    _ = MTrip.where { $0.tags.jsonbEach().where { $0.value.eq("urgent") }.exists() }
+  }
 }
 
 private enum DictionaryOfObjects {
@@ -83,6 +88,11 @@ private enum DictionaryOfObjects {
 private enum DictionaryOfScalars {
   private func dictionaryScalarWhere() {
     _ = MTrip.where { $0.reactions.jsonEach().where { $0.value > 10 }.exists() }
+  }
+
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+  private func jsonbEachDictionaryOfScalars() {
+    _ = MTrip.where { $0.reactions.jsonbEach().where { $0.value > 10 }.exists() }
   }
 }
 

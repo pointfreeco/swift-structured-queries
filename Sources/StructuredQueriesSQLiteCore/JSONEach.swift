@@ -185,6 +185,15 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRe
   where QueryValue._ElementRepresentation: _JSONObjectRepresentation<Element> {
     JSONBEach.select(from: "jsonb_each(\(argumentFragment))")
   }
+
+  /// A select statement that iterates over the elements of this JSON array expression using the
+  /// `jsonb_each` table-valued function.
+  ///
+  /// - Returns: A select statement over the elements of this JSON array.
+  public func jsonbEach() -> SelectOf<JSONBEach<Int, QueryValue._Element>>
+  where QueryValue._Element: QueryRepresentable & QueryBindable {
+    JSONBEach.select(from: "jsonb_each(\(argumentFragment))")
+  }
 }
 
 extension QueryExpression
@@ -199,6 +208,19 @@ where QueryValue: _AnyJSONRepresentable & _JSONDictionaryRepresentation {
     QueryValue._Key: QueryBindable,
     QueryValue._ValueRepresentation: _JSONObjectRepresentation<Element>
   {
+    JSONBEach.select(from: "jsonb_each(\(argumentFragment))")
+  }
+
+  /// A select statement that iterates over the key value pairs of this JSON object expression using
+  /// the `jsonb_each` table-valued function.
+  ///
+  /// Scalar values decode identically to ``jsonEach()``, since SQLite exposes them as SQL values
+  /// rather than JSONB. This overload exists so that ``jsonbEach()`` is available anywhere
+  /// ``jsonEach()`` is.
+  ///
+  /// - Returns: A select statement over the key value pairs of this JSON object.
+  public func jsonbEach() -> SelectOf<JSONBEach<QueryValue._Key, QueryValue._Value>>
+  where QueryValue._Key: QueryBindable, QueryValue._Value: QueryRepresentable & QueryBindable {
     JSONBEach.select(from: "jsonb_each(\(argumentFragment))")
   }
 }
@@ -217,6 +239,17 @@ where
   public func jsonbEach<Element: Table & Codable>()
     -> SelectOf<JSONBEach<Int, _CodableJSONBRepresentation<Element>>>
   where QueryValue.Wrapped._ElementRepresentation: _JSONObjectRepresentation<Element> {
+    JSONBEach.select(from: "jsonb_each(\(argumentFragment))")
+  }
+
+  /// A select statement that iterates over the elements of this JSON array expression using the
+  /// `jsonb_each` table-valued function.
+  ///
+  /// A `NULL` JSON expression iterates as an empty collection.
+  ///
+  /// - Returns: A select statement over the elements of this JSON array.
+  public func jsonbEach() -> SelectOf<JSONBEach<Int, QueryValue.Wrapped._Element>>
+  where QueryValue.Wrapped._Element: QueryRepresentable & QueryBindable {
     JSONBEach.select(from: "jsonb_each(\(argumentFragment))")
   }
 }
@@ -240,6 +273,25 @@ where
   {
     JSONBEach.select(from: "jsonb_each(\(argumentFragment))")
   }
+
+  /// A select statement that iterates over the key value pairs of this JSON object expression using
+  /// the `jsonb_each` table-valued function.
+  ///
+  /// A `NULL` JSON expression iterates as an empty collection.
+  ///
+  /// Scalar values decode identically to ``jsonEach()``, since SQLite exposes them as SQL values
+  /// rather than JSONB. This overload exists so that ``jsonbEach()`` is available anywhere
+  /// ``jsonEach()`` is.
+  ///
+  /// - Returns: A select statement over the key value pairs of this JSON object.
+  public func jsonbEach()
+    -> SelectOf<JSONBEach<QueryValue.Wrapped._Key, QueryValue.Wrapped._Value>>
+  where
+    QueryValue.Wrapped._Key: QueryBindable,
+    QueryValue.Wrapped._Value: QueryRepresentable & QueryBindable
+  {
+    JSONBEach.select(from: "jsonb_each(\(argumentFragment))")
+  }
 }
 
 extension QueryExpression where QueryValue: _AnyJSONRepresentable {
@@ -255,6 +307,18 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
     JSONBEach.select(from: jsonbEachFragment(path))
   }
 
+  /// A select statement that iterates over the elements of a JSON array at the given path using the
+  /// `jsonb_each` table-valued function.
+  ///
+  /// - Parameter path: A key path from the JSON expression to an array.
+  /// - Returns: A select statement over the elements of the JSON array at the given path.
+  public func jsonbEach<Context, Member: _JSONArrayRepresentation>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> SelectOf<JSONBEach<Int, Member._Element>>
+  where Member._Element: QueryRepresentable & QueryBindable {
+    JSONBEach.select(from: jsonbEachFragment(path))
+  }
+
   /// A select statement that iterates over the key value pairs of a JSON object at the given path
   /// using the `jsonb_each` table-valued function.
   ///
@@ -267,6 +331,22 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
     Member._Key: QueryBindable,
     Member._ValueRepresentation: _JSONObjectRepresentation<Element>
   {
+    JSONBEach.select(from: jsonbEachFragment(path))
+  }
+
+  /// A select statement that iterates over the key value pairs of a JSON object at the given path
+  /// using the `jsonb_each` table-valued function.
+  ///
+  /// Scalar values decode identically to ``jsonEach(_:)``, since SQLite exposes them as SQL values
+  /// rather than JSONB. This overload exists so that ``jsonbEach(_:)`` is available anywhere
+  /// ``jsonEach(_:)`` is.
+  ///
+  /// - Parameter path: A key path from the JSON expression to an object.
+  /// - Returns: A select statement over the key value pairs of the JSON object at the given path.
+  public func jsonbEach<Context, Member: _JSONDictionaryRepresentation>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+  ) -> SelectOf<JSONBEach<Member._Key, Member._Value>>
+  where Member._Key: QueryBindable, Member._Value: QueryRepresentable & QueryBindable {
     JSONBEach.select(from: jsonbEachFragment(path))
   }
 }
