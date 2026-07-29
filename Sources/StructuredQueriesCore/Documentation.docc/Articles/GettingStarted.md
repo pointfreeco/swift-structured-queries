@@ -382,7 +382,7 @@ equivalent SQL code. In this case the `+=` operator on Swift strings is translat
 operator in SQL for concatenating text.
 
 The library also supports the `RETURNING` clause of insert statements by using the
-``Insert/returning(_:)`` method. If you wanted to fetch the ID of each new reminder inserted, you
+`returning(_:)` method. If you wanted to fetch the ID of each new reminder inserted, you
 can do the following:
 
 @Row {
@@ -535,7 +535,7 @@ Reminder
 ```
 
 Update statements, like inserts, have a `RETURNING` clause, which you can use to specify data to
-fetch from rows updated by the query. Simply use the ``Update/returning(_:)`` method:
+fetch from rows updated by the query. Simply use the `returning(_:)` method:
 
 @Row {
   @Column {
@@ -609,7 +609,7 @@ Reminder
 ```
 
 Delete statements, like inserts and updates, have a `RETURNING` clause, which you can use to specify
-data to fetch from rows deleted by the query. Simply use the ``Update/returning(_:)`` method:
+data to fetch from rows deleted by the query. Simply use the `returning(_:)` method:
 
 @Row {
   @Column {

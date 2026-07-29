@@ -28,7 +28,7 @@ where Value: QueryBindable {
 extension TableColumnExpression {
   public var _names: [String] { [name] }
 
-  var returningFragment: QueryFragment {
+  package var returningFragment: QueryFragment {
     Value.queryFragment(decoding: "\(quote: name)")
   }
 }

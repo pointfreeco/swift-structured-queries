@@ -1,18 +1,16 @@
 extension QueryExpression where QueryValue: QueryBindable {
   /// This expression with an ascending ordering term.
   ///
-  /// - Parameter nullOrdering: `NULL`-specific ordering.
   /// - Returns: An ascending ordering of this expression.
-  public func asc(nulls nullOrdering: NullOrdering? = nil) -> _OrderingTerm<QueryValue> {
-    _OrderingTerm(base: self, direction: .asc, nullOrdering: nullOrdering)
+  public func asc() -> _OrderingTerm<QueryValue> {
+    _OrderingTerm(base: self, direction: .asc, nullOrdering: nil)
   }
 
   /// This expression with a descending ordering term.
   ///
-  /// - Parameter nullOrdering: `NULL`-specific ordering.
   /// - Returns: A descending ordering of this expression.
-  public func desc(nulls nullOrdering: NullOrdering? = nil) -> _OrderingTerm<QueryValue> {
-    _OrderingTerm(base: self, direction: .desc, nullOrdering: nullOrdering)
+  public func desc() -> _OrderingTerm<QueryValue> {
+    _OrderingTerm(base: self, direction: .desc, nullOrdering: nil)
   }
 }
 
@@ -34,9 +32,9 @@ public struct NullOrdering: RawRepresentable, Sendable {
 public struct _OrderingTerm<Value>: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
-  struct Direction {
-    static var asc: Self { Self(queryFragment: "ASC") }
-    static var desc: Self { Self(queryFragment: "DESC") }
+  package struct Direction {
+    package static var asc: Self { Self(queryFragment: "ASC") }
+    package static var desc: Self { Self(queryFragment: "DESC") }
     let queryFragment: QueryFragment
   }
 
@@ -45,7 +43,11 @@ public struct _OrderingTerm<Value>: QueryExpression, Sendable {
   let direction: Direction
   let nullOrdering: NullOrdering?
 
-  init(base: some QueryExpression<Value>, direction: Direction, nullOrdering: NullOrdering?) {
+  package init(
+    base: some QueryExpression<Value>,
+    direction: Direction,
+    nullOrdering: NullOrdering?
+  ) {
     self.baseQueryFragment = base.queryFragment
     self.direction = direction
     self.nullOrdering = nullOrdering

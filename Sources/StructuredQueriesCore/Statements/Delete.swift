@@ -40,6 +40,10 @@ public struct Delete<From: Table, Returning> {
   var `where`: [QueryFragment] = []
   var returning: [QueryFragment] = []
 
+  package func _returning<R>(_ returning: [QueryFragment]) -> Delete<From, R> {
+    Delete<From, R>(isEmpty: isEmpty, where: `where`, returning: returning)
+  }
+
   /// Adds a condition to a delete statement.
   ///
   /// ```swift
@@ -88,51 +92,6 @@ public struct Delete<From: Table, Returning> {
     return update
   }
 
-  /// Adds a returning clause to a delete statement.
-  ///
-  /// ```swift
-  /// Reminder.delete().returning { ($0.id, $0.title) }
-  /// // DELETE FROM "reminders" RETURNING "id", "title"
-  ///
-  /// Reminder.delete().returning(\.self)
-  /// // DELETE FROM "reminders" RETURNING …
-  /// ```
-  ///
-  /// - Parameter selection: Columns to return.
-  /// - Returns: A statement with a returning clause.
-  public func returning<each QueryValue: QueryRepresentable>(
-    _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
-  ) -> Delete<From, (repeat each QueryValue)> {
-    var returning: [QueryFragment] = []
-    for resultColumn in repeat each selection(From.columns) {
-      returning.append(resultColumn.returningFragment)
-    }
-    return Delete<From, (repeat each QueryValue)>(
-      isEmpty: isEmpty,
-      where: `where`,
-      returning: returning
-    )
-  }
-
-  // NB: This overload allows for 'returning(\.self)'.
-  /// Adds a returning clause to a delete statement.
-  ///
-  /// - Parameter selection: Columns to return.
-  /// - Returns: A statement with a returning clause.
-  @_documentation(visibility: private)
-  public func returning(
-    _ selection: (From.TableColumns) -> From.TableColumns
-  ) -> Delete<From, From> {
-    var returning: [QueryFragment] = []
-    for resultColumn in From.TableColumns.allColumns {
-      returning.append(resultColumn.returningFragment)
-    }
-    return Delete<From, From>(
-      isEmpty: isEmpty,
-      where: `where`,
-      returning: returning
-    )
-  }
 }
 
 /// A convenience type alias for a non-`RETURNING ``Delete``.
