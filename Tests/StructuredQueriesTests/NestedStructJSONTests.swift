@@ -38,9 +38,12 @@ extension SnapshotTests {
       )
     }
 
-    // TODO: 'json_object' should nest column groups to match their 'Codable' conformances.
     @Test func jsonObjectDecodes() {
-      withKnownIssue {
+      withKnownIssue(
+        """
+        'json_object' should nest column groups to match their 'Codable' conformances.
+        """
+      ) {
         assertQuery(
           Photo.select { $0.jsonObject() }
         ) {
@@ -61,12 +64,23 @@ extension SnapshotTests {
           └───────────────────────────┘
           """
         }
+      } matching: { issue in
+        issue.description.hasSuffix("The data couldn’t be read because it is missing.")
+          || issue.description.hasSuffix(
+            """
+              +SELECT json_object('id', json_quote("photos"."id"), 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height"))
+               FROM "photos"
+            """
+          )
       }
     }
 
-    // TODO: 'json_object' should nest column groups to match their 'Codable' conformances.
     @Test func jsonGroupArrayDecodes() {
-      withKnownIssue {
+      withKnownIssue(
+        """
+        'json_object' should nest column groups to match their 'Codable' conformances.
+        """
+      ) {
         assertQuery(
           Photo.select { $0.jsonGroupArray() }
         ) {
@@ -89,6 +103,14 @@ extension SnapshotTests {
           └─────────────────────────────┘
           """
         }
+      } matching: { issue in
+        issue.description.hasSuffix("The data couldn’t be read because it is missing.")
+          || issue.description.hasSuffix(
+            """
+              +SELECT json_group_array(json_object('id', json_quote("photos"."id"), 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height")))
+               FROM "photos"
+            """
+          )
       }
     }
   }
