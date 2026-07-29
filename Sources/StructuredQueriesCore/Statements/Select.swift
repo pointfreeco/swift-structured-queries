@@ -136,6 +136,9 @@ extension Table {
   ///   - other: A select statement for another table.
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that right-joins the given table.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public static func rightJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -157,6 +160,9 @@ extension Table {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that right-joins the given table.
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public static func rightJoin<each C: QueryRepresentable, F: Table>(
     _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
@@ -172,6 +178,9 @@ extension Table {
   ///   - other: A select statement for another table.
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that full-joins the given table.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public static func fullJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -197,6 +206,9 @@ extension Table {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that full-joins the given table.
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public static func fullJoin<each C: QueryRepresentable, F: Table>(
     _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
@@ -968,6 +980,9 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that right-joins the given table and combines their clauses
   ///   together.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public func rightJoin<
     each C1: QueryRepresentable,
     each C2: QueryRepresentable,
@@ -1026,6 +1041,9 @@ extension Select {
   ///   together.
   @_disfavoredOverload
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public func rightJoin<
     each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
   >(
@@ -1077,6 +1095,9 @@ extension Select {
   ///   together.
   @_disfavoredOverload
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public func rightJoin<F: Table, each J: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(), F, (repeat each J)>,
@@ -1110,6 +1131,9 @@ extension Select {
 
   @_disfavoredOverload
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public func rightJoin<F: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatementOf<F>,
@@ -1148,6 +1172,9 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that full-joins the given table and combines their clauses
   ///   together.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public func fullJoin<
     each C1: QueryRepresentable,
     each C2: QueryRepresentable,
@@ -1206,6 +1233,9 @@ extension Select {
   ///   together.
   @_disfavoredOverload
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public func fullJoin<
     each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
   >(
@@ -1257,6 +1287,9 @@ extension Select {
   ///   together.
   @_disfavoredOverload
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public func fullJoin<F: Table, each J: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(), F, (repeat each J)>,
@@ -1290,6 +1323,9 @@ extension Select {
 
   @_disfavoredOverload
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
+  #endif
   public func fullJoin<F: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatementOf<F>,
