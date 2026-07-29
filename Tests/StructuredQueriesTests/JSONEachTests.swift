@@ -604,6 +604,73 @@ extension SnapshotTests {
         """
       }
     }
+
+    @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+    @Test func jsonbEachJoin() {
+      assertQuery(
+        Trip
+          .join(Trip.columns.geofence.jsonbEach()) { _, _ in true }
+          .select { ($0.title, $1.key, $1.value.jsonExtract(\.label)) }
+      ) {
+        """
+        SELECT "trips"."title", "jsonb_each"."key", json_extract("jsonb_each"."value", '$."label"')
+        FROM "trips"
+        JOIN jsonb_each("trips"."geofence") ON 1
+        """
+      } results: {
+        """
+        ┌────────────┬───┬────────┐
+        │ "Northern" │ 0 │ "home" │
+        │ "Northern" │ 1 │ "away" │
+        │ "Mixed"    │ 0 │ "home" │
+        │ "Mixed"    │ 1 │ "away" │
+        └────────────┴───┴────────┘
+        """
+      }
+    }
+
+    @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+    @Test func jsonbEachDecodesValue() {
+      assertQuery(
+        Trip
+          .join(Trip.columns.geofence.jsonbEach()) { _, _ in true }
+          .select { $1.value }
+      ) {
+        """
+        SELECT json("jsonb_each"."value")
+        FROM "trips"
+        JOIN jsonb_each("trips"."geofence") ON 1
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ Coordinate(         │
+        │   latitude: 40.7,   │
+        │   longitude: -74.0, │
+        │   label: "home"     │
+        │ )                   │
+        ├─────────────────────┤
+        │ Coordinate(         │
+        │   latitude: 51.5,   │
+        │   longitude: -0.1,  │
+        │   label: "away"     │
+        │ )                   │
+        ├─────────────────────┤
+        │ Coordinate(         │
+        │   latitude: 40.7,   │
+        │   longitude: -74.0, │
+        │   label: "home"     │
+        │ )                   │
+        ├─────────────────────┤
+        │ Coordinate(         │
+        │   latitude: -33.9,  │
+        │   longitude: 151.2, │
+        │   label: "away"     │
+        │ )                   │
+        └─────────────────────┘
+        """
+      }
+    }
   }
 }
 
