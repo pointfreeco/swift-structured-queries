@@ -36,7 +36,7 @@ For example, a `Profile` table can hold an entire `Author` document in a single 
       @Column(as: Author.JSONRepresentation.self)
       var author: Author
     }
-      
+
     @Selection
     struct Author: Codable {
       var name = ""
