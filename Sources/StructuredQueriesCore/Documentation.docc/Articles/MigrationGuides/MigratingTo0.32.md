@@ -8,3 +8,5 @@ The `StructuredQueriesCasePaths` and `StructuredQueriesTagged` traits have been 
 `CasePaths` and `Tagged`, respectively. The old traits remain for now as aliases to the new traits,
 but will be removed in a future version of StructuredQueries. If you have either of these traits
 enabled in a project, make the appropriate changes to your Xcode projects and/or package files.
+
+See <doc:Traits> for more information on the traits that StructuredQueries provides.
