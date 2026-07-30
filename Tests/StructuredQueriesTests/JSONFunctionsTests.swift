@@ -656,6 +656,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `jsonbExtract from a JSONRepresentation`() throws {
       try db.execute(Doc.delete())
       try db.execute(
@@ -682,6 +683,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `jsonbSet on a JSONRepresentation`() throws {
       try db.execute(Doc.delete())
       try db.execute(
@@ -708,6 +710,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `jsonbAppend and jsonbRemove on a JSONRepresentation`() throws {
       try db.execute(Doc.delete())
       try db.execute(
