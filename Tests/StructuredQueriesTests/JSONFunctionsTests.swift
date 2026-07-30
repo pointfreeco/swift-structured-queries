@@ -10,6 +10,20 @@ extension SnapshotTests {
   @Suite struct JSONFunctionsTests {
     @Dependency(\.defaultDatabase) var db
 
+    init() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "docs" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "tags" TEXT NOT NULL,
+            "optionalTags" TEXT
+          )
+          """
+        )
+      )
+    }
+
     @Test func jsonGroupArray() {
       assertQuery(
         Reminder.select {
@@ -473,17 +487,6 @@ extension SnapshotTests {
 
     @Test func jsonGroupArrayOfJSONColumns() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Doc.insert {
           [
             Doc.Draft(tags: ["a", "b"], optionalTags: ["c"]),
@@ -516,17 +519,6 @@ extension SnapshotTests {
     }
 
     @Test func jsonSet() throws {
-      try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
       try db.execute(
         Doc.insert {
           Doc.Draft(tags: ["a", "b"])
@@ -586,17 +578,6 @@ extension SnapshotTests {
 
     @Test func jsonRemoveAndReplace() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Doc.insert {
           Doc.Draft(tags: ["a", "b", "c"])
         }
@@ -653,17 +634,6 @@ extension SnapshotTests {
 
     @Test func jsonbExtract() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Doc.insert {
           Doc.Draft(tags: ["a", "b"])
         }
@@ -681,6 +651,20 @@ extension SnapshotTests {
         │ "a" │ "b" │
         └─────┴─────┘
         """
+      }
+    }
+
+    @Test func `jsonbExtract from a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      withKnownIssue {
+        assertQuery(
+          Doc.select { $0.tags.jsonbExtract(\.self) }
+        ) {
+          """
+          SELECT json(jsonb_extract("docs"."tags", '$'))
+          FROM "docs"
+          """
+        }
       }
     }
 
