@@ -232,14 +232,27 @@ of strings into a value that SQLite understands. If you annotate this field with
 string when storing data in the table, and decode the JSON array into a Swift array when decoding a
 row:
 
-```swift
-@Table struct Reminder {
-  let id: Int
-  var title = ""
-  @Column(as: [String].JSONRepresentation.self)
-  var notes: [String]
+@Row {
+  @Column {
+    ```swift
+    @Table struct Reminder {
+      let id: Int
+      var title = ""
+      @Column(as: [String].JSONRepresentation.self)
+      var notes: [String]
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TABLE "reminders"(
+      "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+      "title" TEXT NOT NULL,
+      "notes" TEXT NOT NULL
+    ) STRICT
+    ```
+  }
 }
-```
 
 With that you can insert reminders with notes like so:
 
