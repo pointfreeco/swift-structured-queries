@@ -442,21 +442,6 @@ extension TableMacro: ExtensionMacro {
           continue
         }
 
-        if parameter.type.isOptionalType {
-          diagnostics.append(
-            Diagnostic(
-              node: parameter.type,
-              message: MacroExpansionErrorMessage(
-                """
-                Table case value must not be optional; a 'nil' value is indistinguishable from \
-                an inactive case
-                """
-              )
-            )
-          )
-          continue
-        }
-
         let identifier = caseElement.name
         var columnName = ExprSyntax(
           StringLiteralExprSyntax(content: identifier.text.trimmingBackticks())
