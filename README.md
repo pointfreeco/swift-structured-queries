@@ -159,6 +159,7 @@ comfortable with the library:
   * [Primary-keyed tables](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/primarykeyedtables)
   * [Safe SQL strings](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/safesqlstrings)
   * [Query cookbook](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/querycookbook)
+  * [Package traits](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/traits)
 
 As well as more comprehensive example usage:
 
@@ -231,11 +232,18 @@ And then adding the product to any target that needs access to the library:
 .product(name: "StructuredQueries", package: "swift-structured-queries"),
 ```
 
-If you are on Swift 6.1 or greater, you can enable package traits that extend the library with
-support for other libraries:
+If you are on Swift 6.1 or greater, you can enable
+[package traits](https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/traits)
+that extend the library with additional functionality:
 
   * `CasePaths`: Adds support for single-table inheritance _via_ "enum" tables by
     leveraging the [CasePaths](https://github.com/pointfreeco/swift-case-paths) library.
+
+  * `ColumnCoding`: Aligns the `Codable` conformance of tables and selections with their column
+    names.
+
+  * `LazyInitializableByDefault`: Makes draft properties with no default value
+    lazy-initializable.
 
   * `Tagged`: Adds support for type-safe identifiers _via_
     the [Tagged](https://github.com/pointfreeco/swift-tagged) library.
@@ -245,25 +253,32 @@ support for other libraries:
    .package(
      url: "https://github.com/pointfreeco/swift-structured-queries",
      from: "0.28.0",
-+    traits: [
-+      "CasePaths",
-+      "Tagged",
-+    ],
++    traits: ["CasePaths", "ColumnCoding", "LazyInitializableByDefault"]
    ),
-+  .package(
-+    url: "https://github.com/pointfreeco/swift-case-paths",
-+    from: "1.0.0"
-+  ),
-+  .package(
-+    url: "https://github.com/pointfreeco/swift-tagged",
-+    from: "0.1.0"
-+  ),
  ]
 ```
 
+See [Traits] for more information on each of these traits.
+
+[Traits]: https://swiftpackageindex.com/pointfreeco/swift-structured-queries/~/documentation/structuredqueriescore/traits
+
 > [!IMPORTANT]
-> As shown above, you _must_ explicitly depend on `swift-case-paths` and/or `swift-tagged` depending
-> on the trait(s) you enable to work around a Swift bug.
+> On Swift toolchains earlier than 6.3 you _must_ also explicitly depend on `swift-case-paths`
+> and/or `swift-tagged`, depending on the trait(s) you enable, to work around a SwiftPM bug in
+> which dependencies introduced by a trait are not resolved:
+>
+> ```diff
+> +.package(
+> +  url: "https://github.com/pointfreeco/swift-case-paths",
+> +  from: "1.0.0"
+> +),
+> +.package(
+> +  url: "https://github.com/pointfreeco/swift-tagged",
+> +  from: "0.1.0"
+> +),
+> ```
+>
+> This bug is fixed in Swift 6.3, where the explicit dependencies can be omitted.
 
 ## Community
 

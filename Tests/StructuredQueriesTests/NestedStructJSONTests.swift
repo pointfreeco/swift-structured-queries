@@ -44,9 +44,12 @@ extension SnapshotTests {
       )
     }
 
-    // TODO: 'json_object' should nest column groups to match their 'Codable' conformances.
     @Test func jsonObjectDecodes() {
-      withKnownIssue {
+      withKnownIssue(
+        """
+        'json_object' should nest column groups to match their 'Codable' conformances.
+        """
+      ) {
         assertQuery(
           Photo.select { $0.jsonObject() }
         ) {
@@ -110,9 +113,12 @@ extension SnapshotTests {
       }
     }
 
-    // TODO: 'json_object' should nest column groups to match their 'Codable' conformances.
     @Test func jsonGroupArrayDecodes() {
-      withKnownIssue {
+      withKnownIssue(
+        """
+        'json_object' should nest column groups to match their 'Codable' conformances.
+        """
+      ) {
         assertQuery(
           Photo.select { $0.jsonGroupArray() }
         ) {
