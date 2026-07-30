@@ -75,6 +75,23 @@ extension SnapshotTests {
         )
       )
       try db.execute(
+        #sql(
+          """
+          CREATE TABLE "blobTrips" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "geofence" BLOB NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        BlobTrip.insert {
+          BlobTrip.Draft(
+            geofence: [Coordinate(latitude: 40.7, longitude: -74.0, label: "home")]
+          )
+        }
+      )
+      try db.execute(
         Trip.insert {
           Trip.Draft(
             title: "Northern",
@@ -148,7 +165,9 @@ extension SnapshotTests {
 
     @Test func aggregateOfElements() {
       assertQuery(
-        Trip.select { ($0.title, $0.geofence.jsonEach().select { $0.value.jsonExtract(\.latitude).max() }) }
+        Trip.select {
+          ($0.title, $0.geofence.jsonEach().select { $0.value.jsonExtract(\.latitude).max() })
+        }
       ) {
         """
         SELECT "trips"."title", (
@@ -399,7 +418,9 @@ extension SnapshotTests {
           Post.Draft(reactions: ["👍": 3], writer: Writer())
         }
       )
-      assertQuery(Post.where { $0.reactions.jsonEach().where { $0.value > 10 }.exists() }.select(\.id)) {
+      assertQuery(
+        Post.where { $0.reactions.jsonEach().where { $0.value > 10 }.exists() }.select(\.id)
+      ) {
         """
         SELECT "posts"."id"
         FROM "posts"
@@ -426,7 +447,8 @@ extension SnapshotTests {
         }
       )
       assertQuery(
-        Post.where { $0.writer.jsonEach(\.tags).where { $0.value.eq("swift") }.exists() }.select(\.id)
+        Post.where { $0.writer.jsonEach(\.tags).where { $0.value.eq("swift") }.exists() }.select(
+          \.id)
       ) {
         """
         SELECT "posts"."id"
@@ -592,6 +614,30 @@ extension SnapshotTests {
       }
     }
 
+    @Test func `jsonEach over a JSONBRepresentation`() {
+      assertQuery(
+        BlobTrip
+          .join(BlobTrip.columns.geofence.jsonEach()) { _, _ in true }
+          .select { $1.value }
+      ) {
+        """
+        SELECT "json_each"."value"
+        FROM "blobTrips"
+        JOIN json_each("blobTrips"."geofence") ON 1
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ Coordinate(         │
+        │   latitude: 40.7,   │
+        │   longitude: -74.0, │
+        │   label: "home"     │
+        │ )                   │
+        └─────────────────────┘
+        """
+      }
+    }
+
     @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
     @Test func jsonbEachJoin() {
       assertQuery(
@@ -669,6 +715,13 @@ private struct Trip: Codable, Equatable {
   var geofence: [Coordinate] = []
 }
 
+@Table
+private struct BlobTrip: Codable, Equatable {
+  let id: Int
+  @Column(as: [Coordinate].JSONBRepresentation.self)
+  var geofence: [Coordinate] = []
+}
+
 @Selection
 private struct Coordinate: Codable, Equatable {
   var latitude = 0.0
@@ -733,7 +786,6 @@ private struct Writer: Codable, Equatable {
   @Column(as: [String: Int].JSONRepresentation.self)
   var scores: [String: Int] = [:]
 }
-
 
 @Table
 private struct Route: Codable, Equatable {
