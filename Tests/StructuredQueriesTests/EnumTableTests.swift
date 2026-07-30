@@ -546,7 +546,8 @@
             """
           }
         } matching: { issue in
-          issue.description.hasSuffix("""
+          issue.description.hasSuffix(
+            """
             The data couldn’t be read because it isn’t in the correct format.
             """)
         }

@@ -88,8 +88,8 @@ schema with enums.
 ### ColumnCoding
 
 The `ColumnCoding` trait aligns the `Codable` conformance of tables and selections with their
-column names. By default, Swift synthesizes coding keys for `Codable` types from a type's property 
-names, which can drift from the column names the `@Table` and `@Selection` macros use when columns 
+column names. By default, Swift synthesizes coding keys for `Codable` types from a type's property
+names, which can drift from the column names the `@Table` and `@Selection` macros use when columns
 are renamed:
 
 ```swift
@@ -166,8 +166,8 @@ To enable the trait, specify it in the `Package.swift` file that depends on Stru
 See [Lazy initialization](<doc:TableDrafts#Lazy-initialization>) for more information on
 lazy-initializable draft properties.
 
-> Important: In a future version of StructuredQueries this will become the default behavior, and 
-> you will be able to opt out of it for a particular property with 
+> Important: In a future version of StructuredQueries this will become the default behavior, and
+> you will be able to opt out of it for a particular property with
 > `@Column(lazyInitializable: false)`. Enable the trait today to prepare for that future release.
 
 ### Tagged
