@@ -48,7 +48,7 @@ extension SnapshotTests {
           Photo.select { $0.jsonObject() }
         ) {
           """
-          SELECT json_object('id', json_quote("photos"."id"), json_object('dimensions', 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height")))
+          SELECT json_object('id', "photos"."id", json_object('dimensions', 'width', "photos"."width", 'height', "photos"."height"))
           FROM "photos"
           """
         } results: {
@@ -77,7 +77,7 @@ extension SnapshotTests {
           Photo.select { $0.jsonGroupArray() }
         ) {
           """
-          SELECT json_group_array(json_object('id', json_quote("photos"."id"), json_object('dimensions', 'width', json_quote("photos"."width"), 'height', json_quote("photos"."height"))))
+          SELECT json_group_array(json_object('id', "photos"."id", json_object('dimensions', 'width', "photos"."width", 'height', "photos"."height")))
           FROM "photos"
           """
         } results: {
