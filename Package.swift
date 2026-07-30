@@ -41,20 +41,16 @@ let package = Package(
   ],
   traits: [
     .trait(
-      name: "LazyInitializableByDefault",
-      description: "Optionalize draft properties that have no default."
-    ),
-    .trait(
       name: "CasePaths",
       description: "Introduce enum table support to StructuredQueries."
     ),
     .trait(
-      name: "Tagged",
-      description: "Introduce StructuredQueries conformances to the swift-tagged package."
-    ),
-    .trait(
       name: "ColumnCoding",
       description: "Align the Codable coding of tables and selections with their column names."
+    ),
+    .trait(
+      name: "LazyInitializableByDefault",
+      description: "Optionalize draft properties that have no default."
     ),
     .trait(
       name: "SuppressPlatformSQLiteAvailability",
@@ -62,6 +58,10 @@ let package = Package(
         Suppress '@available' checks on APIs that depend on a newer version of SQLite than the one \
         bundled with the platform.
         """
+    ),
+    .trait(
+      name: "Tagged",
+      description: "Introduce StructuredQueries conformances to the swift-tagged package."
     ),
     .trait(
       name: "StructuredQueriesCasePaths",

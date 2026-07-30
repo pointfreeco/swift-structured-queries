@@ -652,6 +652,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbExtract() throws {
       try db.execute(
         #sql(
