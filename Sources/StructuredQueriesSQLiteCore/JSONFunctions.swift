@@ -54,7 +54,10 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// - Parameter path: A key path from the JSON expression to a field to extract.
   /// - Returns: An expression of the value extracted.
   public func jsonbExtract<Context, Member: QueryRepresentable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >
   ) -> some QueryExpression<Member> {
     _jsonbExtract(path)
   }
@@ -64,7 +67,10 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
     Context: _OptionalJSONPathContext,
     Member: QueryRepresentable
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >
   ) -> some QueryExpression<Member._Optionalized> {
     _jsonbExtract(path)
   }

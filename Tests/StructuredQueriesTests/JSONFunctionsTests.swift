@@ -656,15 +656,27 @@ extension SnapshotTests {
 
     @Test func `jsonbExtract from a JSONRepresentation`() throws {
       try db.execute(Doc.delete())
-      withKnownIssue {
-        assertQuery(
-          Doc.select { $0.tags.jsonbExtract(\.self) }
-        ) {
-          """
-          SELECT json(jsonb_extract("docs"."tags", '$'))
-          FROM "docs"
-          """
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
         }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbExtract(\.self) }
+      ) {
+        """
+        SELECT json(jsonb_extract("docs"."tags", '$'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "a", │
+        │   [1]: "b"  │
+        │ ]           │
+        └─────────────┘
+        """
       }
     }
 
