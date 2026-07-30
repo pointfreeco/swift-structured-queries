@@ -720,6 +720,21 @@ extension QueryExpression {
       filter: filter?.queryFragment
     )
   }
+
+  /// Wraps this expression with the `json_array_length` function.
+  ///
+  /// ```swift
+  /// Reminder.where { $0.tags.jsonArrayLength().gt(1) }
+  /// // SELECT … FROM "reminders"
+  /// // WHERE (json_array_length("reminders"."tags")) > (1)
+  /// ```
+  ///
+  /// - Returns: An integer expression of the `json_array_length` function wrapping this expression.
+  @_disfavoredOverload
+  public func jsonArrayLength<Element: Codable>() -> some QueryExpression<Int>
+  where QueryValue == [Element].JSONBRepresentation {
+    QueryFunction("json_array_length", self)
+  }
 }
 
 extension QueryExpression where QueryValue: Codable & QueryBindable {
@@ -781,6 +796,102 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
       "jsonb_group_array",
       isDistinct: isDistinct,
       [queryFragment],
+      order: order?.queryFragment,
+      filter: filter?.queryFragment
+    )
+  }
+}
+
+extension QueryExpression {
+  /// A JSON array aggregate of this JSON expression.
+  ///
+  /// Concatenates all of the JSON documents in a group into a JSON array.
+  ///
+  /// ```swift
+  /// Reminder.select { $0.tags.jsonGroupArray() }
+  /// // SELECT json_group_array(json("reminders"."tags")) FROM "reminders"
+  /// // => [[String]].JSONRepresentation
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray<QueryOutput: Codable>(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryOutput].JSONRepresentation>
+  where QueryValue == _CodableJSONRepresentation<QueryOutput> {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+
+  /// A JSON array aggregate of this JSON expression.
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray<QueryOutput: Codable>(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryOutput?].JSONRepresentation>
+  where QueryValue == _CodableJSONRepresentation<QueryOutput>? {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+
+  /// A JSON array aggregate of this JSONB expression.
+  ///
+  /// Concatenates all of the JSONB documents in a group into a JSON array.
+  ///
+  /// ```swift
+  /// Reminder.select { $0.tags.jsonGroupArray() }
+  /// // SELECT json_group_array(json("reminders"."tags")) FROM "reminders"
+  /// // => [[String]].JSONRepresentation
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray<QueryOutput: Codable>(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryOutput].JSONRepresentation>
+  where QueryValue == _CodableJSONBRepresentation<QueryOutput> {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+
+  /// A JSON array aggregate of this JSONB expression.
+  ///
+  /// - Parameters:
+  ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A JSON array aggregate of this expression.
+  public func jsonGroupArray<QueryOutput: Codable>(
+    distinct isDistinct: Bool = false,
+    order: (some QueryExpression)? = Bool?.none,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<[QueryOutput?].JSONRepresentation>
+  where QueryValue == _CodableJSONBRepresentation<QueryOutput>? {
+    _jsonGroupArray(isDistinct: isDistinct, order: order, filter: filter)
+  }
+
+  private func _jsonGroupArray<Result>(
+    isDistinct: Bool,
+    order: (some QueryExpression)?,
+    filter: (some QueryExpression<Bool>)?
+  ) -> AggregateFunctionExpression<Result> {
+    AggregateFunctionExpression(
+      "json_group_array",
+      isDistinct: isDistinct,
+      ["json(\($_isSelecting.withValue(false) { queryFragment }))"],
       order: order?.queryFragment,
       filter: filter?.queryFragment
     )
@@ -1010,7 +1121,53 @@ extension TableDefinition where QueryValue: Codable {
       Self.allColumns
         .map { open($0) }
         .joined(separator: ", ")
+    let fragment: QueryFragment = $_isSelecting.withValue(false) {
+      Self.allColumns
+        .map { "\(quote: $0.name, delimiter: .text), \(_jsonObjectValue($0))" }
+        .joined(separator: ", ")
     }
+    return QueryFunction("json_object", SQLQueryExpression(fragment))
+  }
+}
+
+private func _jsonObjectValue<TableColumn: TableColumnExpression>(
+  _ column: TableColumn
+) -> QueryFragment {
+  typealias Value = TableColumn.QueryValue._Optionalized.Wrapped
+
+  func isJSONRepresentation<T: Codable>(_: T.Type, isOptional: Bool = false) -> Bool {
+    func isOptionalJSONRepresentation<U: StructuredQueriesCore._OptionalProtocol>(_: U.Type) -> Bool
+    {
+      if let codableType = U.Wrapped.self as? any Codable.Type {
+        return isJSONRepresentation(codableType, isOptional: true)
+      } else {
+        return false
+      }
+    }
+    if let optionalType = T.self as? any StructuredQueriesCore._OptionalProtocol.Type {
+      return isOptionalJSONRepresentation(optionalType)
+    } else if isOptional {
+      return TableColumn.QueryValue.self == T.JSONRepresentation?.self
+        || TableColumn.QueryValue.self == T.JSONBRepresentation?.self
+    } else {
+      return Value.self == T.JSONRepresentation.self
+        || Value.self == T.JSONBRepresentation.self
+    }
+  }
+
+  if Value.self == Bool.self {
+    return "json(CASE \(column) WHEN 0 THEN 'false' WHEN 1 THEN 'true' END)"
+  } else if Value.self == Date.UnixTimeRepresentation.self {
+    return "datetime(\(column), 'unixepoch')"
+  } else if Value.self == Date.JulianDayRepresentation.self {
+    return "datetime(\(column), 'julianday')"
+  } else if let codableType = TableColumn.QueryValue.QueryOutput.self
+    as? any Codable.Type,
+    isJSONRepresentation(codableType)
+  {
+    return "json(\(column))"
+  } else {
+    return "json_quote(\(column))"
   }
 }
 

@@ -54,8 +54,6 @@ extension QueryRepresentable {
   @inlinable
   @inline(__always)
   public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
-    queryFragment
-  }
 }
 
 extension QueryRepresentable where Self: QueryDecodable, Self == QueryOutput {
