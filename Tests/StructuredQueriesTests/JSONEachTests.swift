@@ -23,6 +23,58 @@ extension SnapshotTests {
         )
       )
       try db.execute(
+        #sql(
+          """
+          CREATE TABLE "taggedItems" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "title" TEXT NOT NULL,
+            "tags" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "products" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "inventory" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "posts" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "reactions" TEXT NOT NULL,
+            "writer" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "routes" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "waypoints" TEXT
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "profiles" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "author" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
         Trip.insert {
           Trip.Draft(
             title: "Northern",
@@ -231,17 +283,6 @@ extension SnapshotTests {
 
     @Test func scalarElements() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "taggedItems" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "title" TEXT NOT NULL,
-            "tags" TEXT NOT NULL
-          )
-          """
-        )
-      )
-      try db.execute(
         TaggedItem.insert {
           TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"])
           TaggedItem.Draft(title: "Taxes", tags: ["work"])
@@ -272,17 +313,6 @@ extension SnapshotTests {
 
     @Test func scalarElementsJoin() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "taggedItems" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "title" TEXT NOT NULL,
-            "tags" TEXT NOT NULL
-          )
-          """
-        )
-      )
-      try db.execute(
         TaggedItem.insert { TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"]) }
       )
       assertQuery(
@@ -306,16 +336,6 @@ extension SnapshotTests {
     }
 
     @Test func dictionaryKeys() throws {
-      try db.execute(
-        #sql(
-          """
-          CREATE TABLE "products" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "inventory" TEXT NOT NULL
-          )
-          """
-        )
-      )
       try db.execute(
         Product.insert {
           Product.Draft(inventory: ["SFO": Stock(onHand: 0), "JFK": Stock(onHand: 4)])
@@ -351,16 +371,6 @@ extension SnapshotTests {
 
     @Test func dictionaryKeyAndValue() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "products" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "inventory" TEXT NOT NULL
-          )
-          """
-        )
-      )
-      try db.execute(
         Product.insert { Product.Draft(inventory: ["JFK": Stock(onHand: 4)]) }
       )
       assertQuery(
@@ -383,7 +393,6 @@ extension SnapshotTests {
     }
 
     @Test func scalarDictionaryValues() throws {
-      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
       try db.execute(
         Post.insert {
           Post.Draft(reactions: ["🎉": 12], writer: Writer())
@@ -410,7 +419,6 @@ extension SnapshotTests {
     }
 
     @Test func scalarArrayAtPath() throws {
-      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
       try db.execute(
         Post.insert {
           Post.Draft(writer: Writer(tags: ["swift", "sql"]))
@@ -439,7 +447,6 @@ extension SnapshotTests {
     }
 
     @Test func scalarDictionaryAtPath() throws {
-      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
       try db.execute(
         Post.insert {
           Post.Draft(writer: Writer(scores: ["swift": 9]))
@@ -511,16 +518,6 @@ extension SnapshotTests {
 
     @Test func optionalColumn() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "routes" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "waypoints" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Route.insert {
           Route.Draft(waypoints: [Coordinate(latitude: 1, longitude: 2, label: "a")])
           Route.Draft(waypoints: nil)
@@ -547,16 +544,6 @@ extension SnapshotTests {
     }
 
     @Test func nestedPath() throws {
-      try db.execute(
-        #sql(
-          """
-          CREATE TABLE "profiles" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "author" TEXT NOT NULL
-          )
-          """
-        )
-      )
       try db.execute(
         Profile.insert {
           Profile.Draft(

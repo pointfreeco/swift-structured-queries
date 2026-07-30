@@ -5,13 +5,30 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRe
   /// A select statement that iterates over the elements of this JSON array expression using the
   /// `json_each` table-valued function.
   ///
-  /// ```swift
-  /// Trip.where {
-  ///   !$0.geofence.jsonEach()
-  ///     .where { $0.value.jsonExtract(\.latitude) < 0 }
-  ///     .exists()
+  /// @Row {
+  ///   @Column {
+  ///     ```swift
+  ///     Trip.where {
+  ///       !$0.geofence.jsonEach()
+  ///         .where { $0.value.jsonExtract(\.latitude) < 0 }
+  ///         .exists()
+  ///     }
+  ///     ```
+  ///   }
+  ///   @Column {
+  ///     ```sql
+  ///     SELECT "trips".…
+  ///     FROM "trips"
+  ///     WHERE (
+  ///       NOT (EXISTS (
+  ///         SELECT "json_each"."key", "json_each"."value"
+  ///         FROM json_each("trips"."geofence")
+  ///         WHERE ((json_extract("json_each"."value", '$."latitude"')) < (0.0))
+  ///       ))
+  ///     )
+  ///     ```
+  ///   }
   /// }
-  /// ```
   ///
   /// - Returns: A select statement over the elements of this JSON array.
   public func jsonEach() -> SelectOf<JSONEach<Int, QueryValue._ElementRepresentation>>
@@ -22,11 +39,29 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRe
   /// A select statement that iterates over the elements of this JSON array expression using the
   /// `json_each` table-valued function.
   ///
-  /// ```swift
-  /// Reminder.where {
-  ///   $0.tags.jsonEach().where { $0.value.eq("urgent") }.exists()
+  /// @Row {
+  ///   @Column {
+  ///     ```swift
+  ///     Reminder.where {
+  ///       $0.tags.jsonEach()
+  ///         .where { $0.value.eq("urgent") }.exists()
+  ///     }
+  ///     ```
+  ///   }
+  ///   @Column {
+  ///     ```sql
+  ///     SELECT "reminders".…
+  ///     FROM "reminders"
+  ///     WHERE (
+  ///       EXISTS (
+  ///         SELECT "json_each"."key", "json_each"."value"
+  ///         FROM json_each("reminders"."tags")
+  ///         WHERE (("json_each"."value") = ('urgent'))
+  ///       )
+  ///     )
+  ///     ```
+  ///   }
   /// }
-  /// ```
   ///
   /// - Returns: A select statement over the elements of this JSON array.
   public func jsonEach() -> SelectOf<JSONEach<Int, QueryValue._Element>>
