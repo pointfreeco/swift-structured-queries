@@ -26,10 +26,12 @@ To enable a trait, specify it in the `Package.swift` file that depends on Struct
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.32.0",
+   from: "0.35.0",
 +  traits: ["CasePaths", "ColumnCoding", "LazyInitializableByDefault"]
  ),
 ```
+
+…or enable the trait from your Xcode project's package dependencies.
 
 ### CasePaths
 
@@ -62,7 +64,7 @@ To enable the trait, specify it in the `Package.swift` file that depends on Stru
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.32.0",
+   from: "0.35.0",
 +  traits: ["CasePaths"]
  ),
 ```
@@ -119,13 +121,13 @@ To enable the trait, specify it in the `Package.swift` file that depends on Stru
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.32.0",
+   from: "0.35.0",
 +  traits: ["ColumnCoding"]
  ),
 ```
 
 > Important: In the next major release of StructuredQueries this be the default behavior. Add this
-trait and update your tables to get a head start on compatibility.
+> trait and update your tables to get a head start on compatibility.
 
 ### LazyInitializableByDefault
 
@@ -156,7 +158,7 @@ To enable the trait, specify it in the `Package.swift` file that depends on Stru
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.32.0",
+   from: "0.35.0",
 +  traits: ["LazyInitializableByDefault"]
  ),
 ```
@@ -165,8 +167,8 @@ See [Lazy initialization](<doc:TableDrafts#Lazy-initialization>) for more inform
 lazy-initializable draft properties.
 
 > Important: In a future version of StructuredQueries this will become the default behavior, and 
-you will be able to opt out of it for a particular property with 
-`@Column(lazyInitializable: false)`. Enable the trait today to prepare for that future release.
+> you will be able to opt out of it for a particular property with 
+> `@Column(lazyInitializable: false)`. Enable the trait today to prepare for that future release.
 
 ### Tagged
 
@@ -200,7 +202,7 @@ To enable the trait, specify it in the `Package.swift` file that depends on Stru
 ```diff
  .package(
    url: "https://github.com/pointfreeco/swift-structured-queries",
-   from: "0.32.0",
+   from: "0.35.0",
 +  traits: ["Tagged"]
  ),
 ```
