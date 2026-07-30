@@ -180,6 +180,41 @@
         }
       }
     }
+
+    @_disfavoredOverload
+    public subscript<Payload>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, CaseColumnGroup<Base, Payload>>
+    ) -> _CaseGroupUpdate<Payload> {
+      get { _CaseGroupUpdate() }
+      set {}
+    }
+  }
+
+  @dynamicMemberLookup
+  public struct _CaseGroupUpdate<Payload: Table> where Payload.QueryOutput: Table {
+    @available(
+      *,
+      unavailable,
+      message: "Assign the entire case, instead: '$0.enum = .case(value)'"
+    )
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Payload.TableColumns, TableColumn<Payload.QueryOutput, Member>>
+    ) -> any QueryExpression<Member> {
+      get { fatalError() }
+      set {}
+    }
+
+    @available(
+      *,
+      unavailable,
+      message: "Assign the entire case, instead: '$0.enum = .case(value)'"
+    )
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Payload.TableColumns, ColumnGroup<Payload.QueryOutput, Member>>
+    ) -> _CaseGroupUpdate<Member> {
+      get { fatalError() }
+      set {}
+    }
   }
 
   extension UpdatesGroup {
@@ -233,6 +268,14 @@
           updates.append((other.name, "NULL"))
         }
       }
+    }
+
+    @_disfavoredOverload
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>>
+    ) -> _CaseGroupUpdate<Member> {
+      get { _CaseGroupUpdate() }
+      set {}
     }
   }
 
