@@ -23,6 +23,75 @@ extension SnapshotTests {
         )
       )
       try db.execute(
+        #sql(
+          """
+          CREATE TABLE "taggedItems" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "title" TEXT NOT NULL,
+            "tags" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "products" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "inventory" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "posts" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "reactions" TEXT NOT NULL,
+            "writer" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "routes" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "waypoints" TEXT
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "profiles" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "author" TEXT NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "blobTrips" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "geofence" BLOB NOT NULL
+          )
+          """
+        )
+      )
+      try db.execute(
+        BlobTrip.insert {
+          BlobTrip.Draft(
+            geofence: [Coordinate(latitude: 40.7, longitude: -74.0, label: "home")]
+          )
+        }
+      )
+      try db.execute(
         Trip.insert {
           Trip.Draft(
             title: "Northern",
@@ -96,7 +165,9 @@ extension SnapshotTests {
 
     @Test func aggregateOfElements() {
       assertQuery(
-        Trip.select { ($0.title, $0.geofence.jsonEach().select { $0.value.jsonExtract(\.latitude).max() }) }
+        Trip.select {
+          ($0.title, $0.geofence.jsonEach().select { $0.value.jsonExtract(\.latitude).max() })
+        }
       ) {
         """
         SELECT "trips"."title", (
@@ -231,17 +302,6 @@ extension SnapshotTests {
 
     @Test func scalarElements() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "taggedItems" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "title" TEXT NOT NULL,
-            "tags" TEXT NOT NULL
-          )
-          """
-        )
-      )
-      try db.execute(
         TaggedItem.insert {
           TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"])
           TaggedItem.Draft(title: "Taxes", tags: ["work"])
@@ -272,17 +332,6 @@ extension SnapshotTests {
 
     @Test func scalarElementsJoin() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "taggedItems" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "title" TEXT NOT NULL,
-            "tags" TEXT NOT NULL
-          )
-          """
-        )
-      )
-      try db.execute(
         TaggedItem.insert { TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"]) }
       )
       assertQuery(
@@ -306,16 +355,6 @@ extension SnapshotTests {
     }
 
     @Test func dictionaryKeys() throws {
-      try db.execute(
-        #sql(
-          """
-          CREATE TABLE "products" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "inventory" TEXT NOT NULL
-          )
-          """
-        )
-      )
       try db.execute(
         Product.insert {
           Product.Draft(inventory: ["SFO": Stock(onHand: 0), "JFK": Stock(onHand: 4)])
@@ -351,16 +390,6 @@ extension SnapshotTests {
 
     @Test func dictionaryKeyAndValue() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "products" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "inventory" TEXT NOT NULL
-          )
-          """
-        )
-      )
-      try db.execute(
         Product.insert { Product.Draft(inventory: ["JFK": Stock(onHand: 4)]) }
       )
       assertQuery(
@@ -383,14 +412,15 @@ extension SnapshotTests {
     }
 
     @Test func scalarDictionaryValues() throws {
-      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
       try db.execute(
         Post.insert {
           Post.Draft(reactions: ["🎉": 12], writer: Writer())
           Post.Draft(reactions: ["👍": 3], writer: Writer())
         }
       )
-      assertQuery(Post.where { $0.reactions.jsonEach().where { $0.value > 10 }.exists() }.select(\.id)) {
+      assertQuery(
+        Post.where { $0.reactions.jsonEach().where { $0.value > 10 }.exists() }.select(\.id)
+      ) {
         """
         SELECT "posts"."id"
         FROM "posts"
@@ -410,7 +440,6 @@ extension SnapshotTests {
     }
 
     @Test func scalarArrayAtPath() throws {
-      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
       try db.execute(
         Post.insert {
           Post.Draft(writer: Writer(tags: ["swift", "sql"]))
@@ -418,7 +447,8 @@ extension SnapshotTests {
         }
       )
       assertQuery(
-        Post.where { $0.writer.jsonEach(\.tags).where { $0.value.eq("swift") }.exists() }.select(\.id)
+        Post.where { $0.writer.jsonEach(\.tags).where { $0.value.eq("swift") }.exists() }.select(
+          \.id)
       ) {
         """
         SELECT "posts"."id"
@@ -439,7 +469,6 @@ extension SnapshotTests {
     }
 
     @Test func scalarDictionaryAtPath() throws {
-      try db.execute(#sql(#"CREATE TABLE "posts" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "reactions" TEXT NOT NULL, "writer" TEXT NOT NULL)"#))
       try db.execute(
         Post.insert {
           Post.Draft(writer: Writer(scores: ["swift": 9]))
@@ -511,16 +540,6 @@ extension SnapshotTests {
 
     @Test func optionalColumn() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "routes" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "waypoints" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Route.insert {
           Route.Draft(waypoints: [Coordinate(latitude: 1, longitude: 2, label: "a")])
           Route.Draft(waypoints: nil)
@@ -547,16 +566,6 @@ extension SnapshotTests {
     }
 
     @Test func nestedPath() throws {
-      try db.execute(
-        #sql(
-          """
-          CREATE TABLE "profiles" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "author" TEXT NOT NULL
-          )
-          """
-        )
-      )
       try db.execute(
         Profile.insert {
           Profile.Draft(
@@ -601,6 +610,30 @@ extension SnapshotTests {
         ┌────────┐
         │ "Blob" │
         └────────┘
+        """
+      }
+    }
+
+    @Test func `jsonEach over a JSONBRepresentation`() {
+      assertQuery(
+        BlobTrip
+          .join(BlobTrip.columns.geofence.jsonEach()) { _, _ in true }
+          .select { $1.value }
+      ) {
+        """
+        SELECT "json_each"."value"
+        FROM "blobTrips"
+        JOIN json_each("blobTrips"."geofence") ON 1
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ Coordinate(         │
+        │   latitude: 40.7,   │
+        │   longitude: -74.0, │
+        │   label: "home"     │
+        │ )                   │
+        └─────────────────────┘
         """
       }
     }
@@ -682,6 +715,13 @@ private struct Trip: Codable, Equatable {
   var geofence: [Coordinate] = []
 }
 
+@Table
+private struct BlobTrip: Codable, Equatable {
+  let id: Int
+  @Column(as: [Coordinate].JSONBRepresentation.self)
+  var geofence: [Coordinate] = []
+}
+
 @Selection
 private struct Coordinate: Codable, Equatable {
   var latitude = 0.0
@@ -746,7 +786,6 @@ private struct Writer: Codable, Equatable {
   @Column(as: [String: Int].JSONRepresentation.self)
   var scores: [String: Int] = [:]
 }
-
 
 @Table
 private struct Route: Codable, Equatable {
