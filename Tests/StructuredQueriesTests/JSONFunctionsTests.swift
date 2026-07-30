@@ -680,6 +680,75 @@ extension SnapshotTests {
       }
     }
 
+    @Test func `jsonbSet on a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbSet(\.[0], "z").jsonbSet(\.[1], "y") }
+      ) {
+        """
+        SELECT json(jsonb_set("docs"."tags", '$[0]', 'z', '$[1]', 'y'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "z", │
+        │   [1]: "y"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func `jsonbAppend and jsonbRemove on a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbAppend("c") }
+      ) {
+        """
+        SELECT json(jsonb_insert("docs"."tags", '$[#]', 'c'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "a", │
+        │   [1]: "b", │
+        │   [2]: "c"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+      assertQuery(
+        Doc.select { $0.tags.jsonbRemove(\.[0]) }
+      ) {
+        """
+        SELECT json(jsonb_remove("docs"."tags", '$[0]'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ [          │
+        │   [0]: "b" │
+        │ ]          │
+        └────────────┘
+        """
+      }
+    }
+
     @Test func codableJSONGroup() throws {
       try db.execute(
         #sql(

@@ -654,6 +654,26 @@ extension SnapshotTests {
       }
     }
 
+    @Test func `jsonSet on a JSONBRepresentation`() {
+      assertQuery(
+        Post.select { $0.notes.jsonSet(\.[0], "z") }
+      ) {
+        """
+        SELECT json_set("posts"."notes", '$[0]', 'z')
+        FROM "posts"
+        """
+      } results: {
+        """
+        ┌────────────────────┐
+        │ [                  │
+        │   [0]: "z",        │
+        │   [1]: "An update" │
+        │ ]                  │
+        └────────────────────┘
+        """
+      }
+    }
+
     @Test func jsonbGetSet() {
       assertQuery(
         Profile

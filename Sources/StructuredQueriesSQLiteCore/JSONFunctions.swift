@@ -124,7 +124,7 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   }
 }
 
-extension QueryExpression where QueryValue: _JSONRepresentable {
+extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// Sets a value at a given path in this JSON expression using the `json_set` function.
   ///
   /// ```swift
@@ -137,9 +137,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   ///   - value: A value to set.
   /// - Returns: A JSON expression with the value set.
   public func jsonSet<Context: _RequiredJSONPathContext, Member: QueryBindable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member>
-  ) -> _JSONSetExpression<QueryValue> {
+  ) -> _JSONSetExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
     _JSONSetExpression(
       function: "json_set",
       base: argumentFragment,
@@ -149,9 +152,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
 
   @_documentation(visibility: private)
   public func jsonSet<Member: QueryBindable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathCase, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<_JSONPathCase, Member>
+    >,
     _ value: some QueryExpression<Member>
-  ) -> _JSONSetExpression<QueryValue> {
+  ) -> _JSONSetExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
     _JSONSetExpression(
       function: "json_set",
       base: argumentFragment,
@@ -166,9 +172,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   ///   - value: A value to insert.
   /// - Returns: A JSON expression with the value inserted.
   public func jsonInsert<Member: QueryBindable & StructuredQueriesCore._OptionalProtocol>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathMember, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<_JSONPathMember, Member>
+    >,
     _ value: some QueryExpression<Member.Wrapped>
-  ) -> _JSONInsertExpression<QueryValue>
+  ) -> _JSONInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>>
   where Member.Wrapped: QueryBindable {
     _JSONInsertExpression(
       function: "json_insert",
@@ -190,9 +199,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   ///   - value: A value to append.
   /// - Returns: A JSON expression with the value appended.
   public func jsonAppend<Context: _RequiredJSONPathContext, Member: _JSONArrayRepresentation>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member._Element>
-  ) -> _JSONInsertExpression<QueryValue>
+  ) -> _JSONInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>>
   where Member._Element: QueryBindable {
     _JSONInsertExpression(
       function: "json_insert",
@@ -203,9 +215,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
 
   @_documentation(visibility: private)
   public func jsonAppend<Context: _RequiredJSONPathContext, Member: _JSONArrayRepresentation>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member._ElementRepresentation>
-  ) -> _JSONInsertExpression<QueryValue> {
+  ) -> _JSONInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
     _JSONInsertExpression(
       function: "json_insert",
       base: argumentFragment,
@@ -217,9 +232,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   public func jsonAppend<
     Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member.Wrapped._Element>
-  ) -> _JSONInsertExpression<QueryValue>
+  ) -> _JSONInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>>
   where Member.Wrapped: _JSONArrayRepresentation, Member.Wrapped._Element: QueryBindable {
     _JSONInsertExpression(
       function: "json_insert",
@@ -232,9 +250,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   public func jsonAppend<
     Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member.Wrapped._ElementRepresentation>
-  ) -> _JSONInsertExpression<QueryValue>
+  ) -> _JSONInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>>
   where Member.Wrapped: _JSONArrayRepresentation {
     _JSONInsertExpression(
       function: "json_insert",
@@ -251,8 +272,11 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   public func jsonRemove<
     Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
-  ) -> _JSONRemoveExpression<QueryValue> {
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >
+  ) -> _JSONRemoveExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
     _JSONRemoveExpression(
       function: "json_remove",
       base: argumentFragment,
@@ -266,8 +290,11 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   /// - Parameter path: A key path to an array element.
   /// - Returns: A JSON expression with the element removed.
   public func jsonRemove<Context: _JSONPathElementContext, Member>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
-  ) -> _JSONRemoveExpression<QueryValue> {
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >
+  ) -> _JSONRemoveExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
     _JSONRemoveExpression(
       function: "json_remove",
       base: argumentFragment,
@@ -282,9 +309,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   ///   - value: A value to replace.
   /// - Returns: A JSON expression with the value replaced.
   public func jsonReplace<Context: _JSONPathMemberContext, Member: QueryBindable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member.Wrapped>
-  ) -> _JSONReplaceExpression<QueryValue>
+  ) -> _JSONReplaceExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>>
   where Member: StructuredQueriesCore._OptionalProtocol, Member.Wrapped: QueryBindable {
     _JSONReplaceExpression(
       function: "json_replace",
@@ -301,9 +331,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   ///   - value: A value to replace.
   /// - Returns: A JSON expression with the value replaced.
   public func jsonReplace<Context: _JSONPathElementContext, Member: QueryBindable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member>
-  ) -> _JSONReplaceExpression<QueryValue> {
+  ) -> _JSONReplaceExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
     _JSONReplaceExpression(
       function: "json_replace",
       base: argumentFragment,
@@ -316,9 +349,12 @@ extension QueryExpression where QueryValue: _JSONRepresentable {
   public func jsonReplace<
     Context: _JSONPathMemberContext & _OptionalJSONPathContext, Member: QueryBindable
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member>
-  ) -> _JSONReplaceExpression<QueryValue> {
+  ) -> _JSONReplaceExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
     _JSONReplaceExpression(
       function: "json_replace",
       base: argumentFragment,
@@ -378,24 +414,28 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
 }
 
 extension QueryExpression
-where QueryValue: _JSONRepresentable & _JSONArrayRepresentation {
+where
+  QueryValue: _AnyJSONRepresentable,
+  QueryValue.QueryOutput: RangeReplaceableCollection,
+  QueryValue.QueryOutput.Element: Codable
+{
   @_documentation(visibility: private)
   public func jsonAppend(
-    _ value: some QueryExpression<QueryValue._Element>
-  ) -> _JSONInsertExpression<QueryValue>
-  where QueryValue._Element: QueryBindable {
+    _ value: some QueryExpression<QueryValue.QueryOutput.Element>
+  ) -> _JSONInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>>
+  where QueryValue.QueryOutput.Element: QueryBindable {
     jsonAppend(\.self, value)
   }
 
   @_documentation(visibility: private)
   public func jsonAppend(
-    _ value: some QueryExpression<QueryValue._ElementRepresentation>
-  ) -> _JSONInsertExpression<QueryValue> {
+    _ value: some QueryExpression<_CodableJSONRepresentation<QueryValue.QueryOutput.Element>>
+  ) -> _JSONInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
     jsonAppend(\.self, value)
   }
 }
 
-extension QueryExpression where QueryValue: _JSONBRepresentable {
+extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// Sets a value at a given path in this JSONB expression using the `jsonb_set` function.
   ///
   /// The result is in SQLite's binary JSONB format, making it appropriate for storage contexts,
@@ -411,9 +451,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   ///   - value: A value to set.
   /// - Returns: A JSONB expression with the value set.
   public func jsonbSet<Context: _RequiredJSONPathContext, Member: QueryBindable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member>
-  ) -> _JSONSetExpression<QueryValue> {
+  ) -> _JSONSetExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     _JSONSetExpression(
       function: "jsonb_set",
       base: argumentFragment,
@@ -423,9 +466,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
 
   @_documentation(visibility: private)
   public func jsonbSet<Member: QueryBindable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathCase, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<_JSONPathCase, Member>
+    >,
     _ value: some QueryExpression<Member>
-  ) -> _JSONSetExpression<QueryValue> {
+  ) -> _JSONSetExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     _JSONSetExpression(
       function: "jsonb_set",
       base: argumentFragment,
@@ -440,9 +486,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   ///   - value: A value to insert.
   /// - Returns: A JSONB expression with the value inserted.
   public func jsonbInsert<Member: QueryBindable & StructuredQueriesCore._OptionalProtocol>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathMember, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<_JSONPathMember, Member>
+    >,
     _ value: some QueryExpression<Member.Wrapped>
-  ) -> _JSONInsertExpression<QueryValue>
+  ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>>
   where Member.Wrapped: QueryBindable {
     _JSONInsertExpression(
       function: "jsonb_insert",
@@ -464,9 +513,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   ///   - value: A value to append.
   /// - Returns: An JSONB expression with the value appended.
   public func jsonbAppend<Context: _RequiredJSONPathContext, Member: _JSONArrayRepresentation>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member._Element>
-  ) -> _JSONInsertExpression<QueryValue>
+  ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>>
   where Member._Element: QueryBindable {
     _JSONInsertExpression(
       function: "jsonb_insert",
@@ -477,9 +529,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
 
   @_documentation(visibility: private)
   public func jsonbAppend<Context: _RequiredJSONPathContext, Member: _JSONArrayRepresentation>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member._ElementRepresentation>
-  ) -> _JSONInsertExpression<QueryValue> {
+  ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     _JSONInsertExpression(
       function: "jsonb_insert",
       base: argumentFragment,
@@ -491,9 +546,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   public func jsonbAppend<
     Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member.Wrapped._Element>
-  ) -> _JSONInsertExpression<QueryValue>
+  ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>>
   where Member.Wrapped: _JSONArrayRepresentation, Member.Wrapped._Element: QueryBindable {
     _JSONInsertExpression(
       function: "jsonb_insert",
@@ -506,9 +564,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   public func jsonbAppend<
     Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member.Wrapped._ElementRepresentation>
-  ) -> _JSONInsertExpression<QueryValue>
+  ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>>
   where Member.Wrapped: _JSONArrayRepresentation {
     _JSONInsertExpression(
       function: "jsonb_insert",
@@ -525,8 +586,11 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   public func jsonbRemove<
     Context: _JSONPathMemberContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
-  ) -> _JSONRemoveExpression<QueryValue> {
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >
+  ) -> _JSONRemoveExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     _JSONRemoveExpression(
       function: "jsonb_remove",
       base: argumentFragment,
@@ -540,8 +604,11 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   /// - Parameter path: A key path to an array element.
   /// - Returns: A JSONB expression with the element removed.
   public func jsonbRemove<Context: _JSONPathElementContext, Member>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>
-  ) -> _JSONRemoveExpression<QueryValue> {
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >
+  ) -> _JSONRemoveExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     _JSONRemoveExpression(
       function: "jsonb_remove",
       base: argumentFragment,
@@ -557,9 +624,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   ///   - value: A value to replace.
   /// - Returns: A JSONB expression with the value replaced.
   public func jsonbReplace<Context: _JSONPathMemberContext, Member: QueryBindable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member.Wrapped>
-  ) -> _JSONReplaceExpression<QueryValue>
+  ) -> _JSONReplaceExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>>
   where Member: StructuredQueriesCore._OptionalProtocol, Member.Wrapped: QueryBindable {
     _JSONReplaceExpression(
       function: "jsonb_replace",
@@ -576,9 +646,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   ///   - value: A value to replace.
   /// - Returns: A JSONB expression with the value replaced.
   public func jsonbReplace<Context: _JSONPathElementContext, Member: QueryBindable>(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member>
-  ) -> _JSONReplaceExpression<QueryValue> {
+  ) -> _JSONReplaceExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     _JSONReplaceExpression(
       function: "jsonb_replace",
       base: argumentFragment,
@@ -591,9 +664,12 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
   public func jsonbReplace<
     Context: _JSONPathMemberContext & _OptionalJSONPathContext, Member: QueryBindable
   >(
-    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
     _ value: some QueryExpression<Member>
-  ) -> _JSONReplaceExpression<QueryValue> {
+  ) -> _JSONReplaceExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     _JSONReplaceExpression(
       function: "jsonb_replace",
       base: argumentFragment,
@@ -603,19 +679,23 @@ extension QueryExpression where QueryValue: _JSONBRepresentable {
 }
 
 extension QueryExpression
-where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
+where
+  QueryValue: _AnyJSONRepresentable,
+  QueryValue.QueryOutput: RangeReplaceableCollection,
+  QueryValue.QueryOutput.Element: Codable
+{
   @_documentation(visibility: private)
   public func jsonbAppend(
-    _ value: some QueryExpression<QueryValue._Element>
-  ) -> _JSONInsertExpression<QueryValue>
-  where QueryValue._Element: QueryBindable {
+    _ value: some QueryExpression<QueryValue.QueryOutput.Element>
+  ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>>
+  where QueryValue.QueryOutput.Element: QueryBindable {
     jsonbAppend(\.self, value)
   }
 
   @_documentation(visibility: private)
   public func jsonbAppend(
-    _ value: some QueryExpression<QueryValue._ElementRepresentation>
-  ) -> _JSONInsertExpression<QueryValue> {
+    _ value: some QueryExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput.Element>>
+  ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     jsonbAppend(\.self, value)
   }
 }
