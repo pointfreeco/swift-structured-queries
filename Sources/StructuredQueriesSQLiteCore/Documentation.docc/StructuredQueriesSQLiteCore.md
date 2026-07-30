@@ -25,6 +25,7 @@ custom database functions, and more.
 - ``Foundation/Date/UnixTimeRepresentation``
 - ``Foundation/UUID/BytesRepresentation``
 - ``Foundation/UUID/UppercasedRepresentation``
+- ``Swift/Decodable/JSONBRepresentation``
 
 ### Custom collations
 

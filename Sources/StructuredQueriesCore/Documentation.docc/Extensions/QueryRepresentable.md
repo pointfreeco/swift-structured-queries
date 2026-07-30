@@ -7,6 +7,7 @@
 - ``QueryOutput``
 - ``init(queryOutput:)``
 - ``queryOutput``
+- ``queryFragment(decoding:)``
 
 ### Conformances
 

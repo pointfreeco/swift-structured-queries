@@ -70,7 +70,7 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders"
         WHERE (("reminders"."id") IN ((1)))
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -87,7 +87,7 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders"
         WHERE (("reminders"."id") IN ((2)))
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """

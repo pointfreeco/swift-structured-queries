@@ -196,7 +196,7 @@ extension SnapshotTests {
         DELETE FROM "reminders"
         WHERE (("reminders"."title") IN ((SELECT "incompleteReminders"."title"
         FROM "incompleteReminders")))
-        RETURNING "reminders"."title"
+        RETURNING "title"
         """
       } results: {
         """
@@ -276,7 +276,7 @@ extension SnapshotTests {
           WHERE (NOT ("reminders"."isCompleted"))
         )
         DELETE FROM "reminders"
-        RETURNING "reminders"."title"
+        RETURNING "title"
         """
       } results: {
         """

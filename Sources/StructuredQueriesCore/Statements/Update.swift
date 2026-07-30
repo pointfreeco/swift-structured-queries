@@ -165,7 +165,7 @@ public struct Update<From: Table, Returning> {
   ) -> Update<From, (repeat each QueryValue)> {
     var returning: [QueryFragment] = []
     for resultColumn in repeat each selection(From.columns) {
-      returning.append("\(quote: resultColumn.name)")
+      returning.append(resultColumn.returningFragment)
     }
     return Update<From, (repeat each QueryValue)>(
       isEmpty: false,
@@ -187,7 +187,7 @@ public struct Update<From: Table, Returning> {
   ) -> Update<From, From> {
     var returning: [QueryFragment] = []
     for resultColumn in From.TableColumns.allColumns {
-      returning.append("\(quote: resultColumn.name)")
+      returning.append(resultColumn.returningFragment)
     }
     return Update<From, From>(
       isEmpty: isEmpty,

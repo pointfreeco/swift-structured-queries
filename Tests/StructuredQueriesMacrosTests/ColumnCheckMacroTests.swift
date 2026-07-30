@@ -21,6 +21,7 @@ extension SnapshotTests {
           @_ColumnCheck([String].self)
           ╰─ 🛑 '[String]' is not representable as a column
              ✏️ Apply '@Column(as: [String].JSONRepresentation.self)' to store as JSON
+             ✏️ Apply '@Column(as: [String].JSONBRepresentation.self)' to store as JSONB
              ✏️ Apply '@Column(as:)' to specify a representation
              ✏️ Apply '@Ephemeral' to exclude from table
           var tags: [String]
@@ -94,7 +95,7 @@ extension SnapshotTests {
         """
         struct Row {
           @_ColumnCheck(NotRepresentable())
-          ╰─ 🛑 'NotRepresentable()' is not representable as a column
+          ╰─ 🛑 'NotRepresentable()' is not a '@Selection' or representable as a column
              ✏️ Apply '@Column(as:)' to specify a representation
              ✏️ Apply '@Ephemeral' to exclude from table
           var value = NotRepresentable()

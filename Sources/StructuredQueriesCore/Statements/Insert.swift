@@ -773,7 +773,7 @@ public struct Insert<Into: Table, Returning> {
   ) -> Insert<Into, (repeat each QueryValue)> {
     var returning: [QueryFragment] = []
     for resultColumn in repeat each selection(From.columns) {
-      returning.append("\(quote: resultColumn.name)")
+      returning.append(resultColumn.returningFragment)
     }
     return Insert<Into, (repeat each QueryValue)>(
       conflictResolution: conflictResolution,
@@ -798,7 +798,7 @@ public struct Insert<Into: Table, Returning> {
   ) -> Insert<Into, Into> {
     var returning: [QueryFragment] = []
     for resultColumn in From.TableColumns.allColumns {
-      returning.append("\(quote: resultColumn.name)")
+      returning.append(resultColumn.returningFragment)
     }
     return Insert<Into, Into>(
       conflictResolution: conflictResolution,
