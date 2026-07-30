@@ -82,34 +82,13 @@ extension AggregateDatabaseFunction {
   ///   - input: Expressions representing the arguments of the function.
   ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
   ///     the aggregation.
-  /// - Returns: An expression representing the function call.
-  @_disfavoredOverload
-  public func callAsFunction(
-    _ input: some QueryExpression<Input>,
-    distinct isDistinct: Bool = false
-  ) -> some QueryExpression<Output>
-  where Input: QueryBindable {
-    $_isSelecting.withValue(false) {
-      AggregateFunctionExpression<Output>(name, distinct: isDistinct, input)
-    }
-  }
-
-  /// An aggregate function call expression.
-  ///
-  /// - Parameters
-  ///   - input: Expressions representing the arguments of the function.
-  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
-  ///     the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: An expression representing the function call.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
-  #endif
   @_disfavoredOverload
   public func callAsFunction(
     _ input: some QueryExpression<Input>,
     distinct isDistinct: Bool = false,
-    filter: some QueryExpression<Bool>
+    filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<Output>
   where Input: QueryBindable {
     $_isSelecting.withValue(false) {
@@ -146,31 +125,14 @@ extension AggregateDatabaseFunction {
 
   /// An aggregate function call expression.
   ///
-  /// - Parameter input: Expressions representing the arguments of the function.
-  /// - Returns: An expression representing the function call.
-  @_disfavoredOverload
-  public func callAsFunction<each T: QueryExpression>(
-    _ input: repeat each T
-  ) -> some QueryExpression<Output>
-  where Input == (repeat (each T).QueryValue) {
-    $_isSelecting.withValue(false) {
-      AggregateFunctionExpression<Output>(name, repeat each input)
-    }
-  }
-
-  /// An aggregate function call expression.
-  ///
   /// - Parameters
   ///   - input: Expressions representing the arguments of the function.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: An expression representing the function call.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)
-  #endif
   @_disfavoredOverload
   public func callAsFunction<each T: QueryExpression>(
     _ input: repeat each T,
-    filter: some QueryExpression<Bool>
+    filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<Output>
   where Input == (repeat (each T).QueryValue) {
     $_isSelecting.withValue(false) {

@@ -565,12 +565,9 @@ extension DatabaseFunctionMacro: PeerMacro {
         )
       #else
         methods.append(
-          aggregateMethod(availability: "", extraParameters: [], extraArguments: [])
-        )
-        methods.append(
           aggregateMethod(
-            availability: "@available(iOS 14, macOS 11, tvOS 14, watchOS 7, *)\n",
-            extraParameters: [requiredFilterParameter],
+            availability: "",
+            extraParameters: [optionalFilterParameter],
             extraArguments: ["filter: filter"]
           )
         )

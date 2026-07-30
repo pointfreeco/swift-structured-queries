@@ -5,9 +5,6 @@ extension Delete {
   ///
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-  #endif
   public func returning<each QueryValue: QueryRepresentable>(
     _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
   ) -> Delete<From, (repeat each QueryValue)> {
@@ -24,9 +21,6 @@ extension Delete {
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-  #endif
   public func returning(
     _ selection: (From.TableColumns) -> From.TableColumns
   ) -> Delete<From, From> {
@@ -43,9 +37,6 @@ extension Insert {
   ///
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-  #endif
   public func returning<each QueryValue: QueryRepresentable>(
     _ selection: (Into.TableColumns) -> (repeat TableColumn<Into, each QueryValue>)
   ) -> Insert<Into, (repeat each QueryValue)> {
@@ -62,9 +53,6 @@ extension Insert {
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-  #endif
   public func returning(
     _ selection: (Into.TableColumns) -> Into.TableColumns
   ) -> Insert<Into, Into> {
@@ -81,9 +69,6 @@ extension Update {
   ///
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-  #endif
   public func returning<each QueryValue: QueryRepresentable>(
     _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
   ) -> Update<From, (repeat each QueryValue)> {
@@ -100,9 +85,6 @@ extension Update {
   /// - Parameter selection: Columns to return.
   /// - Returns: A statement with a returning clause.
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-  #endif
   public func returning(
     _ selection: (From.TableColumns) -> From.TableColumns
   ) -> Update<From, From> {

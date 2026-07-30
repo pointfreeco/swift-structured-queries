@@ -136,9 +136,6 @@ extension Table {
   ///   - other: A select statement for another table.
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that right-joins the given table.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public static func rightJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -160,9 +157,6 @@ extension Table {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that right-joins the given table.
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public static func rightJoin<each C: QueryRepresentable, F: Table>(
     _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
@@ -178,9 +172,6 @@ extension Table {
   ///   - other: A select statement for another table.
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that full-joins the given table.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public static func fullJoin<
     each C: QueryRepresentable,
     F: Table,
@@ -206,9 +197,6 @@ extension Table {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that full-joins the given table.
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public static func fullJoin<each C: QueryRepresentable, F: Table>(
     _ other: some SelectStatement<(repeat each C), F, ()>,
     on constraint: (
@@ -316,9 +304,12 @@ extension Table {
 
   /// A select statement for this table's row count.
   ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A select statement that selects `count(*)`.
-  public static func count() -> Select<Int, Self, ()> {
-    Where().count()
+  public static func count(
+    filter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> Select<Int, Self, ()> {
+    Where().count(filter: filter)
   }
 }
 
@@ -980,9 +971,6 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that right-joins the given table and combines their clauses
   ///   together.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func rightJoin<
     each C1: QueryRepresentable,
     each C2: QueryRepresentable,
@@ -1041,9 +1029,6 @@ extension Select {
   ///   together.
   @_disfavoredOverload
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func rightJoin<
     each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
   >(
@@ -1095,9 +1080,6 @@ extension Select {
   ///   together.
   @_disfavoredOverload
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func rightJoin<F: Table, each J: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(), F, (repeat each J)>,
@@ -1131,9 +1113,6 @@ extension Select {
 
   @_disfavoredOverload
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func rightJoin<F: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatementOf<F>,
@@ -1172,9 +1151,6 @@ extension Select {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that full-joins the given table and combines their clauses
   ///   together.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func fullJoin<
     each C1: QueryRepresentable,
     each C2: QueryRepresentable,
@@ -1233,9 +1209,6 @@ extension Select {
   ///   together.
   @_disfavoredOverload
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func fullJoin<
     each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table, each J: Table
   >(
@@ -1287,9 +1260,6 @@ extension Select {
   ///   together.
   @_disfavoredOverload
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func fullJoin<F: Table, each J: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(), F, (repeat each J)>,
@@ -1323,9 +1293,6 @@ extension Select {
 
   @_disfavoredOverload
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func fullJoin<F: Table>(
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatementOf<F>,
@@ -1743,38 +1710,54 @@ extension Select {
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
-  public func count<each J: Table>() -> Select<Int, From, Joins>
+  public func count<each J: Table>(
+    filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> Select<Int, From, Joins>
   where Columns == (), Joins == (repeat each J) {
-    select { _ in .count() }
+    let filter = filter?(From.columns, repeat (each J).columns)
+    return select { _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
-  public func count<each C: QueryRepresentable, each J: Table>() -> Select<
+  public func count<each C: QueryRepresentable, each J: Table>(
+    filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> Select<
     (repeat each C, Int), From, (repeat each J)
   >
   where Columns == (repeat each C), Joins == (repeat each J) {
-    select { _ in .count() }
+    let filter = filter?(From.columns, repeat (each J).columns)
+    return select { _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
-  public func count() -> Select<Int, From, Joins>
+  public func count(
+    filter: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> Select<Int, From, Joins>
   where Columns == (), Joins: Table {
-    select { _, _ in .count() }
+    let filter = filter?(From.columns, Joins.columns)
+    return select { _, _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A new select statement that selects `count(*)`.
-  public func count<each C: QueryRepresentable>() -> Select<
+  public func count<each C: QueryRepresentable>(
+    filter: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> Select<
     (repeat each C, Int), From, Joins
   >
   where Columns == (repeat each C), Joins: Table {
-    select { _, _ in .count() }
+    let filter = filter?(From.columns, Joins.columns)
+    return select { _, _ in .count(filter: filter) }
   }
 
   /// Creates a new select statement from this one by transforming its selected columns to a new

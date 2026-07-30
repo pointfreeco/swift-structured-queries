@@ -229,9 +229,6 @@ extension Where: SelectStatement {
   ///   - other: A select statement for another table.
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that right-joins the given table.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func rightJoin<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -250,9 +247,6 @@ extension Where: SelectStatement {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that right-joins the given table.
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func rightJoin<each C: QueryRepresentable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
@@ -266,9 +260,6 @@ extension Where: SelectStatement {
   ///   - other: A select statement for another table.
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that full-joins the given table.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func fullJoin<each C: QueryRepresentable, F: Table, each J: Table>(
     _ other: any SelectStatement<(repeat each C), F, (repeat each J)>,
     on constraint: (
@@ -291,9 +282,6 @@ extension Where: SelectStatement {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A select statement that full-joins the given table.
   @_documentation(visibility: private)
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 16, macOS 13, tvOS 16, watchOS 9, *)
-  #endif
   public func fullJoin<each C: QueryRepresentable, F: Table>(
     _ other: any SelectStatement<(repeat each C), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
@@ -506,9 +494,12 @@ extension Where: SelectStatement {
 
   /// A select statement for the filtered table's row count.
   ///
+  /// - Parameter filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A select statement that selects `count(*)`.
-  public func count() -> Select<Int, From, ()> {
-    asSelect().count()
+  public func count(
+    filter: ((From.TableColumns) -> any QueryExpression<Bool>)? = nil
+  ) -> Select<Int, From, ()> {
+    asSelect().count(filter: filter)
   }
 
   /// A delete statement for the filtered table.

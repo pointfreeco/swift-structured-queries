@@ -84,9 +84,6 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
   /// Wraps this numeric query expression with the `sign` function.
   ///
   /// - Returns: An expression wrapped with the `sign` function.
-  #if !SuppressPlatformSQLiteAvailability
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-  #endif
   public func sign() -> some QueryExpression<QueryValue> {
     QueryFunction("sign", self)
   }
