@@ -554,8 +554,6 @@
 
   #if ColumnCoding
     extension SnapshotTests.EnumTableTests {
-      // TODO: 'json_object' should produce a single-key object to match an enum's 'Codable'
-      // conformance.
       @Test func jsonGroupArrayDecoding() throws {
         try db.execute(
           """
@@ -577,7 +575,13 @@
           (NULL, NULL, 'Blob', 'https://www.pointfree.co/blob.jpg')
           """
         )
-        withKnownIssue {
+        withKnownIssue(
+          """
+          * 'json_object' should produce a single-key object to match an enum's 'Codable' 
+            conformance.
+          * `jsonObject` should preserve nested fields of 'MediaImage'
+          """
+        ) {
           assertQuery(
             Media.select { MediaList.Columns(medias: $0.jsonGroupArray()) }
           ) {
@@ -603,6 +607,11 @@
             └────────────────────────────────────────────────────────────────────┘
             """
           }
+        } matching: { issue in
+          issue.description.hasSuffix(
+            """
+            The data couldn’t be read because it isn’t in the correct format.
+            """)
         }
       }
 
