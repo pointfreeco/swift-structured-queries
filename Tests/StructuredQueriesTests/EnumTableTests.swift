@@ -543,7 +543,7 @@
           )
         ) {
           """
-          SELECT NULL AS "link", NULL AS "note", NULL AS "videoURL", NULL AS "videoKind", 'Blob', 'https://pointfree.co' AS "imageCaption"
+          SELECT NULL AS "link", NULL AS "note", NULL AS "videoURL", NULL AS "videoKind", 'Blob' AS "imageCaption", 'https://pointfree.co' AS "imageURL"
           """
         } results: {
           """

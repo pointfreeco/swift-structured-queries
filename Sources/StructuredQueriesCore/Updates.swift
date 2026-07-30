@@ -53,10 +53,10 @@ public struct Updates<Base: Table> {
     set {}
   }
 
-  public subscript<Value: QueryExpression>(
+  public subscript<Value: Table>(
     dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Value>>
-  ) -> Updates<TableAlias<Value, _TableAliasName<Base>>> {
-    get { Updates<TableAlias<Value, _TableAliasName<Base>>> { _ in } }
+  ) -> GroupUpdates<Base, Value> {
+    get { GroupUpdates(group: Base.columns[keyPath: keyPath]) }
     set { updates.append(contentsOf: newValue.updates) }
   }
 
@@ -97,6 +97,89 @@ extension Updates: QueryExpression {
 
   public var queryFragment: QueryFragment {
     "SET \(updates.map { "\(quote: $0) = \($1)" }.joined(separator: ", "))"
+  }
+}
+
+/// A collection of updates to a group of columns.
+///
+/// A value of this type is produced when an update clause navigates into a column group, _e.g._
+/// the `$0.group` of `$0.group.property = value`. Its members are looked up directly on the
+/// group's generated table definition.
+@dynamicMemberLookup
+public struct GroupUpdates<Base: Table, Values: Table> where Values.QueryOutput: Table {
+  package let group: ColumnGroup<Base, Values>
+  package var updates: [(String, QueryFragment)] = []
+
+  package init(group: ColumnGroup<Base, Values>) {
+    self.group = group
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values.QueryOutput, Member>>
+  ) -> any QueryExpression<Member> {
+    get { group[dynamicMember: keyPath] }
+    set { updates.append((group[dynamicMember: keyPath].name, newValue.queryFragment)) }
+  }
+
+  @_disfavoredOverload
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values.QueryOutput, Member>>
+  ) -> SQLQueryExpression<Member> {
+    get { SQLQueryExpression(group[dynamicMember: keyPath]) }
+    set { updates.append((group[dynamicMember: keyPath].name, newValue.queryFragment)) }
+  }
+
+  @_disfavoredOverload
+  @available(
+    *,
+    unavailable,
+    message: """
+      Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+      """
+  )
+  public subscript<Member: QueryExpression>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values.QueryOutput, Member>>
+  ) -> Member.QueryOutput {
+    get { fatalError() }
+    set {}
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, ColumnGroup<Values.QueryOutput, Member>>
+  ) -> GroupUpdates<Base, Member> {
+    get { GroupUpdates<Base, Member>(group: group[dynamicMember: keyPath]) }
+    set { updates.append(contentsOf: newValue.updates) }
+  }
+
+  @_disfavoredOverload
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, ColumnGroup<Values.QueryOutput, Member>>
+  ) -> Member.QueryOutput {
+    @available(
+      *,
+      unavailable,
+      message: """
+        Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+        """
+    )
+    get { fatalError() }
+    set {
+      func open<R, V>(
+        _ column: some WritableTableColumnExpression<R, V>
+      ) -> QueryFragment {
+        V(
+          queryOutput: Member(queryOutput: newValue)[
+            keyPath: column.keyPath as! KeyPath<Member, V.QueryOutput>
+          ]
+        )
+        .queryFragment
+      }
+      updates.append(
+        contentsOf: Member.TableColumns.writableColumns.map { column in
+          (column.name, open(column))
+        }
+      )
+    }
   }
 }
 

@@ -166,33 +166,70 @@
 
     public subscript<Payload>(
       dynamicMember keyPath: KeyPath<Base.TableColumns, CaseColumnGroup<Base, Payload>>
-    ) -> Payload.QueryOutput {
-      @available(
-        *,
-        unavailable,
-        message: """
-          Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
-          """
-      )
-      get { fatalError() }
+    ) -> any QueryExpression<Payload> {
+      get { SQLQueryExpression(Base.columns[keyPath: keyPath].queryFragment) }
       set {
-        func open<R, V>(
-          _ column: some WritableTableColumnExpression<R, V>
-        ) -> QueryFragment {
-          V(
-            queryOutput: newValue[
-              keyPath: column.keyPath as! KeyPath<Payload.QueryOutput, V.QueryOutput>
-            ]
-          )
-          .queryFragment
-        }
         let group = Base.columns[keyPath: keyPath]
-        updates.append(
-          contentsOf: Payload.QueryOutput.TableColumns.writableColumns.map { column in
-            (column.name, open(column))
-          }
-        )
+        let writableNames = Set(group._writableColumns.map(\.name))
+        for (column, value) in zip(group._allColumns, newValue._allColumns)
+        where writableNames.contains(column.name) {
+          updates.append((column.name, value.queryFragment))
+        }
         for other in Base.TableColumns.allColumns where !group._names.contains(other.name) {
+          updates.append((other.name, "NULL"))
+        }
+      }
+    }
+  }
+
+  extension GroupUpdates {
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumn<Values.QueryOutput, Member>>
+    ) -> any QueryExpression<Member?> {
+      group[dynamicMember: keyPath]
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumn<Values.QueryOutput, Member>>
+    ) -> any QueryExpression<Member> {
+      get { SQLQueryExpression(group[dynamicMember: keyPath].queryFragment) }
+      set {
+        let column = group[dynamicMember: keyPath]
+        updates.append((column.name, newValue.queryFragment))
+        for other in Values.QueryOutput.TableColumns.allColumns where other.name != column.name {
+          updates.append((other.name, "NULL"))
+        }
+      }
+    }
+
+    @_disfavoredOverload
+    @available(
+      *,
+      unavailable,
+      message: """
+        Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+        """
+    )
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumn<Values.QueryOutput, Member>>
+    ) -> Member.QueryOutput {
+      get { fatalError() }
+      set {}
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>>
+    ) -> any QueryExpression<Member> {
+      get { SQLQueryExpression(group[dynamicMember: keyPath].queryFragment) }
+      set {
+        let caseGroup = group[dynamicMember: keyPath]
+        let writableNames = Set(caseGroup._writableColumns.map(\.name))
+        for (column, value) in zip(caseGroup._allColumns, newValue._allColumns)
+        where writableNames.contains(column.name) {
+          updates.append((column.name, value.queryFragment))
+        }
+        for other in Values.QueryOutput.TableColumns.allColumns
+        where !caseGroup._names.contains(other.name) {
           updates.append((other.name, "NULL"))
         }
       }
