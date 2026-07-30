@@ -138,6 +138,7 @@ reading to learn more about building SQL with StructuredQueries.
 
 ### Advanced
 
+- <doc:Traits>
 - <doc:Integration>
 
 ### Migration guides

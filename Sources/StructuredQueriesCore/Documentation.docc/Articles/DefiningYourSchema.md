@@ -269,7 +269,7 @@ With that you can insert reminders with notes like so:
 
 The [Tagged](https://github.com/pointfreeco/swift-tagged) library provides lightweight syntax for
 introducing type-safe identifiers (and more) to your models. StructuredQueries ships support for
-Tagged with a `Tagged` package trait, which is available starting from Swift 6.1.
+Tagged with a `Tagged` [package trait](<doc:Traits>), which is available starting from Swift 6.1.
 
 To enable the trait, specify it in the Package.swift file that depends on StructuredQueries:
 
@@ -279,13 +279,20 @@ To enable the trait, specify it in the Package.swift file that depends on Struct
    from: "0.32.0",
 +  traits: ["Tagged"]
  ),
-+.package(
-+  url: "https://github.com/pointfreeco/swift-tagged",
-+  from: "0.1.0"
-+),
 ```
 
-> Important: You _must_ explicitly depend on the `swift-tagged` package to work around a Swift bug.
+> Important: On Swift toolchains earlier than 6.3, you _must_ also explicitly depend on the
+> `swift-tagged` package to work around a SwiftPM bug in which dependencies introduced by a trait
+> are not resolved:
+>
+> ```diff
+> +.package(
+> +  url: "https://github.com/pointfreeco/swift-tagged",
+> +  from: "0.1.0"
+> +),
+> ```
+>
+> This bug is fixed in Swift 6.3, where the explicit dependency can be omitted.
 
 This will allow you to introduce distinct `Tagged` identifiers throughout your schema:
 
@@ -513,9 +520,9 @@ attachments supported, annotated with the `@Selection` macro:
 }
 ```
 
-> Important: It is required to enable the `CasePaths` trait in order to define columns from an enum.
-> This trait uses our [CasePaths] library to enhance enumerations with key path-like functionality
-> needed to work with enum columns in the abstract.
+> Important: It is required to enable the `CasePaths` [package trait](<doc:Traits>) in order to
+> define columns from an enum. This trait uses our [CasePaths] library to enhance enumerations with
+> key path-like functionality needed to work with enum columns in the abstract.
 
 [CasePaths]: http://github.com/pointfreeco/swift-case-paths
 
