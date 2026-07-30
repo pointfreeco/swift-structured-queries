@@ -4,6 +4,11 @@ SQLite-specific tips for defining your schema.
 
 ## Overview
 
+* [UUID and Date representations](#UUID-and-Date-representations)
+  * [Dates](#Dates)
+  * [UUIDs](#UUIDs)
+* [JSONB](#JSONB)
+
 ### UUID and Date representations
 
 While some relational databases, like MySQL and Postgres, have native types for dates and UUIDs,
@@ -103,3 +108,78 @@ Reminder.where { $0.id != #bind(reminder.id) }
 > ```swift
 > Reminder.where { $0.id != reminder.id }
 > ```
+
+### JSONB
+
+The StructuredQueries core library provides a `JSONRepresentation` for serializing complex data
+types to a JSON string (see "Defining your schema" in the StructuredQueriesCore documentation for
+more information). SQLite also supports [JSONB](https://www.sqlite.org/jsonb.html), a binary
+representation of JSON that is stored as a `BLOB` and is more efficient for SQLite to process.
+This library provides a ``Swift/Decodable/JSONBRepresentation`` for storing a codable value as
+JSONB.
+
+For example, suppose the `Reminder` table has an array of notes. You can annotate this field with
+`JSONBRepresentation` to store the array as JSONB in the database:
+
+@Row {
+  @Column {
+    ```swift
+    @Table struct Reminder {
+      let id: Int
+      var title = ""
+      @Column(as: [String].JSONBRepresentation.self)
+      var notes: [String]
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TABLE "reminders"(
+      "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+      "title" TEXT NOT NULL, 
+      "notes" BLOB NOT NULL
+    ) STRICT
+    ```
+  }
+}
+
+With that you can insert reminders with notes like so:
+
+@Row {
+  @Column {
+    ```swift
+    Reminder.insert {
+      Reminder.Draft(
+        title: "Get groceries",
+        notes: ["Milk", "Eggs", "Bananas"]
+      )
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    INSERT INTO "reminders"
+      ("title", "notes")
+    VALUES
+      ('Get groceries',
+       jsonb('["Milk","Eggs","Bananas"]'))
+    ```
+  }
+}
+
+And when selecting a reminder's notes back out of the database, the library will automatically
+convert the JSONB blob to JSON text before decoding it into the Swift value:
+
+@Row {
+  @Column {
+    ```swift
+    Reminder.select(\.notes)
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT json("reminders"."notes")
+    FROM "reminders"
+    ```
+  }
+}
