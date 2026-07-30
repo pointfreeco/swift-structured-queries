@@ -535,6 +535,41 @@
         }
       }
 
+      @Test func updateCaseGroupExpression() {
+        assertQuery(
+          Attachment
+            .find(1)
+            .update {
+              $0.kind.image = Attachment.Image.Selection(
+                caption: #sql("upper('blob')"),
+                url: #bind(URL(string: "https://www.pointfree.co/blob.png")!)
+              )
+            }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "attachments"
+          SET "imageCaption" = upper('blob'), "imageURL" = 'https://www.pointfree.co/blob.png', "link" = NULL, "note" = NULL, "videoURL" = NULL, "videoKind" = NULL
+          WHERE (("attachments"."id") IN ((1)))
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────┐
+          │ Attachment(                                       │
+          │   id: 1,                                          │
+          │   kind: .image(                                   │
+          │     Attachment.Image(                             │
+          │       caption: "BLOB",                            │
+          │       url: URL(https://www.pointfree.co/blob.png) │
+          │     )                                             │
+          │   )                                               │
+          │ )                                                 │
+          └───────────────────────────────────────────────────┘
+          """
+        }
+      }
+
       @Test func selection() {
         assertQuery(
           Values(

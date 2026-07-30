@@ -182,7 +182,7 @@
     }
   }
 
-  extension GroupUpdates {
+  extension UpdatesGroup {
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumn<Values.QueryOutput, Member>>
     ) -> any QueryExpression<Member?> {

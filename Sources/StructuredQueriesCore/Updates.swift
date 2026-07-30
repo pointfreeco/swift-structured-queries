@@ -55,8 +55,8 @@ public struct Updates<Base: Table> {
 
   public subscript<Value: Table>(
     dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Value>>
-  ) -> GroupUpdates<Base, Value> {
-    get { GroupUpdates(group: Base.columns[keyPath: keyPath]) }
+  ) -> UpdatesGroup<Base, Value> {
+    get { UpdatesGroup(group: Base.columns[keyPath: keyPath]) }
     set { updates.append(contentsOf: newValue.updates) }
   }
 
@@ -106,7 +106,7 @@ extension Updates: QueryExpression {
 /// the `$0.group` of `$0.group.property = value`. Its members are looked up directly on the
 /// group's generated table definition.
 @dynamicMemberLookup
-public struct GroupUpdates<Base: Table, Values: Table> where Values.QueryOutput: Table {
+public struct UpdatesGroup<Base: Table, Values: Table> where Values.QueryOutput: Table {
   package let group: ColumnGroup<Base, Values>
   package var updates: [(String, QueryFragment)] = []
 
@@ -146,8 +146,8 @@ public struct GroupUpdates<Base: Table, Values: Table> where Values.QueryOutput:
 
   public subscript<Member>(
     dynamicMember keyPath: KeyPath<Values.TableColumns, ColumnGroup<Values.QueryOutput, Member>>
-  ) -> GroupUpdates<Base, Member> {
-    get { GroupUpdates<Base, Member>(group: group[dynamicMember: keyPath]) }
+  ) -> UpdatesGroup<Base, Member> {
+    get { UpdatesGroup<Base, Member>(group: group[dynamicMember: keyPath]) }
     set { updates.append(contentsOf: newValue.updates) }
   }
 
@@ -181,8 +181,4 @@ public struct GroupUpdates<Base: Table, Values: Table> where Values.QueryOutput:
       )
     }
   }
-}
-
-public struct _TableAliasName<Base: Table>: AliasName {
-  public static var aliasName: String { Base.tableName }
 }
