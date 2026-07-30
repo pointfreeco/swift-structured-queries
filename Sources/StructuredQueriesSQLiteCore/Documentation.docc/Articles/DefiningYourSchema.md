@@ -136,7 +136,7 @@ For example, suppose the `Reminder` table has an array of notes. You can annotat
     ```sql
     CREATE TABLE "reminders"(
       "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
-      "title" TEXT NOT NULL, 
+      "title" TEXT NOT NULL,
       "notes" BLOB NOT NULL
     ) STRICT
     ```

@@ -247,7 +247,7 @@ row:
     ```sql
     CREATE TABLE "reminders"(
       "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
-      "title" TEXT NOT NULL, 
+      "title" TEXT NOT NULL,
       "notes" TEXT NOT NULL
     ) STRICT
     ```
