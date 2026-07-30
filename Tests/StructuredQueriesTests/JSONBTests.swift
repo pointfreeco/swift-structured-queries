@@ -1270,6 +1270,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `Multiple jsonSet's are fused`() throws {
       try db.execute(Profile.delete())
       assertQuery(
@@ -1289,6 +1290,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `Multiple jsonReplace's are fused`() throws {
       try db.execute(Profile.delete())
       assertQuery(
@@ -1308,6 +1310,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `Multiple jsonInsert's are fused`() throws {
       try db.execute(Profile.delete())
       assertQuery(
