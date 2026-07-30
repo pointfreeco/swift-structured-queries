@@ -1212,6 +1212,63 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func `Multiple jsonSet's are fused`() throws {
+      try db.execute(Profile.delete())
+      assertQuery(
+        Profile.update {
+          $0.author = $0.author
+            .jsonbSet(\.name, "Blob")
+            .jsonbSet(\.isVerified, false)
+            .jsonbSet(\.nickname, Optional("blobbo"))
+        }
+        .returning(\.self)
+      ) {
+        """
+        UPDATE "profiles"
+        SET "author" = jsonb_set("profiles"."author", '$."name"', 'Blob', '$."is_verified"', json(CASE 0 WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), '$."nickname"', 'blobbo')
+        RETURNING "id", json("author"), json("editor")
+        """
+      }
+    }
+
+    @Test func `Multiple jsonReplace's are fused`() throws {
+      try db.execute(Profile.delete())
+      assertQuery(
+        Profile.update {
+          $0.author = $0.author
+            .jsonbReplace(\.nickname, "blobbo1")
+            .jsonbReplace(\.nickname, "blobbo2")
+            .jsonbReplace(\.nickname, "blobbo3")
+        }
+        .returning(\.self)
+      ) {
+        """
+        UPDATE "profiles"
+        SET "author" = jsonb_replace("profiles"."author", '$."nickname"', 'blobbo1', '$."nickname"', 'blobbo2', '$."nickname"', 'blobbo3')
+        RETURNING "id", json("author"), json("editor")
+        """
+      }
+    }
+
+    @Test func `Multiple jsonInsert's are fused`() throws {
+      try db.execute(Profile.delete())
+      assertQuery(
+        Profile.update {
+          $0.author = $0.author
+            .jsonbInsert(\.nickname, "blobbo1")
+            .jsonbInsert(\.nickname, "blobbo2")
+            .jsonbInsert(\.nickname, "blobbo3")
+        }
+        .returning(\.self)
+      ) {
+        """
+        UPDATE "profiles"
+        SET "author" = jsonb_insert("profiles"."author", '$."nickname"', 'blobbo1', '$."nickname"', 'blobbo2', '$."nickname"', 'blobbo3')
+        RETURNING "id", json("author"), json("editor")
+        """
+      }
+    }
   }
 }
 

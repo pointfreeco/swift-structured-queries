@@ -28,6 +28,22 @@
         )
         try db.execute(
           """
+          CREATE TABLE "takes" (
+            "id" INTEGER PRIMARY KEY,
+            "media" BLOB NOT NULL
+          )
+          """
+        )
+        try db.execute(
+          """
+          CREATE TABLE "abcRows" (
+            "id" INTEGER PRIMARY KEY,
+            "doc" BLOB NOT NULL
+          )
+          """
+        )
+        try db.execute(
+          """
           INSERT INTO "attachments"
           ("link") VALUES ('https://www.pointfree.co')
           """
@@ -666,14 +682,6 @@
 
       @Test func jsonExtractCases() throws {
         try db.execute(
-          """
-          CREATE TABLE "takes" (
-            "id" INTEGER PRIMARY KEY,
-            "media" BLOB NOT NULL
-          )
-          """
-        )
-        try db.execute(
           Take.insert {
             [
               Take(id: 1, media: .note("Hello")),
@@ -736,14 +744,6 @@
 
       @Test func jsonbSetCase() throws {
         try db.execute(
-          """
-          CREATE TABLE "takes" (
-            "id" INTEGER PRIMARY KEY,
-            "media" BLOB NOT NULL
-          )
-          """
-        )
-        try db.execute(
           Take.insert {
             [
               Take(id: 1, media: .note("Hello")),
@@ -774,14 +774,6 @@
       }
 
       @Test func jsonbReplaceCase() throws {
-        try db.execute(
-          """
-          CREATE TABLE "takes" (
-            "id" INTEGER PRIMARY KEY,
-            "media" BLOB NOT NULL
-          )
-          """
-        )
         try db.execute(
           Take.insert {
             [
@@ -816,14 +808,6 @@
         }
       }
       @Test func replaceIfActive() throws {
-        try db.execute(
-          """
-          CREATE TABLE "abcRows" (
-            "id" INTEGER PRIMARY KEY,
-            "doc" BLOB NOT NULL
-          )
-          """
-        )
         try db.execute(
           ABCRow.insert {
             [
