@@ -14,11 +14,11 @@ custom database functions, and more.
 - <doc:DefiningYourSchema>
 - <doc:QueryCookbook>
 - <doc:BuiltinFunctions>
+- <doc:JSON>
 - <doc:CustomFunctions>
 - <doc:Triggers>
 - <doc:Views>
 - <doc:FullTextSearch>
-- <doc:JSON>
 
 ### Query representations
 
@@ -34,7 +34,7 @@ custom database functions, and more.
 
 ### Casting
 
-- ``StructuredQueriesCore/QueryExpression/cast(as:)``
+- ``QueryExpression/cast(as:)``
 - ``SQLiteType``
 - ``SQLiteTypeAffinity``
 

@@ -11,6 +11,20 @@ extension SnapshotTests {
   @Suite struct JSONFunctionsTests {
     @Dependency(\.defaultDatabase) var db
 
+    init() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "docs" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "tags" TEXT NOT NULL,
+            "optionalTags" TEXT
+          )
+          """
+        )
+      )
+    }
+
     @Test func jsonGroupArray() {
       assertQuery(
         Reminder.select {
@@ -474,17 +488,6 @@ extension SnapshotTests {
 
     @Test func jsonGroupArrayOfJSONColumns() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Doc.insert {
           [
             Doc.Draft(tags: ["a", "b"], optionalTags: ["c"]),
@@ -517,17 +520,6 @@ extension SnapshotTests {
     }
 
     @Test func jsonSet() throws {
-      try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
       try db.execute(
         Doc.insert {
           Doc.Draft(tags: ["a", "b"])
@@ -587,17 +579,6 @@ extension SnapshotTests {
 
     @Test func jsonRemoveAndReplace() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Doc.insert {
           Doc.Draft(tags: ["a", "b", "c"])
         }
@@ -655,17 +636,6 @@ extension SnapshotTests {
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbExtract() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Doc.insert {
           Doc.Draft(tags: ["a", "b"])
         }
@@ -682,6 +652,101 @@ extension SnapshotTests {
         ┌─────┬─────┐
         │ "a" │ "b" │
         └─────┴─────┘
+        """
+      }
+    }
+
+    @Test func `jsonbExtract from a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbExtract(\.self) }
+      ) {
+        """
+        SELECT json(jsonb_extract("docs"."tags", '$'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "a", │
+        │   [1]: "b"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func `jsonbSet on a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbSet(\.[0], "z").jsonbSet(\.[1], "y") }
+      ) {
+        """
+        SELECT json(jsonb_set("docs"."tags", '$[0]', 'z', '$[1]', 'y'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "z", │
+        │   [1]: "y"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func `jsonbAppend and jsonbRemove on a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbAppend("c") }
+      ) {
+        """
+        SELECT json(jsonb_insert("docs"."tags", '$[#]', 'c'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "a", │
+        │   [1]: "b", │
+        │   [2]: "c"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+      assertQuery(
+        Doc.select { $0.tags.jsonbRemove(\.[0]) }
+      ) {
+        """
+        SELECT json(jsonb_remove("docs"."tags", '$[0]'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ [          │
+        │   [0]: "b" │
+        │ ]          │
+        └────────────┘
         """
       }
     }

@@ -6,13 +6,12 @@ Apply SQLite functions to SQL expressions.
 
 ### Strings
 
-- ``StructuredQueriesCore/QueryExpression/unhex(_:)``
 - ``StructuredQueriesCore/QueryExpression/unicode()``
 
 ### Numeric
 
-- ``StructuredQueriesCore/QueryExpression/randomblob()``
 - ``StructuredQueriesCore/QueryExpression/sign()``
+- ``StructuredQueriesCore/QueryExpression/randomblob()``
 - ``StructuredQueriesCore/QueryExpression/zeroblob()``
 
 ### Boolean Query optimization

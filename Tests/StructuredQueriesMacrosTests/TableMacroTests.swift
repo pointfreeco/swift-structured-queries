@@ -3185,28 +3185,6 @@ extension SnapshotTests {
       }
     }
 
-    @Test func enumOptionalPayloadDiagnostic() {
-      assertMacro {
-        """
-        @Table
-        enum Post {
-          case photo(Photo)
-          case note(String?)
-        }
-        """
-      } diagnostics: {
-        """
-        @Table
-        enum Post {
-          case photo(Photo)
-          case note(String?)
-                    ┬──────
-                    ╰─ 🛑 Table case value must not be optional; a 'nil' value is indistinguishable from an inactive case
-        }
-        """
-      }
-    }
-
     @Test func enumDiagnostic() {
       assertMacro {
         """
@@ -3485,6 +3463,32 @@ extension SnapshotTests {
         extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
         }
         """#
+      }
+    }
+
+    @Test func enumCaseWithoutSingleAssociatedValueDiagnostic() {
+      assertMacro {
+        """
+        @Table
+        enum Post {
+          case photo(Photo)
+          case note(title: String, body: String)
+          case untitled
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        enum Post {
+          case photo(Photo)
+          case note(title: String, body: String)
+          ┬─────────────────────────────────────
+          ╰─ 🛑 Table case must contain a single associated value representing one or more columns
+          case untitled
+          ┬────────────
+          ╰─ 🛑 Table case must contain a single associated value representing one or more columns
+        }
+        """
       }
     }
 
