@@ -131,6 +131,55 @@
         }
       }
 
+      @Test func leftJoinCaseColumn() {
+        assertQuery(
+          Reminder
+            .leftJoin(Attachment.all) { $0.id.eq($1.id) }
+            .select { $1.kind.note }
+            .limit(3)
+        ) {
+          """
+          SELECT "attachments"."note"
+          FROM "reminders"
+          LEFT JOIN "attachments" ON ("reminders"."id") = ("attachments"."id")
+          LIMIT 3
+          """
+        } results: {
+          """
+          ┌────────────────────────┐
+          │ nil                    │
+          │ "Today was a good day" │
+          │ nil                    │
+          └────────────────────────┘
+          """
+        }
+      }
+
+      @Test func leftJoinCaseColumnGroup() {
+        assertQuery(
+          Reminder
+            .leftJoin(Attachment.all) { $0.id.eq($1.id) }
+            .where { $1.id.eq(4) }
+            .select { $1.kind.image }
+        ) {
+          """
+          SELECT "attachments"."imageCaption", "attachments"."imageURL"
+          FROM "reminders"
+          LEFT JOIN "attachments" ON ("reminders"."id") = ("attachments"."id")
+          WHERE (("attachments"."id") = (4))
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────┐
+          │ Attachment.Image(                             │
+          │   caption: "Blob",                            │
+          │   url: URL(https://www.pointfree.co/blob.jpg) │
+          │ )                                             │
+          └───────────────────────────────────────────────┘
+          """
+        }
+      }
+
       @Test func isOperator() {
         assertQuery(
           Attachment.where { $0.kind.is(\.note) }

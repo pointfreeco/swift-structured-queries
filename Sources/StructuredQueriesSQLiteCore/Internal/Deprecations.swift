@@ -1,7 +1,7 @@
 public import Foundation
 public import StructuredQueriesCore
 
-// NB: Deprecated after 0.33.3:
+// NB: Deprecated after 0.34.0:
 
 extension QueryExpression where QueryValue: _JSONRepresentable {
   @available(
