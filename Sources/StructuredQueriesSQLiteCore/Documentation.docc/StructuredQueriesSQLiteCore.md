@@ -30,11 +30,11 @@ custom database functions, and more.
 
 ### Custom collations
 
-- ``Collation``
+- ``StructuredQueriesCore/Collation``
 
 ### Casting
 
-- ``QueryExpression/cast(as:)``
+- ``StructuredQueriesCore/QueryExpression/cast(as:)``
 - ``SQLiteType``
 - ``SQLiteTypeAffinity``
 

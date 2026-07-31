@@ -408,7 +408,7 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
 /// collection.
 ///
 /// Statements of this table are created by applying
-/// ``QueryExpression/jsonEach()`` to a JSON expression. It has the two
+/// ``StructuredQueriesCore/QueryExpression/jsonEach()`` to a JSON expression. It has the two
 /// columns `json_each` exposes: ``TableColumns/key`` and ``TableColumns/value``. Reach into the
 /// fields of an object element with `jsonExtract` on ``TableColumns/value``.
 public struct JSONEach<
@@ -483,7 +483,7 @@ extension JSONEach: Equatable where Key.QueryOutput: Equatable, Value.QueryOutpu
 /// collection.
 ///
 /// Statements of this table are created by applying
-/// ``QueryExpression/jsonbEach()`` to a JSON expression. It has the two
+/// ``StructuredQueriesCore/QueryExpression/jsonbEach()`` to a JSON expression. It has the two
 /// columns `jsonb_each` exposes: ``TableColumns/key`` and ``TableColumns/value``. Reach into the
 /// fields of an object element with `jsonExtract` on ``TableColumns/value``.
 ///
