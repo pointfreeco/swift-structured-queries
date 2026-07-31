@@ -38,6 +38,14 @@
     }
   }
 
+  package protocol _CaseColumnExpression {
+    var _base: any WritableTableColumnExpression { get }
+  }
+
+  extension CaseColumn: _CaseColumnExpression {
+    package var _base: any WritableTableColumnExpression { base }
+  }
+
   /// A group of columns representing a single case of an enum table.
   ///
   /// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros
@@ -77,6 +85,58 @@
       return TableColumn<Root, Member?>(
         column.name,
         keyPath: base.keyPath.appending(path: \.[member: \Member.self, column: column.keyPath])
+      )
+    }
+  }
+
+  extension OptionalColumnGroup {
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        Values.QueryOutput.TableColumns, CaseColumn<Values.QueryOutput, Member>
+      >
+    ) -> CaseColumn<Root, Member> {
+      let column = Values.QueryOutput.columns[keyPath: keyPath].base
+      return CaseColumn(
+        base: TableColumn<Root, Member?>(
+          column.name,
+          keyPath: base.keyPath.appending(
+            path: \.[flattenedMember: \Member.self, column: column.keyPath]
+          )
+        )
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        Values.QueryOutput.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>
+      >
+    ) -> CaseColumnGroup<Root, Member> {
+      let column = Values.QueryOutput.columns[keyPath: keyPath].base
+      return CaseColumnGroup(
+        base: ColumnGroup<Root, Member?>(
+          column.name,
+          keyPath: base.keyPath.appending(
+            path: \.[flattenedMember: \Member.self, column: column.keyPath]
+          )
+        )
+      )
+    }
+  }
+
+  extension CaseColumnGroup {
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        Payload.QueryOutput.TableColumns, OptionalColumnGroup<Payload.QueryOutput, Member>
+      >
+    ) -> OptionalColumnGroup<Root, Member> {
+      let column = Payload.QueryOutput.columns[keyPath: keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<Root, Member?>(
+          column.name,
+          keyPath: base.keyPath.appending(
+            path: \.[flattenedMember: \Member.self, column: column.keyPath]
+          )
+        )
       )
     }
   }

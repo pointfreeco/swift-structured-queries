@@ -65,6 +65,18 @@ where Values.QueryOutput: Table {
     )
   }
 
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, OptionalColumnGroup<Values.QueryOutput, Member>>
+  ) -> OptionalColumnGroup<Root, Member> {
+    let column = Values.columns[keyPath: keyPath]
+    return OptionalColumnGroup(
+      base: ColumnGroup<Root, Member?>(
+        column.name,
+        keyPath: self.keyPath.appending(path: column.keyPath)
+      )
+    )
+  }
+
   public var _allColumns: [any TableColumnExpression] {
     Values.QueryOutput.TableColumns.allColumns.map { column in
       func open<R, V>(

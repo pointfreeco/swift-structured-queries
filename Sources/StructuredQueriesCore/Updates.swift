@@ -60,6 +60,44 @@ public struct Updates<Base: Table> {
     set { updates.append(contentsOf: newValue.updates) }
   }
 
+  public subscript<Value>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, OptionalColumnGroup<Base, Value>>
+  ) -> UpdatesGroup<Base, Value?> {
+    get { UpdatesGroup<Base, Value?>(group: Base.columns[keyPath: keyPath].base) }
+    set { updates.append(contentsOf: newValue.updates) }
+  }
+
+  @_disfavoredOverload
+  public subscript<Value>(
+    dynamicMember keyPath: KeyPath<Base.TableColumns, OptionalColumnGroup<Base, Value>>
+  ) -> Value.QueryOutput? {
+    @available(
+      *,
+      unavailable,
+      message: """
+        Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+        """
+    )
+    get { fatalError() }
+    set {
+      func open<R, V>(
+        _ column: some WritableTableColumnExpression<R, V>
+      ) -> QueryFragment {
+        V(
+          queryOutput: Value?(queryOutput: newValue)[
+            keyPath: column.keyPath as! KeyPath<Value?, V.QueryOutput>
+          ]
+        )
+        .queryFragment
+      }
+      updates.append(
+        contentsOf: Optional<Value>.TableColumns.writableColumns.map { column in
+          (column.name, open(column))
+        }
+      )
+    }
+  }
+
   @_disfavoredOverload
   public subscript<Value: QueryExpression>(
     dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Value>>
@@ -148,6 +186,13 @@ public struct UpdatesGroup<Base: Table, Values: Table> where Values.QueryOutput:
     dynamicMember keyPath: KeyPath<Values.TableColumns, ColumnGroup<Values.QueryOutput, Member>>
   ) -> UpdatesGroup<Base, Member> {
     get { UpdatesGroup<Base, Member>(group: group[dynamicMember: keyPath]) }
+    set { updates.append(contentsOf: newValue.updates) }
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Values.TableColumns, OptionalColumnGroup<Values.QueryOutput, Member>>
+  ) -> UpdatesGroup<Base, Member?> {
+    get { UpdatesGroup<Base, Member?>(group: group[dynamicMember: keyPath].base) }
     set { updates.append(contentsOf: newValue.updates) }
   }
 
