@@ -12,7 +12,7 @@ triggers in a type-safe and schema-safe fashion.
 
 One of the most common use cases for a trigger is refreshing an "updatedAt" timestamp on a row when
 it is updated in the database. One can create such a trigger SQL statement using the
-``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
+``Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
 static method:
 
 @Row {
@@ -191,9 +191,9 @@ reminder is inserted into the database with the following trigger:
 
 ### Creating temporary triggers
 
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:before:fileID:line:column:)``
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:insteadOf:fileID:line:column:)``
+- ``Table/createTemporaryTrigger(_:ifNotExists:after:fileID:line:column:)``
+- ``Table/createTemporaryTrigger(_:ifNotExists:before:fileID:line:column:)``
+- ``Table/createTemporaryTrigger(_:ifNotExists:insteadOf:fileID:line:column:)``
 
 ### Triggers
 
@@ -201,5 +201,5 @@ reminder is inserted into the database with the following trigger:
 
 ### Deprecations
 
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:fileID:line:column:)``
-- ``StructuredQueriesCore/Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``
+- ``Table/createTemporaryTrigger(_:ifNotExists:afterInsertTouch:fileID:line:column:)``
+- ``Table/createTemporaryTrigger(_:ifNotExists:afterUpdateTouch:fileID:line:column:)``

@@ -30,7 +30,7 @@ custom database functions, and more.
 
 ### Custom collations
 
-- ``StructuredQueriesCore/Collation``
+- ``Collation``
 
 ### Casting
 

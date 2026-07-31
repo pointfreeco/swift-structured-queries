@@ -29,7 +29,7 @@ which includes database views and virtual tables. It allows one to represent a t
 and purposes seems like a regular SQLite table, but it's not actually persisted in the database.
 
 With that type defined we can use the
-``StructuredQueriesCore/Table/createTemporaryView(ifNotExists:as:)`` function to create a SQL query
+``Table/createTemporaryView(ifNotExists:as:)`` function to create a SQL query
 that creates a temporary view. You provide a select statement that selects all the data needed for
 the view:
 
@@ -146,7 +146,7 @@ Following this pattern you can also restore updates and deletes on the view.
 
 ### Creating temporary views
 
-- ``StructuredQueriesCore/Table/createTemporaryView(ifNotExists:as:)``
+- ``Table/createTemporaryView(ifNotExists:as:)``
 
 ### Views
 
