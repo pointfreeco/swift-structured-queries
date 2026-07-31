@@ -11,7 +11,7 @@ document without ever loading it into memory, and aggregating many rows into a s
 
   * [Storing JSON in your tables](#Storing-JSON-in-your-tables)
   * [Extracting values from JSON](#Extracting-values-from-JSON)
-  * [Iterating over JSON collections](#Iterating-over-JSON-collections)
+  * [Querying over JSON collections](#Querying-over-JSON-collections)
   * [Updating JSON in place](#Updating-JSON-in-place)
   * [Aggregating rows into JSON](#Aggregating-rows-into-JSON)
   * [Using JSONB](#Using-JSONB)
@@ -67,6 +67,12 @@ Note that the nested `Author` and `Link` types are annotated with the `@Selectio
 generates the column metadata that powers the type-safe, key path-based APIs described below,
 allowing you to navigate into the JSON document using the same dot syntax you use for regular
 Swift values.
+
+> Warning: When applying `@Selection` to a `Codable` type in order to expose its schema to the
+> library's tools, `@Selection` must take over responsibility for how the type is encoded and
+> decoded into JSON. For this reason you **must not** provide custom `CodingKeys` for your type,
+> and to enforce this we recommend turning on the "ColumnCoding" trait, which will be the default
+> behavior fo the library in the future.
 
 ### Extracting values from JSON
 
@@ -158,7 +164,7 @@ And the ``QueryExpression/jsonArrayLength()`` and
   }
 }
 
-### Iterating over JSON collections
+### Querying over JSON collections
 
 This library supports a few special cases of the [`json_each` table-valued function][json-each], 
 such such as arrays and dictionaries. It allows you to turn a JSON array or dictionary into a 
