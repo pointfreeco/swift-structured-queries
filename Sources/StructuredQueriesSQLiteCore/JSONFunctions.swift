@@ -199,8 +199,8 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// function.
   ///
   /// ```swift
-  /// Profile.update { $0.tags = $0.tags.jsonAppend("new") }
-  /// // UPDATE "profiles" SET "tags" = json_insert("profiles"."tags", '$[#]', 'new')
+  /// Profile.update { $0.author = $0.author.jsonAppend(\.tags, "new") }
+  /// // UPDATE "profiles" SET "author" = json_insert("profiles"."author", '$."tags"[#]', 'new')
   /// ```
   ///
   /// - Parameters:
@@ -428,7 +428,15 @@ where
   QueryValue.QueryOutput: RangeReplaceableCollection,
   QueryValue.QueryOutput.Element: Codable
 {
-  @_documentation(visibility: private)
+  /// Appends a value to a JSON array using the `json_insert` function.
+  ///
+  /// ```swift
+  /// Profile.update { $0.tags = $0.tags.jsonAppend("new") }
+  /// // UPDATE "profiles" SET "tags" = json_insert("profiles"."tags", '$[#]', 'new')
+  /// ```
+  ///
+  /// - Parameter value: A value to append.
+  /// - Returns: A JSON expression with the value appended.
   public func jsonAppend(
     _ value: some QueryExpression<QueryValue.QueryOutput.Element>
   ) -> _JSONInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>>
@@ -516,8 +524,8 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// function.
   ///
   /// ```swift
-  /// Doc.update { $0.tags = $0.tags.jsonbAppend("new") }
-  /// // UPDATE "docs" SET "tags" = jsonb_insert("docs"."tags", '$[#]', 'new')
+  /// Profile.update { $0.author = $0.author.jsonbAppend(\.tags, "new") }
+  /// // UPDATE "profiles" SET "author" = jsonb_insert("profiles"."author", '$."tags"[#]', 'new')
   /// ```
   ///
   /// - Parameters:
@@ -699,7 +707,15 @@ where
   QueryValue.QueryOutput: RangeReplaceableCollection,
   QueryValue.QueryOutput.Element: Codable
 {
-  @_documentation(visibility: private)
+  /// Appends a value to a JSON array using the `jsonb_insert` function.
+  ///
+  /// ```swift
+  /// Profile.update { $0.tags = $0.tags.jsonbAppend("new") }
+  /// // UPDATE "profiles" SET "tags" = jsonb_insert("profiles"."tags", '$.[#]', 'new')
+  /// ```
+  ///
+  /// - Parameter value: A value to append.
+  /// - Returns: An JSONB expression with the value appended.
   public func jsonbAppend(
     _ value: some QueryExpression<QueryValue.QueryOutput.Element>
   ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>>
@@ -870,7 +886,6 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
   ///
   /// - Parameters:
   ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
-  ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this expression.
   @_disfavoredOverload
@@ -925,7 +940,6 @@ extension QueryExpression where QueryValue: Codable & QueryBindable {
   ///
   /// - Parameters:
   ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
-  ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSONB array aggregate of this expression.
   @_disfavoredOverload
@@ -1005,7 +1019,6 @@ extension TableDefinition where QueryValue: Codable {
   ///
   /// - Parameters:
   ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
-  ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSON array aggregate of this table.
   @_disfavoredOverload
@@ -1053,7 +1066,6 @@ extension TableDefinition where QueryValue: Codable {
   ///
   /// - Parameters:
   ///   - isDistinct: A boolean to enable the `DISTINCT` clause to apply to the aggregation.
-  ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: A JSONB array aggregate of this table.
   @_disfavoredOverload
@@ -1593,7 +1605,6 @@ extension _JSONInsertExpression where QueryValue: _JSONRepresentable {
     appending(.jsonArguments(path, appending: "[#]", .jsonEncoded(value)))
   }
 
-  @_documentation(visibility: private)
   public func jsonAppend<Context: _RequiredJSONPathContext, Member: _JSONArrayRepresentation>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member._ElementRepresentation>
@@ -1601,7 +1612,6 @@ extension _JSONInsertExpression where QueryValue: _JSONRepresentable {
     appending(.jsonArguments(path, appending: "[#]", .jsonEncoded(value)))
   }
 
-  @_documentation(visibility: private)
   public func jsonAppend<
     Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
@@ -1612,7 +1622,6 @@ extension _JSONInsertExpression where QueryValue: _JSONRepresentable {
     appending(.jsonArguments(path, appending: "[#]", .jsonEncoded(value)))
   }
 
-  @_documentation(visibility: private)
   public func jsonAppend<
     Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
@@ -1626,7 +1635,6 @@ extension _JSONInsertExpression where QueryValue: _JSONRepresentable {
 
 extension _JSONInsertExpression
 where QueryValue: _JSONRepresentable & _JSONArrayRepresentation {
-  @_documentation(visibility: private)
   public func jsonAppend(
     _ value: some QueryExpression<QueryValue._Element>
   ) -> _JSONInsertExpression<QueryValue>
@@ -1634,7 +1642,6 @@ where QueryValue: _JSONRepresentable & _JSONArrayRepresentation {
     jsonAppend(\.self, value)
   }
 
-  @_documentation(visibility: private)
   public func jsonAppend(
     _ value: some QueryExpression<QueryValue._ElementRepresentation>
   ) -> _JSONInsertExpression<QueryValue> {
@@ -1662,7 +1669,6 @@ extension _JSONInsertExpression where QueryValue: _JSONBRepresentable {
     appending(.jsonArguments(path, appending: "[#]", .jsonEncoded(value)))
   }
 
-  @_documentation(visibility: private)
   public func jsonbAppend<Context: _RequiredJSONPathContext, Member: _JSONArrayRepresentation>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
     _ value: some QueryExpression<Member._ElementRepresentation>
@@ -1670,7 +1676,6 @@ extension _JSONInsertExpression where QueryValue: _JSONBRepresentable {
     appending(.jsonArguments(path, appending: "[#]", .jsonEncoded(value)))
   }
 
-  @_documentation(visibility: private)
   public func jsonbAppend<
     Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
@@ -1681,7 +1686,6 @@ extension _JSONInsertExpression where QueryValue: _JSONBRepresentable {
     appending(.jsonArguments(path, appending: "[#]", .jsonEncoded(value)))
   }
 
-  @_documentation(visibility: private)
   public func jsonbAppend<
     Context: _RequiredJSONPathContext, Member: StructuredQueriesCore._OptionalProtocol
   >(
@@ -1698,7 +1702,6 @@ extension _JSONInsertExpression where QueryValue: _JSONBRepresentable {
 #endif
 extension _JSONInsertExpression
 where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
-  @_documentation(visibility: private)
   public func jsonbAppend(
     _ value: some QueryExpression<QueryValue._Element>
   ) -> _JSONInsertExpression<QueryValue>
@@ -1706,7 +1709,6 @@ where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
     jsonbAppend(\.self, value)
   }
 
-  @_documentation(visibility: private)
   public func jsonbAppend(
     _ value: some QueryExpression<QueryValue._ElementRepresentation>
   ) -> _JSONInsertExpression<QueryValue> {
@@ -1778,7 +1780,6 @@ extension _JSONReplaceExpression where QueryValue: _JSONRepresentable {
   }
 
   @_disfavoredOverload
-  @_documentation(visibility: private)
   public func jsonReplace<
     Context: _JSONPathMemberContext & _OptionalJSONPathContext, Member: QueryBindable
   >(
@@ -1809,7 +1810,6 @@ extension _JSONReplaceExpression where QueryValue: _JSONBRepresentable {
   }
 
   @_disfavoredOverload
-  @_documentation(visibility: private)
   public func jsonbReplace<
     Context: _JSONPathMemberContext & _OptionalJSONPathContext, Member: QueryBindable
   >(
@@ -1834,7 +1834,6 @@ extension _JSONSetExpression where QueryValue: _JSONRepresentable {
     appending(.jsonSetArguments("json_object", path, .jsonEncoded(value)))
   }
 
-  @_documentation(visibility: private)
   public func jsonSet<Member: QueryBindable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathCase, Member>>,
     _ value: some QueryExpression<Member>
@@ -1854,7 +1853,6 @@ extension _JSONSetExpression where QueryValue: _JSONBRepresentable {
     appending(.jsonSetArguments("jsonb_object", path, .jsonEncoded(value)))
   }
 
-  @_documentation(visibility: private)
   public func jsonbSet<Member: QueryBindable>(
     _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<_JSONPathCase, Member>>,
     _ value: some QueryExpression<Member>
