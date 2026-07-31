@@ -18,7 +18,6 @@
 - ``Swift/Int64``
 - ``Swift/Int8``
 - ``Swift/String``
-- ``Swift/UInt``
 - ``Swift/UInt16``
 - ``Swift/UInt32``
 - ``Swift/UInt8``

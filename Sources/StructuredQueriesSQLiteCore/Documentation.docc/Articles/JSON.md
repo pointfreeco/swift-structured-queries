@@ -76,7 +76,7 @@ Swift values.
 
 ### Extracting values from JSON
 
-The ``QueryExpression/jsonExtract(_:)`` method invokes SQLite's
+The ``StructuredQueriesCore/QueryExpression/jsonExtract(_:)`` method invokes SQLite's
 `json_extract` function to pluck a value out of a JSON document using a key path:
 
 @Row {
@@ -142,8 +142,8 @@ expected, such as a `WHERE` clause:
   }
 }
 
-And the ``QueryExpression/jsonArrayLength()`` and
-``QueryExpression/jsonArrayLength(_:)`` methods invoke SQLite's
+And the ``StructuredQueriesCore/QueryExpression/jsonArrayLength()`` and
+``StructuredQueriesCore/QueryExpression/jsonArrayLength(_:)`` methods invoke SQLite's
 `json_array_length` function to count the elements of a JSON array:
 
 @Row {
@@ -314,8 +314,8 @@ A few things to note:
   * When iterating an object (a dictionary column), `key` is the object's key and can be filtered
     just like `value`, _e.g._ `$0.key.eq("JFK")`.
   * Invoking `jsonEach` on an optional column iterates a `NULL` document as an empty collection.
-  * The ``QueryExpression/jsonbEach()`` and
-    ``QueryExpression/jsonbEach(_:)`` methods invoke the
+  * The ``StructuredQueriesCore/QueryExpression/jsonbEach()`` and
+    ``StructuredQueriesCore/QueryExpression/jsonbEach(_:)`` methods invoke the
     `jsonb_each` function, instead, which can more efficiently iterate object elements by handing
     them to `jsonExtract` in SQLite's binary JSONB format.
 
@@ -325,15 +325,15 @@ SQLite's JSON functions can also update parts of a JSON document directly in the
 ever loading the document into your application, and this library provides type-safe methods for
 each of them:
 
-  * ``QueryExpression/jsonSet(_:_:)`` sets a value at a path, creating it
+  * ``StructuredQueriesCore/QueryExpression/jsonSet(_:_:)`` sets a value at a path, creating it
     if it does not exist.
-  * ``QueryExpression/jsonInsert(_:_:)`` inserts a value at a path only if
+  * ``StructuredQueriesCore/QueryExpression/jsonInsert(_:_:)`` inserts a value at a path only if
     it does not already exist.
-  * ``QueryExpression/jsonReplace(_:_:)`` replaces a value at a path only
+  * ``StructuredQueriesCore/QueryExpression/jsonReplace(_:_:)`` replaces a value at a path only
     if it already exists.
-  * ``QueryExpression/jsonAppend(_:_:)`` appends an element to an array at
+  * ``StructuredQueriesCore/QueryExpression/jsonAppend(_:_:)`` appends an element to an array at
     a path.
-  * ``QueryExpression/jsonRemove(_:)`` removes a value at a path.
+  * ``StructuredQueriesCore/QueryExpression/jsonRemove(_:)`` removes a value at a path.
 
 For example, to rename an author without touching the rest of the document:
 
@@ -386,7 +386,7 @@ into a single call:
 
 ### Aggregating rows into JSON
 
-The ``QueryExpression/jsonGroupArray(distinct:order:filter:)`` method invokes
+The ``StructuredQueriesCore/QueryExpression/jsonGroupArray(distinct:order:filter:)`` method invokes
 SQLite's `json_group_array` aggregate function to concatenate every value in a group into a single
 JSON array, which the library automatically decodes into a Swift array:
 
@@ -410,7 +410,7 @@ JSON array, which the library automatically decodes into a Swift array:
 }
 
 This becomes especially powerful when combined with
-``TableDefinition/jsonObject()``, which packages an entire table row up as a
+``StructuredQueriesCore/TableDefinition/jsonObject()``, which packages an entire table row up as a
 JSON object. Invoking `jsonGroupArray` on a joined table aggregates whole associated rows, letting
 you load a one-to-many association in a single query:
 
@@ -504,8 +504,8 @@ because SQLite's `json_*` functions accept text JSON and JSONB arguments interch
 values, iterate collections, and update documents in place with the same key path syntax, no
 matter which representation the column uses.
 
-However, each function has a `jsonb`-prefixed variant (``QueryExpression/jsonbExtract(_:)``,
-``QueryExpression/jsonbSet(_:_:)``, ``QueryExpression/jsonbEach()``, _etc._) that produces JSONB
+However, each function has a `jsonb`-prefixed variant (``StructuredQueriesCore/QueryExpression/jsonbExtract(_:)``,
+``StructuredQueriesCore/QueryExpression/jsonbSet(_:_:)``, ``StructuredQueriesCore/QueryExpression/jsonbEach()``, _etc._) that produces JSONB
 output instead of JSON text. Prefer the `jsonb` variants when the result is stored back into a
 column or fed into another JSON function, sparing SQLite a round trip through text:
 
@@ -537,31 +537,31 @@ column or fed into another JSON function, sparing SQLite a round trip through te
 
 ### Getting and setting JSON values
 
-- ``QueryExpression/jsonExtract(_:)``
-- ``QueryExpression/jsonbExtract(_:)``
-- ``QueryExpression/jsonArrayLength()``
-- ``QueryExpression/jsonArrayLength(_:)``
-- ``TableDefinition/jsonObject()``
-- ``TableDefinition/jsonbObject()``
-- ``QueryExpression/jsonGroupArray(distinct:order:filter:)``
-- ``QueryExpression/jsonbGroupArray(distinct:order:filter:)``
-- ``QueryExpression/jsonInsert(_:_:)``
-- ``QueryExpression/jsonbInsert(_:_:)``
-- ``QueryExpression/jsonAppend(_:_:)``
-- ``QueryExpression/jsonbAppend(_:_:)``
-- ``QueryExpression/jsonRemove(_:)``
-- ``QueryExpression/jsonbRemove(_:)``
-- ``QueryExpression/jsonReplace(_:_:)``
-- ``QueryExpression/jsonbReplace(_:_:)``
-- ``QueryExpression/jsonSet(_:_:)``
-- ``QueryExpression/jsonbSet(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonExtract(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbExtract(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonArrayLength()``
+- ``StructuredQueriesCore/QueryExpression/jsonArrayLength(_:)``
+- ``StructuredQueriesCore/TableDefinition/jsonObject()``
+- ``StructuredQueriesCore/TableDefinition/jsonbObject()``
+- ``StructuredQueriesCore/QueryExpression/jsonGroupArray(distinct:order:filter:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbGroupArray(distinct:order:filter:)``
+- ``StructuredQueriesCore/QueryExpression/jsonInsert(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbInsert(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonAppend(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbAppend(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonRemove(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbRemove(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonReplace(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbReplace(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonSet(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbSet(_:_:)``
 - ``JSONPath``
 
 ### Iterating over JSON collections 
 
-- ``QueryExpression/jsonEach()``
-- ``QueryExpression/jsonEach(_:)``
-- ``QueryExpression/jsonbEach()``
-- ``QueryExpression/jsonbEach(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonEach()``
+- ``StructuredQueriesCore/QueryExpression/jsonEach(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbEach()``
+- ``StructuredQueriesCore/QueryExpression/jsonbEach(_:)``
 - ``JSONEach``
 - ``JSONBEach``
