@@ -20,7 +20,7 @@ extension Table {
 
 /// A `CREATE TEMPORARY VIEW` statement.
 ///
-/// This type of statement is returned from ``Table/createTemporaryView(ifNotExists:as:)``.
+/// This type of statement is returned from ``StructuredQueriesCore/Table/createTemporaryView(ifNotExists:as:)``.
 ///
 /// To learn more, see <doc:Views>.
 public struct TemporaryView<View: Table, Selection: PartialSelectStatement>: Statement

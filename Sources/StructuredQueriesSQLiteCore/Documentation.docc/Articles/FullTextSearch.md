@@ -12,15 +12,15 @@ StructuredQueries comes with built-in support for SQLite's FTS5 module.
 
 ### Performing searches
 
-- ``TableDefinition/match(_:)``
-- ``TableColumnExpression/match(_:)``
+- ``StructuredQueriesCore/TableDefinition/match(_:)``
+- ``StructuredQueriesCore/TableColumnExpression/match(_:)``
 
 ### Ranking searches
 
-- ``TableDefinition/rank``
-- ``TableDefinition/bm25(_:)``
+- ``StructuredQueriesCore/TableDefinition/rank``
+- ``StructuredQueriesCore/TableDefinition/bm25(_:)``
 
 ### Highlighting results
 
-- ``TableColumnExpression/highlight(_:_:)``
-- ``TableColumnExpression/snippet(_:_:_:_:)``
+- ``StructuredQueriesCore/TableColumnExpression/highlight(_:_:)``
+- ``StructuredQueriesCore/TableColumnExpression/snippet(_:_:_:_:)``
