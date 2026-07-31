@@ -69,7 +69,8 @@ extension SnapshotTests {
           """
           CREATE TABLE "profiles" (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "author" TEXT NOT NULL
+            "author" TEXT NOT NULL,
+            "favoriteNumbers" TEXT NOT NULL
           )
           """
         )
@@ -354,36 +355,82 @@ extension SnapshotTests {
       }
     }
 
+    @Test func `aggregate scalar quantities in JSON arrays`() throws {
+      try db.execute(
+        Profile.insert {
+          Profile.Draft(favoriteNumbers: [42, 1729])
+          Profile.Draft(favoriteNumbers: [-1, 0, 1])
+          Profile.Draft(favoriteNumbers: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34])
+        }
+      )
+      assertQuery(
+        Profile.select {
+          (
+            $0.id,
+            $0.favoriteNumbers.jsonEach().select { $0.value.sum() }
+          )
+        }
+      ) {
+        """
+        SELECT "profiles"."id", (
+          SELECT sum("json_each"."value")
+          FROM json_each("profiles"."favoriteNumbers")
+        )
+        FROM "profiles"
+        """
+      } results: {
+        """
+        ┌───┬──────┐
+        │ 1 │ 1771 │
+        │ 2 │ 0    │
+        │ 3 │ 88   │
+        └───┴──────┘
+        """
+      }
+    }
+
     @Test func dictionaryKeys() throws {
       try db.execute(
         Product.insert {
-          Product.Draft(inventory: ["SFO": Stock(onHand: 0), "JFK": Stock(onHand: 4)])
+          Product.Draft(inventory: ["SFO": Stock(onHand: 1), "JFK": Stock(onHand: 4)])
           Product.Draft(inventory: ["SFO": Stock(onHand: 7)])
         }
       )
       assertQuery(
         Product
-          .where {
-            $0.inventory.jsonEach()
-              .where { $0.key.eq("SFO") && $0.value.jsonExtract(\.onHand).eq(0) }
-              .exists()
+          .select {
+            (
+              $0,
+              $0.inventory.jsonEach()
+                .select { $0.value.jsonExtract(\.onHand).sum() }
+            )
           }
-          .select(\.id)
       ) {
         """
-        SELECT "products"."id"
-        FROM "products"
-        WHERE (EXISTS (
-          SELECT "json_each"."key", "json_each"."value"
+        SELECT "products"."id", "products"."inventory", (
+          SELECT sum(json_extract("json_each"."value", '$."onHand"'))
           FROM json_each("products"."inventory")
-          WHERE ((("json_each"."key") = ('SFO')) AND ((json_extract("json_each"."value", '$."onHand"')) = (0)))
-        ))
+        )
+        FROM "products"
         """
       } results: {
         """
-        ┌───┐
-        │ 1 │
-        └───┘
+        ┌──────────────────────────────┬───┐
+        │ Product(                     │ 5 │
+        │   id: 1,                     │   │
+        │   inventory: [               │   │
+        │     "JFK": Stock(onHand: 4), │   │
+        │     "SFO": Stock(onHand: 1)  │   │
+        │   ]                          │   │
+        │ )                            │   │
+        ├──────────────────────────────┼───┤
+        │ Product(                     │ 7 │
+        │   id: 2,                     │   │
+        │   inventory: [               │   │
+        │     "SFO": Stock(onHand: 7)  │   │
+        │   ]                          │   │
+        │ )                            │   │
+        └──────────────────────────────┴───┘
         """
       }
     }
@@ -448,7 +495,8 @@ extension SnapshotTests {
       )
       assertQuery(
         Post.where { $0.writer.jsonEach(\.tags).where { $0.value.eq("swift") }.exists() }.select(
-          \.id)
+          \.id
+        )
       ) {
         """
         SELECT "posts"."id"
@@ -734,6 +782,8 @@ private struct Profile: Codable, Equatable {
   let id: Int
   @Column(as: Author.JSONRepresentation.self)
   var author = Author()
+  @Column(as: [Int].JSONRepresentation.self)
+  var favoriteNumbers: [Int] = []
 }
 
 @Selection

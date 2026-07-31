@@ -11,8 +11,10 @@ document without ever loading it into memory, and aggregating many rows into a s
 
   * [Storing JSON in your tables](#Storing-JSON-in-your-tables)
   * [Extracting values from JSON](#Extracting-values-from-JSON)
+  * [Iterating over JSON collections](#Iterating-over-JSON-collections)
   * [Updating JSON in place](#Updating-JSON-in-place)
   * [Aggregating rows into JSON](#Aggregating-rows-into-JSON)
+  * [Using JSONB](#Using-JSONB)
 
 ### Storing JSON in your tables
 
@@ -21,11 +23,11 @@ JSON text, and this library further provides a ``Swift/Decodable/JSONBRepresenta
 a codable value in SQLite's more efficient, binary [JSONB](https://www.sqlite.org/jsonb.html)
 format. See <doc:DefiningYourSchema#JSONB> for the basics of defining such columns.
 
-For example, a `Profile` table can hold an entire `Author` document in a single column using JSONB:
+For example, a `Profile` table can hold an entire `Author` document in a single column as JSON:
 
 > Tip: For simplicity this article uses JSON over JSONB, but you should strongly consider JSONB
 > for your tables (if possible) due to its improved efficiency. Everything discussed below applies
-> equally well to JSONB.
+> equally well to JSONB, as described in [Using JSONB](#Using-JSONB).
 
 @Row {
   @Column {
@@ -55,7 +57,7 @@ For example, a `Profile` table can hold an entire `Author` document in a single 
     ```sql
     CREATE TABLE "profiles" (
       "id" INTEGER PRIMARY KEY,
-      "author" BLOB NOT NULL
+      "author" TEXT NOT NULL
     ) STRICT
     ```
   }
@@ -156,6 +158,161 @@ And the ``QueryExpression/jsonArrayLength()`` and
   }
 }
 
+### Iterating over JSON collections
+
+This library supports a few special cases of the [`json_each` table-valued function][json-each], 
+such such as arrays and dictionaries. It allows you to turn a JSON array or dictionary into a 
+virtual SQLite table which can be queried in its own right. It returns a full select statement 
+whose rows have two columns: `key`, the element's index in an array or its key in an object, and
+`value`, the element itself.
+
+[json-each]: https://sqlite.org/json1.html#jeach
+
+This select statement can be used as a subquery to filter rows by the contents of a JSON
+collection. For example, to find every profile whose author links to a particular homepage:
+
+@Row {
+  @Column {
+    ```swift
+    Profile.where {
+      $0.author.jsonEach(\.links)
+        .where {
+          $0.value.jsonExtract(\.homepage)
+            .like("%pointfree.co%")
+        }
+        .exists()
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT … FROM "profiles"
+    WHERE EXISTS (
+      SELECT
+        "json_each"."key",
+        "json_each"."value"
+      FROM json_each(
+        "profiles"."author", '$."links"'
+      )
+      WHERE json_extract(
+        "json_each"."value", '$."homepage"'
+      ) LIKE '%pointfree.co%'
+    )
+    ```
+  }
+}
+
+Because it is an ordinary select statement, it supports the full query-building toolkit, including
+`where`, `order`, `limit`, and aggregate functions, and it can be selected as a scalar subquery
+alongside other columns:
+
+@Row {
+  @Column {
+    ```swift
+    Profile.select {
+      (
+        $0.id
+        $0.favoriteNumbers.jsonEach()
+          .select { $0.value.sum() }
+      )
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT
+      "profiles"."id",
+      (
+        SELECT sum("json_each"."value")
+        FROM json_each(
+          "profiles"."author", '$."favoriteNumbers"'
+        )
+      )
+    FROM "profiles"
+    ```
+  }
+}
+
+You can also join a table to `json_each` to fan each row out into one row per element of its JSON
+collection:
+
+@Row {
+  @Column {
+    ```swift
+    Profile
+      .join(Profile.columns.author.jsonEach(\.links)) { _, _ in true }
+      .select {
+        (
+          $0.author.jsonExtract(\.name),
+          $1.value.jsonExtract(\.homepage)
+        )
+      }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT
+      json_extract(
+        "profiles"."author", '$."name"'
+      ),
+      json_extract(
+        "json_each"."value", '$."homepage"'
+      )
+    FROM "profiles"
+    JOIN json_each(
+      "profiles"."author", '$."links"'
+    ) ON 1
+    ```
+  }
+}
+
+This also works when storing JSON arrays and dictionaries of primitive types, such as `[String]` or
+`[String: Int]`. In this case scalar elements are fully typed and can be compared directly, without 
+any extraction:
+
+@Row {
+  @Column {
+    ```swift
+    @Table
+    struct Reminder {
+      let id: Int
+      @Column(as: [String].JSONRepresentation.self)
+      var tags: [String] = []
+    }
+
+    Reminder.where {
+      $0.tags.jsonEach()
+        .where { $0.value.eq("urgent") }
+        .exists()
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT … FROM "reminders"
+    WHERE EXISTS (
+      SELECT
+        "json_each"."key",
+        "json_each"."value"
+      FROM json_each(
+        "reminders"."tags"
+      )
+      WHERE "json_each"."value" = 'urgent'
+    )
+    ```
+  }
+}
+
+A few things to note:
+
+  * When iterating an object (a dictionary column), `key` is the object's key and can be filtered
+    just like `value`, _e.g._ `$0.key.eq("JFK")`.
+  * Invoking `jsonEach` on an optional column iterates a `NULL` document as an empty collection.
+  * The ``QueryExpression/jsonbEach()`` and
+    ``QueryExpression/jsonbEach(_:)`` methods invoke the
+    `jsonb_each` function, instead, which can more efficiently iterate object elements by handing
+    them to `jsonExtract` in SQLite's binary JSONB format.
+
 ### Updating JSON in place
 
 SQLite's JSON functions can also update parts of a JSON document directly in the database, without
@@ -219,38 +376,7 @@ into a single call:
   }
 }
 
-Each method also has a `jsonb`-prefixed variant (``QueryExpression/jsonbSet(_:_:)``,
-``QueryExpression/jsonbAppend(_:_:)``, _etc._) that produces JSONB instead
-of JSON text. Prefer the `jsonb` variants when the result is being stored back into a column, as
-above, and the `json` variants when the result is being selected.
-
-To move a value from one part of a document to another, combine an update with
-``QueryExpression/jsonExtract(_:)``:
-
-@Row {
-  @Column {
-    ```swift
-    Profile.update {
-      $0.author = $0.author.jsonSet(
-        \.links,
-        $0.author.jsonExtract(\.pastLinks)
-      )
-    }
-    ```
-  }
-  @Column {
-    ```sql
-    UPDATE "profiles"
-    SET "author" = json_set(
-      "profiles"."author",
-      '$."links"',
-      json_extract(
-        "profiles"."author", '$."pastLinks"'
-      )
-    )
-    ```
-  }
-}
+[insert-replace-set]: https://sqlite.org/json1.html#the_json_insert_json_replace_and_json_set_functions
 
 ### Aggregating rows into JSON
 
@@ -304,6 +430,99 @@ RemindersList
 This query selects every reminders list along with an array of all of its associated reminders,
 decoded directly into the `Row` type.
 
+### Using JSONB
+
+Everything above stores JSON as plain text, but SQLite also supports
+[JSONB](https://www.sqlite.org/jsonb.html), a binary encoding of JSON stored as a `BLOB`. This
+allows SQLite to traverse the JSON and make modifications without parsing text into structured
+data and then rendering structured data back to text, which can be a significant cost. JSONB is 
+both slightly smaller than the equivalent text and can be processed in a fraction of the CPU cycles.
+
+To use JSONB instead of JSON, annotate a column with ``Swift/Decodable/JSONBRepresentation`` and 
+give it a `BLOB` column in your schema:
+
+@Row {
+  @Column {
+    ```swift
+    @Table
+    struct Profile {
+      let id: Int
+      @Column(as: Author.JSONBRepresentation.self)
+      var author: Author
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TABLE "profiles" (
+      "id" INTEGER PRIMARY KEY,
+      "author" BLOB NOT NULL
+    ) STRICT
+    ```
+  }
+}
+
+You do not need to do any extra work to use JSONB correctly. The library makes sure to use JSONB
+where necessary, such as inserting data into a table, and converts to JSON where necessary,
+such as selecting from a table so that it can be decoded back into a Swift type:
+
+@Row {
+  @Column {
+    ```swift
+    Profile.insert {
+      Profile.Draft(
+        author: Author(name: "Blob")
+      )
+    }
+
+    Profile.select(\.author)
+    
+    ```
+  }
+  @Column {
+    ```sql
+    INSERT INTO "profiles" ("author")
+    VALUES (
+      jsonb('{"name":"Blob",…}')
+    )
+
+      
+    SELECT json("profiles"."author")
+    FROM "profiles"
+    ```
+  }
+}
+
+Every API discussed in this article works on a JSONB column exactly as it does on a JSON column,
+because SQLite's `json_*` functions accept text JSON and JSONB arguments interchangeably. Extract
+values, iterate collections, and update documents in place with the same key path syntax, no
+matter which representation the column uses.
+
+However, each function has a `jsonb`-prefixed variant (``QueryExpression/jsonbExtract(_:)``,
+``QueryExpression/jsonbSet(_:_:)``, ``QueryExpression/jsonbEach()``, _etc._) that produces JSONB
+output instead of JSON text. Prefer the `jsonb` variants when the result is stored back into a
+column or fed into another JSON function, sparing SQLite a round trip through text:
+
+@Row {
+  @Column {
+    ```swift
+    Profile.update {
+      $0.author = $0.author
+        .jsonbSet(\.name, "Blob, Esq.")
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    UPDATE "profiles"
+    SET "author" = jsonb_set(
+      "profiles"."author",
+      '$."name"', 'Blob, Esq.'
+    )
+    ```
+  }
+}
+
 ## Topics
 
 ### Representing JSONB
@@ -324,8 +543,6 @@ decoded directly into the `Row` type.
 - ``QueryExpression/jsonbInsert(_:_:)``
 - ``QueryExpression/jsonAppend(_:_:)``
 - ``QueryExpression/jsonbAppend(_:_:)``
-- ``QueryExpression/jsonAppend(_:)``
-- ``QueryExpression/jsonbAppend(_:)``
 - ``QueryExpression/jsonRemove(_:)``
 - ``QueryExpression/jsonbRemove(_:)``
 - ``QueryExpression/jsonReplace(_:_:)``
@@ -333,3 +550,12 @@ decoded directly into the `Row` type.
 - ``QueryExpression/jsonSet(_:_:)``
 - ``QueryExpression/jsonbSet(_:_:)``
 - ``JSONPath``
+
+### Iterating over JSON collections 
+
+- ``QueryExpression/jsonEach()``
+- ``QueryExpression/jsonEach(_:)``
+- ``QueryExpression/jsonbEach()``
+- ``QueryExpression/jsonbEach(_:)``
+- ``JSONEach``
+- ``JSONBEach``
