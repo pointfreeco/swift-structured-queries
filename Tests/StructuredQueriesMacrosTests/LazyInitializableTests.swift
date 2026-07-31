@@ -20,11 +20,11 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Place {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
-          @StructuredQueries._ColumnCheck(Double.self)
+          @StructuredQueries.ColumnCheck(Double.self)
           var latitude: Double
-          @StructuredQueries._ColumnCheck(Double.self)
+          @StructuredQueries.ColumnCheck(Double.self)
           var longitude: Double
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -76,10 +76,10 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Place
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(Double?.self) var latitude: Double?
-            @StructuredQueries._ColumnCheck(Double?.self) var longitude: Double?
+            @StructuredQueries.ColumnCheck(Double?.self) var latitude: Double?
+            @StructuredQueries.ColumnCheck(Double?.self) var longitude: Double?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -214,9 +214,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Place {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
-          @StructuredQueries._ColumnCheck(Double.self)
+          @StructuredQueries.ColumnCheck(Double.self)
           var latitude: Double
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -263,9 +263,9 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Place
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(Double.self) var latitude: Double
+            @StructuredQueries.ColumnCheck(Double.self) var latitude: Double
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -390,9 +390,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Event {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
-          @StructuredQueries._ColumnCheck(Date.ISO8601Representation.self)
+          @StructuredQueries.ColumnCheck(Date.ISO8601Representation.self)
           var startsAt: Date
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -439,9 +439,9 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Event
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(Date.ISO8601Representation?.self) var startsAt: Date?
+            @StructuredQueries.ColumnCheck(Date.ISO8601Representation?.self) var startsAt: Date?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -562,9 +562,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Place {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
-          @StructuredQueries._ColumnCheck(Coordinate.self)
+          @StructuredQueries.ColumnCheck(Coordinate.self)
           var coordinate: Coordinate
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -611,9 +611,9 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Place
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(Coordinate?.self) var coordinate: Coordinate?
+            @StructuredQueries.ColumnCheck(Coordinate?.self) var coordinate: Coordinate?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -734,9 +734,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Record {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
-          @StructuredQueries._ColumnCheck(CKRecord?.SystemFieldsRepresentation.self)
+          @StructuredQueries.ColumnCheck(CKRecord?.SystemFieldsRepresentation.self)
           var systemFields: CKRecord?
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -783,9 +783,9 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Record
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(CKRecord?.SystemFieldsRepresentation.self) var systemFields: CKRecord?
+            @StructuredQueries.ColumnCheck(CKRecord?.SystemFieldsRepresentation.self) var systemFields: CKRecord?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -946,13 +946,13 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Record {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
-          @StructuredQueries._ColumnCheck(String?.self)
+          @StructuredQueries.ColumnCheck(String?.self)
           var a: String?
-          @StructuredQueries._ColumnCheck(Int?.self)
+          @StructuredQueries.ColumnCheck(Int?.self)
           var b: Int?
-          @StructuredQueries._ColumnCheck(Double.self)
+          @StructuredQueries.ColumnCheck(Double.self)
           var c: Double
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -1009,11 +1009,11 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Record
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(String?.self) var a: String?
-            @StructuredQueries._ColumnCheck(Int?.self) var b: Int?
-            @StructuredQueries._ColumnCheck(Double?.self) var c: Double?
+            @StructuredQueries.ColumnCheck(String?.self) var a: String?
+            @StructuredQueries.ColumnCheck(Int?.self) var b: Int?
+            @StructuredQueries.ColumnCheck(Double?.self) var c: Double?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -1156,11 +1156,11 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Location {
-          @StructuredQueries._ColumnCheck(Double.self)
+          @StructuredQueries.ColumnCheck(Double.self)
           var latitude: Double
-          @StructuredQueries._ColumnCheck(Double.self)
+          @StructuredQueries.ColumnCheck(Double.self)
           var longitude: Double
-          @StructuredQueries._ColumnCheck(String.self)
+          @StructuredQueries.ColumnCheck(String.self)
           var name: String
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1210,9 +1210,9 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Location
-            @StructuredQueries._ColumnCheck(Double?.self) var latitude: Double?
-            @StructuredQueries._ColumnCheck(Double?.self) var longitude: Double?
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(Double?.self) var latitude: Double?
+            @StructuredQueries.ColumnCheck(Double?.self) var longitude: Double?
+            @StructuredQueries.ColumnCheck(String.self)
             var name: String
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1357,13 +1357,13 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Place {
-            @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int.self)
+            @Column("id", primaryKey: true) @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @Column("latitude", lazyInitializable: true) @StructuredQueries._ColumnCheck(Double.self)
+            @Column("latitude", lazyInitializable: true) @StructuredQueries.ColumnCheck(Double.self)
             var latitude: Double
-            @Column("name") @StructuredQueries._ColumnCheck(Swift.String.self)
+            @Column("name") @StructuredQueries.ColumnCheck(Swift.String.self)
             var name = ""
-            @Column("note") @StructuredQueries._ColumnCheck(String?.self)
+            @Column("note") @StructuredQueries.ColumnCheck(String?.self)
             var note: String?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -1420,13 +1420,13 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Place
-              @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int?.self)
+              @Column("id", primaryKey: true) @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @Column("latitude") @StructuredQueries._ColumnCheck(Double?.self)
+              @Column("latitude") @StructuredQueries.ColumnCheck(Double?.self)
               var latitude: Double?
-              @Column("name") @StructuredQueries._ColumnCheck(Swift.String.self)
+              @Column("name") @StructuredQueries.ColumnCheck(Swift.String.self)
               var name = ""
-              @Column("note") @StructuredQueries._ColumnCheck(String?.self)
+              @Column("note") @StructuredQueries.ColumnCheck(String?.self)
               var note: String?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1576,11 +1576,11 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Item {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             var quantity: Int
-            @StructuredQueries._ColumnCheck(String?.self)
+            @StructuredQueries.ColumnCheck(String?.self)
             var note: String?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -1632,11 +1632,11 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Item
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var quantity: Int?
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(String?.self)
               var note: String?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1771,13 +1771,13 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct User {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             /// The user's identifier.
             let id: /* TODO: UUID */Int // Primary key
-            @StructuredQueries._ColumnCheck(String?.self)
+            @StructuredQueries.ColumnCheck(String?.self)
             /// The user's email.
             var email: String? = ""  // TODO: Should this be non-optional?
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             /// The user's age.
             var age: Int
 
@@ -1830,11 +1830,11 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = User
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: /* TODO: UUID */ Int? // Primary key
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(String?.self)
               var email: String? = ""
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var age: Int?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1966,11 +1966,11 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct User {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             var name: String
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let generated: Int
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -2021,9 +2021,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = User
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(String?.self)
               var name: String?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2151,9 +2151,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct SyncUp {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             var name: String
             var computed: Int
 
@@ -2201,9 +2201,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = SyncUp
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(String?.self)
               var name: String?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2328,11 +2328,11 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Foo {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             var id: Int {
               willSet { print(newValue) }
             }
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             var name: String {
               willSet { print(newValue) }
             }
@@ -2381,9 +2381,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Foo
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(String?.self)
               var name: String?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2506,11 +2506,11 @@ extension SnapshotTests {
         } expansion: {
           #"""
           private struct ReminderWithList {
-            @StructuredQueries._ColumnCheck(Reminder.ID.self)
+            @StructuredQueries.ColumnCheck(Reminder.ID.self)
             let reminderID: Reminder.ID
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             let reminderTitle: String
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             let remindersListTitle: String
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -2562,10 +2562,10 @@ extension SnapshotTests {
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = ReminderWithList
-              @StructuredQueries._ColumnCheck(Reminder.ID?.self) var reminderID: Reminder.ID?
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(Reminder.ID?.self) var reminderID: Reminder.ID?
+              @StructuredQueries.ColumnCheck(String?.self)
               var reminderTitle: String?
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(String?.self)
               var remindersListTitle: String?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2700,9 +2700,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           private struct Metadata: Identifiable {
-            @StructuredQueries._ColumnCheck(MetadataID.self)
+            @StructuredQueries.ColumnCheck(MetadataID.self)
             let id: MetadataID
-            @StructuredQueries._ColumnCheck(Date.self)
+            @StructuredQueries.ColumnCheck(Date.self)
             var userModificationDate: Date
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -2749,9 +2749,9 @@ extension SnapshotTests {
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Metadata
-              @StructuredQueries._ColumnCheck(MetadataID?.self)
+              @StructuredQueries.ColumnCheck(MetadataID?.self)
               var id: MetadataID?
-              @StructuredQueries._ColumnCheck(Date?.self)
+              @StructuredQueries.ColumnCheck(Date?.self)
               var userModificationDate: Date?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2872,9 +2872,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           private struct Row {
-            @StructuredQueries._ColumnCheck(UUID.self)
+            @StructuredQueries.ColumnCheck(UUID.self)
             let id: UUID
-            @StructuredQueries._ColumnCheck(Timestamps.self)
+            @StructuredQueries.ColumnCheck(Timestamps.self)
             var timestamps: Timestamps
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -2921,9 +2921,9 @@ extension SnapshotTests {
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Row
-              @StructuredQueries._ColumnCheck(UUID?.self)
+              @StructuredQueries.ColumnCheck(UUID?.self)
               var id: UUID?
-              @StructuredQueries._ColumnCheck(Timestamps?.self) var timestamps: Timestamps?
+              @StructuredQueries.ColumnCheck(Timestamps?.self) var timestamps: Timestamps?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
                 public typealias QueryValue = Draft
@@ -3048,13 +3048,13 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Place {
-            @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int.self)
+            @Column("id", primaryKey: true) @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @Column("latitude") @StructuredQueries._ColumnCheck(Double.self)
+            @Column("latitude") @StructuredQueries.ColumnCheck(Double.self)
             var latitude: Double
-            @Column("name") @StructuredQueries._ColumnCheck(Swift.String.self)
+            @Column("name") @StructuredQueries.ColumnCheck(Swift.String.self)
             var name = ""
-            @Column("note") @StructuredQueries._ColumnCheck(String?.self)
+            @Column("note") @StructuredQueries.ColumnCheck(String?.self)
             var note: String?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -3111,13 +3111,13 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Place
-              @Column("id", primaryKey: true) @StructuredQueries._ColumnCheck(Int?.self)
+              @Column("id", primaryKey: true) @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @Column("latitude") @StructuredQueries._ColumnCheck(Double.self)
+              @Column("latitude") @StructuredQueries.ColumnCheck(Double.self)
               var latitude: Double
-              @Column("name") @StructuredQueries._ColumnCheck(Swift.String.self)
+              @Column("name") @StructuredQueries.ColumnCheck(Swift.String.self)
               var name = ""
-              @Column("note") @StructuredQueries._ColumnCheck(String?.self)
+              @Column("note") @StructuredQueries.ColumnCheck(String?.self)
               var note: String?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3271,11 +3271,11 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Item {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             var quantity: Int
-            @StructuredQueries._ColumnCheck(String?.self)
+            @StructuredQueries.ColumnCheck(String?.self)
             var note: String?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -3327,11 +3327,11 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Item
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(Int.self)
+              @StructuredQueries.ColumnCheck(Int.self)
               var quantity: Int
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(String?.self)
               var note: String?
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3470,13 +3470,13 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct User {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             /// The user's identifier.
             let id: /* TODO: UUID */Int // Primary key
-            @StructuredQueries._ColumnCheck(String?.self)
+            @StructuredQueries.ColumnCheck(String?.self)
             /// The user's email.
             var email: String? = ""  // TODO: Should this be non-optional?
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             /// The user's age.
             var age: Int
 
@@ -3529,11 +3529,11 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = User
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: /* TODO: UUID */ Int? // Primary key
-              @StructuredQueries._ColumnCheck(String?.self)
+              @StructuredQueries.ColumnCheck(String?.self)
               var email: String? = ""
-              @StructuredQueries._ColumnCheck(Int.self)
+              @StructuredQueries.ColumnCheck(Int.self)
               var age: Int
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3669,11 +3669,11 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct User {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             var name: String
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let generated: Int
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -3724,9 +3724,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = User
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(String.self)
+              @StructuredQueries.ColumnCheck(String.self)
               var name: String
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3858,9 +3858,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct SyncUp {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             var name: String
             var computed: Int
 
@@ -3908,9 +3908,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = SyncUp
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(String.self)
+              @StructuredQueries.ColumnCheck(String.self)
               var name: String
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4039,11 +4039,11 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Foo {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             var id: Int {
               willSet { print(newValue) }
             }
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             var name: String {
               willSet { print(newValue) }
             }
@@ -4092,9 +4092,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Foo
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(String.self)
+              @StructuredQueries.ColumnCheck(String.self)
               var name: String
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4221,11 +4221,11 @@ extension SnapshotTests {
         } expansion: {
           #"""
           private struct ReminderWithList {
-            @StructuredQueries._ColumnCheck(Reminder.ID.self)
+            @StructuredQueries.ColumnCheck(Reminder.ID.self)
             let reminderID: Reminder.ID
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             let reminderTitle: String
-            @StructuredQueries._ColumnCheck(String.self)
+            @StructuredQueries.ColumnCheck(String.self)
             let remindersListTitle: String
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -4277,10 +4277,10 @@ extension SnapshotTests {
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = ReminderWithList
-              @StructuredQueries._ColumnCheck(Reminder.ID?.self) var reminderID: Reminder.ID?
-              @StructuredQueries._ColumnCheck(String.self)
+              @StructuredQueries.ColumnCheck(Reminder.ID?.self) var reminderID: Reminder.ID?
+              @StructuredQueries.ColumnCheck(String.self)
               let reminderTitle: String
-              @StructuredQueries._ColumnCheck(String.self)
+              @StructuredQueries.ColumnCheck(String.self)
               let remindersListTitle: String
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4423,9 +4423,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           private struct Metadata: Identifiable {
-            @StructuredQueries._ColumnCheck(MetadataID.self)
+            @StructuredQueries.ColumnCheck(MetadataID.self)
             let id: MetadataID
-            @StructuredQueries._ColumnCheck(Date.self)
+            @StructuredQueries.ColumnCheck(Date.self)
             var userModificationDate: Date
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -4472,9 +4472,9 @@ extension SnapshotTests {
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Metadata
-              @StructuredQueries._ColumnCheck(MetadataID?.self)
+              @StructuredQueries.ColumnCheck(MetadataID?.self)
               var id: MetadataID?
-              @StructuredQueries._ColumnCheck(Date.self)
+              @StructuredQueries.ColumnCheck(Date.self)
               var userModificationDate: Date
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4599,9 +4599,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           private struct Row {
-            @StructuredQueries._ColumnCheck(UUID.self)
+            @StructuredQueries.ColumnCheck(UUID.self)
             let id: UUID
-            @StructuredQueries._ColumnCheck(Timestamps.self)
+            @StructuredQueries.ColumnCheck(Timestamps.self)
             var timestamps: Timestamps
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -4648,9 +4648,9 @@ extension SnapshotTests {
             }
             fileprivate struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Row
-              @StructuredQueries._ColumnCheck(UUID?.self)
+              @StructuredQueries.ColumnCheck(UUID?.self)
               var id: UUID?
-              @StructuredQueries._ColumnCheck(Timestamps.self) var timestamps: Timestamps
+              @StructuredQueries.ColumnCheck(Timestamps.self) var timestamps: Timestamps
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
                 public typealias QueryValue = Draft

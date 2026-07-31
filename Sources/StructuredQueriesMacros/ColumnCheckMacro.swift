@@ -178,7 +178,7 @@ extension DeclSyntaxProtocol {
       var filtered = Array(attributes).filter { element in
         guard case .attribute(let attribute) = element else { return true }
         let name = attribute.attributeName.trimmedDescription
-        return name != "_ColumnCheck" && name != "Column" && name != "Columns"
+        return name != "ColumnCheck" && name != "Column" && name != "Columns"
       }
       filtered.insert(.attribute(attribute), at: filtered.startIndex)
       return AttributeListSyntax(filtered)

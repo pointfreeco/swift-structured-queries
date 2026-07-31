@@ -1568,9 +1568,9 @@ extension TableMacro: MemberAttributeMacro {
 
     let checkAttribute: [AttributeSyntax]
     if let columnType {
-      checkAttribute = ["@\(macrosModuleName)._ColumnCheck(\(columnType.trimmed).self)"]
+      checkAttribute = ["@\(macrosModuleName).ColumnCheck(\(columnType.trimmed).self)"]
     } else if let initializer = binding.initializer {
-      checkAttribute = ["@\(macrosModuleName)._ColumnCheck(\(initializer.value.trimmed))"]
+      checkAttribute = ["@\(macrosModuleName).ColumnCheck(\(initializer.value.trimmed))"]
     } else {
       checkAttribute = []
     }

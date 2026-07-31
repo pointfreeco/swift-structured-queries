@@ -16,7 +16,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var bar: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -98,7 +98,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var bar: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -218,7 +218,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var bar: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -340,7 +340,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Bar {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var baz: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -467,13 +467,13 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Swift.Bool.self)
+          @StructuredQueries.ColumnCheck(Swift.Bool.self)
           var c1 = true
-          @StructuredQueries._ColumnCheck(Swift.Int.self)
+          @StructuredQueries.ColumnCheck(Swift.Int.self)
           var c2 = 1
-          @StructuredQueries._ColumnCheck(Swift.Double.self)
+          @StructuredQueries.ColumnCheck(Swift.Double.self)
           var c3 = 1.2
-          @StructuredQueries._ColumnCheck(Swift.String.self)
+          @StructuredQueries.ColumnCheck(Swift.String.self)
           var c4 = ""
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -590,9 +590,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Foo: Codable {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(Swift.String.self)
+            @StructuredQueries.ColumnCheck(Swift.String.self)
             var title = ""
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -639,9 +639,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Foo
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(Swift.String.self)
+              @StructuredQueries.ColumnCheck(Swift.String.self)
               var title = ""
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -774,9 +774,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Foo: Codable {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(Swift.Bool.self)
+            @StructuredQueries.ColumnCheck(Swift.Bool.self)
             var isCompleted = false
             var scratch = ""
 
@@ -824,9 +824,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Foo
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(Swift.Bool.self) var isCompleted = false
+              @StructuredQueries.ColumnCheck(Swift.Bool.self) var isCompleted = false
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
                 public typealias QueryValue = Draft
@@ -988,9 +988,9 @@ extension SnapshotTests {
         } expansion: {
           #"""
           struct Foo: Codable {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
-            @StructuredQueries._ColumnCheck(Swift.Bool.self)
+            @StructuredQueries.ColumnCheck(Swift.Bool.self)
             var isCompleted = false
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -1037,9 +1037,9 @@ extension SnapshotTests {
             }
             struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
               public typealias SourceTable = Foo
-              @StructuredQueries._ColumnCheck(Int?.self)
+              @StructuredQueries.ColumnCheck(Int?.self)
               var id: Int?
-              @StructuredQueries._ColumnCheck(Swift.Bool.self) var isCompleted = false
+              @StructuredQueries.ColumnCheck(Swift.Bool.self) var isCompleted = false
 
               public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
                 public typealias QueryValue = Draft
@@ -1370,7 +1370,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var bar: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1497,7 +1497,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Date.UnixTimeRepresentation.self)
+          @StructuredQueries.ColumnCheck(Date.UnixTimeRepresentation.self)
           var bar: Date
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1580,9 +1580,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct User {
-          @StructuredQueries._ColumnCheck(String.self)
+          @StructuredQueries.ColumnCheck(String.self)
           var name: String
-          @StructuredQueries._ColumnCheck(String.self)
+          @StructuredQueries.ColumnCheck(String.self)
           let generated: String
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1694,9 +1694,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct User {
-          @StructuredQueries._ColumnCheck(String.self)
+          @StructuredQueries.ColumnCheck(String.self)
           var name: String
-          @StructuredQueries._ColumnCheck(String.self)
+          @StructuredQueries.ColumnCheck(String.self)
           let generated: String
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -1789,7 +1789,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var bar: Int
           var baz: Int { 42 }
 
@@ -1873,7 +1873,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var bar: Int
           static var baz: Int { 42 }
 
@@ -1956,7 +1956,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var `bar`: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2038,7 +2038,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(ID<Self>.self)
+          @StructuredQueries.ColumnCheck(ID<Self>.self)
           var bar: ID<Self>
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2120,7 +2120,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(ID<Self>())
+          @StructuredQueries.ColumnCheck(ID<Self>())
           var bar = ID<Self>()
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2205,9 +2205,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct User {
-          @StructuredQueries._ColumnCheck(ID<Self, UUID.BytesRepresentation>.self)
+          @StructuredQueries.ColumnCheck(ID<Self, UUID.BytesRepresentation>.self)
           let id: ID<Self, UUID>
-          @StructuredQueries._ColumnCheck(ID<Self, UUID.BytesRepresentation>?.self)
+          @StructuredQueries.ColumnCheck(ID<Self, UUID.BytesRepresentation>?.self)
           var referrerID: ID<Self, UUID>?
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -2254,8 +2254,8 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = User
-            @StructuredQueries._ColumnCheck(ID<User, UUID.BytesRepresentation>?.self) var id: ID<User, UUID>?
-            @StructuredQueries._ColumnCheck(ID<User, UUID.BytesRepresentation>?.self) var referrerID: ID<User, UUID>?
+            @StructuredQueries.ColumnCheck(ID<User, UUID.BytesRepresentation>?.self) var id: ID<User, UUID>?
+            @StructuredQueries.ColumnCheck(ID<User, UUID.BytesRepresentation>?.self) var referrerID: ID<User, UUID>?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -2371,7 +2371,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct SyncUp {
-          @StructuredQueries._ColumnCheck(String.self)
+          @StructuredQueries.ColumnCheck(String.self)
           var name: String
           var computed: Int
 
@@ -2454,9 +2454,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct SyncUp {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
-          @StructuredQueries._ColumnCheck(60 * 5)
+          @StructuredQueries.ColumnCheck(60 * 5)
           var seconds = 60 * 5
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -2503,9 +2503,9 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = SyncUp
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(60 * 5)
+            @StructuredQueries.ColumnCheck(60 * 5)
             var seconds = 60 * 5
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2632,11 +2632,11 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct RemindersList: Hashable, Identifiable {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           var id: Int
-          @StructuredQueries._ColumnCheck(Color.HexRepresentation.self)
+          @StructuredQueries.ColumnCheck(Color.HexRepresentation.self)
           var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
-          @StructuredQueries._ColumnCheck(Swift.String.self)
+          @StructuredQueries.ColumnCheck(Swift.String.self)
           var name = ""
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -2688,10 +2688,10 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = RemindersList
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(Color.HexRepresentation.self) var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
-            @StructuredQueries._ColumnCheck(Swift.String.self)
+            @StructuredQueries.ColumnCheck(Color.HexRepresentation.self) var color = Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)
+            @StructuredQueries.ColumnCheck(Swift.String.self)
             var name = ""
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -2872,7 +2872,7 @@ extension SnapshotTests {
     } expansion: {
       #"""
       struct Foo {
-        @StructuredQueries._ColumnCheck(String.self)
+        @StructuredQueries.ColumnCheck(String.self)
         var name: String {
           willSet { print(newValue) }
         }
@@ -2958,9 +2958,9 @@ extension SnapshotTests {
     } expansion: {
       #"""
       struct RemindersListAliasAndReminderCount {
-        @StructuredQueries._ColumnCheck(TableAlias<RemindersList, RL>.self)
+        @StructuredQueries.ColumnCheck(TableAlias<RemindersList, RL>.self)
         let remindersList: RemindersList
-        @StructuredQueries._ColumnCheck(Int.self)
+        @StructuredQueries.ColumnCheck(Int.self)
         let remindersCount: Int
 
         public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4085,7 +4085,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Foo {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -4127,7 +4127,7 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Foo
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4263,7 +4263,7 @@ extension SnapshotTests {
             }
           }
           public struct Draft {
-            @StructuredQueries._ColumnCheck(Int.self)
+            @StructuredQueries.ColumnCheck(Int.self)
             let id: Int
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4354,13 +4354,13 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Reminder {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
-          @StructuredQueries._ColumnCheck(Swift.String.self)
+          @StructuredQueries.ColumnCheck(Swift.String.self)
           var title = ""
-          @StructuredQueries._ColumnCheck(Date.UnixTimeRepresentation?.self)
+          @StructuredQueries.ColumnCheck(Date.UnixTimeRepresentation?.self)
           var date: Date?
-          @StructuredQueries._ColumnCheck(Priority?.self)
+          @StructuredQueries.ColumnCheck(Priority?.self)
           var priority: Priority?
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -4417,12 +4417,12 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Reminder
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?
-            @StructuredQueries._ColumnCheck(Swift.String.self)
+            @StructuredQueries.ColumnCheck(Swift.String.self)
             var title = ""
-            @StructuredQueries._ColumnCheck(Date.UnixTimeRepresentation?.self) var date: Date?
-            @StructuredQueries._ColumnCheck(Priority?.self)
+            @StructuredQueries.ColumnCheck(Date.UnixTimeRepresentation?.self) var date: Date?
+            @StructuredQueries.ColumnCheck(Priority?.self)
             var priority: Priority?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4567,7 +4567,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Reminder {
-          @StructuredQueries._ColumnCheck(UUID.BytesRepresentation.self)
+          @StructuredQueries.ColumnCheck(UUID.BytesRepresentation.self)
           let id: UUID
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -4609,7 +4609,7 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Reminder
-            @StructuredQueries._ColumnCheck(UUID.BytesRepresentation?.self) var id: UUID?
+            @StructuredQueries.ColumnCheck(UUID.BytesRepresentation?.self) var id: UUID?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -4715,7 +4715,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Reminder {
-          @StructuredQueries._ColumnCheck(Int.self)
+          @StructuredQueries.ColumnCheck(Int.self)
           let id: Int
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4798,9 +4798,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct Reminder {
-          @StructuredQueries._ColumnCheck(Int?.self)
+          @StructuredQueries.ColumnCheck(Int?.self)
           let id: Int?  // TODO: Migrate to UUID
-          @StructuredQueries._ColumnCheck(Swift.String.self)
+          @StructuredQueries.ColumnCheck(Swift.String.self)
           var title = ""
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -4847,9 +4847,9 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Reminder
-            @StructuredQueries._ColumnCheck(Int?.self)
+            @StructuredQueries.ColumnCheck(Int?.self)
             var id: Int?  // TODO: Migrate to UUID
-            @StructuredQueries._ColumnCheck(Swift.String.self)
+            @StructuredQueries.ColumnCheck(Swift.String.self)
             var title = ""
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4970,7 +4970,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         struct ReminderTag: Identifiable {
-          @StructuredQueries._ColumnCheck(ReminderTagID.self)
+          @StructuredQueries.ColumnCheck(ReminderTagID.self)
           let id: ReminderTagID
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
@@ -5012,7 +5012,7 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = ReminderTag
-            @StructuredQueries._ColumnCheck(ReminderTagID?.self) var id: ReminderTagID?
+            @StructuredQueries.ColumnCheck(ReminderTagID?.self) var id: ReminderTagID?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
