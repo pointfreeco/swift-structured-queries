@@ -141,13 +141,13 @@
     }
   }
 
-  public enum _CaseColumn<Root: Table, Value: QueryRepresentable> {
+  public enum _CaseColumn<Root: Table, Value> {
     public static func `for`(
       _ name: String,
       keyPath: KeyPath<Root, Value.QueryOutput?>,
       default defaultValue: Value.QueryOutput? = nil
     ) -> CaseColumn<Root, Value>
-    where Value: QueryBindable {
+    where Value: QueryRepresentable & QueryBindable {
       CaseColumn(base: TableColumn(name, keyPath: keyPath, default: defaultValue))
     }
 
@@ -156,7 +156,7 @@
       keyPath: KeyPath<Root, Value.QueryOutput?>,
       default defaultValue: Value.QueryOutput? = nil
     ) -> CaseColumnGroup<Root, Value>
-    where Value: Table, Value.QueryOutput: Table {
+    where Value: QueryRepresentable, Value: Table, Value.QueryOutput: Table {
       CaseColumnGroup(base: ColumnGroup(name, keyPath: keyPath, default: defaultValue))
     }
   }
