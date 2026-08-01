@@ -19,6 +19,9 @@ The library currently provides the following traits:
     with their column names.
   * [`LazyInitializableByDefault`](#LazyInitializableByDefault): Makes draft properties with no
     default value lazy-initializable.
+  * [`SuppressPlatformSQLiteAvailability`](#SuppressPlatformSQLiteAvailability): Suppresses
+    `@available` checks on APIs that depend on a newer version of SQLite than the one bundled with
+    the platform.
   * [`Tagged`](#Tagged): Adds support for type-safe identifiers.
 
 To enable a trait, specify it in the `Package.swift` file that depends on StructuredQueries:
@@ -169,6 +172,37 @@ lazy-initializable draft properties.
 > Important: In a future version of StructuredQueries this will become the default behavior, and
 > you will be able to opt out of it for a particular property with
 > `@Column(lazyInitializable: false)`. Enable the trait today to prepare for that future release.
+
+### SuppressPlatformSQLiteAvailability
+
+Some of the library's APIs correspond to SQLite features that are newer than the version of SQLite
+bundled with certain Apple platforms. For example, the JSONB family of functions requires SQLite
+3.45, which first shipped with iOS 26, macOS 26, tvOS 26, and watchOS 26. Such APIs are annotated
+with `@available` attributes so that the compiler prevents you from invoking a SQLite function that
+does not exist on an older OS:
+
+```swift
+Reminder.select { $0.title.jsonbGroupArray() }
+// 🛑 'jsonbGroupArray' is only available in iOS 26 or newer
+```
+
+These checks only apply to the system SQLite, though. If your app links against its own copy of
+SQLite instead, such as a custom build of SQLite or SQLCipher, these restrictions are unnecessary,
+and you can enable the `SuppressPlatformSQLiteAvailability` trait to remove them.
+
+To enable the trait, specify it in the `Package.swift` file that depends on StructuredQueries:
+
+```diff
+ .package(
+   url: "https://github.com/pointfreeco/swift-structured-queries",
+   from: "0.35.0",
++  traits: ["SuppressPlatformSQLiteAvailability"]
+ ),
+```
+
+> Warning: Only enable this trait if your app embeds a version of SQLite that supports the features
+> you use. If you enable it while relying on the system SQLite, queries that use newer functions
+> will compile but fail at runtime on older OS versions.
 
 ### Tagged
 
