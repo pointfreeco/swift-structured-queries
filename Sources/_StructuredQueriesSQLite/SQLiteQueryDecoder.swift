@@ -26,7 +26,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
   }
 
   @inlinable
-  mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
+  mutating func decode(_ columnType: [UInt8].Type) throws(QueryDecodingError) -> [UInt8]? {
     precondition(sqlite3_column_count(statement) > currentIndex)
     switch sqlite3_column_type(statement, currentIndex) {
     case SQLITE_NULL:
@@ -46,18 +46,22 @@ struct SQLiteQueryDecoder: QueryDecoder {
   }
 
   @inlinable
-  mutating func decode(_ columnType: Bool.Type) throws -> Bool? {
+  mutating func decode(_ columnType: Bool.Type) throws(QueryDecodingError) -> Bool? {
     try decode(Int64.self).map { $0 != 0 }
   }
 
   @usableFromInline
-  mutating func decode(_ columnType: Date.Type) throws -> Date? {
-    guard let iso8601String = try decode(String.self) else { return nil }
-    return try Date(iso8601String: iso8601String)
+  mutating func decode(_ columnType: Date.Type) throws(QueryDecodingError) -> Date? {
+    do {
+      guard let iso8601String = try decode(String.self) else { return nil }
+      return try Date(iso8601String: iso8601String)
+    } catch {
+      throw .other(error)
+    }
   }
 
   @inlinable
-  mutating func decode(_ columnType: Double.Type) throws -> Double? {
+  mutating func decode(_ columnType: Double.Type) throws(QueryDecodingError) -> Double? {
     precondition(sqlite3_column_count(statement) > currentIndex)
     switch sqlite3_column_type(statement, currentIndex) {
     case SQLITE_NULL:
@@ -72,12 +76,12 @@ struct SQLiteQueryDecoder: QueryDecoder {
   }
 
   @inlinable
-  mutating func decode(_ columnType: Int.Type) throws -> Int? {
+  mutating func decode(_ columnType: Int.Type) throws(QueryDecodingError) -> Int? {
     try decode(Int64.self).map(Int.init)
   }
 
   @inlinable
-  mutating func decode(_ columnType: Int64.Type) throws -> Int64? {
+  mutating func decode(_ columnType: Int64.Type) throws(QueryDecodingError) -> Int64? {
     precondition(sqlite3_column_count(statement) > currentIndex)
     switch sqlite3_column_type(statement, currentIndex) {
     case SQLITE_NULL:
@@ -92,7 +96,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
   }
 
   @inlinable
-  mutating func decode(_ columnType: String.Type) throws -> String? {
+  mutating func decode(_ columnType: String.Type) throws(QueryDecodingError) -> String? {
     precondition(sqlite3_column_count(statement) > currentIndex)
     switch sqlite3_column_type(statement, currentIndex) {
     case SQLITE_NULL:
@@ -107,14 +111,14 @@ struct SQLiteQueryDecoder: QueryDecoder {
   }
 
   @inlinable
-  mutating func decode(_ columnType: UInt64.Type) throws -> UInt64? {
+  mutating func decode(_ columnType: UInt64.Type) throws(QueryDecodingError) -> UInt64? {
     guard let n = try decode(Int64.self) else { return nil }
-    guard n >= 0 else { throw UInt64OverflowError(signedInteger: n) }
+    guard n >= 0 else { throw .other(UInt64OverflowError(signedInteger: n)) }
     return UInt64(n)
   }
 
   @usableFromInline
-  mutating func decode(_ columnType: UUID.Type) throws -> UUID? {
+  mutating func decode(_ columnType: UUID.Type) throws(QueryDecodingError) -> UUID? {
     guard let uuidString = try decode(String.self) else { return nil }
     return UUID(uuidString: uuidString)
   }
