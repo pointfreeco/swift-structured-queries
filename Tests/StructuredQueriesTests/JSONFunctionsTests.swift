@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import Testing
 import _StructuredQueriesSQLite
 
@@ -632,6 +633,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbExtract() throws {
       try db.execute(
         Doc.insert {
@@ -654,6 +656,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `jsonbExtract from a JSONRepresentation`() throws {
       try db.execute(Doc.delete())
       try db.execute(
@@ -680,6 +683,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `jsonbSet on a JSONRepresentation`() throws {
       try db.execute(Doc.delete())
       try db.execute(
@@ -706,6 +710,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `jsonbAppend and jsonbRemove on a JSONRepresentation`() throws {
       try db.execute(Doc.delete())
       try db.execute(

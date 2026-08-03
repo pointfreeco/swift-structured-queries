@@ -12,10 +12,10 @@ import PackageDescription
 let package = Package(
   name: "swift-structured-queries",
   platforms: [
-    .iOS(.v13),
-    .macOS(.v10_15),
-    .tvOS(.v13),
-    .watchOS(.v6),
+    .iOS(.v16),
+    .macOS(.v13),
+    .tvOS(.v16),
+    .watchOS(.v9),
   ],
   products: [
     .library(
@@ -41,20 +41,27 @@ let package = Package(
   ],
   traits: [
     .trait(
-      name: "LazyInitializableByDefault",
-      description: "Optionalize draft properties that have no default."
-    ),
-    .trait(
       name: "CasePaths",
       description: "Introduce enum table support to StructuredQueries."
     ),
     .trait(
-      name: "Tagged",
-      description: "Introduce StructuredQueries conformances to the swift-tagged package."
-    ),
-    .trait(
       name: "ColumnCoding",
       description: "Align the Codable coding of tables and selections with their column names."
+    ),
+    .trait(
+      name: "LazyInitializableByDefault",
+      description: "Optionalize draft properties that have no default."
+    ),
+    .trait(
+      name: "SuppressPlatformSQLiteAvailability",
+      description: """
+        Suppress '@available' checks on APIs that depend on a newer version of SQLite than the one \
+        bundled with the platform.
+        """
+    ),
+    .trait(
+      name: "Tagged",
+      description: "Introduce StructuredQueries conformances to the swift-tagged package."
     ),
     .trait(
       name: "StructuredQueriesCasePaths",

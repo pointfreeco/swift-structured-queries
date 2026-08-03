@@ -18,6 +18,7 @@
 - ``order(by:)``
 - ``limit(_:)``
 - ``offset(_:)``
+- ``count()``
 - ``count(filter:)``
 - ``find(_:)``
 

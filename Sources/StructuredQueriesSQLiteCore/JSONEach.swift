@@ -210,6 +210,9 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRepresentation {
   /// A select statement that iterates over the elements of this JSON array expression using the
   /// `jsonb_each` table-valued function.
@@ -234,6 +237,9 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable & _JSONArrayRe
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension QueryExpression
 where QueryValue: _AnyJSONRepresentable & _JSONDictionaryRepresentation {
   /// A select statement that iterates over the key value pairs of this JSON object expression using
@@ -263,6 +269,9 @@ where QueryValue: _AnyJSONRepresentable & _JSONDictionaryRepresentation {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension QueryExpression
 where
   QueryValue: StructuredQueriesCore._OptionalProtocol,
@@ -292,6 +301,9 @@ where
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension QueryExpression
 where
   QueryValue: StructuredQueriesCore._OptionalProtocol,
@@ -332,6 +344,9 @@ where
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// A select statement that iterates over the elements of a JSON array at the given path using the
   /// `jsonb_each` table-valued function.
@@ -474,6 +489,9 @@ extension JSONEach: Equatable where Key.QueryOutput: Equatable, Value.QueryOutpu
 ///
 /// Unlike ``JSONEach``, ``TableColumns/value`` is SQLite's binary JSONB format rather than text
 /// JSON.
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 public struct JSONBEach<
   Key: QueryRepresentable & QueryBindable,
   Value: QueryRepresentable & QueryBindable
@@ -527,10 +545,16 @@ public struct JSONBEach<
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension JSONBEach: QueryRepresentable {
   public typealias QueryOutput = JSONBEach
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension JSONBEach: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
     self.key = try Key(decoder: &decoder).queryOutput
@@ -538,8 +562,14 @@ extension JSONBEach: QueryDecodable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension JSONBEach: Sendable where Key.QueryOutput: Sendable, Value.QueryOutput: Sendable {}
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
 extension JSONBEach: Equatable where Key.QueryOutput: Equatable, Value.QueryOutput: Equatable {}
 
 extension QueryExpression {

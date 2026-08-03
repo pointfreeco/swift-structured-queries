@@ -4,7 +4,6 @@
 
 ### Query building
 
-- ``returning(_:)``
 
 ### Supporting types
 

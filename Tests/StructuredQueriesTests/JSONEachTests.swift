@@ -10,6 +10,7 @@ extension SnapshotTests {
   @Suite struct JSONEachTests {
     @Dependency(\.defaultDatabase) var db
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     init() throws {
       try db.execute(
         #sql(
@@ -113,6 +114,7 @@ extension SnapshotTests {
       )
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func exists() {
       assertQuery(
         Trip
@@ -142,6 +144,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func count() {
       assertQuery(
         Trip.select { ($0.title, $0.geofence.jsonEach().count()) }
@@ -164,6 +167,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func aggregateOfElements() {
       assertQuery(
         Trip.select {
@@ -188,6 +192,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func orderAndLimit() {
       assertQuery(
         Trip
@@ -222,6 +227,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func keyAndValue() {
       assertQuery(
         Trip
@@ -254,6 +260,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func join() {
       assertQuery(
         Trip
@@ -277,6 +284,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func leftJoin() {
       assertQuery(
         Trip
@@ -301,6 +309,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func scalarElements() throws {
       try db.execute(
         TaggedItem.insert {
@@ -331,6 +340,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func scalarElementsJoin() throws {
       try db.execute(
         TaggedItem.insert { TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"]) }
@@ -355,6 +365,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `aggregate scalar quantities in JSON arrays`() throws {
       try db.execute(
         Profile.insert {
@@ -389,6 +400,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func dictionaryKeys() throws {
       try db.execute(
         Product.insert {
@@ -435,6 +447,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func dictionaryKeyAndValue() throws {
       try db.execute(
         Product.insert { Product.Draft(inventory: ["JFK": Stock(onHand: 4)]) }
@@ -458,6 +471,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func scalarDictionaryValues() throws {
       try db.execute(
         Post.insert {
@@ -486,6 +500,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func scalarArrayAtPath() throws {
       try db.execute(
         Post.insert {
@@ -516,6 +531,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func scalarDictionaryAtPath() throws {
       try db.execute(
         Post.insert {
@@ -548,6 +564,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func decodesKeyAndValueRow() {
       assertQuery(
         Trip
@@ -586,6 +603,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func optionalColumn() throws {
       try db.execute(
         Route.insert {
@@ -613,6 +631,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func nestedPath() throws {
       try db.execute(
         Profile.insert {
@@ -662,6 +681,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `jsonEach over a JSONBRepresentation`() {
       assertQuery(
         BlobTrip
@@ -763,6 +783,7 @@ private struct Trip: Codable, Equatable {
   var geofence: [Coordinate] = []
 }
 
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 @Table
 private struct BlobTrip: Codable, Equatable {
   let id: Int

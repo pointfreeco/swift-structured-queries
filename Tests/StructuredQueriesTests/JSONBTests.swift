@@ -11,6 +11,7 @@ extension SnapshotTests {
   @Suite struct JSONBTests {
     @Dependency(\.defaultDatabase) var db
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     init() throws {
       try db.execute(
         #sql(
@@ -130,6 +131,7 @@ extension SnapshotTests {
       )
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func insertReturning() {
       assertQuery(
         Post.insert {
@@ -161,6 +163,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func selectAll() {
       assertQuery(
         Post.all
@@ -187,6 +190,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func selectColumn() {
       assertQuery(
         Post.select(\.notes)
@@ -207,6 +211,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func whereClause() {
       assertQuery(
         Post
@@ -230,6 +235,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func updateReturning() {
       assertQuery(
         Post
@@ -254,6 +260,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func deleteReturning() {
       assertQuery(
         Post
@@ -276,6 +283,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonArrayLengthInSelect() {
       assertQuery(
         Post.select { $0.notes.jsonArrayLength() }
@@ -293,6 +301,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonArrayLengthInWhere() {
       assertQuery(
         Post
@@ -313,6 +322,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonArrayLengthPath() {
       assertQuery(
         Profile.select {
@@ -350,6 +360,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbGroupArray() {
       assertQuery(
         Post
@@ -389,6 +400,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbObject() {
       assertInlineSnapshot(of: Track.columns.jsonbObject(), as: .sql) {
         """
@@ -402,6 +414,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonGroupArray() {
       assertQuery(
         Post.select { $0.jsonGroupArray() }
@@ -430,6 +443,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonGroupArrayOfColumns() {
       assertQuery(
         Post.select { ($0.notes.jsonGroupArray(), $0.optionalTags.jsonGroupArray()) }
@@ -453,6 +467,7 @@ extension SnapshotTests {
     }
 
     #if ColumnCoding
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
       @Test func jsonGroupArrayWithRenamedColumns() {
         assertQuery(
           Track.select { $0.jsonGroupArray() }
@@ -481,6 +496,7 @@ extension SnapshotTests {
     #endif
 
     #if ColumnCoding
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
       @Test func jsonExtract() {
         assertQuery(
           Profile.select {
@@ -506,6 +522,7 @@ extension SnapshotTests {
       }
     #endif
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonExtractNested() {
       assertQuery(
         Profile.select {
@@ -530,6 +547,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonExtractIdentity() {
       assertQuery(
         Profile.select { $0.author.jsonExtract(\.self) }
@@ -563,6 +581,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonExtractIndex() {
       assertQuery(
         Post.select {
@@ -583,6 +602,7 @@ extension SnapshotTests {
     }
 
     #if ColumnCoding
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
       @Test func jsonbExtract() {
         assertQuery(
           Profile.select {
@@ -609,6 +629,7 @@ extension SnapshotTests {
       }
     #endif
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbExtractDocument() {
       assertQuery(
         Profile.select {
@@ -631,6 +652,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbExtractThroughOptional() {
       assertQuery(
         Bio.select {
@@ -654,6 +676,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `jsonSet on a JSONBRepresentation`() {
       assertQuery(
         Post.select { $0.notes.jsonSet(\.[0], "z") }
@@ -674,6 +697,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbGetSet() {
       assertQuery(
         Profile
@@ -713,6 +737,7 @@ extension SnapshotTests {
     }
 
     #if ColumnCoding
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
       @Test func jsonbSet() {
         assertQuery(
           Profile
@@ -759,6 +784,7 @@ extension SnapshotTests {
       }
     #endif
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbInsertAndReplace() {
       assertQuery(
         Profile
@@ -823,6 +849,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbAppend() {
       assertQuery(
         Post
@@ -899,6 +926,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbRemove() {
       assertQuery(
         Post
@@ -960,6 +988,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbRemove_select() {
       assertQuery(
         Post
@@ -982,6 +1011,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonExtractThroughOptional() {
       assertQuery(
         Bio.select {
@@ -1005,6 +1035,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbMutateThroughOptional() {
       assertQuery(
         Bio
@@ -1044,6 +1075,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonGroupArrayBytesUUID() {
       assertQuery(
         Session.select { $0.jsonGroupArray() }
@@ -1067,6 +1099,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonExtractUUID() {
       assertQuery(
         Profile
@@ -1090,6 +1123,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func updateReturningClosure() {
       assertQuery(
         Profile
@@ -1126,6 +1160,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonExtractInWhere() {
       assertQuery(
         Profile
@@ -1146,6 +1181,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func join() {
       assertQuery(
         Post
@@ -1174,6 +1210,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonGetSet() {
       assertQuery(
         Profile.update {
@@ -1233,6 +1270,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `Multiple jsonSet's are fused`() throws {
       try db.execute(Profile.delete())
       assertQuery(
@@ -1252,6 +1290,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `Multiple jsonReplace's are fused`() throws {
       try db.execute(Profile.delete())
       assertQuery(
@@ -1271,6 +1310,7 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func `Multiple jsonInsert's are fused`() throws {
       try db.execute(Profile.delete())
       assertQuery(
@@ -1292,6 +1332,7 @@ extension SnapshotTests {
   }
 }
 
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 @Table
 private struct Post: Codable, Equatable {
   let id: Int
@@ -1301,6 +1342,7 @@ private struct Post: Codable, Equatable {
   var optionalTags: [String]?
 }
 
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 @Table
 private struct Comment: Codable, Equatable {
   let id: Int
@@ -1309,6 +1351,7 @@ private struct Comment: Codable, Equatable {
   var moderation: [String]?
 }
 
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 @Table
 private struct Profile: Codable, Equatable {
   let id: Int
@@ -1318,6 +1361,7 @@ private struct Profile: Codable, Equatable {
   var editor: Author?
 }
 
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 @Selection
 private struct Author: Codable, Equatable {
   var name = ""
@@ -1340,6 +1384,7 @@ private struct Link: Codable, Equatable {
   var updatedAt = Date(timeIntervalSince1970: 0)
 }
 
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 @Table
 private struct Track: Codable, Equatable {
   let id: Int
@@ -1349,12 +1394,14 @@ private struct Track: Codable, Equatable {
   var trackTags: [String] = []
 }
 
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 @Selection
 private struct Resume: Codable, Equatable {
   @Column(as: Author.JSONBRepresentation?.self)
   var author: Author?
 }
 
+@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 @Table
 private struct Bio: Codable, Equatable {
   let id: Int

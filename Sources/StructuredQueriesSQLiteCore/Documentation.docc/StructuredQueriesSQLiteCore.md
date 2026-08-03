@@ -42,3 +42,9 @@ custom database functions, and more.
 
 - ``Foundation/Date/ISO8601Representation``
 - ``Foundation/UUID/LowercasedRepresentation``
+
+### Statements
+
+- ``StructuredQueriesCore/Delete/returning(_:)``
+- ``StructuredQueriesCore/Insert/returning(_:)``
+- ``StructuredQueriesCore/Update/returning(_:)``

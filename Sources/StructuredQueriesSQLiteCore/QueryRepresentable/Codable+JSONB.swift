@@ -1,6 +1,9 @@
 import Foundation
 public import StructuredQueriesCore
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 public struct _CodableJSONBRepresentation<QueryOutput: Codable>: Codable, QueryRepresentable {
   public var queryOutput: QueryOutput
 
@@ -13,8 +16,19 @@ public struct _CodableJSONBRepresentation<QueryOutput: Codable>: Codable, QueryR
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: Equatable where QueryOutput: Equatable {}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: Hashable where QueryOutput: Hashable {}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: Sendable where QueryOutput: Sendable {}
 
 extension Decodable where Self: Encodable {
@@ -33,14 +47,23 @@ extension Decodable where Self: Encodable {
   /// Item.all
   /// // SELECT json("items"."notes") FROM "items"
   /// ```
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
   public typealias JSONBRepresentation = _CodableJSONBRepresentation<Self>
 }
 
 extension Optional where Wrapped: Codable {
   @_documentation(visibility: private)
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
   public typealias JSONBRepresentation = _CodableJSONBRepresentation<Wrapped>?
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: QueryBindable {
   public var queryBinding: QueryBinding {
     do {
@@ -55,6 +78,9 @@ extension _CodableJSONBRepresentation: QueryBindable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
     self.init(
@@ -66,6 +92,9 @@ extension _CodableJSONBRepresentation: QueryDecodable {
   }
 }
 
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+#endif
 extension _CodableJSONBRepresentation: SQLiteType {
   public static var typeAffinity: SQLiteTypeAffinity { .blob }
 }

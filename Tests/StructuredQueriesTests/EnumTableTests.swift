@@ -4,6 +4,7 @@
   import Foundation
   import InlineSnapshotTesting
   import StructuredQueries
+  import StructuredQueriesSQLite
   import StructuredQueriesTestSupport
   import Testing
   import _StructuredQueriesSQLite
@@ -680,6 +681,7 @@
         }
       }
 
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
       @Test func jsonExtractCases() throws {
         try db.execute(
           Take.insert {
@@ -742,6 +744,7 @@
         }
       }
 
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
       @Test func jsonbSetCase() throws {
         try db.execute(
           Take.insert {
@@ -773,6 +776,7 @@
         }
       }
 
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
       @Test func jsonbReplaceCase() throws {
         try db.execute(
           Take.insert {
@@ -807,6 +811,7 @@
           """
         }
       }
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
       @Test func replaceIfActive() throws {
         try db.execute(
           ABCRow.insert {
@@ -861,6 +866,7 @@
       let medias: [Media]
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Table private struct Take {
       let id: Int
       @Column(as: Media.JSONBRepresentation.self)
@@ -892,12 +898,14 @@
       case tags([String])
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Table private struct FeedRow {
       let id: Int
       @Column(as: Feed.JSONBRepresentation.self)
       var feed: Feed
     }
 
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Table("abcRows") private struct ABCRow {
       let id: Int
       @Column(as: ABCDoc.JSONBRepresentation.self)

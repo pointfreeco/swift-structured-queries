@@ -183,6 +183,27 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ///
     /// - Parameters:
     ///   - dateColumn: A key path to a datetime column.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `INSERT` trigger operation.
+    #if !SuppressPlatformSQLiteAvailability
+      @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
+    #endif
+    @_disfavoredOverload
+    public static func insert<D: _OptionalPromotable<Date?>>(
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      insert(
+        touch: dateColumn,
+        date: SQLQueryExpression<D>("datetime('subsec')"),
+        when: condition
+      )
+    }
+
+    /// An `INSERT` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - dateColumn: A key path to a datetime column.
     ///   - dateFunction: A database function that returns the current datetime, _e.g._,
     ///     `#sql("datetime('subsec'))"`.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
@@ -190,7 +211,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     @_disfavoredOverload
     public static func insert<D: _OptionalPromotable<Date?>>(
       touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
-      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      date dateFunction: any QueryExpression<D>,
       when condition: ((_ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       insert(
@@ -270,6 +291,27 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ///
     /// - Parameters:
     ///   - dateColumn: A key path to a datetime column.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
+    #if !SuppressPlatformSQLiteAvailability
+      @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
+    #endif
+    @_disfavoredOverload
+    public static func update<D: _OptionalPromotable<Date?>>(
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      update(
+        touch: dateColumn,
+        date: SQLQueryExpression<D>("datetime('subsec')"),
+        when: condition
+      )
+    }
+
+    /// An `UPDATE` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - dateColumn: A key path to a datetime column.
     ///   - dateFunction: A database function that returns the current datetime, _e.g._,
     ///     `#sql("datetime('subsec'))"`.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
@@ -277,7 +319,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     @_disfavoredOverload
     public static func update<D: _OptionalPromotable<Date?>>(
       touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
-      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      date dateFunction: any QueryExpression<D>,
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       update(
@@ -315,6 +357,30 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     /// - Parameters:
     ///   - columns: Updated columns to scope the operation to.
     ///   - dateColumn: A key path to a datetime column.
+    ///   - condition: A predicate that must be satisfied to perform the given statement.
+    /// - Returns: An `UPDATE` trigger operation.
+    #if !SuppressPlatformSQLiteAvailability
+      @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
+    #endif
+    @_disfavoredOverload
+    public static func update<each Column: _TableColumnExpression, D: _OptionalPromotable<Date?>>(
+      of columns: (On.TableColumns) -> (repeat each Column),
+      touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
+      when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
+    ) -> Self {
+      update(
+        of: columns,
+        touch: dateColumn,
+        date: SQLQueryExpression<D>("datetime('subsec')"),
+        when: condition
+      )
+    }
+
+    /// An `UPDATE` trigger operation that updates a datetime column for the associated rows.
+    ///
+    /// - Parameters:
+    ///   - columns: Updated columns to scope the operation to.
+    ///   - dateColumn: A key path to a datetime column.
     ///   - dateFunction: A database function that returns the current datetime, _e.g._,
     ///     `#sql("datetime('subsec'))"`.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
@@ -323,7 +389,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     public static func update<each Column: _TableColumnExpression, D: _OptionalPromotable<Date?>>(
       of columns: (On.TableColumns) -> (repeat each Column),
       touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
-      date dateFunction: any QueryExpression<D> = SQLQueryExpression<D>("datetime('subsec')"),
+      date dateFunction: any QueryExpression<D>,
       when condition: ((_ old: Old, _ new: New) -> any QueryExpression<Bool>)? = nil
     ) -> Self {
       update(

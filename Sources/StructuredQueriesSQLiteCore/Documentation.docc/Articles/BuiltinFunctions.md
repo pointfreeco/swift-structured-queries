@@ -10,6 +10,7 @@ Apply SQLite functions to SQL expressions.
 
 ### Numeric
 
+- ``StructuredQueriesCore/QueryExpression/sign()``
 - ``StructuredQueriesCore/QueryExpression/randomblob()``
 - ``StructuredQueriesCore/QueryExpression/zeroblob()``
 
@@ -27,12 +28,14 @@ Apply SQLite functions to SQL expressions.
 - ``StructuredQueriesCore/QueryExpression/jsonExtract(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonAppend(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonAppend(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonRemove(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonReplace(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonSet(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbExtract(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbAppend(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbAppend(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbRemove(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbReplace(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbSet(_:_:)``
