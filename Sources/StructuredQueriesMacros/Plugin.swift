@@ -9,7 +9,6 @@ struct StructuredQueriesPlugin: CompilerPlugin {
     ColumnCheckFailMacro.self,
     ColumnCheckGroupMacro.self,
     ColumnCheckPassMacro.self,
-    ColumnCheckFailRawRepresentableMacro.self,
     ColumnMacro.self,
     ColumnsMacro.self,
     EphemeralMacro.self,
