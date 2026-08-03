@@ -313,7 +313,9 @@
     }
 
     public subscript<Member>(
-      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>>
+      dynamicMember keyPath: KeyPath<
+        Values.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>
+      >
     ) -> any QueryExpression<Member> {
       get { SQLQueryExpression(group[dynamicMember: keyPath].queryFragment) }
       set {
@@ -332,7 +334,9 @@
 
     @_disfavoredOverload
     public subscript<Member>(
-      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>>
+      dynamicMember keyPath: KeyPath<
+        Values.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>
+      >
     ) -> _CaseGroupUpdate<Member> {
       get { _CaseGroupUpdate() }
       set {}

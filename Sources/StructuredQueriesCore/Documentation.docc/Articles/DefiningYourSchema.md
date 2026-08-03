@@ -328,7 +328,7 @@ JSON inside the geofence:
     SELECT "trips".…
     FROM "trips"
     WHERE json_extract(
-      "trips"."geofence", 
+      "trips"."geofence",
       '$[0].latitude'
     )
     ```

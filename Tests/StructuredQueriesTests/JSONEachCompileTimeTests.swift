@@ -173,7 +173,8 @@ private enum JoinsAndOptionality {
 
   @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
   private func jsonbEachAtPath() {
-    _ = MTrip
+    _ =
+      MTrip
       .join(MTrip.columns.geofence.jsonbEach()) { _, _ in true }
       .select { ($0.title, $1.value.jsonExtract(\.label)) }
   }

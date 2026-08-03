@@ -66,7 +66,9 @@ where Values.QueryOutput: Table {
   }
 
   public subscript<Member>(
-    dynamicMember keyPath: KeyPath<Values.TableColumns, OptionalColumnGroup<Values.QueryOutput, Member>>
+    dynamicMember keyPath: KeyPath<
+      Values.TableColumns, OptionalColumnGroup<Values.QueryOutput, Member>
+    >
   ) -> OptionalColumnGroup<Root, Member> {
     let column = Values.columns[keyPath: keyPath]
     return OptionalColumnGroup(

@@ -585,7 +585,8 @@
 
       @Test func optionalGroupDrillJoined() {
         assertInlineSnapshot(
-          of: Owner
+          of:
+            Owner
             .leftJoin(Record.all) { $0.id.eq($1.id) }
             .where { $1.time.is(\.interval) }
             .order { ($1.time.span.endDate.desc(), $0.name) }

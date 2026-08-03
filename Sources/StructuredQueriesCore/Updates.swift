@@ -190,7 +190,9 @@ public struct UpdatesGroup<Base: Table, Values: Table> where Values.QueryOutput:
   }
 
   public subscript<Member>(
-    dynamicMember keyPath: KeyPath<Values.TableColumns, OptionalColumnGroup<Values.QueryOutput, Member>>
+    dynamicMember keyPath: KeyPath<
+      Values.TableColumns, OptionalColumnGroup<Values.QueryOutput, Member>
+    >
   ) -> UpdatesGroup<Base, Member?> {
     get { UpdatesGroup<Base, Member?>(group: group[dynamicMember: keyPath].base) }
     set { updates.append(contentsOf: newValue.updates) }

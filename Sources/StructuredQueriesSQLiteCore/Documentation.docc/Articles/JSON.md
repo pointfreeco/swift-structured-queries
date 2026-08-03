@@ -166,9 +166,9 @@ And the ``StructuredQueriesCore/QueryExpression/jsonArrayLength()`` and
 
 ### Querying over JSON collections
 
-This library supports a few special cases of the [`json_each` table-valued function][json-each], 
-such such as arrays and dictionaries. It allows you to turn a JSON array or dictionary into a 
-virtual SQLite table which can be queried in its own right. It returns a full select statement 
+This library supports a few special cases of the [`json_each` table-valued function][json-each],
+such such as arrays and dictionaries. It allows you to turn a JSON array or dictionary into a
+virtual SQLite table which can be queried in its own right. It returns a full select statement
 whose rows have two columns: `key`, the element's index in an array or its key in an object, and
 `value`, the element itself.
 
@@ -273,7 +273,7 @@ collection:
 }
 
 This also works when storing JSON arrays and dictionaries of primitive types, such as `[String]` or
-`[String: Int]`. In this case scalar elements are fully typed and can be compared directly, without 
+`[String: Int]`. In this case scalar elements are fully typed and can be compared directly, without
 any extraction:
 
 @Row {
@@ -441,10 +441,10 @@ decoded directly into the `Row` type.
 Everything above stores JSON as plain text, but SQLite also supports
 [JSONB](https://www.sqlite.org/jsonb.html), a binary encoding of JSON stored as a `BLOB`. This
 allows SQLite to traverse the JSON and make modifications without parsing text into structured
-data and then rendering structured data back to text, which can be a significant cost. JSONB is 
+data and then rendering structured data back to text, which can be a significant cost. JSONB is
 both slightly smaller than the equivalent text and can be processed in a fraction of the CPU cycles.
 
-To use JSONB instead of JSON, annotate a column with ``Swift/Decodable/JSONBRepresentation`` and 
+To use JSONB instead of JSON, annotate a column with ``Swift/Decodable/JSONBRepresentation`` and
 give it a `BLOB` column in your schema:
 
 @Row {
@@ -482,7 +482,7 @@ such as selecting from a table so that it can be decoded back into a Swift type:
     }
 
     Profile.select(\.author)
-    
+
     ```
   }
   @Column {
@@ -492,7 +492,7 @@ such as selecting from a table so that it can be decoded back into a Swift type:
       jsonb('{"name":"Blob",…}')
     )
 
-      
+
     SELECT json("profiles"."author")
     FROM "profiles"
     ```
@@ -557,7 +557,7 @@ column or fed into another JSON function, sparing SQLite a round trip through te
 - ``StructuredQueriesCore/QueryExpression/jsonbSet(_:_:)``
 - ``JSONPath``
 
-### Iterating over JSON collections 
+### Iterating over JSON collections
 
 - ``StructuredQueriesCore/QueryExpression/jsonEach()``
 - ``StructuredQueriesCore/QueryExpression/jsonEach(_:)``
