@@ -296,38 +296,47 @@ public macro _PrimaryKeyDefault() =
 public macro _Draft<T>(_ primaryTable: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "TableMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T>(_ type: T.Type) =
+public macro ColumnCheck<T>(_ type: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T: Codable>(_ type: T.Type) =
+public macro ColumnCheck<T: Codable>(_ type: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailJSONMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T: QueryBindable>(_ type: T.Type) =
+public macro ColumnCheck<T: QueryBindable>(_ type: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T: QueryBindable & Codable>(_ type: T.Type) =
+public macro ColumnCheck<T: QueryBindable & Codable>(_ type: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T: Table>(_ type: T.Type) =
+public macro ColumnCheck<T: Table>(_ type: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckGroupMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T: Table & Codable>(_ type: T.Type) =
+public macro ColumnCheck<T: Table & Codable>(_ type: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckGroupMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T>(_ value: T) =
+public macro ColumnCheck<T>(_ value: T) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckFailMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T: QueryBindable>(_ value: T) =
+public macro ColumnCheck<T: QueryBindable>(_ value: T) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
 
+@_documentation(visibility: private)
 @attached(peer)
-public macro _ColumnCheck<T: Table>(_ value: T) =
+public macro ColumnCheck<T: Table>(_ value: T) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckGroupMacro")
