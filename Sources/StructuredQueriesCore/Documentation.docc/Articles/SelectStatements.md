@@ -347,6 +347,38 @@ enum Referrer: AliasName {}
   }
 }
 
+Statements can also be aliased after they have been built using ``SelectStatement/as(_:)``. This
+is especially useful for statements whose `FROM` clause is not a plain table name, such as the
+table-valued functions `json_each` and `jsonb_each`:
+
+@Row {
+  @Column {
+    ```swift
+    enum Tag1: AliasName {}
+    enum Tag2: AliasName {}
+
+    Item
+      .join(
+        Item.tags.jsonEach().as(Tag1.self)
+      ) { _, _ in true }
+      .join(
+        Item.tags.jsonEach().as(Tag2.self)
+      ) { $1.key < $2.key }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT …
+    FROM "items"
+    JOIN json_each("items"."tags")
+      AS "tag1s" ON 1
+    JOIN json_each("items"."tags")
+      AS "tag2s" ON ("tag1s"."key")
+        < ("tag2s"."key")
+    ```
+  }
+}
+
 ### Filtering results
 
 The `where` function is used to filter the results of a query. It passes the table columns to a
@@ -860,9 +892,10 @@ functions, which apply the appropriate SQL operator between each statement.
 
 - ``NullOrdering``
 
-### Self-joins
+### Aliasing
 
 - ``TableAlias``
 - ``AliasName``
+- ``SelectStatement/as(_:)``
 
 <!--### Compound selects-->
