@@ -531,11 +531,6 @@ extension DatabaseFunctionMacro: PeerMacro {
         colon: .colonToken(trailingTrivia: .space),
         type: "some QueryExpression" as TypeSyntax
       )
-      let requiredFilterParameter = FunctionParameterSyntax(
-        firstName: "filter",
-        colon: .colonToken(trailingTrivia: .space),
-        type: "some QueryExpression<Bool>" as TypeSyntax
-      )
       let optionalFilterParameter = FunctionParameterSyntax(
         firstName: "filter",
         colon: .colonToken(trailingTrivia: .space),
