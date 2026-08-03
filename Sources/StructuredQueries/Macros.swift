@@ -404,3 +404,15 @@ where T.RawValue: QueryBindable
 public macro ColumnCheck<T: QueryBindable & RawRepresentable>(_ value: T) =
   #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
 where T.RawValue: QueryBindable
+
+#if CasePaths
+  @_documentation(visibility: private)
+  @attached(peer)
+  public macro CaseCheck<T>(_ type: T.Type) =
+    #externalMacro(module: "StructuredQueriesMacros", type: "ColumnCheckPassMacro")
+
+  @_documentation(visibility: private)
+  @attached(peer)
+  public macro CaseCheck<T: StructuredQueriesCore._OptionalProtocol>(_ type: T.Type) =
+    #externalMacro(module: "StructuredQueriesMacros", type: "CaseCheckFailMacro")
+#endif
