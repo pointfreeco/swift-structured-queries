@@ -703,6 +703,29 @@ where
 extension QueryExpression
 where QueryValue: StructuredQueriesCore._OptionalProtocol, QueryValue.Wrapped: _AnyJSONRepresentable
 {
+  /// Extracts a value from this optional JSON expression using the `json_extract` function.
+  ///
+  /// Works like ``jsonExtract(_:)``, except the extracted value is optional-promoted, since the
+  /// JSON expression itself may be `NULL`.
+  ///
+  /// - Parameter path: A key path from the JSON expression to a field to extract.
+  /// - Returns: An optional expression of the value extracted.
+  public func jsonExtract<Context, Member: QueryRepresentable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Member._Optionalized> {
+    _jsonExtract(path)
+  }
+
+  /// Extracts a value from this optional JSON expression using the `jsonb_extract` function.
+  ///
+  /// - Parameter path: A key path from the JSON expression to a field to extract.
+  /// - Returns: An optional expression of the value extracted.
+  public func jsonbExtract<Context, Member: QueryRepresentable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue.Wrapped>, JSONPath<Context, Member>>
+  ) -> some QueryExpression<Member._Optionalized> {
+    _jsonbExtract(path)
+  }
+
   /// A JSON array aggregate of this JSON expression.
   ///
   /// - Parameters:
@@ -1754,6 +1777,19 @@ public protocol _JSONArrayRepresentation<_Element, _ElementRepresentation> {
   associatedtype _ElementRepresentation: QueryRepresentable
 }
 
+public protocol _JSONDictionaryRepresentation<_Key, _Value> {
+  associatedtype _Key: QueryRepresentable
+  associatedtype _Value: Codable
+  associatedtype _ValueRepresentation: QueryRepresentable
+}
+
+public protocol _DictionaryProtocol<Key, Value> {
+  associatedtype Key: Hashable
+  associatedtype Value
+}
+
+extension Dictionary: _DictionaryProtocol {}
+
 extension _CodableJSONRepresentation: _JSONArrayRepresentation
 where QueryOutput: RangeReplaceableCollection, QueryOutput.Element: Codable {
   public typealias _Element = QueryOutput.Element
@@ -1764,6 +1800,20 @@ extension _CodableJSONBRepresentation: _JSONArrayRepresentation
 where QueryOutput: RangeReplaceableCollection, QueryOutput.Element: Codable {
   public typealias _Element = QueryOutput.Element
   public typealias _ElementRepresentation = _CodableJSONBRepresentation<QueryOutput.Element>
+}
+
+extension _CodableJSONRepresentation: _JSONDictionaryRepresentation
+where QueryOutput: _DictionaryProtocol, QueryOutput.Key == String, QueryOutput.Value: Codable {
+  public typealias _Key = String
+  public typealias _Value = QueryOutput.Value
+  public typealias _ValueRepresentation = _CodableJSONRepresentation<QueryOutput.Value>
+}
+
+extension _CodableJSONBRepresentation: _JSONDictionaryRepresentation
+where QueryOutput: _DictionaryProtocol, QueryOutput.Key == String, QueryOutput.Value: Codable {
+  public typealias _Key = String
+  public typealias _Value = QueryOutput.Value
+  public typealias _ValueRepresentation = _CodableJSONBRepresentation<QueryOutput.Value>
 }
 
 extension QueryFragment {

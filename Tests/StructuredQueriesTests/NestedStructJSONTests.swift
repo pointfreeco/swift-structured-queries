@@ -16,6 +16,12 @@ import _StructuredQueriesSQLite
   var dimensions: Dimensions
 }
 
+@Table private struct Album: Codable {
+  let id: Int
+  @Column(as: [Photo].JSONRepresentation.self)
+  var photos: [Photo] = []
+}
+
 extension SnapshotTests {
   @MainActor
   @Suite struct NestedStructJSONTests {
@@ -64,6 +70,46 @@ extension SnapshotTests {
           └───────────────────────────┘
           """
         }
+      }
+    }
+
+    @Test func jsonEachExtractsColumnGroups() throws {
+      try db.execute(
+        """
+        CREATE TABLE "albums" (
+          "id" INTEGER PRIMARY KEY,
+          "photos" TEXT NOT NULL
+        )
+        """
+      )
+      try db.execute(
+        Album.insert {
+          Album(id: 1, photos: [Photo(id: 1, dimensions: Dimensions(width: 800, height: 600))])
+        }
+      )
+      assertQuery(
+        Album.join(Album.columns.photos.jsonEach()) { _, _ in true }.select { $1 }
+      ) {
+        """
+        SELECT "json_each"."key", "json_each"."value"
+        FROM "albums"
+        JOIN json_each("albums"."photos") ON 1
+        """
+      } results: {
+        """
+        ┌─────────────────────────────┐
+        │ JSONEach(                   │
+        │   key: 0,                   │
+        │   value: Photo(             │
+        │     id: 1,                  │
+        │     dimensions: Dimensions( │
+        │       width: 800,           │
+        │       height: 600           │
+        │     )                       │
+        │   )                         │
+        │ )                           │
+        └─────────────────────────────┘
+        """
       }
     }
 

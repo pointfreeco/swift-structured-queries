@@ -25,6 +25,7 @@ result.
 
 > Note: If your project is using [default main actor isolation] then you further need to annotate
 > your function as `nonisolated`.
+
 [default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
 
 Once defined, the function is immediately callable in a query by prefixing the function with `$`:

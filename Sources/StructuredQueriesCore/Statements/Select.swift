@@ -317,6 +317,7 @@ public struct _SelectClauses: Sendable {
   var isEmpty = false
   var distinct = false
   var columns: [QueryFragment] = []
+  var from: QueryFragment?
   var joins: [_JoinClause] = []
   var `where`: [QueryFragment] = []
   var group: [QueryFragment] = []
@@ -353,6 +354,11 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     set { clauses.columns = newValue }
     _modify { yield &clauses.columns }
   }
+  fileprivate var from: QueryFragment? {
+    get { clauses.from }
+    set { clauses.from = newValue }
+    _modify { yield &clauses.from }
+  }
   fileprivate var joins: [_JoinClause] {
     get { clauses.joins }
     set { clauses.joins = newValue }
@@ -388,6 +394,7 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     isEmpty: Bool,
     distinct: Bool,
     columns: [QueryFragment],
+    from: QueryFragment? = nil,
     joins: [_JoinClause],
     where: [QueryFragment],
     group: [QueryFragment],
@@ -398,6 +405,7 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     self.isEmpty = isEmpty
     self.columns = columns
     self.distinct = distinct
+    self.from = from
     self.joins = joins
     self.where = `where`
     self.group = group
@@ -408,6 +416,11 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
 
   init(clauses: _SelectClauses) {
     self.clauses = clauses
+  }
+
+  package var _tableReference: QueryFragment? {
+    get { clauses.from }
+    set { clauses.from = newValue }
   }
 }
 
@@ -590,6 +603,7 @@ extension Select {
         + $_isSelecting.withValue(true) {
           Array(repeat each selection((From.columns, repeat (each J).columns)))
         },
+      from: from,
       joins: joins,
       where: `where`,
       group: group,
@@ -636,6 +650,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -645,6 +660,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -677,6 +693,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -686,6 +703,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -714,6 +732,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -723,6 +742,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -744,6 +764,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -753,6 +774,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -793,6 +815,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -806,6 +829,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -842,6 +866,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -855,6 +880,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -885,6 +911,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -894,6 +921,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -916,6 +944,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -925,6 +954,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -965,6 +995,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -978,6 +1009,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1014,6 +1046,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -1027,6 +1060,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1057,6 +1091,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -1066,6 +1101,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1088,6 +1124,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -1097,6 +1134,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1137,6 +1175,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -1150,6 +1189,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1186,6 +1226,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -1199,6 +1240,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1229,6 +1271,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -1238,6 +1281,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1260,6 +1304,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -1269,6 +1314,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1735,6 +1781,7 @@ extension Select {
       isEmpty: isEmpty,
       distinct: distinct,
       columns: Array(repeat each transform(repeat { _ in next() }((each C1).self))),
+      from: from,
       joins: joins,
       where: `where`,
       group: group,
@@ -1792,6 +1839,7 @@ public func + <
     isEmpty: lhs.isEmpty || rhs.isEmpty,
     distinct: lhs.distinct || rhs.distinct,
     columns: lhs.columns + rhs.columns,
+    from: rhs.from ?? lhs.from,
     joins: lhs.joins + rhs.joins,
     where: (lhs.where + rhs.where).removingDuplicates(),
     group: (lhs.group + rhs.group).removingDuplicates(),
@@ -1823,10 +1871,14 @@ extension Select: SelectStatement {
     }
     query.append(" \(columns.joined(separator: ", "))")
     query.append("\(.newlineOrSpace)FROM ")
-    if let schemaName = From.schemaName {
-      query.append("\(quote: schemaName).")
+    if let tableReference = clauses.from {
+      query.append(tableReference)
+    } else {
+      if let schemaName = From.schemaName {
+        query.append("\(quote: schemaName).")
+      }
+      query.append(From.tableFragment)
     }
-    query.append(From.tableFragment)
     if let tableAlias = From.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }
@@ -1872,10 +1924,11 @@ public struct _JoinClause: QueryExpression, Sendable {
   let `operator`: QueryFragment?
   let tableAlias: String?
   let tableColumns: QueryFragment
-  let tableName: QueryFragment
+  let tableReference: QueryFragment
 
   init(
     operator: Operator?,
+    tableReference: QueryFragment? = nil,
     table: any Table.Type,
     constraint: some QueryExpression<Bool>
   ) {
@@ -1883,7 +1936,7 @@ public struct _JoinClause: QueryExpression, Sendable {
     self.operator = `operator`?.queryFragment
     tableAlias = table.tableAlias
     tableColumns = $_isSelecting.withValue(true) { table.columns.queryFragment }
-    tableName = table.tableFragment
+    self.tableReference = tableReference ?? table.tableFragment
   }
 
   public var queryFragment: QueryFragment {
@@ -1891,7 +1944,7 @@ public struct _JoinClause: QueryExpression, Sendable {
     if let `operator` {
       query.append("\(`operator`) ")
     }
-    query.append("JOIN \(tableName) ")
+    query.append("JOIN \(tableReference) ")
     if let tableAlias = tableAlias {
       query.append("AS \(quote: tableAlias) ")
     }

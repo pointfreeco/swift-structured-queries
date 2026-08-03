@@ -53,6 +53,7 @@ To define a Swift data type that represents this table, one can use the `@Table`
 
 > Note: If your project is using [default main actor isolation] then you further need to annotate
 > your struct as `nonisolated`.
+
 [default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
 
 Note that the struct's field names match the column tables of the table exactly. In order to support
@@ -280,6 +281,65 @@ With that you can insert reminders with notes like so:
 
 > Tip: If you are using SQLite and would like to store your field as a `BLOB` of JSONB, you can
 > annotate this field with `JSONBRepresentation`, instead.
+
+You can also store more complex data types in JSON fields, such as an array of location coordinates
+to represent a geofence of a trip:
+
+@Row {
+  @Column {
+    ```swift
+    @Table struct Trip {
+      let id: Int
+      var title = ""
+      @Column(as: [Location].JSONRepresentation.self)
+      var geofence: [Location] = []
+      @Selection struct Location: Codable {
+        var latitude = 0.0
+        var longitude = 0.0
+      }
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TABLE "trips"(
+      "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+      "title" TEXT NOT NULL,
+      "geofence" TEXT NOT NULL
+    ) STRICT
+    ```
+  }
+}
+
+By applying the `@Selection` macro to `Location: Codable` you expose its underlying schema to
+the library's query building tools. This gives you a type-safe and schema-safe way to query the
+JSON inside the geofence:
+
+@Row {
+  @Column {
+    ```swift
+    Trip.where {
+      $0.geofence.jsonExtract(\.[0].latitude).gt(0)
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT "trips".…
+    FROM "trips"
+    WHERE json_extract(
+      "trips"."geofence", 
+      '$[0].latitude'
+    )
+    ```
+  }
+}
+
+> Warning: When applying `@Selection` to a `Codable` type in order to expose its schema to the
+> library's tools, `@Selection` must take over responsibility for how the type is encoded and
+> decoded into JSON. For this reason you **must not** provide custom `CodingKeys` for your type,
+> and to enforce this we recommend turning on the "ColumnCoding" trait, which will be the default
+> behavior fo the library in the future.
 
 #### Tagged identifiers
 

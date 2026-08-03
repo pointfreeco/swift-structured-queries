@@ -34,7 +34,7 @@ custom database functions, and more.
 
 ### Casting
 
-- ``QueryExpression/cast(as:)``
+- ``StructuredQueriesCore/QueryExpression/cast(as:)``
 - ``SQLiteType``
 - ``SQLiteTypeAffinity``
 

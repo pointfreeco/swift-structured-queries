@@ -91,7 +91,7 @@ public struct TableAlias<
 >: _OptionalPromotable {
   let base: Base
 
-  subscript<Member: QueryRepresentable>(
+  package subscript<Member: QueryRepresentable>(
     member _: KeyPath<Member, Member>,
     column keyPath: KeyPath<Base, Member.QueryOutput>
   ) -> Member.QueryOutput {
