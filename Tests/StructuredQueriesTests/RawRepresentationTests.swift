@@ -20,11 +20,10 @@ private struct Item {
 extension SnapshotTests {
   @MainActor
   @Suite struct RawRepresentationTests {
-    let db: Database
+    @Dependency(\.defaultDatabase) var database: Database
 
     init() throws {
-      db = try Database()
-      try db.execute(
+      try database.execute(
         #sql(
           """
           CREATE TABLE "items" (
@@ -38,51 +37,43 @@ extension SnapshotTests {
     }
 
     @Test func decoding() throws {
-      try withDependencies {
-        $0.defaultDatabase = db
-      } operation: {
-        try db.execute(
-          #sql(
-            """
-            INSERT INTO "items" ("id", "ranking", "backupRanking")
-            VALUES (1, 2, NULL), (2, 0, 2)
-            """
-          )
+      try database.execute(
+        #sql(
+          """
+          INSERT INTO "items" ("id", "ranking", "backupRanking")
+          VALUES (1, 2, NULL), (2, 0, 2)
+          """
         )
-        let items = try db.execute(Item.all)
-        #expect(items.map(\.ranking) == [.high, .low])
-        #expect(items.map(\.backupRanking) == [nil, .high])
-      }
+      )
+      let items = try database.execute(Item.all)
+      #expect(items.map(\.ranking) == [.high, .low])
+      #expect(items.map(\.backupRanking) == [nil, .high])
     }
 
     @Test func binding() throws {
-      try withDependencies {
-        $0.defaultDatabase = db
-      } operation: {
-        assertQuery(
-          Item.insert {
-            Item.Draft(id: 1, ranking: .medium, backupRanking: .high)
-          }
-          .returning(\.self)
-        ) {
-          """
-          INSERT INTO "items"
-          ("id", "ranking", "backupRanking")
-          VALUES
-          (1, 1, 2)
-          RETURNING "id", "ranking", "backupRanking"
-          """
-        } results: {
-          """
-          ┌────────────────────────┐
-          │ Item(                  │
-          │   id: 1,               │
-          │   ranking: .medium,    │
-          │   backupRanking: .high │
-          │ )                      │
-          └────────────────────────┘
-          """
+      assertQuery(
+        Item.insert {
+          Item.Draft(id: 1, ranking: .medium, backupRanking: .high)
         }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "items"
+        ("id", "ranking", "backupRanking")
+        VALUES
+        (1, 1, 2)
+        RETURNING "id", "ranking", "backupRanking"
+        """
+      } results: {
+        """
+        ┌────────────────────────┐
+        │ Item(                  │
+        │   id: 1,               │
+        │   ranking: .medium,    │
+        │   backupRanking: .high │
+        │ )                      │
+        └────────────────────────┘
+        """
       }
     }
   }
