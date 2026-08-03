@@ -123,6 +123,11 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
       func open<Root, Value>(
         _ column: some TableColumnExpression<Root, Value>
       ) -> any TableColumnExpression {
+        #if CasePaths
+          if let caseColumn = column as? any _CaseColumnExpression {
+            return open(caseColumn._base)
+          }
+        #endif
         guard let column = column as? TableColumn<Wrapped, Value>
         else {
           let column = column as! GeneratedColumn<Wrapped, Value>
@@ -145,6 +150,11 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
       func open<Root, Value>(
         _ column: some WritableTableColumnExpression<Root, Value>
       ) -> any WritableTableColumnExpression {
+        #if CasePaths
+          if let caseColumn = column as? any _CaseColumnExpression {
+            return open(caseColumn._base)
+          }
+        #endif
         let column = column as! TableColumn<Wrapped, Value>
         return TableColumn<Optional, Value?>(
           column.name,
@@ -177,11 +187,25 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
 
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, ColumnGroup<Wrapped, Member>>
-    ) -> ColumnGroup<Optional, Member?> {
+    ) -> OptionalColumnGroup<Optional, Member> {
       let column = Wrapped.columns[keyPath: keyPath]
-      return ColumnGroup<Optional, Member?>(
-        column.name,
-        keyPath: \.[member: \Member.self, column: column.keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<Optional, Member?>(
+          column.name,
+          keyPath: \.[member: \Member.self, column: column.keyPath]
+        )
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, OptionalColumnGroup<Wrapped, Member>>
+    ) -> OptionalColumnGroup<Optional, Member> {
+      let column = Wrapped.columns[keyPath: keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<Optional, Member?>(
+          column.name,
+          keyPath: \.[flattenedMember: \Member.self, column: column.keyPath]
+        )
       )
     }
 

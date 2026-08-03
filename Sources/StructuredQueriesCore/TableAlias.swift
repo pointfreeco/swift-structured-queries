@@ -187,6 +187,18 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
         keyPath: \.[member: \Member.self, column: column.keyPath]
       )
     }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, OptionalColumnGroup<Base, Member>>
+    ) -> OptionalColumnGroup<TableAlias, Member> {
+      let column = Base.columns[keyPath: keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<TableAlias, Member?>(
+          column.name,
+          keyPath: \.[member: \Member?.self, column: column.keyPath]
+        )
+      )
+    }
   }
 
   public struct Selection: TableExpression {

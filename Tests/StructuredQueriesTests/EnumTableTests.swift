@@ -535,6 +535,74 @@
         }
       }
 
+      @Test func updateCaseGroupExpression() {
+        assertQuery(
+          Attachment
+            .find(1)
+            .update {
+              $0.kind.image = Attachment.Image.Selection(
+                caption: #sql("upper('blob')"),
+                url: #bind(URL(string: "https://www.pointfree.co/blob.png")!)
+              )
+            }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "attachments"
+          SET "imageCaption" = upper('blob'), "imageURL" = 'https://www.pointfree.co/blob.png', "link" = NULL, "note" = NULL, "videoURL" = NULL, "videoKind" = NULL
+          WHERE (("attachments"."id") IN ((1)))
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────┐
+          │ Attachment(                                       │
+          │   id: 1,                                          │
+          │   kind: .image(                                   │
+          │     Attachment.Image(                             │
+          │       caption: "BLOB",                            │
+          │       url: URL(https://www.pointfree.co/blob.png) │
+          │     )                                             │
+          │   )                                               │
+          │ )                                                 │
+          └───────────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func optionalGroupDrill() {
+        assertInlineSnapshot(
+          of: Record.order { ($0.time.interval.desc(), $0.time.span.startDate, $0.meta.author) },
+          as: .sql
+        ) {
+          """
+          SELECT "records"."id", "records"."moment", "records"."note", "records"."interval", "records"."spanStart", "records"."spanEnd", "records"."metaAuthor"
+          FROM "records"
+          ORDER BY "records"."interval" DESC, "records"."spanStart", "records"."metaAuthor"
+          """
+        }
+      }
+
+      @Test func optionalGroupDrillJoined() {
+        assertInlineSnapshot(
+          of: Owner
+            .leftJoin(Record.all) { $0.id.eq($1.id) }
+            .where { $1.time.is(\.interval) }
+            .order { ($1.time.span.endDate.desc(), $0.name) }
+            .limit(10),
+          as: .sql
+        ) {
+          """
+          SELECT "owners"."id", "owners"."name", "records"."id", "records"."moment", "records"."note", "records"."interval", "records"."spanStart", "records"."spanEnd", "records"."metaAuthor"
+          FROM "owners"
+          LEFT JOIN "records" ON ("owners"."id") = ("records"."id")
+          WHERE (("records"."interval") IS NOT (NULL))
+          ORDER BY "records"."spanEnd" DESC, "owners"."name"
+          LIMIT 10
+          """
+        }
+      }
+
       @Test func selection() {
         assertQuery(
           Values(
@@ -559,7 +627,7 @@
           )
         ) {
           """
-          SELECT NULL AS "link", NULL AS "note", NULL AS "videoURL", NULL AS "videoKind", 'Blob', 'https://pointfree.co' AS "imageCaption"
+          SELECT NULL AS "link", NULL AS "note", NULL AS "videoURL", NULL AS "videoKind", 'Blob' AS "imageCaption", 'https://pointfree.co' AS "imageURL"
           """
         } results: {
           """
@@ -912,6 +980,37 @@
       var doc: ABCDoc
     }
   #endif
+
+  @Table private struct Record {
+    let id: Int
+    var time: RecordTime?
+    var meta: Meta?
+
+    @Selection
+    fileprivate enum RecordTime {
+      case moment(Date)
+      case note(String)
+      case interval(startDate: Date)
+      case span(Record.Interval)
+    }
+
+    @Selection fileprivate struct Interval {
+      @Column("spanStart")
+      var startDate: Date
+      @Column("spanEnd")
+      var endDate: Date
+    }
+
+    @Selection fileprivate struct Meta {
+      @Column("metaAuthor")
+      var author: String
+    }
+  }
+
+  @Table private struct Owner {
+    let id: Int
+    var name = ""
+  }
 
   @Table private struct Attachment {
     let id: Int

@@ -38,6 +38,14 @@
     }
   }
 
+  package protocol _CaseColumnExpression {
+    var _base: any WritableTableColumnExpression { get }
+  }
+
+  extension CaseColumn: _CaseColumnExpression {
+    package var _base: any WritableTableColumnExpression { base }
+  }
+
   /// A group of columns representing a single case of an enum table.
   ///
   /// Don't create instances of this value directly. Instead, use the `@Table` and `@Column` macros
@@ -81,13 +89,65 @@
     }
   }
 
-  public enum _CaseColumn<Root: Table, Value: QueryRepresentable> {
+  extension OptionalColumnGroup {
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        Values.QueryOutput.TableColumns, CaseColumn<Values.QueryOutput, Member>
+      >
+    ) -> CaseColumn<Root, Member> {
+      let column = Values.QueryOutput.columns[keyPath: keyPath].base
+      return CaseColumn(
+        base: TableColumn<Root, Member?>(
+          column.name,
+          keyPath: base.keyPath.appending(
+            path: \.[flattenedMember: \Member.self, column: column.keyPath]
+          )
+        )
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        Values.QueryOutput.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>
+      >
+    ) -> CaseColumnGroup<Root, Member> {
+      let column = Values.QueryOutput.columns[keyPath: keyPath].base
+      return CaseColumnGroup(
+        base: ColumnGroup<Root, Member?>(
+          column.name,
+          keyPath: base.keyPath.appending(
+            path: \.[flattenedMember: \Member.self, column: column.keyPath]
+          )
+        )
+      )
+    }
+  }
+
+  extension CaseColumnGroup {
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<
+        Payload.QueryOutput.TableColumns, OptionalColumnGroup<Payload.QueryOutput, Member>
+      >
+    ) -> OptionalColumnGroup<Root, Member> {
+      let column = Payload.QueryOutput.columns[keyPath: keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<Root, Member?>(
+          column.name,
+          keyPath: base.keyPath.appending(
+            path: \.[flattenedMember: \Member.self, column: column.keyPath]
+          )
+        )
+      )
+    }
+  }
+
+  public enum _CaseColumn<Root: Table, Value> {
     public static func `for`(
       _ name: String,
       keyPath: KeyPath<Root, Value.QueryOutput?>,
       default defaultValue: Value.QueryOutput? = nil
     ) -> CaseColumn<Root, Value>
-    where Value: QueryBindable {
+    where Value: QueryRepresentable & QueryBindable {
       CaseColumn(base: TableColumn(name, keyPath: keyPath, default: defaultValue))
     }
 
@@ -96,7 +156,7 @@
       keyPath: KeyPath<Root, Value.QueryOutput?>,
       default defaultValue: Value.QueryOutput? = nil
     ) -> CaseColumnGroup<Root, Value>
-    where Value: Table, Value.QueryOutput: Table {
+    where Value: QueryRepresentable, Value: Table, Value.QueryOutput: Table {
       CaseColumnGroup(base: ColumnGroup(name, keyPath: keyPath, default: defaultValue))
     }
   }
@@ -166,36 +226,116 @@
 
     public subscript<Payload>(
       dynamicMember keyPath: KeyPath<Base.TableColumns, CaseColumnGroup<Base, Payload>>
-    ) -> Payload.QueryOutput {
-      @available(
-        *,
-        unavailable,
-        message: """
-          Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
-          """
-      )
-      get { fatalError() }
+    ) -> any QueryExpression<Payload> {
+      get { SQLQueryExpression(Base.columns[keyPath: keyPath].queryFragment) }
       set {
-        func open<R, V>(
-          _ column: some WritableTableColumnExpression<R, V>
-        ) -> QueryFragment {
-          V(
-            queryOutput: newValue[
-              keyPath: column.keyPath as! KeyPath<Payload.QueryOutput, V.QueryOutput>
-            ]
-          )
-          .queryFragment
-        }
         let group = Base.columns[keyPath: keyPath]
-        updates.append(
-          contentsOf: Payload.QueryOutput.TableColumns.writableColumns.map { column in
-            (column.name, open(column))
-          }
-        )
+        let writableNames = Set(group._writableColumns.map(\.name))
+        for (column, value) in zip(group._allColumns, newValue._allColumns)
+        where writableNames.contains(column.name) {
+          updates.append((column.name, value.queryFragment))
+        }
         for other in Base.TableColumns.allColumns where !group._names.contains(other.name) {
           updates.append((other.name, "NULL"))
         }
       }
+    }
+
+    @_disfavoredOverload
+    public subscript<Payload>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, CaseColumnGroup<Base, Payload>>
+    ) -> _CaseGroupUpdate<Payload> {
+      get { _CaseGroupUpdate() }
+      set {}
+    }
+  }
+
+  @dynamicMemberLookup
+  public struct _CaseGroupUpdate<Payload: Table> where Payload.QueryOutput: Table {
+    @available(
+      *,
+      unavailable,
+      message: "Assign the entire case, instead: '$0.enum = .case(value)'"
+    )
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Payload.TableColumns, TableColumn<Payload.QueryOutput, Member>>
+    ) -> any QueryExpression<Member> {
+      get { fatalError() }
+      set {}
+    }
+
+    @available(
+      *,
+      unavailable,
+      message: "Assign the entire case, instead: '$0.enum = .case(value)'"
+    )
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Payload.TableColumns, ColumnGroup<Payload.QueryOutput, Member>>
+    ) -> _CaseGroupUpdate<Member> {
+      get { fatalError() }
+      set {}
+    }
+  }
+
+  extension UpdatesGroup {
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumn<Values.QueryOutput, Member>>
+    ) -> any QueryExpression<Member?> {
+      group[dynamicMember: keyPath]
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumn<Values.QueryOutput, Member>>
+    ) -> any QueryExpression<Member> {
+      get { SQLQueryExpression(group[dynamicMember: keyPath].queryFragment) }
+      set {
+        let column = group[dynamicMember: keyPath]
+        updates.append((column.name, newValue.queryFragment))
+        for other in Values.QueryOutput.TableColumns.allColumns where other.name != column.name {
+          updates.append((other.name, "NULL"))
+        }
+      }
+    }
+
+    @_disfavoredOverload
+    @available(
+      *,
+      unavailable,
+      message: """
+        Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+        """
+    )
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumn<Values.QueryOutput, Member>>
+    ) -> Member.QueryOutput {
+      get { fatalError() }
+      set {}
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>>
+    ) -> any QueryExpression<Member> {
+      get { SQLQueryExpression(group[dynamicMember: keyPath].queryFragment) }
+      set {
+        let caseGroup = group[dynamicMember: keyPath]
+        let writableNames = Set(caseGroup._writableColumns.map(\.name))
+        for (column, value) in zip(caseGroup._allColumns, newValue._allColumns)
+        where writableNames.contains(column.name) {
+          updates.append((column.name, value.queryFragment))
+        }
+        for other in Values.QueryOutput.TableColumns.allColumns
+        where !caseGroup._names.contains(other.name) {
+          updates.append((other.name, "NULL"))
+        }
+      }
+    }
+
+    @_disfavoredOverload
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Values.TableColumns, CaseColumnGroup<Values.QueryOutput, Member>>
+    ) -> _CaseGroupUpdate<Member> {
+      get { _CaseGroupUpdate() }
+      set {}
     }
   }
 
