@@ -148,6 +148,14 @@ extension Table {
     }
     return TableColumns.allColumns.map { open($0) }.joined(separator: ", ")
   }
+
+  public var _allColumns: [any QueryExpression] {
+    func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> any QueryExpression
+    {
+      Value(queryOutput: (self as! Root)[keyPath: column.keyPath])
+    }
+    return TableColumns.allColumns.map { open($0) }
+  }
 }
 
 extension Table where DefaultScope == Where<Self> {

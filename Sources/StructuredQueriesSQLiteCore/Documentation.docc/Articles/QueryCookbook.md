@@ -74,7 +74,7 @@ struct Row {
 
 This allows the query to serialize the associated rows into JSON, which are then deserialized into
 a `Row` type. To construct such a query you can use the
-``StructuredQueriesCore/PrimaryKeyedTableDefinition/jsonGroupArray(distinct:order:filter:)``
+``StructuredQueriesCore/QueryExpression/jsonGroupArray(distinct:order:filter:)``
 property that is defined on the columns of primary-keyed tables:
 
 ```swift
@@ -116,7 +116,7 @@ struct Milestone: Identifiable, Codable {
 And suppose you would like to fetch all `RemindersList`s along with the collection of all milestones
 and reminders associated with the list:
 
-```struct
+```swift
 @Selection
 struct Row {
   let remindersList: RemindersList

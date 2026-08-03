@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import Testing
 import _StructuredQueriesSQLite
 
@@ -70,7 +71,7 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders"
         WHERE (("reminders"."id") IN ((1)))
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """
@@ -87,7 +88,7 @@ extension SnapshotTests {
         """
         DELETE FROM "reminders"
         WHERE (("reminders"."id") IN ((2)))
-        RETURNING "reminders"."id"
+        RETURNING "id"
         """
       } results: {
         """

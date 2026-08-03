@@ -744,6 +744,19 @@ public struct Insert<Into: Table, Returning> {
   var updateFilter: [QueryFragment]
   var returning: [QueryFragment]
 
+  package func _returning<R>(_ returning: [QueryFragment]) -> Insert<Into, R> {
+    Insert<Into, R>(
+      conflictResolution: conflictResolution,
+      columnNames: columnNames,
+      conflictTargetColumnNames: conflictTargetColumnNames,
+      conflictTargetFilter: conflictTargetFilter,
+      values: values,
+      updates: updates,
+      updateFilter: updateFilter,
+      returning: returning
+    )
+  }
+
   fileprivate init(
     conflictResolution: QueryFragment?,
     columnNames: [String],
@@ -764,53 +777,6 @@ public struct Insert<Into: Table, Returning> {
     self.returning = returning
   }
 
-  /// Adds a returning clause to an insert statement.
-  ///
-  /// - Parameter selection: Columns to return.
-  /// - Returns: A statement with a returning clause.
-  public func returning<each QueryValue: QueryRepresentable>(
-    _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
-  ) -> Insert<Into, (repeat each QueryValue)> {
-    var returning: [QueryFragment] = []
-    for resultColumn in repeat each selection(From.columns) {
-      returning.append("\(quote: resultColumn.name)")
-    }
-    return Insert<Into, (repeat each QueryValue)>(
-      conflictResolution: conflictResolution,
-      columnNames: columnNames,
-      conflictTargetColumnNames: conflictTargetColumnNames,
-      conflictTargetFilter: conflictTargetFilter,
-      values: values,
-      updates: updates,
-      updateFilter: updateFilter,
-      returning: returning
-    )
-  }
-
-  // NB: This overload allows for 'returning(\.self)'.
-  /// Adds a returning clause to an insert statement.
-  ///
-  /// - Parameter selection: Columns to return.
-  /// - Returns: A statement with a returning clause.
-  @_documentation(visibility: private)
-  public func returning(
-    _ selection: (Into.TableColumns) -> Into.TableColumns
-  ) -> Insert<Into, Into> {
-    var returning: [QueryFragment] = []
-    for resultColumn in From.TableColumns.allColumns {
-      returning.append("\(quote: resultColumn.name)")
-    }
-    return Insert<Into, Into>(
-      conflictResolution: conflictResolution,
-      columnNames: columnNames,
-      conflictTargetColumnNames: conflictTargetColumnNames,
-      conflictTargetFilter: conflictTargetFilter,
-      values: values,
-      updates: updates,
-      updateFilter: updateFilter,
-      returning: returning
-    )
-  }
 }
 
 extension Insert: Statement {

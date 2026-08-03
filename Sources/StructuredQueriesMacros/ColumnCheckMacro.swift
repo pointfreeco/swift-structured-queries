@@ -19,7 +19,7 @@ package enum ColumnCheckFailMacro: PeerMacro {
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
-    diagnoseUnrepresentableColumn(of: node, on: declaration, suggesting: .none, in: context)
+    diagnoseUnrepresentableColumn(of: node, on: declaration, suggestingJSON: false, in: context)
     return []
   }
 }
@@ -30,20 +30,7 @@ package enum ColumnCheckFailJSONMacro: PeerMacro {
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
-    diagnoseUnrepresentableColumn(of: node, on: declaration, suggesting: .json, in: context)
-    return []
-  }
-}
-
-package enum ColumnCheckFailRawRepresentableMacro: PeerMacro {
-  package static func expansion(
-    of node: AttributeSyntax,
-    providingPeersOf declaration: some DeclSyntaxProtocol,
-    in context: some MacroExpansionContext
-  ) throws -> [DeclSyntax] {
-    diagnoseUnrepresentableColumn(
-      of: node, on: declaration, suggesting: .rawRepresentation, in: context
-    )
+    diagnoseUnrepresentableColumn(of: node, on: declaration, suggestingJSON: true, in: context)
     return []
   }
 }
@@ -67,8 +54,6 @@ package enum ColumnCheckGroupMacro: PeerMacro {
         let argument = arguments[argumentIndex]
         let message: String
         switch argument.label?.text {
-        case nil:
-          message = "Column name cannot be applied to a column group"
         case "generated":
           message = "Argument 'generated' cannot be applied to a column group"
         default:
@@ -104,16 +89,10 @@ package enum ColumnCheckGroupMacro: PeerMacro {
   }
 }
 
-private enum UnrepresentableSuggestion {
-  case none
-  case json
-  case rawRepresentation
-}
-
 private func diagnoseUnrepresentableColumn(
   of node: AttributeSyntax,
   on declaration: some DeclSyntaxProtocol,
-  suggesting suggestion: UnrepresentableSuggestion,
+  suggestingJSON: Bool,
   in context: some MacroExpansionContext
 ) {
   guard case .argumentList(let arguments) = node.arguments,
@@ -144,12 +123,10 @@ private func diagnoseUnrepresentableColumn(
       Diagnostic(
         node: Syntax(declaration),
         message: MacroExpansionErrorMessage(
-          suggestion == .rawRepresentation
-            ? """
-            \(defaultValue.map { "'\($0)'" } ?? "Type") is not representable as a column; conform \
-            it to 'QueryBindable' to store it as its raw value
-            """
-            : "\(defaultValue.map { "'\($0)'" } ?? "Type") is not representable as a column"
+          """
+          \(defaultValue.map { "'\($0)'" } ?? "Type") is not a '@Selection' or representable as a \
+          column
+          """
         ),
         fixIts: fixIts
       )
@@ -158,39 +135,29 @@ private func diagnoseUnrepresentableColumn(
   }
   let type = base.trimmedDescription
 
-  let message: String
-  switch suggestion {
-  case .none:
-    message = "'\(type)' is not representable as a column"
-  case .json:
-    message = "'\(type)' is not representable as a column"
+  if suggestingJSON {
     fixIts.insert(
-      .replace(
-        message: MacroExpansionFixItMessage(
-          "Apply '@Column(as: \(type).JSONRepresentation.self)' to store as JSON"
+      contentsOf: [
+        .replace(
+          message: MacroExpansionFixItMessage(
+            "Apply '@Column(as: \(type).JSONRepresentation.self)' to store as JSON"
+          ),
+          oldNode: declaration,
+          newNode: declaration.applyingColumnFixIt(
+            "@Column(as: \(raw: type).JSONRepresentation.self)"
+          )
         ),
-        oldNode: declaration,
-        newNode: declaration.applyingColumnFixIt(
-          "@Column(as: \(raw: type).JSONRepresentation.self)"
-        )
-      ),
-      at: 0
-    )
-  case .rawRepresentation:
-    message = """
-      '\(type)' is not representable as a column; conform it to 'QueryBindable' to store it as its \
-      raw value
-      """
-    fixIts.insert(
-      .replace(
-        message: MacroExpansionFixItMessage(
-          "Apply '@Column(as: \(type).RawRepresentation.self)' to store as its raw value"
+        // TODO: Hide behind 'SQLite' trait when introduced in the future
+        .replace(
+          message: MacroExpansionFixItMessage(
+            "Apply '@Column(as: \(type).JSONBRepresentation.self)' to store as JSONB"
+          ),
+          oldNode: declaration,
+          newNode: declaration.applyingColumnFixIt(
+            "@Column(as: \(raw: type).JSONBRepresentation.self)"
+          )
         ),
-        oldNode: declaration,
-        newNode: declaration.applyingColumnFixIt(
-          "@Column(as: \(raw: type).RawRepresentation.self)"
-        )
-      ),
+      ],
       at: 0
     )
   }
@@ -198,7 +165,7 @@ private func diagnoseUnrepresentableColumn(
   context.diagnose(
     Diagnostic(
       node: Syntax(declaration),
-      message: MacroExpansionErrorMessage(message),
+      message: MacroExpansionErrorMessage("'\(type)' is not representable as a column"),
       fixIts: fixIts
     )
   )
@@ -211,7 +178,7 @@ extension DeclSyntaxProtocol {
       var filtered = Array(attributes).filter { element in
         guard case .attribute(let attribute) = element else { return true }
         let name = attribute.attributeName.trimmedDescription
-        return name != "_ColumnCheck" && name != "Column" && name != "Columns"
+        return name != "ColumnCheck" && name != "Column" && name != "Columns"
       }
       filtered.insert(.attribute(attribute), at: filtered.startIndex)
       return AttributeListSyntax(filtered)

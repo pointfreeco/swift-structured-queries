@@ -78,3 +78,32 @@ extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
     QueryFunction("unicode", self)
   }
 }
+
+extension QueryExpression
+where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric {
+  /// Wraps this numeric query expression with the `sign` function.
+  ///
+  /// - Returns: An expression wrapped with the `sign` function.
+  public func sign() -> some QueryExpression<QueryValue> {
+    QueryFunction("sign", self)
+  }
+}
+
+extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
+  /// Wraps this string query expression with the `unhex` function.
+  ///
+  /// - Parameter characters: Non-hexadecimal characters to skip.
+  /// - Returns: An optional blob expression of the `unhex` function wrapping this expression.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
+  #endif
+  public func unhex(
+    _ characters: (some QueryExpression<String>)? = String?.none
+  ) -> some QueryExpression<[UInt8]?> {
+    if let characters {
+      return QueryFunction("unhex", self, characters)
+    } else {
+      return QueryFunction("unhex", self)
+    }
+  }
+}

@@ -14,6 +14,7 @@ extension QueryExpression where QueryValue: QueryBindable {
   public func desc(nulls nullOrdering: NullOrdering? = nil) -> _OrderingTerm<QueryValue> {
     _OrderingTerm(base: self, direction: .desc, nullOrdering: nullOrdering)
   }
+
 }
 
 /// `NULL`-specific ordering for an ordering term.

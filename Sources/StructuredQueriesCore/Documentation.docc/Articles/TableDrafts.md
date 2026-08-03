@@ -61,7 +61,7 @@ Since the `"id"` column is not specified in this query it allows the database to
 us. This `Draft` type is appropriate to use in any features that needs to build up a value without
 specifying an ID.
 
-Further, using the ``Insert/returning(_:)`` method you can get back the ID of the newly inserted
+Further, using the `returning(_:)` method you can get back the ID of the newly inserted
 row:
 
 @Row {
@@ -205,7 +205,8 @@ to insert, you can apply the parent ID to each child record.
 > Note: In a future version of StructuredQueries, `lazyInitializable: true` will be the default
 > behavior for all fields without a default value, and if you want to opt out of it you will
 > provide `lazyInitializable: false`. To prepare for that future release you can enable the
-> `LazyInitializableByDefault` trait in your dependence on StructuredQueries today.
+> `LazyInitializableByDefault` [package trait](<doc:Traits>) in your dependence on
+> StructuredQueries today.
 
 Lazy initialization is not limited to primary-keyed tables. Marking any column of a table as
 `lazyInitializable` will cause the `@Table` macro to generate a `Draft` type, even if the table has

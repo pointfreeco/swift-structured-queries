@@ -4,6 +4,7 @@
   import Foundation
   import InlineSnapshotTesting
   import StructuredQueries
+  import StructuredQueriesSQLite
   import StructuredQueriesTestSupport
   import Testing
   import _StructuredQueriesSQLite
@@ -24,6 +25,22 @@
             "imageCaption" TEXT,
             "imageURL" TEXT
           ) STRICT
+          """
+        )
+        try db.execute(
+          """
+          CREATE TABLE "takes" (
+            "id" INTEGER PRIMARY KEY,
+            "media" BLOB NOT NULL
+          )
+          """
+        )
+        try db.execute(
+          """
+          CREATE TABLE "abcRows" (
+            "id" INTEGER PRIMARY KEY,
+            "doc" BLOB NOT NULL
+          )
           """
         )
         try db.execute(
@@ -126,6 +143,55 @@
           │   )                                                 │
           │ )                                                   │
           └─────────────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func leftJoinCaseColumn() {
+        assertQuery(
+          Reminder
+            .leftJoin(Attachment.all) { $0.id.eq($1.id) }
+            .select { $1.kind.note }
+            .limit(3)
+        ) {
+          """
+          SELECT "attachments"."note"
+          FROM "reminders"
+          LEFT JOIN "attachments" ON ("reminders"."id") = ("attachments"."id")
+          LIMIT 3
+          """
+        } results: {
+          """
+          ┌────────────────────────┐
+          │ nil                    │
+          │ "Today was a good day" │
+          │ nil                    │
+          └────────────────────────┘
+          """
+        }
+      }
+
+      @Test func leftJoinCaseColumnGroup() {
+        assertQuery(
+          Reminder
+            .leftJoin(Attachment.all) { $0.id.eq($1.id) }
+            .where { $1.id.eq(4) }
+            .select { $1.kind.image }
+        ) {
+          """
+          SELECT "attachments"."imageCaption", "attachments"."imageURL"
+          FROM "reminders"
+          LEFT JOIN "attachments" ON ("reminders"."id") = ("attachments"."id")
+          WHERE (("attachments"."id") = (4))
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────┐
+          │ Attachment.Image(                             │
+          │   caption: "Blob",                            │
+          │   url: URL(https://www.pointfree.co/blob.jpg) │
+          │ )                                             │
+          └───────────────────────────────────────────────┘
           """
         }
       }
@@ -407,6 +473,137 @@
         }
       }
 
+      @Test func updateCase() {
+        assertQuery(
+          Attachment
+            .find(1)
+            .update {
+              $0.kind.note = #bind("Hello, world!")
+            }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "attachments"
+          SET "note" = 'Hello, world!', "link" = NULL, "videoURL" = NULL, "videoKind" = NULL, "imageCaption" = NULL, "imageURL" = NULL
+          WHERE (("attachments"."id") IN ((1)))
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌────────────────────────────────┐
+          │ Attachment(                    │
+          │   id: 1,                       │
+          │   kind: .note("Hello, world!") │
+          │ )                              │
+          └────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func updateCaseGroup() {
+        assertQuery(
+          Attachment
+            .find(2)
+            .update {
+              $0.kind.image = Attachment.Image(
+                caption: "Blob",
+                url: URL(string: "https://www.pointfree.co/blob.jpg")!
+              )
+            }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "attachments"
+          SET "imageCaption" = 'Blob', "imageURL" = 'https://www.pointfree.co/blob.jpg', "link" = NULL, "note" = NULL, "videoURL" = NULL, "videoKind" = NULL
+          WHERE (("attachments"."id") IN ((2)))
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────┐
+          │ Attachment(                                       │
+          │   id: 2,                                          │
+          │   kind: .image(                                   │
+          │     Attachment.Image(                             │
+          │       caption: "Blob",                            │
+          │       url: URL(https://www.pointfree.co/blob.jpg) │
+          │     )                                             │
+          │   )                                               │
+          │ )                                                 │
+          └───────────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func updateCaseGroupExpression() {
+        assertQuery(
+          Attachment
+            .find(1)
+            .update {
+              $0.kind.image = Attachment.Image.Selection(
+                caption: #sql("upper('blob')"),
+                url: #bind(URL(string: "https://www.pointfree.co/blob.png")!)
+              )
+            }
+            .returning(\.self)
+        ) {
+          """
+          UPDATE "attachments"
+          SET "imageCaption" = upper('blob'), "imageURL" = 'https://www.pointfree.co/blob.png', "link" = NULL, "note" = NULL, "videoURL" = NULL, "videoKind" = NULL
+          WHERE (("attachments"."id") IN ((1)))
+          RETURNING "id", "link", "note", "videoURL", "videoKind", "imageCaption", "imageURL"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────┐
+          │ Attachment(                                       │
+          │   id: 1,                                          │
+          │   kind: .image(                                   │
+          │     Attachment.Image(                             │
+          │       caption: "BLOB",                            │
+          │       url: URL(https://www.pointfree.co/blob.png) │
+          │     )                                             │
+          │   )                                               │
+          │ )                                                 │
+          └───────────────────────────────────────────────────┘
+          """
+        }
+      }
+
+      @Test func optionalGroupDrill() {
+        assertInlineSnapshot(
+          of: Record.order { ($0.time.interval.desc(), $0.time.span.startDate, $0.meta.author) },
+          as: .sql
+        ) {
+          """
+          SELECT "records"."id", "records"."moment", "records"."note", "records"."interval", "records"."spanStart", "records"."spanEnd", "records"."metaAuthor"
+          FROM "records"
+          ORDER BY "records"."interval" DESC, "records"."spanStart", "records"."metaAuthor"
+          """
+        }
+      }
+
+      @Test func optionalGroupDrillJoined() {
+        assertInlineSnapshot(
+          of:
+            Owner
+            .leftJoin(Record.all) { $0.id.eq($1.id) }
+            .where { $1.time.is(\.interval) }
+            .order { ($1.time.span.endDate.desc(), $0.name) }
+            .limit(10),
+          as: .sql
+        ) {
+          """
+          SELECT "owners"."id", "owners"."name", "records"."id", "records"."moment", "records"."note", "records"."interval", "records"."spanStart", "records"."spanEnd", "records"."metaAuthor"
+          FROM "owners"
+          LEFT JOIN "records" ON ("owners"."id") = ("records"."id")
+          WHERE (("records"."interval") IS NOT (NULL))
+          ORDER BY "records"."spanEnd" DESC, "owners"."name"
+          LIMIT 10
+          """
+        }
+      }
+
       @Test func selection() {
         assertQuery(
           Values(
@@ -431,7 +628,7 @@
           )
         ) {
           """
-          SELECT NULL AS "link", NULL AS "note", NULL AS "videoURL", NULL AS "videoKind", 'Blob', 'https://pointfree.co' AS "imageCaption"
+          SELECT NULL AS "link", NULL AS "note", NULL AS "videoURL", NULL AS "videoKind", 'Blob' AS "imageCaption", 'https://pointfree.co' AS "imageURL"
           """
         } results: {
           """
@@ -488,6 +685,332 @@
         }
       }
     }
+  }
+
+  #if ColumnCoding
+    extension SnapshotTests.EnumTableTests {
+      @Test func jsonGroupArrayDecoding() throws {
+        try db.execute(
+          """
+          CREATE TABLE "medias" (
+            "note" TEXT,
+            "video_preview" TEXT,
+            "image_caption" TEXT,
+            "image_url" TEXT
+          )
+          """
+        )
+        try db.execute(
+          """
+          INSERT INTO "medias"
+          ("note", "video_preview", "image_caption", "image_url")
+          VALUES
+          ('Hello', NULL, NULL, NULL),
+          (NULL, 'https://www.pointfree.co/preview.mov', NULL, NULL),
+          (NULL, NULL, 'Blob', 'https://www.pointfree.co/blob.jpg')
+          """
+        )
+        withKnownIssue(
+          """
+          * 'json_object' should produce a single-key object to match an enum's 'Codable' 
+            conformance.
+          * `jsonObject` should preserve nested fields of 'MediaImage'
+          """
+        ) {
+          assertQuery(
+            Media.select { MediaList.Columns(medias: $0.jsonGroupArray()) }
+          ) {
+            """
+            SELECT json_group_array(json_object('note', "medias"."note", 'video_preview', "medias"."video_preview", 'image_caption', "medias"."image_caption", 'image_url', "medias"."image_url")) AS "medias"
+            FROM "medias"
+            """
+          } results: {
+            """
+            ┌────────────────────────────────────────────────────────────────────┐
+            │ MediaList(                                                         │
+            │   medias: [                                                        │
+            │     [0]: .note("Hello"),                                           │
+            │     [1]: .videoPreview(URL(https://www.pointfree.co/preview.mov)), │
+            │     [2]: .image(                                                   │
+            │       MediaImage(                                                  │
+            │         caption: "Blob",                                           │
+            │         url: URL(https://www.pointfree.co/blob.jpg)                │
+            │       )                                                            │
+            │     )                                                              │
+            │   ]                                                                │
+            │ )                                                                  │
+            └────────────────────────────────────────────────────────────────────┘
+            """
+          }
+        } matching: { issue in
+          issue.description.hasSuffix(
+            """
+            The data couldn’t be read because it isn’t in the correct format.
+            """)
+        }
+      }
+
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+      @Test func jsonExtractCases() throws {
+        try db.execute(
+          Take.insert {
+            [
+              Take(id: 1, media: .note("Hello")),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
+              Take(
+                id: 3,
+                media: .image(
+                  MediaImage(
+                    caption: "Blob", url: URL(string: "https://www.pointfree.co/blob.jpg")!
+                  )
+                )
+              ),
+            ]
+          }
+        )
+        assertQuery(
+          Take.select {
+            ($0.media.jsonExtract(\.note), $0.media.jsonbExtract(\.videoPreview))
+          }
+        ) {
+          """
+          SELECT json_extract("takes"."media", '$."note"'), jsonb_extract("takes"."media", '$."video_preview"')
+          FROM "takes"
+          """
+        } results: {
+          """
+          ┌─────────┬───────────────────────────────────────────┐
+          │ "Hello" │ nil                                       │
+          │ nil     │ URL(https://www.pointfree.co/preview.mov) │
+          │ nil     │ nil                                       │
+          └─────────┴───────────────────────────────────────────┘
+          """
+        }
+        assertQuery(
+          Take.select {
+            ($0.media.jsonExtract(\.image), $0.media.jsonExtract(\.image.caption))
+          }
+        ) {
+          """
+          SELECT json_extract("takes"."media", '$."image"'), json_extract("takes"."media", '$."image"."image_caption"')
+          FROM "takes"
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────┬────────┐
+          │ nil                                           │ nil    │
+          ├───────────────────────────────────────────────┼────────┤
+          │ nil                                           │ nil    │
+          ├───────────────────────────────────────────────┼────────┤
+          │ MediaImage(                                   │ "Blob" │
+          │   caption: "Blob",                            │        │
+          │   url: URL(https://www.pointfree.co/blob.jpg) │        │
+          │ )                                             │        │
+          └───────────────────────────────────────────────┴────────┘
+          """
+        }
+      }
+
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+      @Test func jsonbSetCase() throws {
+        try db.execute(
+          Take.insert {
+            [
+              Take(id: 1, media: .note("Hello")),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
+            ]
+          }
+        )
+        assertQuery(
+          Take
+            .update { $0.media = $0.media.jsonbSet(\.note, "Switched") }
+            .returning(\.media)
+        ) {
+          """
+          UPDATE "takes"
+          SET "media" = jsonb_set("takes"."media", '$', jsonb_object('note', 'Switched'))
+          RETURNING json("media")
+          """
+        } results: {
+          """
+          ┌────────────────────────┐
+          │ Media.note("Switched") │
+          │ Media.note("Switched") │
+          └────────────────────────┘
+          """
+        }
+      }
+
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+      @Test func jsonbReplaceCase() throws {
+        try db.execute(
+          Take.insert {
+            [
+              Take(id: 1, media: .note("Hello")),
+              Take(
+                id: 2, media: .videoPreview(URL(string: "https://www.pointfree.co/preview.mov")!)
+              ),
+            ]
+          }
+        )
+        assertQuery(
+          Take
+            .update {
+              $0.media = $0.media.jsonbReplace(
+                \.videoPreview, URL(string: "https://www.pointfree.co/preview.mp4")!
+              )
+            }
+            .returning(\.media)
+        ) {
+          """
+          UPDATE "takes"
+          SET "media" = jsonb_replace("takes"."media", '$."video_preview"', 'https://www.pointfree.co/preview.mp4')
+          RETURNING json("media")
+          """
+        } results: {
+          """
+          ┌───────────────────────────────────────────────────────────────┐
+          │ Media.note("Hello")                                           │
+          │ Media.videoPreview(URL(https://www.pointfree.co/preview.mp4)) │
+          └───────────────────────────────────────────────────────────────┘
+          """
+        }
+      }
+      @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+      @Test func replaceIfActive() throws {
+        try db.execute(
+          ABCRow.insert {
+            [
+              ABCRow(id: 1, doc: ABCDoc(abc: .a(CaseA(d: 1)))),
+              ABCRow(id: 2, doc: ABCDoc(abc: .b(CaseB(e: 2, f: 3)))),
+            ]
+          }
+        )
+        assertQuery(
+          ABCRow.update { $0.doc = $0.doc.jsonbReplace(\.abc.b.e, 99) }
+        ) {
+          """
+          UPDATE "abcRows"
+          SET "doc" = jsonb_replace("abcRows"."doc", '$."abc"."b"."e"', 99)
+          """
+        }
+        assertQuery(
+          ABCRow.select { _ in #sql("json(\"doc\")", as: String.self) }
+        ) {
+          """
+          SELECT json("doc")
+          FROM "abcRows"
+          """
+        } results: {
+          """
+          ┌──────────────────────────────────┐
+          │ #"{"abc":{"a":{"d":1}}}"#        │
+          │ #"{"abc":{"b":{"e":99,"f":3}}}"# │
+          └──────────────────────────────────┘
+          """
+        }
+      }
+    }
+
+    @Table private enum Media: Codable {
+      case note(String)
+      @Column("video_preview")
+      case videoPreview(URL)
+      case image(MediaImage)
+    }
+
+    @Selection private struct MediaImage: Codable {
+      @Column("image_caption")
+      var caption = ""
+      @Column("image_url")
+      let url: URL
+    }
+
+    @Selection private struct MediaList {
+      @Column(as: [Media].JSONRepresentation.self)
+      let medias: [Media]
+    }
+
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+    @Table private struct Take {
+      let id: Int
+      @Column(as: Media.JSONBRepresentation.self)
+      var media: Media
+    }
+
+    @Table private enum ABC: Codable {
+      case a(CaseA)
+      case b(CaseB)
+      case c(String)
+    }
+
+    @Selection private struct CaseA: Codable {
+      var d = 0
+    }
+
+    @Selection private struct CaseB: Codable {
+      var e = 0
+      var f = 0
+    }
+
+    @Selection private struct ABCDoc: Codable {
+      var abc: ABC
+    }
+
+    @Table private enum Feed: Codable {
+      case title(String)
+      @Column(as: [String].JSONRepresentation.self)
+      case tags([String])
+    }
+
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+    @Table private struct FeedRow {
+      let id: Int
+      @Column(as: Feed.JSONBRepresentation.self)
+      var feed: Feed
+    }
+
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+    @Table("abcRows") private struct ABCRow {
+      let id: Int
+      @Column(as: ABCDoc.JSONBRepresentation.self)
+      var doc: ABCDoc
+    }
+  #endif
+
+  @Table private struct Record {
+    let id: Int
+    var time: RecordTime?
+    var meta: Meta?
+
+    @Selection
+    fileprivate enum RecordTime {
+      case moment(Date)
+      case note(String)
+      case interval(startDate: Date)
+      case span(Record.Interval)
+    }
+
+    @Selection fileprivate struct Interval {
+      @Column("spanStart")
+      var startDate: Date
+      @Column("spanEnd")
+      var endDate: Date
+    }
+
+    @Selection fileprivate struct Meta {
+      @Column("metaAuthor")
+      var author: String
+    }
+  }
+
+  @Table private struct Owner {
+    let id: Int
+    var name = ""
   }
 
   @Table private struct Attachment {

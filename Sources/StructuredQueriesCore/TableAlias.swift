@@ -91,7 +91,7 @@ public struct TableAlias<
 >: _OptionalPromotable {
   let base: Base
 
-  subscript<Member: QueryRepresentable>(
+  package subscript<Member: QueryRepresentable>(
     member _: KeyPath<Member, Member>,
     column keyPath: KeyPath<Base, Member.QueryOutput>
   ) -> Member.QueryOutput {
@@ -181,8 +181,22 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Member>>
     ) -> ColumnGroup<TableAlias, Member> {
-      ColumnGroup<TableAlias, Member>(
-        keyPath: \.[member: \Member.self, column: Base.columns[keyPath: keyPath].keyPath]
+      let column = Base.columns[keyPath: keyPath]
+      return ColumnGroup<TableAlias, Member>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column.keyPath]
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, OptionalColumnGroup<Base, Member>>
+    ) -> OptionalColumnGroup<TableAlias, Member> {
+      let column = Base.columns[keyPath: keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<TableAlias, Member?>(
+          column.name,
+          keyPath: \.[member: \Member?.self, column: column.keyPath]
+        )
       )
     }
   }

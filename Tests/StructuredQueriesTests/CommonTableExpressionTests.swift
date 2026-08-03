@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import Testing
 import _StructuredQueriesSQLite
 
@@ -196,7 +197,7 @@ extension SnapshotTests {
         DELETE FROM "reminders"
         WHERE (("reminders"."title") IN ((SELECT "incompleteReminders"."title"
         FROM "incompleteReminders")))
-        RETURNING "reminders"."title"
+        RETURNING "title"
         """
       } results: {
         """
@@ -276,7 +277,7 @@ extension SnapshotTests {
           WHERE (NOT ("reminders"."isCompleted"))
         )
         DELETE FROM "reminders"
-        RETURNING "reminders"."title"
+        RETURNING "title"
         """
       } results: {
         """
@@ -504,7 +505,8 @@ extension SnapshotTests {
         } query: {
           Fibonacci
             .select { $0.fib.cast(as: Double.self) / $0.prevFib.cast() }
-            .limit(1, offset: 30)
+            .limit(1)
+            .offset(30)
         }
       ) {
         """
