@@ -7,20 +7,21 @@ extension SnapshotTests {
   @Suite struct ColumnCheckMacroTests {
     @Test func codable() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckFailJSONMacro.self
+        "ColumnCheck": ColumnCheckFailJSONMacro.self
       ]) {
         """
         struct Row {
-          @_ColumnCheck([String].self)
+          @ColumnCheck([String].self)
           var tags: [String]
         }
         """
       } diagnostics: {
         """
         struct Row {
-          @_ColumnCheck([String].self)
+          @ColumnCheck([String].self)
           ╰─ 🛑 '[String]' is not representable as a column
              ✏️ Apply '@Column(as: [String].JSONRepresentation.self)' to store as JSON
+             ✏️ Apply '@Column(as: [String].JSONBRepresentation.self)' to store as JSONB
              ✏️ Apply '@Column(as:)' to specify a representation
              ✏️ Apply '@Ephemeral' to exclude from table
           var tags: [String]
@@ -45,18 +46,18 @@ extension SnapshotTests {
 
     @Test func notRepresentable() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckFailMacro.self
+        "ColumnCheck": ColumnCheckFailMacro.self
       ]) {
         """
         struct Row {
-          @_ColumnCheck(NotRepresentable.self)
+          @ColumnCheck(NotRepresentable.self)
           var value: NotRepresentable
         }
         """
       } diagnostics: {
         """
         struct Row {
-          @_ColumnCheck(NotRepresentable.self)
+          @ColumnCheck(NotRepresentable.self)
           ╰─ 🛑 'NotRepresentable' is not representable as a column
              ✏️ Apply '@Column(as:)' to specify a representation
              ✏️ Apply '@Ephemeral' to exclude from table
@@ -82,19 +83,19 @@ extension SnapshotTests {
 
     @Test func notRepresentableInferred() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckFailMacro.self
+        "ColumnCheck": ColumnCheckFailMacro.self
       ]) {
         """
         struct Row {
-          @_ColumnCheck(NotRepresentable())
+          @ColumnCheck(NotRepresentable())
           var value = NotRepresentable()
         }
         """
       } diagnostics: {
         """
         struct Row {
-          @_ColumnCheck(NotRepresentable())
-          ╰─ 🛑 'NotRepresentable()' is not representable as a column
+          @ColumnCheck(NotRepresentable())
+          ╰─ 🛑 'NotRepresentable()' is not a '@Selection' or representable as a column
              ✏️ Apply '@Column(as:)' to specify a representation
              ✏️ Apply '@Ephemeral' to exclude from table
           var value = NotRepresentable()
@@ -119,12 +120,12 @@ extension SnapshotTests {
 
     @Test func groupWithName() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckGroupMacro.self
+        "ColumnCheck": ColumnCheckGroupMacro.self
       ]) {
         """
         struct Row {
           @Column("addr")
-          @_ColumnCheck(Address.self)
+          @ColumnCheck(Address.self)
           var address: Address
         }
         """
@@ -135,7 +136,7 @@ extension SnapshotTests {
                   ┬─────
                   ╰─ 🛑 Column name cannot be applied to a column group
                      ✏️ Remove '"addr"'
-          @_ColumnCheck(Address.self)
+          @ColumnCheck(Address.self)
           var address: Address
         }
         """
@@ -143,7 +144,7 @@ extension SnapshotTests {
         """
         struct Row {
           @Column
-          @_ColumnCheck(Address.self)
+          @ColumnCheck(Address.self)
           var address: Address
         }
         """
@@ -159,12 +160,12 @@ extension SnapshotTests {
 
     @Test func groupWithGenerated() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckGroupMacro.self
+        "ColumnCheck": ColumnCheckGroupMacro.self
       ]) {
         """
         struct Row {
           @Column(generated: .stored, primaryKey: true)
-          @_ColumnCheck(Address.self)
+          @ColumnCheck(Address.self)
           let address: Address
         }
         """
@@ -175,7 +176,7 @@ extension SnapshotTests {
                   ┬──────────────────
                   ╰─ 🛑 Argument 'generated' cannot be applied to a column group
                      ✏️ Remove 'generated: .stored'
-          @_ColumnCheck(Address.self)
+          @ColumnCheck(Address.self)
           let address: Address
         }
         """
@@ -183,7 +184,7 @@ extension SnapshotTests {
         """
         struct Row {
           @Column(primaryKey: true)
-          @_ColumnCheck(Address.self)
+          @ColumnCheck(Address.self)
           let address: Address
         }
         """
@@ -199,12 +200,12 @@ extension SnapshotTests {
 
     @Test func groupPass() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckGroupMacro.self
+        "ColumnCheck": ColumnCheckGroupMacro.self
       ]) {
         """
         struct Row {
           @Column(as: Address.self, primaryKey: true)
-          @_ColumnCheck(Address.self)
+          @ColumnCheck(Address.self)
           var address: Address
         }
         """
@@ -220,11 +221,11 @@ extension SnapshotTests {
 
     @Test func pass() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckPassMacro.self
+        "ColumnCheck": ColumnCheckPassMacro.self
       ]) {
         """
         struct Row {
-          @_ColumnCheck(Int.self)
+          @ColumnCheck(Int.self)
           var count: Int
         }
         """
@@ -239,18 +240,18 @@ extension SnapshotTests {
 
     @Test func rawRepresentable() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
+        "ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
       ]) {
         """
         struct Row {
-          @_ColumnCheck(Priority.self)
+          @ColumnCheck(Priority.self)
           var priority: Priority
         }
         """
       } diagnostics: {
         """
         struct Row {
-          @_ColumnCheck(Priority.self)
+          @ColumnCheck(Priority.self)
           ╰─ 🛑 'Priority' is not representable as a column; conform it to 'QueryBindable' to store it as its raw value
              ✏️ Apply '@Column(as: Priority.RawRepresentation.self)' to store as its raw value
              ✏️ Apply '@Column(as:)' to specify a representation
@@ -277,18 +278,18 @@ extension SnapshotTests {
 
     @Test func rawRepresentableOptional() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
+        "ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
       ]) {
         """
         struct Row {
-          @_ColumnCheck(Priority?.self)
+          @ColumnCheck(Priority?.self)
           var priority: Priority?
         }
         """
       } diagnostics: {
         """
         struct Row {
-          @_ColumnCheck(Priority?.self)
+          @ColumnCheck(Priority?.self)
           ╰─ 🛑 'Priority?' is not representable as a column; conform it to 'QueryBindable' to store it as its raw value
              ✏️ Apply '@Column(as: Priority?.RawRepresentation.self)' to store as its raw value
              ✏️ Apply '@Column(as:)' to specify a representation
@@ -315,18 +316,18 @@ extension SnapshotTests {
 
     @Test func rawRepresentableInferred() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
+        "ColumnCheck": ColumnCheckFailRawRepresentableMacro.self
       ]) {
         """
         struct Row {
-          @_ColumnCheck(Priority.high)
+          @ColumnCheck(Priority.high)
           var priority = Priority.high
         }
         """
       } diagnostics: {
         """
         struct Row {
-          @_ColumnCheck(Priority.high)
+          @ColumnCheck(Priority.high)
           ╰─ 🛑 'Priority.high' is not representable as a column; conform it to 'QueryBindable' to store it as its raw value
              ✏️ Apply '@Column(as:)' to specify a representation
              ✏️ Apply '@Ephemeral' to exclude from table
@@ -353,18 +354,18 @@ extension SnapshotTests {
     #if CasePaths
       @Test func caseCheckOptional() {
         assertMacro([
-          "_CaseCheck": CaseCheckFailMacro.self
+          "CaseCheck": CaseCheckFailMacro.self
         ]) {
           """
           enum Post {
-            @_CaseCheck(Int?.self)
+            @CaseCheck(Int?.self)
             case draft(Int?)
           }
           """
         } diagnostics: {
           """
           enum Post {
-            @_CaseCheck(Int?.self)
+            @CaseCheck(Int?.self)
             ╰─ 🛑 Associated value must not be optional
                ✏️ Replace 'Int?' with 'Int'
             case draft(Int?)
@@ -373,7 +374,7 @@ extension SnapshotTests {
         } fixes: {
           """
           enum Post {
-            @_CaseCheck(Int?.self)
+            @CaseCheck(Int?.self)
             case draft(Int)
           }
           """
@@ -383,20 +384,21 @@ extension SnapshotTests {
 
     @Test func caseRepresentability() {
       assertMacro([
-        "_ColumnCheck": ColumnCheckFailJSONMacro.self
+        "ColumnCheck": ColumnCheckFailJSONMacro.self
       ]) {
         """
         enum Post {
-          @_ColumnCheck([String].self)
+          @ColumnCheck([String].self)
           case tags([String])
         }
         """
       } diagnostics: {
         """
         enum Post {
-          @_ColumnCheck([String].self)
+          @ColumnCheck([String].self)
           ╰─ 🛑 '[String]' is not representable as a column
              ✏️ Apply '@Column(as: [String].JSONRepresentation.self)' to store as JSON
+             ✏️ Apply '@Column(as: [String].JSONBRepresentation.self)' to store as JSONB
              ✏️ Apply '@Column(as:)' to specify a representation
           case tags([String])
         }

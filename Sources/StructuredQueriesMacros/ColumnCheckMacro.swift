@@ -198,7 +198,10 @@ private func diagnoseUnrepresentableColumn(
             \(defaultValue.map { "'\($0)'" } ?? "Type") is not representable as a column; conform \
             it to 'QueryBindable' to store it as its raw value
             """
-            : "\(defaultValue.map { "'\($0)'" } ?? "Type") is not representable as a column"
+            : """
+            \(defaultValue.map { "'\($0)'" } ?? "Type") is not a '@Selection' or representable as \
+            a column
+            """
         ),
         fixIts: fixIts
       )
@@ -214,15 +217,27 @@ private func diagnoseUnrepresentableColumn(
   case .json:
     message = "'\(type)' is not representable as a column"
     fixIts.insert(
-      .replace(
-        message: MacroExpansionFixItMessage(
-          "Apply '@Column(as: \(type).JSONRepresentation.self)' to store as JSON"
+      contentsOf: [
+        .replace(
+          message: MacroExpansionFixItMessage(
+            "Apply '@Column(as: \(type).JSONRepresentation.self)' to store as JSON"
+          ),
+          oldNode: declaration,
+          newNode: declaration.applyingColumnFixIt(
+            "@Column(as: \(raw: type).JSONRepresentation.self)"
+          )
         ),
-        oldNode: declaration,
-        newNode: declaration.applyingColumnFixIt(
-          "@Column(as: \(raw: type).JSONRepresentation.self)"
-        )
-      ),
+        // TODO: Hide behind 'SQLite' trait when introduced in the future
+        .replace(
+          message: MacroExpansionFixItMessage(
+            "Apply '@Column(as: \(type).JSONBRepresentation.self)' to store as JSONB"
+          ),
+          oldNode: declaration,
+          newNode: declaration.applyingColumnFixIt(
+            "@Column(as: \(raw: type).JSONBRepresentation.self)"
+          )
+        ),
+      ],
       at: 0
     )
   case .rawRepresentation:
@@ -260,7 +275,7 @@ extension DeclSyntaxProtocol {
       var filtered = Array(attributes).filter { element in
         guard case .attribute(let attribute) = element else { return true }
         let name = attribute.attributeName.trimmedDescription
-        return name != "_ColumnCheck" && name != "_CaseCheck" && name != "Column"
+        return name != "ColumnCheck" && name != "CaseCheck" && name != "Column"
           && name != "Columns"
       }
       filtered.insert(.attribute(attribute), at: filtered.startIndex)

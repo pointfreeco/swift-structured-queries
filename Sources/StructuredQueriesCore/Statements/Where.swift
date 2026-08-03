@@ -452,27 +452,44 @@ extension Where: SelectStatement {
     asSelect().order(by: ordering)
   }
 
-  /// A select statement for the filtered table with a limit and optional offset.
+  /// A select statement for the filtered table with the given limit.
   ///
-  /// - Parameters:
-  ///   - maxLength: A closure that produces a `LIMIT` expression from this table's columns.
-  ///   - offset: A closure that produces an `OFFSET` expression from this table's columns.
-  /// - Returns: A select statement with a limit and optional offset.
-  public func limit(
-    _ maxLength: (From.TableColumns) -> some QueryExpression<Int>,
-    offset: ((From.TableColumns) -> some QueryExpression<Int>)? = nil
-  ) -> SelectOf<From> {
-    asSelect().limit(maxLength, offset: offset)
+  /// - Parameter maxLength: An expression for the select's `LIMIT` clause, or `nil` for no limit.
+  /// - Returns: A select statement with the given limit.
+  public func limit(_ maxLength: (any QueryExpression<Int>)?) -> SelectOf<From> {
+    asSelect().limit(maxLength)
   }
 
-  /// A select statement for the filtered table with a limit and optional offset.
+  /// A select statement for the filtered table with the given limit.
   ///
-  /// - Parameters:
-  ///   - maxLength: An integer limit for the select's `LIMIT` clause.
-  ///   - offset: An optional integer offset of the select's `OFFSET` clause.
-  /// - Returns: A select statement with a limit and optional offset.
-  public func limit(_ maxLength: Int, offset: Int? = nil) -> SelectOf<From> {
-    asSelect().limit(maxLength, offset: offset)
+  /// - Parameter maxLength: A result builder closure that returns an expression for the select's
+  ///   `LIMIT` clause from this table's columns.
+  /// - Returns: A select statement with the given limit.
+  public func limit(
+    @QueryFragmentBuilder<Int>
+    _ maxLength: (From.TableColumns) -> [QueryFragment]
+  ) -> SelectOf<From> {
+    asSelect().limit(maxLength)
+  }
+
+  /// A select statement for the filtered table with the given offset.
+  ///
+  /// - Parameter offset: An expression for the select's `OFFSET` clause, or `nil` for no offset.
+  /// - Returns: A select statement with the given offset.
+  public func offset(_ offset: (any QueryExpression<Int>)?) -> SelectOf<From> {
+    asSelect().offset(offset)
+  }
+
+  /// A select statement for the filtered table with the given offset.
+  ///
+  /// - Parameter offset: A result builder closure that returns an expression for the select's
+  ///   `OFFSET` clause from this table's columns.
+  /// - Returns: A select statement with the given offset.
+  public func offset(
+    @QueryFragmentBuilder<Int>
+    _ offset: (From.TableColumns) -> [QueryFragment]
+  ) -> SelectOf<From> {
+    asSelect().offset(offset)
   }
 
   /// A select statement for the filtered table's row count.

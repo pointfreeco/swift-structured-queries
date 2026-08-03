@@ -356,6 +356,16 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func emptyReturning() {
+      assertQuery(
+        Reminder.none.update { $0.isCompleted.toggle() }.returning(\.id)
+      ) {
+        """
+
+        """
+      }
+    }
   }
 
   @Suite struct SelectionUpdateTests {

@@ -3,6 +3,7 @@
   import Foundation
   import InlineSnapshotTesting
   import StructuredQueries
+  import StructuredQueriesSQLite
   import Tagged
   import Testing
   import _StructuredQueriesSQLite

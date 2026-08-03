@@ -37,6 +37,22 @@ extension QueryFragmentBuilder<Bool> {
   ) -> [QueryFragment] {
     [expression.queryFragment]
   }
+
+  public static func buildExpression(_ expression: Never?) -> [QueryFragment] {
+    []
+  }
+}
+
+extension QueryFragmentBuilder<Int> {
+  public static func buildExpression(
+    _ expression: some QueryExpression<Int>
+  ) -> [QueryFragment] {
+    [expression.queryFragment]
+  }
+
+  public static func buildExpression(_ expression: Never?) -> [QueryFragment] {
+    []
+  }
 }
 
 extension QueryFragmentBuilder<()> {

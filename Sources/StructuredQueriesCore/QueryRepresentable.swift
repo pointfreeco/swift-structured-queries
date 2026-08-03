@@ -23,6 +23,39 @@ public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
 
   /// Unwraps a value from this representation.
   var queryOutput: QueryOutput { get }
+
+  /// A query fragment that prepares a stored expression for decoding.
+  ///
+  /// Result columns in a `SELECT` or `RETURNING` clause are rendered through this function. The
+  /// default implementation returns the fragment unchanged.
+  ///
+  /// - Parameter queryFragment: A fragment representing a stored expression.
+  /// - Returns: A fragment that can be decoded by this representation.
+  static func queryFragment(decoding queryFragment: QueryFragment) -> QueryFragment
+
+  static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment
+
+  static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment
+}
+
+extension QueryRepresentable {
+  @inlinable
+  @inline(__always)
+  public static func queryFragment(decoding queryFragment: QueryFragment) -> QueryFragment {
+    queryFragment
+  }
+
+  @inlinable
+  @inline(__always)
+  public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+    queryFragment
+  }
+
+  @inlinable
+  @inline(__always)
+  public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+    queryFragment
+  }
 }
 
 extension QueryRepresentable where Self: QueryDecodable, Self == QueryOutput {
@@ -41,7 +74,11 @@ extension QueryRepresentable where Self: QueryDecodable, Self == QueryOutput {
 
 extension [UInt8]: QueryRepresentable {}
 
-extension Bool: QueryRepresentable {}
+extension Bool: QueryRepresentable {
+  public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+    "json(CASE \(queryFragment) WHEN 0 THEN 'false' WHEN 1 THEN 'true' END)"
+  }
+}
 
 extension Double: QueryRepresentable {}
 
