@@ -7,6 +7,7 @@ struct StructuredQueriesPlugin: CompilerPlugin {
     BindMacro.self,
     ColumnCheckFailJSONMacro.self,
     ColumnCheckFailMacro.self,
+    ColumnCheckFailRawRepresentableMacro.self,
     ColumnCheckGroupMacro.self,
     ColumnCheckPassMacro.self,
     ColumnMacro.self,
