@@ -10,6 +10,20 @@ extension SnapshotTests {
   @Suite struct JSONFunctionsTests {
     @Dependency(\.defaultDatabase) var db
 
+    init() throws {
+      try db.execute(
+        #sql(
+          """
+          CREATE TABLE "docs" (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "tags" TEXT NOT NULL,
+            "optionalTags" TEXT
+          )
+          """
+        )
+      )
+    }
+
     @Test func jsonGroupArray() {
       assertQuery(
         Reminder.select {
@@ -142,7 +156,7 @@ extension SnapshotTests {
           .limit(2)
       ) {
         """
-        SELECT "users"."id" AS "id", "users"."name" AS "name", "reminders"."id" AS "id", "reminders"."assignedUserID" AS "assignedUserID", "reminders"."dueDate" AS "dueDate", "reminders"."isCompleted" AS "isCompleted", "reminders"."isFlagged" AS "isFlagged", "reminders"."notes" AS "notes", "reminders"."priority" AS "priority", "reminders"."remindersListID" AS "remindersListID", "reminders"."title" AS "title", "reminders"."updatedAt" AS "updatedAt", json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."rowid") IS NOT (NULL)) AS "tags"
+        SELECT "users"."id" AS "id", "users"."name" AS "name", "reminders"."id" AS "id", "reminders"."assignedUserID" AS "assignedUserID", "reminders"."dueDate" AS "dueDate", "reminders"."isCompleted" AS "isCompleted", "reminders"."isFlagged" AS "isFlagged", "reminders"."notes" AS "notes", "reminders"."priority" AS "priority", "reminders"."remindersListID" AS "remindersListID", "reminders"."title" AS "title", "reminders"."updatedAt" AS "updatedAt", json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', "tags"."id", 'title', "tags"."title") END) FILTER (WHERE ("tags"."rowid") IS NOT (NULL)) AS "tags"
         FROM "reminders"
         LEFT JOIN "remindersTags" ON ("reminders"."id") = ("remindersTags"."reminderID")
         LEFT JOIN "tags" ON ("remindersTags"."tagID") = ("tags"."id")
@@ -228,7 +242,7 @@ extension SnapshotTests {
           .limit(1)
       ) {
         """
-        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", json_group_array(DISTINCT CASE WHEN ("milestones"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("milestones"."id"), 'remindersListID', json_quote("milestones"."remindersListID"), 'title', json_quote("milestones"."title")) END) FILTER (WHERE ("milestones"."rowid") IS NOT (NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")) END) FILTER (WHERE ("reminders"."rowid") IS NOT (NULL)) AS "reminders"
+        SELECT "remindersLists"."id" AS "id", "remindersLists"."color" AS "color", "remindersLists"."title" AS "title", "remindersLists"."position" AS "position", json_group_array(DISTINCT CASE WHEN ("milestones"."rowid") IS NOT (NULL) THEN json_object('id', "milestones"."id", 'remindersListID', "milestones"."remindersListID", 'title', "milestones"."title") END) FILTER (WHERE ("milestones"."rowid") IS NOT (NULL)) AS "milestones", json_group_array(DISTINCT CASE WHEN ("reminders"."rowid") IS NOT (NULL) THEN json_object('id', "reminders"."id", 'assignedUserID', "reminders"."assignedUserID", 'dueDate', "reminders"."dueDate", 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', "reminders"."notes", 'priority', "reminders"."priority", 'remindersListID', "reminders"."remindersListID", 'title', "reminders"."title", 'updatedAt', "reminders"."updatedAt") END) FILTER (WHERE ("reminders"."rowid") IS NOT (NULL)) AS "reminders"
         FROM "remindersLists"
         LEFT JOIN "milestones" ON ("remindersLists"."id") = ("milestones"."remindersListID")
         LEFT JOIN "reminders" ON ("remindersLists"."id") = ("reminders"."remindersListID")
@@ -319,27 +333,6 @@ extension SnapshotTests {
       }
     }
 
-    @Test func jsonPatch() {
-      assertQuery(Values(#bind(["a": 1]).jsonPatch(#bind(["b": 2])))) {
-        """
-        SELECT json_patch('{
-          "a" : 1
-        }', '{
-          "b" : 2
-        }')
-        """
-      } results: {
-        """
-        ┌───────────┐
-        │ [         │
-        │   "a": 1, │
-        │   "b": 2  │
-        │ ]         │
-        └───────────┘
-        """
-      }
-    }
-
     @Test func jsonObject() {
       assertQuery(
         Reminder
@@ -347,7 +340,7 @@ extension SnapshotTests {
           .select { ($0, $1.jsonObject()) }
       ) {
         """
-        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", json_object('id', json_quote("remindersLists"."id"), 'color', json_quote("remindersLists"."color"), 'title', json_quote("remindersLists"."title"), 'position', json_quote("remindersLists"."position"))
+        SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt", json_object('id', "remindersLists"."id", 'color', "remindersLists"."color", 'title', "remindersLists"."title", 'position', "remindersLists"."position")
         FROM "reminders"
         JOIN "remindersLists" ON ("reminders"."remindersListID") = ("remindersLists"."id")
         """
@@ -494,17 +487,6 @@ extension SnapshotTests {
 
     @Test func jsonGroupArrayOfJSONColumns() throws {
       try db.execute(
-        #sql(
-          """
-          CREATE TABLE "docs" (
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "tags" TEXT NOT NULL,
-            "optionalTags" TEXT
-          )
-          """
-        )
-      )
-      try db.execute(
         Doc.insert {
           [
             Doc.Draft(tags: ["a", "b"], optionalTags: ["c"]),
@@ -536,6 +518,237 @@ extension SnapshotTests {
       }
     }
 
+    @Test func jsonSet() throws {
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc
+          .update {
+            $0.tags = $0.tags
+              .jsonSet(\.[0], "z")
+              .jsonSet(\.[1], "y")
+          }
+          .returning(\.tags)
+      ) {
+        """
+        UPDATE "docs"
+        SET "tags" = json_set("docs"."tags", '$[0]', 'z', '$[1]', 'y')
+        RETURNING "tags"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "z", │
+        │   [1]: "y"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+      assertQuery(
+        Doc
+          .update {
+            $0.tags = $0.tags
+              .jsonAppend("c")
+              .jsonAppend("d")
+          }
+          .returning(\.tags)
+      ) {
+        """
+        UPDATE "docs"
+        SET "tags" = json_insert("docs"."tags", '$[#]', 'c', '$[#]', 'd')
+        RETURNING "tags"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "z", │
+        │   [1]: "y", │
+        │   [2]: "c", │
+        │   [3]: "d"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func jsonRemoveAndReplace() throws {
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b", "c"])
+        }
+      )
+      assertQuery(
+        Doc
+          .update {
+            $0.tags = $0.tags
+              .jsonReplace(\.[0], "z")
+              .jsonReplace(\.[1], "y")
+          }
+          .returning(\.tags)
+      ) {
+        """
+        UPDATE "docs"
+        SET "tags" = json_replace("docs"."tags", '$[0]', 'z', '$[1]', 'y')
+        RETURNING "tags"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "z", │
+        │   [1]: "y", │
+        │   [2]: "c"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+      assertQuery(
+        Doc
+          .update {
+            $0.tags = $0.tags
+              .jsonRemove(\.[0])
+              .jsonRemove(\.[0])
+          }
+          .returning(\.tags)
+      ) {
+        """
+        UPDATE "docs"
+        SET "tags" = json_remove("docs"."tags", '$[0]', '$[0]')
+        RETURNING "tags"
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ [          │
+        │   [0]: "c" │
+        │ ]          │
+        └────────────┘
+        """
+      }
+    }
+
+    @Test func jsonbExtract() throws {
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { ($0.tags.jsonExtract(\.[0]), $0.tags.jsonbExtract(\.[1])) }
+      ) {
+        """
+        SELECT json_extract("docs"."tags", '$[0]'), jsonb_extract("docs"."tags", '$[1]')
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────┬─────┐
+        │ "a" │ "b" │
+        └─────┴─────┘
+        """
+      }
+    }
+
+    @Test func `jsonbExtract from a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbExtract(\.self) }
+      ) {
+        """
+        SELECT json(jsonb_extract("docs"."tags", '$'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "a", │
+        │   [1]: "b"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func `jsonbSet on a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbSet(\.[0], "z").jsonbSet(\.[1], "y") }
+      ) {
+        """
+        SELECT json(jsonb_set("docs"."tags", '$[0]', 'z', '$[1]', 'y'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "z", │
+        │   [1]: "y"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
+    @Test func `jsonbAppend and jsonbRemove on a JSONRepresentation`() throws {
+      try db.execute(Doc.delete())
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbAppend("c") }
+      ) {
+        """
+        SELECT json(jsonb_insert("docs"."tags", '$[#]', 'c'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "a", │
+        │   [1]: "b", │
+        │   [2]: "c"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+      assertQuery(
+        Doc.select { $0.tags.jsonbRemove(\.[0]) }
+      ) {
+        """
+        SELECT json(jsonb_remove("docs"."tags", '$[0]'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ [          │
+        │   [0]: "b" │
+        │ ]          │
+        └────────────┘
+        """
+      }
+    }
+
     @Test func codableJSONGroup() throws {
       try db.execute(
         #sql(
@@ -561,7 +774,7 @@ extension SnapshotTests {
           .select { GroupedItem.Columns(bucket: $0.bucket, items: $0.jsonGroupArray()) }
       ) {
         """
-        SELECT "items"."bucket" AS "bucket", json_group_array(json_object('bucket', json_quote("items"."bucket"), 'value', json_quote("items"."value"))) AS "items"
+        SELECT "items"."bucket" AS "bucket", json_group_array(json_object('bucket', "items"."bucket", 'value', "items"."value")) AS "items"
         FROM "items"
         GROUP BY "items"."bucket"
         """

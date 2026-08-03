@@ -288,7 +288,7 @@ extension SnapshotTests {
           .select { $joinTags($2.jsonGroupArray()) }
       ) {
         """
-        SELECT "joinTags"(json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."rowid") IS NOT (NULL)))
+        SELECT "joinTags"(json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', "tags"."id", 'title', "tags"."title") END) FILTER (WHERE ("tags"."rowid") IS NOT (NULL)))
         FROM "reminders"
         LEFT JOIN "remindersTags" ON ("reminders"."id") = ("remindersTags"."reminderID")
         LEFT JOIN "tags" ON ("remindersTags"."tagID") = ("tags"."id")
@@ -323,7 +323,7 @@ extension SnapshotTests {
         Reminder.select { $isJSONValid($0.jsonObject(), true) }.limit(1)
       ) {
         """
-        SELECT "isJSONValid"(json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")), 1)
+        SELECT "isJSONValid"(json_object('id', "reminders"."id", 'assignedUserID', "reminders"."assignedUserID", 'dueDate', "reminders"."dueDate", 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', "reminders"."notes", 'priority', "reminders"."priority", 'remindersListID', "reminders"."remindersListID", 'title', "reminders"."title", 'updatedAt', "reminders"."updatedAt"), 1)
         FROM "reminders"
         LIMIT 1
         """

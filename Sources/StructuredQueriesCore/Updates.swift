@@ -6,7 +6,7 @@
 /// To learn more, see <doc:UpdateStatements>.
 @dynamicMemberLookup
 public struct Updates<Base: Table> {
-  private var updates: [(String, QueryFragment)] = []
+  package var updates: [(String, QueryFragment)] = []
 
   init(_ body: (inout Self) -> Void) {
     body(&self)

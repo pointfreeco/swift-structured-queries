@@ -6,22 +6,35 @@ Apply SQLite functions to SQL expressions.
 
 ### Strings
 
-- ``StructuredQueriesCore/QueryExpression/unicode()``
+- ``QueryExpression/unicode()``
 
 ### Numeric
 
-- ``StructuredQueriesCore/QueryExpression/randomblob()``
-- ``StructuredQueriesCore/QueryExpression/zeroblob()``
+- ``QueryExpression/randomblob()``
+- ``QueryExpression/zeroblob()``
 
 ### Boolean Query optimization
 
-- ``StructuredQueriesCore/QueryExpression/likelihood(_:)``
-- ``StructuredQueriesCore/QueryExpression/likely()``
-- ``StructuredQueriesCore/QueryExpression/unlikely()``
+- ``QueryExpression/likelihood(_:)``
+- ``QueryExpression/likely()``
+- ``QueryExpression/unlikely()``
 
 ### JSON functions
 
-- ``StructuredQueriesCore/QueryExpression/jsonArrayLength()``
-- ``StructuredQueriesCore/QueryExpression/jsonGroupArray(distinct:order:filter:)``
-- ``StructuredQueriesCore/TableDefinition/jsonObject()``
-- ``StructuredQueriesCore/QueryExpression/jsonPatch(_:)``
+- ``QueryExpression/jsonArrayLength()``
+- ``QueryExpression/jsonGroupArray(distinct:order:filter:)``
+- ``TableDefinition/jsonObject()``
+- ``QueryExpression/jsonExtract(_:)``
+- ``QueryExpression/jsonInsert(_:_:)``
+- ``QueryExpression/jsonAppend(_:_:)``
+- ``QueryExpression/jsonAppend(_:)``
+- ``QueryExpression/jsonRemove(_:)``
+- ``QueryExpression/jsonReplace(_:_:)``
+- ``QueryExpression/jsonSet(_:_:)``
+- ``QueryExpression/jsonbExtract(_:)``
+- ``QueryExpression/jsonbInsert(_:_:)``
+- ``QueryExpression/jsonbAppend(_:_:)``
+- ``QueryExpression/jsonbAppend(_:)``
+- ``QueryExpression/jsonbRemove(_:)``
+- ``QueryExpression/jsonbReplace(_:_:)``
+- ``QueryExpression/jsonbSet(_:_:)``

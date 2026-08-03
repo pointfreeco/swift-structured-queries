@@ -1199,8 +1199,8 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Foo
-              public let count = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("count", keyPath: \QueryValue.count)
-              public let name = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("name", keyPath: \QueryValue.name)
+              public let count = StructuredQueriesCore._CaseColumn<QueryValue, Int>.for("count", keyPath: \QueryValue.count)
+              public let name = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -3061,8 +3061,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let photo = StructuredQueriesCore._TableColumn<QueryValue, Photo?>.for("photo", keyPath: \QueryValue.photo)
-            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public let photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3202,8 +3202,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let photo = StructuredQueriesCore._TableColumn<QueryValue, Photo?>.for("photo", keyPath: \QueryValue.photo)
-            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public let photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3342,8 +3342,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let photo = StructuredQueriesCore._TableColumn<QueryValue, Photo?>.for("photo", keyPath: \QueryValue.photo)
-            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public let photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3466,6 +3466,32 @@ extension SnapshotTests {
       }
     }
 
+    @Test func enumCaseWithoutSingleAssociatedValueDiagnostic() {
+      assertMacro {
+        """
+        @Table
+        enum Post {
+          case photo(Photo)
+          case note(title: String, body: String)
+          case untitled
+        }
+        """
+      } diagnostics: {
+        """
+        @Table
+        enum Post {
+          case photo(Photo)
+          case note(title: String, body: String)
+          ┬─────────────────────────────────────
+          ╰─ 🛑 Table case must contain a single associated value representing one or more columns
+          case untitled
+          ┬────────────
+          ╰─ 🛑 Table case must contain a single associated value representing one or more columns
+        }
+        """
+      }
+    }
+
     @Test func enumFirstNames() {
       assertMacro {
         """
@@ -3483,8 +3509,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let photo = StructuredQueriesCore._TableColumn<QueryValue, Photo?>.for("photo", keyPath: \QueryValue.photo)
-            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note", keyPath: \QueryValue.note, default: "")
+            public let photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
+            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3623,7 +3649,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let note = StructuredQueriesCore._TableColumn<QueryValue, String?>.for("note_text", keyPath: \QueryValue.note, default: "")
+            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note_text", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3735,7 +3761,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let timestamp = StructuredQueriesCore._TableColumn<QueryValue, Date.UnixTimeRepresentation?>.for("timestamp", keyPath: \QueryValue.timestamp)
+            public let timestamp = StructuredQueriesCore._CaseColumn<QueryValue, Date.UnixTimeRepresentation>.for("timestamp", keyPath: \QueryValue.timestamp)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3850,8 +3876,8 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Attachment
-              public let image = StructuredQueriesCore._TableColumn<QueryValue, Image?>.for("image", keyPath: \QueryValue.image)
-              public let videoPreview = StructuredQueriesCore._TableColumn<QueryValue, VideoPreview?>.for("video_preview", keyPath: \QueryValue.videoPreview)
+              public let image = StructuredQueriesCore._CaseColumn<QueryValue, Image>.for("image", keyPath: \QueryValue.image)
+              public let videoPreview = StructuredQueriesCore._CaseColumn<QueryValue, VideoPreview>.for("video_preview", keyPath: \QueryValue.videoPreview)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
