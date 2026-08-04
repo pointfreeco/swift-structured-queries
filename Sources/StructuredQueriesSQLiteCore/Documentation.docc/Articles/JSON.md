@@ -333,6 +333,8 @@ each of them:
     if it already exists.
   * ``StructuredQueriesCore/QueryExpression/jsonAppend(_:_:)`` appends an element to an array at
     a path.
+  * ``StructuredQueriesCore/QueryExpression/jsonArrayInsert(_:_:)`` inserts an element before an
+    array element at a path.
   * ``StructuredQueriesCore/QueryExpression/jsonRemove(_:)`` removes a value at a path.
 
 For example, to rename an author without touching the rest of the document:
@@ -549,6 +551,8 @@ column or fed into another JSON function, sparing SQLite a round trip through te
 - ``StructuredQueriesCore/QueryExpression/jsonbInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonAppend(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbAppend(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonArrayInsert(_:_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbArrayInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonRemove(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbRemove(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonReplace(_:_:)``
