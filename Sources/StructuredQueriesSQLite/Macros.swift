@@ -112,3 +112,63 @@ public macro DatabaseFunction<R: QueryBindable>(
     module: "StructuredQueriesSQLiteMacros",
     type: "DatabaseFunctionMacro"
   )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro StructuredQueriesIsolationCheck<each Input, Output>(
+  collation: (repeat each Input) throws -> Output
+) =
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "IsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro StructuredQueriesIsolationCheck<each Input, Output>(
+  collation: @MainActor (repeat each Input) throws -> Output
+) =
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "MainActorIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro StructuredQueriesIsolationCheck<each Input, Output>(
+  function: (repeat each Input) throws -> Output
+) =
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "IsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro StructuredQueriesIsolationCheck<each Input, Output>(
+  function: @MainActor (repeat each Input) throws -> Output
+) =
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "MainActorIsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro StructuredQueriesIsolationCheck(
+  property: () -> Void
+) =
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "IsolationCheckMacro"
+  )
+
+@_documentation(visibility: private)
+@freestanding(declaration)
+public macro StructuredQueriesIsolationCheck(
+  property: @MainActor () -> Void
+) =
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "MainActorIsolationCheckMacro"
+  )
