@@ -769,9 +769,6 @@ extension QueryExpression where QueryValue: _AnyJSONRepresentable {
   /// Inserts a value before an array element at a given path in this JSONB expression using the
   /// `jsonb_array_insert` function.
   ///
-  /// Works like ``jsonArrayInsert(_:_:)``, except the result is in SQLite's binary JSONB format,
-  /// making it appropriate for storage contexts, like assignment to a JSONB column.
-  ///
   /// - Parameters:
   ///   - path: A key path to an array element.
   ///   - value: A value to insert before the element.
