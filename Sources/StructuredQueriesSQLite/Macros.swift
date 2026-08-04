@@ -1,6 +1,19 @@
 public import StructuredQueriesCore
 import StructuredQueriesSQLiteCore
 
+/// Defines and implements a conformance to the ``/StructuredQueriesSQLiteCore/DatabaseCollation``
+/// protocol.
+///
+/// - Parameters
+///   - name: The collating sequence's name. Defaults to the name of the function the macro is
+///     applied to.
+@attached(peer, names: overloaded, prefixed(`$`))
+public macro DatabaseCollation(_ name: String = "") =
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "DatabaseCollationMacro"
+  )
+
 /// Defines and implements a conformance to the ``/StructuredQueriesSQLiteCore/DatabaseFunction``
 /// protocol.
 ///

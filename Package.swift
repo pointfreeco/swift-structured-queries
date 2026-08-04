@@ -193,7 +193,8 @@ let package = Package(
     .target(
       name: "_StructuredQueriesSQLite",
       dependencies: [
-        "StructuredQueriesSQLite"
+        "StructuredQueriesSQLite",
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
   ],
