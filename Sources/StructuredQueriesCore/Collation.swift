@@ -18,9 +18,15 @@
 ///
 /// Collating sequences implemented in Swift can be defined using the `@DatabaseCollation` macro,
 /// which generates a conformance to this protocol.
-public protocol Collation {
+public protocol Collation: QueryExpression<Never> {
   /// The name of the collating sequence.
   var name: String { get }
+}
+
+extension Collation {
+  public var queryFragment: QueryFragment {
+    "\(quote: name)"
+  }
 }
 
 /// A collating sequence that is referenced by name.
@@ -78,7 +84,7 @@ extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
   /// - Parameter collation: A collating sequence.
   /// - Returns: An expression that is compared using the given collating sequence.
   public func collate(_ collation: some Collation) -> some QueryExpression<QueryValue> {
-    SQLQueryExpression("\(self) COLLATE \(quote: collation.name)")
+    SQLQueryExpression("\(self) COLLATE \(collation)")
   }
 }
 
