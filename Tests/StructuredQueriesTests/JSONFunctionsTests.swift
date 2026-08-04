@@ -633,6 +633,68 @@ extension SnapshotTests {
       }
     }
 
+    @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+    @Test func jsonArrayInsert() throws {
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["b", "c"])
+        }
+      )
+      assertQuery(
+        Doc
+          .update {
+            $0.tags = $0.tags
+              .jsonArrayInsert(\.[0], "a")
+              .jsonArrayInsert(\.[1], "z")
+          }
+          .returning(\.tags)
+      ) {
+        """
+        UPDATE "docs"
+        SET "tags" = json_array_insert("docs"."tags", '$[0]', 'a', '$[1]', 'z')
+        RETURNING "tags"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "a", │
+        │   [1]: "z", │
+        │   [2]: "b", │
+        │   [3]: "c"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
+    @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+    @Test func jsonbArrayInsert() throws {
+      try db.execute(
+        Doc.insert {
+          Doc.Draft(tags: ["a", "b"])
+        }
+      )
+      assertQuery(
+        Doc.select { $0.tags.jsonbArrayInsert(\.[0], "z") }
+      ) {
+        """
+        SELECT json(jsonb_array_insert("docs"."tags", '$[0]', 'z'))
+        FROM "docs"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ [           │
+        │   [0]: "z", │
+        │   [1]: "a", │
+        │   [2]: "b"  │
+        │ ]           │
+        └─────────────┘
+        """
+      }
+    }
+
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
     @Test func jsonbExtract() throws {
       try db.execute(

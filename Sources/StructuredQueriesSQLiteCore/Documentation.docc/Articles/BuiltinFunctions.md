@@ -29,6 +29,7 @@ Apply SQLite functions to SQL expressions.
 - ``StructuredQueriesCore/QueryExpression/jsonInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonAppend(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonAppend(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonArrayInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonRemove(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonReplace(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonSet(_:_:)``
@@ -36,6 +37,7 @@ Apply SQLite functions to SQL expressions.
 - ``StructuredQueriesCore/QueryExpression/jsonbInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbAppend(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbAppend(_:)``
+- ``StructuredQueriesCore/QueryExpression/jsonbArrayInsert(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbRemove(_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbReplace(_:_:)``
 - ``StructuredQueriesCore/QueryExpression/jsonbSet(_:_:)``
