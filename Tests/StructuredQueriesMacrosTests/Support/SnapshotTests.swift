@@ -13,6 +13,7 @@ import Testing
       "bind": BindMacro.self,
       "Column": ColumnMacro.self,
       "Columns": ColumnsMacro.self,
+      "DatabaseCollation": DatabaseCollationMacro.self,
       "DatabaseFunction": DatabaseFunctionMacro.self,
       "Ephemeral": EphemeralMacro.self,
       "Selection": TableMacro.self,
