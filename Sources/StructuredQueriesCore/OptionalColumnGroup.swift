@@ -24,9 +24,11 @@ where Values.QueryOutput: Table {
 
   public var queryFragment: QueryFragment { base.queryFragment }
 
-  public var _allColumns: [any TableColumnExpression] { base._allColumns }
+  public var _allColumns: TableColumnList<any TableColumnExpression> { base._allColumns }
 
-  public var _writableColumns: [any WritableTableColumnExpression] { base._writableColumns }
+  public var _writableColumns: TableColumnList<any WritableTableColumnExpression> {
+    base._writableColumns
+  }
 
   public subscript<Member>(
     dynamicMember keyPath: KeyPath<

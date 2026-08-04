@@ -79,39 +79,57 @@ where Values.QueryOutput: Table {
     )
   }
 
-  public var _allColumns: [any TableColumnExpression] {
-    Values.QueryOutput.TableColumns.allColumns.map { column in
-      func open<R, V>(
-        _ column: some TableColumnExpression<R, V>
-      ) -> any TableColumnExpression {
-        let keyPath = keyPath.appending(
-          path: unsafeDowncast(column.keyPath, to: KeyPath<Values.QueryOutput, V.QueryOutput>.self)
+  public var _allColumns: TableColumnList<any TableColumnExpression> {
+    TableColumnList(
+      nodes: [
+        .group(
+          name: name,
+          Values.QueryOutput.TableColumns.allColumns.transformingColumns { column in
+            func open<R, V>(
+              _ column: some TableColumnExpression<R, V>
+            ) -> any TableColumnExpression {
+              let keyPath = keyPath.appending(
+                path: unsafeDowncast(
+                  column.keyPath, to: KeyPath<Values.QueryOutput, V.QueryOutput>.self
+                )
+              )
+              return TableColumn<Root, V>(
+                column.name,
+                keyPath: keyPath,
+                default: column.defaultValue
+              )
+            }
+            return open(column)
+          }
         )
-        return TableColumn<Root, V>(
-          column.name,
-          keyPath: keyPath,
-          default: column.defaultValue
-        )
-      }
-      return open(column)
-    }
+      ]
+    )
   }
 
-  public var _writableColumns: [any WritableTableColumnExpression] {
-    Values.QueryOutput.TableColumns.writableColumns.map { column in
-      func open<R, V>(
-        _ column: some WritableTableColumnExpression<R, V>
-      ) -> any WritableTableColumnExpression {
-        let keyPath = keyPath.appending(
-          path: unsafeDowncast(column.keyPath, to: KeyPath<Values.QueryOutput, V.QueryOutput>.self)
+  public var _writableColumns: TableColumnList<any WritableTableColumnExpression> {
+    TableColumnList(
+      nodes: [
+        .group(
+          name: name,
+          Values.QueryOutput.TableColumns.writableColumns.transformingColumns { column in
+            func open<R, V>(
+              _ column: some WritableTableColumnExpression<R, V>
+            ) -> any WritableTableColumnExpression {
+              let keyPath = keyPath.appending(
+                path: unsafeDowncast(
+                  column.keyPath, to: KeyPath<Values.QueryOutput, V.QueryOutput>.self
+                )
+              )
+              return TableColumn<Root, V>(
+                column.name,
+                keyPath: keyPath,
+                default: column.defaultValue
+              )
+            }
+            return open(column)
+          }
         )
-        return TableColumn<Root, V>(
-          column.name,
-          keyPath: keyPath,
-          default: column.defaultValue
-        )
-      }
-      return open(column)
-    }
+      ]
+    )
   }
 }

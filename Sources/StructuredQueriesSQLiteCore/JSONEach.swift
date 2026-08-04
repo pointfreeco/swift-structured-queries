@@ -436,11 +436,11 @@ public struct JSONEach<
   public struct TableColumns: TableDefinition, Sendable {
     public typealias QueryValue = JSONEach
 
-    public static var allColumns: [any TableColumnExpression] {
+    public static var allColumns: TableColumnList<any TableColumnExpression> {
       [TableColumns().key, TableColumns().value]
     }
 
-    public static var writableColumns: [any WritableTableColumnExpression] { [] }
+    public static var writableColumns: TableColumnList<any WritableTableColumnExpression> { [] }
 
     /// The key of the current element: its index in a JSON array, or its name in a JSON object.
     public var key: GeneratedColumn<JSONEach, Key> {
@@ -517,11 +517,11 @@ public struct JSONBEach<
   public struct TableColumns: TableDefinition, Sendable {
     public typealias QueryValue = JSONBEach
 
-    public static var allColumns: [any TableColumnExpression] {
+    public static var allColumns: TableColumnList<any TableColumnExpression> {
       [TableColumns().key, TableColumns().value]
     }
 
-    public static var writableColumns: [any WritableTableColumnExpression] { [] }
+    public static var writableColumns: TableColumnList<any WritableTableColumnExpression> { [] }
 
     /// The key of the current element: its index in a JSON array, or its name in a JSON object.
     public var key: GeneratedColumn<JSONBEach, Key> {
