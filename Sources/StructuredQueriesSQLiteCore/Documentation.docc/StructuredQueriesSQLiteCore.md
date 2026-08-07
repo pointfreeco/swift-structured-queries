@@ -16,6 +16,7 @@ custom database functions, and more.
 - <doc:BuiltinFunctions>
 - <doc:JSON>
 - <doc:CustomFunctions>
+- <doc:CustomCollations>
 - <doc:Triggers>
 - <doc:Views>
 - <doc:FullTextSearch>
@@ -31,6 +32,9 @@ custom database functions, and more.
 ### Custom collations
 
 - ``StructuredQueriesCore/Collation``
+- ``StructuredQueriesCore/NamedCollation``
+- ``StructuredQueriesCore/CollationOrder``
+- ``DatabaseCollation``
 
 ### Casting
 

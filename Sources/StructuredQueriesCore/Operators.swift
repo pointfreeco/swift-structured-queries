@@ -656,14 +656,6 @@ extension QueryExpression where QueryValue == String {
     BinaryOperator(lhs: lhs, operator: "||", rhs: rhs)
   }
 
-  /// Returns an expression of this expression that is compared using the given collating sequence.
-  ///
-  /// - Parameter collation: A collating sequence name.
-  /// - Returns: An expression that is compared using the given collating sequence.
-  public func collate(_ collation: Collation) -> some QueryExpression<QueryValue> {
-    SQLQueryExpression("\(self) COLLATE \(collation)")
-  }
-
   /// A predicate expression from this string expression matched against another _via_ the `GLOB`
   /// operator.
   ///
