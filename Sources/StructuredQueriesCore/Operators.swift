@@ -471,28 +471,6 @@ extension QueryExpression where QueryValue: Numeric {
   }
 }
 
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-public prefix func - <QueryValue: Numeric>(
-  expression: any QueryExpression<QueryValue>
-) -> some QueryExpression<QueryValue> {
-  func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
-    SQLQueryExpression(UnaryOperator(operator: "-", base: expression, separator: ""))
-  }
-  return open(expression)
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-public prefix func + <QueryValue: Numeric>(
-  expression: any QueryExpression<QueryValue>
-) -> some QueryExpression<QueryValue> {
-  func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
-    SQLQueryExpression(UnaryOperator(operator: "+", base: expression, separator: ""))
-  }
-  return open(expression)
-}
-
 extension SQLQueryExpression where QueryValue: Numeric {
   /// Adds to a numeric expression in an update clause.
   ///
@@ -611,17 +589,6 @@ extension QueryExpression where QueryValue: BinaryInteger {
   public static prefix func ~ (expression: Self) -> some QueryExpression<QueryValue> {
     UnaryOperator(operator: "~", base: expression, separator: "")
   }
-}
-
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-public prefix func ~ <QueryValue: BinaryInteger>(
-  expression: any QueryExpression<QueryValue>
-) -> some QueryExpression<QueryValue> {
-  func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
-    SQLQueryExpression(UnaryOperator(operator: "~", base: expression, separator: ""))
-  }
-  return open(expression)
 }
 
 extension SQLQueryExpression where QueryValue: BinaryInteger {

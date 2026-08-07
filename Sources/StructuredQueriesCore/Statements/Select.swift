@@ -336,7 +336,9 @@ public struct _SelectClauses: Sendable {
   @dynamicMemberLookup
 #endif
 public struct Select<Columns, From: Table, Joins>: Sendable {
-  // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
+  // NB: Heap-allocated storage works around a Swift 6.1 parameter pack compiler crash. Remove
+  //     'CopyOnWrite' when Swift 6.1 support is dropped, but benchmark first: it also makes
+  //     copies of 'Select' cheap.
   @CopyOnWrite var clauses = _SelectClauses()
 
   fileprivate var isEmpty: Bool {
@@ -463,19 +465,6 @@ extension Select {
   ) -> Select<(repeat each C1, C2.QueryValue), From, ()>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == () {
     select { $0[keyPath: selection] }
-  }
-
-  // NB: This overload is required for CTEs with join clauses to avoid a compiler bug.
-  /// Creates a new select statement from this one by selecting the given result column.
-  ///
-  /// - Parameter selection: A closure that selects a result column from this select's tables.
-  /// - Returns: A new select statement that selects the given column.
-  @_disfavoredOverload
-  public func select<C: QueryExpression, each J: Table>(
-    _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C
-  ) -> Select<C.QueryValue, From, Joins>
-  where Columns == (), C.QueryValue: QueryRepresentable, Joins == (repeat each J) {
-    _select(selection)
   }
 
   /// Creates a new select statement from this one by selecting the given result column.
