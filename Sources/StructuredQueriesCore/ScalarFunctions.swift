@@ -75,12 +75,12 @@ extension QueryExpression where QueryValue: _OptionalPromotable {
   ///   `NULL` when both expressions are equal.
   public func nullif<Other: QueryExpression>(
     _ other: Other
-  ) -> some QueryExpression<QueryValue._Optionalized>
+  ) -> SQLQueryExpression<QueryValue._Optionalized>
   where
     Other.QueryValue: _OptionalPromotable,
     Other.QueryValue._Optionalized == QueryValue._Optionalized
   {
-    QueryFunction("nullif", self, other)
+    SQLQueryExpression(QueryFunction("nullif", self, other))
   }
 }
 

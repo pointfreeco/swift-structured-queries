@@ -395,17 +395,6 @@ extension QueryExpression where QueryValue == Bool {
   }
 }
 
-// NB: This overload is required due to an overload resolution bug of 'Updates[dynamicMember:]'.
-@_documentation(visibility: private)
-public prefix func ! (
-  expression: any QueryExpression<Bool>
-) -> some QueryExpression<Bool> {
-  func open(_ expression: some QueryExpression<Bool>) -> SQLQueryExpression<Bool> {
-    SQLQueryExpression(expression.not())
-  }
-  return open(expression)
-}
-
 extension SQLQueryExpression<Bool> {
   public mutating func toggle() {
     self = Self(not())
