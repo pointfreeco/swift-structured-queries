@@ -2840,7 +2840,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func `@Selection with empty struct`() {
+    @Test("@Selection with empty struct") func selectionWithEmptyStruct() {
       assertMacro {
         """
         @Selection
@@ -4063,7 +4063,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func `selection enum requires CasePaths trait`() {
+    @Test("selection enum requires CasePaths trait") func selectionEnumRequiresCasePathsTrait() {
       assertMacro {
         """
         @Selection enum Post {

@@ -644,7 +644,8 @@
         }
       }
 
-      @Test func `enum case with defaults isn't always decoded successfully`() {
+      @Test("enum case with defaults isn't always decoded successfully")
+      func enumCaseWithDefaultsIsntAlwaysDecodedSuccessfully() {
         assertQuery(
           Attachment.upsert {
             Attachment

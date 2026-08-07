@@ -366,7 +366,9 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `aggregate scalar quantities in JSON arrays`() throws {
+    @Test("aggregate scalar quantities in JSON arrays") func aggregateScalarQuantitiesInJSONArrays()
+      throws
+    {
       try db.execute(
         Profile.insert {
           Profile.Draft(favoriteNumbers: [42, 1729])
@@ -682,7 +684,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `jsonEach over a JSONBRepresentation`() {
+    @Test("jsonEach over a JSONBRepresentation") func jsonEachOverAJSONBRepresentation() {
       assertQuery(
         BlobTrip
           .join(BlobTrip.columns.geofence.jsonEach()) { _, _ in true }

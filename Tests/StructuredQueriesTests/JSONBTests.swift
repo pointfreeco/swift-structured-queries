@@ -677,7 +677,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `jsonSet on a JSONBRepresentation`() {
+    @Test("jsonSet on a JSONBRepresentation") func jsonSetOnAJSONBRepresentation() {
       assertQuery(
         Post.select { $0.notes.jsonSet(\.[0], "z") }
       ) {
@@ -1271,7 +1271,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `Multiple jsonSet's are fused`() throws {
+    @Test("Multiple jsonSet's are fused") func multipleJsonSetsAreFused() throws {
       try db.execute(Profile.delete())
       assertQuery(
         Profile.update {
@@ -1291,7 +1291,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `Multiple jsonReplace's are fused`() throws {
+    @Test("Multiple jsonReplace's are fused") func multipleJsonReplacesAreFused() throws {
       try db.execute(Profile.delete())
       assertQuery(
         Profile.update {
@@ -1311,7 +1311,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `Multiple jsonInsert's are fused`() throws {
+    @Test("Multiple jsonInsert's are fused") func multipleJsonInsertsAreFused() throws {
       try db.execute(Profile.delete())
       assertQuery(
         Profile.update {
