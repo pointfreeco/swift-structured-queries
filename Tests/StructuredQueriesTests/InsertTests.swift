@@ -716,14 +716,6 @@ extension SnapshotTests {
     }
 
     @Test func onConflict_invalidUpdateFilters() {
-      print(
-        Reminder.insert {
-          Reminder.Draft(remindersListID: 1)
-        } where: {
-          $0.isFlagged
-        }
-          .query.debugDescription
-      )
       withKnownIssue {
         assertQuery(
           Reminder.insert {
