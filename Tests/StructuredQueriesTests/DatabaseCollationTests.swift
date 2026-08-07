@@ -1,12 +1,17 @@
 import Dependencies
 import Foundation
 import InlineSnapshotTesting
-import SQLite3
 import StructuredQueries
 import StructuredQueriesSQLite
 import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite
+
+#if canImport(Darwin)
+  import SQLite3
+#else
+  import _StructuredQueriesSQLite3
+#endif
 
 extension SnapshotTests {
   @Suite struct DatabaseCollationTests {
@@ -66,16 +71,15 @@ extension SnapshotTests {
       }
     }
     @Test func deallocatedOwner() {
-      func makeCollation() -> some DatabaseCollation {
-        Engine().$reversed
-      }
-      let collation = makeCollation()
-      collation.install(database.handle)
+      var engines = [Engine()]
+      let reversed = engines[0].$reversed
+      reversed.install(database.handle)
+      engines.removeAll()
       // NB: A collating sequence cannot surface an error to SQLite, so the deallocated engine is
       //     reported as an issue and the comparison falls back to a byte-wise one.
       withKnownIssue {
         assertQuery(
-          RemindersList.select(\.title).order { $0.title.collate(collation) }
+          RemindersList.select(\.title).order { $0.title.collate(reversed) }
         ) {
           """
           SELECT "remindersLists"."title"
