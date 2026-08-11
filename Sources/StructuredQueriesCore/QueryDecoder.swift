@@ -6,61 +6,63 @@ public protocol QueryDecoder {
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]?
+  mutating func decode(_ columnType: [UInt8].Type) throws(QueryDecodingError) -> [UInt8]?
 
   /// Decodes a single value of the given type from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: Double.Type) throws -> Double?
+  mutating func decode(_ columnType: Double.Type) throws(QueryDecodingError) -> Double?
 
   /// Decodes a single value of the given type from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: Int64.Type) throws -> Int64?
+  mutating func decode(_ columnType: Int64.Type) throws(QueryDecodingError) -> Int64?
 
   /// Decodes a single value of the given type from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: UInt64.Type) throws -> UInt64?
+  mutating func decode(_ columnType: UInt64.Type) throws(QueryDecodingError) -> UInt64?
 
   /// Decodes a single value of the given type from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: String.Type) throws -> String?
+  mutating func decode(_ columnType: String.Type) throws(QueryDecodingError) -> String?
 
   /// Decodes a single value of the given type from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: Bool.Type) throws -> Bool?
+  mutating func decode(_ columnType: Bool.Type) throws(QueryDecodingError) -> Bool?
 
   /// Decodes a single value of the given type from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: Int.Type) throws -> Int?
+  mutating func decode(_ columnType: Int.Type) throws(QueryDecodingError) -> Int?
 
   /// Decodes a single value of the given type from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: Date.Type) throws -> Date?
+  mutating func decode(_ columnType: Date.Type) throws(QueryDecodingError) -> Date?
 
   /// Decodes a single value of the given type from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode(_ columnType: UUID.Type) throws -> UUID?
+  mutating func decode(_ columnType: UUID.Type) throws(QueryDecodingError) -> UUID?
 
   /// Decodes a single value of the given type starting from the current column.
   ///
   /// - Parameter columnType: The type to decode as.
   /// - Returns: A value of the requested type, or `nil` if the column is `NULL`.
-  mutating func decode<T: QueryRepresentable>(_ columnType: T.Type) throws -> T.QueryOutput?
+  mutating func decode<T: QueryRepresentable>(
+    _ columnType: T.Type
+  ) throws(QueryDecodingError) -> T.QueryOutput?
 }
 
 extension QueryDecoder {
@@ -72,7 +74,7 @@ extension QueryDecoder {
   @inline(__always)
   public mutating func decode<T: QueryRepresentable>(
     _ columnType: T.Type
-  ) throws -> T.QueryOutput? {
+  ) throws(QueryDecodingError) -> T.QueryOutput? {
     try T?(decoder: &self)?.queryOutput
   }
 
@@ -84,7 +86,7 @@ extension QueryDecoder {
   @inline(__always)
   public mutating func decodeColumns<each T: QueryRepresentable>(
     _ columnTypes: (repeat each T).Type
-  ) throws -> (repeat (each T).QueryOutput) {
+  ) throws(QueryDecodingError) -> (repeat (each T).QueryOutput) {
     try (repeat (each T)(decoder: &self).queryOutput)
   }
 
@@ -92,7 +94,7 @@ extension QueryDecoder {
   @inline(__always)
   public mutating func decode<T: QueryRepresentable<T>>(
     _ columnType: T.Type = T.self
-  ) throws -> T? {
+  ) throws(QueryDecodingError) -> T? {
     try T?(decoder: &self)?.queryOutput
   }
 
@@ -100,7 +102,7 @@ extension QueryDecoder {
   @inline(__always)
   public mutating func decode<Column: _TableColumnExpression>(
     _ column: @autoclosure () -> Column
-  ) throws -> Column.Value.QueryOutput? {
+  ) throws(QueryDecodingError) -> Column.Value.QueryOutput? {
     try Column.Value?(decoder: &self)?.queryOutput
   }
 
@@ -109,19 +111,21 @@ extension QueryDecoder {
   @inline(__always)
   public mutating func decode<Column: _TableColumnExpression, Value>(
     _ column: @autoclosure () -> Column
-  ) throws -> Value.QueryOutput?
+  ) throws(QueryDecodingError) -> Value.QueryOutput?
   where Column.Value == Value? {
     try Value?(decoder: &self)?.queryOutput
   }
 }
 
 public enum QueryDecodingError: Error {
-  /// A required column was `NULL`.
-  case missingRequiredColumn
+  case dataCorrupted
 
-  /// A column's value could not be decoded as the given type.
-  case typeMismatch(Any.Type)
+  /// A required column was `NULL`.
+  case missingRequiredColumn  // TODO: Rename to 'valueNotFound' for more general decoding.
 
   /// Some other error occurred during decoding a column.
   case other(any Error)
+
+  /// A column's value could not be decoded as the given type.
+  case typeMismatch(Any.Type)
 }

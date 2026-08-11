@@ -38,7 +38,7 @@ extension Date.UnixTimeRepresentation: QueryBindable {
 }
 
 extension Date.UnixTimeRepresentation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     try self.init(queryOutput: Date(timeIntervalSince1970: Double(Int64(decoder: &decoder))))
   }
 }

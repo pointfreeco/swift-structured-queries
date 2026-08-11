@@ -166,7 +166,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Draft {
-          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
             self.latitude = try decoder.decode(Self.columns.latitude)
             self.longitude = try decoder.decode(Self.columns.longitude)
@@ -179,7 +179,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             let id = try decoder.decode(Self.columns.id)
             let latitude = try decoder.decode(Self.columns.latitude)
             let longitude = try decoder.decode(Self.columns.longitude)
@@ -345,7 +345,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Draft {
-          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
             let latitude = try decoder.decode(Self.columns.latitude)
             guard let latitude else {
@@ -360,7 +360,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             let id = try decoder.decode(Self.columns.id)
             let latitude = try decoder.decode(Self.columns.latitude)
             guard let id else {
@@ -521,7 +521,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Draft {
-          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
             self.startsAt = try decoder.decode(Self.columns.startsAt)
           }
@@ -532,7 +532,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Event: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             let id = try decoder.decode(Self.columns.id)
             let startsAt = try decoder.decode(Self.columns.startsAt)
             guard let id else {
@@ -693,7 +693,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Draft {
-          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
             self.coordinate = try decoder.decode(Self.columns.coordinate)
           }
@@ -704,7 +704,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             let id = try decoder.decode(Self.columns.id)
             let coordinate = try decoder.decode(Self.columns.coordinate)
             guard let id else {
@@ -865,7 +865,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Draft {
-          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
             let systemFields = try decoder.decode(Self.columns.systemFields)
             guard let systemFields else {
@@ -880,7 +880,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Record: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             let id = try decoder.decode(Self.columns.id)
             let systemFields = try decoder.decode(Self.columns.systemFields)
             guard let id else {
@@ -1107,7 +1107,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Draft {
-          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
             self.a = try decoder.decode(Self.columns.a)
             self.b = try decoder.decode(Self.columns.b)
@@ -1122,7 +1122,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Record: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             let id = try decoder.decode(Self.columns.id)
             self.a = try decoder.decode(Self.columns.a)
             self.b = try decoder.decode(Self.columns.b)
@@ -1300,7 +1300,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Draft {
-          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.latitude = try decoder.decode(Self.columns.latitude)
             self.longitude = try decoder.decode(Self.columns.longitude)
             let name = try decoder.decode(Self.columns.name)
@@ -1317,7 +1317,7 @@ extension SnapshotTests {
         }
 
         nonisolated extension Location: StructuredQueriesCore.Table, StructuredQueriesCore.PartialSelectStatement {
-          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+          public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             let latitude = try decoder.decode(Self.columns.latitude)
             let longitude = try decoder.decode(Self.columns.longitude)
             let name = try decoder.decode(Self.columns.name)
@@ -3212,7 +3212,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.id = try decoder.decode(Self.columns.id)
               let latitude = try decoder.decode(Self.columns.latitude)
               let name = try decoder.decode(Self.columns.name)
@@ -3235,7 +3235,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Place: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let id = try decoder.decode(Self.columns.id)
               let latitude = try decoder.decode(Self.columns.latitude)
               let name = try decoder.decode(Self.columns.name)
@@ -3419,7 +3419,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.id = try decoder.decode(Self.columns.id)
               let quantity = try decoder.decode(Self.columns.quantity)
               self.note = try decoder.decode(Self.columns.note)
@@ -3436,7 +3436,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Item: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let id = try decoder.decode(Self.columns.id)
               let quantity = try decoder.decode(Self.columns.quantity)
               self.note = try decoder.decode(Self.columns.note)
@@ -3621,7 +3621,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.id = try decoder.decode(Self.columns.id)
               self.email = try decoder.decode(Self.columns.email)
               let age = try decoder.decode(Self.columns.age)
@@ -3638,7 +3638,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let id = try decoder.decode(Self.columns.id)
               self.email = try decoder.decode(Self.columns.email)
               let age = try decoder.decode(Self.columns.age)
@@ -3808,7 +3808,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
@@ -3823,7 +3823,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension User: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               let generated = try decoder.decode(Self.columns.generated)
@@ -3991,7 +3991,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
@@ -4006,7 +4006,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension SyncUp: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let id else {
@@ -4175,7 +4175,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
@@ -4190,7 +4190,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Foo: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let id else {
@@ -4368,7 +4368,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.reminderID = try decoder.decode(Self.columns.reminderID)
               let reminderTitle = try decoder.decode(Self.columns.reminderTitle)
               let remindersListTitle = try decoder.decode(Self.columns.remindersListTitle)
@@ -4389,7 +4389,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension ReminderWithList: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let reminderID = try decoder.decode(Self.columns.reminderID)
               let reminderTitle = try decoder.decode(Self.columns.reminderTitle)
               let remindersListTitle = try decoder.decode(Self.columns.remindersListTitle)
@@ -4555,7 +4555,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.id = try decoder.decode(Self.columns.id)
               let userModificationDate = try decoder.decode(Self.columns.userModificationDate)
               guard let userModificationDate else {
@@ -4570,7 +4570,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Metadata: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let id = try decoder.decode(Self.columns.id)
               let userModificationDate = try decoder.decode(Self.columns.userModificationDate)
               guard let id else {
@@ -4730,7 +4730,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Draft {
-            fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            fileprivate nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               self.id = try decoder.decode(Self.columns.id)
               let timestamps = try decoder.decode(Self.columns.timestamps)
               guard let timestamps else {
@@ -4745,7 +4745,7 @@ extension SnapshotTests {
           }
 
           nonisolated extension Row: StructuredQueriesCore.Table, StructuredQueriesCore.PrimaryKeyedTable, StructuredQueriesCore.PartialSelectStatement {
-            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+            public nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
               let id = try decoder.decode(Self.columns.id)
               let timestamps = try decoder.decode(Self.columns.timestamps)
               guard let id else {

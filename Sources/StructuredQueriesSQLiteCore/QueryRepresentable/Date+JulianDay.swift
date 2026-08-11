@@ -38,7 +38,7 @@ extension Date.JulianDayRepresentation: QueryBindable {
 }
 
 extension Date.JulianDayRepresentation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     try self.init(
       queryOutput: Date(timeIntervalSince1970: (Double(decoder: &decoder) - 2440587.5) * 86400)
     )

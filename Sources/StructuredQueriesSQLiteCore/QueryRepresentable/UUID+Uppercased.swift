@@ -34,10 +34,9 @@ extension UUID.UppercasedRepresentation: QueryBindable {
 }
 
 extension UUID.UppercasedRepresentation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
-    guard let uuid = try UUID(uuidString: String(decoder: &decoder)) else {
-      throw InvalidString()
-    }
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
+    guard let uuid = try UUID(uuidString: String(decoder: &decoder))
+    else { throw .dataCorrupted }
     self.init(queryOutput: uuid)
   }
 

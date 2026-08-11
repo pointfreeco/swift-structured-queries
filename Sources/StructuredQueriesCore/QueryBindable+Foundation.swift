@@ -5,7 +5,7 @@ extension Data: QueryBindable {
     .blob([UInt8](self))
   }
 
-  public init(decoder: inout some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     try self.init([UInt8](decoder: &decoder))
   }
 }
@@ -15,12 +15,9 @@ extension URL: QueryBindable {
     .text(absoluteString)
   }
 
-  public init(decoder: inout some QueryDecoder) throws {
-    guard let url = Self(string: try String(decoder: &decoder)) else {
-      throw InvalidURL()
-    }
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
+    guard let url = Self(string: try String(decoder: &decoder))
+    else { throw .dataCorrupted }
     self = url
   }
 }
-
-private struct InvalidURL: Error {}

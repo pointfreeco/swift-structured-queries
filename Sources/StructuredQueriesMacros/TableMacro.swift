@@ -409,7 +409,7 @@ extension TableMacro: ExtensionMacro {
       initDecoder = """
 
         \(raw: initAccess)\(nonisolated)\
-        init(decoder: inout some \(moduleName).QueryDecoder) throws {
+        init(decoder: inout some \(moduleName).QueryDecoder) throws(\(moduleName).QueryDecodingError) {
         \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
         }
         """
@@ -591,7 +591,7 @@ extension TableMacro: ExtensionMacro {
       }
       initDecoder = """
 
-        public \(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws {
+        public \(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws(\(moduleName).QueryDecodingError) {
         \(raw: decodings.joined(separator: "\n"))
         \(raw: decodingAssignments.joined(separator: " else ")) else {
         throw \(moduleName).QueryDecodingError.missingRequiredColumn

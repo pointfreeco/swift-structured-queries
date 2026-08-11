@@ -45,11 +45,10 @@ extension UUID.BytesRepresentation: QueryBindable {
 }
 
 extension UUID.BytesRepresentation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     let queryOutput = try [UInt8](decoder: &decoder)
-    guard queryOutput.count == 16 else {
-      throw InvalidBytes()
-    }
+    guard queryOutput.count == 16
+    else { throw .dataCorrupted }
     self.init(
       queryOutput: queryOutput.withUnsafeBytes {
         UUID(uuid: $0.load(as: uuid_t.self))

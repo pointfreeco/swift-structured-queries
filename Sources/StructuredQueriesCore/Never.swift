@@ -19,8 +19,8 @@ extension Never: Table {
 
   public static let tableName = "nevers"
 
-  public init(decoder: inout some QueryDecoder) throws {
-    throw NotDecodable()
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
+    throw .typeMismatch(Self.self)
   }
 
   private struct NotDecodable: Error {}

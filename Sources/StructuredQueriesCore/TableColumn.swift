@@ -83,7 +83,9 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
     self.keyPath = keyPath
   }
 
-  public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
+  public func decode(_ decoder: inout some QueryDecoder) throws(QueryDecodingError)
+    -> Value.QueryOutput
+  {
     try Value(decoder: &decoder).queryOutput
   }
 
@@ -192,7 +194,9 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
     self.keyPath = keyPath
   }
 
-  public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
+  public func decode(_ decoder: inout some QueryDecoder) throws(QueryDecodingError)
+    -> Value.QueryOutput
+  {
     try Value(decoder: &decoder).queryOutput
   }
 

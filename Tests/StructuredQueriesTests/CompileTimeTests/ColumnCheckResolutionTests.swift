@@ -3,7 +3,7 @@ import StructuredQueries
 private struct Scalar: QueryBindable {
   var queryBinding: QueryBinding { .null }
   init() {}
-  init(decoder: inout some QueryDecoder) throws { self.init() }
+  init(decoder: inout some QueryDecoder) throws(QueryDecodingError) { self.init() }
 }
 
 private enum IntEnum: Int, QueryBindable { case a, b }
