@@ -39,8 +39,6 @@ extension UUID.UppercasedRepresentation: QueryDecodable {
     else { throw .dataCorrupted }
     self.init(queryOutput: uuid)
   }
-
-  private struct InvalidString: Error {}
 }
 
 extension UUID.UppercasedRepresentation: SQLiteType {

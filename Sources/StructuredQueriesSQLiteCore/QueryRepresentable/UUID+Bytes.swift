@@ -55,8 +55,6 @@ extension UUID.BytesRepresentation: QueryDecodable {
       }
     )
   }
-
-  private struct InvalidBytes: Error {}
 }
 
 extension UUID.BytesRepresentation: SQLiteType {

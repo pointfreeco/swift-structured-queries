@@ -118,6 +118,7 @@ extension QueryDecoder {
 }
 
 public enum QueryDecodingError: Error {
+  /// A column's value was corrupted or otherwise invalid.
   case dataCorrupted
 
   /// A required column was `NULL`.
