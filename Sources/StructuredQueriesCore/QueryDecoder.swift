@@ -121,4 +121,7 @@ public enum QueryDecodingError: Error {
 
   /// A column's value could not be decoded as the given type.
   case typeMismatch(Any.Type)
+
+  /// Some other error occurred during decoding a column.
+  case other(any Error)
 }
