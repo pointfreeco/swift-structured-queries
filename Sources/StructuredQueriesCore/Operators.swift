@@ -765,7 +765,7 @@ extension QueryExpression where QueryValue: QueryExpression {
     BinaryOperator(
       lhs: self,
       operator: "IN",
-      rhs: SQLQueryExpression("(\(query.query))", as: Void.self)
+      rhs: SQLQueryExpression("\(query.query)", as: Void.self)
     )
   }
 
@@ -778,7 +778,7 @@ extension QueryExpression where QueryValue: QueryExpression {
     BinaryOperator(
       lhs: self,
       operator: "NOT IN",
-      rhs: SQLQueryExpression("(\(query.query))", as: Void.self)
+      rhs: SQLQueryExpression("\(query.query)", as: Void.self)
     )
   }
 
