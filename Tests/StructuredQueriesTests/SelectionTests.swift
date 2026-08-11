@@ -1,6 +1,7 @@
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import Testing
 
 extension SnapshotTests {
@@ -469,14 +470,14 @@ enum RL: AliasName {}
 
 @Selection
 struct RemindersListAliasAndReminderCount {
-  @Columns(as: TableAlias<RemindersList, RL>.self)
+  @Column(as: TableAlias<RemindersList, RL>.self)
   let remindersList: RemindersList
   let remindersCount: Int
 }
 
 @Selection
 struct OptionalRemindersListAliasAndReminderCount {
-  @Columns(as: TableAlias<RemindersList, RL>?.self)
+  @Column(as: TableAlias<RemindersList, RL>?.self)
   let remindersList: RemindersList?
   let remindersCount: Int
 }
@@ -507,6 +508,6 @@ struct SelectionWithColumnGroupAndID {
 @Selection
 struct SelectionWithColumnGroupAliasAndID {
   let id: Int
-  @Columns(as: TableAlias<RemindersList, RL>.self)
+  @Column(as: TableAlias<RemindersList, RL>.self)
   let remindersList: RemindersList
 }

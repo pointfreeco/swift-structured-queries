@@ -96,6 +96,46 @@ private func functionWithLotsOfArguments(
 ) {
 }
 
+@Table
+private struct TableWithNestedRepresentation {
+  struct Nested: Codable, Equatable {
+    var x = 0
+  }
+
+  enum Status: Int, QueryBindable {
+    case active, archived
+  }
+
+  let id: Int
+
+  @Column(as: Nested.JSONRepresentation.self)
+  var nested: Nested
+
+  @Column(as: Nested.JSONRepresentation.self)
+  var nestedWithDefault: Nested = Nested(x: 1)
+
+  var status: Status = Status.active
+}
+private func nestedRepresentationDraft() {
+  _ = TableWithNestedRepresentation.Draft(nested: TableWithNestedRepresentation.Nested())
+}
+private enum Namespace {
+  struct Sibling: Codable, Equatable {
+    var y = 0
+  }
+
+  @Table
+  struct TableWithSiblingRepresentation {
+    let id: Int
+
+    @Column(as: Sibling.JSONRepresentation.self)
+    var sibling: Sibling
+  }
+}
+private func siblingRepresentationDraft() {
+  _ = Namespace.TableWithSiblingRepresentation.Draft(sibling: Namespace.Sibling())
+}
+
 // NB: Nested access control mismatch
 @Table
 private struct Item {

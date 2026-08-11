@@ -56,7 +56,7 @@ Reminder.delete(reminder)
 ### Returning
 
 By default, ``Delete`` statements are fire-and-forget and do not return any results from the
-database. To return the data deleted from the database, you can use ``Delete/returning(_:)``, which
+database. To return the data deleted from the database, you can use `returning(_:)`, which
 adds a `RETURNING` clause to the statement.
 
 ```swift

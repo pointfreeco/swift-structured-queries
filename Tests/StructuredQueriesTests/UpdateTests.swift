@@ -356,6 +356,16 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func emptyReturning() {
+      assertQuery(
+        Reminder.none.update { $0.isCompleted.toggle() }.returning(\.id)
+      ) {
+        """
+
+        """
+      }
+    }
   }
 
   @Suite struct SelectionUpdateTests {
@@ -386,7 +396,7 @@ extension SnapshotTests {
       ) {
         """
         UPDATE "roots"
-        SET "honestCount" = 1, "optionalCount" = 1
+        SET "honestCount" = 1, "optionalCount" = 1, "string" = NULL
         """
       }
     }
@@ -414,10 +424,26 @@ extension SnapshotTests {
 }
 
 @Table private struct Root {
-  @Columns var fields: NestedFields
+  @Column var fields: NestedFields
 }
 
 @Selection struct NestedFields {
   var honestCount: Int = 0
   var optionalCount: Int?
+  @Column(as: String.TestRepresentation?.self)
+  var string: String?
+}
+
+extension String {
+  struct TestRepresentation: QueryRepresentable, QueryBindable, QueryDecodable {
+    var queryOutput: String
+    var queryBinding: QueryBinding { .text(queryOutput) }
+
+    init(queryOutput: String) {
+      self.queryOutput = queryOutput
+    }
+    init(decoder: inout some QueryDecoder) throws {
+      self.queryOutput = try String(decoder: &decoder)
+    }
+  }
 }

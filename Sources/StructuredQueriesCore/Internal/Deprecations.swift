@@ -1,5 +1,109 @@
 import Foundation
 
+// NB: Deprecated after 0.33.3:
+
+extension Table {
+  @available(*, deprecated, message: "Use 'limit(_:)' and 'offset(_:)', instead.")
+  public static func limit(
+    _ maxLength: (TableColumns) -> some QueryExpression<Int>,
+    offset: ((TableColumns) -> some QueryExpression<Int>)?
+  ) -> SelectOf<Self> {
+    Where().limit(maxLength, offset: offset)
+  }
+
+  @available(*, deprecated, message: "Use 'limit(_:)' and 'offset(_:)', instead.")
+  public static func limit(_ maxLength: Int, offset: Int?) -> SelectOf<Self> {
+    Where().limit(maxLength, offset: offset)
+  }
+}
+
+extension Where {
+  @available(*, deprecated, message: "Use 'limit(_:)' and 'offset(_:)', instead.")
+  public func limit(
+    _ maxLength: (From.TableColumns) -> some QueryExpression<Int>,
+    offset: ((From.TableColumns) -> some QueryExpression<Int>)?
+  ) -> SelectOf<From> {
+    asSelect().limit(maxLength, offset: offset)
+  }
+
+  @available(*, deprecated, message: "Use 'limit(_:)' and 'offset(_:)', instead.")
+  public func limit(_ maxLength: Int, offset: Int?) -> SelectOf<From> {
+    asSelect().limit(maxLength, offset: offset)
+  }
+}
+
+extension Select {
+  @_disfavoredOverload
+  @available(*, deprecated, message: "Use 'limit(_:)' and 'offset(_:)', instead.")
+  public func limit<each J: Table>(
+    _ maxLength: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Int>,
+    offset: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Int>)?
+  ) -> Self
+  where Joins == (repeat each J) {
+    limit(maxLength(From.columns, repeat (each J).columns))
+      .offset(offset?(From.columns, repeat (each J).columns))
+  }
+
+  @_disfavoredOverload
+  @available(*, deprecated, message: "Use 'limit(_:)' and 'offset(_:)', instead.")
+  public func limit(
+    _ maxLength: (From.TableColumns, Joins.TableColumns) -> some QueryExpression<Int>,
+    offset: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Int>)?
+  ) -> Self
+  where Joins: Table {
+    limit(maxLength(From.columns, Joins.columns))
+      .offset(offset?(From.columns, Joins.columns))
+  }
+
+  @available(*, deprecated, message: "Use 'limit(_:)' and 'offset(_:)', instead.")
+  public func limit<each J: Table>(_ maxLength: Int, offset: Int?) -> Self
+  where Joins == (repeat each J) {
+    limit(maxLength).offset(offset)
+  }
+}
+
+// NB: Deprecated after 0.33.1:
+
+extension QueryExpression where QueryValue == String {
+  @available(*, deprecated, message: "Prefer 'like(\"\\(other)%\")' instead")
+  public func hasPrefix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
+    like("\(other)%")
+  }
+
+  @available(*, deprecated, message: "Prefer 'like(\"%\\(other)\")' instead")
+  public func hasSuffix(_ other: some StringProtocol) -> some QueryExpression<Bool> {
+    like("%\(other)")
+  }
+
+  @_disfavoredOverload
+  @available(*, deprecated, message: "Prefer 'like(\"%\\(other)%\")' instead")
+  public func contains(_ other: some StringProtocol) -> some QueryExpression<Bool> {
+    return like("%\(other)%")
+  }
+}
+
+extension Sequence where Element: QueryBindable {
+  @available(*, deprecated, message: "Prefer 'element.in(self)' instead")
+  public func contains(
+    _ element: some QueryExpression<Element.QueryValue>
+  ) -> some QueryExpression<Bool> {
+    element.in(self)
+  }
+}
+
+extension ClosedRange where Bound: QueryBindable {
+  @available(
+    *,
+    deprecated,
+    message: "Prefer 'element.between(lowerBound, and: upperBound)' instead"
+  )
+  public func contains(
+    _ element: some QueryExpression<Bound.QueryValue>
+  ) -> some QueryExpression<Bool> {
+    element.between(lowerBound, and: upperBound)
+  }
+}
+
 // NB: Deprecated after 0.32.0:
 
 extension TableDraft {

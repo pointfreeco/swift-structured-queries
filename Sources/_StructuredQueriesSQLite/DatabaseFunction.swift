@@ -153,6 +153,7 @@ private final class AggregateDatabaseFunctionIterator<
     } catch {
       _result = .invalid(error)
     }
+    stream.stopBuffering()
   }
   func step(_ decoder: inout some QueryDecoder) throws {
     try stream.send(body.step(&decoder))
@@ -162,24 +163,30 @@ private final class AggregateDatabaseFunctionIterator<
   }
   var result: QueryBinding {
     get throws {
-      while true {
-        if let result = queue.sync(execute: { _result }) {
-          return result
-        }
-      }
+      queue.sync { _result! }
     }
   }
 }
 
 private final class Stream<Element>: Sequence {
+  private static var capacity: Int { 64 }
+
   let condition = NSCondition()
   private var buffer: [Element] = []
+  private var head = 0
   private var isFinished = false
+  private var isBuffering = true
+
+  private var count: Int { buffer.count - head }
 
   func send(_ element: Element) {
     condition.withLock {
+      while isBuffering && count >= Self.capacity {
+        condition.wait()
+      }
+      guard isBuffering else { return }
       buffer.append(element)
-      condition.signal()
+      condition.broadcast()
     }
   }
 
@@ -190,17 +197,33 @@ private final class Stream<Element>: Sequence {
     }
   }
 
+  func stopBuffering() {
+    condition.withLock {
+      isBuffering = false
+      buffer.removeAll()
+      head = 0
+      condition.broadcast()
+    }
+  }
+
   func makeIterator() -> Iterator { Iterator(base: self) }
 
   struct Iterator: IteratorProtocol {
     fileprivate let base: Stream
     mutating func next() -> Element? {
       base.condition.withLock {
-        while base.buffer.isEmpty && !base.isFinished {
+        while base.count == 0 && !base.isFinished {
           base.condition.wait()
         }
-        guard !base.buffer.isEmpty else { return nil }
-        return base.buffer.removeFirst()
+        guard base.count > 0 else { return nil }
+        let element = base.buffer[base.head]
+        base.head += 1
+        if base.head >= Stream.capacity {
+          base.buffer.removeFirst(base.head)
+          base.head = 0
+        }
+        base.condition.broadcast()
+        return element
       }
     }
   }

@@ -4,6 +4,9 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
 
   var _names: [String] { get }
 
+  /// The default value of the table column.
+  var defaultValue: Value.QueryOutput? { get }
+
   /// The table model key path associated with this table column.
   var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 }
@@ -17,9 +20,6 @@ where Value: QueryBindable {
   /// The name of the table column.
   var name: String { get }
 
-  /// The default value of the table column.
-  var defaultValue: Value.QueryOutput? { get }
-
   func _aliased<Name: AliasName>(
     _ alias: Name.Type
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
@@ -27,6 +27,10 @@ where Value: QueryBindable {
 
 extension TableColumnExpression {
   public var _names: [String] { [name] }
+
+  package var returningFragment: QueryFragment {
+    Value.queryFragment(decoding: "\(quote: name)")
+  }
 }
 
 /// A type representing a _writable_ table column, _i.e._ not a generated column.
@@ -84,7 +88,8 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
   }
 
   public var queryFragment: QueryFragment {
-    "\(Root.self).\(quote: name)"
+    let column: QueryFragment = "\(Root.self).\(quote: name)"
+    return _isSelecting ? Value.queryFragment(decoding: column) : column
   }
 
   public func _aliased<Name>(
@@ -120,13 +125,23 @@ public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
     TableColumn(name, keyPath: keyPath, default: defaultValue)
   }
 
+  @_disfavoredOverload
   public static func `for`(
-    _: String,
-    keyPath: KeyPath<Root, Value>,
-    default _: Value? = nil
+    _ name: String,
+    keyPath: KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: Value.QueryOutput? = nil
   ) -> ColumnGroup<Root, Value>
-  where Value: Table, Value == Value.QueryOutput {
-    ColumnGroup(keyPath: keyPath)
+  where Value: Table, Value.QueryOutput: Table {
+    ColumnGroup(name, keyPath: keyPath, default: defaultValue)
+  }
+
+  public static func `for`<Wrapped>(
+    _ name: String,
+    keyPath: KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: Value.QueryOutput? = nil
+  ) -> OptionalColumnGroup<Root, Wrapped>
+  where Value == Wrapped?, Wrapped: Table, Wrapped.QueryOutput: Table {
+    OptionalColumnGroup(base: ColumnGroup(name, keyPath: keyPath, default: defaultValue))
   }
 }
 
@@ -182,7 +197,8 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
   }
 
   public var queryFragment: QueryFragment {
-    "\(Root.self).\(quote: name)"
+    let column: QueryFragment = "\(Root.self).\(quote: name)"
+    return _isSelecting ? Value.queryFragment(decoding: column) : column
   }
 
   public func _aliased<Name>(

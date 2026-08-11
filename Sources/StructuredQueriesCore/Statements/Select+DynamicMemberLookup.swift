@@ -8,7 +8,7 @@
       S: SelectStatement<(), From, ()>
     >(
       dynamicMember keyPath: KeyPath<From.Type, S>
-    ) -> Select<(repeat each C), From, (repeat each J)>
+    ) -> Select<Columns, From, Joins>
     where Columns == (repeat each C), Joins == (repeat each J) {
       self + From.self[keyPath: keyPath]
     }
@@ -19,7 +19,7 @@
       each J: Table
     >(
       dynamicMember keyPath: KeyPath<From.Type, Select<C2, From, ()>>
-    ) -> Select<(repeat each C1, C2), From, (repeat each J)>
+    ) -> Select<(repeat each C1, C2), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self + From.self[keyPath: keyPath]
     }
@@ -31,7 +31,7 @@
       each J: Table
     >(
       dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3), From, ()>>
-    ) -> Select<(repeat each C1, C2, C3), From, (repeat each J)>
+    ) -> Select<(repeat each C1, C2, C3), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self + From.self[keyPath: keyPath]
     }
@@ -44,7 +44,7 @@
       each J: Table
     >(
       dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3, C4), From, ()>>
-    ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J)>
+    ) -> Select<(repeat each C1, C2, C3, C4), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self + From.self[keyPath: keyPath]
     }
@@ -58,7 +58,7 @@
       each J: Table
     >(
       dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3, C4, C5), From, ()>>
-    ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J)>
+    ) -> Select<(repeat each C1, C2, C3, C4, C5), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self + From.self[keyPath: keyPath]
     }
@@ -195,7 +195,7 @@
       S: SelectStatement<(), From.SourceTable, ()>
     >(
       dynamicMember keyPath: KeyPath<From.SourceTable.Type, S>
-    ) -> Select<(repeat each C), From, (repeat each J)>
+    ) -> Select<Columns, From, Joins>
     where Columns == (repeat each C), Joins == (repeat each J) {
       self
         + unsafeBitCast(
@@ -210,7 +210,7 @@
       each J: Table
     >(
       dynamicMember keyPath: KeyPath<From.SourceTable.Type, Select<C2, From.SourceTable, ()>>
-    ) -> Select<(repeat each C1, C2), From, (repeat each J)>
+    ) -> Select<(repeat each C1, C2), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self
         + unsafeBitCast(
@@ -228,7 +228,7 @@
       dynamicMember keyPath: KeyPath<
         From.SourceTable.Type, Select<(C2, C3), From.SourceTable, ()>
       >
-    ) -> Select<(repeat each C1, C2, C3), From, (repeat each J)>
+    ) -> Select<(repeat each C1, C2, C3), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self
         + unsafeBitCast(
@@ -247,7 +247,7 @@
       dynamicMember keyPath: KeyPath<
         From.SourceTable.Type, Select<(C2, C3, C4), From.SourceTable, ()>
       >
-    ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J)>
+    ) -> Select<(repeat each C1, C2, C3, C4), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self
         + unsafeBitCast(
@@ -267,7 +267,7 @@
       dynamicMember keyPath: KeyPath<
         From.SourceTable.Type, Select<(C2, C3, C4, C5), From.SourceTable, ()>
       >
-    ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J)>
+    ) -> Select<(repeat each C1, C2, C3, C4, C5), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
       self
         + unsafeBitCast(

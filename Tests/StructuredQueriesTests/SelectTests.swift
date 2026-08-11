@@ -861,7 +861,117 @@ extension SnapshotTests {
         └───┘
         """
       }
+      assertQuery(Reminder.select(\.id).limit(2).offset(2)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        │ 4 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit(2).limit(nil).offset(nil)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        └───┘
+        """
+      }
+    }
+
+    @Test func offsetWithoutLimit() {
+      assertQuery(Reminder.select(\.id).offset(8)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT -1 OFFSET 8
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 9  │
+        │ 10 │
+        └────┘
+        """
+      }
+    }
+
+    @Test func limitAndOffsetBuilders() {
+      enum PerPage { case none, `default` }
+      let perPage = PerPage.default
+      let offset: Int? = nil
+      assertQuery(
+        Reminder
+          .select(\.id)
+          .limit { _ in
+            switch perPage {
+            case .none: nil
+            case .default: 2
+            }
+          }
+          .offset { _ in
+            if let offset {
+              offset
+            }
+          }
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        └───┘
+        """
+      }
+    }
+
+    @available(*, deprecated)
+    @Test func deprecatedLimit() {
       assertQuery(Reminder.select(\.id).limit(2, offset: 2)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        │ 4 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit(2, offset: 2).limit(1, offset: nil)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 1 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit({ _ in 2 }, offset: { _ in 2 })) {
         """
         SELECT "reminders"."id"
         FROM "reminders"
@@ -1068,7 +1178,7 @@ extension SnapshotTests {
           .select { ($0, $1.jsonGroupArray()) }
       ) {
         """
-        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."rowid") IS NOT (NULL))
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', "r2s"."id", 'assignedUserID', "r2s"."assignedUserID", 'dueDate', "r2s"."dueDate", 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', "r2s"."notes", 'priority', "r2s"."priority", 'remindersListID', "r2s"."remindersListID", 'title', "r2s"."title", 'updatedAt', "r2s"."updatedAt") END) FILTER (WHERE ("r2s"."rowid") IS NOT (NULL))
         FROM "reminders" AS "r1s"
         LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id") = ("r2s"."id")
         GROUP BY "r1s"."id"
@@ -1106,7 +1216,7 @@ extension SnapshotTests {
           .select { ($0, $1.jsonGroupArray()) }
       ) {
         """
-        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."rowid") IS NOT (NULL))
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', "r2s"."id", 'assignedUserID', "r2s"."assignedUserID", 'dueDate', "r2s"."dueDate", 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', "r2s"."notes", 'priority', "r2s"."priority", 'remindersListID', "r2s"."remindersListID", 'title', "r2s"."title", 'updatedAt', "r2s"."updatedAt") END) FILTER (WHERE ("r2s"."rowid") IS NOT (NULL))
         FROM "reminders" AS "r1s"
         LEFT JOIN "reminders" AS "r2s" ON (("r1s"."id") = ("r2s"."id")) AND (("r1s"."id") = (42))
         GROUP BY "r1s"."id"
@@ -1247,94 +1357,92 @@ extension SnapshotTests {
       }
     }
 
-    #if swift(>=6.1)
-      @Test func reusableStaticHelperOnDraft() {
-        assertQuery(
-          Reminder.Draft.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.where { _ in true }.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (1) AND (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.select(\.id).incomplete
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.all.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
+    @Test func reusableStaticHelperOnDraft() {
+      assertQuery(
+        Reminder.Draft.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
       }
-    #endif
+      assertQuery(
+        Reminder.Draft.where { _ in true }.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (1) AND (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.select(\.id).incomplete
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.all.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+    }
 
     @Test func reusableColumnHelperOnDraft() {
       assertQuery(
@@ -1435,6 +1543,10 @@ extension SnapshotTests {
       _ = base.order { r, _ in r.isCompleted }
       _ = base.limit { r, _ in r.title.length() }
       _ = base.limit(1)
+      _ = base.limit(nil)
+      _ = base.offset { r, _ in r.title.length() }
+      _ = base.offset(1)
+      _ = base.offset(nil)
       _ = base.count()
       _ = base.count { r, _ in r.isCompleted }
       _ = base.map {}

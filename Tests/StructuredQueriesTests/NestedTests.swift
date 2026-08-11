@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite
@@ -160,7 +161,6 @@ extension SnapshotTests {
         SET "isOutOfStock" = 1, "isOnBackOrder" = 1
         """
       }
-      // FIXME: These should decode 'nil' but because all its fields have defaults it coalesces.
       assertQuery(
         DefaultItem?(nil)
       ) {
@@ -169,16 +169,9 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌──────────────────────────┐
-        │ DefaultItem(             │
-        │   title: "",             │
-        │   quantity: 0,           │
-        │   status: Status(        │
-        │     isOutOfStock: false, │
-        │     isOnBackOrder: false │
-        │   )                      │
-        │ )                        │
-        └──────────────────────────┘
+        ┌─────┐
+        │ nil │
+        └─────┘
         """
       }
       // NB: This tests that 'Optional.none' is favored over 'Table.none'.
@@ -190,16 +183,9 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌──────────────────────────┐
-        │ DefaultItem(             │
-        │   title: "",             │
-        │   quantity: 0,           │
-        │   status: Status(        │
-        │     isOutOfStock: false, │
-        │     isOnBackOrder: false │
-        │   )                      │
-        │ )                        │
-        └──────────────────────────┘
+        ┌─────┐
+        │ nil │
+        └─────┘
         """
       }
       assertQuery(

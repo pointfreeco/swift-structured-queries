@@ -60,13 +60,13 @@ extension Table {
   /// // ON "users"."referrerID" = "referrers"."id"
   /// ```
   ///
-  /// Table aliases are representable in selections by providing the type to the `@Columns` macro:
+  /// Table aliases are representable in selections by providing the type to the `@Column` macro:
   ///
   /// ```swift
   /// @Selection
   /// struct UserWithReferrer {
   ///   let user: User
-  ///   @Columns(as: TableAlias<User, Referrer>.self)
+  ///   @Column(as: TableAlias<User, Referrer>.self)
   ///   let referrer: User
   /// }
   ///
@@ -91,7 +91,7 @@ public struct TableAlias<
 >: _OptionalPromotable {
   let base: Base
 
-  subscript<Member: QueryRepresentable>(
+  package subscript<Member: QueryRepresentable>(
     member _: KeyPath<Member, Member>,
     column keyPath: KeyPath<Base, Member.QueryOutput>
   ) -> Member.QueryOutput {
@@ -181,8 +181,22 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Member>>
     ) -> ColumnGroup<TableAlias, Member> {
-      ColumnGroup<TableAlias, Member>(
-        keyPath: \.[member: \Member.self, column: Base.columns[keyPath: keyPath].keyPath]
+      let column = Base.columns[keyPath: keyPath]
+      return ColumnGroup<TableAlias, Member>(
+        column.name,
+        keyPath: \.[member: \Member.self, column: column.keyPath]
+      )
+    }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Base.TableColumns, OptionalColumnGroup<Base, Member>>
+    ) -> OptionalColumnGroup<TableAlias, Member> {
+      let column = Base.columns[keyPath: keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<TableAlias, Member?>(
+          column.name,
+          keyPath: \.[member: \Member?.self, column: column.keyPath]
+        )
       )
     }
   }
@@ -226,6 +240,10 @@ where Base.TableColumns: PrimaryKeyedTableDefinition {
       Base.columns.primaryKey._names
     }
 
+    public var defaultValue: Base.PrimaryKey.QueryOutput? {
+      Base.columns.primaryKey.defaultValue
+    }
+
     public var keyPath: KeyPath<TableAlias, Base.PrimaryKey.QueryOutput> {
       \.[member: \Base.PrimaryKey.self, column: Base.columns.primaryKey.keyPath]
     }
@@ -246,10 +264,6 @@ extension TableAlias.TableColumns.PrimaryColumn: TableColumnExpression
 where Base.TableColumns.PrimaryColumn: TableColumnExpression {
   public var name: String {
     Base.columns.primaryKey.name
-  }
-
-  public var defaultValue: Base.PrimaryKey.QueryOutput? {
-    Base.columns.primaryKey.defaultValue
   }
 
   public func _aliased<N: AliasName>(

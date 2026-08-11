@@ -262,27 +262,44 @@ extension Table {
     Where().order(by: ordering)
   }
 
-  /// A select statement for this table with a limit and optional offset.
+  /// A select statement for this table with the given limit.
   ///
-  /// - Parameters:
-  ///   - maxLength: A closure that produces a `LIMIT` expression from the filtered table's columns.
-  ///   - offset: A closure that produces an `OFFSET` expression from the filtered table's columns.
-  /// - Returns: A select statement with a limit and optional offset.
-  public static func limit(
-    _ maxLength: (TableColumns) -> some QueryExpression<Int>,
-    offset: ((TableColumns) -> some QueryExpression<Int>)? = nil
-  ) -> SelectOf<Self> {
-    Where().limit(maxLength, offset: offset)
+  /// - Parameter maxLength: An expression for the select's `LIMIT` clause, or `nil` for no limit.
+  /// - Returns: A select statement with the given limit.
+  public static func limit(_ maxLength: (any QueryExpression<Int>)?) -> SelectOf<Self> {
+    Where().limit(maxLength)
   }
 
-  /// A select statement for this table with a limit and optional offset.
+  /// A select statement for this table with the given limit.
   ///
-  /// - Parameters:
-  ///   - maxLength: An integer limit for the select's `LIMIT` clause.
-  ///   - offset: An optional integer offset of the select's `OFFSET` clause.
-  /// - Returns: A select statement with a limit and optional offset.
-  public static func limit(_ maxLength: Int, offset: Int? = nil) -> SelectOf<Self> {
-    Where().limit(maxLength, offset: offset)
+  /// - Parameter maxLength: A result builder closure that returns an expression for the select's
+  ///   `LIMIT` clause from this table's columns.
+  /// - Returns: A select statement with the given limit.
+  public static func limit(
+    @QueryFragmentBuilder<Int>
+    _ maxLength: (TableColumns) -> [QueryFragment]
+  ) -> SelectOf<Self> {
+    Where().limit(maxLength)
+  }
+
+  /// A select statement for this table with the given offset.
+  ///
+  /// - Parameter offset: An expression for the select's `OFFSET` clause, or `nil` for no offset.
+  /// - Returns: A select statement with the given offset.
+  public static func offset(_ offset: (any QueryExpression<Int>)?) -> SelectOf<Self> {
+    Where().offset(offset)
+  }
+
+  /// A select statement for this table with the given offset.
+  ///
+  /// - Parameter offset: A result builder closure that returns an expression for the select's
+  ///   `OFFSET` clause from this table's columns.
+  /// - Returns: A select statement with the given offset.
+  public static func offset(
+    @QueryFragmentBuilder<Int>
+    _ offset: (TableColumns) -> [QueryFragment]
+  ) -> SelectOf<Self> {
+    Where().offset(offset)
   }
 
   /// A select statement for this table's row count.
@@ -300,6 +317,7 @@ public struct _SelectClauses: Sendable {
   var isEmpty = false
   var distinct = false
   var columns: [QueryFragment] = []
+  var from: QueryFragment?
   var joins: [_JoinClause] = []
   var `where`: [QueryFragment] = []
   var group: [QueryFragment] = []
@@ -336,6 +354,11 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     set { clauses.columns = newValue }
     _modify { yield &clauses.columns }
   }
+  fileprivate var from: QueryFragment? {
+    get { clauses.from }
+    set { clauses.from = newValue }
+    _modify { yield &clauses.from }
+  }
   fileprivate var joins: [_JoinClause] {
     get { clauses.joins }
     set { clauses.joins = newValue }
@@ -371,6 +394,7 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     isEmpty: Bool,
     distinct: Bool,
     columns: [QueryFragment],
+    from: QueryFragment? = nil,
     joins: [_JoinClause],
     where: [QueryFragment],
     group: [QueryFragment],
@@ -381,6 +405,7 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
     self.isEmpty = isEmpty
     self.columns = columns
     self.distinct = distinct
+    self.from = from
     self.joins = joins
     self.where = `where`
     self.group = group
@@ -391,6 +416,11 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
 
   init(clauses: _SelectClauses) {
     self.clauses = clauses
+  }
+
+  package var _tableReference: QueryFragment? {
+    get { clauses.from }
+    set { clauses.from = newValue }
   }
 }
 
@@ -443,7 +473,7 @@ extension Select {
   @_disfavoredOverload
   public func select<C: QueryExpression, each J: Table>(
     _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C
-  ) -> Select<C.QueryValue, From, (repeat each J)>
+  ) -> Select<C.QueryValue, From, Joins>
   where Columns == (), C.QueryValue: QueryRepresentable, Joins == (repeat each J) {
     _select(selection)
   }
@@ -455,7 +485,7 @@ extension Select {
   @_disfavoredOverload
   public func select<C: QueryExpression, each J: Table>(
     _ selection: (From.TableColumns, repeat (each J).TableColumns) -> C
-  ) -> Select<C.QueryValue, From, (repeat each J)>
+  ) -> Select<C.QueryValue, From, Joins>
   where Columns == (), C.QueryValue: QueryRepresentable, Joins == (repeat each J) {
     _select(selection)
   }
@@ -479,7 +509,7 @@ extension Select {
   /// - Returns: A new select statement that selects the given column.
   public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
     _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C2
-  ) -> Select<(repeat each C1, C2.QueryValue), From, (repeat each J)>
+  ) -> Select<(repeat each C1, C2.QueryValue), From, Joins>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == (repeat each J) {
     _select(selection)
   }
@@ -492,7 +522,7 @@ extension Select {
   @_disfavoredOverload
   public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
     _ selection: (From.TableColumns, repeat (each J).TableColumns) -> C2
-  ) -> Select<(repeat each C1, C2.QueryValue), From, (repeat each J)>
+  ) -> Select<(repeat each C1, C2.QueryValue), From, Joins>
   where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == (repeat each J) {
     _select(selection)
   }
@@ -513,7 +543,7 @@ extension Select {
   ) -> Select<
     (repeat each C1, C2.QueryValue, C3.QueryValue, repeat (each C4).QueryValue),
     From,
-    (repeat each J)
+    Joins
   >
   where
     Columns == (repeat each C1),
@@ -542,7 +572,7 @@ extension Select {
   ) -> Select<
     (repeat each C1, C2.QueryValue, C3.QueryValue, repeat (each C4).QueryValue),
     From,
-    (repeat each J)
+    Joins
   >
   where
     Columns == (repeat each C1),
@@ -573,6 +603,7 @@ extension Select {
         + $_isSelecting.withValue(true) {
           Array(repeat each selection((From.columns, repeat (each J).columns)))
         },
+      from: from,
       joins: joins,
       where: `where`,
       group: group,
@@ -619,6 +650,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -628,6 +660,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -660,6 +693,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -669,6 +703,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -697,6 +732,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -706,6 +742,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -727,6 +764,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: nil,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -736,6 +774,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -776,6 +815,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -789,6 +829,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -825,6 +866,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -838,6 +880,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -868,6 +911,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -877,6 +921,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -899,6 +944,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .left,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -908,6 +954,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -948,6 +995,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -961,6 +1009,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -997,6 +1046,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -1010,6 +1060,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1040,6 +1091,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -1049,6 +1101,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1071,6 +1124,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .right,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -1080,6 +1134,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1120,6 +1175,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -1133,6 +1189,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1169,6 +1226,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, repeat (each J).columns, F.columns)
@@ -1182,6 +1240,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1212,6 +1271,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, F.columns, repeat (each J).columns)
@@ -1221,6 +1281,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1243,6 +1304,7 @@ extension Select {
     let other = other.asSelect()
     let join = _JoinClause(
       operator: .full,
+      tableReference: other._tableReference,
       table: F.self,
       constraint: constraint(
         (From.columns, Joins.columns, F.columns)
@@ -1252,6 +1314,7 @@ extension Select {
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
+      from: from,
       joins: joins + [join] + other.joins,
       where: `where` + other.where,
       group: group + other.group,
@@ -1543,58 +1606,105 @@ extension Select {
     return select
   }
 
-  /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
+  /// Creates a new select statement from this one by overriding its `LIMIT` clause.
   ///
-  /// - Parameters:
-  ///   - maxLength: A closure that produces a `LIMIT` expression from this select's tables.
-  ///   - offset: A closure that produces an `OFFSET` expression from this select's tables.
-  /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
-  @_disfavoredOverload
-  public func limit<each J: Table>(
-    _ maxLength: (From.TableColumns, repeat (each J).TableColumns) -> some QueryExpression<Int>,
-    offset: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Int>)? = nil
-  ) -> Self
+  /// Passing `nil` will leave this select's `LIMIT` clause untouched.
+  ///
+  /// - Parameter maxLength: An expression for the select's `LIMIT` clause, or `nil` to leave the
+  ///   clause untouched.
+  /// - Returns: A new select statement that overrides this one's `LIMIT` clause.
+  public func limit<each J: Table>(_ maxLength: (any QueryExpression<Int>)?) -> Self
   where Joins == (repeat each J) {
-    var select = self
-    select.limit = _LimitClause(
-      maxLength: maxLength(From.columns, repeat (each J).columns).queryFragment,
-      offset: offset?(From.columns, repeat (each J).columns).queryFragment ?? select.limit?.offset
-    )
-    return select
+    _limit(maxLength?.queryFragment)
   }
 
-  /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
+  /// Creates a new select statement from this one by overriding its `LIMIT` clause.
   ///
-  /// - Parameters:
-  ///   - maxLength: A closure that produces a `LIMIT` expression from this select's tables.
-  ///   - offset: A closure that produces an `OFFSET` expression from this select's tables.
-  /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
+  /// A result builder closure that produces no expression will leave this select's `LIMIT` clause
+  /// untouched.
+  ///
+  /// - Parameter maxLength: A result builder closure that returns an expression for the select's
+  ///   `LIMIT` clause from this select's tables.
+  /// - Returns: A new select statement that overrides this one's `LIMIT` clause.
+  public func limit<each J: Table>(
+    @QueryFragmentBuilder<Int>
+    _ maxLength: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
+  ) -> Self
+  where Joins == (repeat each J) {
+    _limit(maxLength(From.columns, repeat (each J).columns).last)
+  }
+
+  /// Creates a new select statement from this one by overriding its `LIMIT` clause.
+  ///
+  /// A result builder closure that produces no expression will leave this select's `LIMIT` clause
+  /// untouched.
+  ///
+  /// - Parameter maxLength: A result builder closure that returns an expression for the select's
+  ///   `LIMIT` clause from this select's tables.
+  /// - Returns: A new select statement that overrides this one's `LIMIT` clause.
   public func limit(
-    _ maxLength: (From.TableColumns, Joins.TableColumns) -> some QueryExpression<Int>,
-    offset: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Int>)? = nil
+    @QueryFragmentBuilder<Int>
+    _ maxLength: (From.TableColumns, Joins.TableColumns) -> [QueryFragment]
   ) -> Self
   where Joins: Table {
+    _limit(maxLength(From.columns, Joins.columns).last)
+  }
+
+  /// Creates a new select statement from this one by overriding its `OFFSET` clause.
+  ///
+  /// Passing `nil` will leave this select's `OFFSET` clause untouched.
+  ///
+  /// - Parameter offset: An expression for the select's `OFFSET` clause, or `nil` to leave the
+  ///   clause untouched.
+  /// - Returns: A new select statement that overrides this one's `OFFSET` clause.
+  public func offset<each J: Table>(_ offset: (any QueryExpression<Int>)?) -> Self
+  where Joins == (repeat each J) {
+    _offset(offset?.queryFragment)
+  }
+
+  /// Creates a new select statement from this one by overriding its `OFFSET` clause.
+  ///
+  /// A result builder closure that produces no expression will leave this select's `OFFSET` clause
+  /// untouched.
+  ///
+  /// - Parameter offset: A result builder closure that returns an expression for the select's
+  ///   `OFFSET` clause from this select's tables.
+  /// - Returns: A new select statement that overrides this one's `OFFSET` clause.
+  public func offset<each J: Table>(
+    @QueryFragmentBuilder<Int>
+    _ offset: (From.TableColumns, repeat (each J).TableColumns) -> [QueryFragment]
+  ) -> Self
+  where Joins == (repeat each J) {
+    _offset(offset(From.columns, repeat (each J).columns).last)
+  }
+
+  /// Creates a new select statement from this one by overriding its `OFFSET` clause.
+  ///
+  /// A result builder closure that produces no expression will leave this select's `OFFSET` clause
+  /// untouched.
+  ///
+  /// - Parameter offset: A result builder closure that returns an expression for the select's
+  ///   `OFFSET` clause from this select's tables.
+  /// - Returns: A new select statement that overrides this one's `OFFSET` clause.
+  public func offset(
+    @QueryFragmentBuilder<Int>
+    _ offset: (From.TableColumns, Joins.TableColumns) -> [QueryFragment]
+  ) -> Self
+  where Joins: Table {
+    _offset(offset(From.columns, Joins.columns).last)
+  }
+
+  private func _limit(_ maxLength: QueryFragment?) -> Self {
+    guard let maxLength else { return self }
     var select = self
-    select.limit = _LimitClause(
-      maxLength: maxLength(From.columns, Joins.columns).queryFragment,
-      offset: offset?(From.columns, Joins.columns).queryFragment ?? select.limit?.offset
-    )
+    select.limit = _LimitClause(maxLength: maxLength, offset: select.limit?.offset)
     return select
   }
 
-  /// Creates a new select statement from this one by overriding its `LIMIT` and `OFFSET` clauses.
-  ///
-  /// - Parameters:
-  ///   - maxLength: An integer limit for the select's `LIMIT` clause.
-  ///   - offset: An optional integer offset of the select's `OFFSET` clause.
-  /// - Returns: A new select statement that overrides this one's `LIMIT` and `OFFSET` clauses.
-  public func limit<each J: Table>(_ maxLength: Int, offset: Int? = nil) -> Self
-  where Joins == (repeat each J) {
+  private func _offset(_ offset: QueryFragment?) -> Self {
+    guard let offset else { return self }
     var select = self
-    select.limit = _LimitClause(
-      maxLength: maxLength.queryFragment,
-      offset: offset?.queryFragment ?? select.limit?.offset
-    )
+    select.limit = _LimitClause(maxLength: select.limit?.maxLength, offset: offset)
     return select
   }
 
@@ -1604,7 +1714,7 @@ extension Select {
   /// - Returns: A new select statement that selects `count(*)`.
   public func count<each J: Table>(
     filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? = nil
-  ) -> Select<Int, From, (repeat each J)>
+  ) -> Select<Int, From, Joins>
   where Columns == (), Joins == (repeat each J) {
     let filter = filter?(From.columns, repeat (each J).columns)
     return select { _ in .count(filter: filter) }
@@ -1671,6 +1781,7 @@ extension Select {
       isEmpty: isEmpty,
       distinct: distinct,
       columns: Array(repeat each transform(repeat { _ in next() }((each C1).self))),
+      from: from,
       joins: joins,
       where: `where`,
       group: group,
@@ -1728,6 +1839,7 @@ public func + <
     isEmpty: lhs.isEmpty || rhs.isEmpty,
     distinct: lhs.distinct || rhs.distinct,
     columns: lhs.columns + rhs.columns,
+    from: rhs.from ?? lhs.from,
     joins: lhs.joins + rhs.joins,
     where: (lhs.where + rhs.where).removingDuplicates(),
     group: (lhs.group + rhs.group).removingDuplicates(),
@@ -1751,17 +1863,22 @@ extension Select: SelectStatement {
     var query: QueryFragment = "SELECT"
     let columns =
       columns.isEmpty
-      ? [From.columns.queryFragment] + joins.map { $0.tableColumns }
+      ? $_isSelecting.withValue(true) { [From.columns.queryFragment] }
+        + joins.map { $0.tableColumns }
       : columns
     if distinct {
       query.append(" DISTINCT")
     }
     query.append(" \(columns.joined(separator: ", "))")
     query.append("\(.newlineOrSpace)FROM ")
-    if let schemaName = From.schemaName {
-      query.append("\(quote: schemaName).")
+    if let tableReference = clauses.from {
+      query.append(tableReference)
+    } else {
+      if let schemaName = From.schemaName {
+        query.append("\(quote: schemaName).")
+      }
+      query.append(From.tableFragment)
     }
-    query.append(From.tableFragment)
     if let tableAlias = From.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }
@@ -1807,18 +1924,19 @@ public struct _JoinClause: QueryExpression, Sendable {
   let `operator`: QueryFragment?
   let tableAlias: String?
   let tableColumns: QueryFragment
-  let tableName: QueryFragment
+  let tableReference: QueryFragment
 
   init(
     operator: Operator?,
+    tableReference: QueryFragment? = nil,
     table: any Table.Type,
     constraint: some QueryExpression<Bool>
   ) {
     self.constraint = constraint.queryFragment
     self.operator = `operator`?.queryFragment
     tableAlias = table.tableAlias
-    tableColumns = table.columns.queryFragment
-    tableName = table.tableFragment
+    tableColumns = $_isSelecting.withValue(true) { table.columns.queryFragment }
+    self.tableReference = tableReference ?? table.tableFragment
   }
 
   public var queryFragment: QueryFragment {
@@ -1826,7 +1944,7 @@ public struct _JoinClause: QueryExpression, Sendable {
     if let `operator` {
       query.append("\(`operator`) ")
     }
-    query.append("JOIN \(tableName) ")
+    query.append("JOIN \(tableReference) ")
     if let tableAlias = tableAlias {
       query.append("AS \(quote: tableAlias) ")
     }
@@ -1838,11 +1956,11 @@ public struct _JoinClause: QueryExpression, Sendable {
 public struct _LimitClause: QueryExpression, Sendable {
   public typealias QueryValue = Never
 
-  let maxLength: QueryFragment
+  let maxLength: QueryFragment?
   let offset: QueryFragment?
 
   public var queryFragment: QueryFragment {
-    var query: QueryFragment = "LIMIT \(maxLength)"
+    var query: QueryFragment = "LIMIT \(maxLength ?? "-1")"
     if let offset {
       query.append(" OFFSET \(offset)")
     }

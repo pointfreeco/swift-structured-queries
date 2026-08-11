@@ -7,7 +7,9 @@
 - ``QueryOutput``
 - ``init(queryOutput:)``
 - ``queryOutput``
+- ``queryFragment(decoding:)``
 
 ### Conformances
 
 - ``Swift/Decodable/JSONRepresentation``
+- ``Swift/RawRepresentable/RawRepresentation``
