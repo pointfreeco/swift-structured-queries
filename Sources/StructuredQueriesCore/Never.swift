@@ -22,8 +22,6 @@ extension Never: Table {
   public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     throw .typeMismatch(Self.self)
   }
-
-  private struct NotDecodable: Error {}
 }
 
 extension Never: _Selection {}
