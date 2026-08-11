@@ -880,16 +880,18 @@ public enum InsertValuesBuilder<Value> {
   where Value: Table {
     var valueFragments: [[QueryFragment]] = []
     for value in expression {
-      var valueFragment: [QueryFragment] = []
-      for column in Value.TableColumns.writableColumns {
-        func open<Root, Member>(
-          _ column: some WritableTableColumnExpression<Root, Member>
-        ) -> QueryFragment {
-          Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        valueFragment.append(open(column))
+      var encoder = QueryFragmentsEncoder()
+      do {
+        try value.encode(to: &encoder)
+        valueFragments.append(encoder.fragments)
+      } catch {
+        valueFragments.append(
+          Array(
+            repeating: "\(QueryBinding.invalid(error))",
+            count: Value.TableColumns.writableColumns.count
+          )
+        )
       }
-      valueFragments.append(valueFragment)
     }
     return valueFragments
   }
@@ -899,16 +901,18 @@ public enum InsertValuesBuilder<Value> {
   where Value: Table, Value.Draft: TableDraft {
     var valueFragments: [[QueryFragment]] = []
     for value in expression {
-      var valueFragment: [QueryFragment] = []
-      for column in Value.Draft.TableColumns.writableColumns {
-        func open<Root, Member>(
-          _ column: some WritableTableColumnExpression<Root, Member>
-        ) -> QueryFragment {
-          Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        valueFragment.append(open(column))
+      var encoder = QueryFragmentsEncoder()
+      do {
+        try value.encode(to: &encoder)
+        valueFragments.append(encoder.fragments)
+      } catch {
+        valueFragments.append(
+          Array(
+            repeating: "\(QueryBinding.invalid(error))",
+            count: Value.Draft.TableColumns.writableColumns.count
+          )
+        )
       }
-      valueFragments.append(valueFragment)
     }
     return valueFragments
   }
