@@ -22,9 +22,9 @@ extension SelectStatement {
   /// Explicitly selects all columns and tables from this statement.
   ///
   /// - Returns: A select statement.
-  public func selectStar<each J: Table>() -> Select<(From, repeat each J), From, (repeat each J)>
+  public func selectStar<each J: Table>() -> Select<(From, repeat each J), From, Joins>
   where Joins == (repeat each J) {
-    var select = Select<(From, repeat each J), From, (repeat each J)>()
+    var select = Select<(From, repeat each J), From, Joins>()
     select.clauses = asSelect().clauses
     return select
   }

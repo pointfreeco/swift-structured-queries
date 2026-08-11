@@ -27,19 +27,18 @@ Explore the full list of available functions below.
 - ``QueryExpression/replace(_:_:)``
 - ``QueryExpression/rtrim(_:)``
 - ``QueryExpression/trim(_:)``
-- ``QueryExpression/unhex(_:)``
 - ``QueryExpression/upper()``
 
 ### Numeric
 
 - ``QueryExpression/abs()``
 - ``QueryExpression/round(_:)``
-- ``QueryExpression/sign()``
 
 ### Optionality
 
 - ``QueryExpression/??(_:_:)``
 - ``QueryExpression/ifnull(_:)``
+- ``QueryExpression/nullif(_:)``
 
 ### Bytes
 

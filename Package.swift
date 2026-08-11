@@ -12,10 +12,10 @@ import PackageDescription
 let package = Package(
   name: "swift-structured-queries",
   platforms: [
-    .iOS(.v13),
-    .macOS(.v10_15),
-    .tvOS(.v13),
-    .watchOS(.v6),
+    .iOS(.v16),
+    .macOS(.v13),
+    .tvOS(.v16),
+    .watchOS(.v9),
   ],
   products: [
     .library(
@@ -41,12 +41,23 @@ let package = Package(
   ],
   traits: [
     .trait(
+      name: "CasePaths",
+      description: "Introduce enum table support to StructuredQueries."
+    ),
+    .trait(
+      name: "ColumnCoding",
+      description: "Align the Codable coding of tables and selections with their column names."
+    ),
+    .trait(
       name: "LazyInitializableByDefault",
       description: "Optionalize draft properties that have no default."
     ),
     .trait(
-      name: "CasePaths",
-      description: "Introduce enum table support to StructuredQueries."
+      name: "SuppressPlatformSQLiteAvailability",
+      description: """
+        Suppress '@available' checks on APIs that depend on a newer version of SQLite than the one \
+        bundled with the platform.
+        """
     ),
     .trait(
       name: "Tagged",
@@ -66,7 +77,7 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-case-paths", from: "1.8.0"),
     .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
-    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.1"),
+    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.14.0"),
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.6.3"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.4"),
     .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
@@ -129,6 +140,11 @@ let package = Package(
       name: "StructuredQueriesSQLiteCore",
       dependencies: [
         "StructuredQueriesCore",
+        .product(
+          name: "CasePaths",
+          package: "swift-case-paths",
+          condition: .when(traits: ["CasePaths"])
+        ),
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
@@ -186,6 +202,7 @@ if ProcessInfo.processInfo.environment["SPI_GENERATE_DOCS"] != nil  // || true  
     .default(
       enabledTraits: [
         "CasePaths",
+        "ColumnCoding",
         "Tagged",
       ]
     )

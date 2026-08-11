@@ -76,6 +76,21 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
   public var queryOutput: Wrapped.QueryOutput? {
     self?.queryOutput
   }
+
+  @inlinable
+  public static func queryFragment(decoding queryFragment: QueryFragment) -> QueryFragment {
+    Wrapped.queryFragment(decoding: queryFragment)
+  }
+
+  @inlinable
+  public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+    Wrapped._queryFragment(jsonEncoding: queryFragment)
+  }
+
+  @inlinable
+  public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+    Wrapped._queryFragment(jsonDecoding: queryFragment)
+  }
 }
 
 extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {
@@ -93,7 +108,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
     TableColumns()
   }
 
-  fileprivate subscript<Member: QueryRepresentable>(
+  subscript<Member: QueryRepresentable>(
     member _: KeyPath<Member, Member>,
     column keyPath: KeyPath<Wrapped, Member.QueryOutput>
   ) -> Member.QueryOutput? {
@@ -108,6 +123,11 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
       func open<Root, Value>(
         _ column: some TableColumnExpression<Root, Value>
       ) -> any TableColumnExpression {
+        #if CasePaths
+          if let caseColumn = column as? any _CaseColumnExpression {
+            return open(caseColumn._base)
+          }
+        #endif
         guard let column = column as? TableColumn<Wrapped, Value>
         else {
           let column = column as! GeneratedColumn<Wrapped, Value>
@@ -130,6 +150,11 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
       func open<Root, Value>(
         _ column: some WritableTableColumnExpression<Root, Value>
       ) -> any WritableTableColumnExpression {
+        #if CasePaths
+          if let caseColumn = column as? any _CaseColumnExpression {
+            return open(caseColumn._base)
+          }
+        #endif
         let column = column as! TableColumn<Wrapped, Value>
         return TableColumn<Optional, Value?>(
           column.name,
@@ -162,11 +187,49 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
 
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, ColumnGroup<Wrapped, Member>>
-    ) -> ColumnGroup<Optional, Member?> {
-      ColumnGroup<Optional, Member?>(
-        keyPath: \.[member: \Member.self, column: Wrapped.columns[keyPath: keyPath].keyPath]
+    ) -> OptionalColumnGroup<Optional, Member> {
+      let column = Wrapped.columns[keyPath: keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<Optional, Member?>(
+          column.name,
+          keyPath: \.[member: \Member.self, column: column.keyPath]
+        )
       )
     }
+
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.TableColumns, OptionalColumnGroup<Wrapped, Member>>
+    ) -> OptionalColumnGroup<Optional, Member> {
+      let column = Wrapped.columns[keyPath: keyPath]
+      return OptionalColumnGroup(
+        base: ColumnGroup<Optional, Member?>(
+          column.name,
+          keyPath: \.[flattenedMember: \Member.self, column: column.keyPath]
+        )
+      )
+    }
+
+    #if CasePaths
+      public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumn<Wrapped, Member>>
+      ) -> TableColumn<Optional, Member??> {
+        let column = Wrapped.columns[keyPath: keyPath].base
+        return TableColumn<Optional, Member??>(
+          column.name,
+          keyPath: \.[member: \Member?.self, column: column.keyPath]
+        )
+      }
+
+      public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumnGroup<Wrapped, Member>>
+      ) -> ColumnGroup<Optional, Member??> {
+        let column = Wrapped.columns[keyPath: keyPath].base
+        return ColumnGroup<Optional, Member??>(
+          column.name,
+          keyPath: \.[member: \Member?.self, column: column.keyPath]
+        )
+      }
+    #endif
 
     public subscript<Member: QueryExpression>(
       dynamicMember keyPath: KeyPath<Wrapped.TableColumns, Member>
@@ -209,6 +272,10 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
       Wrapped.columns.primaryKey._names
     }
 
+    public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
+      Wrapped.columns.primaryKey.defaultValue
+    }
+
     public var keyPath: KeyPath<Wrapped?, Wrapped.PrimaryKey.QueryOutput?> {
       \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
     }
@@ -227,10 +294,6 @@ extension Optional.TableColumns.PrimaryColumn: TableColumnExpression
 where Wrapped.TableColumns.PrimaryColumn: TableColumnExpression {
   public var name: String {
     Wrapped.columns.primaryKey.name
-  }
-
-  public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
-    Wrapped.columns.primaryKey.defaultValue
   }
 
   public func _aliased<Name: AliasName>(

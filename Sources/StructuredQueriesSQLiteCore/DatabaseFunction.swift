@@ -82,19 +82,61 @@ extension AggregateDatabaseFunction {
   ///   - input: Expressions representing the arguments of the function.
   ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
   ///     the aggregation.
-  ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: An expression representing the function call.
   @_disfavoredOverload
   public func callAsFunction(
     _ input: some QueryExpression<Input>,
     distinct isDistinct: Bool = false,
-    order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<Output>
   where Input: QueryBindable {
     $_isSelecting.withValue(false) {
-      AggregateFunctionExpression(name, distinct: isDistinct, input, order: order, filter: filter)
+      AggregateFunctionExpression<Output>(name, distinct: isDistinct, input, filter: filter)
+    }
+  }
+
+  /// An aggregate function call expression.
+  ///
+  /// - Parameters
+  ///   - input: Expressions representing the arguments of the function.
+  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
+  ///     the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: An expression representing the function call.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
+  @_disfavoredOverload
+  public func callAsFunction(
+    _ input: some QueryExpression<Input>,
+    distinct isDistinct: Bool = false,
+    order: some QueryExpression,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<Output>
+  where Input: QueryBindable {
+    $_isSelecting.withValue(false) {
+      AggregateFunctionExpression<Output>(
+        name, distinct: isDistinct, input, order: order, filter: filter
+      )
+    }
+  }
+
+  /// An aggregate function call expression.
+  ///
+  /// - Parameters
+  ///   - input: Expressions representing the arguments of the function.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: An expression representing the function call.
+  @_disfavoredOverload
+  public func callAsFunction<each T: QueryExpression>(
+    _ input: repeat each T,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<Output>
+  where Input == (repeat (each T).QueryValue) {
+    $_isSelecting.withValue(false) {
+      AggregateFunctionExpression<Output>(name, repeat each input, filter: filter)
     }
   }
 
@@ -105,15 +147,18 @@ extension AggregateDatabaseFunction {
   ///   - order: An `ORDER BY` clause to apply to the aggregation.
   ///   - filter: A `FILTER` clause to apply to the aggregation.
   /// - Returns: An expression representing the function call.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
   @_disfavoredOverload
   public func callAsFunction<each T: QueryExpression>(
     _ input: repeat each T,
-    order: (some QueryExpression)? = Bool?.none,
+    order: some QueryExpression,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<Output>
   where Input == (repeat (each T).QueryValue) {
     $_isSelecting.withValue(false) {
-      AggregateFunctionExpression(name, repeat each input, order: order, filter: filter)
+      AggregateFunctionExpression<Output>(name, repeat each input, order: order, filter: filter)
     }
   }
 }

@@ -691,7 +691,8 @@ enum Ordering {
 
 ### Paginating results
 
-The `limit(_:offset:)` function is used to change a query's `LIMIT` and `OFFSET` clauses.
+The `limit(_:)` and `offset(_:)` functions are used to change a query's `LIMIT` and `OFFSET`
+clauses.
 
 @Row {
   @Column {
@@ -710,7 +711,9 @@ The `limit(_:offset:)` function is used to change a query's `LIMIT` and `OFFSET`
 @Row {
   @Column {
     ```swift
-    Reminder.limit(10, offset: 10)
+    Reminder
+      .limit(10)
+      .offset(10)
     ```
   }
   @Column {
@@ -721,53 +724,62 @@ The `limit(_:offset:)` function is used to change a query's `LIMIT` and `OFFSET`
   }
 }
 
-Multiple chained calls to `limit` will override the limit and offset to the last call, using the
-existing offset if none is provided:
-
-@Row {
-  @Column {
-    ```swift
-    Reminder
-      .limit(10, offset: 10)
-      .limit(20)
-    ```
-  }
-  @Column {
-    ```sql
-    SELECT … FROM "reminders"
-    LIMIT 20
-    ```
-  }
-}
+Multiple chained calls will override the clause of the last call:
 
 @Row {
   @Column {
     ```swift
     Reminder
       .limit(10)
-      .limit(20, offset: 20)
+      .offset(10)
+      .limit(20)
     ```
   }
   @Column {
     ```sql
     SELECT … FROM "reminders"
-    LIMIT 20 OFFSET 20
+    LIMIT 20 OFFSET 10
     ```
   }
 }
 
+Passing `nil` will leave the clause untouched, which makes it easy to apply a limit or offset from
+optional data:
+
 @Row {
   @Column {
     ```swift
+    let offset: Int? = nil
     Reminder
-      .limit(10, offset: 10)
-      .limit(20, offset: 20)
+      .limit(10)
+      .offset(offset)
     ```
   }
   @Column {
     ```sql
     SELECT … FROM "reminders"
-    LIMIT 20 OFFSET 20
+    LIMIT 10
+    ```
+  }
+}
+
+And both functions have result builder variants that can build the clause from the query's tables,
+where producing no expression is equivalent to passing `nil`:
+
+@Row {
+  @Column {
+    ```swift
+    Reminder.limit { _ in
+      if isPaginated {
+        pageSize
+      }
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT … FROM "reminders"
+    LIMIT 10
     ```
   }
 }

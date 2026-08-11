@@ -48,13 +48,35 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
   /// - Returns: A string concatenation aggregate of this expression.
   public func groupConcat(
     _ separator: (some QueryExpression)? = String?.none,
-    order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<String?> {
     AggregateFunctionExpression(
       "group_concat",
       separator.map { [queryFragment, $0.queryFragment] } ?? [queryFragment],
-      order: order?.queryFragment,
+      filter: filter?.queryFragment
+    )
+  }
+
+  /// A string concatenation aggregate of this expression, ordered within the group.
+  ///
+  /// - Parameters:
+  ///   - separator: A string to insert between each of the results in a group. The default
+  ///     separator is a comma.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A string concatenation aggregate of this expression.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
+  public func groupConcat(
+    _ separator: (some QueryExpression)? = String?.none,
+    order: some QueryExpression,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<String?> {
+    AggregateFunctionExpression(
+      "group_concat",
+      separator.map { [queryFragment, $0.queryFragment] } ?? [queryFragment],
+      order: order.queryFragment,
       filter: filter?.queryFragment
     )
   }
@@ -71,14 +93,37 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped == Strin
   /// - Returns: A string concatenation aggregate of this expression.
   public func groupConcat(
     distinct isDistinct: Bool,
-    order: (some QueryExpression)? = Bool?.none,
     filter: (some QueryExpression<Bool>)? = Bool?.none
   ) -> some QueryExpression<String?> {
     AggregateFunctionExpression(
       "group_concat",
       isDistinct: isDistinct,
       [queryFragment],
-      order: order?.queryFragment,
+      filter: filter?.queryFragment
+    )
+  }
+
+  /// A string concatenation aggregate of this expression, ordered within the group.
+  ///
+  /// - Parameters:
+  ///   - isDistinct: Whether or not to include a `DISTINCT` clause, which filters duplicates from
+  ///     the aggregation.
+  ///   - order: An `ORDER BY` clause to apply to the aggregation.
+  ///   - filter: A `FILTER` clause to apply to the aggregation.
+  /// - Returns: A string concatenation aggregate of this expression.
+  #if !SuppressPlatformSQLiteAvailability
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+  #endif
+  public func groupConcat(
+    distinct isDistinct: Bool,
+    order: some QueryExpression,
+    filter: (some QueryExpression<Bool>)? = Bool?.none
+  ) -> some QueryExpression<String?> {
+    AggregateFunctionExpression(
+      "group_concat",
+      isDistinct: isDistinct,
+      [queryFragment],
+      order: order.queryFragment,
       filter: filter?.queryFragment
     )
   }
