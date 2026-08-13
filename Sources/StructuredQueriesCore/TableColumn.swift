@@ -91,10 +91,6 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
     self._keyPath = keyPath
   }
 
-  public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
-    try Value(decoder: &decoder).queryOutput
-  }
-
   public var queryFragment: QueryFragment {
     let column: QueryFragment = "\(Root.self).\(quote: name)"
     return _isSelecting ? Value.queryFragment(decoding: column) : column
@@ -208,10 +204,6 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
     self.name = name
     self._defaultValue = defaultValue
     self._keyPath = keyPath
-  }
-
-  public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
-    try Value(decoder: &decoder).queryOutput
   }
 
   public var queryFragment: QueryFragment {

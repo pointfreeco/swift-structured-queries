@@ -98,14 +98,6 @@ extension QueryDecoder {
 
   @inlinable
   @inline(__always)
-  public mutating func decode<T: QueryRepresentable<T>>(
-    _ columnType: T.Type = T.self
-  ) throws -> T? {
-    try T?(decoder: &self)?.queryOutput
-  }
-
-  @inlinable
-  @inline(__always)
   public mutating func decode<Column: _TableColumnExpression>(
     _ column: Column
   ) throws -> Column.Value.QueryOutput? {
