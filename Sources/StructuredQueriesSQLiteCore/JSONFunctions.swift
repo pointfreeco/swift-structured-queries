@@ -2113,8 +2113,8 @@ extension String {
   fileprivate static func member(_ name: String) -> String {
     let escaped =
       name
-      .replacingOccurrences(of: "\\", with: "\\\\")
-      .replacingOccurrences(of: "\"", with: "\\\"")
+      .replacing("\\", with: "\\\\")
+      .replacing("\"", with: "\\\"")
     return ".\"\(escaped)\""
   }
 

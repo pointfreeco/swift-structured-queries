@@ -359,7 +359,7 @@ extension QueryFragment {
       switch query.segments[index] {
       case .sql(let sql):
         query.segments[index] = .sql(
-          sql.replacingOccurrences(of: T.tableName.quoted(), with: A.aliasName.quoted())
+          sql.replacing(T.tableName.quoted(), with: A.aliasName.quoted())
         )
       case .binding:
         continue
