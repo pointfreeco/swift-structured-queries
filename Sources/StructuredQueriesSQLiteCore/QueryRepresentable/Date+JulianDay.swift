@@ -22,7 +22,11 @@ extension Date {
     }
 
     public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
-      "datetime(\(queryFragment), 'julianday')"
+      "datetime(\(queryFragment), 'julianday', 'subsec')"
+    }
+
+    public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+      "julianday(\(queryFragment))"
     }
   }
 }
