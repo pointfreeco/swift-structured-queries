@@ -119,6 +119,19 @@ extension Table {
     QueryFragment(quote: tableName)
   }
 
+  static var _allColumnsFragment: QueryFragment {
+    columns.queryFragment
+  }
+
+  package static var _columnFieldOffsets: [Int] {
+    TableColumns.allColumns.map { column in
+      func offset<C: TableColumnExpression>(_ column: C) -> Int {
+        MemoryLayout<C.Root>.offset(of: column.keyPath) ?? 0
+      }
+      return offset(column)
+    }
+  }
+
   /// Returns a table column to the resulting value of a given key path.
   ///
   /// Allows, _e.g._ `Reminder.columns.id` to be abbreviated `Reminder.id`, which is useful when

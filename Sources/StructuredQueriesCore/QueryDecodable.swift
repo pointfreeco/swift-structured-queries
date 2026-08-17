@@ -1,7 +1,7 @@
 public import Foundation
 
 /// A type that can decode itself from a query.
-public protocol QueryDecodable: _OptionalPromotable {
+public protocol QueryDecodable: _OptionalPromotable, _SendableMetatype {
   /// Creates a new instance by decoding from the given decoder.
   ///
   /// This initializer throws an error if reading from the decoder fails, or if the data read is

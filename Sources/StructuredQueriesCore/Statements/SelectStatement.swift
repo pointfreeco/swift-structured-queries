@@ -1,7 +1,8 @@
 public protocol PartialSelectStatement<QueryValue>: Statement {}
 
-/// A type representing a `SELECT` statement.
-public protocol SelectStatement<QueryValue, From, Joins>: PartialSelectStatement {
+/// A type representing a `SELECT` statement for a table.
+public protocol SelectStatement<QueryValue, From, Joins>: PartialSelectStatement
+where From: Table {
   /// Creates a ``Select`` statement from this statement.
   ///
   /// - Returns: A select statement.

@@ -169,7 +169,7 @@ reminder is inserted into the database with the following trigger:
 
     Reminders.createTemporaryTrigger(
       after: .insert { new in
-        Values($didInsertReminder(new.id))
+        Select($didInsertReminder(new.id))
       }
     )
     ```

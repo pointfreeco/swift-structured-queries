@@ -9,4 +9,5 @@
 
 - ``InsertOf``
 - ``InsertValuesBuilder``
+- ``ValuesRows``
 - ``ConflictResolution``

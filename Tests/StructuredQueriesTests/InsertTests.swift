@@ -204,7 +204,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          Values("vacation")
+          Select("vacation")
         }
         .returning(\.self)
       ) {
@@ -879,7 +879,7 @@ extension SnapshotTests {
         RemindersList.insert {
           $0.title
         } select: {
-          Values(#sql("'Groceries'"))
+          Select(#sql("'Groceries'"))
         }
         .returning(\.id)
       ) {

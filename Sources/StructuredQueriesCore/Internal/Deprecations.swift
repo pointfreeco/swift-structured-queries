@@ -1,5 +1,23 @@
 import Foundation
 
+// NB: Deprecated after 0.36.0:
+
+@available(*, deprecated, renamed: "Select(_:)")
+public func Values<QueryValue: QueryExpression>(
+  _ value: QueryValue
+) -> Select<QueryValue, ValuesColumns<QueryValue>, ()> {
+  Select(value)
+}
+
+@available(*, deprecated, renamed: "Select(_:)")
+public func Values<each Value: QueryExpression>(
+  _ values: repeat each Value
+) -> Select<
+  (repeat (each Value).QueryValue), ValuesColumns<(repeat (each Value).QueryValue)>, ()
+> {
+  Select(repeat each values)
+}
+
 // NB: Deprecated after 0.33.3:
 
 extension Table {
@@ -32,7 +50,7 @@ extension Where {
   }
 }
 
-extension Select {
+extension Select where From: Table {
   @_disfavoredOverload
   @available(*, deprecated, message: "Use 'limit(_:)' and 'offset(_:)', instead.")
   public func limit<each J: Table>(
@@ -175,7 +193,7 @@ extension Table {
   @available(*, deprecated, renamed: "insert(_:values:onConflictDoUpdate:)")
   public static func insert(
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    @InsertValuesBuilder<Self> values: () -> ValuesRows<Self>,
     onConflict updates: ((inout Updates<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(columns, values: values, onConflictDoUpdate: updates)
@@ -185,7 +203,7 @@ extension Table {
   public static func insert<V1, each V2>(
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
-    values: () -> [[QueryFragment]],
+    values: () -> ValuesRows<(V1, repeat each V2)>,
     onConflict updates: ((inout Updates<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(columns, values: values, onConflictDoUpdate: updates)
