@@ -1,3 +1,4 @@
+import Foundation
 import StructuredQueries
 import StructuredQueriesSQLite
 
@@ -112,9 +113,9 @@ private struct TableWithNestedRepresentation {
   var nested: Nested
 
   @Column(as: Nested.JSONRepresentation.self)
-  var nestedWithDefault: Nested = Nested(x: 1)
+  var nestedWithDefault = Nested(x: 1)
 
-  var status: Status = Status.active
+  var status: Status = .active
 }
 private func nestedRepresentationDraft() {
   _ = TableWithNestedRepresentation.Draft(nested: TableWithNestedRepresentation.Nested())
@@ -145,4 +146,54 @@ private struct Item {
     var b: Int
   }
   var group: Group?
+}
+
+// NB: Unannotated columns of non-Sendable types must not produce shared witness storage
+private final class NonSendableDefault {
+  init() {}
+}
+extension NonSendableDefault: QueryBindable {
+  var queryBinding: QueryBinding { .null }
+}
+extension NonSendableDefault: QueryDecodable {
+  convenience init(decoder: inout some QueryDecoder) throws { self.init() }
+}
+@Selection
+private struct NonSendableDefaultColumns {
+  var handle = NonSendableDefault()
+  var title: String
+}
+
+// NB: Witness inference must handle backticks, optional inference, and multiple columns
+@Selection
+private struct WitnessEdgeCases {
+  var `class` = Date(timeIntervalSince1970: 0)
+  var note = Optional("hi")
+  var stamp = Date(timeIntervalSince1970: 1)
+}
+private func witnessEdgeCases() {
+  _ = WitnessEdgeCases.Columns()
+}
+
+// NB: Witness defaults may reference static members of the enclosing type
+@Selection
+private struct WitnessSelfReference {
+  static let epoch = Date(timeIntervalSince1970: 42)
+  var startsAt = Self.epoch
+  var title: String
+}
+private func witnessSelfReference() {
+  _ = WitnessSelfReference.Columns(title: "ok")
+}
+
+// NB: Unannotated '@Column(as:)' primary keys must produce an optional draft column
+@Table
+private struct InferredRepresentationPrimaryKey {
+  @Column(as: UUID.BytesRepresentation.self)
+  var id = UUID()
+  var title: String
+}
+private func inferredRepresentationPrimaryKey() {
+  let _: UUID? = InferredRepresentationPrimaryKey.Draft(title: "x").id
+  _ = InferredRepresentationPrimaryKey.Draft.Columns(title: "x")
 }

@@ -2123,6 +2123,18 @@ extension SnapshotTests {
           @StructuredQueries.ColumnCheck(ID<Self>())
           var bar = ID<Self>()
 
+          public protocol _ColumnTypes {
+            associatedtype bar
+            static var barDefault: bar {
+              get
+            }
+          }
+
+          public nonisolated enum _ColumnWitness: _ColumnTypes {
+            @StructuredQueries._ColumnDefault
+            public static var barDefault = ID<Foo>()
+          }
+
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
             public let bar = StructuredQueriesCore._TableColumn<QueryValue, _>.for("bar", keyPath: \QueryValue.bar, default: ID<Foo>())
@@ -2151,7 +2163,7 @@ extension SnapshotTests {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
-              bar: some StructuredQueriesCore.QueryExpression
+              bar: some StructuredQueriesCore.QueryExpression<_ColumnWitness.bar> = _ColumnWitness.bar(queryOutput: ID<Foo>())
             ) {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: bar._allColumns)
@@ -2244,7 +2256,7 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>>,
-              referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil)
+              referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = Optional<ID<User, UUID.BytesRepresentation>>(queryOutput: nil)
             ) {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: id._allColumns)
@@ -2254,12 +2266,12 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = User
-            @StructuredQueries.ColumnCheck(ID<User, UUID.BytesRepresentation>?.self) var id: ID<User, UUID>?
+            @StructuredQueries.ColumnCheck(Optional<ID<User, UUID.BytesRepresentation>>.self) var id: ID<User, UUID>?
             @StructuredQueries.ColumnCheck(ID<User, UUID.BytesRepresentation>?.self) var referrerID: ID<User, UUID>?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Optional<ID<User, UUID.BytesRepresentation>>>.for("id", keyPath: \QueryValue.id, default: nil)
               public let referrerID = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>.for("referrerID", keyPath: \QueryValue.referrerID, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
@@ -2288,8 +2300,8 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil),
-                referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = ID<User, UUID.BytesRepresentation>?(queryOutput: nil)
+                id: some StructuredQueriesCore.QueryExpression<Optional<ID<User, UUID.BytesRepresentation>>> = Optional<ID<User, UUID.BytesRepresentation>>(queryOutput: nil),
+                referrerID: some StructuredQueriesCore.QueryExpression<ID<User, UUID.BytesRepresentation>?> = Optional<ID<User, UUID.BytesRepresentation>>(queryOutput: nil)
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
                 allColumns.append(contentsOf: id._allColumns)
@@ -2308,8 +2320,8 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Swift.Int {
               var columnWidth = 0
-              columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
-              columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
+              columnWidth += Optional<ID<User, UUID.BytesRepresentation>>._columnWidth
+              columnWidth += Optional<ID<User, UUID.BytesRepresentation>>._columnWidth
               return columnWidth
             }
           }
@@ -2325,7 +2337,7 @@ extension SnapshotTests {
           public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
             columnWidth += ID<User, UUID.BytesRepresentation>._columnWidth
-            columnWidth += ID<User, UUID.BytesRepresentation>?._columnWidth
+            columnWidth += Optional<ID<User, UUID.BytesRepresentation>>._columnWidth
             return columnWidth
           }
 
@@ -2459,6 +2471,18 @@ extension SnapshotTests {
           @StructuredQueries.ColumnCheck(60 * 5)
           var seconds = 60 * 5
 
+          public protocol _ColumnTypes {
+            associatedtype seconds
+            static var secondsDefault: seconds {
+              get
+            }
+          }
+
+          public nonisolated enum _ColumnWitness: _ColumnTypes {
+            @StructuredQueries._ColumnDefault
+            public static var secondsDefault = 60 * 5
+          }
+
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = SyncUp
             public typealias PrimaryKey = Int
@@ -2493,7 +2517,7 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              seconds: some StructuredQueriesCore.QueryExpression
+              seconds: some StructuredQueriesCore.QueryExpression<_ColumnWitness.seconds> = _ColumnWitness.seconds(queryOutput: 60 * 5)
             ) {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: id._allColumns)
@@ -2507,6 +2531,18 @@ extension SnapshotTests {
             var id: Int?
             @StructuredQueries.ColumnCheck(60 * 5)
             var seconds = 60 * 5
+
+            public protocol _ColumnTypes {
+              associatedtype seconds
+              static var secondsDefault: seconds {
+                get
+              }
+            }
+
+            public nonisolated enum _ColumnWitness: _ColumnTypes {
+              @StructuredQueries._ColumnDefault
+              public static var secondsDefault = 60 * 5
+            }
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
@@ -2539,8 +2575,8 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
-                seconds: some StructuredQueriesCore.QueryExpression
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Optional<Int>(queryOutput: nil),
+                seconds: some StructuredQueriesCore.QueryExpression<_ColumnWitness.seconds> = _ColumnWitness.seconds(queryOutput: 60 * 5)
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
                 allColumns.append(contentsOf: id._allColumns)
@@ -2559,7 +2595,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Swift.Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth
+              columnWidth += Optional<Int>._columnWidth
               columnWidth += StructuredQueriesCore._columnWidth(\QueryValue.seconds)
               return columnWidth
             }
@@ -2728,7 +2764,7 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Optional<Int>(queryOutput: nil),
                 color: some StructuredQueriesCore.QueryExpression<Color.HexRepresentation> = Color.HexRepresentation(queryOutput: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255)),
                 name: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
               ) {
@@ -2750,7 +2786,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Swift.Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth
+              columnWidth += Optional<Int>._columnWidth
               columnWidth += Color.HexRepresentation._columnWidth
               columnWidth += Swift.String._columnWidth
               return columnWidth
@@ -4168,7 +4204,7 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil)
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Optional<Int>(queryOutput: nil)
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
                 allColumns.append(contentsOf: id._allColumns)
@@ -4186,7 +4222,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Swift.Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth
+              columnWidth += Optional<Int>._columnWidth
               return columnWidth
             }
           }
@@ -4414,8 +4450,8 @@ extension SnapshotTests {
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
               title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
-              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Date.UnixTimeRepresentation?(queryOutput: nil),
-              priority: some StructuredQueriesCore.QueryExpression<Priority?> = Priority?(queryOutput: nil)
+              date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Optional<Date.UnixTimeRepresentation>(queryOutput: nil),
+              priority: some StructuredQueriesCore.QueryExpression<Priority?> = Optional<Priority>(queryOutput: nil)
             ) {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: id._allColumns)
@@ -4472,10 +4508,10 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Optional<Int>(queryOutput: nil),
                 title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: ""),
-                date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Date.UnixTimeRepresentation?(queryOutput: nil),
-                priority: some StructuredQueriesCore.QueryExpression<Priority?> = Priority?(queryOutput: nil)
+                date: some StructuredQueriesCore.QueryExpression<Date.UnixTimeRepresentation?> = Optional<Date.UnixTimeRepresentation>(queryOutput: nil),
+                priority: some StructuredQueriesCore.QueryExpression<Priority?> = Optional<Priority>(queryOutput: nil)
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
                 allColumns.append(contentsOf: id._allColumns)
@@ -4496,10 +4532,10 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Swift.Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth
+              columnWidth += Optional<Int>._columnWidth
               columnWidth += Swift.String._columnWidth
-              columnWidth += Date.UnixTimeRepresentation?._columnWidth
-              columnWidth += Priority?._columnWidth
+              columnWidth += Optional<Date.UnixTimeRepresentation>._columnWidth
+              columnWidth += Optional<Priority>._columnWidth
               return columnWidth
             }
           }
@@ -4516,8 +4552,8 @@ extension SnapshotTests {
             var columnWidth = 0
             columnWidth += Int._columnWidth
             columnWidth += Swift.String._columnWidth
-            columnWidth += Date.UnixTimeRepresentation?._columnWidth
-            columnWidth += Priority?._columnWidth
+            columnWidth += Optional<Date.UnixTimeRepresentation>._columnWidth
+            columnWidth += Optional<Priority>._columnWidth
             return columnWidth
           }
 
@@ -4619,11 +4655,11 @@ extension SnapshotTests {
           }
           struct Draft: StructuredQueriesCore.TableDraft, StructuredQueriesCore.PartialSelectStatement {
             public typealias SourceTable = Reminder
-            @StructuredQueries.ColumnCheck(UUID.BytesRepresentation?.self) var id: UUID?
+            @StructuredQueries.ColumnCheck(Optional<UUID.BytesRepresentation>.self) var id: UUID?
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID.BytesRepresentation?>.for("id", keyPath: \QueryValue.id, default: nil)
+              public let id = StructuredQueriesCore._TableColumn<QueryValue, Optional<UUID.BytesRepresentation>>.for("id", keyPath: \QueryValue.id, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -4649,7 +4685,7 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<UUID.BytesRepresentation?> = UUID.BytesRepresentation?(queryOutput: nil)
+                id: some StructuredQueriesCore.QueryExpression<Optional<UUID.BytesRepresentation>> = Optional<UUID.BytesRepresentation>(queryOutput: nil)
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
                 allColumns.append(contentsOf: id._allColumns)
@@ -4667,7 +4703,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Swift.Int {
               var columnWidth = 0
-              columnWidth += UUID.BytesRepresentation?._columnWidth
+              columnWidth += Optional<UUID.BytesRepresentation>._columnWidth
               return columnWidth
             }
           }
@@ -4846,7 +4882,7 @@ extension SnapshotTests {
             public typealias QueryValue = Reminder
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
-              id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+              id: some StructuredQueriesCore.QueryExpression<Int?> = Optional<Int>(queryOutput: nil),
               title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
             ) {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
@@ -4893,7 +4929,7 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<Int?> = Int?(queryOutput: nil),
+                id: some StructuredQueriesCore.QueryExpression<Int?> = Optional<Int>(queryOutput: nil),
                 title: some StructuredQueriesCore.QueryExpression<Swift.String> = Swift.String(queryOutput: "")
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
@@ -4913,7 +4949,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Swift.Int {
               var columnWidth = 0
-              columnWidth += Int?._columnWidth
+              columnWidth += Optional<Int>._columnWidth
               columnWidth += Swift.String._columnWidth
               return columnWidth
             }
@@ -4929,7 +4965,7 @@ extension SnapshotTests {
 
           public nonisolated static var _columnWidth: Swift.Int {
             var columnWidth = 0
-            columnWidth += Int?._columnWidth
+            columnWidth += Optional<Int>._columnWidth
             columnWidth += Swift.String._columnWidth
             return columnWidth
           }
@@ -5052,7 +5088,7 @@ extension SnapshotTests {
               public typealias QueryValue = Draft
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
-                id: some StructuredQueriesCore.QueryExpression<ReminderTagID?> = ReminderTagID?(queryOutput: nil)
+                id: some StructuredQueriesCore.QueryExpression<ReminderTagID?> = Optional<ReminderTagID>(queryOutput: nil)
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
                 allColumns.append(contentsOf: id._allColumns)
@@ -5070,7 +5106,7 @@ extension SnapshotTests {
 
             public nonisolated static var _columnWidth: Swift.Int {
               var columnWidth = 0
-              columnWidth += ReminderTagID?._columnWidth
+              columnWidth += Optional<ReminderTagID>._columnWidth
               return columnWidth
             }
           }

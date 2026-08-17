@@ -733,6 +733,8 @@ extension TableMacro: MemberMacro {
       )?
     let selfRewriter = SelfRewriter(selfEquivalent: type.name)
     var selectionInitializers: [DeclSyntax] = []
+    var columnTypesDecl: DeclSyntax?
+    var columnWitnessDecl: DeclSyntax?
     var schemaName: ExprSyntax?
     var tableName = ExprSyntax(
       StringLiteralExprSyntax(
@@ -876,7 +878,7 @@ extension TableMacro: MemberMacro {
 
         selectedColumns.append((identifier, columnQueryValueType))
         columnWidths.append(
-          columnQueryValueType.map { "\($0)._columnWidth" as ExprSyntax }
+          columnQueryValueType.map { "\($0.asCallableType())._columnWidth" as ExprSyntax }
             ?? "\(moduleName)._columnWidth(\\QueryValue.\(identifier))"
         )
 
@@ -940,7 +942,7 @@ extension TableMacro: MemberMacro {
                 switch argument.label?.text {
                 case "as":
                   if var expression = argument.expression.as(MemberAccessExprSyntax.self) {
-                    expression.base = "\(expression.base)?"
+                    expression.base = "Optional<\(expression.base)>"
                     argument.expression = ExprSyntax(expression)
                   }
 
@@ -977,6 +979,8 @@ extension TableMacro: MemberMacro {
             var binding = binding
             if let type = binding.typeAnnotation?.type.asOptionalType() {
               binding.typeAnnotation?.type = type
+            } else if let value = binding.initializer?.value {
+              binding.initializer?.value = "Optional(\(value.trimmed))"
             }
             property.bindings = [binding]
             draftProperties.append(
@@ -1008,7 +1012,7 @@ extension TableMacro: MemberMacro {
                   if argument.label?.text == "as",
                     var expression = argument.expression.as(MemberAccessExprSyntax.self)
                   {
-                    expression.base = "\(expression.base)?"
+                    expression.base = "Optional<\(expression.base)>"
                     argument.expression = ExprSyntax(expression)
                   }
                 }
@@ -1043,6 +1047,33 @@ extension TableMacro: MemberMacro {
           }
         }
       }
+      let witnessColumns = allColumns.filter { $0.type == nil && $0.default != nil }
+      if !witnessColumns.isEmpty {
+        columnTypesDecl = """
+          public protocol _ColumnTypes {
+          \(raw: witnessColumns
+            .map {
+              """
+              associatedtype \($0.name)
+              static var \($0.name.text.trimmingBackticks())Default: \($0.name) { get }
+              """
+            }
+            .joined(separator: "\n"))
+          }
+          """
+        columnWitnessDecl = """
+          public \(nonisolated)enum _ColumnWitness: _ColumnTypes {
+          \(raw: witnessColumns
+            .map {
+              """
+              @\(macrosModuleName)._ColumnDefault
+              public static var \($0.name.text.trimmingBackticks())Default = \($0.default!)
+              """
+            }
+            .joined(separator: "\n"))
+          }
+          """
+      }
       let selectionInitArguments =
         allColumns
         .map { name, _, type, `default` in
@@ -1050,8 +1081,11 @@ extension TableMacro: MemberMacro {
           if let type {
             query.append("<\(type)>")
             if let `default` {
-              query.append(" = \(type)(queryOutput: \(`default`))")
+              query.append(" = \(type.asCallableType())(queryOutput: \(`default`))")
             }
+          } else if let `default` {
+            query.append("<_ColumnWitness.\(name)>")
+            query.append(" = _ColumnWitness.\(name)(queryOutput: \(`default`))")
           }
           return query
         }
@@ -1469,6 +1503,8 @@ extension TableMacro: MemberMacro {
 
     var members =
       [
+        columnTypesDecl,
+        columnWitnessDecl,
         """
         public \(nonisolated)struct TableColumns: \(schemaConformances, separator: ", ") {
         public typealias QueryValue = \(type.trimmed)\(primaryKeyTypealias)
