@@ -6,6 +6,7 @@ public struct With<Base: Statement>: Statement, Sendable {
 
   var ctes: [CommonTableExpressionClause]
   var statement: QueryFragment
+  var hasUpsertParsingAmbiguity: Bool
 
   @_disfavoredOverload
   public init(
@@ -13,7 +14,10 @@ public struct With<Base: Statement>: Statement, Sendable {
     query statement: () -> Base
   ) {
     self.ctes = ctes()
-    self.statement = statement().query
+    let statement = statement()
+    self.statement = statement.query
+    hasUpsertParsingAmbiguity =
+      (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity ?? false
   }
 
   public init<S: SelectStatement, each J: Table>(
@@ -26,7 +30,10 @@ public struct With<Base: Statement>: Statement, Sendable {
     Base == Select<(S.From, repeat each J), S.From, (repeat each J)>
   {
     self.ctes = ctes()
-    self.statement = statement().query
+    let statement = statement()
+    self.statement = statement.query
+    hasUpsertParsingAmbiguity =
+      (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity ?? false
   }
 
   @_disfavoredOverload
@@ -40,7 +47,10 @@ public struct With<Base: Statement>: Statement, Sendable {
     Base == Select<S.From, S.From, ()>
   {
     self.ctes = ctes()
-    self.statement = statement().query
+    let statement = statement()
+    self.statement = statement.query
+    hasUpsertParsingAmbiguity =
+      (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity ?? false
   }
 
   public var query: QueryFragment {
@@ -56,6 +66,8 @@ public struct With<Base: Statement>: Statement, Sendable {
 }
 
 extension With: PartialSelectStatement where Base: PartialSelectStatement {}
+
+extension With: HasUpsertParsingAmbiguity {}
 
 extension QueryFragment {
   fileprivate var presence: Self? { isEmpty ? nil : self }

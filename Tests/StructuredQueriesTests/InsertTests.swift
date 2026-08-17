@@ -229,8 +229,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          // NB: 'WHERE 1' is required to avoid a SQL syntax error.
-          RemindersList.where { _ in true }.select { $0.title.lower() }
+          RemindersList.select { $0.title.lower() }
         } onConflict: {
           $0.title
         } doUpdate: {
@@ -243,7 +242,7 @@ extension SnapshotTests {
         ("title")
         SELECT lower("remindersLists"."title")
         FROM "remindersLists"
-        WHERE (1)
+        WHERE 1
         ON CONFLICT ("title")
         DO UPDATE SET "title" = ("excluded"."title") || ('-copy')
         RETURNING "id", "title"
@@ -272,8 +271,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          // NB: 'WHERE 1' is required to avoid a SQL syntax error.
-          RemindersList.where { _ in true }.select { $0.title.lower() + "-copy" }
+          RemindersList.select { $0.title.lower() + "-copy" }
         } onConflict: {
           $0.title
         } doUpdate: {
@@ -286,7 +284,7 @@ extension SnapshotTests {
         ("title")
         SELECT (lower("remindersLists"."title")) || ('-copy')
         FROM "remindersLists"
-        WHERE (1)
+        WHERE 1
         ON CONFLICT ("title")
         DO UPDATE SET "title" = ("tags"."title") || ('-2')
         RETURNING "id", "title"
@@ -309,6 +307,107 @@ extension SnapshotTests {
         │   title: "personal-copy-2" │
         │ )                          │
         └────────────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          RemindersList.select { $0.title.lower() }.order { $0.title }.limit(1)
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title += "!"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT lower("remindersLists"."title")
+        FROM "remindersLists"
+        ORDER BY "remindersLists"."title"
+        LIMIT 1
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("tags"."title") || ('!')
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ Tag(                │
+        │   id: 15,           │
+        │   title: "business" │
+        │ )                   │
+        └─────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          Values("vacation")
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title += "!"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT 'vacation'
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("tags"."title") || ('!')
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌──────────────────────┐
+        │ Tag(                 │
+        │   id: 8,             │
+        │   title: "vacation!" │
+        │ )                    │
+        └──────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          RemindersList.select { $0.title.lower() }
+            .union(RemindersList.select { $0.title.upper() })
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title += "?"
+        }
+        .returning(\.title)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT lower("remindersLists"."title")
+        FROM "remindersLists"
+          UNION
+        SELECT upper("remindersLists"."title")
+        FROM "remindersLists"
+        WHERE 1
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("tags"."title") || ('?')
+        RETURNING "title"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ "business?" │
+        │ "FAMILY"    │
+        │ "PERSONAL"  │
+        │ "business"  │
+        │ "FAMILY?"   │
+        │ "PERSONAL?" │
+        └─────────────┘
         """
       }
     }
