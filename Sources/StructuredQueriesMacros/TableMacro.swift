@@ -878,7 +878,7 @@ extension TableMacro: MemberMacro {
 
         selectedColumns.append((identifier, columnQueryValueType))
         columnWidths.append(
-          columnQueryValueType.map { "\($0.asCallableType())._columnWidth" as ExprSyntax }
+          columnQueryValueType.map { "\($0.asDesugaredOptionalType())._columnWidth" as ExprSyntax }
             ?? "\(moduleName)._columnWidth(\\QueryValue.\(identifier))"
         )
 
@@ -1081,7 +1081,7 @@ extension TableMacro: MemberMacro {
           if let type {
             query.append("<\(type)>")
             if let `default` {
-              query.append(" = \(type.asCallableType())(queryOutput: \(`default`))")
+              query.append(" = \(type.asDesugaredOptionalType())(queryOutput: \(`default`))")
             }
           } else if let `default` {
             query.append("<_$ColumnWitness.\(name)>")

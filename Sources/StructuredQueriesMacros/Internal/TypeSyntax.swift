@@ -23,7 +23,7 @@ extension TypeSyntax {
     self.as(OptionalTypeSyntax.self)?.wrappedType ?? self
   }
 
-  func asCallableType() -> Self {
+  func asDesugaredOptionalType() -> Self {
     guard let optionalType = self.as(OptionalTypeSyntax.self)
     else { return self }
     return "Optional<\(optionalType.wrappedType.trimmed)>"
