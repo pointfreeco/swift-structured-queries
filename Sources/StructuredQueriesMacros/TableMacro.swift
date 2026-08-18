@@ -1050,7 +1050,7 @@ extension TableMacro: MemberMacro {
       let witnessColumns = allColumns.filter { $0.type == nil && $0.default != nil }
       if !witnessColumns.isEmpty {
         columnTypesDecl = """
-          public protocol _ColumnTypes {
+          public protocol _$ColumnTypes {
           \(raw: witnessColumns
             .map {
               """
@@ -1062,7 +1062,7 @@ extension TableMacro: MemberMacro {
           }
           """
         columnWitnessDecl = """
-          public \(nonisolated)enum _ColumnWitness: _ColumnTypes {
+          public \(nonisolated)enum _$ColumnWitness: _$ColumnTypes {
           \(raw: witnessColumns
             .map {
               """
@@ -1084,8 +1084,8 @@ extension TableMacro: MemberMacro {
               query.append(" = \(type.asCallableType())(queryOutput: \(`default`))")
             }
           } else if let `default` {
-            query.append("<_ColumnWitness.\(name)>")
-            query.append(" = _ColumnWitness.\(name)(queryOutput: \(`default`))")
+            query.append("<_$ColumnWitness.\(name)>")
+            query.append(" = _$ColumnWitness.\(name)(queryOutput: \(`default`))")
           }
           return query
         }

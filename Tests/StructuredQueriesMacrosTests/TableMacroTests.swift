@@ -2123,14 +2123,14 @@ extension SnapshotTests {
           @StructuredQueries.ColumnCheck(ID<Self>())
           var bar = ID<Self>()
 
-          public protocol _ColumnTypes {
+          public protocol _$ColumnTypes {
             associatedtype bar
             static var barDefault: bar {
               get
             }
           }
 
-          public nonisolated enum _ColumnWitness: _ColumnTypes {
+          public nonisolated enum _$ColumnWitness: _$ColumnTypes {
             @StructuredQueries._ColumnDefault
             public static var barDefault = ID<Foo>()
           }
@@ -2163,7 +2163,7 @@ extension SnapshotTests {
             public typealias QueryValue = Foo
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
-              bar: some StructuredQueriesCore.QueryExpression<_ColumnWitness.bar> = _ColumnWitness.bar(queryOutput: ID<Foo>())
+              bar: some StructuredQueriesCore.QueryExpression<_$ColumnWitness.bar> = _$ColumnWitness.bar(queryOutput: ID<Foo>())
             ) {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: bar._allColumns)
@@ -2471,14 +2471,14 @@ extension SnapshotTests {
           @StructuredQueries.ColumnCheck(60 * 5)
           var seconds = 60 * 5
 
-          public protocol _ColumnTypes {
+          public protocol _$ColumnTypes {
             associatedtype seconds
             static var secondsDefault: seconds {
               get
             }
           }
 
-          public nonisolated enum _ColumnWitness: _ColumnTypes {
+          public nonisolated enum _$ColumnWitness: _$ColumnTypes {
             @StructuredQueries._ColumnDefault
             public static var secondsDefault = 60 * 5
           }
@@ -2517,7 +2517,7 @@ extension SnapshotTests {
             public let allColumns: [any StructuredQueriesCore.QueryExpression]
             public init(
               id: some StructuredQueriesCore.QueryExpression<Int>,
-              seconds: some StructuredQueriesCore.QueryExpression<_ColumnWitness.seconds> = _ColumnWitness.seconds(queryOutput: 60 * 5)
+              seconds: some StructuredQueriesCore.QueryExpression<_$ColumnWitness.seconds> = _$ColumnWitness.seconds(queryOutput: 60 * 5)
             ) {
               var allColumns: [any StructuredQueriesCore.QueryExpression] = []
               allColumns.append(contentsOf: id._allColumns)
@@ -2532,14 +2532,14 @@ extension SnapshotTests {
             @StructuredQueries.ColumnCheck(60 * 5)
             var seconds = 60 * 5
 
-            public protocol _ColumnTypes {
+            public protocol _$ColumnTypes {
               associatedtype seconds
               static var secondsDefault: seconds {
                 get
               }
             }
 
-            public nonisolated enum _ColumnWitness: _ColumnTypes {
+            public nonisolated enum _$ColumnWitness: _$ColumnTypes {
               @StructuredQueries._ColumnDefault
               public static var secondsDefault = 60 * 5
             }
@@ -2576,7 +2576,7 @@ extension SnapshotTests {
               public let allColumns: [any StructuredQueriesCore.QueryExpression]
               public init(
                 id: some StructuredQueriesCore.QueryExpression<Int?> = Optional<Int>(queryOutput: nil),
-                seconds: some StructuredQueriesCore.QueryExpression<_ColumnWitness.seconds> = _ColumnWitness.seconds(queryOutput: 60 * 5)
+                seconds: some StructuredQueriesCore.QueryExpression<_$ColumnWitness.seconds> = _$ColumnWitness.seconds(queryOutput: 60 * 5)
               ) {
                 var allColumns: [any StructuredQueriesCore.QueryExpression] = []
                 allColumns.append(contentsOf: id._allColumns)
