@@ -1147,6 +1147,37 @@ extension SnapshotTests {
       }
     }
 
+    @Test func aliasedFind() {
+      enum R1: AliasName {}
+      enum R2: AliasName {}
+      assertQuery(
+        Reminder.as(R1.self).find(1).as(R2.self)
+      ) {
+        """
+        SELECT "r2s"."id", "r2s"."assignedUserID", "r2s"."dueDate", "r2s"."isCompleted", "r2s"."isFlagged", "r2s"."notes", "r2s"."priority", "r2s"."remindersListID", "r2s"."title", "r2s"."updatedAt"
+        FROM "reminders" AS "r2s"
+        WHERE (("r2s"."id") IN ((1)))
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┐
+        │ Reminder(                                   │
+        │   id: 1,                                    │
+        │   assignedUserID: 1,                        │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: false,                         │
+        │   notes: "Milk, Eggs, Apples",              │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Groceries",                       │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
+        """
+      }
+    }
+
     @Test func selfLeftJoinSelect() {
       enum R1: AliasName {}
       enum R2: AliasName {}

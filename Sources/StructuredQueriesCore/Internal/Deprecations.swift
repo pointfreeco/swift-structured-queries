@@ -126,6 +126,8 @@ extension QueryFragment {
         string.append(sql)
       case .binding:
         string.append("?")
+      case .identifier(let identifier):
+        string.append(identifier.name.quoted())
       }
     }
   }
@@ -138,7 +140,7 @@ extension QueryFragment {
   public var bindings: [QueryBinding] {
     segments.reduce(into: []) { bindings, segment in
       switch segment {
-      case .sql:
+      case .sql, .identifier:
         break
       case .binding(let binding):
         bindings.append(binding)
