@@ -40,7 +40,7 @@ extension QueryFragment {
         switch query.segments[index] {
         case .sql(let sql):
           query.segments[index] = .sql(sql.replacing("\n", with: "\n  "))
-        case .binding:
+        case .binding, .identifier:
           continue
         }
       }

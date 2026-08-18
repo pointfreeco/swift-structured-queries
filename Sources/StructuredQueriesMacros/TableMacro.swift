@@ -353,8 +353,8 @@ extension TableMacro: ExtensionMacro {
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            \(raw: primaryKey ? "@\(macrosModuleName)._PrimaryKeyDefault public var" : "public let") \
-            \(primaryKey ? "primaryKey" : identifier) = \
+            @\(macrosModuleName).\(raw: primaryKey ? "_PrimaryKeyDefault" : "_ColumnDefinition") \
+            public var \(primaryKey ? "primaryKey" : identifier) = \
             \(moduleName).\(raw: tableColumnType)<\
             QueryValue, \
             \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
@@ -556,7 +556,8 @@ extension TableMacro: ExtensionMacro {
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            public let \(primaryKey ? "primaryKey" : identifier) = \
+            @\(macrosModuleName)._ColumnDefinition \
+            public var \(primaryKey ? "primaryKey" : identifier) = \
             \(moduleName)._CaseColumn<\
             QueryValue, \
             \(raw: columnQueryValueType.trimmedDescription)\
@@ -893,8 +894,8 @@ extension TableMacro: MemberMacro {
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            \(raw: primaryKey ? "@\(macrosModuleName)._PrimaryKeyDefault public var" : "public let") \
-            \(primaryKey ? "primaryKey" : identifier) = \
+            @\(macrosModuleName).\(raw: primaryKey ? "_PrimaryKeyDefault" : "_ColumnDefinition") \
+            public var \(primaryKey ? "primaryKey" : identifier) = \
             \(moduleName).\(raw: tableColumnType)<\
             QueryValue, \
             \(raw: columnQueryValueType?.trimmedDescription ?? "_")\
@@ -1193,7 +1194,8 @@ extension TableMacro: MemberMacro {
         func appendColumnProperty(primaryKey: Bool = false) {
           columnsProperties.append(
             """
-            public let \(primaryKey ? "primaryKey" : identifier) = \
+            @\(macrosModuleName)._ColumnDefinition \
+            public var \(primaryKey ? "primaryKey" : identifier) = \
             \(moduleName)._CaseColumn<\
             QueryValue, \
             \(raw: columnQueryValueType.trimmedDescription)\

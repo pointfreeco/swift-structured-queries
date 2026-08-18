@@ -12,6 +12,7 @@ struct StructuredQueriesPlugin: CompilerPlugin {
       ColumnCheckGroupMacro.self,
       ColumnCheckPassMacro.self,
       ColumnDefaultMacro.self,
+      ColumnDefinitionMacro.self,
       ColumnMacro.self,
       ColumnsMacro.self,
       EphemeralMacro.self,

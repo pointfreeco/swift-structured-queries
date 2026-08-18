@@ -17,6 +17,20 @@ public struct QueryFragment: Hashable, Sendable {
 
     /// A binding.
     case binding(QueryBinding)
+
+    /// A late-bound table identifier.
+    case identifier(Identifier)
+  }
+
+  /// A late-bound reference to a table identifier.
+  ///
+  /// Identifier segments render as a quoted identifier, but unlike raw SQL they retain the
+  /// identity of the table they reference, and so can be rebound to an alias after the fragment
+  /// has been built.
+  @_documentation(visibility: private)
+  public struct Identifier: Hashable, Sendable {
+    public internal(set) var name: String
+    package var key: ObjectIdentifier
   }
 
   /// An array of segments backing this query fragment.
@@ -39,7 +53,7 @@ public struct QueryFragment: Hashable, Sendable {
       switch segment {
       case .sql(let sql):
         guard sql.isEmpty else { return false }
-      case .binding:
+      case .binding, .identifier:
         return false
       }
     }
@@ -83,6 +97,8 @@ public struct QueryFragment: Hashable, Sendable {
         defer { offset += 1 }
         sql.append(template(offset))
         bindings.append(binding)
+      case .identifier(let identifier):
+        sql.append(identifier.name.quoted())
       }
     }
     return (sql, bindings)
@@ -97,6 +113,8 @@ extension QueryFragment: CustomDebugStringConvertible {
         debugDescription.append(sql)
       case .binding(let binding):
         debugDescription.append(binding.debugDescription)
+      case .identifier(let identifier):
+        debugDescription.append(identifier.name.quoted())
       }
     }
   }
@@ -161,6 +179,8 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       switch $1 {
       case .sql(let sql):
         $0.append("\(raw: sql)")
+      case .identifier:
+        $0.segments.append($1)
       case .binding(let binding):
         switch binding {
         case .blob(let blob):
@@ -287,11 +307,15 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     ///
     /// - Parameter binding: A query binding.
     public mutating func appendInterpolation(_ binding: QueryBinding) {
+      appendSegment(.binding(binding))
+    }
+
+    private mutating func appendSegment(_ segment: Segment) {
       if !sqlBuffer.isEmpty {
         segments.append(.sql(sqlBuffer))
         sqlBuffer.removeAll(keepingCapacity: true)
       }
-      segments.append(.binding(binding))
+      segments.append(segment)
     }
 
     /// Append a query representable output to the interpolation.
@@ -316,6 +340,8 @@ extension QueryFragment: ExpressibleByStringInterpolation {
           appendInterpolation(binding)
         case .sql(let sql):
           appendLiteral(sql)
+        case .identifier:
+          appendSegment(segment)
         }
       }
     }
@@ -376,7 +402,14 @@ extension QueryFragment: ExpressibleByStringInterpolation {
         appendInterpolation(quote: schemaName)
         appendLiteral(".")
       }
-      appendInterpolation(quote: table.tableAlias ?? table.tableName)
+      appendSegment(
+        .identifier(
+          Identifier(
+            name: table.tableAlias ?? table.tableName,
+            key: ObjectIdentifier(T.self)
+          )
+        )
+      )
     }
 
     @available(
