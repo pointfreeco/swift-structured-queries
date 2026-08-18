@@ -14,6 +14,7 @@ custom database functions, and more.
 - <doc:DefiningYourSchema>
 - <doc:QueryCookbook>
 - <doc:BuiltinFunctions>
+- <doc:DateTimeFunctions>
 - <doc:JSON>
 - <doc:CustomFunctions>
 - <doc:Triggers>
