@@ -191,7 +191,7 @@ private func witnessSelfReference() {
 private struct InferredRepresentationPrimaryKey {
   @Column(as: UUID.BytesRepresentation.self)
   var id = UUID()
-  var title: String
+  var title = ""
 }
 private func inferredRepresentationPrimaryKey() {
   let _: UUID? = InferredRepresentationPrimaryKey.Draft(title: "x").id
