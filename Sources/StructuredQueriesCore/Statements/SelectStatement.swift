@@ -41,3 +41,29 @@ extension SelectStatement {
     Self(predicates: [predicate(From.columns).queryFragment])
   }
 }
+
+// NB: https://sqlite.org/lang_upsert.html#parsing_ambiguity
+protocol HasUpsertParsingAmbiguity {
+  var hasUpsertParsingAmbiguity: Bool { get }
+}
+
+extension HasUpsertParsingAmbiguity where Self: SelectStatement {
+  var hasUpsertParsingAmbiguity: Bool {
+    _selectClauses.hasUpsertParsingAmbiguity
+  }
+}
+
+extension Select: HasUpsertParsingAmbiguity {}
+extension Where: HasUpsertParsingAmbiguity {}
+
+extension _SelectClauses {
+  var hasUpsertParsingAmbiguity: Bool {
+    !isEmpty
+      && joins.isEmpty
+      && `where`.isEmpty
+      && group.isEmpty
+      && having.isEmpty
+      && order.isEmpty
+      && limit == nil
+  }
+}

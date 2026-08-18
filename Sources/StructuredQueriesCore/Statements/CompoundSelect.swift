@@ -58,11 +58,15 @@ private struct CompoundSelect<QueryValue>: PartialSelectStatement {
   let lhs: QueryFragment
   let `operator`: QueryFragment
   let rhs: QueryFragment
+  let hasUpsertParsingAmbiguity: Bool
 
   init(lhs: some PartialSelectStatement, operator: Operator, rhs: some PartialSelectStatement) {
     self.lhs = lhs.query
     self.operator = `operator`.queryFragment
     self.rhs = rhs.query
+    let tail: any PartialSelectStatement = self.rhs.isEmpty ? lhs : rhs
+    hasUpsertParsingAmbiguity =
+      (tail as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity ?? false
   }
 
   var query: QueryFragment {
@@ -71,3 +75,5 @@ private struct CompoundSelect<QueryValue>: PartialSelectStatement {
     return "\(lhs)\(.newlineOrSpace)\(`operator`.indented())\(.newlineOrSpace)\(rhs)"
   }
 }
+
+extension CompoundSelect: HasUpsertParsingAmbiguity {}

@@ -2840,7 +2840,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func `@Selection with empty struct`() {
+    @Test("@Selection with empty struct") func selectionWithEmptyStruct() {
       assertMacro {
         """
         @Selection
@@ -3056,7 +3056,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries.CaseCheck(Photo.self) @StructuredQueries.ColumnCheck(Photo.self)
           case photo(Photo)
+          @StructuredQueries.CaseCheck(String.self) @StructuredQueries.ColumnCheck(String.self)
           case note(String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3197,7 +3199,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries.CaseCheck(Photo.self) @StructuredQueries.ColumnCheck(Photo.self)
           case photo(Photo)
+          @StructuredQueries.CaseCheck(String.self) @StructuredQueries.ColumnCheck(String.self)
           case note(String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3337,7 +3341,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries.CaseCheck(Photo.self) @StructuredQueries.ColumnCheck(Photo.self)
           case photo(Photo)
+          @StructuredQueries.CaseCheck(String.self) @StructuredQueries.ColumnCheck(String.self)
           case note(String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3504,7 +3510,9 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries.CaseCheck(Photo.self) @StructuredQueries.ColumnCheck(Photo.self)
           case photo(Photo)
+          @StructuredQueries.CaseCheck(String.self) @StructuredQueries.ColumnCheck(String.self)
           case note(text: String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3645,6 +3653,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries.CaseCheck(String.self) @StructuredQueries.ColumnCheck(String.self)
           case note(text: String = "")
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -3757,6 +3766,7 @@ extension SnapshotTests {
       } expansion: {
         #"""
         enum Post {
+          @StructuredQueries.CaseCheck(Date.self) @StructuredQueries.ColumnCheck(Date.UnixTimeRepresentation.self)
           case timestamp(Date)
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
@@ -4053,7 +4063,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func `selection enum requires CasePaths trait`() {
+    @Test("selection enum requires CasePaths trait") func selectionEnumRequiresCasePathsTrait() {
       assertMacro {
         """
         @Selection enum Post {

@@ -49,14 +49,15 @@ public struct QueryFragment: Hashable, Sendable {
 
   /// A Boolean value indicating whether the query fragment is empty.
   public var isEmpty: Bool {
-    segments.allSatisfy {
-      switch $0 {
+    for segment in segments {
+      switch segment {
       case .sql(let sql):
-        sql.isEmpty
+        guard sql.isEmpty else { return false }
       case .binding, .identifier:
-        false
+        return false
       }
     }
+    return true
   }
 
   /// Appends the given fragment to this query fragment.
@@ -128,6 +129,9 @@ extension [QueryFragment] {
   /// - Returns: A single, concatenated fragment.
   public func joined(separator: QueryFragment = "") -> QueryFragment {
     guard var joined = first else { return QueryFragment() }
+    joined.segments.reserveCapacity(
+      reduce(0) { $0 + $1.segments.count } + (count - 1) * separator.segments.count
+    )
     for fragment in dropFirst() {
       joined.append(separator)
       joined.append(fragment)

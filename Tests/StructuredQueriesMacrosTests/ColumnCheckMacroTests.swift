@@ -129,10 +129,29 @@ extension SnapshotTests {
           var address: Address
         }
         """
-      } expansion: {
+      } diagnostics: {
         """
         struct Row {
           @Column("addr")
+                  ┬─────
+                  ╰─ 🛑 Column name cannot be applied to a column group
+                     ✏️ Remove '"addr"'
+          @ColumnCheck(Address.self)
+          var address: Address
+        }
+        """
+      } fixes: {
+        """
+        struct Row {
+          @Column
+          @ColumnCheck(Address.self)
+          var address: Address
+        }
+        """
+      } expansion: {
+        """
+        struct Row {
+          @Column
           var address: Address
         }
         """
@@ -327,6 +346,75 @@ extension SnapshotTests {
         struct Row {
           @Column(as: <#QueryRepresentable.Type#>)
           var priority = Priority.high
+        }
+        """
+      }
+    }
+
+    #if CasePaths
+      @Test func caseCheckOptional() {
+        assertMacro([
+          "CaseCheck": CaseCheckFailMacro.self
+        ]) {
+          """
+          enum Post {
+            @CaseCheck(Int?.self)
+            case draft(Int?)
+          }
+          """
+        } diagnostics: {
+          """
+          enum Post {
+            @CaseCheck(Int?.self)
+            ╰─ 🛑 Associated value must not be optional
+               ✏️ Replace 'Int?' with 'Int'
+            case draft(Int?)
+          }
+          """
+        } fixes: {
+          """
+          enum Post {
+            @CaseCheck(Int?.self)
+            case draft(Int)
+          }
+          """
+        }
+      }
+    #endif
+
+    @Test func caseRepresentability() {
+      assertMacro([
+        "ColumnCheck": ColumnCheckFailJSONMacro.self
+      ]) {
+        """
+        enum Post {
+          @ColumnCheck([String].self)
+          case tags([String])
+        }
+        """
+      } diagnostics: {
+        """
+        enum Post {
+          @ColumnCheck([String].self)
+          ╰─ 🛑 '[String]' is not representable as a column
+             ✏️ Apply '@Column(as: [String].JSONRepresentation.self)' to store as JSON
+             ✏️ Apply '@Column(as: [String].JSONBRepresentation.self)' to store as JSONB
+             ✏️ Apply '@Column(as:)' to specify a representation
+          case tags([String])
+        }
+        """
+      } fixes: {
+        """
+        enum Post {
+          @Column(as: [String].JSONRepresentation.self) 
+          case tags([String])
+        }
+        """
+      } expansion: {
+        """
+        enum Post {
+          @Column(as: [String].JSONRepresentation.self)
+          case tags([String])
         }
         """
       }

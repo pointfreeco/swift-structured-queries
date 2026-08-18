@@ -156,8 +156,8 @@ extension SnapshotTests {
         )
         UPDATE "reminders"
         SET "title" = upper("reminders"."title")
-        WHERE (("reminders"."title") IN ((SELECT "incompleteReminders"."title"
-        FROM "incompleteReminders")))
+        WHERE (("reminders"."title") IN (SELECT "incompleteReminders"."title"
+        FROM "incompleteReminders"))
         RETURNING "title"
         """
       } results: {
@@ -195,8 +195,8 @@ extension SnapshotTests {
           WHERE (NOT ("reminders"."isCompleted"))
         )
         DELETE FROM "reminders"
-        WHERE (("reminders"."title") IN ((SELECT "incompleteReminders"."title"
-        FROM "incompleteReminders")))
+        WHERE (("reminders"."title") IN (SELECT "incompleteReminders"."title"
+        FROM "incompleteReminders"))
         RETURNING "title"
         """
       } results: {

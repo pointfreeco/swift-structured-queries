@@ -453,6 +453,37 @@ where
 }
 
 #if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
+extension QueryExpression where QueryValue: _AnyJSONRepresentable {
+  /// Inserts a value before an array element at a given path in this JSON expression using the
+  /// `json_array_insert` function.
+  ///
+  /// ```swift
+  /// Profile.update { $0.tags = $0.tags.jsonArrayInsert(\.[0], "new") }
+  /// // UPDATE "profiles" SET "tags" = json_array_insert("profiles"."tags", '$[0]', 'new')
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - path: A key path to an array element.
+  ///   - value: A value to insert before the element.
+  /// - Returns: A JSON expression with the value inserted.
+  public func jsonArrayInsert<Context: _JSONPathElementContext, Member: QueryBindable>(
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
+    _ value: some QueryExpression<Member>
+  ) -> _JSONArrayInsertExpression<_CodableJSONRepresentation<QueryValue.QueryOutput>> {
+    _JSONArrayInsertExpression(
+      function: "json_array_insert",
+      base: argumentFragment,
+      arguments: [.jsonArguments(path, .jsonEncoded(value))]
+    )
+  }
+}
+
+#if !SuppressPlatformSQLiteAvailability
   @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 #endif
 extension QueryExpression where QueryValue: _AnyJSONRepresentable {
@@ -728,6 +759,32 @@ where
     _ value: some QueryExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput.Element>>
   ) -> _JSONInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
     jsonbAppend(\.self, value)
+  }
+}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
+extension QueryExpression where QueryValue: _AnyJSONRepresentable {
+  /// Inserts a value before an array element at a given path in this JSONB expression using the
+  /// `jsonb_array_insert` function.
+  ///
+  /// - Parameters:
+  ///   - path: A key path to an array element.
+  ///   - value: A value to insert before the element.
+  /// - Returns: A JSONB expression with the value inserted.
+  public func jsonbArrayInsert<Context: _JSONPathElementContext, Member: QueryBindable>(
+    _ path: KeyPath<
+      JSONPath<_JSONPathRoot, _CodableJSONBRepresentation<QueryValue.QueryOutput>>,
+      JSONPath<Context, Member>
+    >,
+    _ value: some QueryExpression<Member>
+  ) -> _JSONArrayInsertExpression<_CodableJSONBRepresentation<QueryValue.QueryOutput>> {
+    _JSONArrayInsertExpression(
+      function: "jsonb_array_insert",
+      base: argumentFragment,
+      arguments: [.jsonArguments(path, .jsonEncoded(value))]
+    )
   }
 }
 
@@ -1716,6 +1773,36 @@ where QueryValue: _JSONBRepresentable & _JSONArrayRepresentation {
   }
 }
 
+public struct _JSONArrayInsertExpression<QueryValue: QueryRepresentable>: _JSONMutationExpression {
+  let function: QueryFragment
+  let base: QueryFragment
+  let arguments: [QueryFragment]
+}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
+extension _JSONArrayInsertExpression where QueryValue: _JSONRepresentable {
+  public func jsonArrayInsert<Context: _JSONPathElementContext, Member: QueryBindable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ value: some QueryExpression<Member>
+  ) -> _JSONArrayInsertExpression<QueryValue> {
+    appending(.jsonArguments(path, .jsonEncoded(value)))
+  }
+}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
+extension _JSONArrayInsertExpression where QueryValue: _JSONBRepresentable {
+  public func jsonbArrayInsert<Context: _JSONPathElementContext, Member: QueryBindable>(
+    _ path: KeyPath<JSONPath<_JSONPathRoot, QueryValue>, JSONPath<Context, Member>>,
+    _ value: some QueryExpression<Member>
+  ) -> _JSONArrayInsertExpression<QueryValue> {
+    appending(.jsonArguments(path, .jsonEncoded(value)))
+  }
+}
+
 public struct _JSONRemoveExpression<QueryValue: QueryRepresentable>: _JSONMutationExpression {
   let function: QueryFragment
   let base: QueryFragment
@@ -2026,8 +2113,8 @@ extension String {
   fileprivate static func member(_ name: String) -> String {
     let escaped =
       name
-      .replacingOccurrences(of: "\\", with: "\\\\")
-      .replacingOccurrences(of: "\"", with: "\\\"")
+      .replacing("\\", with: "\\\\")
+      .replacing("\"", with: "\\\"")
     return ".\"\(escaped)\""
   }
 

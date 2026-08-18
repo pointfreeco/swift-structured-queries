@@ -631,7 +631,7 @@ extension Table {
     }
     return _insert(
       columnNames: columnNames,
-      values: .select(selection().query),
+      values: .select(selection()),
       onConflict: conflictTargets,
       where: targetFilter,
       doUpdate: updates,
@@ -724,7 +724,7 @@ extension PrimaryKeyedTable {
 private enum InsertValues {
   case `default`
   case values([[QueryFragment]])
-  case select(QueryFragment)
+  case select(any PartialSelectStatement)
 }
 
 /// An `INSERT` statement.
@@ -805,8 +805,15 @@ extension Insert: Statement {
     case .default:
       query.append("\(.newlineOrSpace)DEFAULT VALUES")
 
-    case .select(let select):
+    case .select(let statement):
+      let select = statement.query
       query.append("\(.newlineOrSpace)\(select)")
+      if updates != nil,
+        !select.isEmpty,
+        (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity == true
+      {
+        query.append("\(.newlineOrSpace)WHERE 1")
+      }
 
     case .values(let values):
       guard !values.isEmpty else { return "" }
