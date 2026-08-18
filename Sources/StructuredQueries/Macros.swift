@@ -291,6 +291,10 @@ public macro sql(
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
 
 @attached(accessor, names: named(get))
+public macro _ColumnDefinition() =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnDefinitionMacro")
+
+@attached(accessor, names: named(get))
 public macro _PrimaryKeyDefault() =
   #externalMacro(module: "StructuredQueriesMacros", type: "PrimaryKeyDefaultMacro")
 

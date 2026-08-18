@@ -13,19 +13,23 @@ where Values.QueryOutput: Table {
 
   package let name: String
 
-  public let defaultValue: Values.QueryOutput?
+  private let _defaultValue: () -> Values.QueryOutput?
 
-  public let keyPath: KeyPath<Root, Values.QueryOutput>
+  private let _keyPath: () -> KeyPath<Root, Values.QueryOutput>
+
+  public var defaultValue: Values.QueryOutput? { _defaultValue() }
+
+  public var keyPath: KeyPath<Root, Values.QueryOutput> { _keyPath() }
 
   // TODO: Reconsider access control level for 1.0.
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Values.QueryOutput>,
-    default defaultValue: Values.QueryOutput? = nil
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Values.QueryOutput>,
+    default defaultValue: @autoclosure @escaping () -> Values.QueryOutput? = nil
   ) {
     self.name = name
-    self.defaultValue = defaultValue
-    self.keyPath = keyPath
+    self._defaultValue = defaultValue
+    self._keyPath = keyPath
   }
 
   public var queryFragment: QueryFragment {

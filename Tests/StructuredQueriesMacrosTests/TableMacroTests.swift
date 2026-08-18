@@ -21,7 +21,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -103,7 +103,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -223,7 +223,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -345,7 +345,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Bar
-            public let baz = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("baz", keyPath: \QueryValue.baz)
+            @StructuredQueries._ColumnDefinition public var baz = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("baz", keyPath: \QueryValue.baz)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -478,10 +478,10 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let c1 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Bool>.for("c1", keyPath: \QueryValue.c1, default: true)
-            public let c2 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Int>.for("c2", keyPath: \QueryValue.c2, default: 1)
-            public let c3 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Double>.for("c3", keyPath: \QueryValue.c3, default: 1.2)
-            public let c4 = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("c4", keyPath: \QueryValue.c4, default: "")
+            @StructuredQueries._ColumnDefinition public var c1 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Bool>.for("c1", keyPath: \QueryValue.c1, default: true)
+            @StructuredQueries._ColumnDefinition public var c2 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Int>.for("c2", keyPath: \QueryValue.c2, default: 1)
+            @StructuredQueries._ColumnDefinition public var c3 = StructuredQueriesCore._TableColumn<QueryValue, Swift.Double>.for("c3", keyPath: \QueryValue.c3, default: 1.2)
+            @StructuredQueries._ColumnDefinition public var c4 = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("c4", keyPath: \QueryValue.c4, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -1375,7 +1375,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("Bar", keyPath: \QueryValue.bar)
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("Bar", keyPath: \QueryValue.bar)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -1502,7 +1502,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Date.UnixTimeRepresentation>.for("bar", keyPath: \QueryValue.bar)
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, Date.UnixTimeRepresentation>.for("bar", keyPath: \QueryValue.bar)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -1587,8 +1587,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = User
-            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
-            public let generated = StructuredQueriesCore.GeneratedColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
+            @StructuredQueries._ColumnDefinition public var name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+            @StructuredQueries._ColumnDefinition public var generated = StructuredQueriesCore.GeneratedColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -1701,8 +1701,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = User
-            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
-            public let generated = StructuredQueriesCore.GeneratedColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
+            @StructuredQueries._ColumnDefinition public var name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+            @StructuredQueries._ColumnDefinition public var generated = StructuredQueriesCore.GeneratedColumn<QueryValue, String>("generated", keyPath: \QueryValue.generated)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -1795,7 +1795,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -1879,7 +1879,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.bar)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -1961,7 +1961,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let `bar` = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.`bar`)
+            @StructuredQueries._ColumnDefinition public var `bar` = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("bar", keyPath: \QueryValue.`bar`)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -2043,7 +2043,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, ID<Foo>>.for("bar", keyPath: \QueryValue.bar)
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, ID<Foo>>.for("bar", keyPath: \QueryValue.bar)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -2125,7 +2125,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Foo
-            public let bar = StructuredQueriesCore._TableColumn<QueryValue, _>.for("bar", keyPath: \QueryValue.bar, default: ID<Foo>())
+            @StructuredQueries._ColumnDefinition public var bar = StructuredQueriesCore._TableColumn<QueryValue, _>.for("bar", keyPath: \QueryValue.bar, default: ID<Foo>())
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -2213,9 +2213,9 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = User
             public typealias PrimaryKey = ID<User, UUID.BytesRepresentation>
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>>.for("id", keyPath: \QueryValue.id)
-            public let referrerID = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>.for("referrerID", keyPath: \QueryValue.referrerID, default: nil)
+            @StructuredQueries._ColumnDefinition public var referrerID = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>.for("referrerID", keyPath: \QueryValue.referrerID, default: nil)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -2259,8 +2259,8 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let referrerID = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>.for("referrerID", keyPath: \QueryValue.referrerID, default: nil)
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>.for("id", keyPath: \QueryValue.id, default: nil)
+              @StructuredQueries._ColumnDefinition public var referrerID = StructuredQueriesCore._TableColumn<QueryValue, ID<User, UUID.BytesRepresentation>?>.for("referrerID", keyPath: \QueryValue.referrerID, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -2377,7 +2377,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = SyncUp
-            public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+            @StructuredQueries._ColumnDefinition public var name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -2462,9 +2462,9 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = SyncUp
             public typealias PrimaryKey = Int
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let seconds = StructuredQueriesCore._TableColumn<QueryValue, _>.for("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
+            @StructuredQueries._ColumnDefinition public var seconds = StructuredQueriesCore._TableColumn<QueryValue, _>.for("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -2510,8 +2510,8 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let seconds = StructuredQueriesCore._TableColumn<QueryValue, _>.for("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              @StructuredQueries._ColumnDefinition public var seconds = StructuredQueriesCore._TableColumn<QueryValue, _>.for("seconds", keyPath: \QueryValue.seconds, default: 60 * 5)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -2642,10 +2642,10 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = RemindersList
             public typealias PrimaryKey = Int
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let color = StructuredQueriesCore._TableColumn<QueryValue, Color.HexRepresentation>.for("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
-            public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
+            @StructuredQueries._ColumnDefinition public var color = StructuredQueriesCore._TableColumn<QueryValue, Color.HexRepresentation>.for("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
+            @StructuredQueries._ColumnDefinition public var name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -2696,9 +2696,9 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let color = StructuredQueriesCore._TableColumn<QueryValue, Color.HexRepresentation>.for("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
-              public let name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              @StructuredQueries._ColumnDefinition public var color = StructuredQueriesCore._TableColumn<QueryValue, Color.HexRepresentation>.for("color", keyPath: \QueryValue.color, default: Color(red: 0x4a / 255, green: 0x99 / 255, blue: 0xef / 255))
+              @StructuredQueries._ColumnDefinition public var name = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("name", keyPath: \QueryValue.name, default: "")
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -2879,7 +2879,7 @@ extension SnapshotTests {
 
         public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
           public typealias QueryValue = Foo
-          public let name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
+          @StructuredQueries._ColumnDefinition public var name = StructuredQueriesCore._TableColumn<QueryValue, String>.for("name", keyPath: \QueryValue.name)
           #if compiler(>=6.4)
           @_optimize(none)
           #endif
@@ -2965,8 +2965,8 @@ extension SnapshotTests {
 
         public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
           public typealias QueryValue = RemindersListAliasAndReminderCount
-          public let remindersList = StructuredQueriesCore._TableColumn<QueryValue, TableAlias<RemindersList, RL>>.for("remindersList", keyPath: \QueryValue.remindersList)
-          public let remindersCount = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("remindersCount", keyPath: \QueryValue.remindersCount)
+          @StructuredQueries._ColumnDefinition public var remindersList = StructuredQueriesCore._TableColumn<QueryValue, TableAlias<RemindersList, RL>>.for("remindersList", keyPath: \QueryValue.remindersList)
+          @StructuredQueries._ColumnDefinition public var remindersCount = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("remindersCount", keyPath: \QueryValue.remindersCount)
           #if compiler(>=6.4)
           @_optimize(none)
           #endif
@@ -3063,8 +3063,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
-            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
+            @StructuredQueries._ColumnDefinition public var photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
+            @StructuredQueries._ColumnDefinition public var note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3206,8 +3206,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
-            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
+            @StructuredQueries._ColumnDefinition public var photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
+            @StructuredQueries._ColumnDefinition public var note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3348,8 +3348,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
-            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
+            @StructuredQueries._ColumnDefinition public var photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
+            @StructuredQueries._ColumnDefinition public var note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3517,8 +3517,8 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
-            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
+            @StructuredQueries._ColumnDefinition public var photo = StructuredQueriesCore._CaseColumn<QueryValue, Photo>.for("photo", keyPath: \QueryValue.photo)
+            @StructuredQueries._ColumnDefinition public var note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3658,7 +3658,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note_text", keyPath: \QueryValue.note, default: "")
+            @StructuredQueries._ColumnDefinition public var note = StructuredQueriesCore._CaseColumn<QueryValue, String>.for("note_text", keyPath: \QueryValue.note, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -3771,7 +3771,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Post
-            public let timestamp = StructuredQueriesCore._CaseColumn<QueryValue, Date.UnixTimeRepresentation>.for("timestamp", keyPath: \QueryValue.timestamp)
+            @StructuredQueries._ColumnDefinition public var timestamp = StructuredQueriesCore._CaseColumn<QueryValue, Date.UnixTimeRepresentation>.for("timestamp", keyPath: \QueryValue.timestamp)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -4101,7 +4101,7 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Foo
             public typealias PrimaryKey = Int
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             #if compiler(>=6.4)
             @_optimize(none)
@@ -4142,7 +4142,7 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -4278,7 +4278,7 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -4376,11 +4376,11 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
             public typealias PrimaryKey = Int
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-            public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
-            public let date = StructuredQueriesCore._TableColumn<QueryValue, Date.UnixTimeRepresentation?>.for("date", keyPath: \QueryValue.date, default: nil)
-            public let priority = StructuredQueriesCore._TableColumn<QueryValue, Priority?>.for("priority", keyPath: \QueryValue.priority, default: nil)
+            @StructuredQueries._ColumnDefinition public var title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
+            @StructuredQueries._ColumnDefinition public var date = StructuredQueriesCore._TableColumn<QueryValue, Date.UnixTimeRepresentation?>.for("date", keyPath: \QueryValue.date, default: nil)
+            @StructuredQueries._ColumnDefinition public var priority = StructuredQueriesCore._TableColumn<QueryValue, Priority?>.for("priority", keyPath: \QueryValue.priority, default: nil)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -4437,10 +4437,10 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
-              public let date = StructuredQueriesCore._TableColumn<QueryValue, Date.UnixTimeRepresentation?>.for("date", keyPath: \QueryValue.date, default: nil)
-              public let priority = StructuredQueriesCore._TableColumn<QueryValue, Priority?>.for("priority", keyPath: \QueryValue.priority, default: nil)
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              @StructuredQueries._ColumnDefinition public var title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
+              @StructuredQueries._ColumnDefinition public var date = StructuredQueriesCore._TableColumn<QueryValue, Date.UnixTimeRepresentation?>.for("date", keyPath: \QueryValue.date, default: nil)
+              @StructuredQueries._ColumnDefinition public var priority = StructuredQueriesCore._TableColumn<QueryValue, Priority?>.for("priority", keyPath: \QueryValue.priority, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -4583,7 +4583,7 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
             public typealias PrimaryKey = UUID.BytesRepresentation
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID.BytesRepresentation>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, UUID.BytesRepresentation>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, UUID.BytesRepresentation>.for("id", keyPath: \QueryValue.id)
             #if compiler(>=6.4)
             @_optimize(none)
@@ -4623,7 +4623,7 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, UUID.BytesRepresentation?>.for("id", keyPath: \QueryValue.id, default: nil)
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, UUID.BytesRepresentation?>.for("id", keyPath: \QueryValue.id, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -4730,7 +4730,7 @@ extension SnapshotTests {
 
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
             public typealias QueryValue = Reminder
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -4816,9 +4816,9 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = Reminder
             public typealias PrimaryKey = Int?
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-            public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
+            @StructuredQueries._ColumnDefinition public var title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
             #if compiler(>=6.4)
             @_optimize(none)
             #endif
@@ -4864,8 +4864,8 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
-              public let title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, Int?>.for("id", keyPath: \QueryValue.id, default: nil)
+              @StructuredQueries._ColumnDefinition public var title = StructuredQueriesCore._TableColumn<QueryValue, Swift.String>.for("title", keyPath: \QueryValue.title, default: "")
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
@@ -4986,7 +4986,7 @@ extension SnapshotTests {
           public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition, StructuredQueriesCore.PrimaryKeyedTableDefinition {
             public typealias QueryValue = ReminderTag
             public typealias PrimaryKey = ReminderTagID
-            public let id = StructuredQueriesCore._TableColumn<QueryValue, ReminderTagID>.for("id", keyPath: \QueryValue.id)
+            @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, ReminderTagID>.for("id", keyPath: \QueryValue.id)
             @StructuredQueries._PrimaryKeyDefault public var primaryKey = StructuredQueriesCore._TableColumn<QueryValue, ReminderTagID>.for("id", keyPath: \QueryValue.id)
             #if compiler(>=6.4)
             @_optimize(none)
@@ -5026,7 +5026,7 @@ extension SnapshotTests {
 
             public nonisolated struct TableColumns: StructuredQueriesCore.TableDefinition {
               public typealias QueryValue = Draft
-              public let id = StructuredQueriesCore._TableColumn<QueryValue, ReminderTagID?>.for("id", keyPath: \QueryValue.id, default: nil)
+              @StructuredQueries._ColumnDefinition public var id = StructuredQueriesCore._TableColumn<QueryValue, ReminderTagID?>.for("id", keyPath: \QueryValue.id, default: nil)
               #if compiler(>=6.4)
               @_optimize(none)
               #endif
