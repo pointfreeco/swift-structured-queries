@@ -1849,6 +1849,52 @@ public func + <
   )
 }
 
+extension SelectStatement {
+  /// Returns this statement with its base table aliased.
+  ///
+  /// Unlike ``Table/as(_:)``, which aliases a table type before a query is built, this method
+  /// aliases a statement that has already been built, which makes it possible to alias statements
+  /// whose `FROM` clause is not a plain table name, such as table-valued functions:
+  ///
+  /// ```swift
+  /// enum Approach: AliasName {}
+  /// enum Departure: AliasName {}
+  ///
+  /// Trip
+  ///   .join(Trip.approach.jsonEach().as(Approach.self)) { ... }
+  ///   .join(Trip.departure.jsonEach().as(Departure.self)) { ... }
+  /// // ...
+  /// // JOIN json_each("trips"."approach") AS "approaches" ON ...
+  /// // JOIN json_each("trips"."departure") AS "departures" ON ...
+  /// ```
+  ///
+  /// - Parameter alias: An alias name for this statement's base table.
+  /// - Returns: A select statement aliased to the given name.
+  public func `as`<Name: AliasName>(
+    _ alias: Name.Type
+  ) -> Select<QueryValue, TableAlias<From, Name>, Joins> {
+    Select(clauses: asSelect().clauses.aliasing(From.self, as: Name.self))
+  }
+}
+
+extension _SelectClauses {
+  fileprivate func aliasing<T: Table, Name: AliasName>(
+    _ table: T.Type,
+    as alias: Name.Type
+  ) -> Self {
+    var clauses = self
+    clauses.columns = columns.map { $0.aliasing(table, as: alias) }
+    clauses.from = from.map { $0.aliasing(table, as: alias) }
+    clauses.joins = joins.map { $0.aliasing(table, as: alias) }
+    clauses.where = `where`.map { $0.aliasing(table, as: alias) }
+    clauses.group = group.map { $0.aliasing(table, as: alias) }
+    clauses.having = having.map { $0.aliasing(table, as: alias) }
+    clauses.order = order.map { $0.aliasing(table, as: alias) }
+    clauses.limit = limit.map { $0.aliasing(table, as: alias) }
+    return clauses
+  }
+}
+
 @TaskLocal public var _isSelecting = false
 
 extension Select: SelectStatement {
@@ -1951,6 +1997,33 @@ public struct _JoinClause: QueryExpression, Sendable {
     query.append("ON \(constraint)")
     return query
   }
+
+  private init(
+    constraint: QueryFragment,
+    operator: QueryFragment?,
+    tableAlias: String?,
+    tableColumns: QueryFragment,
+    tableReference: QueryFragment
+  ) {
+    self.constraint = constraint
+    self.operator = `operator`
+    self.tableAlias = tableAlias
+    self.tableColumns = tableColumns
+    self.tableReference = tableReference
+  }
+
+  fileprivate func aliasing<T: Table, Name: AliasName>(
+    _ table: T.Type,
+    as alias: Name.Type
+  ) -> Self {
+    Self(
+      constraint: constraint.aliasing(table, as: alias),
+      operator: `operator`,
+      tableAlias: tableAlias,
+      tableColumns: tableColumns.aliasing(table, as: alias),
+      tableReference: tableReference.aliasing(table, as: alias)
+    )
+  }
 }
 
 public struct _LimitClause: QueryExpression, Sendable {
@@ -1965,6 +2038,16 @@ public struct _LimitClause: QueryExpression, Sendable {
       query.append(" OFFSET \(offset)")
     }
     return query
+  }
+
+  fileprivate func aliasing<T: Table, Name: AliasName>(
+    _ table: T.Type,
+    as alias: Name.Type
+  ) -> Self {
+    Self(
+      maxLength: maxLength.map { $0.aliasing(table, as: alias) },
+      offset: offset.map { $0.aliasing(table, as: alias) }
+    )
   }
 }
 

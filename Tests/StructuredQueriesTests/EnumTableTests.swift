@@ -1028,7 +1028,7 @@
 
     @Selection fileprivate struct Video {
       @Column("videoURL")
-      var url: URL = URL(string: "https://youtube.com")!
+      var url = URL(string: "https://youtube.com")!
       @Column("videoKind")
       var kind: Kind = .youtube
       fileprivate enum Kind: String, QueryBindable { case youtube, vimeo }

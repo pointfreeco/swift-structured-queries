@@ -428,7 +428,7 @@ extension SnapshotTests {
 }
 
 @Selection struct NestedFields {
-  var honestCount: Int = 0
+  var honestCount = 0
   var optionalCount: Int?
   @Column(as: String.TestRepresentation?.self)
   var string: String?

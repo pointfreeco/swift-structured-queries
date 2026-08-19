@@ -26,7 +26,9 @@ public import StructuredQueriesCore
     conformances: Table,
     PartialSelectStatement,
     PrimaryKeyedTable,
-    names: named(Draft),
+    names: named(_$ColumnTypes),
+    named(_$ColumnWitness),
+    named(Draft),
     named(From),
     named(QueryValue),
     named(Selection),
@@ -65,7 +67,9 @@ public import StructuredQueriesCore
     conformances: Table,
     PartialSelectStatement,
     PrimaryKeyedTable,
-    names: named(Draft),
+    names: named(_$ColumnTypes),
+    named(_$ColumnWitness),
+    named(Draft),
     named(From),
     named(QueryValue),
     named(Selection),
@@ -137,7 +141,9 @@ public import StructuredQueriesCore
     Table,
     PartialSelectStatement,
     PrimaryKeyedTable,
-    names: named(Draft),
+    names: named(_$ColumnTypes),
+    named(_$ColumnWitness),
+    named(Draft),
     named(From),
     named(QueryValue),
     named(Selection),
@@ -177,7 +183,9 @@ public import StructuredQueriesCore
     Table,
     PartialSelectStatement,
     PrimaryKeyedTable,
-    names: named(Draft),
+    names: named(_$ColumnTypes),
+    named(_$ColumnWitness),
+    named(Draft),
     named(From),
     named(QueryValue),
     named(Selection),
@@ -291,12 +299,23 @@ public macro sql(
   #externalMacro(module: "StructuredQueriesMacros", type: "SQLMacro")
 
 @attached(accessor, names: named(get))
+public macro _ColumnDefinition() =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnDefinitionMacro")
+
+@attached(accessor, names: named(get))
 public macro _PrimaryKeyDefault() =
   #externalMacro(module: "StructuredQueriesMacros", type: "PrimaryKeyDefaultMacro")
 
+@_documentation(visibility: private)
+@attached(accessor, names: named(get))
+public macro _ColumnDefault() =
+  #externalMacro(module: "StructuredQueriesMacros", type: "ColumnDefaultMacro")
+
 @attached(
   member,
-  names: named(From),
+  names: named(_$ColumnTypes),
+  named(_$ColumnWitness),
+  named(From),
   named(QueryValue),
   named(Selection),
   named(TableColumns),

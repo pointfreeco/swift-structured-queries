@@ -75,6 +75,8 @@ extension Table {
   ///   .select { UserWithReferrer.Columns(user: $0, referrer: $1) }
   /// ```
   ///
+  /// To alias a statement after it has been built, see ``SelectStatement/as(_:)``.
+  ///
   /// - Parameter aliasName: An alias name for this table.
   /// - Returns: A table alias of this table type.
   public static func `as`<Name: AliasName>(_ aliasName: Name.Type) -> TableAlias<Self, Name>.Type {
@@ -115,19 +117,7 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
   }
 
   public static var all: SelectOf<Self> {
-    var select = unsafeBitCast(Base.all.asSelect(), to: SelectOf<Self>.self)
-    select.clauses.columns = select.clauses.columns.map {
-      $0.replacingOccurrences(of: Base.self, with: Name.self)
-    }
-    select.clauses.where = select.clauses.where
-      .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
-    select.clauses.group = select.clauses.group
-      .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
-    select.clauses.having = select.clauses.having
-      .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
-    select.clauses.order = select.clauses.order
-      .map { $0.replacingOccurrences(of: Base.self, with: Name.self) }
-    return select
+    Base.all.as(Name.self)
   }
 
   @dynamicMemberLookup
@@ -250,7 +240,7 @@ where Base.TableColumns: PrimaryKeyedTableDefinition {
 
     public var queryFragment: QueryFragment {
       Base.columns.primaryKey._names
-        .map { "\(quote: Name.aliasName).\(quote: $0)" }
+        .map { "\(TableAlias.self).\(quote: $0)" }
         .joined(separator: ", ")
     }
   }
@@ -311,14 +301,14 @@ extension TableAlias: QueryDecodable where Base: QueryDecodable {
 }
 
 extension TableAlias: QueryRepresentable where Base: QueryRepresentable {
-  public typealias QueryOutput = Base
+  public typealias QueryOutput = Base.QueryOutput
 
-  public init(queryOutput: Base) {
-    self.init(base: queryOutput)
+  public init(queryOutput: Base.QueryOutput) {
+    self.init(base: Base(queryOutput: queryOutput))
   }
 
-  public var queryOutput: Base {
-    base
+  public var queryOutput: Base.QueryOutput {
+    base.queryOutput
   }
 }
 
@@ -350,20 +340,20 @@ extension TableAlias: Encodable where Base: Encodable {
 }
 
 extension QueryFragment {
-  fileprivate func replacingOccurrences<T: Table, A: AliasName>(
-    of _: T.Type,
-    with _: A.Type
+  package func aliasing<T: Table, Name: AliasName>(
+    _ table: T.Type,
+    as alias: Name.Type
   ) -> QueryFragment {
     var query = self
+    let key = ObjectIdentifier(T.self)
     for index in query.segments.indices {
-      switch query.segments[index] {
-      case .sql(let sql):
-        query.segments[index] = .sql(
-          sql.replacingOccurrences(of: T.tableName.quoted(), with: A.aliasName.quoted())
-        )
-      case .binding:
-        continue
-      }
+      guard
+        case .identifier(var identifier) = query.segments[index],
+        identifier.key == key
+      else { continue }
+      identifier.name = Name.aliasName
+      identifier.key = ObjectIdentifier(TableAlias<T, Name>.self)
+      query.segments[index] = .identifier(identifier)
     }
     return query
   }

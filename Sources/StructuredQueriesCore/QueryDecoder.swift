@@ -63,6 +63,14 @@ public protocol QueryDecoder {
   mutating func decode<T: QueryRepresentable>(
     _ columnType: T.Type
   ) throws(QueryDecodingError) -> T.QueryOutput?
+
+  /// Decodes a single value for the given table column starting from the current column.
+  ///
+  /// - Parameter column: The table column to decode.
+  /// - Returns: A value of the column's type, or `nil` if the column is `NULL`.
+  mutating func decode<Column: _TableColumnExpression>(
+    _ column: Column
+  ) throws(QueryDecodingError) -> Column.Value.QueryOutput?
 }
 
 extension QueryDecoder {
@@ -92,16 +100,8 @@ extension QueryDecoder {
 
   @inlinable
   @inline(__always)
-  public mutating func decode<T: QueryRepresentable<T>>(
-    _ columnType: T.Type = T.self
-  ) throws(QueryDecodingError) -> T? {
-    try T?(decoder: &self)?.queryOutput
-  }
-
-  @inlinable
-  @inline(__always)
   public mutating func decode<Column: _TableColumnExpression>(
-    _ column: @autoclosure () -> Column
+    _ column: Column
   ) throws(QueryDecodingError) -> Column.Value.QueryOutput? {
     try Column.Value?(decoder: &self)?.queryOutput
   }
@@ -110,10 +110,10 @@ extension QueryDecoder {
   @inlinable
   @inline(__always)
   public mutating func decode<Column: _TableColumnExpression, Value>(
-    _ column: @autoclosure () -> Column
+    _ column: Column
   ) throws(QueryDecodingError) -> Value.QueryOutput?
   where Column.Value == Value? {
-    try Value?(decoder: &self)?.queryOutput
+    try decode(column) ?? nil
   }
 }
 

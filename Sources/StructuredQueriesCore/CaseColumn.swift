@@ -144,20 +144,20 @@
   public enum _CaseColumn<Root: Table, Value> {
     public static func `for`(
       _ name: String,
-      keyPath: KeyPath<Root, Value.QueryOutput?>,
-      default defaultValue: Value.QueryOutput? = nil
+      keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput?>,
+      default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
     ) -> CaseColumn<Root, Value>
     where Value: QueryRepresentable & QueryBindable {
-      CaseColumn(base: TableColumn(name, keyPath: keyPath, default: defaultValue))
+      CaseColumn(base: TableColumn(name, keyPath: keyPath(), default: defaultValue()))
     }
 
     public static func `for`(
       _ name: String,
-      keyPath: KeyPath<Root, Value.QueryOutput?>,
-      default defaultValue: Value.QueryOutput? = nil
+      keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput?>,
+      default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
     ) -> CaseColumnGroup<Root, Value>
     where Value: QueryRepresentable, Value: Table, Value.QueryOutput: Table {
-      CaseColumnGroup(base: ColumnGroup(name, keyPath: keyPath, default: defaultValue))
+      CaseColumnGroup(base: ColumnGroup(name, keyPath: keyPath(), default: defaultValue()))
     }
   }
 
