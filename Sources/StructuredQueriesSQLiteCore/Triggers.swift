@@ -185,9 +185,6 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ///   - dateColumn: A key path to a datetime column.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `INSERT` trigger operation.
-    #if !SuppressPlatformSQLiteAvailability
-      @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
-    #endif
     @_disfavoredOverload
     public static func insert<D: _OptionalPromotable<Date?>>(
       touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
@@ -195,7 +192,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ) -> Self {
       insert(
         touch: dateColumn,
-        date: SQLQueryExpression<D>("datetime('subsec')"),
+        date: SQLQueryExpression<D>(subsecDateTime()),
         when: condition
       )
     }
@@ -293,9 +290,6 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ///   - dateColumn: A key path to a datetime column.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `UPDATE` trigger operation.
-    #if !SuppressPlatformSQLiteAvailability
-      @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
-    #endif
     @_disfavoredOverload
     public static func update<D: _OptionalPromotable<Date?>>(
       touch dateColumn: KeyPath<On.TableColumns, TableColumn<On, D>>,
@@ -303,7 +297,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ) -> Self {
       update(
         touch: dateColumn,
-        date: SQLQueryExpression<D>("datetime('subsec')"),
+        date: SQLQueryExpression<D>(subsecDateTime()),
         when: condition
       )
     }
@@ -359,9 +353,6 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
     ///   - dateColumn: A key path to a datetime column.
     ///   - condition: A predicate that must be satisfied to perform the given statement.
     /// - Returns: An `UPDATE` trigger operation.
-    #if !SuppressPlatformSQLiteAvailability
-      @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
-    #endif
     @_disfavoredOverload
     public static func update<each Column: _TableColumnExpression, D: _OptionalPromotable<Date?>>(
       of columns: (On.TableColumns) -> (repeat each Column),
@@ -371,7 +362,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       update(
         of: columns,
         touch: dateColumn,
-        date: SQLQueryExpression<D>("datetime('subsec')"),
+        date: SQLQueryExpression<D>(subsecDateTime()),
         when: condition
       )
     }

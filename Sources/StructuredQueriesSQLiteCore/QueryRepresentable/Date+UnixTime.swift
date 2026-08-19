@@ -24,6 +24,10 @@ extension Date {
     public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
       "datetime(\(queryFragment), 'unixepoch')"
     }
+
+    public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+      "unixepoch(\(queryFragment))"
+    }
   }
 }
 
