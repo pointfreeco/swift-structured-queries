@@ -1512,12 +1512,12 @@ extension TableMacro: MemberMacro {
         public typealias QueryValue = \(type.trimmed)\(primaryKeyTypealias)
         \(columnsProperties, separator: "\n")
         \(raw: optimizeNoneWorkaround)public static var allColumns: \
-        [any \(moduleName).TableColumnExpression] {
-        var allColumns: [any \(moduleName).TableColumnExpression] = []
+        \(moduleName).TableColumnList<any \(moduleName).TableColumnExpression> {
+        var allColumns: \(moduleName).TableColumnList<any \(moduleName).TableColumnExpression> = []
         \(raw: allColumnsAssignment)return allColumns
         }
-        \(raw: optimizeNoneWorkaround)public static var writableColumns: [any \(moduleName).WritableTableColumnExpression] {
-        var writableColumns: [any \(moduleName).WritableTableColumnExpression] = []
+        \(raw: optimizeNoneWorkaround)public static var writableColumns: \(moduleName).TableColumnList<any \(moduleName).WritableTableColumnExpression> {
+        var writableColumns: \(moduleName).TableColumnList<any \(moduleName).WritableTableColumnExpression> = []
         \(raw: writableColumnsAssignment)return writableColumns
         }
         public var queryFragment: QueryFragment {

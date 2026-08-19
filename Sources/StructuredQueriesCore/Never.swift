@@ -2,9 +2,9 @@ extension Never: Table {
   public struct TableColumns: TableDefinition {
     public typealias QueryValue = Never
 
-    public static var allColumns: [any TableColumnExpression] { [] }
+    public static var allColumns: TableColumnList<any TableColumnExpression> { [] }
 
-    public static var writableColumns: [any WritableTableColumnExpression] { [] }
+    public static var writableColumns: TableColumnList<any WritableTableColumnExpression> { [] }
   }
 
   public struct Selection: TableExpression {
