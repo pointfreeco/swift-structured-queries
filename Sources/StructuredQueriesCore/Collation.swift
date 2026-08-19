@@ -64,12 +64,12 @@ public struct NamedCollation: Collation, Sendable {
 ///
 /// Reminder.order { $0.title.collate(.caseInsensitive) }
 /// ```
-public struct CustomCollation: Collation, Sendable {
+public struct CustomCollation: Collation {
   /// The name of the collating sequence.
   public let name: String
 
   /// The function that compares two text values from the database.
-  public let body: @Sendable (String, String) -> CollationOrder
+  public let body: (String, String) -> CollationOrder
 
   /// Initializes a collating sequence from a name and comparison function.
   ///
@@ -78,7 +78,7 @@ public struct CustomCollation: Collation, Sendable {
   ///   - body: A function that compares two text values from the database.
   public init(
     _ name: String,
-    _ body: @escaping @Sendable (String, String) -> CollationOrder
+    _ body: @escaping (String, String) -> CollationOrder
   ) {
     self.name = name
     self.body = body
