@@ -17,7 +17,7 @@ extension QueryExpression where QueryValue: _SQLiteDateRepresentation {
   public func callAsFunction(_ modifier: DateTimeModifier) -> some QueryExpression<QueryValue> {
     _ModifiedDate(base: timeValueArguments, modifier: modifier)
   }
-  
+
   /// This date formatted according to a format string.
   ///
   /// ```swift
@@ -34,7 +34,7 @@ extension QueryExpression where QueryValue: _SQLiteDateRepresentation {
   public func strftime(_ format: String) -> some QueryExpression<String?> {
     SQLQueryExpression("strftime(\(bind: format), \(timeValueArguments.joined(separator: ", ")))")
   }
-  
+
   /// The date's year (`%Y`).
   public var year: some QueryExpression<Int> { component("%Y") }
 
@@ -109,7 +109,7 @@ extension QueryExpression where Self == _ModifiedDate<Date.JulianDayRepresentati
 @dynamicMemberLookup
 public struct DateTimeModifier: Sendable {
   var fragments: [QueryFragment] = []
-  
+
   /// The overflow rule for date time modification.
   public enum Overflow: Sendable {
     /// Choose the later date.
@@ -125,7 +125,7 @@ public struct DateTimeModifier: Sendable {
       }
     }
   }
-  
+
   /// Move the time-value by the number of years.
   ///
   /// - Parameter count: The number of years.
