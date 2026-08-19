@@ -243,7 +243,8 @@ extension SnapshotTests {
       )
     }
 
-    @Test func `NULL value in optional column does not decode as default`() throws {
+    @Test("NULL value in optional column does not decode as default")
+    func nullValueInOptionalColumnDoesNotDecodeAsDefault() throws {
       try withDependencies {
         $0.defaultDatabase = db
       } operation: {

@@ -296,8 +296,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c") IN ((SELECT "rows"."c"
-        FROM "rows"))
+        ("rows"."c") IN (SELECT "rows"."c"
+        FROM "rows")
         """
       }
     }
@@ -317,8 +317,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c") IN ((SELECT "rows"."c"
-        FROM "rows"))
+        ("rows"."c") IN (SELECT "rows"."c"
+        FROM "rows")
         """
       }
     }
@@ -431,8 +431,8 @@ extension SnapshotTests {
         """
         SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string"
         FROM "rows"
-        WHERE (("rows"."c") IN ((SELECT CAST("rows"."bool" AS INTEGER)
-        FROM "rows")))
+        WHERE (("rows"."c") IN (SELECT CAST("rows"."bool" AS INTEGER)
+        FROM "rows"))
         """
       }
       assertInlineSnapshot(

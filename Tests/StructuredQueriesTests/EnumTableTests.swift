@@ -644,7 +644,8 @@
         }
       }
 
-      @Test func `enum case with defaults isn't always decoded successfully`() {
+      @Test("enum case with defaults isn't always decoded successfully")
+      func enumCaseWithDefaultsIsntAlwaysDecodedSuccessfully() {
         assertQuery(
           Attachment.upsert {
             Attachment
@@ -1027,7 +1028,7 @@
 
     @Selection fileprivate struct Video {
       @Column("videoURL")
-      var url: URL = URL(string: "https://youtube.com")!
+      var url = URL(string: "https://youtube.com")!
       @Column("videoKind")
       var kind: Kind = .youtube
       fileprivate enum Kind: String, QueryBindable { case youtube, vimeo }

@@ -24,6 +24,27 @@ extension SnapshotTests {
       #expect(condition2 == true)
     }
 
+    @Test func representationDefault() {
+      assertQuery(
+        Reminder.select { _ in StampedTag.Columns(name: "car") }.limit(1)
+      ) {
+        """
+        SELECT 86400 AS "createdAt", 'car' AS "name"
+        FROM "reminders"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────────────────────────────────────────────┐
+        │ StampedTag(                                  │
+        │   createdAt: Date(1970-01-02T00:00:00.000Z), │
+        │   name: "car"                                │
+        │ )                                            │
+        └──────────────────────────────────────────────┘
+        """
+      }
+    }
+
     @Test func selectAll() {
       assertQuery(Tag.all) {
         """
@@ -1147,6 +1168,37 @@ extension SnapshotTests {
       }
     }
 
+    @Test func aliasedFind() {
+      enum R1: AliasName {}
+      enum R2: AliasName {}
+      assertQuery(
+        Reminder.as(R1.self).find(1).as(R2.self)
+      ) {
+        """
+        SELECT "r2s"."id", "r2s"."assignedUserID", "r2s"."dueDate", "r2s"."isCompleted", "r2s"."isFlagged", "r2s"."notes", "r2s"."priority", "r2s"."remindersListID", "r2s"."title", "r2s"."updatedAt"
+        FROM "reminders" AS "r2s"
+        WHERE (("r2s"."id") IN ((1)))
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┐
+        │ Reminder(                                   │
+        │   id: 1,                                    │
+        │   assignedUserID: 1,                        │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: false,                         │
+        │   notes: "Milk, Eggs, Apples",              │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Groceries",                       │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
+        """
+      }
+    }
+
     @Test func selfLeftJoinSelect() {
       enum R1: AliasName {}
       enum R2: AliasName {}
@@ -1357,94 +1409,92 @@ extension SnapshotTests {
       }
     }
 
-    #if swift(>=6.1)
-      @Test func reusableStaticHelperOnDraft() {
-        assertQuery(
-          Reminder.Draft.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.where { _ in true }.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (1) AND (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.select(\.id).incomplete
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.all.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
+    @Test func reusableStaticHelperOnDraft() {
+      assertQuery(
+        Reminder.Draft.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
       }
-    #endif
+      assertQuery(
+        Reminder.Draft.where { _ in true }.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (1) AND (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.select(\.id).incomplete
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.all.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+    }
 
     @Test func reusableColumnHelperOnDraft() {
       assertQuery(
@@ -1778,6 +1828,13 @@ struct PragmaForeignKeyList<Base: Table> {
   @Column("on_update") let onUpdate: ForeignKeyAction
   @Column("on_delete") let onDelete: ForeignKeyAction
   let match: String
+}
+
+@Selection
+private struct StampedTag {
+  @Column(as: Date.UnixTimeRepresentation.self)
+  var createdAt = Date(timeIntervalSince1970: 60 * 60 * 24)
+  var name = ""
 }
 
 enum ForeignKeyAction: String, QueryBindable {

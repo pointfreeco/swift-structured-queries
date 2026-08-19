@@ -677,7 +677,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `jsonSet on a JSONBRepresentation`() {
+    @Test("jsonSet on a JSONBRepresentation") func jsonSetOnAJSONBRepresentation() {
       assertQuery(
         Post.select { $0.notes.jsonSet(\.[0], "z") }
       ) {
@@ -1271,7 +1271,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `Multiple jsonSet's are fused`() throws {
+    @Test("Multiple jsonSet's are fused") func multipleJsonSetsAreFused() throws {
       try db.execute(Profile.delete())
       assertQuery(
         Profile.update {
@@ -1291,7 +1291,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `Multiple jsonReplace's are fused`() throws {
+    @Test("Multiple jsonReplace's are fused") func multipleJsonReplacesAreFused() throws {
       try db.execute(Profile.delete())
       assertQuery(
         Profile.update {
@@ -1311,7 +1311,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `Multiple jsonInsert's are fused`() throws {
+    @Test("Multiple jsonInsert's are fused") func multipleJsonInsertsAreFused() throws {
       try db.execute(Profile.delete())
       assertQuery(
         Profile.update {
@@ -1356,7 +1356,7 @@ private struct Comment: Codable, Equatable {
 private struct Profile: Codable, Equatable {
   let id: Int
   @Column(as: Author.JSONBRepresentation.self)
-  var author: Author = Author()
+  var author = Author()
   @Column(as: Author.JSONBRepresentation?.self)
   var editor: Author?
 }
@@ -1373,7 +1373,7 @@ private struct Author: Codable, Equatable {
   @Column(as: UUID.BytesRepresentation.self)
   var externalID = UUID(0)
   @Column(as: Link.JSONBRepresentation.self)
-  var links: Link = Link()
+  var links = Link()
   @Column(as: [Link].JSONBRepresentation.self)
   var pastLinks: [Link] = []
 }
@@ -1406,14 +1406,14 @@ private struct Resume: Codable, Equatable {
 private struct Bio: Codable, Equatable {
   let id: Int
   @Column(as: Resume.JSONBRepresentation.self)
-  var resume: Resume = Resume()
+  var resume = Resume()
 }
 
 @Table
 private struct Session: Codable, Equatable {
   let id: Int
   @Column(as: UUID.BytesRepresentation.self)
-  var token: UUID = UUID(0)
+  var token = UUID(0)
   @Column(as: UUID.BytesRepresentation?.self)
   var refresh: UUID?
 }

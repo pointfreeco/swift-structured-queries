@@ -366,7 +366,147 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `aggregate scalar quantities in JSON arrays`() throws {
+    @Test func aliasedJoins() throws {
+      enum First: AliasName {}
+      enum Second: AliasName {}
+      try db.execute(
+        TaggedItem.insert {
+          TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent", "chores"])
+        }
+      )
+      assertQuery(
+        TaggedItem
+          .join(TaggedItem.columns.tags.jsonEach().as(First.self)) { _, _ in true }
+          .join(TaggedItem.columns.tags.jsonEach().as(Second.self)) { $1.key < $2.key }
+          .select { ($0.title, $1.value, $2.value) }
+      ) {
+        """
+        SELECT "taggedItems"."title", "firsts"."value", "seconds"."value"
+        FROM "taggedItems"
+        JOIN json_each("taggedItems"."tags") AS "firsts" ON 1
+        JOIN json_each("taggedItems"."tags") AS "seconds" ON ("firsts"."key") < ("seconds"."key")
+        """
+      } results: {
+        """
+        ┌─────────────┬──────────┬──────────┐
+        │ "Groceries" │ "home"   │ "urgent" │
+        │ "Groceries" │ "home"   │ "chores" │
+        │ "Groceries" │ "urgent" │ "chores" │
+        └─────────────┴──────────┴──────────┘
+        """
+      }
+    }
+
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+    @Test func aliasAfterJoin() {
+      enum Outer: AliasName {}
+      assertQuery(
+        Trip
+          .join(Trip.columns.geofence.jsonEach()) { _, _ in true }
+          .select { ($0.title, $1.value.jsonExtract(\.label)) }
+          .as(Outer.self)
+      ) {
+        """
+        SELECT "outers"."title", json_extract("json_each"."value", '$."label"')
+        FROM "trips" AS "outers"
+        JOIN json_each("outers"."geofence") ON 1
+        """
+      } results: {
+        """
+        ┌────────────┬────────┐
+        │ "Northern" │ "home" │
+        │ "Northern" │ "away" │
+        │ "Mixed"    │ "home" │
+        │ "Mixed"    │ "away" │
+        └────────────┴────────┘
+        """
+      }
+    }
+
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+    @Test func aliasAfterClauses() throws {
+      enum Element: AliasName {}
+      try db.execute(
+        TaggedItem.insert {
+          TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent", "home"])
+          TaggedItem.Draft(title: "Taxes", tags: ["work"])
+        }
+      )
+      assertQuery(
+        TaggedItem
+          .where {
+            $0.tags.jsonEach()
+              .where { $0.key >= 0 }
+              .group(by: \.value)
+              .having { $0.value.count() > 1 }
+              .order(by: \.value)
+              .limit(1)
+              .offset(0)
+              .as(Element.self)
+              .exists()
+          }
+          .select(\.title)
+      ) {
+        """
+        SELECT "taggedItems"."title"
+        FROM "taggedItems"
+        WHERE (EXISTS (
+          SELECT "elements"."key", "elements"."value"
+          FROM json_each("taggedItems"."tags") AS "elements"
+          WHERE (("elements"."key") >= (0))
+          GROUP BY "elements"."value"
+          HAVING ((count("elements"."value")) > (1))
+          ORDER BY "elements"."value"
+          LIMIT 1 OFFSET 0
+        ))
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ "Groceries" │
+        └─────────────┘
+        """
+      }
+    }
+
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+    @Test func lateAlias() throws {
+      enum Urgent: AliasName {}
+      try db.execute(
+        TaggedItem.insert {
+          TaggedItem.Draft(title: "Groceries", tags: ["home", "urgent"])
+          TaggedItem.Draft(title: "Taxes", tags: ["work"])
+        }
+      )
+      assertQuery(
+        TaggedItem
+          .where {
+            $0.tags.jsonEach().where { $0.value.eq("urgent") }.as(Urgent.self).exists()
+          }
+          .select(\.title)
+      ) {
+        """
+        SELECT "taggedItems"."title"
+        FROM "taggedItems"
+        WHERE (EXISTS (
+          SELECT "urgents"."key", "urgents"."value"
+          FROM json_each("taggedItems"."tags") AS "urgents"
+          WHERE (("urgents"."value") = ('urgent'))
+        ))
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ "Groceries" │
+        └─────────────┘
+        """
+      }
+    }
+
+    @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+    @Test("aggregate scalar quantities in JSON arrays") func aggregateScalarQuantitiesInJSONArrays()
+      throws
+    {
       try db.execute(
         Profile.insert {
           Profile.Draft(favoriteNumbers: [42, 1729])
@@ -682,7 +822,7 @@ extension SnapshotTests {
     }
 
     @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
-    @Test func `jsonEach over a JSONBRepresentation`() {
+    @Test("jsonEach over a JSONBRepresentation") func jsonEachOverAJSONBRepresentation() {
       assertQuery(
         BlobTrip
           .join(BlobTrip.columns.geofence.jsonEach()) { _, _ in true }
@@ -702,6 +842,34 @@ extension SnapshotTests {
         │   label: "home"     │
         │ )                   │
         └─────────────────────┘
+        """
+      }
+    }
+
+    @available(iOS 27, macOS 27, tvOS 27, watchOS 27, visionOS 27, *)
+    @Test func jsonbEachAliasedJoins() {
+      enum First: AliasName {}
+      enum Second: AliasName {}
+      assertQuery(
+        Trip
+          .join(Trip.columns.geofence.jsonbEach().as(First.self)) { _, _ in true }
+          .join(Trip.columns.geofence.jsonbEach().as(Second.self)) { $1.key < $2.key }
+          .select {
+            ($0.title, $1.value.jsonExtract(\.label), $2.value.jsonExtract(\.label))
+          }
+      ) {
+        """
+        SELECT "trips"."title", json_extract("firsts"."value", '$."label"'), json_extract("seconds"."value", '$."label"')
+        FROM "trips"
+        JOIN jsonb_each("trips"."geofence") AS "firsts" ON 1
+        JOIN jsonb_each("trips"."geofence") AS "seconds" ON ("firsts"."key") < ("seconds"."key")
+        """
+      } results: {
+        """
+        ┌────────────┬────────┬────────┐
+        │ "Northern" │ "home" │ "away" │
+        │ "Mixed"    │ "home" │ "away" │
+        └────────────┴────────┴────────┘
         """
       }
     }
