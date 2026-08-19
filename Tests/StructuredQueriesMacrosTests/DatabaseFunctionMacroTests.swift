@@ -1610,7 +1610,15 @@ extension SnapshotTests {
             public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Int) {
               self.body = body
             }
-            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, xs, filter: filter
+                )
+              }
+            }
+            @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: some QueryExpression, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
                 StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, xs, order: order, filter: filter
@@ -1680,7 +1688,15 @@ extension SnapshotTests {
             public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Int) {
               self.body = body
             }
-            public func callAsFunction(of xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
+            public func callAsFunction(of xs: some StructuredQueriesCore.QueryExpression<Int>, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, xs, filter: filter
+                )
+              }
+            }
+            @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+            public func callAsFunction(of xs: some StructuredQueriesCore.QueryExpression<Int>, order: some QueryExpression, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
                 StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, xs, order: order, filter: filter
@@ -1763,7 +1779,15 @@ extension SnapshotTests {
             public init(_ body: @escaping (_ arguments: any Sequence<(String, separator: String)>) -> String?) {
               self.body = body
             }
-            public func callAsFunction(_ p0: some StructuredQueriesCore.QueryExpression<String>, separator: some StructuredQueriesCore.QueryExpression<String>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<String?> {
+            public func callAsFunction(_ p0: some StructuredQueriesCore.QueryExpression<String>, separator: some StructuredQueriesCore.QueryExpression<String>, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<String?> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, p0, separator, filter: filter
+                )
+              }
+            }
+            @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+            public func callAsFunction(_ p0: some StructuredQueriesCore.QueryExpression<String>, separator: some StructuredQueriesCore.QueryExpression<String>, order: some QueryExpression, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<String?> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
                 StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, p0, separator, order: order, filter: filter
@@ -1839,7 +1863,15 @@ extension SnapshotTests {
             public init(_ body: @escaping (_ arrays: any Sequence<[String]>) -> [String]) {
               self.body = body
             }
-            public func callAsFunction(_ arrays: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
+            public func callAsFunction(_ arrays: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, arrays, filter: filter
+                )
+              }
+            }
+            @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+            public func callAsFunction(_ arrays: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>, order: some QueryExpression, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
                 StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, arrays, order: order, filter: filter
@@ -1913,7 +1945,15 @@ extension SnapshotTests {
             public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Swift.Void) {
               self.body = body
             }
-            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, xs, filter: filter
+                )
+              }
+            }
+            @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: some QueryExpression, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
                 StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, xs, order: order, filter: filter
@@ -1992,7 +2032,15 @@ extension SnapshotTests {
             public init(_ body: @escaping (_ xs: any Sequence<Int>) throws -> Swift.Void) {
               self.body = body
             }
-            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
+              StructuredQueriesCore.$_isSelecting.withValue(false) {
+                StructuredQueriesCore.AggregateFunctionExpression(
+                  self.name, xs, filter: filter
+                )
+              }
+            }
+            @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
+            public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: some QueryExpression, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
                 StructuredQueriesCore.AggregateFunctionExpression(
                   self.name, xs, order: order, filter: filter
