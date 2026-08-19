@@ -83,7 +83,7 @@ configuration.prepareDatabase { db in
 - ``StructuredQueriesCore/Collation``
 - ``StructuredQueriesCore/NamedCollation``
 - ``StructuredQueriesCore/CollationOrder``
-- ``CustomCollation``
+- ``StructuredQueriesCore/CustomCollation``
 - ``StructuredQueriesCore/QueryExpression/collate(_:)``
 
 ### Built-in collations

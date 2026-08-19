@@ -1,5 +1,4 @@
-import StructuredQueriesCore
-public import StructuredQueriesSQLiteCore
+public import StructuredQueriesCore
 
 #if canImport(Darwin)
   import SQLite3

@@ -49,6 +49,42 @@ public struct NamedCollation: Collation, Sendable {
   }
 }
 
+/// A collating sequence implemented in Swift with a name and comparison function.
+///
+/// Values of this type can be installed in a database connection and referenced from a query. Use
+/// the `@DatabaseCollations` macro to define them with leading dot syntax:
+///
+/// ```swift
+/// @DatabaseCollations
+/// extension Collation where Self == CustomCollation {
+///   static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+///     CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+///   }
+/// }
+///
+/// Reminder.order { $0.title.collate(.caseInsensitive) }
+/// ```
+public struct CustomCollation: Collation, Sendable {
+  /// The name of the collating sequence.
+  public let name: String
+
+  /// The function that compares two text values from the database.
+  public let body: @Sendable (String, String) -> CollationOrder
+
+  /// Initializes a collating sequence from a name and comparison function.
+  ///
+  /// - Parameters:
+  ///   - name: The name of the collating sequence.
+  ///   - body: A function that compares two text values from the database.
+  public init(
+    _ name: String,
+    _ body: @escaping @Sendable (String, String) -> CollationOrder
+  ) {
+    self.name = name
+    self.body = body
+  }
+}
+
 extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
   /// Returns an expression of this expression that is compared using the given collating sequence.
   ///
@@ -85,11 +121,11 @@ public enum CollationOrder: Hashable, Sendable {
     self = lhs < rhs ? .ascending : rhs < lhs ? .descending : .same
   }
 
-public func combine(with other: @autoclosure () -> Self) -> Self {
-  switch self {
-  case .same: other()
-  case .ascending: .ascending
-  case .descending: .descending
+  public func combine(with other: @autoclosure () -> Self) -> Self {
+    switch self {
+    case .same: other()
+    case .ascending: .ascending
+    case .descending: .descending
+    }
   }
-}
 }

@@ -28,7 +28,7 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: caseInsensitive)
             #sourceLocation()
             #endif
-            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+            return StructuredQueriesCore.CustomCollation("caseInsensitive", caseInsensitive)
           }
         }
         """
@@ -58,7 +58,7 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: caseInsensitive)
             #sourceLocation()
             #endif
-            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+            return StructuredQueriesCore.CustomCollation("caseInsensitive", caseInsensitive)
           }
         }
         """
@@ -89,7 +89,7 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: caseInsensitive)
             #sourceLocation()
             #endif
-            return StructuredQueriesSQLiteCore.CustomCollation("case_insensitive", caseInsensitive)
+            return StructuredQueriesCore.CustomCollation("case_insensitive", caseInsensitive)
           }
         }
         """
@@ -186,7 +186,7 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: caseInsensitive)
             #sourceLocation()
             #endif
-            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+            return StructuredQueriesCore.CustomCollation("caseInsensitive", caseInsensitive)
           }
         }
         """
@@ -237,7 +237,7 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: caseInsensitive)
             #sourceLocation()
             #endif
-            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+            return StructuredQueriesCore.CustomCollation("caseInsensitive", caseInsensitive)
           }
         }
         """
@@ -288,7 +288,7 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: caseInsensitive)
             #sourceLocation()
             #endif
-            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+            return StructuredQueriesCore.CustomCollation("caseInsensitive", caseInsensitive)
           }
         }
         """
@@ -363,7 +363,7 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: caseInsensitive)
             #sourceLocation()
             #endif
-            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+            return StructuredQueriesCore.CustomCollation("caseInsensitive", caseInsensitive)
           }
         }
         """

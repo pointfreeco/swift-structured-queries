@@ -32,8 +32,8 @@ extension DatabaseCollationsMacro: MemberMacro {
       declaration.genericWhereClause?.requirements.contains(where: {
         [
           "Self==CustomCollation",
-          "Self==StructuredQueriesSQLiteCore.CustomCollation",
-          "Self==StructuredQueriesSQLite.CustomCollation",
+          "Self==StructuredQueriesCore.CustomCollation",
+          "Self==StructuredQueries.CustomCollation",
         ]
         .contains($0.requirement.trimmedDescription.filter { !$0.isWhitespace })
       }) == true
@@ -199,7 +199,7 @@ extension DatabaseCollationsMacro: MemberMacro {
         """
         \(attributes)\(access)\(`static`)\(nonisolated)var \(function.name.trimmed): \
         Self {
-        \(raw: check)return StructuredQueriesSQLiteCore.CustomCollation(\
+        \(raw: check)return StructuredQueriesCore.CustomCollation(\
         \(databaseCollationName), \(function.name.trimmed))
         }
         """
