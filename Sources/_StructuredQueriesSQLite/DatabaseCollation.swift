@@ -34,9 +34,6 @@ extension DatabaseCollation {
           case .descending: return 1
           }
         } catch {
-          // NB: SQLite offers no way of surfacing an error from a collating sequence, and it
-          //     requires a total ordering, so we report the issue and fall back to a byte-wise
-          //     comparison.
           reportIssue(error)
           return lhs.lexicographicallyPrecedes(rhs)
             ? -1
