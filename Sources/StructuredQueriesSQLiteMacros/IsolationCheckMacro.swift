@@ -24,7 +24,7 @@ extension MainActorIsolationCheckMacro: DeclarationMacro {
     let decl: String
     switch node.arguments.first?.label?.text {
     case "collation":
-      subject = "'@DatabaseCollation'"
+      subject = "'@DatabaseCollations'"
       decl = "func"
     case "property":
       subject = "'@DatabaseFunction'"

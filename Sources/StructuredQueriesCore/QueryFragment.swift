@@ -330,6 +330,20 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       appendInterpolation(expression.queryFragment)
     }
 
+    /// Append a collating sequence to the interpolation.
+    ///
+    /// Allows collating sequences to be referenced with leading dot syntax:
+    ///
+    /// ```swift
+    /// #sql("SELECT title FROM reminders ORDER BY title COLLATE \(.nocase)", as: String.self)
+    /// // SELECT title FROM reminders ORDER BY title COLLATE "NOCASE"
+    /// ```
+    ///
+    /// - Parameter collation: A collating sequence.
+    public mutating func appendInterpolation(_ collation: some Collation) {
+      appendInterpolation(collation.queryFragment)
+    }
+
     /// Append a statement to the interpolation.
     ///
     /// The statement is directly interpolated into the query fragment, without parentheses. When

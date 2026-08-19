@@ -34,7 +34,7 @@ custom database functions, and more.
 - ``StructuredQueriesCore/Collation``
 - ``StructuredQueriesCore/NamedCollation``
 - ``StructuredQueriesCore/CollationOrder``
-- ``DatabaseCollation``
+- ``CustomCollation``
 
 ### Casting
 

@@ -1,4 +1,3 @@
-import IssueReporting
 import StructuredQueriesCore
 public import StructuredQueriesSQLiteCore
 
@@ -8,7 +7,22 @@ public import StructuredQueriesSQLiteCore
   import _StructuredQueriesSQLite3
 #endif
 
-extension DatabaseCollation {
+extension Database {
+  /// Installs collating sequences in the database connection.
+  ///
+  /// ```swift
+  /// db.install(.caseInsensitive, .byLength)
+  /// ```
+  ///
+  /// - Parameter collations: The collating sequences to install.
+  public func install(_ collations: CustomCollation...) {
+    for collation in collations {
+      collation.install(handle)
+    }
+  }
+}
+
+extension CustomCollation {
   /// Installs the collating sequence in a database connection.
   ///
   /// - Parameter db: A database connection.
@@ -22,25 +36,15 @@ extension DatabaseCollation {
       { body, lhsCount, lhs, rhsCount, rhs in
         let lhs = UnsafeRawBufferPointer(start: lhs, count: Int(lhsCount))
         let rhs = UnsafeRawBufferPointer(start: rhs, count: Int(rhsCount))
-        do {
-          switch try Unmanaged<DatabaseCollationDefinition>
-            .fromOpaque(body!)
-            .takeUnretainedValue()
-            .collation
-            .compare(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
-          {
-          case .ascending: return -1
-          case .same: return 0
-          case .descending: return 1
-          }
-        } catch {
-          // NB: SQLite offers no way of surfacing an error from a collating sequence, and it
-          //     requires a total ordering, so we report the issue and fall back to a byte-wise
-          //     comparison.
-          reportIssue(error)
-          return lhs.lexicographicallyPrecedes(rhs)
-            ? -1
-            : rhs.lexicographicallyPrecedes(lhs) ? 1 : 0
+        switch Unmanaged<DatabaseCollationDefinition>
+          .fromOpaque(body!)
+          .takeUnretainedValue()
+          .collation
+          .body(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
+        {
+        case .ascending: return -1
+        case .same: return 0
+        case .descending: return 1
         }
       },
       { body in
@@ -52,8 +56,8 @@ extension DatabaseCollation {
 }
 
 private final class DatabaseCollationDefinition {
-  let collation: any DatabaseCollation
-  init(_ collation: some DatabaseCollation) {
+  let collation: CustomCollation
+  init(_ collation: CustomCollation) {
     self.collation = collation
   }
 }

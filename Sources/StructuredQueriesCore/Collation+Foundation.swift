@@ -6,9 +6,11 @@ extension CollationOrder {
   /// Useful for collating sequences that delegate to Foundation's comparison APIs:
   ///
   /// ```swift
-  /// @DatabaseCollation
-  /// func localized(_ lhs: String, _ rhs: String) -> CollationOrder {
-  ///   CollationOrder(lhs.localizedCompare(rhs))
+  /// @DatabaseCollations
+  /// extension Collation where Self == CustomCollation {
+  ///   static func localized(_ lhs: String, _ rhs: String) -> CollationOrder {
+  ///     CollationOrder(lhs.localizedCompare(rhs))
+  ///   }
   /// }
   /// ```
   ///

@@ -16,8 +16,7 @@
 /// // ORDER BY "reminders"."title" COLLATE "fr_FR"
 /// ```
 ///
-/// Collating sequences implemented in Swift can be defined using the `@DatabaseCollation` macro,
-/// which generates a conformance to this protocol.
+/// Collating sequences implemented in Swift can be defined using the `@DatabaseCollations` macro.
 public protocol Collation: QueryExpression<Never> {
   /// The name of the collating sequence.
   var name: String { get }
@@ -47,28 +46,6 @@ public struct NamedCollation: Collation, Sendable {
   /// - Parameter name: The name of the collating sequence.
   public init(_ name: String) {
     self.name = name
-  }
-
-  /// Initializes a collating sequence from the name of another collating sequence.
-  ///
-  /// Useful for giving a collating sequence defined in Swift leading dot syntax:
-  ///
-  /// ```swift
-  /// @DatabaseCollation
-  /// func localized(_ lhs: String, _ rhs: String) -> CollationOrder {
-  ///   CollationOrder(lhs.localizedCompare(rhs))
-  /// }
-  ///
-  /// extension Collation where Self == NamedCollation {
-  ///   static var localized: Self { NamedCollation($localized) }
-  /// }
-  ///
-  /// Reminder.order { $0.title.collate(.localized) }
-  /// ```
-  ///
-  /// - Parameter collation: A collating sequence.
-  public init(_ collation: some Collation) {
-    self.name = collation.name
   }
 }
 

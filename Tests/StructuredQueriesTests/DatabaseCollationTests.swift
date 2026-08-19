@@ -17,14 +17,10 @@ extension SnapshotTests {
   @Suite struct DatabaseCollationTests {
     @Dependency(\.defaultDatabase) var database
 
-    @DatabaseCollation
-    func reversed(_ lhs: String, _ rhs: String) -> CollationOrder {
-      CollationOrder(rhs, lhs)
-    }
     @Test func order() {
-      $reversed.install(database.handle)
+      database.install(.reversed)
       assertQuery(
-        RemindersList.select(\.title).order { $0.title.collate($reversed) }
+        RemindersList.select(\.title).order { $0.title.collate(.reversed) }
       ) {
         """
         SELECT "remindersLists"."title"
@@ -43,8 +39,7 @@ extension SnapshotTests {
     }
 
     @Test func equality() {
-      $caseInsensitive.install(database.handle)
-      // NB: '.caseInsensitive' is a 'NamedCollation' alias of '$caseInsensitive', defined below.
+      database.install(.caseInsensitive)
       assertQuery(
         RemindersList
           .where { $0.title.collate(.caseInsensitive).eq("PERSONAL") }
@@ -64,49 +59,34 @@ extension SnapshotTests {
       }
     }
 
-    final class Engine {
-      @DatabaseCollation("engine_reversed")
-      func reversed(_ lhs: String, _ rhs: String) -> CollationOrder {
-        CollationOrder(rhs, lhs)
-      }
-    }
-    @Test func deallocatedOwner() {
-      var engines = [Engine()]
-      let reversed = engines[0].$reversed
-      reversed.install(database.handle)
-      engines.removeAll()
-      // NB: A collating sequence cannot surface an error to SQLite, so the deallocated engine is
-      //     reported as an issue and the comparison falls back to a byte-wise one.
-      withKnownIssue {
-        assertQuery(
-          RemindersList.select(\.title).order { $0.title.collate(reversed) }
-        ) {
+    @Test func sqlMacro() {
+      database.install(.caseInsensitive)
+      assertQuery(
+        #sql(
           """
-          SELECT "remindersLists"."title"
-          FROM "remindersLists"
-          ORDER BY "remindersLists"."title" COLLATE "engine_reversed"
-          """
-        } results: {
-          """
-          ┌────────────┐
-          │ "Business" │
-          │ "Family"   │
-          │ "Personal" │
-          └────────────┘
-          """
-        }
+          SELECT "title" FROM \(RemindersList.self)
+          WHERE ("title" COLLATE \(.caseInsensitive)) = \(bind: "PERSONAL")
+          """,
+          as: String.self
+        )
+      ) {
+        """
+        SELECT "title" FROM "remindersLists"
+        WHERE ("title" COLLATE "caseInsensitive") = 'PERSONAL'
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ "Personal" │
+        └────────────┘
+        """
       }
     }
 
-    @DatabaseCollation
-    func byLength(_ lhs: String, _ rhs: String) -> CollationOrder {
-      let byLength = CollationOrder(lhs.count, rhs.count)
-      return byLength == .same ? CollationOrder(lhs, rhs) : byLength
-    }
     @Test func comparisonInteger() {
-      $byLength.install(database.handle)
+      database.install(.byLength)
       assertQuery(
-        RemindersList.select(\.title).order { $0.title.collate($byLength) }
+        RemindersList.select(\.title).order { $0.title.collate(.byLength) }
       ) {
         """
         SELECT "remindersLists"."title"
@@ -125,11 +105,11 @@ extension SnapshotTests {
     }
 
     @Test func optionalText() {
-      $reversed.install(database.handle)
+      database.install(.reversed)
       assertQuery(
         RemindersList
           .leftJoin(Reminder.all) { $0.id.eq($1.remindersListID) }
-          .order { $1.title.collate($reversed) }
+          .order { $1.title.collate(.reversed) }
           .select { $1.title }
           .limit(3)
       ) {
@@ -153,11 +133,18 @@ extension SnapshotTests {
   }
 }
 
-@DatabaseCollation
-func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
-  CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
-}
+@DatabaseCollations
+extension Collation where Self == CustomCollation {
+  fileprivate static func reversed(_ lhs: String, _ rhs: String) -> CollationOrder {
+    CollationOrder(rhs, lhs)
+  }
 
-extension Collation where Self == NamedCollation {
-  fileprivate static var caseInsensitive: Self { NamedCollation($caseInsensitive) }
+  fileprivate static func byLength(_ lhs: String, _ rhs: String) -> CollationOrder {
+    let byLength = CollationOrder(lhs.count, rhs.count)
+    return byLength == .same ? CollationOrder(lhs, rhs) : byLength
+  }
+
+  fileprivate static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+    CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+  }
 }

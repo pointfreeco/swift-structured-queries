@@ -1,17 +1,36 @@
 public import StructuredQueriesCore
 import StructuredQueriesSQLiteCore
 
-/// Defines and implements a conformance to the ``/StructuredQueriesSQLiteCore/DatabaseCollation``
-/// protocol.
+/// Defines collating sequences with leading dot syntax.
 ///
-/// - Parameters
-///   - name: The collating sequence's name. Defaults to the name of the function the macro is
-///     applied to.
-@attached(peer, names: overloaded, prefixed(`$`))
-public macro DatabaseCollation(_ name: String = "") =
+/// Apply this macro to an `extension Collation where Self == CustomCollation` containing static
+/// functions that implement collating sequences:
+///
+/// ```swift
+/// @DatabaseCollations
+/// extension Collation where Self == CustomCollation {
+///   static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+///     CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+///   }
+/// }
+/// ```
+///
+/// For each such function, the macro generates a static property of the same name whose value can
+/// be installed in a database connection and referenced from a query, both using leading dot
+/// syntax:
+///
+/// ```swift
+/// db.install(.caseInsensitive)
+///
+/// Reminder.order { $0.title.collate(.caseInsensitive) }
+/// // SELECT … FROM "reminders"
+/// // ORDER BY "reminders"."title" COLLATE "caseInsensitive"
+/// ```
+@attached(member, names: arbitrary)
+public macro DatabaseCollations() =
   #externalMacro(
     module: "StructuredQueriesSQLiteMacros",
-    type: "DatabaseCollationMacro"
+    type: "DatabaseCollationsMacro"
   )
 
 /// Defines and implements a conformance to the ``/StructuredQueriesSQLiteCore/DatabaseFunction``

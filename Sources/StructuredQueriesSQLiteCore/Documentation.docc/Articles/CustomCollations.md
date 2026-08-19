@@ -20,25 +20,27 @@ Reminder.order { $0.title.collate(.nocase) }
 
 SQLite's built-in collating sequences are quite limited. `NOCASE`, for example, only folds the 26
 uppercase ASCII characters, which means that "É" and "é" are not considered equal. For anything more
-sophisticated you can define a collating sequence in Swift using the `@DatabaseCollation` macro,
-which can annotate any function that compares two strings:
+sophisticated you can define collating sequences in Swift using the `@DatabaseCollations` macro,
+which annotates an extension of the ``StructuredQueriesCore/Collation`` protocol containing static
+functions that compare two strings:
 
 ```swift
-@DatabaseCollation
-func localized(_ lhs: String, _ rhs: String) -> CollationOrder {
-  CollationOrder(lhs.localizedCompare(rhs))
+@DatabaseCollations
+extension Collation where Self == CustomCollation {
+  static func localized(_ lhs: String, _ rhs: String) -> CollationOrder {
+    CollationOrder(lhs.localizedCompare(rhs))
+  }
 }
 ```
 
-The function returns a `CollationOrder`, which describes how the first value is ordered relative to
+Each function returns a `CollationOrder`, which describes how the first value is ordered relative to
 the second. It can be initialized from any two `Comparable` values, or from a Foundation
 `ComparisonResult`, as above.
 
-Once defined, the collating sequence is immediately usable in a query by prefixing the function with
-`$`:
+Once defined, the collating sequence is immediately usable in a query using leading dot syntax:
 
 ```swift
-Reminder.order { $0.title.collate($localized) }
+Reminder.order { $0.title.collate(.localized) }
 // SELECT … FROM "reminders"
 // ORDER BY "reminders"."title" COLLATE "localized"
 ```
@@ -52,7 +54,7 @@ _e.g._ when you first configure things:
 ```swift
 var configuration = Configuration()
 configuration.prepareDatabase { db in
-  db.add(collation: $localized)
+  db.add(collation: .localized)
 }
 ```
 
@@ -63,7 +65,7 @@ configuration.prepareDatabase { db in
 - ``StructuredQueriesCore/Collation``
 - ``StructuredQueriesCore/NamedCollation``
 - ``StructuredQueriesCore/CollationOrder``
-- ``DatabaseCollation``
+- ``CustomCollation``
 - ``StructuredQueriesCore/QueryExpression/collate(_:)``
 
 ### Built-in collations
