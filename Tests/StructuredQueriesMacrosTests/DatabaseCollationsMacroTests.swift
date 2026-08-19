@@ -157,7 +157,160 @@ extension SnapshotTests {
         @DatabaseCollations
         ┬──────────────────
         ╰─ 🛑 '@DatabaseCollations' can only be applied to an 'extension Collation where Self == CustomCollation'
+           ✏️ Insert 'where Self == CustomCollation'
         extension Collation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } fixes: {
+        """
+        @DatabaseCollations
+        extension Collation where Self == CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } expansion: {
+        """
+        extension Collation where Self == CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+
+          static nonisolated var caseInsensitive: Self {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(collation: caseInsensitive)
+            #sourceLocation()
+            #endif
+            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+          }
+        }
+        """
+      }
+    }
+
+    @Test func wrongConstraint() {
+      assertMacro {
+        """
+        @DatabaseCollations
+        extension Collation where Self == NamedCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseCollations
+        ┬──────────────────
+        ╰─ 🛑 '@DatabaseCollations' can only be applied to an 'extension Collation where Self == CustomCollation'
+           ✏️ Replace constraint with 'Self == CustomCollation'
+        extension Collation where Self == NamedCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } fixes: {
+        """
+        @DatabaseCollations
+        extension Collation where Self == CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } expansion: {
+        """
+        extension Collation where Self == CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+
+          static nonisolated var caseInsensitive: Self {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(collation: caseInsensitive)
+            #sourceLocation()
+            #endif
+            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+          }
+        }
+        """
+      }
+    }
+
+    @Test func wrongType() {
+      assertMacro {
+        """
+        @DatabaseCollations
+        extension CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseCollations
+        ┬──────────────────
+        ╰─ 🛑 '@DatabaseCollations' can only be applied to an 'extension Collation where Self == CustomCollation'
+           ✏️ Replace with 'extension Collation where Self == CustomCollation'
+        extension CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } fixes: {
+        """
+        @DatabaseCollations
+        extension Collation where Self == CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } expansion: {
+        """
+        extension Collation where Self == CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+
+          static nonisolated var caseInsensitive: Self {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(collation: caseInsensitive)
+            #sourceLocation()
+            #endif
+            return StructuredQueriesSQLiteCore.CustomCollation("caseInsensitive", caseInsensitive)
+          }
+        }
+        """
+      }
+    }
+
+    @Test func nonExtension() {
+      assertMacro {
+        """
+        @DatabaseCollations
+        struct Collations {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseCollations
+        ┬──────────────────
+        ╰─ 🛑 '@DatabaseCollations' can only be applied to an 'extension Collation where Self == CustomCollation'
+        struct Collations {
           static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
             CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
           }

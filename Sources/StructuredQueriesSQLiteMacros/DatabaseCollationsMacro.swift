@@ -13,29 +13,72 @@ extension DatabaseCollationsMacro: MemberMacro {
     conformingTo protocols: [TypeSyntax],
     in context: C
   ) throws -> [DeclSyntax] {
-    guard
-      let declaration = declaration.as(ExtensionDeclSyntax.self),
+    let errorMessage = MacroExpansionErrorMessage(
+      """
+      '@DatabaseCollations' can only be applied to an \
+      'extension Collation where Self == CustomCollation'
+      """
+    )
+    guard let declaration = declaration.as(ExtensionDeclSyntax.self)
+    else {
+      context.diagnose(Diagnostic(node: node, message: errorMessage))
+      return []
+    }
+
+    let extendsCollation =
       ["Collation", "StructuredQueriesCore.Collation", "StructuredQueries.Collation"]
-        .contains(declaration.extendedType.trimmedDescription),
-      let genericWhereClause = declaration.genericWhereClause,
-      genericWhereClause.requirements.contains(where: {
+      .contains(declaration.extendedType.trimmedDescription)
+    let isConstrainedToCustomCollation =
+      declaration.genericWhereClause?.requirements.contains(where: {
         [
           "Self==CustomCollation",
           "Self==StructuredQueriesSQLiteCore.CustomCollation",
           "Self==StructuredQueriesSQLite.CustomCollation",
         ]
         .contains($0.requirement.trimmedDescription.filter { !$0.isWhitespace })
-      })
+      }) == true
+    guard extendsCollation, isConstrainedToCustomCollation
     else {
+      var newDeclaration = declaration
+      if !extendsCollation {
+        newDeclaration.extendedType = TypeSyntax("Collation")
+          .with(\.trailingTrivia, declaration.extendedType.trailingTrivia)
+      }
+      newDeclaration.extendedType.trailingTrivia = .space
+      newDeclaration.genericWhereClause = GenericWhereClauseSyntax(
+        whereKeyword: .keyword(.where, trailingTrivia: .space),
+        requirements: [
+          GenericRequirementSyntax(
+            requirement: .sameTypeRequirement(
+              SameTypeRequirementSyntax(
+                leftType: .type(TypeSyntax("Self")),
+                equal: .binaryOperator("==", leadingTrivia: .space, trailingTrivia: .space),
+                rightType: .type(TypeSyntax("CustomCollation"))
+              )
+            )
+          )
+        ],
+        trailingTrivia: .space
+      )
+      let fixItMessage =
+        if !extendsCollation {
+          "Replace with 'extension Collation where Self == CustomCollation'"
+        } else if declaration.genericWhereClause == nil {
+          "Insert 'where Self == CustomCollation'"
+        } else {
+          "Replace constraint with 'Self == CustomCollation'"
+        }
       context.diagnose(
         Diagnostic(
           node: node,
-          message: MacroExpansionErrorMessage(
-            """
-            '@DatabaseCollations' can only be applied to an \
-            'extension Collation where Self == CustomCollation'
-            """
-          )
+          message: errorMessage,
+          fixIts: [
+            .replace(
+              message: MacroExpansionFixItMessage(fixItMessage),
+              oldNode: declaration,
+              newNode: newDeclaration
+            )
+          ]
         )
       )
       return []
