@@ -17,7 +17,7 @@ extension SnapshotTests {
   @Suite struct DatabaseCollationTests {
     @Dependency(\.defaultDatabase) var database
 
-    @Test func order() {
+    @Test func `order collate reversed`() {
       database.install(.reversed)
       assertQuery(
         RemindersList.select(\.title).order { $0.title.collate(.reversed) }
@@ -38,7 +38,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func equality() {
+    @Test func `case insensitive collation equality check`() {
       database.install(.caseInsensitive)
       assertQuery(
         RemindersList
@@ -59,13 +59,13 @@ extension SnapshotTests {
       }
     }
 
-    @Test func sqlMacro() {
+    @Test func `interpolation with #sql macro`() {
       database.install(.caseInsensitive)
       assertQuery(
         #sql(
           """
           SELECT "title" FROM \(RemindersList.self)
-          WHERE ("title" COLLATE \(.caseInsensitive)) = \(bind: "PERSONAL")
+          WHERE ("title" COLLATE \(.caseInsensitive)) = 'PERSONAL'
           """,
           as: String.self
         )
@@ -83,7 +83,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func comparisonInteger() {
+    @Test func `order collate by string length`() {
       database.install(.byLength)
       assertQuery(
         RemindersList.select(\.title).order { $0.title.collate(.byLength) }
@@ -104,7 +104,33 @@ extension SnapshotTests {
       }
     }
 
-    @Test func optionalText() {
+    @Test func `collate NULL text`() {
+      database.install(.fail)
+      assertQuery(
+        #sql(
+          """
+          SELECT "column1" FROM (VALUES ('Business'), (NULL), ('Personal'))
+          ORDER BY "column1" COLLATE \(.fail) NULLS LAST
+          """,
+          as: String?.self
+        )
+      ) {
+        """
+        SELECT "column1" FROM (VALUES ('Business'), (NULL), ('Personal'))
+        ORDER BY "column1" COLLATE "fail" NULLS LAST
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ "Business" │
+        │ "Personal" │
+        │ nil        │
+        └────────────┘
+        """
+      }
+    }
+
+    @Test func `collate optional text`() {
       database.install(.reversed)
       assertQuery(
         RemindersList
@@ -147,5 +173,10 @@ extension Collation where Self == CustomCollation {
 
   fileprivate static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
     CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+  }
+
+  fileprivate static func fail(_: String, _: String) -> CollationOrder {
+    Issue.record("This should  never be called")
+    return .same
   }
 }

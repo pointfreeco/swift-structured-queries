@@ -122,7 +122,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func customNameOutsideExtension() {
+    @Test func `Diagnose using @DatabaseCollation outside of @DatabaseCollations extension`() {
       assertMacro {
         """
         @DatabaseCollation("case_insensitive")
@@ -142,7 +142,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func unconstrainedExtension() {
+    @Test func `Diagnose and fix-it for @DatabaseCollation without constraint`() {
       assertMacro {
         """
         @DatabaseCollations
@@ -193,7 +193,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func wrongConstraint() {
+    @Test func `Diagnose and fix-it for @DatabaseCollations on wrong constraint`() {
       assertMacro {
         """
         @DatabaseCollations
@@ -244,7 +244,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func wrongType() {
+    @Test func `Diagnose and fix-it for @DatabaseCollations on wrong extension`() {
       assertMacro {
         """
         @DatabaseCollations
@@ -295,7 +295,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func nonExtension() {
+    @Test func `Diagnose @DatabaseCollations on wrong type`() {
       assertMacro {
         """
         @DatabaseCollations
@@ -319,7 +319,24 @@ extension SnapshotTests {
       }
     }
 
-    @Test func nonStaticFunction() {
+    @Test func `Ignore computed variables`() {
+      assertMacro {
+        """
+        @DatabaseCollations
+        extension Collation where Self == CustomCollation {
+          var nocase: Bool { true }
+        }
+        """
+      } expansion: {
+        """
+        extension Collation where Self == CustomCollation {
+          var nocase: Bool { true }
+        }
+        """
+      }
+    }
+
+    @Test func `Diagnose and fix-it for @DatabaseCollations with non-static functions`() {
       assertMacro {
         """
         @DatabaseCollations
@@ -327,6 +344,7 @@ extension SnapshotTests {
           func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
             CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
           }
+        var what: Int { 42 }
         }
         """
       } diagnostics: {
@@ -339,6 +357,7 @@ extension SnapshotTests {
                   ✏️ Insert 'static'
             CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
           }
+        var what: Int { 42 }
         }
         """
       } fixes: {
@@ -348,6 +367,7 @@ extension SnapshotTests {
           static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
             CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
           }
+        var what: Int { 42 }
         }
         """
       } expansion: {
@@ -356,6 +376,7 @@ extension SnapshotTests {
           static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
             CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
           }
+        var what: Int { 42 }
 
           static nonisolated var caseInsensitive: Self {
             #if DEBUG
@@ -370,7 +391,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func nonStringArgument() {
+    @Test func `Diagnose non-string arguments`() {
       assertMacro {
         """
         @DatabaseCollations
