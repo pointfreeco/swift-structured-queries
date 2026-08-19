@@ -105,11 +105,23 @@ extension DatabaseFunctionMacro: PeerMacro {
           "\(functionTypeName) { \(raw: getter.throws ? "try " : "")\(rawDeclarationName.trimmed) }"
       }
 
+      let probeName = context.makeUniqueName("\(declarationName)IsolationProbe")
+      let isolation: TokenSyntax? =
+        declaration.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
+        ? .keyword(.nonisolated, trailingTrivia: .space)
+        : nil
+      let check = isolationCheck("property", probeName.text, for: node, in: context)
+
       return [
+        """
+        #if DEBUG
+        \(isolation)\(`static`)func \(probeName)() {}
+        #endif
+        """,
         """
         \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
         \(functionTypeName) {
-        \(projectedCallSyntax)
+        \(raw: check)return \(projectedCallSyntax)
         }
         """,
         """
@@ -672,32 +684,60 @@ extension DatabaseFunctionMacro: PeerMacro {
       )
     }
 
-    return [
-      """
-      \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
-      \(functionTypeName) {
-      \(projectedCallSyntax)
-      }
-      """,
-      """
-      \(attributes)\(access)\(nonisolated)struct \(functionTypeName): \
-      StructuredQueriesSQLiteCore.\(raw: isAggregate ? "Aggregate" : "Scalar")DatabaseFunction {
-      public typealias Input = \(raw: representableInputType)
-      public typealias Output = \(representableOutputType)
-      public let name = \(databaseFunctionName)
-      public var argumentCount: Int? {
-      \(raw: argumentCount)
-      }
-      public let isDeterministic = \(raw: isDeterministic)
-      public let body: \(raw: bodyType)
-      public init(_ body: @escaping \(raw: bodyType)) {
-      self.body = body
-      }
-      \(raw: methods.map(\.description).joined(separator: "\n"))\
-      \(raw: canThrowInvalidInvocation ? "\nprivate struct InvalidInvocation: Error {}" : "")
-      }
-      """,
-    ]
+    var decls: [DeclSyntax] = []
+    let check: String
+    if isAggregate {
+      let probeName = context.makeUniqueName("\(declarationName)IsolationProbe")
+      let isolation: TokenSyntax? =
+        declaration.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
+        ? .keyword(.nonisolated, trailingTrivia: .space)
+        : nil
+      decls.append(
+        """
+        #if DEBUG
+        \(isolation)\(`static`)func \(probeName)() {}
+        #endif
+        """
+      )
+      check = isolationCheck("function", probeName.text, for: node, in: context)
+    } else {
+      check = isolationCheck(
+        "function",
+        declaration.name.trimmedDescription,
+        for: node,
+        in: context
+      )
+    }
+
+    decls.append(
+      contentsOf: [
+        """
+        \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
+        \(functionTypeName) {
+        \(raw: check)return \(projectedCallSyntax)
+        }
+        """,
+        """
+        \(attributes)\(access)\(nonisolated)struct \(functionTypeName): \
+        StructuredQueriesSQLiteCore.\(raw: isAggregate ? "Aggregate" : "Scalar")DatabaseFunction {
+        public typealias Input = \(raw: representableInputType)
+        public typealias Output = \(representableOutputType)
+        public let name = \(databaseFunctionName)
+        public var argumentCount: Int? {
+        \(raw: argumentCount)
+        }
+        public let isDeterministic = \(raw: isDeterministic)
+        public let body: \(raw: bodyType)
+        public init(_ body: @escaping \(raw: bodyType)) {
+        self.body = body
+        }
+        \(raw: methods.map(\.description).joined(separator: "\n"))\
+        \(raw: canThrowInvalidInvocation ? "\nprivate struct InvalidInvocation: Error {}" : "")
+        }
+        """,
+      ]
+    )
+    return decls
   }
 }
 
