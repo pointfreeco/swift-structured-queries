@@ -63,6 +63,7 @@ Reminder.select { $0.createdAt.strftime("%Y-%m") }
 - ``StructuredQueriesCore/QueryExpression/hour``
 - ``StructuredQueriesCore/QueryExpression/minute``
 - ``StructuredQueriesCore/QueryExpression/second``
+- ``StructuredQueriesCore/QueryExpression/fractionalSecond``
 - ``StructuredQueriesCore/QueryExpression/weekday``
 - ``StructuredQueriesCore/QueryExpression/dayOfYear``
 

@@ -53,6 +53,9 @@ extension QueryExpression where QueryValue: _SQLiteDateRepresentation {
   /// The date's second (`%S`).
   public var second: some QueryExpression<Int> { component("%S") }
 
+  /// The date's fractional second (`%f`).
+  public var fractionalSecond: some QueryExpression<Double> { component("%f") }
+
   /// The date's day of the week offset (`%w`).
   public var weekday: some QueryExpression<Int> { component("%w") }
 
@@ -63,9 +66,14 @@ extension QueryExpression where QueryValue: _SQLiteDateRepresentation {
     (self as? any TimeValue)?.timeValueArguments
       ?? [queryFragment] + QueryValue._timeValueModifiers
   }
-  private func component(_ format: QueryFragment) -> SQLQueryExpression<Int> {
+  private func component<T: Numeric & SQLiteType>(
+    _ format: QueryFragment
+  ) -> SQLQueryExpression<T> {
     SQLQueryExpression(
-      "CAST(strftime('\(format)', \(timeValueArguments.joined(separator: ", "))) AS INTEGER)"
+      """
+      CAST(strftime('\(format)', \(timeValueArguments.joined(separator: ", "))) \
+      AS \(T.typeAffinity.rawValue))
+      """
     )
   }
 }
