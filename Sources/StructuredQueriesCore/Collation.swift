@@ -84,4 +84,12 @@ public enum CollationOrder: Hashable, Sendable {
   public init<T: Comparable>(_ lhs: T, _ rhs: T) {
     self = lhs < rhs ? .ascending : rhs < lhs ? .descending : .same
   }
+
+public func combine(with other: @autoclosure () -> Self) -> Self {
+  switch self {
+  case .same: other()
+  case .ascending: .ascending
+  case .descending: .descending
+  }
+}
 }

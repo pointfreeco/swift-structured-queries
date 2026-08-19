@@ -1,6 +1,35 @@
 public import StructuredQueriesCore
 import StructuredQueriesSQLiteCore
 
+/// Renames a collating sequence defined in a ``DatabaseCollations()`` extension.
+///
+/// By default, a collating sequence's name in SQL is the name of the Swift function that
+/// implements it. Apply this attribute to the function to reference it by a different name in SQL:
+///
+/// ```swift
+/// @DatabaseCollations
+/// extension Collation where Self == CustomCollation {
+///   @DatabaseCollation("case_insensitive")
+///   static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+///     CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+///   }
+/// }
+///
+/// Reminder.order { $0.title.collate(.caseInsensitive) }
+/// // SELECT … FROM "reminders"
+/// // ORDER BY "reminders"."title" COLLATE "case_insensitive"
+/// ```
+///
+/// - Parameters
+///   - name: The collating sequence's name. Defaults to the name of the function the attribute is
+///     applied to.
+@attached(peer)
+public macro DatabaseCollation(_ name: String) =
+  #externalMacro(
+    module: "StructuredQueriesSQLiteMacros",
+    type: "DatabaseCollationMacro"
+  )
+
 /// Defines collating sequences with leading dot syntax.
 ///
 /// Apply this macro to an `extension Collation where Self == CustomCollation` containing static

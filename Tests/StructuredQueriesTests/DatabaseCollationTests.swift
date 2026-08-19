@@ -91,7 +91,7 @@ extension SnapshotTests {
         """
         SELECT "remindersLists"."title"
         FROM "remindersLists"
-        ORDER BY "remindersLists"."title" COLLATE "byLength"
+        ORDER BY "remindersLists"."title" COLLATE "by_length"
         """
       } results: {
         """
@@ -139,9 +139,10 @@ extension Collation where Self == CustomCollation {
     CollationOrder(rhs, lhs)
   }
 
+  @DatabaseCollation("by_length")
   fileprivate static func byLength(_ lhs: String, _ rhs: String) -> CollationOrder {
-    let byLength = CollationOrder(lhs.count, rhs.count)
-    return byLength == .same ? CollationOrder(lhs, rhs) : byLength
+    CollationOrder(lhs.count, rhs.count)
+      .combine(with: CollationOrder(lhs, rhs))
   }
 
   fileprivate static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {

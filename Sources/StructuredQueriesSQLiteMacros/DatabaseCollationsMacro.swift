@@ -1,4 +1,5 @@
 import SwiftDiagnostics
+internal import SwiftParser
 public import SwiftSyntax
 import SwiftSyntaxBuilder
 public import SwiftSyntaxMacros
@@ -129,7 +130,20 @@ extension DatabaseCollationsMacro: MemberMacro {
       }
 
       let declarationName = function.name.trimmedDescription.trimmingBackticks()
-      let databaseCollationName = StringLiteralExprSyntax(content: declarationName)
+      var collationName = declarationName
+      for attribute in function.attributes {
+        guard
+          let attribute = attribute.as(AttributeSyntax.self),
+          attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "DatabaseCollation",
+          case .argumentList(let arguments) = attribute.arguments,
+          let string = arguments.first?.expression.as(StringLiteralExprSyntax.self)?
+            .representedLiteralValue
+        else { continue }
+        collationName = string
+      }
+      var attributes = function.attributes
+      attributes.remove("DatabaseCollation")
+      let databaseCollationName = StringLiteralExprSyntax(content: collationName)
 
       let check = isolationCheck(
         "collation",
@@ -140,7 +154,7 @@ extension DatabaseCollationsMacro: MemberMacro {
 
       declarations.append(
         """
-        \(function.attributes)\(access)\(`static`)\(nonisolated)var \(function.name.trimmed): \
+        \(attributes)\(access)\(`static`)\(nonisolated)var \(function.name.trimmed): \
         Self {
         \(raw: check)return StructuredQueriesSQLiteCore.CustomCollation(\
         \(databaseCollationName), \(function.name.trimmed))

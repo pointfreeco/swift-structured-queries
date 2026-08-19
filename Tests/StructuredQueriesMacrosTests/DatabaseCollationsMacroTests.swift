@@ -65,6 +65,83 @@ extension SnapshotTests {
       }
     }
 
+    @Test func customName() {
+      assertMacro {
+        """
+        @DatabaseCollations
+        extension Collation where Self == CustomCollation {
+          @DatabaseCollation("case_insensitive")
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } expansion: {
+        """
+        extension Collation where Self == CustomCollation {
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+
+          static nonisolated var caseInsensitive: Self {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(collation: caseInsensitive)
+            #sourceLocation()
+            #endif
+            return StructuredQueriesSQLiteCore.CustomCollation("case_insensitive", caseInsensitive)
+          }
+        }
+        """
+      }
+    }
+
+    @Test func emptyCustomName() {
+      assertMacro {
+        """
+        @DatabaseCollations
+        extension Collation where Self == CustomCollation {
+          @DatabaseCollation("")
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseCollations
+        extension Collation where Self == CustomCollation {
+          @DatabaseCollation("")
+                             ┬─
+                             ╰─ 🛑 Argument must be a non-empty string literal
+          static func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+            CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+          }
+        }
+        """
+      }
+    }
+
+    @Test func customNameOutsideExtension() {
+      assertMacro {
+        """
+        @DatabaseCollation("case_insensitive")
+        func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+          CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseCollation("case_insensitive")
+        ┬─────────────────────────────────────
+        ╰─ 🛑 '@DatabaseCollation' has no effect outside of a '@DatabaseCollations' extension
+        func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+          CollationOrder(lhs.localizedCaseInsensitiveCompare(rhs))
+        }
+        """
+      }
+    }
+
     @Test func unconstrainedExtension() {
       assertMacro {
         """

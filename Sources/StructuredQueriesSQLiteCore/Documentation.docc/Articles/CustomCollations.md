@@ -45,6 +45,24 @@ Reminder.order { $0.title.collate(.localized) }
 // ORDER BY "reminders"."title" COLLATE "localized"
 ```
 
+By default, the collating sequence's name in SQL is the name of the Swift function that implements
+it. To reference it by a different name in SQL, apply the `@DatabaseCollation` attribute to the
+function:
+
+```swift
+@DatabaseCollations
+extension Collation where Self == CustomCollation {
+  @DatabaseCollation("localized_compare")
+  static func localized(_ lhs: String, _ rhs: String) -> CollationOrder {
+    CollationOrder(lhs.localizedCompare(rhs))
+  }
+}
+
+Reminder.order { $0.title.collate(.localized) }
+// SELECT … FROM "reminders"
+// ORDER BY "reminders"."title" COLLATE "localized_compare"
+```
+
 For the query to successfully execute, you must also add the collating sequence to your SQLite
 database connection. This can be done in [SQLiteData] using the `Database.add(collation:)` method,
 _e.g._ when you first configure things:
