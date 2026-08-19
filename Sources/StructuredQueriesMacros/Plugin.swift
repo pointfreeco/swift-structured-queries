@@ -11,6 +11,7 @@ struct StructuredQueriesPlugin: CompilerPlugin {
       ColumnCheckFailRawRepresentableMacro.self,
       ColumnCheckGroupMacro.self,
       ColumnCheckPassMacro.self,
+      ColumnDefaultMacro.self,
       ColumnDefinitionMacro.self,
       ColumnMacro.self,
       ColumnsMacro.self,

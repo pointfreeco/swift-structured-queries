@@ -623,14 +623,15 @@ extension SnapshotTests {
 private struct Item {
   var title: String
   var quantity = 0
-  var status: Status = Status()
+  var status = Status()
 }
+
 
 @Table("items")
 private struct DefaultItem {
   var title = ""
   var quantity = 0
-  var status: Status = Status()
+  var status = Status()
 }
 
 @Selection

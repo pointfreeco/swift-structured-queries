@@ -141,6 +141,16 @@ public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
     ColumnGroup(name, keyPath: keyPath(), default: defaultValue())
   }
 
+  @_disfavoredOverload
+  public static func `for`(
+    _ name: String,
+    keyPath: KeyPath<Root, Value>,
+    default defaultValue: Value? = nil
+  ) -> ColumnGroup<Root, Value>
+  where Value: Table, Value == Value.QueryOutput {
+    ColumnGroup(name, keyPath: keyPath, default: defaultValue)
+  }
+
   public static func `for`<Wrapped>(
     _ name: String,
     keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,

@@ -1356,7 +1356,7 @@ private struct Comment: Codable, Equatable {
 private struct Profile: Codable, Equatable {
   let id: Int
   @Column(as: Author.JSONBRepresentation.self)
-  var author: Author = Author()
+  var author = Author()
   @Column(as: Author.JSONBRepresentation?.self)
   var editor: Author?
 }
@@ -1373,7 +1373,7 @@ private struct Author: Codable, Equatable {
   @Column(as: UUID.BytesRepresentation.self)
   var externalID = UUID(0)
   @Column(as: Link.JSONBRepresentation.self)
-  var links: Link = Link()
+  var links = Link()
   @Column(as: [Link].JSONBRepresentation.self)
   var pastLinks: [Link] = []
 }
@@ -1406,14 +1406,14 @@ private struct Resume: Codable, Equatable {
 private struct Bio: Codable, Equatable {
   let id: Int
   @Column(as: Resume.JSONBRepresentation.self)
-  var resume: Resume = Resume()
+  var resume = Resume()
 }
 
 @Table
 private struct Session: Codable, Equatable {
   let id: Int
   @Column(as: UUID.BytesRepresentation.self)
-  var token: UUID = UUID(0)
+  var token = UUID(0)
   @Column(as: UUID.BytesRepresentation?.self)
   var refresh: UUID?
 }
