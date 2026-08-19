@@ -626,7 +626,6 @@ private struct Item {
   var status = Status()
 }
 
-
 @Table("items")
 private struct DefaultItem {
   var title = ""
