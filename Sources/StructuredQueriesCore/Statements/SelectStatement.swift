@@ -54,7 +54,11 @@ extension HasUpsertParsingAmbiguity where Self: SelectStatement {
   }
 }
 
-extension Select: HasUpsertParsingAmbiguity {}
+extension Select: HasUpsertParsingAmbiguity {
+  var hasUpsertParsingAmbiguity: Bool {
+    clauses.hasUpsertParsingAmbiguity
+  }
+}
 extension Where: HasUpsertParsingAmbiguity {}
 
 extension _SelectClauses {
