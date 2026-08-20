@@ -56,7 +56,8 @@ extension HasUpsertParsingAmbiguity where Self: SelectStatement {
 
 extension Select: HasUpsertParsingAmbiguity {
   var hasUpsertParsingAmbiguity: Bool {
-    clauses.hasUpsertParsingAmbiguity
+    (clauses.from != nil || From.self is any Table.Type)
+      && clauses.hasUpsertParsingAmbiguity
   }
 }
 extension Where: HasUpsertParsingAmbiguity {}
