@@ -810,7 +810,6 @@ extension Insert: Statement {
       guard !select.isEmpty else { return "" }
       query.append("\(.newlineOrSpace)\(select)")
       if updates != nil,
-        !select.isEmpty,
         (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity == true
       {
         query.append("\(.newlineOrSpace)WHERE 1")
@@ -1014,12 +1013,12 @@ public enum InsertValuesBuilder<Value> {
   }
 
   public static func buildArray(_ components: [ValuesRows<Value>]) -> ValuesRows<Value> {
-    components.reduce(into: ValuesRows(rows: [])) { rows, component in
-      rows.rows.append(contentsOf: component.rows)
-      if rows.elements.isEmpty {
-        rows.elements = component.elements
-      }
+    var rows = ValuesRows<Value>(rows: [])
+    rows.rows.reserveCapacity(components.reduce(0) { $0 + $1.rows.count })
+    for component in components {
+      rows.append(component)
     }
+    return rows
   }
 
   public static func buildBlock(_ components: ValuesRows<Value>) -> ValuesRows<Value> {
@@ -1051,10 +1050,7 @@ public enum InsertValuesBuilder<Value> {
     next: ValuesRows<Value>
   ) -> ValuesRows<Value> {
     var rows = accumulated
-    rows.rows.append(contentsOf: next.rows)
-    if rows.elements.isEmpty {
-      rows.elements = next.elements
-    }
+    rows.append(next)
     return rows
   }
 }

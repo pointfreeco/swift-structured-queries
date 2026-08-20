@@ -432,6 +432,9 @@ public struct Select<Columns, From, Joins>: Sendable {
 /// Values of this type are passed to clause-building closures, like ``Select/where(_:)``, where
 /// they can be used directly as expressions, and multi-column values, like `@Selection` columns,
 /// can be traversed using member syntax, _e.g._ `$1.title`.
+///
+/// It also acts as the `From` type of a `FROM`-less select, _e.g._ `Select(1, "Hello")` is a
+/// `Select<(Int, String), ValuesColumns<(Int, String)>, ()>`.
 @dynamicMemberLookup
 public struct ValuesColumns<Value>: QueryExpression, Sendable {
   public typealias QueryValue = Value
@@ -450,7 +453,7 @@ public struct ValuesColumns<Value>: QueryExpression, Sendable {
     dynamicMember keyPath: KeyPath<Value, Member>
   ) -> SQLQueryExpression<Member> {
     guard
-      let index = _valueColumnIndex(of: keyPath, in: _valuesElements(for: Value.self)),
+      let index = _valuesColumnIndex(of: keyPath, in: _valuesElements(for: Value.self)),
       columns.indices.contains(index)
     else {
       reportIssue("Could not determine the column for the given key path")
@@ -499,7 +502,8 @@ extension Select where Joins == () {
   )
   where
     Columns == (repeat (each Value).QueryValue),
-    From == ValuesColumns<Columns>
+    // NB: Spelling this 'ValuesColumns<Columns>' crashes the Swift 6.1 requirement machine.
+    From == ValuesColumns<(repeat (each Value).QueryValue)>
   {
     self.init(clauses: _SelectClauses())
     columns = $_isSelecting.withValue(true) {
@@ -551,7 +555,13 @@ extension Select where Joins == () {
   ) -> Self
   where From == ValuesColumns<(repeat each C)> {
     var select = self
-    let columns: (repeat ValuesColumns<each C>) = _valuesColumns()
+    let columns: (repeat ValuesColumns<each C>) = _valuesColumns { range in
+      guard range.upperBound <= clauses.columns.count else {
+        reportIssue("Could not determine the columns for value at position \(range.lowerBound)")
+        return Array(repeating: "NULL", count: range.count)
+      }
+      return Array(clauses.columns[range])
+    }
     select.where.append(contentsOf: predicate(repeat each columns))
     return select
   }
@@ -575,7 +585,9 @@ extension Select where Joins == () {
   ) -> Self
   where From == ValuesColumns<(repeat each C)> {
     var select = self
-    let columns: (repeat ValuesColumns<each C>) = _valuesOrdinals()
+    let columns: (repeat ValuesColumns<each C>) = _valuesColumns { range in
+      range.map { "\(raw: $0 + 1)" }
+    }
     select.order.append(contentsOf: ordering(repeat each columns))
     return select
   }
@@ -592,33 +604,18 @@ extension Select where Joins == () {
     return select
   }
 
-  private func _valuesColumns<each C: QueryExpression>()
-    -> (repeat ValuesColumns<each C>)
-  where From == ValuesColumns<(repeat each C)> {
-    var index = 0
-    func column<Value: QueryExpression>(_: Value.Type) -> ValuesColumns<Value> {
-      let width = Value._columnWidth
-      defer { index += width }
-      guard index + width <= clauses.columns.count else {
-        reportIssue("Could not determine the columns for value at position \(index)")
-        return ValuesColumns(columns: Array(repeating: "NULL", count: width))
-      }
-      return ValuesColumns(columns: Array(clauses.columns[index..<index + width]))
-    }
-    return (repeat column((each C).self))
-  }
+}
 
-  private func _valuesOrdinals<each C: QueryExpression>()
-    -> (repeat ValuesColumns<each C>)
-  where From == ValuesColumns<(repeat each C)> {
-    var index = 0
-    func column<Value: QueryExpression>(_: Value.Type) -> ValuesColumns<Value> {
-      let width = Value._columnWidth
-      defer { index += width }
-      return ValuesColumns(columns: (index + 1...index + width).map { "\(raw: $0)" })
-    }
-    return (repeat column((each C).self))
+package func _valuesColumns<each C: QueryExpression>(
+  at columns: (Range<Int>) -> [QueryFragment]
+) -> (repeat ValuesColumns<each C>) {
+  var index = 0
+  func column<Value: QueryExpression>(_: Value.Type) -> ValuesColumns<Value> {
+    let width = Value._columnWidth
+    defer { index += width }
+    return ValuesColumns(columns: columns(index..<index + width))
   }
+  return (repeat column((each C).self))
 }
 
 extension Select {
@@ -2283,34 +2280,3 @@ private struct CopyOnWrite<Value> {
 extension CopyOnWrite: Sendable where Value: Sendable {}
 
 extension CopyOnWrite.Storage: @unchecked Sendable where Value: Sendable {}
-
-package func _valueColumnIndex<Value>(
-  of keyPath: PartialKeyPath<Value>,
-  in elements: [_ValuesElement]
-) -> Int? {
-  if let table = Value.self as? any Table.Type,
-    let index = table._columnIndex(of: keyPath)
-  {
-    return index
-  }
-  guard let target = MemoryLayout<Value>.offset(of: keyPath) else { return nil }
-  var position = 0
-  for element in elements {
-    if element.columns.count == 1 {
-      if element.offset == target {
-        return position
-      }
-      position += 1
-    } else {
-      if let table = element.decodableType as? any Table.Type,
-        target >= element.offset,
-        let field = table._columnFieldOffsets.firstIndex(of: target - element.offset),
-        field < element.columns.count
-      {
-        return position + field
-      }
-      position += element.columns.count
-    }
-  }
-  return nil
-}

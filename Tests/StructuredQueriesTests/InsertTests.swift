@@ -346,7 +346,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          Values("vacation")
+          Select("vacation")
         } onConflict: {
           $0.title
         } doUpdate: {

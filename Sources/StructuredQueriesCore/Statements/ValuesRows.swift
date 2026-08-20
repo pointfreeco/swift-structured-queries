@@ -9,6 +9,13 @@ public struct ValuesRows<Value>: Sendable {
     self.rows = rows
     self.elements = elements
   }
+
+  package mutating func append(_ other: Self) {
+    rows.append(contentsOf: other.rows)
+    if elements.isEmpty {
+      elements = other.elements
+    }
+  }
 }
 
 extension ValuesRows: ExpressibleByArrayLiteral {
@@ -43,6 +50,9 @@ public struct _ValuesElementColumn: Sendable {
   }
 }
 
+// NB: Element offsets are computed with the same align-then-advance arithmetic Swift uses to lay
+//     out tuples, so that they can be matched against 'MemoryLayout.offset(of:)' key path offsets
+//     and used to initialize raw tuple memory when decoding.
 package func _valuesElements<each V>(
   for types: repeat (each V).Type
 ) -> [_ValuesElement] {
@@ -56,7 +66,7 @@ package func _valuesElements<each V>(
       if let table = T.self as? any Table.Type {
         columns = table._allValuesElementColumns
       } else {
-        columns = [_ValuesElementColumn(name: nil, decoding: _valueDecoding(T.self))]
+        columns = [_ValuesElementColumn(name: nil, decoding: _valuesDecoding(T.self))]
       }
       elements.append(
         _ValuesElement(
@@ -72,7 +82,7 @@ package func _valuesElements<each V>(
   return elements
 }
 
-package func _valueDecoding(_ type: Any.Type) -> @Sendable (QueryFragment) -> QueryFragment {
+package func _valuesDecoding(_ type: Any.Type) -> @Sendable (QueryFragment) -> QueryFragment {
   guard let representable = type as? any QueryRepresentable.Type else { return { $0 } }
   func open<U: QueryRepresentable>(_: U.Type) -> @Sendable (QueryFragment) -> QueryFragment {
     { U.queryFragment(decoding: $0) }
@@ -86,6 +96,37 @@ package func _valuesElementColumn<R, V>(
   _ValuesElementColumn(name: column.name, decoding: { V.queryFragment(decoding: $0) })
 }
 
+package func _valuesColumnIndex<Value>(
+  of keyPath: PartialKeyPath<Value>,
+  in elements: [_ValuesElement]
+) -> Int? {
+  if let table = Value.self as? any Table.Type,
+    let index = table._columnIndex(of: keyPath)
+  {
+    return index
+  }
+  guard let target = MemoryLayout<Value>.offset(of: keyPath) else { return nil }
+  var position = 0
+  for element in elements {
+    if element.columns.count == 1 {
+      if element.offset == target {
+        return position
+      }
+      position += 1
+    } else {
+      if let table = element.decodableType as? any Table.Type,
+        target >= element.offset,
+        let field = table._columnFieldOffsets.firstIndex(of: target - element.offset),
+        field < element.columns.count
+      {
+        return position + field
+      }
+      position += element.columns.count
+    }
+  }
+  return nil
+}
+
 extension Table {
   package static func _columnIndex(of keyPath: AnyKeyPath) -> Int? {
     TableColumns.allColumns.firstIndex { column in
@@ -93,6 +134,15 @@ extension Table {
         column.keyPath
       }
       return open(column) == keyPath
+    }
+  }
+
+  package static var _columnFieldOffsets: [Int] {
+    TableColumns.allColumns.map { column in
+      func offset<C: TableColumnExpression>(_ column: C) -> Int {
+        MemoryLayout<C.Root>.offset(of: column.keyPath) ?? 0
+      }
+      return offset(column)
     }
   }
 

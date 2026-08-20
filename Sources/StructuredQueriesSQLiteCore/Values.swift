@@ -59,7 +59,7 @@ extension Values {
       dynamicMember keyPath: KeyPath<QueryValue, Member>
     ) -> SQLQueryExpression<Member> {
       let index: Int
-      if let found = _valueColumnIndex(of: keyPath, in: elements) {
+      if let found = _valuesColumnIndex(of: keyPath, in: elements) {
         index = found
       } else {
         reportIssue("Could not determine the column for the given key path")
@@ -129,7 +129,7 @@ extension Select where Joins == () {
     _ keyPath: KeyPath<Columns, Predicate>
   ) -> Self
   where From == Values<Columns>, Predicate: QueryRepresentable & QueryBindable {
-    _where(_valueColumn(keyPath).queryFragment)
+    _where(_valuesColumn(keyPath).queryFragment)
   }
 
   /// Creates a new select statement from this one by appending a predicate to its `WHERE` clause.
@@ -157,7 +157,7 @@ extension Select where Joins == () {
     by ordering: KeyPath<Columns, Member>
   ) -> Self
   where From == Values<Columns> {
-    _order(_valueColumn(ordering).queryFragment)
+    _order(_valuesColumn(ordering).queryFragment)
   }
 
   /// Creates a new select statement from this one by appending columns to its `ORDER BY` clause.
@@ -190,7 +190,7 @@ extension Select where Joins == () {
   ) -> Self
   where From == Values<(repeat each C)> {
     var select = self
-    let columns: (repeat ValuesColumns<each C>) = _valueColumnNames()
+    let columns: (repeat ValuesColumns<each C>) = _valuesColumnNames()
     for fragment in predicate(repeat each columns) {
       select = select._where(fragment)
     }
@@ -209,32 +209,26 @@ extension Select where Joins == () {
   ) -> Self
   where From == Values<(repeat each C)> {
     var select = self
-    let columns: (repeat ValuesColumns<each C>) = _valueColumnNames()
+    let columns: (repeat ValuesColumns<each C>) = _valuesColumnNames()
     for fragment in ordering(repeat each columns) {
       select = select._order(fragment)
     }
     return select
   }
 
-  private func _valueColumnNames<each C: QueryExpression>()
+  private func _valuesColumnNames<each C: QueryExpression>()
     -> (repeat ValuesColumns<each C>)
   where From == Values<(repeat each C)> {
     let names = _valuesElements.flatMap { $0.columns.map(\.name) }
-    var index = 0
-    func column<Value: QueryExpression>(_: Value.Type) -> ValuesColumns<Value> {
-      let width = Value._columnWidth
-      defer { index += width }
-      return ValuesColumns(
-        columns: (index..<index + width).map { position in
-          let name = names.indices.contains(position) ? names[position] : nil
-          return "\(quote: name ?? "column\(position + 1)")"
-        }
-      )
+    return _valuesColumns { range in
+      range.map { position in
+        let name = names.indices.contains(position) ? names[position] : nil
+        return "\(quote: name ?? "column\(position + 1)")"
+      }
     }
-    return (repeat column((each C).self))
   }
 
-  private func _valueColumn<Member: QueryRepresentable & QueryBindable>(
+  private func _valuesColumn<Member: QueryRepresentable & QueryBindable>(
     _ keyPath: KeyPath<Columns, Member>
   ) -> SQLQueryExpression<Member>
   where From == Values<Columns> {

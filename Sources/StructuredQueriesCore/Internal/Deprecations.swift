@@ -1,6 +1,6 @@
 import Foundation
 
-// NB: Deprecated after 0.36.0:
+// NB: Deprecated after 0.37.0:
 
 @available(*, deprecated, renamed: "Select(_:)")
 public func Values<QueryValue: QueryExpression>(
