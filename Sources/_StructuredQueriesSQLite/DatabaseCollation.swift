@@ -8,9 +8,6 @@ public import StructuredQueriesSQLiteCore
 #endif
 
 extension DatabaseCollation {
-  /// Installs the collating sequence in a database connection.
-  ///
-  /// - Parameter db: A database connection.
   public func install(_ db: OpaquePointer) {
     let body = Unmanaged.passRetained(DatabaseCollationDefinition(self)).toOpaque()
     sqlite3_create_collation_v2(
