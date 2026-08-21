@@ -186,31 +186,27 @@ extension DatabaseCollationMacro: PeerMacro {
 
     let (access, `static`) = declaration.modifiers.metadata
 
-    let needsWeakSelf =
-      `static` == nil
-      && context.lexicalContext.contains { $0.as(ClassDeclSyntax.self) != nil }
-    let canThrow = needsWeakSelf
-
-    let bodyType = "(String, String)\(canThrow ? " throws" : "") -> \(returnClause.type.trimmed)"
-
-    let projectedCallSyntax: ExprSyntax
-    if needsWeakSelf {
-      let callArguments = parameters.enumerated()
-        .map { offset, parameter in
-          parameter.firstName.tokenKind == .wildcard
-            ? "arg\(offset)"
-            : "\(parameter.firstName.text): arg\(offset)"
-        }
-        .joined(separator: ", ")
-      projectedCallSyntax = """
-        \(collationTypeName)({ [weak self] arg0, arg1 in
-        guard let self else { throw StructuredQueriesSQLiteCore._DatabaseCollationDeallocated() }
-        return self.\(declaration.name.trimmed)(\(raw: callArguments))
-        })
-        """
-    } else {
-      projectedCallSyntax = "\(collationTypeName)(\(declaration.name.trimmed))"
+    let isInstance = `static` == nil && !context.lexicalContext.isEmpty
+    var baseType: String?
+    var baseIsWeak = false
+    if isInstance, let enclosing = context.lexicalContext.first {
+      if let decl = enclosing.as(ClassDeclSyntax.self) {
+        baseType = decl.typeDescription
+        baseIsWeak = true
+      } else if let decl = enclosing.as(StructDeclSyntax.self) {
+        baseType = decl.typeDescription
+      } else if let decl = enclosing.as(EnumDeclSyntax.self) {
+        baseType = decl.typeDescription
+      }
     }
+
+    let callArguments = parameters.enumerated()
+      .map { offset, parameter in
+        parameter.firstName.tokenKind == .wildcard
+          ? "arg\(offset)"
+          : "\(parameter.firstName.text): arg\(offset)"
+      }
+      .joined(separator: ", ")
 
     let check = isolationCheck(
       "collation",
@@ -219,28 +215,123 @@ extension DatabaseCollationMacro: PeerMacro {
       in: context
     )
 
+    guard isInstance
+    else {
+      let thunkName = context.makeUniqueName(declarationName)
+      return [
+        """
+        \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
+        \(collationTypeName) {
+        \(raw: check)return \(collationTypeName)()
+        }
+        """,
+        """
+        \(attributes)\(access)\(`static`)\(nonisolated)func \(thunkName)(
+        _ arg0: String, _ arg1: String
+        ) -> \(returnClause.type.trimmed) {
+        \(declaration.name.trimmed)(\(raw: callArguments))
+        }
+        """,
+        """
+        \(attributes)\(access)\(nonisolated)struct \(collationTypeName): \
+        StructuredQueriesSQLiteCore.DatabaseCollation {
+        public var name: String {
+        \(databaseCollationName)
+        }
+        public init() {
+        }
+        public func compare(
+        _ lhs: String, _ rhs: String
+        ) -> \(returnClause.type.trimmed) {
+        \(thunkName)(lhs, rhs)
+        }
+        }
+        """,
+      ]
+    }
+
+    if let baseType {
+      let baseArguments = parameters.enumerated()
+        .map { offset, parameter in
+          let argument = offset == 0 ? "lhs" : "rhs"
+          return parameter.firstName.tokenKind == .wildcard
+            ? argument
+            : "\(parameter.firstName.text): \(argument)"
+        }
+        .joined(separator: ", ")
+      let compareBody =
+        baseIsWeak
+        ? """
+        guard let base else {
+        throw StructuredQueriesSQLiteCore._DatabaseCollationDeallocated()
+        }
+        return base.\(declaration.name.trimmed)(\(baseArguments))
+        """
+        : "base.\(declaration.name.trimmed)(\(baseArguments))"
+      return [
+        """
+        \(attributes)\(access)\(nonisolated)var $\(raw: declarationName): \
+        \(collationTypeName) {
+        \(raw: check)return \(collationTypeName)(self)
+        }
+        """,
+        """
+        \(attributes)\(access)\(nonisolated)struct \(collationTypeName): \
+        StructuredQueriesSQLiteCore.DatabaseCollation {
+        public var name: String {
+        \(databaseCollationName)
+        }
+        private \(raw: baseIsWeak ? "weak var" : "let") base: \
+        \(raw: baseType)\(raw: baseIsWeak ? "?" : "")
+        public init(_ base: \(raw: baseType)) {
+        self.base = base
+        }
+        public func compare(
+        _ lhs: String, _ rhs: String
+        )\(raw: baseIsWeak ? " throws" : "") -> \(returnClause.type.trimmed) {
+        \(raw: compareBody)
+        }
+        }
+        """,
+      ]
+    }
+
+    let bodyType = "(String, String) -> \(returnClause.type.trimmed)"
+
     return [
       """
       \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
       \(collationTypeName) {
-      \(raw: check)return \(projectedCallSyntax)
+      \(raw: check)return \(collationTypeName)(\(declaration.name.trimmed))
       }
       """,
       """
       \(attributes)\(access)\(nonisolated)struct \(collationTypeName): \
       StructuredQueriesSQLiteCore.DatabaseCollation {
-      public let name = \(databaseCollationName)
+      public var name: String {
+      \(databaseCollationName)
+      }
       public let body: \(raw: bodyType)
       public init(_ body: @escaping \(raw: bodyType)) {
       self.body = body
       }
       public func compare(
       _ lhs: String, _ rhs: String
-      )\(raw: canThrow ? " throws" : "") -> \(returnClause.type.trimmed) {
-      \(raw: canThrow ? "try " : "")self.body(lhs, rhs)
+      ) -> \(returnClause.type.trimmed) {
+      self.body(lhs, rhs)
       }
       }
       """,
     ]
+  }
+}
+
+extension NamedDeclSyntax where Self: WithGenericParametersSyntax {
+  fileprivate var typeDescription: String {
+    var type = name.trimmedDescription
+    if let genericParameterClause {
+      type += "<\(genericParameterClause.parameters.map(\.name.text).joined(separator: ", "))>"
+    }
+    return type
   }
 }
