@@ -1,4 +1,3 @@
-import IssueReporting
 import StructuredQueriesCore
 public import StructuredQueriesSQLiteCore
 
@@ -22,22 +21,15 @@ extension DatabaseCollation {
       { body, lhsCount, lhs, rhsCount, rhs in
         let lhs = UnsafeRawBufferPointer(start: lhs, count: Int(lhsCount))
         let rhs = UnsafeRawBufferPointer(start: rhs, count: Int(rhsCount))
-        do {
-          switch try Unmanaged<DatabaseCollationDefinition>
-            .fromOpaque(body!)
-            .takeUnretainedValue()
-            .collation
-            .compare(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
-          {
-          case .ascending: return -1
-          case .same: return 0
-          case .descending: return 1
-          }
-        } catch {
-          reportIssue(error)
-          return lhs.lexicographicallyPrecedes(rhs)
-            ? -1
-            : rhs.lexicographicallyPrecedes(lhs) ? 1 : 0
+        switch Unmanaged<DatabaseCollationDefinition>
+          .fromOpaque(body!)
+          .takeUnretainedValue()
+          .collation
+          .compare(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
+        {
+        case .ascending: return -1
+        case .same: return 0
+        case .descending: return 1
         }
       },
       { body in
