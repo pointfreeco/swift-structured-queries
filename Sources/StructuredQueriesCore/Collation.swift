@@ -8,7 +8,7 @@
 ///
 /// ```swift
 /// extension Collation where Self == NamedCollation {
-///   static var fr_FR: Self { NamedCollation("fr_FR") }
+///   static var fr_FR: Self { Self("fr_FR") }
 /// }
 ///
 /// Reminder.order { $0.title.collate(.fr_FR) }
@@ -36,7 +36,7 @@ extension Collation {
 ///
 /// ```swift
 /// extension Collation where Self == NamedCollation {
-///   static var fr_FR: Self { NamedCollation("fr_FR") }
+///   static var fr_FR: Self { Self("fr_FR") }
 /// }
 /// ```
 public struct NamedCollation: Collation, Sendable {
@@ -60,7 +60,7 @@ public struct NamedCollation: Collation, Sendable {
   /// }
   ///
   /// extension Collation where Self == NamedCollation {
-  ///   static var localized: Self { NamedCollation($localized) }
+  ///   static var localized: Self { Self($localized) }
   /// }
   ///
   /// Reminder.order { $0.title.collate(.localized) }

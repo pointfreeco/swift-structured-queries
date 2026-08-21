@@ -258,5 +258,5 @@ func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
 }
 
 extension Collation where Self == NamedCollation {
-  fileprivate static var caseInsensitive: Self { NamedCollation($caseInsensitive) }
+  fileprivate static var caseInsensitive: Self { Self($caseInsensitive) }
 }
