@@ -1,3 +1,4 @@
+public import Foundation
 public import StructuredQueriesCore
 
 /// A type representing a database function.
@@ -185,6 +186,12 @@ public func _requireQueryRepresentable<T: QueryRepresentable>(_: T.Type) -> T.Ty
 ///
 /// This is used internally by `@DatabaseFunction` when applied to class instance methods to break
 /// retain cycles.
-public struct _DatabaseFunctionDeallocated: Error, Sendable {
-  public init() {}
+public struct _DatabaseFunctionDeallocated: LocalizedError, Sendable {
+  let message: String
+  public init(_ message: String) {
+    self.message = message
+  }
+  public var errorDescription: String? {
+    message
+  }
 }
