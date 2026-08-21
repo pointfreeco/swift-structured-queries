@@ -1,5 +1,6 @@
 public import Foundation
 public import StructuredQueriesCore
+public import StructuredQueriesSQLiteCore
 
 #if canImport(Darwin)
   public import SQLite3
@@ -124,6 +125,36 @@ public struct Database {
     }
   }
 
+  // NB: Resolving values selects against the pack-based overload crashes the type checker, so this
+  //     overload stays generic over an opaque 'Columns' and reconstructs the tuple's layout at
+  //     runtime from its '_ValuesElement' offsets.
+  @_disfavoredOverload
+  public func execute<Columns>(
+    _ query: Select<Columns, Values<Columns>, ()>
+  ) throws -> [Columns] {
+    let elements = query._valuesElements
+    let query = query.query
+    guard !query.isEmpty else { return [] }
+    let plan = try _ValuesRowPlan<Columns>(elements: elements)
+    return try withStatement(query) { statement in
+      var results: [Columns] = []
+      var decoder = SQLiteQueryDecoder(statement: statement)
+      loop: while true {
+        let code = sqlite3_step(statement)
+        switch code {
+        case SQLITE_ROW:
+          try results.append(plan.decodeRow(&decoder))
+          decoder.next()
+        case SQLITE_DONE:
+          break loop
+        default:
+          throw SQLiteError(db: storage.handle)
+        }
+      }
+      return results
+    }
+  }
+
   @inlinable
   public func execute<S: SelectStatement, each J: Table>(
     _ query: S
@@ -223,5 +254,65 @@ struct SQLiteError: LocalizedError {
   @usableFromInline
   var errorDescription: String? {
     message
+  }
+}
+
+private struct ValuesRowDecodingError: Error {}
+
+private enum _ValuesRowPlan<Columns> {
+  case single(any QueryDecodable.Type)
+  case tuple([(type: any QueryDecodable.Type, offset: Int)])
+
+  init(elements: [_ValuesElement]) throws {
+    if elements.count == 1, let decodable = elements[0].decodableType {
+      self = .single(decodable)
+      return
+    }
+    guard !elements.isEmpty else { throw ValuesRowDecodingError() }
+    self = .tuple(
+      try elements.map { element in
+        guard let decodable = element.decodableType else {
+          throw ValuesRowDecodingError()
+        }
+        return (decodable, element.offset)
+      }
+    )
+  }
+
+  func decodeRow(_ decoder: inout SQLiteQueryDecoder) throws -> Columns {
+    func decode<U: QueryDecodable>(_: U.Type) throws -> U {
+      try U(decoder: &decoder)
+    }
+    switch self {
+    case .single(let decodable):
+      return try decode(decodable) as! Columns
+
+    case .tuple(let elements):
+      let raw = UnsafeMutableRawPointer.allocate(
+        byteCount: MemoryLayout<Columns>.size,
+        alignment: MemoryLayout<Columns>.alignment
+      )
+      func initialize<U: QueryDecodable>(_: U.Type, at offset: Int) throws {
+        (raw + offset).initializeMemory(as: U.self, repeating: try U(decoder: &decoder), count: 1)
+      }
+      func deinitialize<U>(_: U.Type, at offset: Int) {
+        (raw + offset).assumingMemoryBound(to: U.self).deinitialize(count: 1)
+      }
+      var initialized: [(type: any QueryDecodable.Type, offset: Int)] = []
+      do {
+        for element in elements {
+          try initialize(element.type, at: element.offset)
+          initialized.append(element)
+        }
+      } catch {
+        for element in initialized {
+          deinitialize(element.type, at: element.offset)
+        }
+        raw.deallocate()
+        throw error
+      }
+      defer { raw.deallocate() }
+      return raw.assumingMemoryBound(to: Columns.self).move()
+    }
   }
 }

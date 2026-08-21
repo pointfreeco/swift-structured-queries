@@ -1,12 +1,16 @@
+import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
 import StructuredQueriesSQLite
 import StructuredQueriesTestSupport
 import Testing
+import _StructuredQueriesSQLite
 
 extension SnapshotTests {
   @Suite struct InsertTests {
+    @Dependency(\.defaultDatabase) var db
+
     @Test func basics() {
       assertQuery(
         Reminder.insert {
@@ -204,7 +208,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          Values("vacation")
+          Select("vacation")
         }
         .returning(\.self)
       ) {
@@ -346,7 +350,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          Values("vacation")
+          Select("vacation")
         } onConflict: {
           $0.title
         } doUpdate: {
@@ -879,7 +883,7 @@ extension SnapshotTests {
         RemindersList.insert {
           $0.title
         } select: {
-          Values(#sql("'Groceries'"))
+          Select(#sql("'Groceries'"))
         }
         .returning(\.id)
       ) {
@@ -897,6 +901,49 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func columnGroup() throws {
+      try db.execute(
+        """
+        CREATE TABLE "itemWrappers" (
+          "id" INTEGER NOT NULL,
+          "title" TEXT NOT NULL DEFAULT '',
+          "quantity" INTEGER NOT NULL DEFAULT 0,
+          "notes" TEXT NOT NULL DEFAULT '[]'
+        )
+        """
+      )
+      assertQuery(
+        ItemWrapper.insert {
+          ($0.id, $0.item)
+        } values: {
+          (1, Item(title: "Blob", quantity: 123, notes: ["To-do"]))
+        }
+      ) {
+        """
+        INSERT INTO "itemWrappers"
+        ("id", "title", "quantity", "notes")
+        VALUES
+        (1, 'Blob', 123, '[
+          "To-do"
+        ]')
+        """
+      }
+      assertQuery(
+        ItemWrapper.insert {
+          ($0.id, $0.item.title)
+        } values: {
+          (2, "Blob Jr")
+        }
+      ) {
+        """
+        INSERT INTO "itemWrappers"
+        ("id", "title")
+        VALUES
+        (2, 'Blob Jr')
+        """
+      }
+    }
   }
 }
 
@@ -905,4 +952,9 @@ extension SnapshotTests {
   var quantity = 0
   @Column(as: [String].JSONRepresentation.self)
   var notes: [String] = []
+}
+
+@Table private struct ItemWrapper {
+  var id: Int
+  var item: Item
 }

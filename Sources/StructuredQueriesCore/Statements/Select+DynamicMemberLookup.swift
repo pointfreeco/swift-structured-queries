@@ -1,7 +1,7 @@
 #if compiler(>=6.1)
   // NB: Using a parameter pack in the dynamic member results in 'EXC_BAD_ACCESS'.
   //     These overloads work around the problem.
-  extension Select {
+  extension Select where From: Table {
     public subscript<
       each C: QueryRepresentable,
       each J: Table,

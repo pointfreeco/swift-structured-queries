@@ -454,7 +454,7 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Values(A.Columns(b: B.Columns(c: C.Columns(d: 42))))
+        Select(A.Columns(b: B.Columns(c: C.Columns(d: 42))))
       ) {
         """
         SELECT 42 AS "d"
@@ -557,7 +557,7 @@ extension SnapshotTests {
           """
         }
         assertQuery(
-          Values(Post.Selection.note("Goodnight moon"))
+          Select(Post.Selection.note("Goodnight moon"))
         ) {
           """
           SELECT NULL AS "url", 'Goodnight moon' AS "note"
@@ -594,7 +594,7 @@ extension SnapshotTests {
           """
         }
         assertQuery(
-          Values(Notes.Columns.list(#bind(["Blob", "Jr"])))
+          Select(Notes.Columns.list(#bind(["Blob", "Jr"])))
         ) {
           """
           SELECT '[

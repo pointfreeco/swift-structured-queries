@@ -34,3 +34,4 @@
 ### Supporting types
 
 - ``SelectOf``
+- ``ValuesColumns``
