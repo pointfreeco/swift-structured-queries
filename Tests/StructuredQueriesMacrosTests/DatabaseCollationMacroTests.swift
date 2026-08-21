@@ -109,13 +109,9 @@ extension SnapshotTests {
         func chronological(_ lhs: Date, _ rhs: Date) -> CollationOrder {
                                                ┬───
                                   │            ╰─ 🛑 '@DatabaseCollation' functions must take two 'String' arguments
-
-        SQLite only invokes a collating sequence with the text being compared.
                                   │               ✏️ Replace 'Date' with 'String'
                                   ┬───
                                   ╰─ 🛑 '@DatabaseCollation' functions must take two 'String' arguments
-
-        SQLite only invokes a collating sequence with the text being compared.
                                      ✏️ Replace 'Date' with 'String'
           CollationOrder(lhs, rhs)
         }
@@ -209,6 +205,68 @@ extension SnapshotTests {
       }
     }
 
+    @Test func asyncFunction() {
+      assertMacro {
+        """
+        @DatabaseCollation
+        func compare(_ lhs: String, _ rhs: String) async -> CollationOrder {
+          CollationOrder(lhs, rhs)
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseCollation
+        func compare(_ lhs: String, _ rhs: String) async -> CollationOrder {
+                                                   ┬────
+                                                   ╰─ 🛑 '@DatabaseCollation' functions cannot be asynchronous
+                                                      ✏️ Remove 'async'
+          CollationOrder(lhs, rhs)
+        }
+        """
+      } fixes: {
+        """
+        @DatabaseCollation
+        func compare(_ lhs: String, _ rhs: String) -> CollationOrder {
+          CollationOrder(lhs, rhs)
+        }
+        """
+      } expansion: {
+        """
+        func compare(_ lhs: String, _ rhs: String) -> CollationOrder {
+          CollationOrder(lhs, rhs)
+        }
+
+        nonisolated var $compare: __macro_local_7comparefMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(collation: compare)
+          #sourceLocation()
+          #endif
+          return __macro_local_7comparefMu_()
+        }
+
+        nonisolated func __macro_local_7comparefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          compare(arg0, arg1)
+        }
+
+        nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
+          public var name: String {
+            "compare"
+          }
+          public init() {
+          }
+          public func compare(
+            _ lhs: String, _ rhs: String
+          ) -> CollationOrder {
+            __macro_local_7comparefMu0_(lhs, rhs)
+          }
+        }
+        """
+      }
+    }
+
     @Test func throwingFunction() {
       assertMacro {
         """
@@ -223,8 +281,6 @@ extension SnapshotTests {
         func compare(_ lhs: String, _ rhs: String) throws -> CollationOrder {
                                                    ┬─────
                                                    ╰─ 🛑 '@DatabaseCollation' functions cannot throw
-
-        SQLite requires a collating sequence to define a total ordering, and it offers no way of surfacing an error from one.
                                                       ✏️ Remove 'throws'
           try validate(lhs, rhs)
         }
@@ -419,7 +475,7 @@ extension SnapshotTests {
         }
         """
       } expansion: {
-        """
+        #"""
         class Engine {
           func compare(lhs: String, rhs: String) -> CollationOrder {
             CollationOrder(lhs, rhs)
@@ -444,15 +500,20 @@ extension SnapshotTests {
             }
             public func compare(
               _ lhs: String, _ rhs: String
-            ) throws -> CollationOrder {
+            ) -> CollationOrder {
               guard let base else {
-                throw StructuredQueriesSQLiteCore._DatabaseCollationDeallocated()
+                reportIssue(
+                  """
+                  Failed to invoke 'compare'; 'Engine' was deallocated
+                  """
+                )
+                return StructuredQueriesSQLiteCore.CollationOrder(lhs, rhs)
               }
               return base.compare(lhs: lhs, rhs: rhs)
             }
           }
         }
-        """
+        """#
       }
     }
 
@@ -724,8 +785,6 @@ extension SnapshotTests {
         func compare(_ lhs: String, _ rhs: Int) -> CollationOrder {
                                            ┬──
                                            ╰─ 🛑 '@DatabaseCollation' functions must take two 'String' arguments
-
-        SQLite only invokes a collating sequence with the text being compared.
                                               ✏️ Replace 'Int' with 'String'
           .same
         }

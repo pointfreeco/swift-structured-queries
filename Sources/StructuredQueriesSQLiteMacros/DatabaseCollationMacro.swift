@@ -76,17 +76,31 @@ extension DatabaseCollationMacro: PeerMacro {
       return []
     }
 
+    if let asyncSpecifier = declaration.signature.effectSpecifiers?.asyncSpecifier {
+      context.diagnose(
+        Diagnostic(
+          node: asyncSpecifier,
+          message: MacroExpansionErrorMessage(
+            "'@DatabaseCollation' functions cannot be asynchronous"
+          ),
+          fixIts: [
+            .replace(
+              message: MacroExpansionFixItMessage("Remove 'async'"),
+              oldNode: asyncSpecifier,
+              newNode: TokenSyntax("")
+            )
+          ]
+        )
+      )
+      return []
+    }
+
     if let throwsClause = declaration.signature.effectSpecifiers?.throwsClause {
       context.diagnose(
         Diagnostic(
           node: throwsClause,
           message: MacroExpansionErrorMessage(
-            """
-            '@DatabaseCollation' functions cannot throw
-
-            SQLite requires a collating sequence to define a total ordering, and it offers no way \
-            of surfacing an error from one.
-            """
+            "'@DatabaseCollation' functions cannot throw"
           ),
           fixIts: [
             .replace(
@@ -130,11 +144,7 @@ extension DatabaseCollationMacro: PeerMacro {
         Diagnostic(
           node: parameter.type,
           message: MacroExpansionErrorMessage(
-            """
-            '@DatabaseCollation' functions must take two 'String' arguments
-
-            SQLite only invokes a collating sequence with the text being compared.
-            """
+            "'@DatabaseCollation' functions must take two 'String' arguments"
           ),
           fixIts: [
             .replace(
@@ -261,12 +271,17 @@ extension DatabaseCollationMacro: PeerMacro {
         .joined(separator: ", ")
       let compareBody =
         baseIsWeak
-        ? """
+        ? #"""
         guard let base else {
-        throw StructuredQueriesSQLiteCore._DatabaseCollationDeallocated()
-        }
-        return base.\(declaration.name.trimmed)(\(baseArguments))
+        reportIssue(
         """
+        Failed to invoke '\#(declaration.name.trimmed)'; '\#(baseType)' was deallocated
+        """
+        )
+        return StructuredQueriesSQLiteCore.CollationOrder(lhs, rhs)
+        }
+        return base.\#(declaration.name.trimmed)(\#(baseArguments))
+        """#
         : "base.\(declaration.name.trimmed)(\(baseArguments))"
       return [
         """
@@ -288,7 +303,7 @@ extension DatabaseCollationMacro: PeerMacro {
         }
         public func compare(
         _ lhs: String, _ rhs: String
-        )\(raw: baseIsWeak ? " throws" : "") -> \(returnClause.type.trimmed) {
+        ) -> \(returnClause.type.trimmed) {
         \(raw: compareBody)
         }
         }

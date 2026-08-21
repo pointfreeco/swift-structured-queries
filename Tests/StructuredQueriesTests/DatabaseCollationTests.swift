@@ -95,6 +95,8 @@ extension SnapshotTests {
           └────────────┘
           """
         }
+      } matching: {
+        $0.description.hasSuffix("Failed to invoke 'reversed'; 'Engine' was deallocated")
       }
     }
 
