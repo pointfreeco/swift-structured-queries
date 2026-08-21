@@ -10,8 +10,8 @@ public protocol DatabaseCollation: Collation {
   /// Compares two text values from the database.
   ///
   /// - Parameters:
-  ///   - lhs: The first value.
-  ///   - rhs: The second value.
+  ///   - lhs: The UTF-8 bytes of the first value. Only valid for the duration of the call.
+  ///   - rhs: The UTF-8 bytes of the second value. Only valid for the duration of the call.
   /// - Returns: The ordering of the first value relative to the second.
-  func compare(_ lhs: String, _ rhs: String) -> CollationOrder
+  func compare(_ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer) -> CollationOrder
 }

@@ -114,15 +114,22 @@ extension DatabaseCollationMacro: PeerMacro {
       return []
     }
 
+    let argumentTypesMessage =
+      "'@DatabaseCollation' functions must take two 'String', two 'UnsafeRawBufferPointer', two"
+      + " 'UTF8Span', or two 'Span<UInt8>' arguments"
+    let stringTypes = ["String", "Swift.String"]
+    let rawTypes = ["UnsafeRawBufferPointer", "Swift.UnsafeRawBufferPointer"]
+    let spanTypes = ["UTF8Span", "Swift.UTF8Span"]
+    let byteSpanTypes = [
+      "Span<UInt8>", "Span<Swift.UInt8>", "Swift.Span<UInt8>", "Swift.Span<Swift.UInt8>",
+    ]
     let parameters = Array(declaration.signature.parameterClause.parameters)
     guard parameters.count == 2
     else {
       context.diagnose(
         Diagnostic(
           node: declaration.signature.parameterClause,
-          message: MacroExpansionErrorMessage(
-            "'@DatabaseCollation' functions must take two 'String' arguments"
-          )
+          message: MacroExpansionErrorMessage(argumentTypesMessage)
         )
       )
       return []
@@ -138,14 +145,14 @@ extension DatabaseCollationMacro: PeerMacro {
         )
         return []
       }
-      guard !["String", "Swift.String"].contains(parameter.type.trimmedDescription)
+      guard
+        !(stringTypes + rawTypes + spanTypes + byteSpanTypes)
+          .contains(parameter.type.trimmedDescription)
       else { continue }
       context.diagnose(
         Diagnostic(
           node: parameter.type,
-          message: MacroExpansionErrorMessage(
-            "'@DatabaseCollation' functions must take two 'String' arguments"
-          ),
+          message: MacroExpansionErrorMessage(argumentTypesMessage),
           fixIts: [
             .replace(
               message: MacroExpansionFixItMessage(
@@ -160,6 +167,36 @@ extension DatabaseCollationMacro: PeerMacro {
       hasInvalidParameter = true
     }
     guard !hasInvalidParameter else { return [] }
+    func argumentKind(_ parameter: FunctionParameterSyntax) -> Int {
+      let type = parameter.type.trimmedDescription
+      return stringTypes.contains(type)
+        ? 0
+        : rawTypes.contains(type) ? 1 : spanTypes.contains(type) ? 2 : 3
+    }
+    let isRaw = argumentKind(parameters[0]) == 1
+    let isSpan = argumentKind(parameters[0]) == 2
+    let isByteSpan = argumentKind(parameters[0]) == 3
+    guard argumentKind(parameters[0]) == argumentKind(parameters[1])
+    else {
+      context.diagnose(
+        Diagnostic(
+          node: declaration.signature.parameterClause,
+          message: MacroExpansionErrorMessage(argumentTypesMessage),
+          fixIts: [
+            .replace(
+              message: MacroExpansionFixItMessage(
+                "Replace '\(parameters[1].type.trimmedDescription)' with"
+                  + " '\(parameters[0].type.trimmedDescription)'"
+              ),
+              oldNode: parameters[1].type,
+              newNode: parameters[0].type.trimmed
+                .with(\.trailingTrivia, parameters[1].type.trailingTrivia)
+            )
+          ]
+        )
+      )
+      return []
+    }
 
     let declarationName = declaration.name.trimmedDescription.trimmingBackticks()
     var collationName = declarationName
@@ -218,17 +255,63 @@ extension DatabaseCollationMacro: PeerMacro {
       }
       .joined(separator: ", ")
 
-    let check = isolationCheck(
-      "collation",
-      declaration.name.trimmedDescription,
-      for: node,
-      in: context
-    )
+    func witnessBody(prologue: String = "", _ call: (String, String) -> String) -> String {
+      if isByteSpan {
+        return """
+          \(prologue)return \(call(
+            "lhs.assumingMemoryBound(to: UInt8.self).span",
+            "rhs.assumingMemoryBound(to: UInt8.self).span"
+          ))
+          """
+      }
+      if isSpan {
+        return """
+          \(prologue)do {
+          let lhsSpan = try UTF8Span(validating: lhs.assumingMemoryBound(to: UInt8.self).span)
+          let rhsSpan = try UTF8Span(validating: rhs.assumingMemoryBound(to: UInt8.self).span)
+          return \(call("lhsSpan", "rhsSpan"))
+          } catch {
+          return lhs.elementsEqual(rhs)
+          ? .same
+          : lhs.lexicographicallyPrecedes(rhs) ? .ascending : .descending
+          }
+          """
+      }
+      func argument(_ name: String) -> String {
+        isRaw ? name : "String(decoding: \(name), as: UTF8.self)"
+      }
+      return "\(prologue)return \(call(argument("lhs"), argument("rhs")))"
+    }
+
+    var decls: [DeclSyntax] = []
+    let check: String
+    if isSpan || isByteSpan {
+      let probeName = context.makeUniqueName("\(declarationName)IsolationProbe")
+      let isolation: TokenSyntax? =
+        declaration.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
+        ? .keyword(.nonisolated, trailingTrivia: .space)
+        : nil
+      decls.append(
+        """
+        #if DEBUG
+        \(isolation)\(`static`)func \(probeName)() {}
+        #endif
+        """
+      )
+      check = isolationCheck("collation", probeName.text, for: node, in: context)
+    } else {
+      check = isolationCheck(
+        "collation",
+        declaration.name.trimmedDescription,
+        for: node,
+        in: context
+      )
+    }
 
     guard isInstance
     else {
       let thunkName = context.makeUniqueName(declarationName)
-      return [
+      return decls + [
         """
         \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
         \(collationTypeName) {
@@ -237,7 +320,7 @@ extension DatabaseCollationMacro: PeerMacro {
         """,
         """
         \(attributes)\(access)\(`static`)\(nonisolated)func \(thunkName)(
-        _ arg0: String, _ arg1: String
+        _ arg0: \(parameters[0].type.trimmed), _ arg1: \(parameters[1].type.trimmed)
         ) -> \(returnClause.type.trimmed) {
         \(declaration.name.trimmed)(\(raw: callArguments))
         }
@@ -251,9 +334,9 @@ extension DatabaseCollationMacro: PeerMacro {
         public init() {
         }
         public func compare(
-        _ lhs: String, _ rhs: String
+        _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
         ) -> \(returnClause.type.trimmed) {
-        \(thunkName)(lhs, rhs)
+        \(raw: witnessBody { "\(thunkName)(\($0), \($1))" })
         }
         }
         """,
@@ -261,15 +344,18 @@ extension DatabaseCollationMacro: PeerMacro {
     }
 
     if let baseType {
-      let baseArguments = parameters.enumerated()
-        .map { offset, parameter in
-          let argument = offset == 0 ? "lhs" : "rhs"
-          return parameter.firstName.tokenKind == .wildcard
-            ? argument
-            : "\(parameter.firstName.text): \(argument)"
-        }
-        .joined(separator: ", ")
-      let compareBody =
+      func baseCall(_ lhsArgument: String, _ rhsArgument: String) -> String {
+        let arguments = parameters.enumerated()
+          .map { offset, parameter in
+            let argument = offset == 0 ? lhsArgument : rhsArgument
+            return parameter.firstName.tokenKind == .wildcard
+              ? argument
+              : "\(parameter.firstName.text): \(argument)"
+          }
+          .joined(separator: ", ")
+        return "base.\(declaration.name.trimmed)(\(arguments))"
+      }
+      let prologue =
         baseIsWeak
         ? #"""
         guard let base else {
@@ -278,12 +364,15 @@ extension DatabaseCollationMacro: PeerMacro {
         Failed to invoke '\#(declaration.name.trimmed)'; '\#(baseType)' was deallocated
         """
         )
-        return StructuredQueriesSQLiteCore.CollationOrder(lhs, rhs)
+        return lhs.elementsEqual(rhs)
+        ? .same
+        : lhs.lexicographicallyPrecedes(rhs) ? .ascending : .descending
         }
-        return base.\#(declaration.name.trimmed)(\#(baseArguments))
+
         """#
-        : "base.\(declaration.name.trimmed)(\(baseArguments))"
-      return [
+        : ""
+      let compareBody = witnessBody(prologue: prologue, baseCall)
+      return decls + [
         """
         \(attributes)\(access)\(nonisolated)var $\(raw: declarationName): \
         \(collationTypeName) {
@@ -302,7 +391,7 @@ extension DatabaseCollationMacro: PeerMacro {
         self.base = base
         }
         public func compare(
-        _ lhs: String, _ rhs: String
+        _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
         ) -> \(returnClause.type.trimmed) {
         \(raw: compareBody)
         }
@@ -311,9 +400,11 @@ extension DatabaseCollationMacro: PeerMacro {
       ]
     }
 
-    let bodyType = "(String, String) -> \(returnClause.type.trimmed)"
+    let bodyType =
+      "(\(parameters[0].type.trimmed), \(parameters[1].type.trimmed)) "
+      + "-> \(returnClause.type.trimmed)"
 
-    return [
+    return decls + [
       """
       \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
       \(collationTypeName) {
@@ -331,9 +422,9 @@ extension DatabaseCollationMacro: PeerMacro {
       self.body = body
       }
       public func compare(
-      _ lhs: String, _ rhs: String
+      _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
       ) -> \(returnClause.type.trimmed) {
-      self.body(lhs, rhs)
+      \(raw: witnessBody { "self.body(\($0), \($1))" })
       }
       }
       """,

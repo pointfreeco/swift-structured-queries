@@ -126,6 +126,103 @@ extension SnapshotTests {
       }
     }
 
+    @DatabaseCollation
+    func byByteCount(
+      _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
+    ) -> CollationOrder {
+      let byCount = CollationOrder(lhs.count, rhs.count)
+      guard byCount == .same else { return byCount }
+      return lhs.elementsEqual(rhs)
+        ? .same
+        : lhs.lexicographicallyPrecedes(rhs) ? .ascending : .descending
+    }
+    @Test func rawBuffers() {
+      $byByteCount.install(database.handle)
+      assertQuery(
+        RemindersList.select(\.title).order { $0.title.collate($byByteCount) }
+      ) {
+        """
+        SELECT "remindersLists"."title"
+        FROM "remindersLists"
+        ORDER BY "remindersLists"."title" COLLATE "byByteCount"
+        """
+      } results: {
+        """
+        ┌────────────┐
+        │ "Family"   │
+        │ "Business" │
+        │ "Personal" │
+        └────────────┘
+        """
+      }
+    }
+
+    #if compiler(>=6.2)
+      @DatabaseCollation
+      @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *)
+      func canonicallyDescending(_ lhs: UTF8Span, _ rhs: UTF8Span) -> CollationOrder {
+        if rhs.isCanonicallyLessThan(lhs) { return .ascending }
+        if lhs.isCanonicallyLessThan(rhs) { return .descending }
+        return .same
+      }
+      @DatabaseCollation
+      @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *)
+      func bytesDescending(_ lhs: Span<UInt8>, _ rhs: Span<UInt8>) -> CollationOrder {
+        let count = min(lhs.count, rhs.count)
+        var index = 0
+        while index < count {
+          if lhs[index] != rhs[index] { return CollationOrder(rhs[index], lhs[index]) }
+          index += 1
+        }
+        return CollationOrder(rhs.count, lhs.count)
+      }
+      @Test
+      @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *)
+      func byteSpan() {
+        $bytesDescending.install(database.handle)
+        assertQuery(
+          RemindersList.select(\.title).order { $0.title.collate($bytesDescending) }
+        ) {
+          """
+          SELECT "remindersLists"."title"
+          FROM "remindersLists"
+          ORDER BY "remindersLists"."title" COLLATE "bytesDescending"
+          """
+        } results: {
+          """
+          ┌────────────┐
+          │ "Personal" │
+          │ "Family"   │
+          │ "Business" │
+          └────────────┘
+          """
+        }
+      }
+
+      @Test
+      @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *)
+      func utf8Span() {
+        $canonicallyDescending.install(database.handle)
+        assertQuery(
+          RemindersList.select(\.title).order { $0.title.collate($canonicallyDescending) }
+        ) {
+          """
+          SELECT "remindersLists"."title"
+          FROM "remindersLists"
+          ORDER BY "remindersLists"."title" COLLATE "canonicallyDescending"
+          """
+        } results: {
+          """
+          ┌────────────┐
+          │ "Personal" │
+          │ "Family"   │
+          │ "Business" │
+          └────────────┘
+          """
+        }
+      }
+    #endif
+
     @Test func optionalText() {
       $reversed.install(database.handle)
       assertQuery(

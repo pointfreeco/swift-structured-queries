@@ -41,9 +41,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_15caseInsensitivefMu0_(lhs, rhs)
+            return __macro_local_15caseInsensitivefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -86,9 +86,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_15caseInsensitivefMu0_(lhs, rhs)
+            return __macro_local_15caseInsensitivefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -108,10 +108,10 @@ extension SnapshotTests {
         @DatabaseCollation
         func chronological(_ lhs: Date, _ rhs: Date) -> CollationOrder {
                                                ┬───
-                                  │            ╰─ 🛑 '@DatabaseCollation' functions must take two 'String' arguments
+                                  │            ╰─ 🛑 '@DatabaseCollation' functions must take two 'String', two 'UnsafeRawBufferPointer', two 'UTF8Span', or two 'Span<UInt8>' arguments
                                   │               ✏️ Replace 'Date' with 'String'
                                   ┬───
-                                  ╰─ 🛑 '@DatabaseCollation' functions must take two 'String' arguments
+                                  ╰─ 🛑 '@DatabaseCollation' functions must take two 'String', two 'UnsafeRawBufferPointer', two 'UTF8Span', or two 'Span<UInt8>' arguments
                                      ✏️ Replace 'Date' with 'String'
           CollationOrder(lhs, rhs)
         }
@@ -151,9 +151,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_13chronologicalfMu0_(lhs, rhs)
+            return __macro_local_13chronologicalfMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -196,9 +196,236 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_7comparefMu0_(lhs, rhs)
+            return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
+          }
+        }
+        """
+      }
+    }
+
+    @Test func rawBuffers() {
+      assertMacro {
+        """
+        @DatabaseCollation
+        func caseInsensitive(
+          _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
+        ) -> CollationOrder {
+          CollationOrder(lhs.count, rhs.count)
+        }
+        """
+      } expansion: {
+        """
+        func caseInsensitive(
+          _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
+        ) -> CollationOrder {
+          CollationOrder(lhs.count, rhs.count)
+        }
+
+        nonisolated var $caseInsensitive: __macro_local_15caseInsensitivefMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(collation: caseInsensitive)
+          #sourceLocation()
+          #endif
+          return __macro_local_15caseInsensitivefMu_()
+        }
+
+        nonisolated func __macro_local_15caseInsensitivefMu0_(
+          _ arg0: UnsafeRawBufferPointer, _ arg1: UnsafeRawBufferPointer
+        ) -> CollationOrder {
+          caseInsensitive(arg0, arg1)
+        }
+
+        nonisolated struct __macro_local_15caseInsensitivefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
+          public var name: String {
+            "caseInsensitive"
+          }
+          public init() {
+          }
+          public func compare(
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
+          ) -> CollationOrder {
+            return __macro_local_15caseInsensitivefMu0_(lhs, rhs)
+          }
+        }
+        """
+      }
+    }
+
+    @Test func utf8SpanBuffers() {
+      assertMacro {
+        """
+        @DatabaseCollation
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *)
+        func canonical(_ lhs: UTF8Span, _ rhs: UTF8Span) -> CollationOrder {
+          if lhs.isCanonicallyLessThan(rhs) { return .ascending }
+          if rhs.isCanonicallyLessThan(lhs) { return .descending }
+          return .same
+        }
+        """
+      } expansion: {
+        """
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *)
+        func canonical(_ lhs: UTF8Span, _ rhs: UTF8Span) -> CollationOrder {
+          if lhs.isCanonicallyLessThan(rhs) { return .ascending }
+          if rhs.isCanonicallyLessThan(lhs) { return .descending }
+          return .same
+        }
+
+        #if DEBUG
+        func __macro_local_23canonicalIsolationProbefMu_() {
+        }
+        #endif
+
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) nonisolated var $canonical: __macro_local_9canonicalfMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(collation: __macro_local_23canonicalIsolationProbefMu_)
+          #sourceLocation()
+          #endif
+          return __macro_local_9canonicalfMu_()
+        }
+
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) nonisolated func __macro_local_9canonicalfMu0_(
+          _ arg0: UTF8Span, _ arg1: UTF8Span
+        ) -> CollationOrder {
+          canonical(arg0, arg1)
+        }
+
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) nonisolated struct __macro_local_9canonicalfMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
+          public var name: String {
+            "canonical"
+          }
+          public init() {
+          }
+          public func compare(
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
+          ) -> CollationOrder {
+            do {
+              let lhsSpan = try UTF8Span(validating: lhs.assumingMemoryBound(to: UInt8.self).span)
+              let rhsSpan = try UTF8Span(validating: rhs.assumingMemoryBound(to: UInt8.self).span)
+              return __macro_local_9canonicalfMu0_(lhsSpan, rhsSpan)
+            } catch {
+              return lhs.elementsEqual(rhs)
+              ? .same
+              : lhs.lexicographicallyPrecedes(rhs) ? .ascending : .descending
+            }
+          }
+        }
+        """
+      }
+    }
+
+    @Test func byteSpanBuffers() {
+      assertMacro {
+        """
+        @DatabaseCollation
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *)
+        func byteCount(_ lhs: Span<UInt8>, _ rhs: Span<UInt8>) -> CollationOrder {
+          CollationOrder(lhs.count, rhs.count)
+        }
+        """
+      } expansion: {
+        """
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *)
+        func byteCount(_ lhs: Span<UInt8>, _ rhs: Span<UInt8>) -> CollationOrder {
+          CollationOrder(lhs.count, rhs.count)
+        }
+
+        #if DEBUG
+        func __macro_local_23byteCountIsolationProbefMu_() {
+        }
+        #endif
+
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) nonisolated var $byteCount: __macro_local_9byteCountfMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(collation: __macro_local_23byteCountIsolationProbefMu_)
+          #sourceLocation()
+          #endif
+          return __macro_local_9byteCountfMu_()
+        }
+
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) nonisolated func __macro_local_9byteCountfMu0_(
+          _ arg0: Span<UInt8>, _ arg1: Span<UInt8>
+        ) -> CollationOrder {
+          byteCount(arg0, arg1)
+        }
+
+        @available(macOS 26, iOS 26, tvOS 26, watchOS 26, *) nonisolated struct __macro_local_9byteCountfMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
+          public var name: String {
+            "byteCount"
+          }
+          public init() {
+          }
+          public func compare(
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
+          ) -> CollationOrder {
+            return __macro_local_9byteCountfMu0_(lhs.assumingMemoryBound(to: UInt8.self).span, rhs.assumingMemoryBound(to: UInt8.self).span)
+          }
+        }
+        """
+      }
+    }
+
+    @Test func mixedArguments() {
+      assertMacro {
+        """
+        @DatabaseCollation
+        func caseInsensitive(_ lhs: String, _ rhs: UnsafeRawBufferPointer) -> CollationOrder {
+          CollationOrder(lhs.count, rhs.count)
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseCollation
+        func caseInsensitive(_ lhs: String, _ rhs: UnsafeRawBufferPointer) -> CollationOrder {
+                            ┬─────────────────────────────────────────────
+                            ╰─ 🛑 '@DatabaseCollation' functions must take two 'String', two 'UnsafeRawBufferPointer', two 'UTF8Span', or two 'Span<UInt8>' arguments
+                               ✏️ Replace 'UnsafeRawBufferPointer' with 'String'
+          CollationOrder(lhs.count, rhs.count)
+        }
+        """
+      } fixes: {
+        """
+        @DatabaseCollation
+        func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+          CollationOrder(lhs.count, rhs.count)
+        }
+        """
+      } expansion: {
+        """
+        func caseInsensitive(_ lhs: String, _ rhs: String) -> CollationOrder {
+          CollationOrder(lhs.count, rhs.count)
+        }
+
+        nonisolated var $caseInsensitive: __macro_local_15caseInsensitivefMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(collation: caseInsensitive)
+          #sourceLocation()
+          #endif
+          return __macro_local_15caseInsensitivefMu_()
+        }
+
+        nonisolated func __macro_local_15caseInsensitivefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          caseInsensitive(arg0, arg1)
+        }
+
+        nonisolated struct __macro_local_15caseInsensitivefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
+          public var name: String {
+            "caseInsensitive"
+          }
+          public init() {
+          }
+          public func compare(
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
+          ) -> CollationOrder {
+            return __macro_local_15caseInsensitivefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -258,9 +485,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_7comparefMu0_(lhs, rhs)
+            return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -320,9 +547,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_7comparefMu0_(lhs, rhs)
+            return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -365,9 +592,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_7comparefMu0_(lhs, rhs)
+            return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -410,9 +637,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_7comparefMu0_(lhs, rhs)
+            return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -455,9 +682,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_7comparefMu0_(lhs, rhs)
+            return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -499,7 +726,7 @@ extension SnapshotTests {
               self.base = base
             }
             public func compare(
-              _ lhs: String, _ rhs: String
+              _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
             ) -> CollationOrder {
               guard let base else {
                 reportIssue(
@@ -507,9 +734,11 @@ extension SnapshotTests {
                   Failed to invoke 'compare'; 'Engine' was deallocated
                   """
                 )
-                return StructuredQueriesSQLiteCore.CollationOrder(lhs, rhs)
+                return lhs.elementsEqual(rhs)
+                ? .same
+                : lhs.lexicographicallyPrecedes(rhs) ? .ascending : .descending
               }
-              return base.compare(lhs: lhs, rhs: rhs)
+              return base.compare(lhs: String(decoding: lhs, as: UTF8.self), rhs: String(decoding: rhs, as: UTF8.self))
             }
           }
         }
@@ -552,9 +781,9 @@ extension SnapshotTests {
               self.base = base
             }
             public func compare(
-              _ lhs: String, _ rhs: String
+              _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
             ) -> CollationOrder {
-              base.compare(lhs: lhs, rhs: rhs)
+              return base.compare(lhs: String(decoding: lhs, as: UTF8.self), rhs: String(decoding: rhs, as: UTF8.self))
             }
           }
         }
@@ -601,9 +830,9 @@ extension SnapshotTests {
             public init() {
             }
             public func compare(
-              _ lhs: String, _ rhs: String
+              _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
             ) -> CollationOrder {
-              __macro_local_7comparefMu0_(lhs, rhs)
+              return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
             }
           }
         }
@@ -684,9 +913,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_7comparefMu0_(lhs, rhs)
+            return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
@@ -742,9 +971,9 @@ extension SnapshotTests {
             public init() {
             }
             public func compare(
-                _ lhs: String, _ rhs: String
+                _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
             ) -> CollationOrder {
-                __macro_local_7comparefMu0_(lhs, rhs)
+                return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
             }
         }
         """
@@ -764,7 +993,7 @@ extension SnapshotTests {
         @DatabaseCollation
         func compare(_ lhs: String) -> CollationOrder {
                     ┬──────────────
-                    ╰─ 🛑 '@DatabaseCollation' functions must take two 'String' arguments
+                    ╰─ 🛑 '@DatabaseCollation' functions must take two 'String', two 'UnsafeRawBufferPointer', two 'UTF8Span', or two 'Span<UInt8>' arguments
           .orderedSame
         }
         """
@@ -784,7 +1013,7 @@ extension SnapshotTests {
         @DatabaseCollation
         func compare(_ lhs: String, _ rhs: Int) -> CollationOrder {
                                            ┬──
-                                           ╰─ 🛑 '@DatabaseCollation' functions must take two 'String' arguments
+                                           ╰─ 🛑 '@DatabaseCollation' functions must take two 'String', two 'UnsafeRawBufferPointer', two 'UTF8Span', or two 'Span<UInt8>' arguments
                                               ✏️ Replace 'Int' with 'String'
           .same
         }
@@ -824,9 +1053,9 @@ extension SnapshotTests {
           public init() {
           }
           public func compare(
-            _ lhs: String, _ rhs: String
+            _ lhs: UnsafeRawBufferPointer, _ rhs: UnsafeRawBufferPointer
           ) -> CollationOrder {
-            __macro_local_7comparefMu0_(lhs, rhs)
+            return __macro_local_7comparefMu0_(String(decoding: lhs, as: UTF8.self), String(decoding: rhs, as: UTF8.self))
           }
         }
         """
