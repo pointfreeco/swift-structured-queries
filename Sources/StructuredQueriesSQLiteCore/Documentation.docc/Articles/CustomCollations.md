@@ -64,7 +64,7 @@ give a collating sequence defined with `@DatabaseCollation` the same spelling by
 
 ```swift
 extension Collation where Self == NamedCollation {
-  static var localized: Self { NamedCollation($localized) }
+  static var localized: Self { Self($localized) }
 }
 
 Reminder.order { $0.title.collate(.localized) }
