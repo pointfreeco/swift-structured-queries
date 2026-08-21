@@ -56,6 +56,25 @@ configuration.prepareDatabase { db in
 }
 ```
 
+### Leading-dot syntax
+
+Built-in collating sequences are referenced with leading-dot syntax, like `.nocase`, and you can
+give a collating sequence defined with `@DatabaseCollation` the same spelling by aliasing it as a
+``StructuredQueriesCore/NamedCollation``:
+
+```swift
+extension Collation where Self == NamedCollation {
+  static var localized: Self { NamedCollation($localized) }
+}
+
+Reminder.order { $0.title.collate(.localized) }
+// SELECT … FROM "reminders"
+// ORDER BY "reminders"."title" COLLATE "localized"
+```
+
+The alias refers to the collating sequence by name alone, so installing it in a database connection
+still uses `$localized`.
+
 ## Topics
 
 ### Custom collations
