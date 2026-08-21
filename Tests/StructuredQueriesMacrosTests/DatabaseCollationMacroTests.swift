@@ -25,19 +25,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: caseInsensitive)
           #sourceLocation()
           #endif
-          return __macro_local_15caseInsensitivefMu_(caseInsensitive)
+          return __macro_local_15caseInsensitivefMu_()
+        }
+
+        nonisolated func __macro_local_15caseInsensitivefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          caseInsensitive(arg0, arg1)
         }
 
         nonisolated struct __macro_local_15caseInsensitivefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "caseInsensitive"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "caseInsensitive"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_15caseInsensitivefMu0_(lhs, rhs)
           }
         }
         """
@@ -64,19 +70,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: caseInsensitive)
           #sourceLocation()
           #endif
-          return __macro_local_15caseInsensitivefMu_(caseInsensitive)
+          return __macro_local_15caseInsensitivefMu_()
+        }
+
+        nonisolated func __macro_local_15caseInsensitivefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          caseInsensitive(arg0, arg1)
         }
 
         nonisolated struct __macro_local_15caseInsensitivefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "case_insensitive"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "case_insensitive"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_15caseInsensitivefMu0_(lhs, rhs)
           }
         }
         """
@@ -127,19 +139,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: chronological)
           #sourceLocation()
           #endif
-          return __macro_local_13chronologicalfMu_(chronological)
+          return __macro_local_13chronologicalfMu_()
+        }
+
+        nonisolated func __macro_local_13chronologicalfMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          chronological(arg0, arg1)
         }
 
         nonisolated struct __macro_local_13chronologicalfMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "chronological"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "chronological"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_13chronologicalfMu0_(lhs, rhs)
           }
         }
         """
@@ -166,19 +184,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: compare)
           #sourceLocation()
           #endif
-          return __macro_local_7comparefMu_(compare)
+          return __macro_local_7comparefMu_()
+        }
+
+        nonisolated func __macro_local_7comparefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          compare(lhs: arg0, rhs: arg1)
         }
 
         nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "compare"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "compare"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_7comparefMu0_(lhs, rhs)
           }
         }
         """
@@ -224,19 +248,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: compare)
           #sourceLocation()
           #endif
-          return __macro_local_7comparefMu_(compare)
+          return __macro_local_7comparefMu_()
+        }
+
+        nonisolated func __macro_local_7comparefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          compare(arg0, arg1)
         }
 
         nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "compare"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "compare"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_7comparefMu0_(lhs, rhs)
           }
         }
         """
@@ -263,19 +293,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: compare)
           #sourceLocation()
           #endif
-          return __macro_local_7comparefMu_(compare)
+          return __macro_local_7comparefMu_()
+        }
+
+        public nonisolated func __macro_local_7comparefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          compare(arg0, arg1)
         }
 
         public nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "compare"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "compare"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_7comparefMu0_(lhs, rhs)
           }
         }
         """
@@ -302,19 +338,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: compare)
           #sourceLocation()
           #endif
-          return __macro_local_7comparefMu_(compare)
+          return __macro_local_7comparefMu_()
+        }
+
+        package nonisolated func __macro_local_7comparefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          compare(arg0, arg1)
         }
 
         package nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "compare"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "compare"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_7comparefMu0_(lhs, rhs)
           }
         }
         """
@@ -341,19 +383,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: compare)
           #sourceLocation()
           #endif
-          return __macro_local_7comparefMu_(compare)
+          return __macro_local_7comparefMu_()
+        }
+
+        fileprivate nonisolated func __macro_local_7comparefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          compare(arg0, arg1)
         }
 
         fileprivate nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "compare"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "compare"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_7comparefMu0_(lhs, rhs)
           }
         }
         """
@@ -383,24 +431,69 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: compare)
             #sourceLocation()
             #endif
-            return __macro_local_7comparefMu_({ [weak self] arg0, arg1 in
-                guard let self else {
-                  throw StructuredQueriesSQLiteCore._DatabaseCollationDeallocated()
-                }
-                return self.compare(lhs: arg0, rhs: arg1)
-              })
+            return __macro_local_7comparefMu_(self)
           }
 
           nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-            public let name = "compare"
-            public let body: (String, String) throws -> CollationOrder
-            public init(_ body: @escaping (String, String) throws -> CollationOrder) {
-              self.body = body
+            public var name: String {
+              "compare"
+            }
+            private weak var base: Engine?
+            public init(_ base: Engine) {
+              self.base = base
             }
             public func compare(
               _ lhs: String, _ rhs: String
             ) throws -> CollationOrder {
-              try self.body(lhs, rhs)
+              guard let base else {
+                throw StructuredQueriesSQLiteCore._DatabaseCollationDeallocated()
+              }
+              return base.compare(lhs: lhs, rhs: rhs)
+            }
+          }
+        }
+        """
+      }
+    }
+
+    @Test func structInstanceMethod() {
+      assertMacro {
+        """
+        struct Engine {
+          @DatabaseCollation
+          func compare(lhs: String, rhs: String) -> CollationOrder {
+            CollationOrder(lhs, rhs)
+          }
+        }
+        """
+      } expansion: {
+        """
+        struct Engine {
+          func compare(lhs: String, rhs: String) -> CollationOrder {
+            CollationOrder(lhs, rhs)
+          }
+
+          nonisolated var $compare: __macro_local_7comparefMu_ {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 2)
+            #StructuredQueriesIsolationCheck(collation: compare)
+            #sourceLocation()
+            #endif
+            return __macro_local_7comparefMu_(self)
+          }
+
+          nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
+            public var name: String {
+              "compare"
+            }
+            private let base: Engine
+            public init(_ base: Engine) {
+              self.base = base
+            }
+            public func compare(
+              _ lhs: String, _ rhs: String
+            ) -> CollationOrder {
+              base.compare(lhs: lhs, rhs: rhs)
             }
           }
         }
@@ -431,19 +524,25 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: compare)
             #sourceLocation()
             #endif
-            return __macro_local_7comparefMu_(compare)
+            return __macro_local_7comparefMu_()
+          }
+
+          static nonisolated func __macro_local_7comparefMu0_(
+            _ arg0: String, _ arg1: String
+          ) -> CollationOrder {
+            compare(arg0, arg1)
           }
 
           nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-            public let name = "compare"
-            public let body: (String, String) -> CollationOrder
-            public init(_ body: @escaping (String, String) -> CollationOrder) {
-              self.body = body
+            public var name: String {
+              "compare"
+            }
+            public init() {
             }
             public func compare(
               _ lhs: String, _ rhs: String
             ) -> CollationOrder {
-              self.body(lhs, rhs)
+              __macro_local_7comparefMu0_(lhs, rhs)
             }
           }
         }
@@ -508,19 +607,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: compare)
           #sourceLocation()
           #endif
-          return __macro_local_7comparefMu_(compare)
+          return __macro_local_7comparefMu_()
+        }
+
+        nonisolated func __macro_local_7comparefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          compare(arg0, arg1)
         }
 
         nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "compare"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "compare"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_7comparefMu0_(lhs, rhs)
           }
         }
         """
@@ -560,19 +665,25 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(collation: compare)
             #sourceLocation()
             #endif
-            return __macro_local_7comparefMu_(compare)
+            return __macro_local_7comparefMu_()
+        }
+
+        nonisolated func __macro_local_7comparefMu0_(
+            _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+            compare(arg0, arg1)
         }
 
         nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-            public let name = "compare"
-            public let body: (String, String) -> CollationOrder
-            public init(_ body: @escaping (String, String) -> CollationOrder) {
-                self.body = body
+            public var name: String {
+                "compare"
+            }
+            public init() {
             }
             public func compare(
                 _ lhs: String, _ rhs: String
             ) -> CollationOrder {
-                self.body(lhs, rhs)
+                __macro_local_7comparefMu0_(lhs, rhs)
             }
         }
         """
@@ -638,19 +749,25 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(collation: compare)
           #sourceLocation()
           #endif
-          return __macro_local_7comparefMu_(compare)
+          return __macro_local_7comparefMu_()
+        }
+
+        nonisolated func __macro_local_7comparefMu0_(
+          _ arg0: String, _ arg1: String
+        ) -> CollationOrder {
+          compare(arg0, arg1)
         }
 
         nonisolated struct __macro_local_7comparefMu_: StructuredQueriesSQLiteCore.DatabaseCollation {
-          public let name = "compare"
-          public let body: (String, String) -> CollationOrder
-          public init(_ body: @escaping (String, String) -> CollationOrder) {
-            self.body = body
+          public var name: String {
+            "compare"
+          }
+          public init() {
           }
           public func compare(
             _ lhs: String, _ rhs: String
           ) -> CollationOrder {
-            self.body(lhs, rhs)
+            __macro_local_7comparefMu0_(lhs, rhs)
           }
         }
         """
