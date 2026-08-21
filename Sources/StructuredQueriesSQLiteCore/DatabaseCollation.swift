@@ -1,4 +1,3 @@
-import IssueReporting
 public import StructuredQueriesCore
 
 /// A type representing a collating sequence that is implemented in Swift and installed in a
