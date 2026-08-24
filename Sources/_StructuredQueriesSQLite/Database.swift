@@ -286,31 +286,31 @@ private enum _ValuesRowPlan<Columns> {
       return try decode(decodable) as! Columns
 
     case .tuple(let elements):
-      let raw = UnsafeMutableRawPointer.allocate(
+      return try withUnsafeTemporaryAllocation(
         byteCount: MemoryLayout<Columns>.size,
         alignment: MemoryLayout<Columns>.alignment
-      )
-      func initialize<U: QueryDecodable>(_: U.Type, at offset: Int) throws {
-        (raw + offset).initializeMemory(as: U.self, repeating: try U(decoder: &decoder), count: 1)
-      }
-      func deinitialize<U>(_: U.Type, at offset: Int) {
-        (raw + offset).assumingMemoryBound(to: U.self).deinitialize(count: 1)
-      }
-      var initialized: [(type: any QueryDecodable.Type, offset: Int)] = []
-      do {
-        for element in elements {
-          try initialize(element.type, at: element.offset)
-          initialized.append(element)
+      ) { buffer in
+        guard let raw = buffer.baseAddress else { throw ValuesRowDecodingError() }
+        func initialize<U: QueryDecodable>(_: U.Type, at offset: Int) throws {
+          (raw + offset).initializeMemory(as: U.self, to: try U(decoder: &decoder))
         }
-      } catch {
-        for element in initialized {
-          deinitialize(element.type, at: element.offset)
+        func deinitialize<U>(_: U.Type, at offset: Int) {
+          (raw + offset).assumingMemoryBound(to: U.self).deinitialize(count: 1)
         }
-        raw.deallocate()
-        throw error
+        var initialized: [(type: any QueryDecodable.Type, offset: Int)] = []
+        do {
+          for element in elements {
+            try initialize(element.type, at: element.offset)
+            initialized.append(element)
+          }
+        } catch {
+          for element in initialized {
+            deinitialize(element.type, at: element.offset)
+          }
+          throw error
+        }
+        return raw.assumingMemoryBound(to: Columns.self).move()
       }
-      defer { raw.deallocate() }
-      return raw.assumingMemoryBound(to: Columns.self).move()
     }
   }
 }
