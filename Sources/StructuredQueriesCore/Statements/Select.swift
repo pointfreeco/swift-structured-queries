@@ -603,7 +603,6 @@ extension Select where Joins == () {
     select.order.append(ordering)
     return select
   }
-
 }
 
 package func _valuesColumns<each C: QueryExpression>(
