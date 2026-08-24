@@ -14,6 +14,7 @@ custom database functions, and more.
 - <doc:DefiningYourSchema>
 - <doc:QueryCookbook>
 - <doc:BuiltinFunctions>
+- <doc:DateTimeFunctions>
 - <doc:JSON>
 - <doc:CustomFunctions>
 - <doc:Triggers>
@@ -45,6 +46,7 @@ custom database functions, and more.
 
 ### Statements
 
+- ``Values``
 - ``StructuredQueriesCore/Delete/returning(_:)``
 - ``StructuredQueriesCore/Insert/returning(_:)``
 - ``StructuredQueriesCore/Update/returning(_:)``

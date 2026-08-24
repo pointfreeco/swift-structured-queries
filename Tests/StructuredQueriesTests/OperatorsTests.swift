@@ -497,7 +497,7 @@ extension SnapshotTests {
     }
 
     @Test func exists() {
-      assertQuery(Values(Reminder.exists())) {
+      assertQuery(Select(Reminder.exists())) {
         """
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
@@ -511,7 +511,7 @@ extension SnapshotTests {
         └──────┘
         """
       }
-      assertQuery(Values(Reminder.where { $0.id.eq(1) }.exists())) {
+      assertQuery(Select(Reminder.where { $0.id.eq(1) }.exists())) {
         """
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
@@ -526,7 +526,7 @@ extension SnapshotTests {
         └──────┘
         """
       }
-      assertQuery(Values(Reminder.where { $0.id.eq(100) }.exists())) {
+      assertQuery(Select(Reminder.where { $0.id.eq(100) }.exists())) {
         """
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"

@@ -1294,9 +1294,127 @@ extension SnapshotTests {
       }
     }
 
+    @Test func values() {
+      assertQuery(Select(1, "Hello", true)) {
+        """
+        SELECT 1, 'Hello', 1
+        """
+      } results: {
+        """
+        ┌───┬─────────┬──────┐
+        │ 1 │ "Hello" │ true │
+        └───┴─────────┴──────┘
+        """
+      }
+    }
+
+    @Test func valuesUnion() {
+      assertQuery(
+        Select(1, "Hello", true)
+          .union(Select(2, "Goodbye", false))
+      ) {
+        """
+        SELECT 1, 'Hello', 1
+          UNION
+        SELECT 2, 'Goodbye', 0
+        """
+      } results: {
+        """
+        ┌───┬───────────┬───────┐
+        │ 1 │ "Hello"   │ true  │
+        │ 2 │ "Goodbye" │ false │
+        └───┴───────────┴───────┘
+        """
+      }
+    }
+
+    @Test func valuesLimit() {
+      assertQuery(
+        Select(1, "Hello", true).limit(1)
+      ) {
+        """
+        SELECT 1, 'Hello', 1
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌───┬─────────┬──────┐
+        │ 1 │ "Hello" │ true │
+        └───┴─────────┴──────┘
+        """
+      }
+    }
+
+    @Test func valuesWhere() {
+      assertQuery(
+        Select(1, "Hello", 3).where { first, _, third in third.gt(first) }
+      ) {
+        """
+        SELECT 1, 'Hello', 3
+        WHERE ((3) > (1))
+        """
+      } results: {
+        """
+        ┌───┬─────────┬───┐
+        │ 1 │ "Hello" │ 3 │
+        └───┴─────────┴───┘
+        """
+      }
+      assertQuery(
+        Select(1, "Hello", 3).where { $2.gt($0) }
+      ) {
+        """
+        SELECT 1, 'Hello', 3
+        WHERE ((3) > (1))
+        """
+      } results: {
+        """
+        ┌───┬─────────┬───┐
+        │ 1 │ "Hello" │ 3 │
+        └───┴─────────┴───┘
+        """
+      }
+    }
+
+    @Test func valuesWhereSingleColumn() {
+      assertQuery(
+        Select(42).where { $0.gt(0) }
+      ) {
+        """
+        SELECT 42
+        WHERE ((42) > (0))
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 42 │
+        └────┘
+        """
+      }
+    }
+
+    @Test func valuesOrderBuilder() {
+      assertQuery(
+        Select(1, "Hello", 3).order { _, second, third in
+          (second.desc(), third.asc())
+        }
+      ) {
+        """
+        SELECT 1, 'Hello', 3
+        ORDER BY 2 DESC, 3 ASC
+        """
+      } results: {
+        """
+        ┌───┬─────────┬───┐
+        │ 1 │ "Hello" │ 3 │
+        └───┴─────────┴───┘
+        """
+      }
+    }
+
     @Test func `case`() {
       assertQuery(
-        Values(
+        Select(
           Case()
             .when(true, then: "present")
             .else("unknown")

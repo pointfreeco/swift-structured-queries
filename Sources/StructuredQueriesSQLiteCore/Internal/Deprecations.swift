@@ -24,7 +24,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    @InsertValuesBuilder<Self> values: () -> ValuesRows<Self>,
     onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
@@ -43,7 +43,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    @InsertValuesBuilder<Self> values: () -> ValuesRows<Self>,
     onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
@@ -57,7 +57,7 @@ extension Table {
   public static func insert<T1, each T2>(
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    @InsertValuesBuilder<Self> values: () -> ValuesRows<Self>,
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -83,7 +83,7 @@ extension Table {
   public static func insert<T1, each T2>(
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    @InsertValuesBuilder<Self> values: () -> ValuesRows<Self>,
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -110,7 +110,7 @@ extension Table {
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
-    values: () -> [[QueryFragment]],
+    values: () -> ValuesRows<(V1, repeat each V2)>,
     onConflictDoUpdate updates: ((inout Updates<Self>, Excluded) -> Void)? = nil,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
@@ -130,7 +130,7 @@ extension Table {
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
-    values: () -> [[QueryFragment]],
+    values: () -> ValuesRows<(V1, repeat each V2)>,
     onConflictDoUpdate updates: ((inout Updates<Self>) -> Void)?,
     @QueryFragmentBuilder<Bool>
     where updateFilter: (TableColumns) -> [QueryFragment] = { _ in [] }
@@ -145,7 +145,7 @@ extension Table {
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
-    values: () -> [[QueryFragment]],
+    values: () -> ValuesRows<(V1, repeat each V2)>,
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -172,7 +172,7 @@ extension Table {
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
-    values: () -> [[QueryFragment]],
+    values: () -> ValuesRows<(V1, repeat each V2)>,
     onConflict conflictTargets: (TableColumns) -> (
       TableColumn<Self, T1>, repeat TableColumn<Self, each T2>
     ),
@@ -314,7 +314,7 @@ extension PrimaryKeyedTable {
   @available(*, deprecated, renamed: "upsert(value:)")
   public static func upsert(
     or conflictResolution: ConflictResolution,
-    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]]
+    @InsertValuesBuilder<Self> values: () -> ValuesRows<Self>
   ) -> InsertOf<Self> {
     var insert = upsert(values: values)
     insert.conflictResolution = conflictResolution.queryFragment
@@ -555,7 +555,7 @@ extension Table {
   public static func insert(
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> TableColumns = { $0 },
-    @InsertValuesBuilder<Self> values: () -> [[QueryFragment]],
+    @InsertValuesBuilder<Self> values: () -> ValuesRows<Self>,
     onConflict updates: ((inout Updates<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, columns, values: values, onConflictDoUpdate: updates)
@@ -566,7 +566,7 @@ extension Table {
     or conflictResolution: ConflictResolution,
     _ columns: (TableColumns) -> (TableColumn<Self, V1>, repeat TableColumn<Self, each V2>),
     @InsertValuesBuilder<(V1, repeat each V2)>
-    values: () -> [[QueryFragment]],
+    values: () -> ValuesRows<(V1, repeat each V2)>,
     onConflict updates: ((inout Updates<Self>) -> Void)?
   ) -> InsertOf<Self> {
     insert(or: conflictResolution, columns, values: values, onConflictDoUpdate: updates)

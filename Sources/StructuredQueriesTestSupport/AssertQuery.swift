@@ -62,123 +62,63 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
   line: UInt = #line,
   column: UInt = #column
 ) {
-  assertInlineSnapshot(
-    of: query,
-    as: .sql,
-    message: "Query did not match",
-    syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
-      trailingClosureLabel: "sql",
-      trailingClosureOffset: snapshotTrailingClosureOffset
-    ),
-    matches: sql,
+  _assertQuery(
+    query,
+    table: {
+      let rows = try execute(query)
+      var table = ""
+      printTable(values: rows, to: &table)
+      return table
+    },
+    sql: sql,
+    results: results,
+    snapshotTrailingClosureOffset: snapshotTrailingClosureOffset,
     fileID: fileID,
-    file: filePath,
+    filePath: filePath,
     function: function,
     line: line,
     column: column
   )
-  do {
-    let rows = try execute(query)
-    var table = ""
-    printTable(rows, to: &table)
-    if !table.isEmpty {
-      assertInlineSnapshot(
-        of: table,
-        as: .lines,
-        message: "Results did not match",
-        syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
-          trailingClosureLabel: "results",
-          trailingClosureOffset: snapshotTrailingClosureOffset + 1
-        ),
-        matches: results,
-        fileID: fileID,
-        file: filePath,
-        function: function,
-        line: line,
-        column: column
-      )
-    } else if results != nil {
-      assertInlineSnapshot(
-        of: table,
-        as: .lines,
-        message: "Results expected to be empty",
-        syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
-          trailingClosureLabel: "results",
-          trailingClosureOffset: snapshotTrailingClosureOffset + 1
-        ),
-        matches: results,
-        fileID: fileID,
-        file: filePath,
-        function: function,
-        line: line,
-        column: column
-      )
-    }
-  } catch {
-    assertInlineSnapshot(
-      of: error.localizedDescription,
-      as: .lines,
-      message: "Results did not match",
-      syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
-        trailingClosureLabel: "results",
-        trailingClosureOffset: snapshotTrailingClosureOffset + 1
-      ),
-      matches: results,
-      fileID: fileID,
-      file: filePath,
-      function: function,
-      line: line,
-      column: column
-    )
-  }
 }
 
-/// An end-to-end snapshot testing helper for statements.
+// NB: This overload keeps the statement's value opaque because resolving a values select against
+//     the parameter pack overload crashes the compiler.
+/// An end-to-end snapshot testing helper for statements whose results are executed as whole rows.
 ///
-/// This helper can be used to generate snapshots of both the given query and the results of the
-/// query decoded back into Swift.
-///
-/// ```swift
-/// assertQuery(
-///   Reminder.select(\.title).order(by: \.title)
-/// ) {
-///   try db.execute($0)
-/// } sql: {
-///   """
-///   SELECT "reminders"."title" FROM "reminders"
-///   ORDER BY "reminders"."title"
-///   """
-/// } results: {
-///   """
-///   ┌────────────────────────────┐
-///   │ "Buy concert tickets"      │
-///   │ "Call accountant"          │
-///   │ "Doctor appointment"       │
-///   │ "Get laundry"              │
-///   │ "Groceries"                │
-///   │ "Haircut"                  │
-///   │ "Pick up kids from school" │
-///   │ "Send weekly emails"       │
-///   │ "Take a walk"              │
-///   │ "Take out trash"           │
-///   └────────────────────────────┘
-///   """
-/// }
-/// ```
-///
-/// - Parameters:
-///   - query: A statement.
-///   - execute: A closure responsible for executing the query and returning the results.
-///   - sql: A snapshot of the SQL produced by the statement.
-///   - results: A snapshot of the results.
-///   - snapshotTrailingClosureOffset: The trailing closure offset of the `sql` snapshot. Defaults
-///     to `1` for invoking this helper directly, but if you write a wrapper function that automates
-///     the `execute` trailing closure, you should pass `0` instead.
-///   - fileID: The source `#fileID` associated with the assertion.
-///   - filePath: The source `#filePath` associated with the assertion.
-///   - function: The source `#function` associated with the assertion
-///   - line: The source `#line` associated with the assertion.
-///   - column: The source `#column` associated with the assertion.
+/// A variant of `assertQuery` for executions that produce rows of a statement's `QueryValue`
+/// directly.
+@_disfavoredOverload
+public func assertQuery<S: PartialSelectStatement>(
+  _ query: S,
+  execute: (S) throws -> [S.QueryValue],
+  sql: (() -> String)? = nil,
+  results: (() -> String)? = nil,
+  snapshotTrailingClosureOffset: Int = 1,
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  function: StaticString = #function,
+  line: UInt = #line,
+  column: UInt = #column
+) {
+  _assertQuery(
+    query,
+    table: {
+      let rows = try execute(query)
+      var table = ""
+      printTable(values: rows, to: &table)
+      return table
+    },
+    sql: sql,
+    results: results,
+    snapshotTrailingClosureOffset: snapshotTrailingClosureOffset,
+    fileID: fileID,
+    filePath: filePath,
+    function: function,
+    line: line,
+    column: column
+  )
+}
+
 public func assertQuery<S: SelectStatement, each J: Table>(
   _ query: S,
   execute: (Select<(S.From, repeat each J), S.From, (repeat each J)>) throws -> [(
@@ -207,21 +147,35 @@ public func assertQuery<S: SelectStatement, each J: Table>(
   )
 }
 
-private func printTable<each C>(_ rows: [(repeat each C)], to output: inout some TextOutputStream) {
-  var maxColumnSpan: [Int] = []
-  var hasMultiLineRows = false
-  for _ in repeat (each C).self {
-    maxColumnSpan.append(0)
-  }
-  var table: [([[Substring]], maxRowSpan: Int)] = []
+private func printTable<Row>(values rows: [Row], to output: inout some TextOutputStream) {
+  var cellRows: [[String]] = []
   for row in rows {
-    var columns: [[Substring]] = []
-    var index = 0
-    var maxRowSpan = 0
-    for column in repeat each row {
-      defer { index += 1 }
+    let mirror = Mirror(reflecting: row)
+    var cells: [String] = []
+    if mirror.displayStyle == .tuple {
+      for child in mirror.children {
+        var cell = ""
+        customDump(child.value, to: &cell)
+        cells.append(cell)
+      }
+    } else {
       var cell = ""
-      customDump(column, to: &cell)
+      customDump(row, to: &cell)
+      cells.append(cell)
+    }
+    cellRows.append(cells)
+  }
+  printTable(cellRows: cellRows, to: &output)
+}
+
+private func printTable(cellRows: [[String]], to output: inout some TextOutputStream) {
+  var maxColumnSpan = [Int](repeating: 0, count: cellRows.map(\.count).max() ?? 0)
+  var hasMultiLineRows = false
+  var table: [([[Substring]], maxRowSpan: Int)] = []
+  for row in cellRows {
+    var columns: [[Substring]] = []
+    var maxRowSpan = 0
+    for (index, cell) in row.enumerated() {
       let lines = cell.split(separator: "\n")
       hasMultiLineRows = hasMultiLineRows || lines.count > 1
       maxRowSpan = max(maxRowSpan, lines.count)
@@ -273,4 +227,85 @@ private func printTable<each C>(_ rows: [(repeat each C)], to output: inout some
       .joined(separator: "─┴─")
   )
   output.write("─┘")
+}
+
+private func _assertQuery(
+  _ query: some Statement,
+  table renderTable: () throws -> String,
+  sql: (() -> String)?,
+  results: (() -> String)?,
+  snapshotTrailingClosureOffset: Int,
+  fileID: StaticString,
+  filePath: StaticString,
+  function: StaticString,
+  line: UInt,
+  column: UInt
+) {
+  assertInlineSnapshot(
+    of: query,
+    as: .sql,
+    message: "Query did not match",
+    syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+      trailingClosureLabel: "sql",
+      trailingClosureOffset: snapshotTrailingClosureOffset
+    ),
+    matches: sql,
+    fileID: fileID,
+    file: filePath,
+    function: function,
+    line: line,
+    column: column
+  )
+  do {
+    let table = try renderTable()
+    if !table.isEmpty {
+      assertInlineSnapshot(
+        of: table,
+        as: .lines,
+        message: "Results did not match",
+        syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+          trailingClosureLabel: "results",
+          trailingClosureOffset: snapshotTrailingClosureOffset + 1
+        ),
+        matches: results,
+        fileID: fileID,
+        file: filePath,
+        function: function,
+        line: line,
+        column: column
+      )
+    } else if results != nil {
+      assertInlineSnapshot(
+        of: table,
+        as: .lines,
+        message: "Results expected to be empty",
+        syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+          trailingClosureLabel: "results",
+          trailingClosureOffset: snapshotTrailingClosureOffset + 1
+        ),
+        matches: results,
+        fileID: fileID,
+        file: filePath,
+        function: function,
+        line: line,
+        column: column
+      )
+    }
+  } catch {
+    assertInlineSnapshot(
+      of: error.localizedDescription,
+      as: .lines,
+      message: "Results did not match",
+      syntaxDescriptor: InlineSnapshotSyntaxDescriptor(
+        trailingClosureLabel: "results",
+        trailingClosureOffset: snapshotTrailingClosureOffset + 1
+      ),
+      matches: results,
+      fileID: fileID,
+      file: filePath,
+      function: function,
+      line: line,
+      column: column
+    )
+  }
 }

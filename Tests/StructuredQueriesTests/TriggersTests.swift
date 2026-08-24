@@ -207,6 +207,41 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func insertTableExpression() throws {
+      try db.execute(
+        """
+        CREATE TABLE "localRemindersLists" (
+          "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+          "color" INTEGER NOT NULL DEFAULT 4889071,
+          "title" TEXT NOT NULL DEFAULT '',
+          "position" INTEGER NOT NULL DEFAULT 0
+        )
+        """
+      )
+      let trigger = LocalRemindersList.createTemporaryTrigger(
+        "after_insert_on_remindersLists",
+        after: .insert { new in
+          RemindersList
+            .insert {
+              new.remindersList
+            }
+        }
+      )
+      assertQuery(trigger) {
+        """
+        CREATE TEMPORARY TRIGGER
+          "after_insert_on_remindersLists"
+        AFTER INSERT ON "localRemindersLists"
+        FOR EACH ROW BEGIN
+          INSERT INTO "remindersLists"
+          ("id", "color", "title", "position")
+          VALUES
+          ("new"."id", "new"."color", "new"."title", "new"."position");
+        END
+        """
+      }
+    }
   }
 }
 
@@ -217,4 +252,8 @@ extension SnapshotTests {
 @Selection private struct Timestamps {
   let createdAt: Date
   let updatedAt: Date?
+}
+
+@Table private struct LocalRemindersList {
+  var remindersList: RemindersList
 }
