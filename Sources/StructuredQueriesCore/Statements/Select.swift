@@ -1,3 +1,5 @@
+import IssueReporting
+
 extension Table {
   /// A select statement for a column of this table.
   ///
@@ -324,6 +326,7 @@ public struct _SelectClauses: Sendable {
   var having: [QueryFragment] = []
   var order: [QueryFragment] = []
   var limit: _LimitClause?
+  var valuesElements: [ValuesElement] = []
 }
 
 /// A `SELECT` statement.
@@ -335,7 +338,7 @@ public struct _SelectClauses: Sendable {
 #if compiler(>=6.1)
   @dynamicMemberLookup
 #endif
-public struct Select<Columns, From: Table, Joins>: Sendable {
+public struct Select<Columns, From, Joins>: Sendable {
   // NB: A parameter pack compiler crash forces us to heap-allocate this storage.
   @CopyOnWrite var clauses = _SelectClauses()
 
@@ -424,7 +427,249 @@ public struct Select<Columns, From: Table, Joins>: Sendable {
   }
 }
 
+/// A value selected by a `FROM`-less ``Select`` statement.
+///
+/// Values of this type are passed to clause-building closures, like ``Select/where(_:)``, where
+/// they can be used directly as expressions, and multi-column values, like `@Selection` columns,
+/// can be traversed using member syntax, _e.g._ `$1.title`.
+///
+/// It also acts as the `From` type of a `FROM`-less select, _e.g._ `Select(1, "Hello")` is a
+/// `Select<(Int, String), ValuesColumns<(Int, String)>, ()>`.
+@dynamicMemberLookup
+public struct ValuesColumns<Value>: QueryExpression, Sendable {
+  public typealias QueryValue = Value
+
+  let columns: [QueryFragment]
+  let elements: [ValuesElement]?
+
+  package init(columns: [QueryFragment], elements: [ValuesElement]? = nil) {
+    self.columns = columns
+    self.elements = elements
+  }
+
+  public var queryFragment: QueryFragment {
+    columns.joined(separator: ", ")
+  }
+
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Value, Member>
+  ) -> SQLQueryExpression<Member> {
+    guard
+      let index = (elements ?? ValuesElement.elements(for: Value.self)).columnIndex(of: keyPath),
+      columns.indices.contains(index)
+    else {
+      reportIssue("Could not determine the column for the given key path")
+      return SQLQueryExpression(columns.first ?? "NULL", as: Member.self)
+    }
+    return SQLQueryExpression(columns[index], as: Member.self)
+  }
+}
+
+extension Select where Joins == () {
+  /// A `SELECT` statement that selects a set of values.
+  ///
+  /// ```swift
+  /// Select(true, 2.3, "Hello")
+  /// // SELECT 1, 2.3, 'Hello'
+  /// // => (Bool, Double, String)
+  /// ```
+  ///
+  /// While not particularly useful on its own, it can act as a helpful starting point for recursive
+  /// common table expressions and other subqueries. See <doc:CommonTableExpressions> for more.
+  ///
+  /// - Parameter value: A value to select.
+  @_disfavoredOverload
+  public init(_ value: Columns)
+  where Columns: QueryExpression, From == ValuesColumns<Columns> {
+    self.init(clauses: _SelectClauses())
+    columns = $_isSelecting.withValue(true) { [value.queryFragment] }
+    clauses.valuesElements = ValuesElement.elements(for: Columns.self)
+  }
+
+  /// A `SELECT` statement that selects a set of values.
+  ///
+  /// ```swift
+  /// Select(true, 2.3, "Hello")
+  /// // SELECT 1, 2.3, 'Hello'
+  /// // => (Bool, Double, String)
+  /// ```
+  ///
+  /// While not particularly useful on its own, it can act as a helpful starting point for recursive
+  /// common table expressions and other subqueries. See <doc:CommonTableExpressions> for more.
+  ///
+  /// - Parameter values: Values to select.
+  @_disfavoredOverload
+  public init<each Value: QueryExpression>(
+    _ values: repeat each Value
+  )
+  where
+    Columns == (repeat (each Value).QueryValue),
+    // NB: Spelling this 'ValuesColumns<Columns>' crashes the Swift 6.1 requirement machine.
+    From == ValuesColumns<(repeat (each Value).QueryValue)>
+  {
+    self.init(clauses: _SelectClauses())
+    columns = $_isSelecting.withValue(true) {
+      var columns: [QueryFragment] = []
+      for value in repeat each values {
+        columns.append(value.queryFragment)
+      }
+      return columns
+    }
+    clauses.valuesElements = ValuesElement.elements(
+      for: repeat ((each Value).QueryValue).self
+    )
+  }
+
+  package init(
+    valuesColumns valueColumns: [QueryFragment],
+    elements: [ValuesElement],
+    from: QueryFragment,
+    isEmpty: Bool = false
+  ) {
+    self.init(clauses: _SelectClauses())
+    self.isEmpty = isEmpty
+    columns = valueColumns
+    clauses.from = from
+    clauses.valuesElements = elements
+  }
+
+  package var _valuesElements: [ValuesElement] {
+    clauses.valuesElements
+  }
+
+  /// Creates a new select statement from this one by appending a predicate to its `WHERE` clause.
+  ///
+  /// The predicate is built from this select's values, passed to the closure as individual
+  /// arguments.
+  ///
+  /// ```swift
+  /// Select(1, "Hello", 3).where { $2.gt($0) }
+  /// // SELECT 1, 'Hello', 3
+  /// // WHERE ((3) > (1))
+  /// ```
+  ///
+  /// - Parameter predicate: A result builder closure that returns a Boolean expression to filter
+  ///   by.
+  /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
+  public func `where`<each C: QueryExpression>(
+    @QueryFragmentBuilder<Bool>
+    _ predicate: (repeat ValuesColumns<each C>) -> [QueryFragment]
+  ) -> Self
+  where From == ValuesColumns<(repeat each C)> {
+    var select = self
+    let columns: (repeat ValuesColumns<each C>) = _valuesColumns { range in
+      guard range.upperBound <= clauses.columns.count else {
+        reportIssue("Could not determine the columns for value at position \(range.lowerBound)")
+        return Array(repeating: "NULL", count: range.count)
+      }
+      return Array(clauses.columns[range])
+    }
+    select.where.append(contentsOf: predicate(repeat each columns))
+    return select
+  }
+
+  /// Creates a new select statement from this one by appending columns to its `ORDER BY` clause.
+  ///
+  /// The columns are passed to the closure as individual arguments, each rendered as its 1-based
+  /// position in the statement.
+  ///
+  /// ```swift
+  /// Select(1, "Hello", 3).order { _, second, _ in second.desc() }
+  /// // SELECT 1, 'Hello', 3
+  /// // ORDER BY 2 DESC
+  /// ```
+  ///
+  /// - Parameter ordering: A result builder closure that returns columns to order by.
+  /// - Returns: A new select statement that appends the returned columns to its `ORDER BY` clause.
+  public func order<each C: QueryExpression>(
+    @QueryFragmentBuilder<()>
+    by ordering: (repeat ValuesColumns<each C>) -> [QueryFragment]
+  ) -> Self
+  where From == ValuesColumns<(repeat each C)> {
+    var select = self
+    let columns: (repeat ValuesColumns<each C>) = _valuesColumns { range in
+      range.map { "\(raw: $0 + 1)" }
+    }
+    select.order.append(contentsOf: ordering(repeat each columns))
+    return select
+  }
+
+  package func _where(_ predicate: QueryFragment) -> Self {
+    var select = self
+    select.where.append(predicate)
+    return select
+  }
+
+  package func _order(_ ordering: QueryFragment) -> Self {
+    var select = self
+    select.order.append(ordering)
+    return select
+  }
+}
+
+package func _valuesColumns<each C: QueryExpression>(
+  at columns: (Range<Int>) -> [QueryFragment]
+) -> (repeat ValuesColumns<each C>) {
+  var index = 0
+  func column<Value: QueryExpression>(_: Value.Type) -> ValuesColumns<Value> {
+    let width = Value._columnWidth
+    defer { index += width }
+    return ValuesColumns(columns: columns(index..<index + width))
+  }
+  return (repeat column((each C).self))
+}
+
 extension Select {
+  /// Creates a new select statement from this one by setting its distinct clause.
+  ///
+  /// - Parameter isDistinct: Whether or not to `SELECT DISTINCT`.
+  /// - Returns: A new select statement with a `DISTINCT` clause determined by `isDistinct`.
+  public func distinct(_ isDistinct: Bool = true) -> Self {
+    var select = self
+    select.distinct = isDistinct
+    return select
+  }
+
+  /// Creates a new select statement from this one by overriding its `LIMIT` clause.
+  ///
+  /// Passing `nil` will leave this select's `LIMIT` clause untouched.
+  ///
+  /// - Parameter maxLength: An expression for the select's `LIMIT` clause, or `nil` to leave the
+  ///   clause untouched.
+  /// - Returns: A new select statement that overrides this one's `LIMIT` clause.
+  public func limit<each J: Table>(_ maxLength: (any QueryExpression<Int>)?) -> Self
+  where Joins == (repeat each J) {
+    _limit(maxLength?.queryFragment)
+  }
+
+  /// Creates a new select statement from this one by overriding its `OFFSET` clause.
+  ///
+  /// Passing `nil` will leave this select's `OFFSET` clause untouched.
+  ///
+  /// - Parameter offset: An expression for the select's `OFFSET` clause, or `nil` to leave the
+  ///   clause untouched.
+  /// - Returns: A new select statement that overrides this one's `OFFSET` clause.
+  public func offset<each J: Table>(_ offset: (any QueryExpression<Int>)?) -> Self
+  where Joins == (repeat each J) {
+    _offset(offset?.queryFragment)
+  }
+
+  fileprivate func _limit(_ maxLength: QueryFragment?) -> Self {
+    guard let maxLength else { return self }
+    var select = self
+    select.limit = _LimitClause(maxLength: maxLength, offset: select.limit?.offset)
+    return select
+  }
+
+  fileprivate func _offset(_ offset: QueryFragment?) -> Self {
+    guard let offset else { return self }
+    var select = self
+    select.limit = _LimitClause(maxLength: select.limit?.maxLength, offset: offset)
+    return select
+  }
+}
+
+extension Select where From: Table {
   init(isEmpty: Bool = false, where: [QueryFragment] = []) {
     self.isEmpty = isEmpty
     self.where = `where`
@@ -611,16 +856,6 @@ extension Select {
       order: order,
       limit: limit
     )
-  }
-
-  /// Creates a new select statement from this one by setting its distinct clause.
-  ///
-  /// - Parameter isDistinct: Whether or not to `SELECT DISTINCT`.
-  /// - Returns: A new select statement with a `DISTINCT` clause determined by `isDistinct`.
-  public func distinct(_ isDistinct: Bool = true) -> Self {
-    var select = self
-    select.distinct = isDistinct
-    return select
   }
 
   /// Creates a new select statement from this one by joining another table.
@@ -1608,18 +1843,6 @@ extension Select {
 
   /// Creates a new select statement from this one by overriding its `LIMIT` clause.
   ///
-  /// Passing `nil` will leave this select's `LIMIT` clause untouched.
-  ///
-  /// - Parameter maxLength: An expression for the select's `LIMIT` clause, or `nil` to leave the
-  ///   clause untouched.
-  /// - Returns: A new select statement that overrides this one's `LIMIT` clause.
-  public func limit<each J: Table>(_ maxLength: (any QueryExpression<Int>)?) -> Self
-  where Joins == (repeat each J) {
-    _limit(maxLength?.queryFragment)
-  }
-
-  /// Creates a new select statement from this one by overriding its `LIMIT` clause.
-  ///
   /// A result builder closure that produces no expression will leave this select's `LIMIT` clause
   /// untouched.
   ///
@@ -1648,18 +1871,6 @@ extension Select {
   ) -> Self
   where Joins: Table {
     _limit(maxLength(From.columns, Joins.columns).last)
-  }
-
-  /// Creates a new select statement from this one by overriding its `OFFSET` clause.
-  ///
-  /// Passing `nil` will leave this select's `OFFSET` clause untouched.
-  ///
-  /// - Parameter offset: An expression for the select's `OFFSET` clause, or `nil` to leave the
-  ///   clause untouched.
-  /// - Returns: A new select statement that overrides this one's `OFFSET` clause.
-  public func offset<each J: Table>(_ offset: (any QueryExpression<Int>)?) -> Self
-  where Joins == (repeat each J) {
-    _offset(offset?.queryFragment)
   }
 
   /// Creates a new select statement from this one by overriding its `OFFSET` clause.
@@ -1694,19 +1905,6 @@ extension Select {
     _offset(offset(From.columns, Joins.columns).last)
   }
 
-  private func _limit(_ maxLength: QueryFragment?) -> Self {
-    guard let maxLength else { return self }
-    var select = self
-    select.limit = _LimitClause(maxLength: maxLength, offset: select.limit?.offset)
-    return select
-  }
-
-  private func _offset(_ offset: QueryFragment?) -> Self {
-    guard let offset else { return self }
-    var select = self
-    select.limit = _LimitClause(maxLength: select.limit?.maxLength, offset: offset)
-    return select
-  }
 
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
@@ -1897,35 +2095,44 @@ extension _SelectClauses {
 
 @TaskLocal public var _isSelecting = false
 
-extension Select: SelectStatement {
-  public typealias QueryValue = Columns
-
+extension Select: SelectStatement where From: Table {
   public var _selectClauses: _SelectClauses {
     clauses
+  }
+}
+
+extension Select: PartialSelectStatement {
+  public typealias QueryValue = Columns
+
+  var _rendersFromClause: Bool {
+    clauses.from != nil || From.self is any Table.Type
   }
 
   public var query: QueryFragment {
     guard !isEmpty else { return "" }
     var query: QueryFragment = "SELECT"
+    let fromTable = From.self as? any Table.Type
     let columns =
       columns.isEmpty
-      ? $_isSelecting.withValue(true) { [From.columns.queryFragment] }
+      ? $_isSelecting.withValue(true) { fromTable.map { [$0._allColumnsFragment] } ?? [] }
         + joins.map { $0.tableColumns }
       : columns
     if distinct {
       query.append(" DISTINCT")
     }
     query.append(" \(columns.joined(separator: ", "))")
-    query.append("\(.newlineOrSpace)FROM ")
-    if let tableReference = clauses.from {
-      query.append(tableReference)
-    } else {
-      if let schemaName = From.schemaName {
-        query.append("\(quote: schemaName).")
+    if _rendersFromClause {
+      query.append("\(.newlineOrSpace)FROM ")
+      if let tableReference = clauses.from {
+        query.append(tableReference)
+      } else if let fromTable {
+        if let schemaName = fromTable.schemaName {
+          query.append("\(quote: schemaName).")
+        }
+        query.append(fromTable.tableFragment)
       }
-      query.append(From.tableFragment)
     }
-    if let tableAlias = From.tableAlias {
+    if let tableAlias = fromTable?.tableAlias {
       query.append(" AS \(quote: tableAlias)")
     }
     for join in joins {

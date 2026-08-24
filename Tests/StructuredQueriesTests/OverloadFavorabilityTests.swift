@@ -1,4 +1,5 @@
 import StructuredQueries
+import StructuredQueriesSQLite
 import Testing
 
 @Suite struct OverloadFavorabilityTests {
@@ -27,5 +28,11 @@ import Testing
       let result = (1...3).contains(1)
       #expect(result == true)
     }
+  }
+
+  @Test func selectOfValuesIsSubquery() {
+    let statement = Select(Values { (1, "Hello") })
+    let _: Select<(Int, String), Values<(Int, String)>, ()> = statement
+    #expect("\(statement.query)".hasPrefix("SELECT \"column1\", \"column2\""))
   }
 }
