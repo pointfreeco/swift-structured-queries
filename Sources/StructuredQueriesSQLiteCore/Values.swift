@@ -117,6 +117,26 @@ extension Select where Joins == () {
     return select
   }
 
+  /// Creates a new select statement from this one by appending a predicate to its `WHERE` clause.
+  ///
+  /// The columns are passed to the closure as individual arguments.
+  ///
+  /// - Parameter predicate: A result builder closure that returns a Boolean expression to filter
+  ///   by.
+  /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
+  public func `where`<each C: QueryExpression>(
+    @QueryFragmentBuilder<Bool>
+    _ predicate: (repeat ValuesColumns<each C>) -> [QueryFragment]
+  ) -> Self
+  where From == Values<(repeat each C)> {
+    var select = self
+    let columns: (repeat ValuesColumns<each C>) = _valuesColumnNames()
+    for fragment in predicate(repeat each columns) {
+      select = select._where(fragment)
+    }
+    return select
+  }
+
   /// Creates a new select statement from this one by appending a column to its `ORDER BY` clause.
   ///
   /// - Parameter ordering: A key path to a value to order by.
@@ -141,26 +161,6 @@ extension Select where Joins == () {
     var select = self
     for fragment in ordering(_valuesNamedColumns()) {
       select = select._order(fragment)
-    }
-    return select
-  }
-
-  /// Creates a new select statement from this one by appending a predicate to its `WHERE` clause.
-  ///
-  /// The columns are passed to the closure as individual arguments.
-  ///
-  /// - Parameter predicate: A result builder closure that returns a Boolean expression to filter
-  ///   by.
-  /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
-  public func `where`<each C: QueryExpression>(
-    @QueryFragmentBuilder<Bool>
-    _ predicate: (repeat ValuesColumns<each C>) -> [QueryFragment]
-  ) -> Self
-  where From == Values<(repeat each C)> {
-    var select = self
-    let columns: (repeat ValuesColumns<each C>) = _valuesColumnNames()
-    for fragment in predicate(repeat each columns) {
-      select = select._where(fragment)
     }
     return select
   }

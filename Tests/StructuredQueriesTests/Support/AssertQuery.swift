@@ -78,9 +78,6 @@ func assertQuery<each V: QueryRepresentable>(
   )
 }
 
-// NB: The concrete 'Select<Columns, Values<Columns>, ()>' type steers 'db.execute' to the values
-//     overload, because resolving a values select against the parameter pack overloads crashes the
-//     compiler.
 @_disfavoredOverload
 func assertQuery<Columns>(
   _ query: Select<Columns, Values<Columns>, ()>,

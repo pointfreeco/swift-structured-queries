@@ -896,7 +896,7 @@ public enum InsertValuesBuilder<Value> {
     V.QueryValue: QueryRepresentable & QueryBindable
   {
     ValuesRows(
-      rows: [expression.map(\.queryFragment)],
+      rows: expression.map { [$0.queryFragment] },
       elements: ValuesElement.elements(for: Value.self)
     )
   }
@@ -907,7 +907,7 @@ public enum InsertValuesBuilder<Value> {
   ) -> ValuesRows<Value>
   where Value: QueryRepresentable & QueryBindable {
     ValuesRows(
-      rows: [expression.map { Value(queryOutput: $0).queryFragment }],
+      rows: expression.map { [Value(queryOutput: $0).queryFragment] },
       elements: ValuesElement.elements(for: Value.self)
     )
   }
