@@ -72,7 +72,7 @@ extension SnapshotTests {
 
         """
       }
-      assertQuery(Reminder.insert(\.id) { return [] }) {
+      assertQuery(Reminder.insert(\.id) { [] }) {
         """
 
         """

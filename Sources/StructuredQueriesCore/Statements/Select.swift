@@ -326,7 +326,7 @@ public struct _SelectClauses: Sendable {
   var having: [QueryFragment] = []
   var order: [QueryFragment] = []
   var limit: _LimitClause?
-  var valuesElements: [_ValuesElement] = []
+  var valuesElements: [ValuesElement] = []
 }
 
 /// A `SELECT` statement.
@@ -440,9 +440,11 @@ public struct ValuesColumns<Value>: QueryExpression, Sendable {
   public typealias QueryValue = Value
 
   let columns: [QueryFragment]
+  let elements: [ValuesElement]?
 
-  package init(columns: [QueryFragment]) {
+  package init(columns: [QueryFragment], elements: [ValuesElement]? = nil) {
     self.columns = columns
+    self.elements = elements
   }
 
   public var queryFragment: QueryFragment {
@@ -453,7 +455,7 @@ public struct ValuesColumns<Value>: QueryExpression, Sendable {
     dynamicMember keyPath: KeyPath<Value, Member>
   ) -> SQLQueryExpression<Member> {
     guard
-      let index = _valuesColumnIndex(of: keyPath, in: _valuesElements(for: Value.self)),
+      let index = (elements ?? ValuesElement.elements(for: Value.self)).columnIndex(of: keyPath),
       columns.indices.contains(index)
     else {
       reportIssue("Could not determine the column for the given key path")
@@ -481,7 +483,7 @@ extension Select where Joins == () {
   where Columns: QueryExpression, From == ValuesColumns<Columns> {
     self.init(clauses: _SelectClauses())
     columns = $_isSelecting.withValue(true) { [value.queryFragment] }
-    clauses.valuesElements = StructuredQueriesCore._valuesElements(for: Columns.self)
+    clauses.valuesElements = ValuesElement.elements(for: Columns.self)
   }
 
   /// A `SELECT` statement that selects a set of values.
@@ -513,14 +515,14 @@ extension Select where Joins == () {
       }
       return columns
     }
-    clauses.valuesElements = StructuredQueriesCore._valuesElements(
+    clauses.valuesElements = ValuesElement.elements(
       for: repeat ((each Value).QueryValue).self
     )
   }
 
   package init(
-    _valuesColumns valueColumns: [QueryFragment],
-    elements: [_ValuesElement],
+    valuesColumns valueColumns: [QueryFragment],
+    elements: [ValuesElement],
     from: QueryFragment,
     isEmpty: Bool = false
   ) {
@@ -531,7 +533,7 @@ extension Select where Joins == () {
     clauses.valuesElements = elements
   }
 
-  package var _valuesElements: [_ValuesElement] {
+  package var _valuesElements: [ValuesElement] {
     clauses.valuesElements
   }
 
@@ -2102,6 +2104,10 @@ extension Select: SelectStatement where From: Table {
 extension Select: PartialSelectStatement {
   public typealias QueryValue = Columns
 
+  var _rendersFromClause: Bool {
+    clauses.from != nil || From.self is any Table.Type
+  }
+
   public var query: QueryFragment {
     guard !isEmpty else { return "" }
     var query: QueryFragment = "SELECT"
@@ -2115,7 +2121,7 @@ extension Select: PartialSelectStatement {
       query.append(" DISTINCT")
     }
     query.append(" \(columns.joined(separator: ", "))")
-    if clauses.from != nil || fromTable != nil {
+    if _rendersFromClause {
       query.append("\(.newlineOrSpace)FROM ")
       if let tableReference = clauses.from {
         query.append(tableReference)

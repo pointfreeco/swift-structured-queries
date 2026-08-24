@@ -34,7 +34,3 @@ Select(
 ### Creating a values statement
 
 - ``init(_:)``
-
-### Referring to values
-
-- ``TableColumns``

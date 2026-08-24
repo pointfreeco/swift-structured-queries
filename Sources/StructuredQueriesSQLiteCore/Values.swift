@@ -1,4 +1,3 @@
-import IssueReporting
 public import StructuredQueriesCore
 
 /// A `VALUES` statement.
@@ -21,12 +20,12 @@ public struct Values<QueryValue>: PartialSelectStatement {
   public typealias From = Never
 
   private let rows: [[QueryFragment]]
-  package let _elements: [_ValuesElement]
+  package let _valuesElements: [ValuesElement]
 
   public init(@InsertValuesBuilder<QueryValue> _ values: () -> ValuesRows<QueryValue>) {
     let built = values()
     rows = built.rows
-    _elements = built.elements
+    _valuesElements = built.elements
   }
 
   public var query: QueryFragment {
@@ -38,37 +37,6 @@ public struct Values<QueryValue>: PartialSelectStatement {
         .joined(separator: ", ")
     )
     return query
-  }
-}
-
-extension Values {
-  /// A type that describes a `VALUES` statement's automatically-named columns, `"column1"` through
-  /// `"columnN"`.
-  ///
-  /// Columns are referred to using member syntax, _e.g._ `$0.0` refers to `"column1"` and a
-  /// selection's `$0.score` refers to `"score"`.
-  @dynamicMemberLookup
-  public struct TableColumns: Sendable {
-    let elements: [_ValuesElement]
-
-    package init(elements: [_ValuesElement]) {
-      self.elements = elements
-    }
-
-    public subscript<Member: QueryRepresentable & QueryBindable>(
-      dynamicMember keyPath: KeyPath<QueryValue, Member>
-    ) -> SQLQueryExpression<Member> {
-      let index: Int
-      if let found = _valuesColumnIndex(of: keyPath, in: elements) {
-        index = found
-      } else {
-        reportIssue("Could not determine the column for the given key path")
-        index = 0
-      }
-      let names = elements.flatMap { $0.columns.map(\.name) }
-      let name = names.indices.contains(index) ? names[index] : nil
-      return SQLQueryExpression("\(quote: name ?? "column\(index + 1)")", as: Member.self)
-    }
   }
 }
 
@@ -94,7 +62,7 @@ extension Select where Joins == () {
   /// - Parameter values: A statement whose values are selected.
   public init(_ values: Values<Columns>)
   where From == Values<Columns> {
-    let elements = values._elements
+    let elements = values._valuesElements
     var columns: [QueryFragment] = []
     var position = 0
     for element in elements {
@@ -113,7 +81,7 @@ extension Select where Joins == () {
       from.append(" AS \(quote: table.tableName)")
     }
     self.init(
-      _valuesColumns: columns,
+      valuesColumns: columns,
       elements: elements,
       from: from,
       isEmpty: values.query.isEmpty
@@ -129,7 +97,7 @@ extension Select where Joins == () {
     _ keyPath: KeyPath<Columns, Predicate>
   ) -> Self
   where From == Values<Columns>, Predicate: QueryRepresentable & QueryBindable {
-    _where(_valuesColumn(keyPath).queryFragment)
+    _where(_valuesNamedColumns()[dynamicMember: keyPath].queryFragment)
   }
 
   /// Creates a new select statement from this one by appending a predicate to its `WHERE` clause.
@@ -139,11 +107,11 @@ extension Select where Joins == () {
   /// - Returns: A new select statement that appends the given predicate to its `WHERE` clause.
   public func `where`(
     @QueryFragmentBuilder<Bool>
-    _ predicate: (Values<Columns>.TableColumns) -> [QueryFragment]
+    _ predicate: (ValuesColumns<Columns>) -> [QueryFragment]
   ) -> Self
   where From == Values<Columns> {
     var select = self
-    for fragment in predicate(Values<Columns>.TableColumns(elements: _valuesElements)) {
+    for fragment in predicate(_valuesNamedColumns()) {
       select = select._where(fragment)
     }
     return select
@@ -157,7 +125,7 @@ extension Select where Joins == () {
     by ordering: KeyPath<Columns, Member>
   ) -> Self
   where From == Values<Columns> {
-    _order(_valuesColumn(ordering).queryFragment)
+    _order(_valuesNamedColumns()[dynamicMember: ordering].queryFragment)
   }
 
   /// Creates a new select statement from this one by appending columns to its `ORDER BY` clause.
@@ -167,11 +135,11 @@ extension Select where Joins == () {
   /// - Returns: A new select statement that appends the returned columns to its `ORDER BY` clause.
   public func order(
     @QueryFragmentBuilder<()>
-    by ordering: (Values<Columns>.TableColumns) -> [QueryFragment]
+    by ordering: (ValuesColumns<Columns>) -> [QueryFragment]
   ) -> Self
   where From == Values<Columns> {
     var select = self
-    for fragment in ordering(Values<Columns>.TableColumns(elements: _valuesElements)) {
+    for fragment in ordering(_valuesNamedColumns()) {
       select = select._order(fragment)
     }
     return select
@@ -228,10 +196,12 @@ extension Select where Joins == () {
     }
   }
 
-  private func _valuesColumn<Member: QueryRepresentable & QueryBindable>(
-    _ keyPath: KeyPath<Columns, Member>
-  ) -> SQLQueryExpression<Member>
+  private func _valuesNamedColumns() -> ValuesColumns<Columns>
   where From == Values<Columns> {
-    Values<Columns>.TableColumns(elements: _valuesElements)[dynamicMember: keyPath]
+    let names = _valuesElements.flatMap { $0.columns.map(\.name) }
+    return ValuesColumns(
+      columns: names.indices.map { "\(quote: names[$0] ?? "column\($0 + 1)")" },
+      elements: _valuesElements
+    )
   }
 }

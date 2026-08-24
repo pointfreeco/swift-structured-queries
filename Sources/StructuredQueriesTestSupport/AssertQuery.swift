@@ -67,7 +67,7 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
     table: {
       let rows = try execute(query)
       var table = ""
-      printTable(rows, to: &table)
+      printTable(values: rows, to: &table)
       return table
     },
     sql: sql,
@@ -81,52 +81,12 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
   )
 }
 
-/// An end-to-end snapshot testing helper for statements.
+// NB: This overload keeps the statement's value opaque because resolving a values select against
+//     the parameter pack overload crashes the compiler.
+/// An end-to-end snapshot testing helper for statements whose results are executed as whole rows.
 ///
-/// This helper can be used to generate snapshots of both the given query and the results of the
-/// query decoded back into Swift.
-///
-/// ```swift
-/// assertQuery(
-///   Reminder.select(\.title).order(by: \.title)
-/// ) {
-///   try db.execute($0)
-/// } sql: {
-///   """
-///   SELECT "reminders"."title" FROM "reminders"
-///   ORDER BY "reminders"."title"
-///   """
-/// } results: {
-///   """
-///   ┌────────────────────────────┐
-///   │ "Buy concert tickets"      │
-///   │ "Call accountant"          │
-///   │ "Doctor appointment"       │
-///   │ "Get laundry"              │
-///   │ "Groceries"                │
-///   │ "Haircut"                  │
-///   │ "Pick up kids from school" │
-///   │ "Send weekly emails"       │
-///   │ "Take a walk"              │
-///   │ "Take out trash"           │
-///   └────────────────────────────┘
-///   """
-/// }
-/// ```
-///
-/// - Parameters:
-///   - query: A statement.
-///   - execute: A closure responsible for executing the query and returning the results.
-///   - sql: A snapshot of the SQL produced by the statement.
-///   - results: A snapshot of the results.
-///   - snapshotTrailingClosureOffset: The trailing closure offset of the `sql` snapshot. Defaults
-///     to `1` for invoking this helper directly, but if you write a wrapper function that automates
-///     the `execute` trailing closure, you should pass `0` instead.
-///   - fileID: The source `#fileID` associated with the assertion.
-///   - filePath: The source `#filePath` associated with the assertion.
-///   - function: The source `#function` associated with the assertion
-///   - line: The source `#line` associated with the assertion.
-///   - column: The source `#column` associated with the assertion.
+/// A variant of `assertQuery` for executions that produce rows of a statement's `QueryValue`
+/// directly.
 @_disfavoredOverload
 public func assertQuery<S: PartialSelectStatement>(
   _ query: S,
@@ -185,20 +145,6 @@ public func assertQuery<S: SelectStatement, each J: Table>(
     line: line,
     column: column
   )
-}
-
-private func printTable<each C>(_ rows: [(repeat each C)], to output: inout some TextOutputStream) {
-  var cellRows: [[String]] = []
-  for row in rows {
-    var cells: [String] = []
-    for column in repeat each row {
-      var cell = ""
-      customDump(column, to: &cell)
-      cells.append(cell)
-    }
-    cellRows.append(cells)
-  }
-  printTable(cellRows: cellRows, to: &output)
 }
 
 private func printTable<Row>(values rows: [Row], to output: inout some TextOutputStream) {

@@ -878,39 +878,13 @@ public typealias InsertOf<Into: Table> = Insert<Into, ()>
 public enum InsertValuesBuilder<Value> {
   public static func buildExpression(_ expression: [Value]) -> ValuesRows<Value>
   where Value: Table {
-    var valueFragments: [[QueryFragment]] = []
-    for value in expression {
-      var valueFragment: [QueryFragment] = []
-      for column in Value.TableColumns.writableColumns {
-        func open<Root, Member>(
-          _ column: some WritableTableColumnExpression<Root, Member>
-        ) -> QueryFragment {
-          Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        valueFragment.append(open(column))
-      }
-      valueFragments.append(valueFragment)
-    }
-    return ValuesRows(rows: valueFragments, elements: [Value._writableTableValuesElement])
+    ValuesRows(rows: _writableRows(expression), elements: [Value.writableValuesElement])
   }
 
   @_disfavoredOverload
   public static func buildExpression(_ expression: [Value.Draft]) -> ValuesRows<Value>
   where Value: Table, Value.Draft: TableDraft {
-    var valueFragments: [[QueryFragment]] = []
-    for value in expression {
-      var valueFragment: [QueryFragment] = []
-      for column in Value.Draft.TableColumns.writableColumns {
-        func open<Root, Member>(
-          _ column: some WritableTableColumnExpression<Root, Member>
-        ) -> QueryFragment {
-          Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        valueFragment.append(open(column))
-      }
-      valueFragments.append(valueFragment)
-    }
-    return ValuesRows(rows: valueFragments, elements: [Value.Draft._writableTableValuesElement])
+    ValuesRows(rows: _writableRows(expression), elements: [Value.Draft.writableValuesElement])
   }
 
   @_disfavoredOverload
@@ -921,7 +895,10 @@ public enum InsertValuesBuilder<Value> {
     Value == V.QueryValue,
     V.QueryValue: QueryRepresentable & QueryBindable
   {
-    ValuesRows(rows: [expression.map(\.queryFragment)], elements: _valuesElements(for: Value.self))
+    ValuesRows(
+      rows: [expression.map(\.queryFragment)],
+      elements: ValuesElement.elements(for: Value.self)
+    )
   }
 
   @_disfavoredOverload
@@ -931,7 +908,7 @@ public enum InsertValuesBuilder<Value> {
   where Value: QueryRepresentable & QueryBindable {
     ValuesRows(
       rows: [expression.map { Value(queryOutput: $0).queryFragment }],
-      elements: _valuesElements(for: Value.self)
+      elements: ValuesElement.elements(for: Value.self)
     )
   }
 
@@ -977,7 +954,7 @@ public enum InsertValuesBuilder<Value> {
     }
     return ValuesRows(
       rows: [valueFragment],
-      elements: _valuesElements(for: repeat ((each V).QueryValue).self)
+      elements: ValuesElement.elements(for: repeat ((each V).QueryValue).self)
     )
   }
 
@@ -989,7 +966,10 @@ public enum InsertValuesBuilder<Value> {
     for (columnType, column) in repeat ((each V).self, each expression) {
       valueFragment.append(columnType.init(queryOutput: column).queryFragment)
     }
-    return ValuesRows(rows: [valueFragment], elements: _valuesElements(for: repeat (each V).self))
+    return ValuesRows(
+      rows: [valueFragment],
+      elements: ValuesElement.elements(for: repeat (each V).self)
+    )
   }
 
   public static func buildExpression(
@@ -998,7 +978,7 @@ public enum InsertValuesBuilder<Value> {
   where Value: Table {
     ValuesRows(
       rows: [expression.allColumns.map(\.queryFragment)],
-      elements: [Value._tableValuesElement]
+      elements: [Value.valuesElement]
     )
   }
 
@@ -1008,7 +988,7 @@ public enum InsertValuesBuilder<Value> {
   where Value: Table {
     ValuesRows(
       rows: [expression.allColumns.map(\.queryFragment)],
-      elements: [Value._tableValuesElement]
+      elements: [Value.valuesElement]
     )
   }
 
@@ -1052,6 +1032,19 @@ public enum InsertValuesBuilder<Value> {
     var rows = accumulated
     rows.append(next)
     return rows
+  }
+}
+
+private func _writableRows<T: Table>(_ values: [T]) -> [[QueryFragment]] {
+  values.map { value in
+    T.TableColumns.writableColumns.map { column in
+      func open<Root, Member>(
+        _ column: some WritableTableColumnExpression<Root, Member>
+      ) -> QueryFragment {
+        Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
+      }
+      return open(column)
+    }
   }
 }
 

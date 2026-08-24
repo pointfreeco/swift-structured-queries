@@ -261,7 +261,7 @@ private enum _ValuesRowPlan<Columns> {
   case single(any QueryDecodable.Type)
   case tuple([(type: any QueryDecodable.Type, offset: Int)])
 
-  init(elements: [_ValuesElement]) throws {
+  init(elements: [ValuesElement]) throws {
     if elements.count == 1, let decodable = elements[0].decodableType {
       self = .single(decodable)
       return
