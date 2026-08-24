@@ -1905,7 +1905,6 @@ extension Select where From: Table {
     _offset(offset(From.columns, Joins.columns).last)
   }
 
-
   /// Creates a new select statement from this one by appending `count(*)` to its selection.
   ///
   /// - Parameter filter: A `FILTER` clause to apply to the aggregation.

@@ -78,7 +78,13 @@ extension SnapshotTests {
         """
       }
       let titles: [String] = []
-      assertQuery(Tag.insert { $0.title } values: { titles }) {
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } values: {
+          titles
+        }
+      ) {
         """
 
         """
@@ -88,8 +94,12 @@ extension SnapshotTests {
     @Test
     func arrayValues() {
       assertQuery(
-        Tag.insert { $0.title } values: { ["boat", "plane"] }
-          .returning(\.title)
+        Tag.insert {
+          $0.title
+        } values: {
+          ["boat", "plane"]
+        }
+        .returning(\.title)
       ) {
         """
         INSERT INTO "tags"
