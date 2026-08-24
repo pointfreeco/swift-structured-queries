@@ -125,9 +125,7 @@ public struct Database {
     }
   }
 
-  // NB: Resolving values selects against the pack-based overload crashes the type checker, so this
-  //     overload stays generic over an opaque 'Columns' and reconstructs the tuple's layout at
-  //     runtime from its '_ValuesElement' offsets.
+  // NB: Works around a parameter pack crash so that `Values` queries can be snapshot-tested.
   @_disfavoredOverload
   public func execute<Columns>(
     _ query: Select<Columns, Values<Columns>, ()>
