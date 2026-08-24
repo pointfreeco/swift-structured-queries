@@ -12,7 +12,7 @@ extension SnapshotTests {
       let ids = Array([2, 3, 5, 1, 4].enumerated())
       let (first, rest) = (ids.first!, ids.dropFirst())
       assertQuery(
-        Values(
+        Select(
           rest
             .reduce(Case(5).when(first.element, then: first.offset)) { cases, id in
               cases.when(id.element, then: id.offset)

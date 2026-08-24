@@ -46,6 +46,7 @@ custom database functions, and more.
 
 ### Statements
 
+- ``Values``
 - ``StructuredQueriesCore/Delete/returning(_:)``
 - ``StructuredQueriesCore/Insert/returning(_:)``
 - ``StructuredQueriesCore/Update/returning(_:)``

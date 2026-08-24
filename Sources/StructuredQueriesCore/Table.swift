@@ -119,6 +119,10 @@ extension Table {
     QueryFragment(quote: tableName)
   }
 
+  static var _allColumnsFragment: QueryFragment {
+    columns.queryFragment
+  }
+
   /// Returns a table column to the resulting value of a given key path.
   ///
   /// Allows, _e.g._ `Reminder.columns.id` to be abbreviated `Reminder.id`, which is useful when

@@ -12,7 +12,7 @@ extension SnapshotTests {
     @Test func basics() {
       let trigger = RemindersList.createTemporaryTrigger(
         after: .insert { new in
-          Values(1)
+          Select(1)
         }
       )
       assertQuery(

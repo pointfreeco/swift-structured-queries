@@ -24,7 +24,7 @@ extension SnapshotTests {
     @Test func customIsEnabled() {
       $isEnabled.install(database.handle)
       assertQuery(
-        Values($isEnabled())
+        Select($isEnabled())
       ) {
         """
         SELECT "isEnabled"()
@@ -45,7 +45,7 @@ extension SnapshotTests {
     @Test func customDateTime() {
       $dateTime.install(database.handle)
       assertQuery(
-        Values($dateTime())
+        Select($dateTime())
       ) {
         """
         SELECT "dateTime"(NULL)
@@ -66,7 +66,7 @@ extension SnapshotTests {
     @Test func customConcat() {
       $concat.install(database.handle)
       assertQuery(
-        Values($concat(first: "foo", second: "bar"))
+        Select($concat(first: "foo", second: "bar"))
       ) {
         """
         SELECT "concat"('foo', 'bar')
@@ -83,7 +83,7 @@ extension SnapshotTests {
     @Test func erasedConcat() {
       $concat.install(database.handle)
       assertQuery(
-        Values($concat("foo", "bar"))
+        Select($concat("foo", "bar"))
       ) {
         """
         SELECT "concat"('foo', 'bar')
@@ -109,7 +109,7 @@ extension SnapshotTests {
     @Test func customThrowing() {
       $throwing.install(database.handle)
       assertQuery(
-        Values($throwing())
+        Select($throwing())
       ) {
         """
         SELECT "throwing"()
@@ -136,7 +136,7 @@ extension SnapshotTests {
     @Test func customToggle() {
       $toggle.install(database.handle)
       assertQuery(
-        Values($toggle(Completion.incomplete))
+        Select($toggle(Completion.incomplete))
       ) {
         """
         SELECT "toggle"(0)
@@ -158,7 +158,7 @@ extension SnapshotTests {
     @Test func customRepresentation() {
       $jsonCapitalize.install(database.handle)
       assertQuery(
-        Values($jsonCapitalize(#bind(["hello", "world"])))
+        Select($jsonCapitalize(#bind(["hello", "world"])))
       ) {
         """
         SELECT "jsonCapitalize"('[
@@ -186,7 +186,7 @@ extension SnapshotTests {
     @Test func customMixedRepresentation() {
       $jsonDropFirst.install(database.handle)
       assertQuery(
-        Values($jsonDropFirst(#bind(["hello", "world", "goodnight", "moon"]), 2))
+        Select($jsonDropFirst(#bind(["hello", "world", "goodnight", "moon"]), 2))
       ) {
         """
         SELECT "jsonDropFirst"('[
@@ -216,7 +216,7 @@ extension SnapshotTests {
     @Test func customNilRepresentation() {
       $jsonCount.install(database.handle)
       assertQuery(
-        Values($jsonCount(#bind(["hello", "world", "goodnight", "moon"])))
+        Select($jsonCount(#bind(["hello", "world", "goodnight", "moon"])))
       ) {
         """
         SELECT "jsonCount"('[
@@ -234,7 +234,7 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Values($jsonCount(#bind(nil)))
+        Select($jsonCount(#bind(nil)))
       ) {
         """
         SELECT "jsonCount"(NULL)
@@ -262,7 +262,7 @@ extension SnapshotTests {
       logger.$log.install(database.handle)
 
       assertQuery(
-        Values(logger.$log("Hello, world!"))
+        Select(logger.$log("Hello, world!"))
       ) {
         """
         SELECT "log"('Hello, world!')
@@ -660,7 +660,7 @@ extension SnapshotTests {
       $epoch.install(database.handle)
 
       assertQuery(
-        Values($epoch)
+        Select($epoch)
       ) {
         """
         SELECT "epoch"()
@@ -682,7 +682,7 @@ extension SnapshotTests {
       $seconds.install(database.handle)
 
       assertQuery(
-        Values($seconds)
+        Select($seconds)
       ) {
         """
         SELECT "epoch"()
@@ -709,7 +709,7 @@ extension SnapshotTests {
       $throw.install(database.handle)
 
       assertQuery(
-        Values($throw)
+        Select($throw)
       ) {
         """
         SELECT "throw"()

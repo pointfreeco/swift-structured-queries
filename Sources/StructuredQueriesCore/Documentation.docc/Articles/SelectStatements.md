@@ -882,7 +882,6 @@ functions, which apply the appropriate SQL operator between each statement.
 - ``Select``
 - ``SelectStatement``
 - ``PartialSelectStatement``
-- ``Values``
 
 ### Convenience type aliases
 

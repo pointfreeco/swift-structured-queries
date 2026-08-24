@@ -606,7 +606,7 @@
 
       @Test func selection() {
         assertQuery(
-          Values(
+          Select(
             Attachment.Kind.Selection.note("Hello, world!")
           )
         ) {
@@ -621,7 +621,7 @@
           """
         }
         assertQuery(
-          Values(
+          Select(
             Attachment.Kind.Selection.image(
               Attachment.Image(caption: "Blob", url: URL(string: "https://pointfree.co")!)
             )
