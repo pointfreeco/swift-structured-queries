@@ -16,7 +16,9 @@
 - ``group(by:)``
 - ``having(_:)``
 - ``order(by:)``
-- ``limit(_:offset:)``
+- ``limit(_:)``
+- ``offset(_:)``
+- ``count()``
 - ``count(filter:)``
 - ``find(_:)``
 
@@ -32,3 +34,4 @@
 ### Supporting types
 
 - ``SelectOf``
+- ``ValuesColumns``

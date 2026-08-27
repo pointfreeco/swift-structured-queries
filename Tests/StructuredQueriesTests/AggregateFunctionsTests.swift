@@ -1,6 +1,7 @@
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import StructuredQueriesTestSupport
 import Testing
 
@@ -190,9 +191,9 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌────┐
-        │ 55 │
-        └────┘
+        ┌──────┐
+        │ 55.0 │
+        └──────┘
         """
       }
     }
@@ -228,14 +229,16 @@ extension SnapshotTests {
         """
       }
 
-      assertInlineSnapshot(
-        of: User.select { $0.name.groupConcat(order: $0.isAdmin.desc()) },
-        as: .sql
-      ) {
-        """
-        SELECT group_concat("users"."name" ORDER BY "users"."isAdmin" DESC)
-        FROM "users"
-        """
+      if #available(iOS 26, macOS 26, tvOS 26, watchOS 26, *) {
+        assertInlineSnapshot(
+          of: User.select { $0.name.groupConcat(order: $0.isAdmin.desc()) },
+          as: .sql
+        ) {
+          """
+          SELECT group_concat("users"."name" ORDER BY "users"."isAdmin" DESC)
+          FROM "users"
+          """
+        }
       }
 
       assertInlineSnapshot(

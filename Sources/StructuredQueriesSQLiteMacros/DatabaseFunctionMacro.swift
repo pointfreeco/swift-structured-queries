@@ -105,11 +105,23 @@ extension DatabaseFunctionMacro: PeerMacro {
           "\(functionTypeName) { \(raw: getter.throws ? "try " : "")\(rawDeclarationName.trimmed) }"
       }
 
+      let probeName = context.makeUniqueName("\(declarationName)IsolationProbe")
+      let isolation: TokenSyntax? =
+        declaration.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
+        ? .keyword(.nonisolated, trailingTrivia: .space)
+        : nil
+      let check = isolationCheck("property", probeName.text, for: node, in: context)
+
       return [
+        """
+        #if DEBUG
+        \(isolation)\(`static`)func \(probeName)() {}
+        #endif
+        """,
         """
         \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
         \(functionTypeName) {
-        \(projectedCallSyntax)
+        \(raw: check)return \(projectedCallSyntax)
         }
         """,
         """
@@ -236,6 +248,7 @@ extension DatabaseFunctionMacro: PeerMacro {
     var bodyArguments: [String] = []
     var representableInputTypes: [String] = []
     var signature = declaration.signature
+    var aggregateBaseParameterClause: FunctionParameterClauseSyntax?
     var invocationArgumentTypes: [TypeSyntax] = []
     var parameters: [String] = []
     var argumentBindings: [String] = []
@@ -347,6 +360,7 @@ extension DatabaseFunctionMacro: PeerMacro {
           )
         )
       }
+      aggregateBaseParameterClause = parameterClause
       parameterClause.parameters.append(
         FunctionParameterSyntax(
           firstName: "order",
@@ -496,20 +510,82 @@ extension DatabaseFunctionMacro: PeerMacro {
       parameter.firstName = .wildcardToken(trailingTrivia: .space)
       parameter.secondName = "arguments"
 
-      methods.append(
-        """
-        public func callAsFunction\(signature.trimmed) {
-        StructuredQueriesCore.$_isSelecting.withValue(false) {
-        StructuredQueriesCore.AggregateFunctionExpression(
-        self.name, \
-        \(raw: parameters.joined(separator: ", ")), \
-        order: order, \
-        filter: filter
-        )
+      func aggregateMethod(
+        availability: String,
+        extraParameters: [FunctionParameterSyntax],
+        extraArguments: [String]
+      ) -> DeclSyntax {
+        var signature = signature
+        if let base = aggregateBaseParameterClause {
+          var params = Array(base.parameters) + extraParameters
+          for index in params.indices {
+            let isLast = index == params.count - 1
+            params[index].trailingComma = isLast ? nil : .commaToken()
+            params[index].trailingTrivia = isLast ? [] : .space
+          }
+          signature.parameterClause = base.with(\.parameters, FunctionParameterListSyntax(params))
         }
-        }
-        """
+        let arguments = (parameters + extraArguments).joined(separator: ", ")
+        return """
+          \(raw: availability)public func callAsFunction\(signature.trimmed) {
+          StructuredQueriesCore.$_isSelecting.withValue(false) {
+          StructuredQueriesCore.AggregateFunctionExpression(
+          self.name, \
+          \(raw: arguments)
+          )
+          }
+          }
+          """
+      }
+
+      let orderParameter = FunctionParameterSyntax(
+        firstName: "order",
+        colon: .colonToken(trailingTrivia: .space),
+        type: "some QueryExpression" as TypeSyntax
       )
+      let optionalFilterParameter = FunctionParameterSyntax(
+        firstName: "filter",
+        colon: .colonToken(trailingTrivia: .space),
+        type: "(some QueryExpression<Bool>)?" as TypeSyntax,
+        defaultValue: InitializerClauseSyntax(
+          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+          value: "Bool?.none" as ExprSyntax
+        )
+      )
+
+      #if SuppressPlatformSQLiteAvailability
+        let defaultedOrderParameter = FunctionParameterSyntax(
+          firstName: "order",
+          colon: .colonToken(trailingTrivia: .space),
+          type: "(some QueryExpression)?" as TypeSyntax,
+          defaultValue: InitializerClauseSyntax(
+            equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+            value: "Bool?.none" as ExprSyntax
+          )
+        )
+        methods.append(
+          aggregateMethod(
+            availability: "",
+            extraParameters: [defaultedOrderParameter, optionalFilterParameter],
+            extraArguments: ["order: order", "filter: filter"]
+          )
+        )
+      #else
+        methods.append(
+          aggregateMethod(
+            availability: "",
+            extraParameters: [optionalFilterParameter],
+            extraArguments: ["filter: filter"]
+          )
+        )
+        methods.append(
+          aggregateMethod(
+            availability: "@available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)\n",
+            extraParameters: [orderParameter, optionalFilterParameter],
+            extraArguments: ["order: order", "filter: filter"]
+          )
+        )
+      #endif
 
       let stepReturnClause: String
       switch parameters.count {
@@ -608,32 +684,60 @@ extension DatabaseFunctionMacro: PeerMacro {
       )
     }
 
-    return [
-      """
-      \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
-      \(functionTypeName) {
-      \(projectedCallSyntax)
-      }
-      """,
-      """
-      \(attributes)\(access)\(nonisolated)struct \(functionTypeName): \
-      StructuredQueriesSQLiteCore.\(raw: isAggregate ? "Aggregate" : "Scalar")DatabaseFunction {
-      public typealias Input = \(raw: representableInputType)
-      public typealias Output = \(representableOutputType)
-      public let name = \(databaseFunctionName)
-      public var argumentCount: Int? {
-      \(raw: argumentCount)
-      }
-      public let isDeterministic = \(raw: isDeterministic)
-      public let body: \(raw: bodyType)
-      public init(_ body: @escaping \(raw: bodyType)) {
-      self.body = body
-      }
-      \(raw: methods.map(\.description).joined(separator: "\n"))\
-      \(raw: canThrowInvalidInvocation ? "\nprivate struct InvalidInvocation: Error {}" : "")
-      }
-      """,
-    ]
+    var decls: [DeclSyntax] = []
+    let check: String
+    if isAggregate {
+      let probeName = context.makeUniqueName("\(declarationName)IsolationProbe")
+      let isolation: TokenSyntax? =
+        declaration.modifiers.contains { $0.name.tokenKind == .keyword(.nonisolated) }
+        ? .keyword(.nonisolated, trailingTrivia: .space)
+        : nil
+      decls.append(
+        """
+        #if DEBUG
+        \(isolation)\(`static`)func \(probeName)() {}
+        #endif
+        """
+      )
+      check = isolationCheck("function", probeName.text, for: node, in: context)
+    } else {
+      check = isolationCheck(
+        "function",
+        declaration.name.trimmedDescription,
+        for: node,
+        in: context
+      )
+    }
+
+    decls.append(
+      contentsOf: [
+        """
+        \(attributes)\(access)\(`static`)\(nonisolated)var $\(raw: declarationName): \
+        \(functionTypeName) {
+        \(raw: check)return \(projectedCallSyntax)
+        }
+        """,
+        """
+        \(attributes)\(access)\(nonisolated)struct \(functionTypeName): \
+        StructuredQueriesSQLiteCore.\(raw: isAggregate ? "Aggregate" : "Scalar")DatabaseFunction {
+        public typealias Input = \(raw: representableInputType)
+        public typealias Output = \(representableOutputType)
+        public let name = \(databaseFunctionName)
+        public var argumentCount: Int? {
+        \(raw: argumentCount)
+        }
+        public let isDeterministic = \(raw: isDeterministic)
+        public let body: \(raw: bodyType)
+        public init(_ body: @escaping \(raw: bodyType)) {
+        self.body = body
+        }
+        \(raw: methods.map(\.description).joined(separator: "\n"))\
+        \(raw: canThrowInvalidInvocation ? "\nprivate struct InvalidInvocation: Error {}" : "")
+        }
+        """,
+      ]
+    )
+    return decls
   }
 }
 

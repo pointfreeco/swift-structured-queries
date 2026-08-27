@@ -1,11 +1,16 @@
+import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import StructuredQueriesTestSupport
 import Testing
+import _StructuredQueriesSQLite
 
 extension SnapshotTests {
   @Suite struct InsertTests {
+    @Dependency(\.defaultDatabase) var db
+
     @Test func basics() {
       assertQuery(
         Reminder.insert {
@@ -67,9 +72,48 @@ extension SnapshotTests {
 
         """
       }
-      assertQuery(Reminder.insert(\.id) { return [] }) {
+      assertQuery(Reminder.insert(\.id) { [] }) {
         """
 
+        """
+      }
+      let titles: [String] = []
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } values: {
+          titles
+        }
+      ) {
+        """
+
+        """
+      }
+    }
+
+    @Test
+    func arrayValues() {
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } values: {
+          ["boat", "plane"]
+        }
+        .returning(\.title)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        VALUES
+        ('boat'), ('plane')
+        RETURNING "title"
+        """
+      } results: {
+        """
+        ┌─────────┐
+        │ "boat"  │
+        │ "plane" │
+        └─────────┘
         """
       }
     }
@@ -203,7 +247,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          Values("vacation")
+          Select("vacation")
         }
         .returning(\.self)
       ) {
@@ -228,8 +272,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          // NB: 'WHERE 1' is required to avoid a SQL syntax error.
-          RemindersList.where { _ in true }.select { $0.title.lower() }
+          RemindersList.select { $0.title.lower() }
         } onConflict: {
           $0.title
         } doUpdate: {
@@ -242,7 +285,7 @@ extension SnapshotTests {
         ("title")
         SELECT lower("remindersLists"."title")
         FROM "remindersLists"
-        WHERE (1)
+        WHERE 1
         ON CONFLICT ("title")
         DO UPDATE SET "title" = ("excluded"."title") || ('-copy')
         RETURNING "id", "title"
@@ -271,8 +314,7 @@ extension SnapshotTests {
         Tag.insert {
           $0.title
         } select: {
-          // NB: 'WHERE 1' is required to avoid a SQL syntax error.
-          RemindersList.where { _ in true }.select { $0.title.lower() + "-copy" }
+          RemindersList.select { $0.title.lower() + "-copy" }
         } onConflict: {
           $0.title
         } doUpdate: {
@@ -285,7 +327,7 @@ extension SnapshotTests {
         ("title")
         SELECT (lower("remindersLists"."title")) || ('-copy')
         FROM "remindersLists"
-        WHERE (1)
+        WHERE 1
         ON CONFLICT ("title")
         DO UPDATE SET "title" = ("tags"."title") || ('-2')
         RETURNING "id", "title"
@@ -308,6 +350,107 @@ extension SnapshotTests {
         │   title: "personal-copy-2" │
         │ )                          │
         └────────────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          RemindersList.select { $0.title.lower() }.order { $0.title }.limit(1)
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title += "!"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT lower("remindersLists"."title")
+        FROM "remindersLists"
+        ORDER BY "remindersLists"."title"
+        LIMIT 1
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("tags"."title") || ('!')
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌─────────────────────┐
+        │ Tag(                │
+        │   id: 15,           │
+        │   title: "business" │
+        │ )                   │
+        └─────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          Select("vacation")
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title += "!"
+        }
+        .returning(\.self)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT 'vacation'
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("tags"."title") || ('!')
+        RETURNING "id", "title"
+        """
+      } results: {
+        """
+        ┌──────────────────────┐
+        │ Tag(                 │
+        │   id: 8,             │
+        │   title: "vacation!" │
+        │ )                    │
+        └──────────────────────┘
+        """
+      }
+      assertQuery(
+        Tag.insert {
+          $0.title
+        } select: {
+          RemindersList.select { $0.title.lower() }
+            .union(RemindersList.select { $0.title.upper() })
+        } onConflict: {
+          $0.title
+        } doUpdate: {
+          $0.title += "?"
+        }
+        .returning(\.title)
+      ) {
+        """
+        INSERT INTO "tags"
+        ("title")
+        SELECT lower("remindersLists"."title")
+        FROM "remindersLists"
+          UNION
+        SELECT upper("remindersLists"."title")
+        FROM "remindersLists"
+        WHERE 1
+        ON CONFLICT ("title")
+        DO UPDATE SET "title" = ("tags"."title") || ('?')
+        RETURNING "title"
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ "business?" │
+        │ "FAMILY"    │
+        │ "PERSONAL"  │
+        │ "business"  │
+        │ "FAMILY?"   │
+        │ "PERSONAL?" │
+        └─────────────┘
         """
       }
     }
@@ -714,27 +857,24 @@ extension SnapshotTests {
       }
     }
 
-    // NB: This currently crashes in Xcode 26.
-    #if swift(<6.2)
-      @Test func onConflict_invalidUpdateFilters() {
-        withKnownIssue {
-          assertQuery(
-            Reminder.insert {
-              Reminder.Draft(remindersListID: 1)
-            } where: {
-              $0.isFlagged
-            }
-          ) {
-            """
-            INSERT INTO "reminders"
-            ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt")
-            VALUES
-            (NULL, NULL, NULL, 0, 0, '', NULL, 1, '', '2040-02-14 23:31:30.000')
-            """
+    @Test func onConflict_invalidUpdateFilters() {
+      withKnownIssue {
+        assertQuery(
+          Reminder.insert {
+            Reminder.Draft(remindersListID: 1)
+          } where: {
+            $0.isFlagged
           }
+        ) {
+          """
+          INSERT INTO "reminders"
+          ("id", "assignedUserID", "dueDate", "isCompleted", "isFlagged", "notes", "priority", "remindersListID", "title", "updatedAt")
+          VALUES
+          (NULL, NULL, NULL, 0, 0, '', NULL, 1, '', '2040-02-14 23:31:30.000')
+          """
         }
       }
-    #endif
+    }
 
     @Test func onConflict_conditionalWhere() {
       let condition = false
@@ -782,7 +922,7 @@ extension SnapshotTests {
         RemindersList.insert {
           $0.title
         } select: {
-          Values(#sql("'Groceries'"))
+          Select(#sql("'Groceries'"))
         }
         .returning(\.id)
       ) {
@@ -800,6 +940,49 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func columnGroup() throws {
+      try db.execute(
+        """
+        CREATE TABLE "itemWrappers" (
+          "id" INTEGER NOT NULL,
+          "title" TEXT NOT NULL DEFAULT '',
+          "quantity" INTEGER NOT NULL DEFAULT 0,
+          "notes" TEXT NOT NULL DEFAULT '[]'
+        )
+        """
+      )
+      assertQuery(
+        ItemWrapper.insert {
+          ($0.id, $0.item)
+        } values: {
+          (1, Item(title: "Blob", quantity: 123, notes: ["To-do"]))
+        }
+      ) {
+        """
+        INSERT INTO "itemWrappers"
+        ("id", "title", "quantity", "notes")
+        VALUES
+        (1, 'Blob', 123, '[
+          "To-do"
+        ]')
+        """
+      }
+      assertQuery(
+        ItemWrapper.insert {
+          ($0.id, $0.item.title)
+        } values: {
+          (2, "Blob Jr")
+        }
+      ) {
+        """
+        INSERT INTO "itemWrappers"
+        ("id", "title")
+        VALUES
+        (2, 'Blob Jr')
+        """
+      }
+    }
   }
 }
 
@@ -808,4 +991,9 @@ extension SnapshotTests {
   var quantity = 0
   @Column(as: [String].JSONRepresentation.self)
   var notes: [String] = []
+}
+
+@Table private struct ItemWrapper {
+  var id: Int
+  var item: Item
 }

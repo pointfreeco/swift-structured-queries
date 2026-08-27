@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import Testing
 import _StructuredQueriesSQLite
 
@@ -679,14 +680,13 @@ extension SnapshotTests {
         )
       }
 
-      // NB: Ideally this shouldn't rewrite the text containing the table name
       @Test func invalidDefaultScope() {
         enum R: AliasName {}
         assertQuery(Row.as(R.self).select(\.id)) {
           """
           SELECT "rs"."id"
           FROM "rows" AS "rs"
-          WHERE (CAST("rs"."id" AS TEXT) = '"rs"')
+          WHERE (CAST("rs"."id" AS TEXT) = '"rows"')
           """
         } results: {
           """

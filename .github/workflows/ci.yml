@@ -18,14 +18,16 @@ jobs:
     name: macOS
     strategy:
       matrix:
-        xcode: ["26.2"]
+        xcode: ["26.6"]
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Select Xcode ${{ matrix.xcode }}
         run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
       - name: Run tests
-        run: swift test --traits CasePaths,Tagged
+        run: swift test --traits CasePaths,Tagged,SuppressPlatformSQLiteAvailability
+      - name: Build with availability checks
+        run: swift build --traits CasePaths,Tagged,ColumnCoding
       - name: Build without exports
         run: swift build -c release -Xswiftc -D -Xswiftc EXCLUDE_EXPORTS --enable-all-traits
       - name: Build release
@@ -35,8 +37,7 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        swift:
-          - "6.1"
+        swift: ["6.1", "6.3"]
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
     steps:
@@ -44,4 +45,4 @@ jobs:
       - name: Install SQLite
         run: apt update && apt -y install libsqlite3-dev
       - name: Build
-        run: swift build
+        run: swift build --build-tests

@@ -15,6 +15,17 @@ extension UUID {
   /// // INSERT INTO "items" ("id") VALUES (<blob>)
   /// ```
   public struct BytesRepresentation: QueryRepresentable {
+    public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+      """
+      CASE WHEN \(queryFragment) IS NULL THEN NULL ELSE lower(printf('%s-%s-%s-%s-%s', \
+      substr(hex(\(queryFragment)), 1, 8), \
+      substr(hex(\(queryFragment)), 9, 4), \
+      substr(hex(\(queryFragment)), 13, 4), \
+      substr(hex(\(queryFragment)), 17, 4), \
+      substr(hex(\(queryFragment)), 21, 12))) END
+      """
+    }
+
     public var queryOutput: UUID
 
     public init(queryOutput: UUID) {

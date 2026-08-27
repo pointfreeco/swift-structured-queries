@@ -43,15 +43,16 @@ to filter out deleted lists and reminders:
 
 ```swift
 extension RemindersList {
-  static let notDeleted = Self.where { $0.deletedAt.isNot(nil) }
+  static let notDeleted = Self.where { $0.deletedAt.is(nil) }
 }
 extension Reminder {
-  static let notDeleted = Self.where { $0.deletedAt.isNot(nil) }
+  static let notDeleted = Self.where { $0.deletedAt.is(nil) }
 }
 ```
 
 > Note: If your project is using [default main actor isolation] then you further need to annotate
 > your extension as `nonisolated`, or define the helpers directly in the declaration of the struct.
+
 [default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
 
 Then these helpers can be used when composing together a larger, more complex query. For example,
@@ -80,9 +81,9 @@ so:
       ON "remindersLists"."id"
         = "reminders"."remindersListID"
       WHERE "remindersLists"."deletedAt"
-        IS NOT NULL
+        IS NULL
       AND "reminders"."deletedAt"
-        IS NOT NULL
+        IS NULL
     ```
   }
 }
@@ -137,6 +138,7 @@ extension Reminder.TableColumns {
 
 > Note: If your project is using [default main actor isolation] then you further need to annotate
 > your extension as `nonisolated`.
+
 [default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
 
 Then you can use these helpers when building a query. For example, you can use
@@ -213,7 +215,7 @@ struct Reminder {
   var isCompleted = false
   var deletedAt: Date?
 
-  static let all = Self.where { $0.isDeleted.isNot(nil) }
+  static let all = Self.where { $0.deletedAt.is(nil) }
 }
 ```
 
@@ -232,7 +234,7 @@ other query entry points:
     ```sql
     SELECT …
     FROM "reminders"
-    WHERE ("deletedAt" IS NOT NULL)
+    WHERE ("deletedAt" IS NULL)
     AND (NOT "isCompleted")
     ```
   }

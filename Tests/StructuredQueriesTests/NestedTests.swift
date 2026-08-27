@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite
@@ -160,7 +161,6 @@ extension SnapshotTests {
         SET "isOutOfStock" = 1, "isOnBackOrder" = 1
         """
       }
-      // FIXME: These should decode 'nil' but because all its fields have defaults it coalesces.
       assertQuery(
         DefaultItem?(nil)
       ) {
@@ -169,16 +169,9 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌──────────────────────────┐
-        │ DefaultItem(             │
-        │   title: "",             │
-        │   quantity: 0,           │
-        │   status: Status(        │
-        │     isOutOfStock: false, │
-        │     isOnBackOrder: false │
-        │   )                      │
-        │ )                        │
-        └──────────────────────────┘
+        ┌─────┐
+        │ nil │
+        └─────┘
         """
       }
       // NB: This tests that 'Optional.none' is favored over 'Table.none'.
@@ -190,16 +183,9 @@ extension SnapshotTests {
         """
       } results: {
         """
-        ┌──────────────────────────┐
-        │ DefaultItem(             │
-        │   title: "",             │
-        │   quantity: 0,           │
-        │   status: Status(        │
-        │     isOutOfStock: false, │
-        │     isOnBackOrder: false │
-        │   )                      │
-        │ )                        │
-        └──────────────────────────┘
+        ┌─────┐
+        │ nil │
+        └─────┘
         """
       }
       assertQuery(
@@ -468,7 +454,7 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Values(A.Columns(b: B.Columns(c: C.Columns(d: 42))))
+        Select(A.Columns(b: B.Columns(c: C.Columns(d: 42))))
       ) {
         """
         SELECT 42 AS "d"
@@ -571,7 +557,7 @@ extension SnapshotTests {
           """
         }
         assertQuery(
-          Values(Post.Selection.note("Goodnight moon"))
+          Select(Post.Selection.note("Goodnight moon"))
         ) {
           """
           SELECT NULL AS "url", 'Goodnight moon' AS "note"
@@ -608,7 +594,7 @@ extension SnapshotTests {
           """
         }
         assertQuery(
-          Values(Notes.Columns.list(#bind(["Blob", "Jr"])))
+          Select(Notes.Columns.list(#bind(["Blob", "Jr"])))
         ) {
           """
           SELECT '[
@@ -637,14 +623,14 @@ extension SnapshotTests {
 private struct Item {
   var title: String
   var quantity = 0
-  var status: Status = Status()
+  var status = Status()
 }
 
 @Table("items")
 private struct DefaultItem {
   var title = ""
   var quantity = 0
-  var status: Status = Status()
+  var status = Status()
 }
 
 @Selection

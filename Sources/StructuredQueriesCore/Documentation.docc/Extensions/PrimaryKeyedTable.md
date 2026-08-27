@@ -39,8 +39,7 @@ struct Reminder {
 }
 ```
 
-To define a composite primary key, group them together into a `@Selection` type and annotate the
-field with the `@Columns` macro:
+To define a composite primary key, group the fields together into a `@Selection` type:
 
 ```swift
 @Table
@@ -51,7 +50,6 @@ struct Enrollment {
     var studentID: StudentID
   }
 
-  // Automatically inferred as '@Columns(primaryKey: True)
   let id: ID
   // ...
 }
@@ -86,7 +84,7 @@ Since the "id" column is not specified in this query it allows the database to i
 This `Draft` type is appropriate to use in any features that needs to build up a value without
 specifying an ID.
 
-Further, using the ``Insert/returning(_:)`` method you can get back the ID of the newly inserted
+Further, using the `returning(_:)` method you can get back the ID of the newly inserted
 row:
 
 ```swift

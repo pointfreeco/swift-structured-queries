@@ -254,8 +254,8 @@ Notice that you can return any number of orders for the query as a tuple, and yo
 which orders are in a descending versus ascending fashion.
 
 And finally, suppose we wanted to further customize the above query by limiting the results to 10
-rows and selecting the 2nd page of results. This can be done using the ``Table/limit(_:offset:)``
-method:
+rows and selecting the 2nd page of results. This can be done using the ``Table/limit(_:)``
+and ``Table/offset(_:)`` methods:
 
 @Row {
   @Column {
@@ -272,7 +272,8 @@ method:
          $0.priority.desc(),
          $0.title)
       }
-      .limit(10, offset: 10)
+      .limit(10)
+      .offset(10)
     // => [String]
     ```
   }
@@ -381,7 +382,7 @@ equivalent SQL code. In this case the `+=` operator on Swift strings is translat
 operator in SQL for concatenating text.
 
 The library also supports the `RETURNING` clause of insert statements by using the
-``Insert/returning(_:)`` method. If you wanted to fetch the ID of each new reminder inserted, you
+`returning(_:)` method. If you wanted to fetch the ID of each new reminder inserted, you
 can do the following:
 
 @Row {
@@ -534,7 +535,7 @@ Reminder
 ```
 
 Update statements, like inserts, have a `RETURNING` clause, which you can use to specify data to
-fetch from rows updated by the query. Simply use the ``Update/returning(_:)`` method:
+fetch from rows updated by the query. Simply use the `returning(_:)` method:
 
 @Row {
   @Column {
@@ -608,7 +609,7 @@ Reminder
 ```
 
 Delete statements, like inserts and updates, have a `RETURNING` clause, which you can use to specify
-data to fetch from rows deleted by the query. Simply use the ``Update/returning(_:)`` method:
+data to fetch from rows deleted by the query. Simply use the `returning(_:)` method:
 
 @Row {
   @Column {

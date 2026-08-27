@@ -296,8 +296,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c") IN ((SELECT "rows"."c"
-        FROM "rows"))
+        ("rows"."c") IN (SELECT "rows"."c"
+        FROM "rows")
         """
       }
     }
@@ -317,8 +317,8 @@ extension SnapshotTests {
         as: .sql
       ) {
         """
-        ("rows"."c") IN ((SELECT "rows"."c"
-        FROM "rows"))
+        ("rows"."c") IN (SELECT "rows"."c"
+        FROM "rows")
         """
       }
     }
@@ -431,8 +431,8 @@ extension SnapshotTests {
         """
         SELECT "rows"."a", "rows"."b", "rows"."c", "rows"."bool", "rows"."string"
         FROM "rows"
-        WHERE (("rows"."c") IN ((SELECT CAST("rows"."bool" AS INTEGER)
-        FROM "rows")))
+        WHERE (("rows"."c") IN (SELECT CAST("rows"."bool" AS INTEGER)
+        FROM "rows"))
         """
       }
       assertInlineSnapshot(
@@ -497,7 +497,7 @@ extension SnapshotTests {
     }
 
     @Test func exists() {
-      assertQuery(Values(Reminder.exists())) {
+      assertQuery(Select(Reminder.exists())) {
         """
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
@@ -511,7 +511,7 @@ extension SnapshotTests {
         └──────┘
         """
       }
-      assertQuery(Values(Reminder.where { $0.id.eq(1) }.exists())) {
+      assertQuery(Select(Reminder.where { $0.id.eq(1) }.exists())) {
         """
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"
@@ -526,7 +526,7 @@ extension SnapshotTests {
         └──────┘
         """
       }
-      assertQuery(Values(Reminder.where { $0.id.eq(100) }.exists())) {
+      assertQuery(Select(Reminder.where { $0.id.eq(100) }.exists())) {
         """
         SELECT EXISTS (
           SELECT "reminders"."id", "reminders"."assignedUserID", "reminders"."dueDate", "reminders"."isCompleted", "reminders"."isFlagged", "reminders"."notes", "reminders"."priority", "reminders"."remindersListID", "reminders"."title", "reminders"."updatedAt"

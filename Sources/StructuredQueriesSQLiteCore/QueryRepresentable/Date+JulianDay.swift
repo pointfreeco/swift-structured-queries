@@ -20,6 +20,14 @@ extension Date {
     public init(queryOutput: Date) {
       self.queryOutput = queryOutput
     }
+
+    public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+      subsecDateTime([queryFragment, "'julianday'"])
+    }
+
+    public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+      "julianday(\(queryFragment))"
+    }
   }
 }
 

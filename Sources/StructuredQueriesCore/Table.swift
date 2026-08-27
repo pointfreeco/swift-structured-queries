@@ -119,6 +119,10 @@ extension Table {
     QueryFragment(quote: tableName)
   }
 
+  static var _allColumnsFragment: QueryFragment {
+    columns.queryFragment
+  }
+
   /// Returns a table column to the resulting value of a given key path.
   ///
   /// Allows, _e.g._ `Reminder.columns.id` to be abbreviated `Reminder.id`, which is useful when
@@ -147,6 +151,14 @@ extension Table {
       Value(queryOutput: (self as! Root)[keyPath: column.keyPath]).queryFragment
     }
     return TableColumns.allColumns.map { open($0) }.joined(separator: ", ")
+  }
+
+  public var _allColumns: [any QueryExpression] {
+    func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> any QueryExpression
+    {
+      Value(queryOutput: (self as! Root)[keyPath: column.keyPath])
+    }
+    return TableColumns.allColumns.map { open($0) }
   }
 }
 

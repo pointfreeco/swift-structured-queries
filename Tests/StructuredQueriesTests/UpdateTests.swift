@@ -356,6 +356,16 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func emptyReturning() {
+      assertQuery(
+        Reminder.none.update { $0.isCompleted.toggle() }.returning(\.id)
+      ) {
+        """
+
+        """
+      }
+    }
   }
 
   @Suite struct SelectionUpdateTests {
@@ -414,11 +424,11 @@ extension SnapshotTests {
 }
 
 @Table private struct Root {
-  @Columns var fields: NestedFields
+  @Column var fields: NestedFields
 }
 
 @Selection struct NestedFields {
-  var honestCount: Int = 0
+  var honestCount = 0
   var optionalCount: Int?
   @Column(as: String.TestRepresentation?.self)
   var string: String?

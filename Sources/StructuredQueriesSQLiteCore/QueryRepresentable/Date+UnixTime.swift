@@ -20,6 +20,14 @@ extension Date {
     public init(queryOutput: Date) {
       self.queryOutput = queryOutput
     }
+
+    public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+      "datetime(\(queryFragment), 'unixepoch')"
+    }
+
+    public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+      "unixepoch(\(queryFragment))"
+    }
   }
 }
 
@@ -35,7 +43,7 @@ extension Date.UnixTimeRepresentation: QueryBindable {
 
 extension Date.UnixTimeRepresentation: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws {
-    try self.init(queryOutput: Date(timeIntervalSince1970: Double(decoder: &decoder)))
+    try self.init(queryOutput: Date(timeIntervalSince1970: Double(Int64(decoder: &decoder))))
   }
 }
 

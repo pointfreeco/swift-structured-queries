@@ -20,7 +20,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -70,7 +75,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -120,7 +130,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $jsonCapitalize: __macro_local_14jsonCapitalizefMu_ {
-          __macro_local_14jsonCapitalizefMu_(jsonCapitalize)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: jsonCapitalize)
+          #sourceLocation()
+          #endif
+          return __macro_local_14jsonCapitalizefMu_(jsonCapitalize)
         }
 
         nonisolated struct __macro_local_14jsonCapitalizefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -178,7 +193,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $fortyTwo: __macro_local_8fortyTwofMu_ {
-          __macro_local_8fortyTwofMu_(fortyTwo)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: fortyTwo)
+          #sourceLocation()
+          #endif
+          return __macro_local_8fortyTwofMu_(fortyTwo)
         }
 
         nonisolated struct __macro_local_8fortyTwofMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -228,7 +248,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -286,7 +311,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -344,7 +374,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -402,7 +437,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -460,7 +500,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $concat: __macro_local_6concatfMu_ {
-          __macro_local_6concatfMu_(concat)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: concat)
+          #sourceLocation()
+          #endif
+          return __macro_local_6concatfMu_(concat)
         }
 
         nonisolated struct __macro_local_6concatfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -540,7 +585,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -598,7 +648,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -652,7 +707,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -706,7 +766,12 @@ extension SnapshotTests {
         }
 
         public nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         public nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -756,7 +821,12 @@ extension SnapshotTests {
         }
 
         static nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -829,7 +899,12 @@ extension SnapshotTests {
         }
 
         @available(*, unavailable) nonisolated var $currentDate: __macro_local_11currentDatefMu_ {
-          __macro_local_11currentDatefMu_(currentDate)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 2)
+          #StructuredQueriesIsolationCheck(function: currentDate)
+          #sourceLocation()
+          #endif
+          return __macro_local_11currentDatefMu_(currentDate)
         }
 
         @available(*, unavailable) nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -879,7 +954,12 @@ extension SnapshotTests {
         }
 
         public nonisolated var $default: __macro_local_7defaultfMu_ {
-          __macro_local_7defaultfMu_(`default`)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: `default`)
+          #sourceLocation()
+          #endif
+          return __macro_local_7defaultfMu_(`default`)
         }
 
         public nonisolated struct __macro_local_7defaultfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -929,7 +1009,12 @@ extension SnapshotTests {
         }
 
         public nonisolated var $void: __macro_local_4voidfMu_ {
-          __macro_local_4voidfMu_(void)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: void)
+          #sourceLocation()
+          #endif
+          return __macro_local_4voidfMu_(void)
         }
 
         public nonisolated struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -974,7 +1059,12 @@ extension SnapshotTests {
         }
 
         public nonisolated var $void: __macro_local_4voidfMu_ {
-          __macro_local_4voidfMu_(void)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: void)
+          #sourceLocation()
+          #endif
+          return __macro_local_4voidfMu_(void)
         }
 
         public nonisolated struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -1032,7 +1122,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $min: __macro_local_3minfMu_ {
-          __macro_local_3minfMu_(min)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: min)
+          #sourceLocation()
+          #endif
+          return __macro_local_3minfMu_(min)
         }
 
         nonisolated struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -1099,7 +1194,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $min: __macro_local_3minfMu_ {
-          __macro_local_3minfMu_(min)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: min)
+          #sourceLocation()
+          #endif
+          return __macro_local_3minfMu_(min)
         }
 
         nonisolated struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -1163,7 +1263,12 @@ extension SnapshotTests {
         }
 
         nonisolated var $isValid: __macro_local_7isValidfMu_ {
-          __macro_local_7isValidfMu_(isValid)
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: isValid)
+          #sourceLocation()
+          #endif
+          return __macro_local_7isValidfMu_(isValid)
         }
 
         nonisolated struct __macro_local_7isValidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -1225,8 +1330,18 @@ extension SnapshotTests {
           Date()
         }
 
+        #if DEBUG
+        func __macro_local_17nowIsolationProbefMu_() {
+        }
+        #endif
+
         nonisolated var $now: __macro_local_3nowfMu_ {
-          __macro_local_3nowfMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
+          #sourceLocation()
+          #endif
+          return __macro_local_3nowfMu_ {
             now
           }
         }
@@ -1278,8 +1393,18 @@ extension SnapshotTests {
           }
         }
 
+        #if DEBUG
+        func __macro_local_17nowIsolationProbefMu_() {
+        }
+        #endif
+
         nonisolated var $now: __macro_local_3nowfMu_ {
-          __macro_local_3nowfMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
+          #sourceLocation()
+          #endif
+          return __macro_local_3nowfMu_ {
             now
           }
         }
@@ -1331,8 +1456,18 @@ extension SnapshotTests {
           }
         }
 
+        #if DEBUG
+        func __macro_local_17nowIsolationProbefMu_() {
+        }
+        #endif
+
         nonisolated var $now: __macro_local_3nowfMu_ {
-          __macro_local_3nowfMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
+          #sourceLocation()
+          #endif
+          return __macro_local_3nowfMu_ {
             try now
           }
         }
@@ -1383,8 +1518,19 @@ extension SnapshotTests {
             Date()
           }
 
+          #if DEBUG
+
+            static func __macro_local_17nowIsolationProbefMu_() {
+          }
+          #endif
+
           static nonisolated var $now: __macro_local_3nowfMu_ {
-            __macro_local_3nowfMu_ {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 2)
+            #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
+            #sourceLocation()
+            #endif
+            return __macro_local_3nowfMu_ {
               now
             }
           }
@@ -1434,8 +1580,18 @@ extension SnapshotTests {
             xs.reduce(into: 0, +=)
           }
 
+          #if DEBUG
+          func __macro_local_17sumIsolationProbefMu_() {
+          }
+          #endif
+
           nonisolated var $sum: __macro_local_3sumfMu_ {
-            __macro_local_3sumfMu_ {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(function: __macro_local_17sumIsolationProbefMu_)
+            #sourceLocation()
+            #endif
+            return __macro_local_3sumfMu_ {
               sum($0)
             }
           }
@@ -1494,8 +1650,18 @@ extension SnapshotTests {
             xs.reduce(into: 0, +=)
           }
 
+          #if DEBUG
+          func __macro_local_17sumIsolationProbefMu_() {
+          }
+          #endif
+
           nonisolated var $sum: __macro_local_3sumfMu_ {
-            __macro_local_3sumfMu_ {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(function: __macro_local_17sumIsolationProbefMu_)
+            #sourceLocation()
+            #endif
+            return __macro_local_3sumfMu_ {
               sum(of: $0)
             }
           }
@@ -1566,8 +1732,18 @@ extension SnapshotTests {
             return result
           }
 
+          #if DEBUG
+          func __macro_local_20joinedIsolationProbefMu_() {
+          }
+          #endif
+
           nonisolated var $joined: __macro_local_6joinedfMu_ {
-            __macro_local_6joinedfMu_ {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(function: __macro_local_20joinedIsolationProbefMu_)
+            #sourceLocation()
+            #endif
+            return __macro_local_6joinedfMu_ {
               joined($0)
             }
           }
@@ -1633,8 +1809,18 @@ extension SnapshotTests {
             arrays.flatMap(\.self)
           }
 
+          #if DEBUG
+          func __macro_local_20joinedIsolationProbefMu_() {
+          }
+          #endif
+
           nonisolated var $joined: __macro_local_6joinedfMu_ {
-            __macro_local_6joinedfMu_ {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(function: __macro_local_20joinedIsolationProbefMu_)
+            #sourceLocation()
+            #endif
+            return __macro_local_6joinedfMu_ {
               joined($0)
             }
           }
@@ -1697,8 +1883,18 @@ extension SnapshotTests {
             }
           }
 
+          #if DEBUG
+          func __macro_local_19printIsolationProbefMu_() {
+          }
+          #endif
+
           nonisolated var $print: __macro_local_5printfMu_ {
-            __macro_local_5printfMu_ {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(function: __macro_local_19printIsolationProbefMu_)
+            #sourceLocation()
+            #endif
+            return __macro_local_5printfMu_ {
               print($0)
             }
           }
@@ -1766,8 +1962,18 @@ extension SnapshotTests {
             }
           }
 
+          #if DEBUG
+          func __macro_local_30validatePositiveIsolationProbefMu_() {
+          }
+          #endif
+
           nonisolated var $validatePositive: __macro_local_16validatePositivefMu_ {
-            __macro_local_16validatePositivefMu_ {
+            #if DEBUG
+            #sourceLocation(file: "Test.swift", line: 1)
+            #StructuredQueriesIsolationCheck(function: __macro_local_30validatePositiveIsolationProbefMu_)
+            #sourceLocation()
+            #endif
+            return __macro_local_16validatePositivefMu_ {
               try validatePositive($0)
             }
           }
@@ -1837,7 +2043,12 @@ extension SnapshotTests {
             }
 
             nonisolated var $uuid: __macro_local_4uuidfMu_ {
-              __macro_local_4uuidfMu_({ [weak self] in
+              #if DEBUG
+              #sourceLocation(file: "Test.swift", line: 2)
+              #StructuredQueriesIsolationCheck(function: uuid)
+              #sourceLocation()
+              #endif
+              return __macro_local_4uuidfMu_({ [weak self] in
                   guard let self else {
                     throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
                   }
@@ -1900,7 +2111,12 @@ extension SnapshotTests {
             }
 
             nonisolated var $concat: __macro_local_6concatfMu_ {
-              __macro_local_6concatfMu_({ [weak self] arg0, arg1 in
+              #if DEBUG
+              #sourceLocation(file: "Test.swift", line: 2)
+              #StructuredQueriesIsolationCheck(function: concat)
+              #sourceLocation()
+              #endif
+              return __macro_local_6concatfMu_({ [weak self] arg0, arg1 in
                   guard let self else {
                     throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
                   }
@@ -1976,7 +2192,12 @@ extension SnapshotTests {
             }
 
             nonisolated var $double: __macro_local_6doublefMu_ {
-              __macro_local_6doublefMu_({ [weak self] arg0 in
+              #if DEBUG
+              #sourceLocation(file: "Test.swift", line: 2)
+              #StructuredQueriesIsolationCheck(function: double)
+              #sourceLocation()
+              #endif
+              return __macro_local_6doublefMu_({ [weak self] arg0 in
                   guard let self else {
                     throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
                   }
@@ -2047,7 +2268,12 @@ extension SnapshotTests {
             }
 
             static nonisolated var $uuid: __macro_local_4uuidfMu_ {
-              __macro_local_4uuidfMu_(uuid)
+              #if DEBUG
+              #sourceLocation(file: "Test.swift", line: 2)
+              #StructuredQueriesIsolationCheck(function: uuid)
+              #sourceLocation()
+              #endif
+              return __macro_local_4uuidfMu_(uuid)
             }
 
             nonisolated struct __macro_local_4uuidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -2101,7 +2327,12 @@ extension SnapshotTests {
             }
 
             nonisolated var $uuid: __macro_local_4uuidfMu_ {
-              __macro_local_4uuidfMu_(uuid)
+              #if DEBUG
+              #sourceLocation(file: "Test.swift", line: 2)
+              #StructuredQueriesIsolationCheck(function: uuid)
+              #sourceLocation()
+              #endif
+              return __macro_local_4uuidfMu_(uuid)
             }
 
             nonisolated struct __macro_local_4uuidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
@@ -2154,8 +2385,18 @@ extension SnapshotTests {
               Date()
             }
 
+            #if DEBUG
+            func __macro_local_17nowIsolationProbefMu_() {
+            }
+            #endif
+
             nonisolated var $now: __macro_local_3nowfMu_ {
-              __macro_local_3nowfMu_({ [weak self] in
+              #if DEBUG
+              #sourceLocation(file: "Test.swift", line: 2)
+              #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
+              #sourceLocation()
+              #endif
+              return __macro_local_3nowfMu_({ [weak self] in
                   guard let self else {
                     throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
                   }

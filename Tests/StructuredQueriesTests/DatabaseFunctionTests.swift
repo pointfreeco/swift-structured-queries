@@ -1,12 +1,17 @@
 import Dependencies
 import Foundation
 import InlineSnapshotTesting
-import SQLite3
 import StructuredQueries
 import StructuredQueriesSQLite
 import StructuredQueriesTestSupport
 import Testing
 import _StructuredQueriesSQLite
+
+#if canImport(Darwin)
+  import SQLite3
+#else
+  import _StructuredQueriesSQLite3
+#endif
 
 extension SnapshotTests {
   @Suite struct DatabaseFunctionTests {
@@ -19,7 +24,7 @@ extension SnapshotTests {
     @Test func customIsEnabled() {
       $isEnabled.install(database.handle)
       assertQuery(
-        Values($isEnabled())
+        Select($isEnabled())
       ) {
         """
         SELECT "isEnabled"()
@@ -40,7 +45,7 @@ extension SnapshotTests {
     @Test func customDateTime() {
       $dateTime.install(database.handle)
       assertQuery(
-        Values($dateTime())
+        Select($dateTime())
       ) {
         """
         SELECT "dateTime"(NULL)
@@ -61,7 +66,7 @@ extension SnapshotTests {
     @Test func customConcat() {
       $concat.install(database.handle)
       assertQuery(
-        Values($concat(first: "foo", second: "bar"))
+        Select($concat(first: "foo", second: "bar"))
       ) {
         """
         SELECT "concat"('foo', 'bar')
@@ -78,7 +83,7 @@ extension SnapshotTests {
     @Test func erasedConcat() {
       $concat.install(database.handle)
       assertQuery(
-        Values($concat("foo", "bar"))
+        Select($concat("foo", "bar"))
       ) {
         """
         SELECT "concat"('foo', 'bar')
@@ -104,7 +109,7 @@ extension SnapshotTests {
     @Test func customThrowing() {
       $throwing.install(database.handle)
       assertQuery(
-        Values($throwing())
+        Select($throwing())
       ) {
         """
         SELECT "throwing"()
@@ -131,7 +136,7 @@ extension SnapshotTests {
     @Test func customToggle() {
       $toggle.install(database.handle)
       assertQuery(
-        Values($toggle(Completion.incomplete))
+        Select($toggle(Completion.incomplete))
       ) {
         """
         SELECT "toggle"(0)
@@ -153,7 +158,7 @@ extension SnapshotTests {
     @Test func customRepresentation() {
       $jsonCapitalize.install(database.handle)
       assertQuery(
-        Values($jsonCapitalize(#bind(["hello", "world"])))
+        Select($jsonCapitalize(#bind(["hello", "world"])))
       ) {
         """
         SELECT "jsonCapitalize"('[
@@ -181,7 +186,7 @@ extension SnapshotTests {
     @Test func customMixedRepresentation() {
       $jsonDropFirst.install(database.handle)
       assertQuery(
-        Values($jsonDropFirst(#bind(["hello", "world", "goodnight", "moon"]), 2))
+        Select($jsonDropFirst(#bind(["hello", "world", "goodnight", "moon"]), 2))
       ) {
         """
         SELECT "jsonDropFirst"('[
@@ -211,7 +216,7 @@ extension SnapshotTests {
     @Test func customNilRepresentation() {
       $jsonCount.install(database.handle)
       assertQuery(
-        Values($jsonCount(#bind(["hello", "world", "goodnight", "moon"])))
+        Select($jsonCount(#bind(["hello", "world", "goodnight", "moon"])))
       ) {
         """
         SELECT "jsonCount"('[
@@ -229,7 +234,7 @@ extension SnapshotTests {
         """
       }
       assertQuery(
-        Values($jsonCount(#bind(nil)))
+        Select($jsonCount(#bind(nil)))
       ) {
         """
         SELECT "jsonCount"(NULL)
@@ -257,7 +262,7 @@ extension SnapshotTests {
       logger.$log.install(database.handle)
 
       assertQuery(
-        Values(logger.$log("Hello, world!"))
+        Select(logger.$log("Hello, world!"))
       ) {
         """
         SELECT "log"('Hello, world!')
@@ -288,7 +293,7 @@ extension SnapshotTests {
           .select { $joinTags($2.jsonGroupArray()) }
       ) {
         """
-        SELECT "joinTags"(json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("tags"."id"), 'title', json_quote("tags"."title")) END) FILTER (WHERE ("tags"."rowid") IS NOT (NULL)))
+        SELECT "joinTags"(json_group_array(CASE WHEN ("tags"."rowid") IS NOT (NULL) THEN json_object('id', "tags"."id", 'title', "tags"."title") END) FILTER (WHERE ("tags"."rowid") IS NOT (NULL)))
         FROM "reminders"
         LEFT JOIN "remindersTags" ON ("reminders"."id") = ("remindersTags"."reminderID")
         LEFT JOIN "tags" ON ("remindersTags"."tagID") = ("tags"."id")
@@ -323,7 +328,7 @@ extension SnapshotTests {
         Reminder.select { $isJSONValid($0.jsonObject(), true) }.limit(1)
       ) {
         """
-        SELECT "isJSONValid"(json_object('id', json_quote("reminders"."id"), 'assignedUserID', json_quote("reminders"."assignedUserID"), 'dueDate', json_quote("reminders"."dueDate"), 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("reminders"."notes"), 'priority', json_quote("reminders"."priority"), 'remindersListID', json_quote("reminders"."remindersListID"), 'title', json_quote("reminders"."title"), 'updatedAt', json_quote("reminders"."updatedAt")), 1)
+        SELECT "isJSONValid"(json_object('id', "reminders"."id", 'assignedUserID', "reminders"."assignedUserID", 'dueDate', "reminders"."dueDate", 'isCompleted', json(CASE "reminders"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "reminders"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', "reminders"."notes", 'priority', "reminders"."priority", 'remindersListID', "reminders"."remindersListID", 'title', "reminders"."title", 'updatedAt', "reminders"."updatedAt"), 1)
         FROM "reminders"
         LIMIT 1
         """
@@ -655,7 +660,7 @@ extension SnapshotTests {
       $epoch.install(database.handle)
 
       assertQuery(
-        Values($epoch)
+        Select($epoch)
       ) {
         """
         SELECT "epoch"()
@@ -677,7 +682,7 @@ extension SnapshotTests {
       $seconds.install(database.handle)
 
       assertQuery(
-        Values($seconds)
+        Select($seconds)
       ) {
         """
         SELECT "epoch"()
@@ -704,7 +709,7 @@ extension SnapshotTests {
       $throw.install(database.handle)
 
       assertQuery(
-        Values($throw)
+        Select($throw)
       ) {
         """
         SELECT "throw"()

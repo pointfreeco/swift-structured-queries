@@ -84,7 +84,7 @@ supports basic control flow statements:
 ### Inserting drafts
 
 If your table has a [primary key](<doc:PrimaryKeyedTables>) that is initialized by the database,
-you can insert its associated ``PrimaryKeyedTable/Draft`` type, instead, which allows you to omit
+you can insert its associated [draft](<doc:TableDrafts>) type, instead, which allows you to omit
 specifying this identifier. Using result builder syntax:
 
 @Row {
@@ -238,7 +238,7 @@ To insert a row into a table where all values have database-provided defaults, u
 
 By default, ``Insert`` statements are fire-and-forget and do not return any results from the
 database. To return the data inserted by the database, including default columns that were not
-provided to the `INSERT`, you can use ``Insert/returning(_:)``, which adds a `RETURNING` clause to
+provided to the `INSERT`, you can use `returning(_:)`, which adds a `RETURNING` clause to
 the statement.
 
 For example, you can return the primary key of an inserted draft:

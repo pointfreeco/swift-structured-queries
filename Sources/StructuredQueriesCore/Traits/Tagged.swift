@@ -23,5 +23,17 @@
     public init(queryOutput: QueryOutput) {
       self.init(rawValue: RawValue(queryOutput: queryOutput.rawValue))
     }
+
+    public static func queryFragment(decoding queryFragment: QueryFragment) -> QueryFragment {
+      RawValue.queryFragment(decoding: queryFragment)
+    }
+
+    public static func _queryFragment(jsonEncoding queryFragment: QueryFragment) -> QueryFragment {
+      RawValue._queryFragment(jsonEncoding: queryFragment)
+    }
+
+    public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
+      RawValue._queryFragment(jsonDecoding: queryFragment)
+    }
   }
 #endif

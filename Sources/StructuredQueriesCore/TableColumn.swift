@@ -4,6 +4,9 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
 
   var _names: [String] { get }
 
+  /// The default value of the table column.
+  var defaultValue: Value.QueryOutput? { get }
+
   /// The table model key path associated with this table column.
   var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 }
@@ -17,9 +20,6 @@ where Value: QueryBindable {
   /// The name of the table column.
   var name: String { get }
 
-  /// The default value of the table column.
-  var defaultValue: Value.QueryOutput? { get }
-
   func _aliased<Name: AliasName>(
     _ alias: Name.Type
   ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
@@ -27,6 +27,10 @@ where Value: QueryBindable {
 
 extension TableColumnExpression {
   public var _names: [String] { [name] }
+
+  package var returningFragment: QueryFragment {
+    Value.queryFragment(decoding: "\(quote: name)")
+  }
 }
 
 /// A type representing a _writable_ table column, _i.e._ not a generated column.
@@ -55,36 +59,41 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 
   public let name: String
 
-  public let defaultValue: Value.QueryOutput?
+  @usableFromInline
+  let _defaultValue: () -> Value.QueryOutput?
 
-  public let keyPath: KeyPath<Root, Value.QueryOutput>
+  @usableFromInline
+  let _keyPath: () -> KeyPath<Root, Value.QueryOutput>
 
+  public var defaultValue: Value.QueryOutput? { _defaultValue() }
+
+  public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
+
+  @inlinable
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput>,
-    default defaultValue: Value.QueryOutput? = nil
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
   ) {
     self.name = name
-    self.defaultValue = defaultValue
-    self.keyPath = keyPath
+    self._defaultValue = defaultValue
+    self._keyPath = keyPath
   }
 
+  @inlinable
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value>,
-    default defaultValue: Value? = nil
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Value>,
+    default defaultValue: @autoclosure @escaping () -> Value? = nil
   ) where Value == Value.QueryOutput {
     self.name = name
-    self.defaultValue = defaultValue
-    self.keyPath = keyPath
-  }
-
-  public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
-    try Value(decoder: &decoder).queryOutput
+    self._defaultValue = defaultValue
+    self._keyPath = keyPath
   }
 
   public var queryFragment: QueryFragment {
-    "\(Root.self).\(quote: name)"
+    let column: QueryFragment = "\(Root.self).\(quote: name)"
+    return _isSelecting ? Value.queryFragment(decoding: column) : column
   }
 
   public func _aliased<Name>(
@@ -102,31 +111,53 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 }
 
 public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
+  @inlinable
   public static func `for`(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput>,
-    default defaultValue: Value.QueryOutput? = nil
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
   ) -> TableColumn<Root, Value>
   where Value: QueryBindable {
-    TableColumn(name, keyPath: keyPath, default: defaultValue)
+    TableColumn(name, keyPath: keyPath(), default: defaultValue())
   }
 
+  @inlinable
+  public static func `for`(
+    _ name: String,
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Value>,
+    default defaultValue: @autoclosure @escaping () -> Value? = nil
+  ) -> TableColumn<Root, Value>
+  where Value: QueryBindable, Value == Value.QueryOutput {
+    TableColumn(name, keyPath: keyPath(), default: defaultValue())
+  }
+
+  @_disfavoredOverload
+  public static func `for`(
+    _ name: String,
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
+  ) -> ColumnGroup<Root, Value>
+  where Value: Table, Value.QueryOutput: Table {
+    ColumnGroup(name, keyPath: keyPath(), default: defaultValue())
+  }
+
+  @_disfavoredOverload
   public static func `for`(
     _ name: String,
     keyPath: KeyPath<Root, Value>,
     default defaultValue: Value? = nil
-  ) -> TableColumn<Root, Value>
-  where Value: QueryBindable, Value == Value.QueryOutput {
-    TableColumn(name, keyPath: keyPath, default: defaultValue)
-  }
-
-  public static func `for`(
-    _: String,
-    keyPath: KeyPath<Root, Value>,
-    default _: Value? = nil
   ) -> ColumnGroup<Root, Value>
   where Value: Table, Value == Value.QueryOutput {
-    ColumnGroup(keyPath: keyPath)
+    ColumnGroup(name, keyPath: keyPath, default: defaultValue)
+  }
+
+  public static func `for`<Wrapped>(
+    _ name: String,
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
+  ) -> OptionalColumnGroup<Root, Wrapped>
+  where Value == Wrapped?, Wrapped: Table, Wrapped.QueryOutput: Table {
+    OptionalColumnGroup(base: ColumnGroup(name, keyPath: keyPath(), default: defaultValue()))
   }
 }
 
@@ -153,36 +184,41 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
 
   public let name: String
 
-  public let defaultValue: Value.QueryOutput?
+  @usableFromInline
+  let _defaultValue: () -> Value.QueryOutput?
 
-  public let keyPath: KeyPath<Root, Value.QueryOutput>
+  @usableFromInline
+  let _keyPath: () -> KeyPath<Root, Value.QueryOutput>
 
+  public var defaultValue: Value.QueryOutput? { _defaultValue() }
+
+  public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
+
+  @inlinable
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput>,
-    default defaultValue: Value.QueryOutput? = nil
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
   ) {
     self.name = name
-    self.defaultValue = defaultValue
-    self.keyPath = keyPath
+    self._defaultValue = defaultValue
+    self._keyPath = keyPath
   }
 
+  @inlinable
   public init(
     _ name: String,
-    keyPath: KeyPath<Root, Value.QueryOutput>,
-    default defaultValue: Value? = nil
+    keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
+    default defaultValue: @autoclosure @escaping () -> Value? = nil
   ) where Value == Value.QueryOutput {
     self.name = name
-    self.defaultValue = defaultValue
-    self.keyPath = keyPath
-  }
-
-  public func decode(_ decoder: inout some QueryDecoder) throws -> Value.QueryOutput {
-    try Value(decoder: &decoder).queryOutput
+    self._defaultValue = defaultValue
+    self._keyPath = keyPath
   }
 
   public var queryFragment: QueryFragment {
-    "\(Root.self).\(quote: name)"
+    let column: QueryFragment = "\(Root.self).\(quote: name)"
+    return _isSelecting ? Value.queryFragment(decoding: column) : column
   }
 
   public func _aliased<Name>(

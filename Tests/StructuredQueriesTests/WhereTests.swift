@@ -2,6 +2,7 @@ import Dependencies
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLite
 import Testing
 import _StructuredQueriesSQLite
 
@@ -247,6 +248,44 @@ extension SnapshotTests {
         SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position"
         FROM "remindersLists"
         WHERE (("remindersLists"."title" LIKE '%daily%')) AND (("remindersLists"."title" LIKE '%monthly%'))
+        """
+      }
+    }
+
+    @Test func nilBuilder() {
+      assertQuery(
+        RemindersList.where { _ in
+          nil
+        }
+      ) {
+        """
+        SELECT "remindersLists"."id", "remindersLists"."color", "remindersLists"."title", "remindersLists"."position"
+        FROM "remindersLists"
+        """
+      } results: {
+        """
+        ┌──────────────────────┐
+        │ RemindersList(       │
+        │   id: 1,             │
+        │   color: 4889071,    │
+        │   title: "Personal", │
+        │   position: 0        │
+        │ )                    │
+        ├──────────────────────┤
+        │ RemindersList(       │
+        │   id: 2,             │
+        │   color: 15567157,   │
+        │   title: "Family",   │
+        │   position: 0        │
+        │ )                    │
+        ├──────────────────────┤
+        │ RemindersList(       │
+        │   id: 3,             │
+        │   color: 11689427,   │
+        │   title: "Business", │
+        │   position: 0        │
+        │ )                    │
+        └──────────────────────┘
         """
       }
     }

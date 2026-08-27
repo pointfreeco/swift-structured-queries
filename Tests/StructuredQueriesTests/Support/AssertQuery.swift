@@ -77,3 +77,29 @@ func assertQuery<each V: QueryRepresentable>(
     column: column
   )
 }
+
+@_disfavoredOverload
+func assertQuery<Columns>(
+  _ query: Select<Columns, Values<Columns>, ()>,
+  sql: (() -> String)? = nil,
+  results: (() -> String)? = nil,
+  fileID: StaticString = #fileID,
+  filePath: StaticString = #filePath,
+  function: StaticString = #function,
+  line: UInt = #line,
+  column: UInt = #column
+) {
+  @Dependency(\.defaultDatabase) var db
+  StructuredQueriesTestSupport.assertQuery(
+    query,
+    execute: db.execute,
+    sql: sql,
+    results: results,
+    snapshotTrailingClosureOffset: 0,
+    fileID: fileID,
+    filePath: filePath,
+    function: function,
+    line: line,
+    column: column
+  )
+}

@@ -24,6 +24,27 @@ extension SnapshotTests {
       #expect(condition2 == true)
     }
 
+    @Test func representationDefault() {
+      assertQuery(
+        Reminder.select { _ in StampedTag.Columns(name: "car") }.limit(1)
+      ) {
+        """
+        SELECT 86400 AS "createdAt", 'car' AS "name"
+        FROM "reminders"
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌──────────────────────────────────────────────┐
+        │ StampedTag(                                  │
+        │   createdAt: Date(1970-01-02T00:00:00.000Z), │
+        │   name: "car"                                │
+        │ )                                            │
+        └──────────────────────────────────────────────┘
+        """
+      }
+    }
+
     @Test func selectAll() {
       assertQuery(Tag.all) {
         """
@@ -861,7 +882,117 @@ extension SnapshotTests {
         └───┘
         """
       }
+      assertQuery(Reminder.select(\.id).limit(2).offset(2)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        │ 4 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit(2).limit(nil).offset(nil)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        └───┘
+        """
+      }
+    }
+
+    @Test func offsetWithoutLimit() {
+      assertQuery(Reminder.select(\.id).offset(8)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT -1 OFFSET 8
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 9  │
+        │ 10 │
+        └────┘
+        """
+      }
+    }
+
+    @Test func limitAndOffsetBuilders() {
+      enum PerPage { case none, `default` }
+      let perPage = PerPage.default
+      let offset: Int? = nil
+      assertQuery(
+        Reminder
+          .select(\.id)
+          .limit { _ in
+            switch perPage {
+            case .none: nil
+            case .default: 2
+            }
+          }
+          .offset { _ in
+            if let offset {
+              offset
+            }
+          }
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        └───┘
+        """
+      }
+    }
+
+    @available(*, deprecated)
+    @Test func deprecatedLimit() {
       assertQuery(Reminder.select(\.id).limit(2, offset: 2)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 2 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        │ 4 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit(2, offset: 2).limit(1, offset: nil)) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        LIMIT 1 OFFSET 2
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 3 │
+        └───┘
+        """
+      }
+      assertQuery(Reminder.select(\.id).limit({ _ in 2 }, offset: { _ in 2 })) {
         """
         SELECT "reminders"."id"
         FROM "reminders"
@@ -1037,6 +1168,37 @@ extension SnapshotTests {
       }
     }
 
+    @Test func aliasedFind() {
+      enum R1: AliasName {}
+      enum R2: AliasName {}
+      assertQuery(
+        Reminder.as(R1.self).find(1).as(R2.self)
+      ) {
+        """
+        SELECT "r2s"."id", "r2s"."assignedUserID", "r2s"."dueDate", "r2s"."isCompleted", "r2s"."isFlagged", "r2s"."notes", "r2s"."priority", "r2s"."remindersListID", "r2s"."title", "r2s"."updatedAt"
+        FROM "reminders" AS "r2s"
+        WHERE (("r2s"."id") IN ((1)))
+        """
+      } results: {
+        """
+        ┌─────────────────────────────────────────────┐
+        │ Reminder(                                   │
+        │   id: 1,                                    │
+        │   assignedUserID: 1,                        │
+        │   dueDate: Date(2001-01-01T00:00:00.000Z),  │
+        │   isCompleted: false,                       │
+        │   isFlagged: false,                         │
+        │   notes: "Milk, Eggs, Apples",              │
+        │   priority: nil,                            │
+        │   remindersListID: 1,                       │
+        │   title: "Groceries",                       │
+        │   updatedAt: Date(2040-02-14T23:31:30.000Z) │
+        │ )                                           │
+        └─────────────────────────────────────────────┘
+        """
+      }
+    }
+
     @Test func selfLeftJoinSelect() {
       enum R1: AliasName {}
       enum R2: AliasName {}
@@ -1068,7 +1230,7 @@ extension SnapshotTests {
           .select { ($0, $1.jsonGroupArray()) }
       ) {
         """
-        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."rowid") IS NOT (NULL))
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', "r2s"."id", 'assignedUserID', "r2s"."assignedUserID", 'dueDate', "r2s"."dueDate", 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', "r2s"."notes", 'priority', "r2s"."priority", 'remindersListID', "r2s"."remindersListID", 'title', "r2s"."title", 'updatedAt', "r2s"."updatedAt") END) FILTER (WHERE ("r2s"."rowid") IS NOT (NULL))
         FROM "reminders" AS "r1s"
         LEFT JOIN "reminders" AS "r2s" ON ("r1s"."id") = ("r2s"."id")
         GROUP BY "r1s"."id"
@@ -1106,7 +1268,7 @@ extension SnapshotTests {
           .select { ($0, $1.jsonGroupArray()) }
       ) {
         """
-        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', json_quote("r2s"."id"), 'assignedUserID', json_quote("r2s"."assignedUserID"), 'dueDate', json_quote("r2s"."dueDate"), 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', json_quote("r2s"."notes"), 'priority', json_quote("r2s"."priority"), 'remindersListID', json_quote("r2s"."remindersListID"), 'title', json_quote("r2s"."title"), 'updatedAt', json_quote("r2s"."updatedAt")) END) FILTER (WHERE ("r2s"."rowid") IS NOT (NULL))
+        SELECT "r1s"."id", "r1s"."assignedUserID", "r1s"."dueDate", "r1s"."isCompleted", "r1s"."isFlagged", "r1s"."notes", "r1s"."priority", "r1s"."remindersListID", "r1s"."title", "r1s"."updatedAt", json_group_array(CASE WHEN ("r2s"."rowid") IS NOT (NULL) THEN json_object('id', "r2s"."id", 'assignedUserID', "r2s"."assignedUserID", 'dueDate', "r2s"."dueDate", 'isCompleted', json(CASE "r2s"."isCompleted" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'isFlagged', json(CASE "r2s"."isFlagged" WHEN 0 THEN 'false' WHEN 1 THEN 'true' END), 'notes', "r2s"."notes", 'priority', "r2s"."priority", 'remindersListID', "r2s"."remindersListID", 'title', "r2s"."title", 'updatedAt', "r2s"."updatedAt") END) FILTER (WHERE ("r2s"."rowid") IS NOT (NULL))
         FROM "reminders" AS "r1s"
         LEFT JOIN "reminders" AS "r2s" ON (("r1s"."id") = ("r2s"."id")) AND (("r1s"."id") = (42))
         GROUP BY "r1s"."id"
@@ -1132,9 +1294,127 @@ extension SnapshotTests {
       }
     }
 
+    @Test func values() {
+      assertQuery(Select(1, "Hello", true)) {
+        """
+        SELECT 1, 'Hello', 1
+        """
+      } results: {
+        """
+        ┌───┬─────────┬──────┐
+        │ 1 │ "Hello" │ true │
+        └───┴─────────┴──────┘
+        """
+      }
+    }
+
+    @Test func valuesUnion() {
+      assertQuery(
+        Select(1, "Hello", true)
+          .union(Select(2, "Goodbye", false))
+      ) {
+        """
+        SELECT 1, 'Hello', 1
+          UNION
+        SELECT 2, 'Goodbye', 0
+        """
+      } results: {
+        """
+        ┌───┬───────────┬───────┐
+        │ 1 │ "Hello"   │ true  │
+        │ 2 │ "Goodbye" │ false │
+        └───┴───────────┴───────┘
+        """
+      }
+    }
+
+    @Test func valuesLimit() {
+      assertQuery(
+        Select(1, "Hello", true).limit(1)
+      ) {
+        """
+        SELECT 1, 'Hello', 1
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌───┬─────────┬──────┐
+        │ 1 │ "Hello" │ true │
+        └───┴─────────┴──────┘
+        """
+      }
+    }
+
+    @Test func valuesWhere() {
+      assertQuery(
+        Select(1, "Hello", 3).where { first, _, third in third.gt(first) }
+      ) {
+        """
+        SELECT 1, 'Hello', 3
+        WHERE ((3) > (1))
+        """
+      } results: {
+        """
+        ┌───┬─────────┬───┐
+        │ 1 │ "Hello" │ 3 │
+        └───┴─────────┴───┘
+        """
+      }
+      assertQuery(
+        Select(1, "Hello", 3).where { $2.gt($0) }
+      ) {
+        """
+        SELECT 1, 'Hello', 3
+        WHERE ((3) > (1))
+        """
+      } results: {
+        """
+        ┌───┬─────────┬───┐
+        │ 1 │ "Hello" │ 3 │
+        └───┴─────────┴───┘
+        """
+      }
+    }
+
+    @Test func valuesWhereSingleColumn() {
+      assertQuery(
+        Select(42).where { $0.gt(0) }
+      ) {
+        """
+        SELECT 42
+        WHERE ((42) > (0))
+        """
+      } results: {
+        """
+        ┌────┐
+        │ 42 │
+        └────┘
+        """
+      }
+    }
+
+    @Test func valuesOrderBuilder() {
+      assertQuery(
+        Select(1, "Hello", 3).order { _, second, third in
+          (second.desc(), third.asc())
+        }
+      ) {
+        """
+        SELECT 1, 'Hello', 3
+        ORDER BY 2 DESC, 3 ASC
+        """
+      } results: {
+        """
+        ┌───┬─────────┬───┐
+        │ 1 │ "Hello" │ 3 │
+        └───┴─────────┴───┘
+        """
+      }
+    }
+
     @Test func `case`() {
       assertQuery(
-        Values(
+        Select(
           Case()
             .when(true, then: "present")
             .else("unknown")
@@ -1247,94 +1527,92 @@ extension SnapshotTests {
       }
     }
 
-    #if swift(>=6.1)
-      @Test func reusableStaticHelperOnDraft() {
-        assertQuery(
-          Reminder.Draft.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.where { _ in true }.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (1) AND (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.select(\.id).incomplete
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
-        assertQuery(
-          Reminder.Draft.all.incomplete.select(\.id)
-        ) {
-          """
-          SELECT "reminders"."id"
-          FROM "reminders"
-          WHERE (NOT ("reminders"."isCompleted"))
-          """
-        } results: {
-          """
-          ┌───┐
-          │ 1 │
-          │ 2 │
-          │ 3 │
-          │ 5 │
-          │ 6 │
-          │ 8 │
-          │ 9 │
-          └───┘
-          """
-        }
+    @Test func reusableStaticHelperOnDraft() {
+      assertQuery(
+        Reminder.Draft.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
       }
-    #endif
+      assertQuery(
+        Reminder.Draft.where { _ in true }.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (1) AND (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.select(\.id).incomplete
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+      assertQuery(
+        Reminder.Draft.all.incomplete.select(\.id)
+      ) {
+        """
+        SELECT "reminders"."id"
+        FROM "reminders"
+        WHERE (NOT ("reminders"."isCompleted"))
+        """
+      } results: {
+        """
+        ┌───┐
+        │ 1 │
+        │ 2 │
+        │ 3 │
+        │ 5 │
+        │ 6 │
+        │ 8 │
+        │ 9 │
+        └───┘
+        """
+      }
+    }
 
     @Test func reusableColumnHelperOnDraft() {
       assertQuery(
@@ -1435,6 +1713,10 @@ extension SnapshotTests {
       _ = base.order { r, _ in r.isCompleted }
       _ = base.limit { r, _ in r.title.length() }
       _ = base.limit(1)
+      _ = base.limit(nil)
+      _ = base.offset { r, _ in r.title.length() }
+      _ = base.offset(1)
+      _ = base.offset(nil)
       _ = base.count()
       _ = base.count { r, _ in r.isCompleted }
       _ = base.map {}
@@ -1664,6 +1946,13 @@ struct PragmaForeignKeyList<Base: Table> {
   @Column("on_update") let onUpdate: ForeignKeyAction
   @Column("on_delete") let onDelete: ForeignKeyAction
   let match: String
+}
+
+@Selection
+private struct StampedTag {
+  @Column(as: Date.UnixTimeRepresentation.self)
+  var createdAt = Date(timeIntervalSince1970: 60 * 60 * 24)
+  var name = ""
 }
 
 enum ForeignKeyAction: String, QueryBindable {

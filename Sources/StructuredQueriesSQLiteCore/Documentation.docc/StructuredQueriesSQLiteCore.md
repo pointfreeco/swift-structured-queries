@@ -14,6 +14,8 @@ custom database functions, and more.
 - <doc:DefiningYourSchema>
 - <doc:QueryCookbook>
 - <doc:BuiltinFunctions>
+- <doc:DateTimeFunctions>
+- <doc:JSON>
 - <doc:CustomFunctions>
 - <doc:Triggers>
 - <doc:Views>
@@ -25,6 +27,7 @@ custom database functions, and more.
 - ``Foundation/Date/UnixTimeRepresentation``
 - ``Foundation/UUID/BytesRepresentation``
 - ``Foundation/UUID/UppercasedRepresentation``
+- ``Swift/Decodable/JSONBRepresentation``
 
 ### Custom collations
 
@@ -40,3 +43,10 @@ custom database functions, and more.
 
 - ``Foundation/Date/ISO8601Representation``
 - ``Foundation/UUID/LowercasedRepresentation``
+
+### Statements
+
+- ``Values``
+- ``StructuredQueriesCore/Delete/returning(_:)``
+- ``StructuredQueriesCore/Insert/returning(_:)``
+- ``StructuredQueriesCore/Update/returning(_:)``

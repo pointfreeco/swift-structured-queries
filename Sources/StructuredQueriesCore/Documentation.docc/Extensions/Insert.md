@@ -4,10 +4,10 @@
 
 ### Query building
 
-- ``returning(_:)``
 
 ### Supporting types
 
 - ``InsertOf``
 - ``InsertValuesBuilder``
+- ``ValuesRows``
 - ``ConflictResolution``

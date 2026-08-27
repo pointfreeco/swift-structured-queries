@@ -93,7 +93,7 @@ Reminder.update(reminder)
 ### Returning
 
 By default, ``Update`` statements are fire-and-forget and do not return any results from the
-database. To return the data updated by the database, you can use ``Update/returning(_:)``, which
+database. To return the data updated by the database, you can use `returning(_:)`, which
 adds a `RETURNING` clause to the statement.
 
 ```swift

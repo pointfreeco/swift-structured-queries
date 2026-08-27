@@ -53,6 +53,7 @@ To define a Swift data type that represents this table, one can use the `@Table`
 
 > Note: If your project is using [default main actor isolation] then you further need to annotate
 > your struct as `nonisolated`.
+
 [default main actor isolation]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md
 
 Note that the struct's field names match the column tables of the table exactly. In order to support
@@ -213,6 +214,22 @@ and will decode data from the database using the `RawRepresentable` conformance 
   }
 }
 
+If you would rather not conform the type to ``QueryBindable`` directly, you can instead store it as
+its raw value by applying `@Column(as:)` with its `RawRepresentation`:
+
+```swift
+@Table
+struct Reminder {
+  let id: Int
+  var title = ""
+  @Column(as: Priority.RawRepresentation.self)
+  var priority: Priority
+}
+enum Priority: Int {
+  case low, medium, high
+}
+```
+
 #### JSON
 
 To store complex data types in a column of a SQLite table you can serialize values to JSON. For
@@ -232,14 +249,27 @@ of strings into a value that SQLite understands. If you annotate this field with
 string when storing data in the table, and decode the JSON array into a Swift array when decoding a
 row:
 
-```swift
-@Table struct Reminder {
-  let id: Int
-  var title = ""
-  @Column(as: [String].JSONRepresentation.self)
-  var notes: [String]
+@Row {
+  @Column {
+    ```swift
+    @Table struct Reminder {
+      let id: Int
+      var title = ""
+      @Column(as: [String].JSONRepresentation.self)
+      var notes: [String]
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TABLE "reminders"(
+      "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+      "title" TEXT NOT NULL,
+      "notes" TEXT NOT NULL
+    ) STRICT
+    ```
+  }
 }
-```
 
 With that you can insert reminders with notes like so:
 
@@ -265,11 +295,73 @@ With that you can insert reminders with notes like so:
   }
 }
 
+> Tip: If you are using SQLite and would like to store your field as a `BLOB` of JSONB, you can
+> annotate this field with `JSONBRepresentation`, instead.
+
+You can also store more complex data types in JSON fields, such as an array of location coordinates
+to represent a geofence of a trip:
+
+@Row {
+  @Column {
+    ```swift
+    @Table struct Trip {
+      let id: Int
+      var title = ""
+      @Column(as: [Location].JSONRepresentation.self)
+      var geofence: [Location] = []
+      @Selection struct Location: Codable {
+        var latitude = 0.0
+        var longitude = 0.0
+      }
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    CREATE TABLE "trips"(
+      "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+      "title" TEXT NOT NULL,
+      "geofence" TEXT NOT NULL
+    ) STRICT
+    ```
+  }
+}
+
+By applying the `@Selection` macro to `Location: Codable` you expose its underlying schema to
+the library's query building tools. This gives you a type-safe and schema-safe way to query the
+JSON inside the geofence:
+
+@Row {
+  @Column {
+    ```swift
+    Trip.where {
+      $0.geofence.jsonExtract(\.[0].latitude).gt(0)
+    }
+    ```
+  }
+  @Column {
+    ```sql
+    SELECT "trips".…
+    FROM "trips"
+    WHERE json_extract(
+      "trips"."geofence",
+      '$[0].latitude'
+    )
+    ```
+  }
+}
+
+> Warning: When applying `@Selection` to a `Codable` type in order to expose its schema to the
+> library's tools, `@Selection` must take over responsibility for how the type is encoded and
+> decoded into JSON. For this reason you **must not** provide custom `CodingKeys` for your type,
+> and to enforce this we recommend turning on the "ColumnCoding" trait, which will be the default
+> behavior fo the library in the future.
+
 #### Tagged identifiers
 
 The [Tagged](https://github.com/pointfreeco/swift-tagged) library provides lightweight syntax for
 introducing type-safe identifiers (and more) to your models. StructuredQueries ships support for
-Tagged with a `Tagged` package trait, which is available starting from Swift 6.1.
+Tagged with a `Tagged` [package trait](<doc:Traits>), which is available starting from Swift 6.1.
 
 To enable the trait, specify it in the Package.swift file that depends on StructuredQueries:
 
@@ -279,13 +371,20 @@ To enable the trait, specify it in the Package.swift file that depends on Struct
    from: "0.32.0",
 +  traits: ["Tagged"]
  ),
-+.package(
-+  url: "https://github.com/pointfreeco/swift-tagged",
-+  from: "0.1.0"
-+),
 ```
 
-> Important: You _must_ explicitly depend on the `swift-tagged` package to work around a Swift bug.
+> Important: On Swift toolchains earlier than 6.3, you _must_ also explicitly depend on the
+> `swift-tagged` package to work around a SwiftPM bug in which dependencies introduced by a trait
+> are not resolved:
+>
+> ```diff
+> +.package(
+> +  url: "https://github.com/pointfreeco/swift-tagged",
+> +  from: "0.1.0"
+> +),
+> ```
+>
+> This bug is fixed in Swift 6.3, where the explicit dependency can be omitted.
 
 This will allow you to introduce distinct `Tagged` identifiers throughout your schema:
 
@@ -513,9 +612,9 @@ attachments supported, annotated with the `@Selection` macro:
 }
 ```
 
-> Important: It is required to enable the `CasePaths` trait in order to define columns from an enum.
-> This trait uses our [CasePaths] library to enhance enumerations with key path-like functionality
-> needed to work with enum columns in the abstract.
+> Important: It is required to enable the `CasePaths` [package trait](<doc:Traits>) in order to
+> define columns from an enum. This trait uses our [CasePaths] library to enhance enumerations with
+> key path-like functionality needed to work with enum columns in the abstract.
 
 [CasePaths]: http://github.com/pointfreeco/swift-case-paths
 

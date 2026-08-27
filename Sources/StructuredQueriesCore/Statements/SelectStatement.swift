@@ -1,7 +1,8 @@
 public protocol PartialSelectStatement<QueryValue>: Statement {}
 
-/// A type representing a `SELECT` statement.
-public protocol SelectStatement<QueryValue, From, Joins>: PartialSelectStatement {
+/// A type representing a `SELECT` statement for a table.
+public protocol SelectStatement<QueryValue, From, Joins>: PartialSelectStatement
+where From: Table {
   /// Creates a ``Select`` statement from this statement.
   ///
   /// - Returns: A select statement.
@@ -22,9 +23,9 @@ extension SelectStatement {
   /// Explicitly selects all columns and tables from this statement.
   ///
   /// - Returns: A select statement.
-  public func selectStar<each J: Table>() -> Select<(From, repeat each J), From, (repeat each J)>
+  public func selectStar<each J: Table>() -> Select<(From, repeat each J), From, Joins>
   where Joins == (repeat each J) {
-    var select = Select<(From, repeat each J), From, (repeat each J)>()
+    var select = Select<(From, repeat each J), From, Joins>()
     select.clauses = asSelect().clauses
     return select
   }
@@ -39,5 +40,35 @@ extension SelectStatement {
   ) -> Self
   where Self == Where<From> {
     Self(predicates: [predicate(From.columns).queryFragment])
+  }
+}
+
+// NB: https://sqlite.org/lang_upsert.html#parsing_ambiguity
+protocol HasUpsertParsingAmbiguity {
+  var hasUpsertParsingAmbiguity: Bool { get }
+}
+
+extension HasUpsertParsingAmbiguity where Self: SelectStatement {
+  var hasUpsertParsingAmbiguity: Bool {
+    _selectClauses.hasUpsertParsingAmbiguity
+  }
+}
+
+extension Select: HasUpsertParsingAmbiguity {
+  var hasUpsertParsingAmbiguity: Bool {
+    _rendersFromClause && clauses.hasUpsertParsingAmbiguity
+  }
+}
+extension Where: HasUpsertParsingAmbiguity {}
+
+extension _SelectClauses {
+  var hasUpsertParsingAmbiguity: Bool {
+    !isEmpty
+      && joins.isEmpty
+      && `where`.isEmpty
+      && group.isEmpty
+      && having.isEmpty
+      && order.isEmpty
+      && limit == nil
   }
 }
