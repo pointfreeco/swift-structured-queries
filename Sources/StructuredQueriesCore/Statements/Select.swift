@@ -1487,7 +1487,10 @@ extension Select where From: Table {
     // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
     _ other: any SelectStatement<(repeat each C2), F, ()>,
     on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
-  ) -> Select<(repeat (each C1)._Optionalized, repeat (each C2)._Optionalized), From._Optionalized, F._Optionalized>
+  ) -> Select<
+    (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized), From._Optionalized,
+    F._Optionalized
+  >
   where Columns == (repeat each C1), Joins == () {
     let other = other.asSelect()
     let join = _JoinClause(
@@ -1496,7 +1499,10 @@ extension Select where From: Table {
       table: F.self,
       constraint: constraint((From.columns, F.columns))
     )
-    return Select<(repeat (each C1)._Optionalized, repeat (each C2)._Optionalized), From._Optionalized, F._Optionalized>(
+    return Select<
+      (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized), From._Optionalized,
+      F._Optionalized
+    >(
       isEmpty: isEmpty || other.isEmpty,
       distinct: distinct || other.distinct,
       columns: columns + other.columns,
