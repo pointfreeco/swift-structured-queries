@@ -1,7 +1,8 @@
 public import Foundation
 
 /// A type representing a value that can be bound to a parameter of a SQL statement.
-public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryValue: QueryBindable {
+public protocol QueryBindable: QueryEncodable, QueryRepresentable, QueryExpression
+where QueryValue: QueryBindable {
   /// The Swift data type representation of the expression's SQL bindable data type.
   ///
   /// For example, a `TEXT` expression may be represented as a `String` query value.
@@ -14,6 +15,8 @@ public protocol QueryBindable: QueryRepresentable, QueryExpression where QueryVa
 extension QueryBindable {
   public var queryFragment: QueryFragment { "\(queryBinding)" }
 }
+
+extension [UInt8]: QueryEncodable {}
 
 extension [UInt8]: QueryBindable, QueryExpression {
   public var queryBinding: QueryBinding { .blob(self) }

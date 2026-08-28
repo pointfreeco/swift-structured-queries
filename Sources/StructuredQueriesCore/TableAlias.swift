@@ -101,6 +101,12 @@ public struct TableAlias<
   }
 }
 
+extension TableAlias: QueryEncodable where Base: QueryEncodable {
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    try base.encode(to: &encoder)
+  }
+}
+
 extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table {
   public typealias Draft = TableAlias<Base.Draft, Name>
 
