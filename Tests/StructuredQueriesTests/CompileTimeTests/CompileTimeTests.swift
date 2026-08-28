@@ -197,3 +197,45 @@ private func inferredRepresentationPrimaryKey() {
   let _: UUID? = InferredRepresentationPrimaryKey.Draft(title: "x").id
   _ = InferredRepresentationPrimaryKey.Draft.Columns(title: "x")
 }
+
+@Selection
+private struct ReminderWithListTitle {
+  let title: String
+  let listTitle: String
+}
+private func joinedStatement<V: QueryRepresentable, From: Table, J: Table>(
+  _ statement: Select<V, From, J>,
+  by grouping: (From.TableColumns, J.TableColumns) -> some QueryExpression
+) -> Select<V, From, J> {
+  statement
+}
+private func joinedStatements() {
+  _ = joinedStatement(
+    Reminder
+      .order(by: \.id)
+      .join(RemindersList.all) { $0.remindersListID.eq($1.id) }
+      .select { ReminderWithListTitle.Columns(title: $0.title, listTitle: $1.title) },
+    by: { $1.title }
+  )
+  _ = joinedStatement(
+    Reminder
+      .order(by: \.id)
+      .leftJoin(RemindersList.all) { $0.remindersListID.eq($1.id) }
+      .select { ReminderWithListTitle.Columns(title: $0.title, listTitle: $1.title ?? "") },
+    by: { $1.title }
+  )
+  _ = joinedStatement(
+    Reminder
+      .order(by: \.id)
+      .rightJoin(RemindersList.all) { $0.remindersListID.eq($1.id) }
+      .select { ReminderWithListTitle.Columns(title: $0.title ?? "", listTitle: $1.title) },
+    by: { $1.title }
+  )
+  _ = joinedStatement(
+    Reminder
+      .order(by: \.id)
+      .fullJoin(RemindersList.all) { $0.remindersListID.eq($1.id) }
+      .select { ReminderWithListTitle.Columns(title: $0.title ?? "", listTitle: $1.title ?? "") },
+    by: { $1.title }
+  )
+}

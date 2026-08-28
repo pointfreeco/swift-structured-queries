@@ -75,7 +75,6 @@ extension Table {
     Where().join(other, on: constraint)
   }
 
-  // NB: Optimization
   /// A select statement for this table joined to another table.
   ///
   /// - Parameters:
@@ -115,7 +114,6 @@ extension Table {
     Where().leftJoin(other, on: constraint)
   }
 
-  // NB: Optimization
   /// A select statement for this table left-joined to another table.
   ///
   /// - Parameters:
@@ -151,7 +149,6 @@ extension Table {
     Where<Self>().rightJoin(other, on: constraint)
   }
 
-  // NB: Optimization
   /// A select statement for this table right-joined to another table.
   ///
   /// - Parameters:
@@ -191,7 +188,6 @@ extension Table {
     Where<Self>().fullJoin(other, on: constraint)
   }
 
-  // NB: Optimization
   /// A select statement for this table full-joined to another table.
   ///
   /// - Parameters:
@@ -865,6 +861,41 @@ extension Select where From: Table {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that joins the given table and combines their clauses
   ///   together.
+  @_documentation(visibility: private)
+  public func join<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatement<(repeat each C2), F, ()>,
+    on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
+  ) -> Select<(repeat each C1, repeat each C2), From, F>
+  where Columns == (repeat each C1), Joins == () {
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: nil,
+      tableReference: other._tableReference,
+      table: F.self,
+      constraint: constraint((From.columns, F.columns))
+    )
+    return Select<(repeat each C1, repeat each C2), From, F>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      from: from,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  /// Creates a new select statement from this one by joining another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A new select statement that joins the given table and combines their clauses
+  ///   together.
   public func join<
     each C1: QueryRepresentable,
     each C2: QueryRepresentable,
@@ -905,7 +936,6 @@ extension Select where From: Table {
     )
   }
 
-  // NB: Optimization
   /// Creates a new select statement from this one by joining another table.
   ///
   /// - Parameters:
@@ -1026,6 +1056,41 @@ extension Select where From: Table {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that left-joins the given table and combines their clauses
   ///   together.
+  @_documentation(visibility: private)
+  public func leftJoin<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatement<(repeat each C2), F, ()>,
+    on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
+  ) -> Select<(repeat each C1, repeat (each C2)._Optionalized), From, F._Optionalized>
+  where Columns == (repeat each C1), Joins == () {
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: .left,
+      tableReference: other._tableReference,
+      table: F.self,
+      constraint: constraint((From.columns, F.columns))
+    )
+    return Select<(repeat each C1, repeat (each C2)._Optionalized), From, F._Optionalized>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      from: from,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  /// Creates a new select statement from this one by left-joining another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A new select statement that left-joins the given table and combines their clauses
+  ///   together.
   public func leftJoin<
     each C1: QueryRepresentable,
     each C2: QueryRepresentable,
@@ -1074,7 +1139,6 @@ extension Select where From: Table {
     )
   }
 
-  // NB: Optimization
   /// Creates a new select statement from this one by left-joining another table.
   ///
   /// - Parameters:
@@ -1125,7 +1189,6 @@ extension Select where From: Table {
     )
   }
 
-  // NB: Optimization
   /// Creates a new select statement from this one by left-joining another table.
   ///
   /// - Parameters:
@@ -1206,6 +1269,41 @@ extension Select where From: Table {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that right-joins the given table and combines their clauses
   ///   together.
+  @_documentation(visibility: private)
+  public func rightJoin<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatement<(repeat each C2), F, ()>,
+    on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
+  ) -> Select<(repeat each C1, repeat each C2), From._Optionalized, F>
+  where Columns == (repeat each C1), Joins == () {
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: .right,
+      tableReference: other._tableReference,
+      table: F.self,
+      constraint: constraint((From.columns, F.columns))
+    )
+    return Select<(repeat each C1, repeat each C2), From._Optionalized, F>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      from: from,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  /// Creates a new select statement from this one by right-joining another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A new select statement that right-joins the given table and combines their clauses
+  ///   together.
   public func rightJoin<
     each C1: QueryRepresentable,
     each C2: QueryRepresentable,
@@ -1254,7 +1352,6 @@ extension Select where From: Table {
     )
   }
 
-  // NB: Optimization
   /// Creates a new select statement from this one by right-joining another table.
   ///
   /// - Parameters:
@@ -1305,7 +1402,6 @@ extension Select where From: Table {
     )
   }
 
-  // NB: Optimization
   /// Creates a new select statement from this one by right-joining another table.
   ///
   /// - Parameters:
@@ -1386,6 +1482,41 @@ extension Select where From: Table {
   ///   - constraint: The constraint describing the join.
   /// - Returns: A new select statement that full-joins the given table and combines their clauses
   ///   together.
+  @_documentation(visibility: private)
+  public func fullJoin<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table>(
+    // TODO: Report issue to Swift team. Using 'some' crashes the compiler.
+    _ other: any SelectStatement<(repeat each C2), F, ()>,
+    on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
+  ) -> Select<(repeat (each C1)._Optionalized, repeat (each C2)._Optionalized), From._Optionalized, F._Optionalized>
+  where Columns == (repeat each C1), Joins == () {
+    let other = other.asSelect()
+    let join = _JoinClause(
+      operator: .full,
+      tableReference: other._tableReference,
+      table: F.self,
+      constraint: constraint((From.columns, F.columns))
+    )
+    return Select<(repeat (each C1)._Optionalized, repeat (each C2)._Optionalized), From._Optionalized, F._Optionalized>(
+      isEmpty: isEmpty || other.isEmpty,
+      distinct: distinct || other.distinct,
+      columns: columns + other.columns,
+      from: from,
+      joins: joins + [join] + other.joins,
+      where: `where` + other.where,
+      group: group + other.group,
+      having: having + other.having,
+      order: order + other.order,
+      limit: other.limit ?? limit
+    )
+  }
+
+  /// Creates a new select statement from this one by full-joining another table.
+  ///
+  /// - Parameters:
+  ///   - other: A select statement for another table.
+  ///   - constraint: The constraint describing the join.
+  /// - Returns: A new select statement that full-joins the given table and combines their clauses
+  ///   together.
   public func fullJoin<
     each C1: QueryRepresentable,
     each C2: QueryRepresentable,
@@ -1434,7 +1565,6 @@ extension Select where From: Table {
     )
   }
 
-  // NB: Optimization
   /// Creates a new select statement from this one by full-joining another table.
   ///
   /// - Parameters:
@@ -1485,7 +1615,6 @@ extension Select where From: Table {
     )
   }
 
-  // NB: Optimization
   /// Creates a new select statement from this one by full-joining another table.
   ///
   /// - Parameters:
