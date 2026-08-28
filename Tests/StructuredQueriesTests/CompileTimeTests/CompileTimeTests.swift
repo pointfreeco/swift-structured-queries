@@ -148,22 +148,6 @@ private struct Item {
   var group: Group?
 }
 
-// NB: Unannotated columns of non-Sendable types must not produce shared witness storage
-private final class NonSendableDefault {
-  init() {}
-}
-extension NonSendableDefault: QueryBindable {
-  var queryBinding: QueryBinding { .null }
-}
-extension NonSendableDefault: QueryDecodable {
-  convenience init(decoder: inout some QueryDecoder) throws(QueryDecodingError) { self.init() }
-}
-@Selection
-private struct NonSendableDefaultColumns {
-  var handle = NonSendableDefault()
-  var title: String
-}
-
 // NB: Witness inference must handle backticks, optional inference, and multiple columns
 @Selection
 private struct WitnessEdgeCases {

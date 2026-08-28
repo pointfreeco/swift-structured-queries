@@ -23,10 +23,6 @@ extension [UInt8]: _OptionalPromotable where Element: _OptionalPromotable {}
 
 extension Optional: QueryBindable where Wrapped: QueryBindable {
   public typealias QueryValue = Wrapped.QueryValue?
-
-  public var queryBinding: QueryBinding {
-    self?.queryBinding ?? .null
-  }
 }
 
 extension Optional: QueryDecodable where Wrapped: QueryDecodable {
@@ -34,7 +30,7 @@ extension Optional: QueryDecodable where Wrapped: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     do {
       self = try Wrapped(decoder: &decoder)
-    } catch .missingRequiredColumn {
+    } catch .valueNotFound {
       self = nil
     }
   }

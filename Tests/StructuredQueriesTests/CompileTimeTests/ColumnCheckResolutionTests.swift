@@ -1,7 +1,9 @@
 import StructuredQueries
 
 private struct Scalar: QueryBindable {
-  var queryBinding: QueryBinding { .null }
+  func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    try encoder.encodeNull()
+  }
   init() {}
   init(decoder: inout some QueryDecoder) throws(QueryDecodingError) { self.init() }
 }

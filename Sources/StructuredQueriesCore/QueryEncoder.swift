@@ -78,6 +78,9 @@ extension QueryEncoder {
 }
 /// An error that can be thrown while encoding a query value.
 public enum QueryEncodingError: Error {
+  /// A value was corrupted or otherwise invalid.
+  case dataCorrupted
+
   /// Some other error occurred while encoding a column.
   case other(any Error)
 }
@@ -92,52 +95,52 @@ package struct QueryFragmentsEncoder: QueryEncoder {
 
   @inlinable
   package mutating func encode(_ value: [UInt8]) {
-    fragments.append("\(QueryBinding.blob(value))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encode(_ value: Bool) {
-    fragments.append("\(QueryBinding.bool(value))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encode(_ value: Date) {
-    fragments.append("\(QueryBinding.date(value))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encode(_ value: Double) {
-    fragments.append("\(QueryBinding.double(value))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encode(_ value: Int) {
-    fragments.append("\(QueryBinding.int(Int64(value)))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encode(_ value: Int64) {
-    fragments.append("\(QueryBinding.int(value))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encode(_ value: String) {
-    fragments.append("\(QueryBinding.text(value))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encode(_ value: UInt64) {
-    fragments.append("\(QueryBinding.uint(value))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encode(_ value: UUID) {
-    fragments.append("\(QueryBinding.uuid(value))")
+    fragments.append(QueryFragment(binding: value))
   }
 
   @inlinable
   package mutating func encodeNull() {
-    fragments.append("\(QueryBinding.null)")
+    fragments.append(QueryFragment(segments: [.binding(nil)]))
   }
 
   @inlinable

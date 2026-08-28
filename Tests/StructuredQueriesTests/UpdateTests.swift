@@ -437,7 +437,9 @@ extension SnapshotTests {
 extension String {
   struct TestRepresentation: QueryRepresentable, QueryBindable, QueryDecodable {
     var queryOutput: String
-    var queryBinding: QueryBinding { .text(queryOutput) }
+    func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+      try encoder.encode(queryOutput)
+    }
 
     init(queryOutput: String) {
       self.queryOutput = queryOutput

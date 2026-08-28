@@ -140,11 +140,11 @@ extension DatabaseFunctionMacro: PeerMacro {
         }
         public func invoke(
         _ decoder: inout some StructuredQueriesCore.QueryDecoder
-        ) throws -> StructuredQueriesCore.QueryBinding {
-        return \(raw: representableOutputType)(
+        ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+        return try \(raw: representableOutputType)(
         queryOutput: \(raw: getter.throws || needsWeakSelf ? "try " : "")self.body()
         )
-        .queryBinding
+        .sqliteValue
         }
         public var queryFragment: StructuredQueriesCore.QueryFragment {
         "\\(quote: self.name)()"
@@ -255,7 +255,6 @@ extension DatabaseFunctionMacro: PeerMacro {
 
     var decodings: [String] = []
     var decodingUnwrappings: [String] = []
-    var canThrowInvalidInvocation = false
 
     let isAggregate: Bool
     var representableInputType: String
@@ -343,9 +342,12 @@ extension DatabaseFunctionMacro: PeerMacro {
           "let \(secondName) = try decoder.decode(_requireQueryRepresentable(\(type).self))"
         )
         decodingUnwrappings.append(
-          "guard let \(secondName) else { throw InvalidInvocation() }"
+          """
+          guard let \(secondName) else {
+          throw StructuredQueriesCore.QueryDecodingError.valueNotFound
+          }
+          """
         )
-        canThrowInvalidInvocation = true
 
         parameterClause.parameters.append(
           FunctionParameterSyntax(
@@ -438,8 +440,13 @@ extension DatabaseFunctionMacro: PeerMacro {
         decodings.append(
           "let \(parameterName) = try decoder.decode(_requireQueryRepresentable(\(type).self))"
         )
-        decodingUnwrappings.append("guard let \(parameterName) else { throw InvalidInvocation() }")
-        canThrowInvalidInvocation = true
+        decodingUnwrappings.append(
+          """
+          guard let \(parameterName) else {
+          throw StructuredQueriesCore.QueryDecodingError.valueNotFound
+          }
+          """
+        )
       }
       representableInputType = representableInputTypes.joined(separator: ", ")
       representableInputType =
@@ -598,7 +605,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         """
         public func step(
         _ decoder: inout some StructuredQueriesCore.QueryDecoder
-        ) throws -> \(raw: rowType) {
+        ) throws(StructuredQueriesCore.QueryDecodingError) -> \(raw: rowType) {
         \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
         \(raw: stepReturnClause)\
         }
@@ -609,25 +616,16 @@ extension DatabaseFunctionMacro: PeerMacro {
         \(functionOriginallyThrows || functionNeedsWeakSelf ? "try " : "")\
         self.body(arguments)
         """
-      var invocationBody =
+      let invocationBody =
         isVoidReturning
         ? """
         \(bodyInvocation)
         return .null
         """
-        : "return \(representableOutputType)(queryOutput: \(bodyInvocation)).queryBinding"
-      if functionOriginallyThrows || functionNeedsWeakSelf {
-        invocationBody = """
-          do {
-          \(invocationBody)
-          } catch {
-          return .invalid(error)
-          }
-          """
-      }
+        : "return try \(representableOutputType)(queryOutput: \(bodyInvocation)).sqliteValue"
       methods.append(
         """
-        public func invoke(\(parameter)) -> QueryBinding {
+        public func invoke(\(parameter)) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
         \(raw: invocationBody)
         }
         """
@@ -650,33 +648,24 @@ extension DatabaseFunctionMacro: PeerMacro {
         \(argumentBindings.joined(separator: ", "))\
         )
         """
-      var invocationBody =
+      let invocationBody =
         isVoidReturning
         ? """
         \(bodyInvocation)
         return .null
         """
         : """
-        return \(functionRepresentation?.returnClause.type ?? outputType)(
+        return try \(functionRepresentation?.returnClause.type ?? outputType)(
         queryOutput: \(bodyInvocation)
         )
-        .queryBinding
+        .sqliteValue
         """
-      if functionOriginallyThrows || functionNeedsWeakSelf {
-        invocationBody = """
-          do {
-          \(invocationBody)
-          } catch {
-          return .invalid(error)
-          }
-          """
-      }
 
       methods.append(
         """
         public func invoke(
         _ decoder: inout some StructuredQueriesCore.QueryDecoder
-        ) throws -> StructuredQueriesCore.QueryBinding {
+        ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
         \(raw: (decodings + decodingUnwrappings).map { "\($0)\n" }.joined())\
         \(raw: invocationBody)
         }
@@ -731,8 +720,7 @@ extension DatabaseFunctionMacro: PeerMacro {
         public init(_ body: @escaping \(raw: bodyType)) {
         self.body = body
         }
-        \(raw: methods.map(\.description).joined(separator: "\n"))\
-        \(raw: canThrowInvalidInvocation ? "\nprivate struct InvalidInvocation: Error {}" : "")
+        \(raw: methods.map(\.description).joined(separator: "\n"))
         }
         """,
       ]

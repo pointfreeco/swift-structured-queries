@@ -49,11 +49,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Date(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
         }
         """#
@@ -104,11 +104,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Date(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
         }
         """#
@@ -161,17 +161,15 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let strings = try decoder.decode(_requireQueryRepresentable([String].JSONRepresentation.self))
             guard let strings else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
-            return [String].JSONRepresentation(
+            return try [String].JSONRepresentation(
               queryOutput: self.body(strings)
             )
-            .queryBinding
-          }
-          private struct InvalidInvocation: Error {
+            .sqliteValue
           }
         }
         """#
@@ -222,11 +220,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Int(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Int(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
         }
         """#
@@ -279,17 +277,15 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
-            return Date?(
+            return try Date?(
               queryOutput: self.body(format)
             )
-            .queryBinding
-          }
-          private struct InvalidInvocation: Error {
+            .sqliteValue
           }
         }
         """#
@@ -342,17 +338,15 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
-            return Date?(
+            return try Date?(
               queryOutput: self.body(format)
             )
-            .queryBinding
-          }
-          private struct InvalidInvocation: Error {
+            .sqliteValue
           }
         }
         """#
@@ -405,17 +399,15 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
-            return Date?(
+            return try Date?(
               queryOutput: self.body(format)
             )
-            .queryBinding
-          }
-          private struct InvalidInvocation: Error {
+            .sqliteValue
           }
         }
         """#
@@ -468,17 +460,15 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let format = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let format else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
-            return Date?(
+            return try Date?(
               queryOutput: self.body(format)
             )
-            .queryBinding
-          }
-          private struct InvalidInvocation: Error {
+            .sqliteValue
           }
         }
         """#
@@ -532,21 +522,19 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let first = try decoder.decode(_requireQueryRepresentable(String.self))
             let second = try decoder.decode(_requireQueryRepresentable(String.self))
             guard let first else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let second else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
-            return String(
+            return try String(
               queryOutput: self.body(first, second)
             )
-            .queryBinding
-          }
-          private struct InvalidInvocation: Error {
+            .sqliteValue
           }
         }
         """#
@@ -616,17 +604,15 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let format = try decoder.decode(_requireQueryRepresentable(String?.self))
             guard let format else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
-            return Date?(
+            return try Date?(
               queryOutput: self.body(format)
             )
-            .queryBinding
-          }
-          private struct InvalidInvocation: Error {
+            .sqliteValue
           }
         }
         """#
@@ -677,15 +663,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            do {
-              return Date(
-                queryOutput: try self.body()
-              )
-              .queryBinding
-            } catch {
-              return .invalid(error)
-            }
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
+              queryOutput: try self.body()
+            )
+            .sqliteValue
           }
         }
         """#
@@ -736,15 +718,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            do {
-              return Date(
-                queryOutput: try self.body()
-              )
-              .queryBinding
-            } catch {
-              return .invalid(error)
-            }
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
+              queryOutput: try self.body()
+            )
+            .sqliteValue
           }
         }
         """#
@@ -795,11 +773,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Date(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
         }
         """#
@@ -850,11 +828,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Date(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
         }
         """#
@@ -928,11 +906,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Date(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
         }
         """#
@@ -983,11 +961,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Int(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Int(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
         }
         """#
@@ -1038,7 +1016,7 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             self.body()
             return .null
           }
@@ -1088,13 +1066,9 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            do {
-              try self.body()
-              return .null
-            } catch {
-              return .invalid(error)
-            }
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            try self.body()
+            return .null
           }
         }
         """#
@@ -1157,19 +1131,17 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let x = try decoder.decode(_requireQueryRepresentable(Int.self))
             let y = try decoder.decode(_requireQueryRepresentable(Int.self))
             guard let x else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let y else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.body(x, y)
             return .null
-          }
-          private struct InvalidInvocation: Error {
           }
         }
         """#
@@ -1229,19 +1201,17 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let x = try decoder.decode(_requireQueryRepresentable(Int.self))
             let y = try decoder.decode(_requireQueryRepresentable(Int.self))
             guard let x else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let y else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.body(x, y)
             return .null
-          }
-          private struct InvalidInvocation: Error {
           }
         }
         """#
@@ -1295,21 +1265,19 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
             let reminder = try decoder.decode(_requireQueryRepresentable(Reminder.self))
             let override = try decoder.decode(_requireQueryRepresentable(Bool.self))
             guard let reminder else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let override else {
-              throw InvalidInvocation()
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
-            return Bool(
+            return try Bool(
               queryOutput: self.body(reminder, override)
             )
-            .queryBinding
-          }
-          private struct InvalidInvocation: Error {
+            .sqliteValue
           }
         }
         """#
@@ -1361,11 +1329,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Date(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
           public var queryFragment: StructuredQueriesCore.QueryFragment {
             "\(quote: self.name)()"
@@ -1424,11 +1392,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Date(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
               queryOutput: self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
           public var queryFragment: StructuredQueriesCore.QueryFragment {
             "\(quote: self.name)()"
@@ -1487,11 +1455,11 @@ extension SnapshotTests {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
-          ) throws -> StructuredQueriesCore.QueryBinding {
-            return Date(
+          ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+            return try Date(
               queryOutput: try self.body()
             )
-            .queryBinding
+            .sqliteValue
           }
           public var queryFragment: StructuredQueriesCore.QueryFragment {
             "\(quote: self.name)()"
@@ -1550,11 +1518,11 @@ extension SnapshotTests {
             }
             public func invoke(
               _ decoder: inout some StructuredQueriesCore.QueryDecoder
-            ) throws -> StructuredQueriesCore.QueryBinding {
-              return Date(
+            ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+              return try Date(
                 queryOutput: self.body()
               )
-              .queryBinding
+              .sqliteValue
             }
             public var queryFragment: StructuredQueriesCore.QueryFragment {
               "\(quote: self.name)()"
@@ -1619,17 +1587,15 @@ extension SnapshotTests {
             }
             public func step(
               _ decoder: inout some StructuredQueriesCore.QueryDecoder
-            ) throws -> Int {
+            ) throws(StructuredQueriesCore.QueryDecodingError) -> Int {
               let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
-                throw InvalidInvocation()
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               return xs
             }
-            public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
-              return Int(queryOutput: self.body(arguments)).queryBinding
-            }
-            private struct InvalidInvocation: Error {
+            public func invoke(_ arguments: some Sequence<Int>) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+              return try Int(queryOutput: self.body(arguments)).sqliteValue
             }
           }
           """
@@ -1689,17 +1655,15 @@ extension SnapshotTests {
             }
             public func step(
               _ decoder: inout some StructuredQueriesCore.QueryDecoder
-            ) throws -> Int {
+            ) throws(StructuredQueriesCore.QueryDecodingError) -> Int {
               let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
-                throw InvalidInvocation()
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               return xs
             }
-            public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
-              return Int(queryOutput: self.body(arguments)).queryBinding
-            }
-            private struct InvalidInvocation: Error {
+            public func invoke(_ arguments: some Sequence<Int>) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+              return try Int(queryOutput: self.body(arguments)).sqliteValue
             }
           }
           """
@@ -1772,21 +1736,19 @@ extension SnapshotTests {
             }
             public func step(
               _ decoder: inout some StructuredQueriesCore.QueryDecoder
-            ) throws -> (String, separator: String) {
+            ) throws(StructuredQueriesCore.QueryDecodingError) -> (String, separator: String) {
               let p0 = try decoder.decode(_requireQueryRepresentable(String.self))
               let separator = try decoder.decode(_requireQueryRepresentable(String.self))
               guard let p0 else {
-                throw InvalidInvocation()
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let separator else {
-                throw InvalidInvocation()
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               return (p0, separator)
             }
-            public func invoke(_ arguments: some Sequence<(String, separator: String)>) -> QueryBinding {
-              return String?(queryOutput: self.body(arguments)).queryBinding
-            }
-            private struct InvalidInvocation: Error {
+            public func invoke(_ arguments: some Sequence<(String, separator: String)>) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+              return try String?(queryOutput: self.body(arguments)).sqliteValue
             }
           }
           """
@@ -1848,17 +1810,15 @@ extension SnapshotTests {
             }
             public func step(
               _ decoder: inout some StructuredQueriesCore.QueryDecoder
-            ) throws -> [String] {
+            ) throws(StructuredQueriesCore.QueryDecodingError) -> [String] {
               let arrays = try decoder.decode(_requireQueryRepresentable([String].JSONRepresentation.self))
               guard let arrays else {
-                throw InvalidInvocation()
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               return arrays
             }
-            public func invoke(_ arguments: some Sequence<[String]>) -> QueryBinding {
-              return [String].JSONRepresentation(queryOutput: self.body(arguments)).queryBinding
-            }
-            private struct InvalidInvocation: Error {
+            public func invoke(_ arguments: some Sequence<[String]>) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+              return try [String].JSONRepresentation(queryOutput: self.body(arguments)).sqliteValue
             }
           }
           """#
@@ -1922,18 +1882,16 @@ extension SnapshotTests {
             }
             public func step(
               _ decoder: inout some StructuredQueriesCore.QueryDecoder
-            ) throws -> Int {
+            ) throws(StructuredQueriesCore.QueryDecodingError) -> Int {
               let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
-                throw InvalidInvocation()
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               return xs
             }
-            public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
+            public func invoke(_ arguments: some Sequence<Int>) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
               self.body(arguments)
               return .null
-            }
-            private struct InvalidInvocation: Error {
             }
           }
           """
@@ -2001,22 +1959,16 @@ extension SnapshotTests {
             }
             public func step(
               _ decoder: inout some StructuredQueriesCore.QueryDecoder
-            ) throws -> Int {
+            ) throws(StructuredQueriesCore.QueryDecodingError) -> Int {
               let xs = try decoder.decode(_requireQueryRepresentable(Int.self))
               guard let xs else {
-                throw InvalidInvocation()
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               return xs
             }
-            public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
-              do {
-                try self.body(arguments)
-                return .null
-              } catch {
-                return .invalid(error)
-              }
-            }
-            private struct InvalidInvocation: Error {
+            public func invoke(_ arguments: some Sequence<Int>) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+              try self.body(arguments)
+              return .null
             }
           }
           """
@@ -2077,15 +2029,11 @@ extension SnapshotTests {
               }
               public func invoke(
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
-              ) throws -> StructuredQueriesCore.QueryBinding {
-                do {
-                  return String(
-                    queryOutput: try self.body()
-                  )
-                  .queryBinding
-                } catch {
-                  return .invalid(error)
-                }
+              ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+                return try String(
+                  queryOutput: try self.body()
+                )
+                .sqliteValue
               }
             }
           }
@@ -2148,25 +2096,19 @@ extension SnapshotTests {
               }
               public func invoke(
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
-              ) throws -> StructuredQueriesCore.QueryBinding {
+              ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
                 let first = try decoder.decode(_requireQueryRepresentable(String.self))
                 let second = try decoder.decode(_requireQueryRepresentable(String.self))
                 guard let first else {
-                  throw InvalidInvocation()
+                  throw StructuredQueriesCore.QueryDecodingError.valueNotFound
                 }
                 guard let second else {
-                  throw InvalidInvocation()
+                  throw StructuredQueriesCore.QueryDecodingError.valueNotFound
                 }
-                do {
-                  return String(
-                    queryOutput: try self.body(first, second)
-                  )
-                  .queryBinding
-                } catch {
-                  return .invalid(error)
-                }
-              }
-              private struct InvalidInvocation: Error {
+                return try String(
+                  queryOutput: try self.body(first, second)
+                )
+                .sqliteValue
               }
             }
           }
@@ -2228,21 +2170,15 @@ extension SnapshotTests {
               }
               public func invoke(
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
-              ) throws -> StructuredQueriesCore.QueryBinding {
+              ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
                 let value = try decoder.decode(_requireQueryRepresentable(Int.self))
                 guard let value else {
-                  throw InvalidInvocation()
+                  throw StructuredQueriesCore.QueryDecodingError.valueNotFound
                 }
-                do {
-                  return Int(
-                    queryOutput: try self.body(value)
-                  )
-                  .queryBinding
-                } catch {
-                  return .invalid(error)
-                }
-              }
-              private struct InvalidInvocation: Error {
+                return try Int(
+                  queryOutput: try self.body(value)
+                )
+                .sqliteValue
               }
             }
           }
@@ -2297,11 +2233,11 @@ extension SnapshotTests {
               }
               public func invoke(
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
-              ) throws -> StructuredQueriesCore.QueryBinding {
-                return String(
+              ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+                return try String(
                   queryOutput: self.body()
                 )
-                .queryBinding
+                .sqliteValue
               }
             }
           }
@@ -2356,11 +2292,11 @@ extension SnapshotTests {
               }
               public func invoke(
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
-              ) throws -> StructuredQueriesCore.QueryBinding {
-                return String(
+              ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+                return try String(
                   queryOutput: self.body()
                 )
-                .queryBinding
+                .sqliteValue
               }
             }
           }
@@ -2419,11 +2355,11 @@ extension SnapshotTests {
               }
               public func invoke(
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
-              ) throws -> StructuredQueriesCore.QueryBinding {
-                return Date(
+              ) throws -> StructuredQueriesSQLiteCore.SQLiteValue {
+                return try Date(
                   queryOutput: try self.body()
                 )
-                .queryBinding
+                .sqliteValue
               }
               public var queryFragment: StructuredQueriesCore.QueryFragment {
                 "\(quote: self.name)()"

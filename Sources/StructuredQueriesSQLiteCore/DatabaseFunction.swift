@@ -32,7 +32,7 @@ public protocol ScalarDatabaseFunction<Input, Output>: DatabaseFunction {
   ///
   /// - Parameter decoder: A query decoder.
   /// - Returns: A binding returned from the database function.
-  func invoke(_ decoder: inout some QueryDecoder) throws -> QueryBinding
+  func invoke(_ decoder: inout some QueryDecoder) throws -> SQLiteValue
 }
 
 extension ScalarDatabaseFunction {
@@ -66,13 +66,13 @@ public protocol AggregateDatabaseFunction<Input, Output>: DatabaseFunction {
   ///
   /// - Parameter decoder: A query decoder.
   /// - Returns: An element to append to the sequence sent to the aggregate function.
-  func step(_ decoder: inout some QueryDecoder) throws -> Element
+  func step(_ decoder: inout some QueryDecoder) throws(QueryDecodingError) -> Element
 
   /// Aggregates elements into a bindable value.
   ///
   /// - Parameter arguments: A sequence of elements to aggregate from.
   /// - Returns: A binding returned from the aggregate function.
-  func invoke(_ arguments: some Sequence<Element>) throws -> QueryBinding
+  func invoke(_ arguments: some Sequence<Element>) throws -> SQLiteValue
 }
 
 extension AggregateDatabaseFunction {

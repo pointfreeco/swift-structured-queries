@@ -50,8 +50,8 @@ extension Optional where Wrapped: RawRepresentable, Wrapped.RawValue: QueryBinda
 }
 
 extension _RawRepresentableRawRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
-    queryOutput.rawValue.queryBinding
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    try queryOutput.rawValue.encode(to: &encoder)
   }
 }
 

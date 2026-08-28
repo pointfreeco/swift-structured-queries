@@ -123,7 +123,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
   public typealias Joins = ()
   public typealias QueryValue = ()
 
-  fileprivate enum When: QueryFragment {
+  fileprivate enum When: String {
     case before = "BEFORE"
     case after = "AFTER"
     case insteadOf = "INSTEAD OF"
@@ -494,7 +494,7 @@ public struct TemporaryTrigger<On: Table>: Sendable, Statement {
       query.append(" IF NOT EXISTS")
     }
     query.append("\(.newlineOrSpace)\(triggerName.indented())")
-    query.append("\(.newlineOrSpace)\(when.rawValue) \(operation)")
+    query.append("\(.newlineOrSpace)\(raw: when.rawValue) \(operation)")
     return query.compiled(statementType: "CREATE TEMPORARY TRIGGER")
   }
 

@@ -28,8 +28,8 @@ extension UUID? {
 }
 
 extension UUID.UppercasedRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
-    .text(queryOutput.uuidString)
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    try encoder.encode(queryOutput.uuidString)
   }
 }
 

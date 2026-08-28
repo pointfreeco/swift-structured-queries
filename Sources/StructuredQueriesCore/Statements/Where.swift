@@ -58,7 +58,7 @@ extension Table {
 #endif
 public struct Where<From: Table>: Sendable {
   public static func + (lhs: Self, rhs: Self) -> Self {
-    Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
+    Where(predicates: lhs.predicates + rhs.predicates)
   }
 
   var predicates: [QueryFragment]

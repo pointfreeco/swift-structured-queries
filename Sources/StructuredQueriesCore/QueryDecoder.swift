@@ -122,7 +122,7 @@ public enum QueryDecodingError: Error {
   case dataCorrupted
 
   /// A required column was `NULL`.
-  case missingRequiredColumn  // TODO: Rename to 'valueNotFound' for more general decoding.
+  case valueNotFound
 
   /// Some other error occurred while decoding a column.
   case other(any Error)

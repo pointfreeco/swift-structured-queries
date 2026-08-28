@@ -36,8 +36,8 @@ extension Date? {
 }
 
 extension Date.JulianDayRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
-    .double(2440587.5 + queryOutput.timeIntervalSince1970 / 86400)
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    try encoder.encode(2440587.5 + queryOutput.timeIntervalSince1970 / 86400)
   }
 }
 

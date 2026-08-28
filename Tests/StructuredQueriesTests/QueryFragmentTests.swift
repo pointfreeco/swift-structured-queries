@@ -1,6 +1,7 @@
 import Foundation
 import InlineSnapshotTesting
 import StructuredQueries
+import StructuredQueriesSQLiteCore
 import StructuredQueriesTestSupport
 import Testing
 
@@ -46,7 +47,7 @@ extension SnapshotTests {
         """
       }
     }
-    @Test func prepare() {
+    @Test func prepare() throws {
       let query = #sql(
         """
         SELECT \(Reminder.id) FROM \(Reminder.self)
@@ -56,16 +57,17 @@ extension SnapshotTests {
       .query
 
       #expect(
-        query.prepare { "$\($0)" } == (
-          """
-          SELECT "reminders"."id" FROM "reminders"
-          WHERE "reminders"."id" > $1 AND "reminders"."title" COLLATE NOCASE LIKE $2
-          """,
-          [
-            .int(1),
-            .text("%get%"),
-          ]
-        )
+        try query.prepare { "$\($0)" }
+          == QueryFragment.Prepared(
+            sql: """
+              SELECT "reminders"."id" FROM "reminders"
+              WHERE "reminders"."id" > $1 AND "reminders"."title" COLLATE NOCASE LIKE $2
+              """,
+            bindings: [
+              .int(1),
+              .text("%get%"),
+            ]
+          )
       )
     }
   }

@@ -38,12 +38,14 @@ extension Optional where Wrapped: Codable {
 }
 
 extension _CodableJSONRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    let json: Data
     do {
-      return try .text(String(decoding: jsonEncoder.encode(queryOutput), as: UTF8.self))
+      json = try jsonEncoder.encode(queryOutput)
     } catch {
-      return .invalid(error)
+      throw .other(error)
     }
+    try encoder.encode(String(decoding: json, as: UTF8.self))
   }
 }
 

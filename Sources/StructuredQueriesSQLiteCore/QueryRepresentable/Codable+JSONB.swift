@@ -65,16 +65,18 @@ extension Optional where Wrapped: Codable {
   @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 #endif
 extension _CodableJSONBRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    let json: Data
     do {
-      return try .text(String(decoding: jsonEncoder.encode(queryOutput), as: UTF8.self))
+      json = try jsonEncoder.encode(queryOutput)
     } catch {
-      return .invalid(error)
+      throw .other(error)
     }
+    try encoder.encode(String(decoding: json, as: UTF8.self))
   }
 
   public var queryFragment: QueryFragment {
-    "jsonb(\(queryBinding))"
+    "jsonb(\(bind: self))"
   }
 }
 

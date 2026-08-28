@@ -1638,7 +1638,7 @@ extension Select where From: Table {
 
   public func and(_ other: Where<From>) -> Self {
     var select = self
-    select.where = (select.where + other.predicates).removingDuplicates()
+    select.where = select.where + other.predicates
     return select
   }
 
@@ -2038,10 +2038,10 @@ public func + <
     columns: lhs.columns + rhs.columns,
     from: rhs.from ?? lhs.from,
     joins: lhs.joins + rhs.joins,
-    where: (lhs.where + rhs.where).removingDuplicates(),
-    group: (lhs.group + rhs.group).removingDuplicates(),
-    having: (lhs.having + rhs.having).removingDuplicates(),
-    order: (lhs.order + rhs.order).removingDuplicates(),
+    where: lhs.where + rhs.where,
+    group: lhs.group + rhs.group,
+    having: lhs.having + rhs.having,
+    order: lhs.order + rhs.order,
     limit: rhs.limit ?? lhs.limit
   )
 }

@@ -1,88 +1,53 @@
 public import Foundation
 
 /// A type representing a value that can be bound to a parameter of a SQL statement.
-public protocol QueryBindable: QueryEncodable, QueryRepresentable, QueryExpression
+public protocol QueryBindable: QueryEncodable, QueryRepresentable, QueryExpression, Sendable
 where QueryValue: QueryBindable {
   /// The Swift data type representation of the expression's SQL bindable data type.
   ///
   /// For example, a `TEXT` expression may be represented as a `String` query value.
   associatedtype QueryValue = Self
-
-  /// A value that can be bound to a parameter of a SQL statement.
-  var queryBinding: QueryBinding { get }
 }
 
 extension QueryBindable {
-  public var queryFragment: QueryFragment { "\(queryBinding)" }
+  public var queryFragment: QueryFragment {
+    QueryFragment(binding: self)
+  }
 }
 
 extension [UInt8]: QueryEncodable {}
 
-extension [UInt8]: QueryBindable, QueryExpression {
-  public var queryBinding: QueryBinding { .blob(self) }
-}
+extension [UInt8]: QueryBindable, QueryExpression {}
 
-extension Bool: QueryBindable {
-  public var queryBinding: QueryBinding { .bool(self) }
-}
+extension Bool: QueryBindable {}
 
-extension Double: QueryBindable {
-  public var queryBinding: QueryBinding { .double(self) }
-}
+extension Double: QueryBindable {}
 
-extension Date: QueryBindable {
-  public var queryBinding: QueryBinding { .date(self) }
-}
+extension Date: QueryBindable {}
 
-extension Float: QueryBindable {
-  public var queryBinding: QueryBinding { .double(Double(self)) }
-}
+extension Float: QueryBindable {}
 
-extension Int: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
-}
+extension Int: QueryBindable {}
 
-extension Int8: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
-}
+extension Int8: QueryBindable {}
 
-extension Int16: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
-}
+extension Int16: QueryBindable {}
 
-extension Int32: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
-}
+extension Int32: QueryBindable {}
 
-extension Int64: QueryBindable {
-  public var queryBinding: QueryBinding { .int(self) }
-}
+extension Int64: QueryBindable {}
 
-extension String: QueryBindable {
-  public var queryBinding: QueryBinding { .text(self) }
-}
+extension String: QueryBindable {}
 
-extension UInt8: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
-}
+extension UInt8: QueryBindable {}
 
-extension UInt16: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
-}
+extension UInt16: QueryBindable {}
 
-extension UInt32: QueryBindable {
-  public var queryBinding: QueryBinding { .int(Int64(self)) }
-}
+extension UInt32: QueryBindable {}
 
-extension UInt64: QueryBindable {
-  public var queryBinding: QueryBinding {
-    return .uint(self)
-  }
-}
+extension UInt64: QueryBindable {}
 
 extension UUID: QueryBindable {
-  public var queryBinding: QueryBinding { .uuid(self) }
-
   public static func _queryFragment(jsonDecoding queryFragment: QueryFragment) -> QueryFragment {
     "(\(queryFragment) COLLATE NOCASE)"
   }
@@ -115,10 +80,16 @@ extension DefaultStringInterpolation {
   }
 }
 
-extension QueryBindable where Self: LosslessStringConvertible {
-  public var queryBinding: QueryBinding { description.queryBinding }
+extension QueryEncodable where Self: LosslessStringConvertible {
+  @inlinable
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    try encoder.encode(description)
+  }
 }
 
-extension QueryBindable where Self: RawRepresentable, RawValue: QueryBindable {
-  public var queryBinding: QueryBinding { rawValue.queryBinding }
+extension QueryEncodable where Self: RawRepresentable, RawValue: QueryEncodable {
+  @inlinable
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    try rawValue.encode(to: &encoder)
+  }
 }

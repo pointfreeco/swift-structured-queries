@@ -190,13 +190,13 @@ extension SnapshotTests {
             let latitude = try decoder.decode(Self.columns.latitude)
             let longitude = try decoder.decode(Self.columns.longitude)
             guard let id else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let latitude else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let longitude else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.id = id
             self.latitude = latitude
@@ -361,7 +361,7 @@ extension SnapshotTests {
             self.id = try decoder.decode(Self.columns.id)
             let latitude = try decoder.decode(Self.columns.latitude)
             guard let latitude else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.latitude = latitude
           }
@@ -381,10 +381,10 @@ extension SnapshotTests {
             let id = try decoder.decode(Self.columns.id)
             let latitude = try decoder.decode(Self.columns.latitude)
             guard let id else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let latitude else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.id = id
             self.latitude = latitude
@@ -563,10 +563,10 @@ extension SnapshotTests {
             let id = try decoder.decode(Self.columns.id)
             let startsAt = try decoder.decode(Self.columns.startsAt)
             guard let id else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let startsAt else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.id = id
             self.startsAt = startsAt
@@ -745,10 +745,10 @@ extension SnapshotTests {
             let id = try decoder.decode(Self.columns.id)
             let coordinate = try decoder.decode(Self.columns.coordinate)
             guard let id else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let coordinate else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.id = id
             self.coordinate = coordinate
@@ -911,7 +911,7 @@ extension SnapshotTests {
             self.id = try decoder.decode(Self.columns.id)
             let systemFields = try decoder.decode(Self.columns.systemFields)
             guard let systemFields else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.systemFields = systemFields
           }
@@ -931,10 +931,10 @@ extension SnapshotTests {
             let id = try decoder.decode(Self.columns.id)
             let systemFields = try decoder.decode(Self.columns.systemFields)
             guard let id else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let systemFields else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.id = id
             self.systemFields = systemFields
@@ -1187,10 +1187,10 @@ extension SnapshotTests {
             self.b = try decoder.decode(Self.columns.b)
             let c = try decoder.decode(Self.columns.c)
             guard let id else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let c else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.id = id
             self.c = c
@@ -1371,7 +1371,7 @@ extension SnapshotTests {
             self.longitude = try decoder.decode(Self.columns.longitude)
             let name = try decoder.decode(Self.columns.name)
             guard let name else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.name = name
           }
@@ -1394,13 +1394,13 @@ extension SnapshotTests {
             let longitude = try decoder.decode(Self.columns.longitude)
             let name = try decoder.decode(Self.columns.name)
             guard let latitude else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let longitude else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             guard let name else {
-              throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+              throw StructuredQueriesCore.QueryDecodingError.valueNotFound
             }
             self.latitude = latitude
             self.longitude = longitude
@@ -1605,7 +1605,7 @@ extension SnapshotTests {
               let name = try decoder.decode(Self.columns.name)
               self.note = try decoder.decode(Self.columns.note)
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.name = name
             }
@@ -1624,13 +1624,13 @@ extension SnapshotTests {
               let name = try decoder.decode(Self.columns.name)
               self.note = try decoder.decode(Self.columns.note)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let latitude else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.latitude = latitude
@@ -1820,10 +1820,10 @@ extension SnapshotTests {
               let quantity = try decoder.decode(Self.columns.quantity)
               self.note = try decoder.decode(Self.columns.note)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let quantity else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.quantity = quantity
@@ -2018,10 +2018,10 @@ extension SnapshotTests {
               self.email = try decoder.decode(Self.columns.email)
               let age = try decoder.decode(Self.columns.age)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let age else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.age = age
@@ -2199,13 +2199,13 @@ extension SnapshotTests {
               let name = try decoder.decode(Self.columns.name)
               let generated = try decoder.decode(Self.columns.generated)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let generated else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.name = name
@@ -2377,10 +2377,10 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.name = name
@@ -2557,10 +2557,10 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.name = name
@@ -2749,13 +2749,13 @@ extension SnapshotTests {
               let reminderTitle = try decoder.decode(Self.columns.reminderTitle)
               let remindersListTitle = try decoder.decode(Self.columns.remindersListTitle)
               guard let reminderID else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let reminderTitle else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let remindersListTitle else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.reminderID = reminderID
               self.reminderTitle = reminderTitle
@@ -2925,10 +2925,10 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let userModificationDate = try decoder.decode(Self.columns.userModificationDate)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let userModificationDate else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.userModificationDate = userModificationDate
@@ -3096,10 +3096,10 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let timestamps = try decoder.decode(Self.columns.timestamps)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let timestamps else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.timestamps = timestamps
@@ -3296,10 +3296,10 @@ extension SnapshotTests {
               let name = try decoder.decode(Self.columns.name)
               self.note = try decoder.decode(Self.columns.note)
               guard let latitude else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.latitude = latitude
               self.name = name
@@ -3326,13 +3326,13 @@ extension SnapshotTests {
               let name = try decoder.decode(Self.columns.name)
               self.note = try decoder.decode(Self.columns.note)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let latitude else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.latitude = latitude
@@ -3516,7 +3516,7 @@ extension SnapshotTests {
               let quantity = try decoder.decode(Self.columns.quantity)
               self.note = try decoder.decode(Self.columns.note)
               guard let quantity else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.quantity = quantity
             }
@@ -3539,10 +3539,10 @@ extension SnapshotTests {
               let quantity = try decoder.decode(Self.columns.quantity)
               self.note = try decoder.decode(Self.columns.note)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let quantity else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.quantity = quantity
@@ -3730,7 +3730,7 @@ extension SnapshotTests {
               self.email = try decoder.decode(Self.columns.email)
               let age = try decoder.decode(Self.columns.age)
               guard let age else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.age = age
             }
@@ -3753,10 +3753,10 @@ extension SnapshotTests {
               self.email = try decoder.decode(Self.columns.email)
               let age = try decoder.decode(Self.columns.age)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let age else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.age = age
@@ -3928,7 +3928,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.name = name
             }
@@ -3949,13 +3949,13 @@ extension SnapshotTests {
               let name = try decoder.decode(Self.columns.name)
               let generated = try decoder.decode(Self.columns.generated)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let generated else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.name = name
@@ -4121,7 +4121,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.name = name
             }
@@ -4141,10 +4141,10 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.name = name
@@ -4315,7 +4315,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.name = name
             }
@@ -4335,10 +4335,10 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let name = try decoder.decode(Self.columns.name)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let name else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.name = name
@@ -4519,10 +4519,10 @@ extension SnapshotTests {
               let reminderTitle = try decoder.decode(Self.columns.reminderTitle)
               let remindersListTitle = try decoder.decode(Self.columns.remindersListTitle)
               guard let reminderTitle else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let remindersListTitle else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.reminderTitle = reminderTitle
               self.remindersListTitle = remindersListTitle
@@ -4546,13 +4546,13 @@ extension SnapshotTests {
               let reminderTitle = try decoder.decode(Self.columns.reminderTitle)
               let remindersListTitle = try decoder.decode(Self.columns.remindersListTitle)
               guard let reminderID else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let reminderTitle else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let remindersListTitle else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.reminderID = reminderID
               self.reminderTitle = reminderTitle
@@ -4717,7 +4717,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(Self.columns.id)
               let userModificationDate = try decoder.decode(Self.columns.userModificationDate)
               guard let userModificationDate else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.userModificationDate = userModificationDate
             }
@@ -4737,10 +4737,10 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let userModificationDate = try decoder.decode(Self.columns.userModificationDate)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let userModificationDate else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.userModificationDate = userModificationDate
@@ -4902,7 +4902,7 @@ extension SnapshotTests {
               self.id = try decoder.decode(Self.columns.id)
               let timestamps = try decoder.decode(Self.columns.timestamps)
               guard let timestamps else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.timestamps = timestamps
             }
@@ -4922,10 +4922,10 @@ extension SnapshotTests {
               let id = try decoder.decode(Self.columns.id)
               let timestamps = try decoder.decode(Self.columns.timestamps)
               guard let id else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               guard let timestamps else {
-                throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
+                throw StructuredQueriesCore.QueryDecodingError.valueNotFound
               }
               self.id = id
               self.timestamps = timestamps

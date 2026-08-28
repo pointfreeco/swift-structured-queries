@@ -843,7 +843,7 @@ extension Insert: Statement {
         query.append("NOTHING")
         hasInvalidWhere = !updateFilter.isEmpty
       } else {
-        query.append("UPDATE \(bind: updates)")
+        query.append("UPDATE \(updates)")
         if !updateFilter.isEmpty {
           query.append("\(.newlineOrSpace)WHERE \(updateFilter.joined(separator: " AND "))")
         }
@@ -887,7 +887,7 @@ public enum InsertValuesBuilder<Value> {
       } catch {
         valueFragments.append(
           Array(
-            repeating: "\(QueryBinding.invalid(error))",
+            repeating: QueryFragment(segments: [.invalid(error)]),
             count: Value.TableColumns.writableColumns.count
           )
         )
@@ -908,7 +908,7 @@ public enum InsertValuesBuilder<Value> {
       } catch {
         valueFragments.append(
           Array(
-            repeating: "\(QueryBinding.invalid(error))",
+            repeating: QueryFragment(segments: [.invalid(error)]),
             count: Value.Draft.TableColumns.writableColumns.count
           )
         )
