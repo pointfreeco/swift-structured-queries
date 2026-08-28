@@ -156,7 +156,7 @@ extension NonSendableDefault: QueryBindable {
   var queryBinding: QueryBinding { .null }
 }
 extension NonSendableDefault: QueryDecodable {
-  convenience init(decoder: inout some QueryDecoder) throws { self.init() }
+  convenience init(decoder: inout some QueryDecoder) throws(QueryDecodingError) { self.init() }
 }
 @Selection
 private struct NonSendableDefaultColumns {

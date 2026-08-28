@@ -136,11 +136,11 @@ extension SnapshotTests {
       struct ReminderResult: QueryRepresentable {
         let title: String
         let isCompleted: Bool
-        init(decoder: inout some QueryDecoder) throws {
+        init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
           guard let title = try decoder.decode(String.self)
-          else { throw QueryDecodingError.missingRequiredColumn }
+          else { throw .missingRequiredColumn }
           guard let isCompleted = try decoder.decode(Bool.self)
-          else { throw QueryDecodingError.missingRequiredColumn }
+          else { throw .missingRequiredColumn }
           self.isCompleted = isCompleted
           self.title = title
         }
