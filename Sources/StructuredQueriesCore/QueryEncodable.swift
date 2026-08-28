@@ -12,24 +12,6 @@ public protocol QueryEncodable {
   func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError)
 }
 
-extension QueryBindable {
-  @inlinable
-  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
-    switch queryBinding {
-    case .blob(let value): try encoder.encode(value)
-    case .bool(let value): try encoder.encode(value)
-    case .date(let value): try encoder.encode(value)
-    case .double(let value): try encoder.encode(value)
-    case .int(let value): try encoder.encode(value)
-    case .null: try encoder.encodeNull()
-    case .text(let value): try encoder.encode(value)
-    case .uint(let value): try encoder.encode(value)
-    case .uuid(let value): try encoder.encode(value)
-    case .invalid(let error): throw QueryEncodingError.other(error.underlyingError)
-    }
-  }
-}
-
 extension Bool {
   @inlinable
   public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
@@ -166,21 +148,5 @@ extension Optional: QueryEncodable where Wrapped: QueryEncodable & QueryExpressi
       return
     }
     try self.encode(to: &encoder)
-  }
-}
-
-extension Table {
-  // TODO: Remove and rely on `@Table`-generated code?
-  public nonisolated func encode(
-    to encoder: inout some QueryEncoder
-  ) throws(QueryEncodingError) {
-    func open<Root, Value>(
-      _ column: some WritableTableColumnExpression<Root, Value>
-    ) throws(QueryEncodingError) {
-      try encoder.encode(column, (self as! Root)[keyPath: column.keyPath])
-    }
-    for column in Self.TableColumns.writableColumns {
-      try open(column)
-    }
   }
 }

@@ -404,7 +404,7 @@ extension TableMacro: ExtensionMacro {
           decodingUnwrappings.append(
             """
             guard let \(identifier) else {
-            throw \(moduleName).QueryDecodingError.missingRequiredColumn
+            throw \(moduleName).QueryDecodingError.valueNotFound
             }
             """
           )
@@ -433,6 +433,7 @@ extension TableMacro: ExtensionMacro {
     } else if declaration.is(EnumDeclSyntax.self) {
       var decodings: [String] = []
       var decodingAssignments: [String] = []
+      var encodings: [String] = []
       for member in declaration.memberBlock.members {
         guard let caseDecl = member.decl.as(EnumCaseDeclSyntax.self) else { continue }
         guard
@@ -588,6 +589,11 @@ extension TableMacro: ExtensionMacro {
         }
         appendColumnProperty()
         allColumns.append(identifier)
+        encodings.append(
+          """
+          try encoder.encode(columns.\(identifier), self.\(identifier))
+          """
+        )
         decodings.append(
           """
           let \(identifier) = try decoder.decode(Self.columns.\(identifier)) ?? nil
@@ -612,8 +618,16 @@ extension TableMacro: ExtensionMacro {
         public \(nonisolated)init(decoder: inout some \(moduleName).QueryDecoder) throws(\(moduleName).QueryDecodingError) {
         \(raw: decodings.joined(separator: "\n"))
         \(raw: decodingAssignments.joined(separator: " else ")) else {
-        throw \(moduleName).QueryDecodingError.missingRequiredColumn
+        throw \(moduleName).QueryDecodingError.valueNotFound
         }
+        }
+        """
+      encodeFunction = """
+
+        public \(nonisolated)func encode(to encoder: inout some \(moduleName).QueryEncoder) \
+        throws(\(moduleName).QueryEncodingError) {
+        let columns = Self.columns
+        \(raw: encodings.joined(separator: "\n"))
         }
         """
     }

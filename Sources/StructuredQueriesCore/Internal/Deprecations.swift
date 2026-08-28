@@ -146,22 +146,8 @@ extension QueryFragment {
         string.append("?")
       case .identifier(let identifier):
         string.append(identifier.name.quoted())
-      }
-    }
-  }
-
-  @available(
-    *,
-    deprecated,
-    message: "Use 'QueryFragment.segments' to build up a SQL string and bindings in a single loop."
-  )
-  public var bindings: [QueryBinding] {
-    segments.reduce(into: []) { bindings, segment in
-      switch segment {
-      case .sql, .identifier:
-        break
-      case .binding(let binding):
-        bindings.append(binding)
+      case .invalid(let error):
+        string.append("<invalid: \(error.localizedDescription)>")
       }
     }
   }

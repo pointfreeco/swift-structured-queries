@@ -138,9 +138,9 @@ extension SnapshotTests {
         let isCompleted: Bool
         init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
           guard let title = try decoder.decode(String.self)
-          else { throw .missingRequiredColumn }
+          else { throw .valueNotFound }
           guard let isCompleted = try decoder.decode(Bool.self)
-          else { throw .missingRequiredColumn }
+          else { throw .valueNotFound }
           self.isCompleted = isCompleted
           self.title = title
         }

@@ -294,11 +294,7 @@ extension TableAlias: QueryExpression where Base: QueryExpression {
   }
 }
 
-extension TableAlias: QueryBindable where Base: QueryBindable {
-  public var queryBinding: QueryBinding {
-    base.queryBinding
-  }
-}
+extension TableAlias: QueryBindable where Base: QueryBindable {}
 
 extension TableAlias: QueryDecodable where Base: QueryDecodable {
   public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {

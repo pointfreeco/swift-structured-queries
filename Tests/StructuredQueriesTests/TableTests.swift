@@ -383,7 +383,7 @@ extension SnapshotTests {
           """
           SELECT "rows"."id", "rows"."isDeleted"
           FROM "rows"
-          WHERE (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
+          WHERE (NOT ("rows"."isDeleted")) AND (NOT ("rows"."isDeleted")) AND (("rows"."id") > (0))
           """
         } results: {
           """
@@ -592,7 +592,7 @@ extension SnapshotTests {
             """
             SELECT "rows"."id", "rows"."isDeleted"
             FROM "rows"
-            WHERE (NOT ("rows"."isDeleted"))
+            WHERE (NOT ("rows"."isDeleted")) AND (NOT ("rows"."isDeleted"))
             """
           } results: {
             """
@@ -611,7 +611,7 @@ extension SnapshotTests {
             """
             SELECT "rows"."id", "rows"."isDeleted"
             FROM "rows"
-            WHERE (NOT ("rows"."isDeleted"))
+            WHERE (NOT ("rows"."isDeleted")) AND (NOT ("rows"."isDeleted")) AND (NOT ("rows"."isDeleted"))
             """
           } results: {
             """

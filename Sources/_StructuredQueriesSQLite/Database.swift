@@ -165,21 +165,17 @@ public struct Database {
   func withStatement<R>(
     _ query: QueryFragment, body: (OpaquePointer) throws -> R
   ) throws -> R {
-    let (sql, bindings) = query.prepare { _ in "?" }
+    let prepared = try query.prepare { _ in "?" }
     var statement: OpaquePointer?
-    let code = sqlite3_prepare_v2(storage.handle, sql, -1, &statement, nil)
+    let code = sqlite3_prepare_v2(storage.handle, prepared.sql, -1, &statement, nil)
     guard code == SQLITE_OK, let statement
     else { throw SQLiteError(db: storage.handle) }
     defer { sqlite3_finalize(statement) }
-    for (index, binding) in zip(Int32(1)..., bindings) {
+    for (index, binding) in zip(Int32(1)..., prepared.bindings) {
       let result =
         switch binding {
         case .blob(let blob):
           sqlite3_bind_blob(statement, index, Array(blob), Int32(blob.count), SQLITE_TRANSIENT)
-        case .bool(let bool):
-          sqlite3_bind_int64(statement, index, bool ? 1 : 0)
-        case .date(let date):
-          sqlite3_bind_text(statement, index, date.iso8601String, -1, SQLITE_TRANSIENT)
         case .double(let double):
           sqlite3_bind_double(statement, index, double)
         case .int(let int):
@@ -188,14 +184,6 @@ public struct Database {
           sqlite3_bind_null(statement, index)
         case .text(let text):
           sqlite3_bind_text(statement, index, text, -1, SQLITE_TRANSIENT)
-        case .uint(let uint) where uint <= UInt64(Int64.max):
-          sqlite3_bind_int64(statement, index, Int64(uint))
-        case .uint(let uint):
-          throw Int64OverflowError(unsignedInteger: uint)
-        case .uuid(let uuid):
-          sqlite3_bind_text(statement, index, uuid.uuidString.lowercased(), -1, SQLITE_TRANSIENT)
-        case .invalid(let error):
-          throw error.underlyingError
         }
       guard result == SQLITE_OK else { throw SQLiteError(db: storage.handle) }
     }
@@ -231,8 +219,6 @@ public struct Database {
     }
   }
 }
-
-struct Int64OverflowError: Error { let unsignedInteger: UInt64 }
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 

@@ -14,9 +14,4 @@ extension RangeReplaceableCollection {
       append(element)
     }
   }
-
-  func removingDuplicates() -> Self where Element: Hashable {
-    var set: Set<Element> = []
-    return filter { set.insert($0).inserted }
-  }
 }

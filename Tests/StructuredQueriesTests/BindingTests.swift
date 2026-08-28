@@ -28,13 +28,13 @@ extension SnapshotTests {
         }
         .returning(\.self)
       ) {
-        #"""
+        """
         INSERT INTO "records"
         ("id", "name", "duration")
         VALUES
-        ('\u{07AD}��ޭ��ޭ��ޭ��', 'Blob', 0)
+        (X'deadbeefdeadbeefdeadbeefdeadbeef', 'Blob', 0)
         RETURNING "id", "name", "duration"
-        """#
+        """
       } results: {
         """
         ┌───────────────────────────────────────────────────┐
@@ -58,16 +58,16 @@ extension SnapshotTests {
         }
         .returning(\.self)
       ) {
-        #"""
+        """
         INSERT INTO "records"
         ("id", "name", "duration")
         VALUES
-        ('\u{07AD}��ޭ��ޭ��ޭ��', '', 18446744073709551615)
+        (X'deadbeefdeadbeefdeadbeefdeadbeef', '', 18446744073709551615)
         RETURNING "id", "name", "duration"
-        """#
+        """
       } results: {
         """
-        The operation couldn’t be completed. (_StructuredQueriesSQLite.Int64OverflowError error 1.)
+        The operation couldn’t be completed. (StructuredQueriesCore.QueryEncodingError error 1.)
         """
       }
     }

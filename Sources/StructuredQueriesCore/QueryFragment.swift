@@ -9,14 +9,17 @@ import IssueReporting
 ///
 /// > Tip: The `#sql` macro performs basic linting and validation of a SQL string literal. Prefer it
 /// > for creating `QueryFragment`s where possible.
-public struct QueryFragment: Hashable, Sendable {
+public struct QueryFragment: Sendable {
   /// A segment of a query fragment.
-  public enum Segment: Hashable, Sendable {
+  public enum Segment: Sendable {
     /// A raw SQL fragment.
     case sql(String)
 
-    /// A binding.
-    case binding(QueryBinding)
+    /// A binding, where `nil` represents `NULL`.
+    case binding((any QueryBindable)?)
+
+    /// An error captured while building the statement, deferred to preparation.
+    case invalid(any Error)
 
     /// A late-bound table identifier.
     case identifier(Identifier)
@@ -39,8 +42,14 @@ public struct QueryFragment: Hashable, Sendable {
   /// Initializes an empty query fragment.
   public init() {}
 
-  fileprivate init(segments: [Segment]) {
+  @usableFromInline
+  package init(segments: [Segment]) {
     self.segments = segments
+  }
+
+  @usableFromInline
+  package init(binding value: any QueryBindable) {
+    self.init(segments: [.binding(value)])
   }
 
   init(_ string: String = "") {
@@ -53,7 +62,7 @@ public struct QueryFragment: Hashable, Sendable {
       switch segment {
       case .sql(let sql):
         guard sql.isEmpty else { return false }
-      case .binding, .identifier:
+      case .binding, .identifier, .invalid:
         return false
       }
     }
@@ -79,30 +88,6 @@ public struct QueryFragment: Hashable, Sendable {
     return query
   }
 
-  /// Returns a prepared SQL string and associated bindings for this query.
-  ///
-  /// - Parameter template: Prepare a template string for a binding at a given 1-based offset.
-  /// - Returns: A SQL string and array of associated bindings.
-  public func prepare(
-    _ template: (_ offset: Int) -> String
-  ) -> (sql: String, bindings: [QueryBinding]) {
-    var sql = ""
-    var bindings: [QueryBinding] = []
-    var offset = 1
-    for segment in segments {
-      switch segment {
-      case .sql(let fragment):
-        sql.append(fragment)
-      case .binding(let binding):
-        defer { offset += 1 }
-        sql.append(template(offset))
-        bindings.append(binding)
-      case .identifier(let identifier):
-        sql.append(identifier.name.quoted())
-      }
-    }
-    return (sql, bindings)
-  }
 }
 
 extension QueryFragment: CustomDebugStringConvertible {
@@ -111,8 +96,10 @@ extension QueryFragment: CustomDebugStringConvertible {
       switch segment {
       case .sql(let sql):
         debugDescription.append(sql)
-      case .binding(let binding):
-        debugDescription.append(binding.debugDescription)
+      case .binding(let value):
+        debugDescription.append(value?._sqlLiteralDescription ?? "NULL")
+      case .invalid(let error):
+        debugDescription.append("<invalid: \(error.localizedDescription)>")
       case .identifier(let identifier):
         debugDescription.append(identifier.name.quoted())
       }
@@ -172,71 +159,6 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     delimiter: QuoteDelimiter = .identifier
   ) {
     self.init(sql.quoted(delimiter))
-  }
-
-  package func compiled(statementType: String) -> Self {
-    segments.reduce(into: QueryFragment()) {
-      switch $1 {
-      case .sql(let sql):
-        $0.append("\(raw: sql)")
-      case .identifier:
-        $0.segments.append($1)
-      case .binding(let binding):
-        switch binding {
-        case .blob(let blob):
-          let hex = blob.reduce(into: "") {
-            let hex = String($1, radix: 16)
-            if hex.count == 1 {
-              $0.append("0")
-            }
-            $0.append(hex)
-          }
-          $0.append("X\(quote: hex, delimiter: .text)")
-        case .bool(let bool):
-          $0.append("\(raw: bool ? 1 : 0)")
-        case .double(let double):
-          $0.append("\(raw: double)")
-        case .date(let date):
-          reportIssue(
-            """
-            Swift Date values should not be bound to a '\(statementType)' statement. Specify dates \
-            using the '#sql' macro, instead. For example, the current date:
-
-                #sql("datetime()")
-
-            Or a constant date:
-
-                #sql("'2018-01-29 00:08:00'")
-            """
-          )
-          $0.append("\(quote: date.iso8601String, delimiter: .text)")
-        case .int(let int):
-          $0.append("\(raw: int)")
-        case .null:
-          $0.append("NULL")
-        case .text(let string):
-          $0.append("\(quote: string, delimiter: .text)")
-        case .uint(let uint):
-          $0.append("\(raw: uint)")
-        case .uuid(let uuid):
-          reportIssue(
-            """
-            Swift UUID values should not be bound to a '\(statementType)' statement. Specify UUIDs \
-            using the '#sql' macro, instead. For example, a random UUID:
-
-                #sql("uuid()")
-
-            Or a constant UUID:
-
-                #sql("'00000000-0000-0000-0000-000000000000'")
-            """
-          )
-          $0.append("\(quote: uuid.uuidString.lowercased(), delimiter: .text)")
-        case .invalid(let error):
-          $0.append("\(.invalid(error.underlyingError))")
-        }
-      }
-    }
   }
 
   public struct StringInterpolation: StringInterpolationProtocol {
@@ -303,14 +225,11 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       appendLiteral(sql.description)
     }
 
-    /// Append a query binding to the interpolation.
-    ///
-    /// - Parameter binding: A query binding.
-    public mutating func appendInterpolation(_ binding: QueryBinding) {
-      appendSegment(.binding(binding))
+    package mutating func appendBinding(_ value: any QueryBindable) {
+      appendSegment(.binding(value))
     }
 
-    private mutating func appendSegment(_ segment: Segment) {
+    package mutating func appendSegment(_ segment: Segment) {
       if !sqlBuffer.isEmpty {
         segments.append(.sql(sqlBuffer))
         sqlBuffer.removeAll(keepingCapacity: true)
@@ -336,21 +255,22 @@ extension QueryFragment: ExpressibleByStringInterpolation {
     public mutating func appendInterpolation(_ fragment: QueryFragment) {
       for segment in fragment.segments {
         switch segment {
-        case .binding(let binding):
-          appendInterpolation(binding)
         case .sql(let sql):
           appendLiteral(sql)
-        case .identifier:
+        case .binding, .invalid, .identifier:
           appendSegment(segment)
         }
       }
     }
 
-    /// Append a query expression to the interpolation.
+    /// Append a value to the interpolation as a bound parameter.
     ///
-    /// - Parameter expression: A query expression.
-    public mutating func appendInterpolation(bind expression: some QueryExpression) {
-      appendInterpolation(expression.queryFragment)
+    /// The value is deferred into the fragment's segments with its type identity intact, to be
+    /// encoded by a database driver when the statement is prepared.
+    ///
+    /// - Parameter value: A single-column value to bind.
+    public mutating func appendInterpolation(bind value: some QueryBindable) {
+      appendBinding(value)
     }
 
     /// Append a query expression to the interpolation.

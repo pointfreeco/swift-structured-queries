@@ -36,8 +36,8 @@ extension Date? {
 }
 
 extension Date.UnixTimeRepresentation: QueryBindable {
-  public var queryBinding: QueryBinding {
-    .int(Int64(queryOutput.timeIntervalSince1970))
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+    try encoder.encode(Int64(queryOutput.timeIntervalSince1970))
   }
 }
 

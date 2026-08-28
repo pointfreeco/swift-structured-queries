@@ -475,6 +475,10 @@ extension JSONEach: QueryDecodable {
   }
 }
 
+extension JSONEach {
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {}
+}
+
 extension JSONEach: Sendable where Key.QueryOutput: Sendable, Value.QueryOutput: Sendable {}
 
 extension JSONEach: Equatable where Key.QueryOutput: Equatable, Value.QueryOutput: Equatable {}
@@ -560,6 +564,13 @@ extension JSONBEach: QueryDecodable {
     self.key = try Key(decoder: &decoder).queryOutput
     self.value = try Value(decoder: &decoder).queryOutput
   }
+}
+
+#if !SuppressPlatformSQLiteAvailability
+  @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
+#endif
+extension JSONBEach {
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {}
 }
 
 #if !SuppressPlatformSQLiteAvailability

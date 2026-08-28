@@ -22,6 +22,8 @@ extension Never: Table {
   public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     throw .typeMismatch(Self.self)
   }
+
+  public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {}
 }
 
 extension Never: _Selection {}
