@@ -25,20 +25,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_() -> Date {
+          currentDate()
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Date
-          public init(_ body: @escaping () -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -51,7 +57,7 @@ extension SnapshotTests {
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
-              queryOutput: self.body()
+              queryOutput: __macro_local_11currentDatefMu0_()
             )
             .queryBinding
           }
@@ -80,20 +86,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_() -> Date {
+          currentDate()
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
-          public let name = "current_date"
+          public var name: String {
+            "current_date"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Date
-          public init(_ body: @escaping () -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -106,7 +118,7 @@ extension SnapshotTests {
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
-              queryOutput: self.body()
+              queryOutput: __macro_local_11currentDatefMu0_()
             )
             .queryBinding
           }
@@ -135,22 +147,28 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: jsonCapitalize)
           #sourceLocation()
           #endif
-          return __macro_local_14jsonCapitalizefMu_(jsonCapitalize)
+          return __macro_local_14jsonCapitalizefMu_()
+        }
+
+        nonisolated func __macro_local_14jsonCapitalizefMu0_(_ arg0: [String]) -> [String] {
+          jsonCapitalize(arg0)
         }
 
         nonisolated struct __macro_local_14jsonCapitalizefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = [String].JSONRepresentation
           public typealias Output = [String].JSONRepresentation
-          public let name = "jsonCapitalize"
+          public var name: String {
+            "jsonCapitalize"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth([String].JSONRepresentation.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: ([String]) -> [String]
-          public init(_ body: @escaping ([String]) -> [String]) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(_ strings: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -167,7 +185,7 @@ extension SnapshotTests {
               throw InvalidInvocation()
             }
             return [String].JSONRepresentation(
-              queryOutput: self.body(strings)
+              queryOutput: __macro_local_14jsonCapitalizefMu0_(strings)
             )
             .queryBinding
           }
@@ -198,20 +216,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: fortyTwo)
           #sourceLocation()
           #endif
-          return __macro_local_8fortyTwofMu_(fortyTwo)
+          return __macro_local_8fortyTwofMu_()
+        }
+
+        nonisolated func __macro_local_8fortyTwofMu0_() -> Int {
+          fortyTwo()
         }
 
         nonisolated struct __macro_local_8fortyTwofMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Int
-          public let name = "fortyTwo"
+          public var name: String {
+            "fortyTwo"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = true
-          public let body: () -> Int
-          public init(_ body: @escaping () -> Int) {
-            self.body = body
+          public var isDeterministic: Bool {
+            true
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Int> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -224,7 +248,7 @@ extension SnapshotTests {
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Int(
-              queryOutput: self.body()
+              queryOutput: __macro_local_8fortyTwofMu0_()
             )
             .queryBinding
           }
@@ -253,22 +277,28 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_(_ arg0: String) -> Date? {
+          currentDate(arg0)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String
           public typealias Output = Date?
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(String.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (String) -> Date?
-          public init(_ body: @escaping (String) -> Date?) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String>) -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -285,7 +315,7 @@ extension SnapshotTests {
               throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format)
+              queryOutput: __macro_local_11currentDatefMu0_(format)
             )
             .queryBinding
           }
@@ -316,22 +346,28 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_(_ arg0: String) -> Date? {
+          currentDate(format: arg0)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String
           public typealias Output = Date?
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(String.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (String) -> Date?
-          public init(_ body: @escaping (String) -> Date?) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(format: some StructuredQueriesCore.QueryExpression<String>) -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -348,7 +384,7 @@ extension SnapshotTests {
               throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format)
+              queryOutput: __macro_local_11currentDatefMu0_(format)
             )
             .queryBinding
           }
@@ -379,22 +415,28 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_(_ arg0: String) -> Date? {
+          currentDate(arg0)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String
           public typealias Output = Date?
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(String.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (String) -> Date?
-          public init(_ body: @escaping (String) -> Date?) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -411,7 +453,7 @@ extension SnapshotTests {
               throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format)
+              queryOutput: __macro_local_11currentDatefMu0_(format)
             )
             .queryBinding
           }
@@ -442,22 +484,28 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_(_ arg0: String) -> Date? {
+          currentDate(format: arg0)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String
           public typealias Output = Date?
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(String.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (String) -> Date?
-          public init(_ body: @escaping (String) -> Date?) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(format: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -474,7 +522,7 @@ extension SnapshotTests {
               throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format)
+              queryOutput: __macro_local_11currentDatefMu0_(format)
             )
             .queryBinding
           }
@@ -505,23 +553,29 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: concat)
           #sourceLocation()
           #endif
-          return __macro_local_6concatfMu_(concat)
+          return __macro_local_6concatfMu_()
+        }
+
+        nonisolated func __macro_local_6concatfMu0_(_ arg0: String, _ arg1: String) -> String {
+          concat(first: arg0, second: arg1)
         }
 
         nonisolated struct __macro_local_6concatfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = (String, String)
           public typealias Output = String
-          public let name = "concat"
+          public var name: String {
+            "concat"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(String.self)
             argumentCount += _columnWidth(String.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (String, String) -> String
-          public init(_ body: @escaping (String, String) -> String) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(first: some StructuredQueriesCore.QueryExpression<String> = "", second: some StructuredQueriesCore.QueryExpression<String> = "") -> some StructuredQueriesCore.QueryExpression<String> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -542,7 +596,7 @@ extension SnapshotTests {
               throw InvalidInvocation()
             }
             return String(
-              queryOutput: self.body(first, second)
+              queryOutput: __macro_local_6concatfMu0_(first, second)
             )
             .queryBinding
           }
@@ -590,22 +644,28 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_(_ arg0: String?) -> Date? {
+          currentDate(arg0)
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = String?
           public typealias Output = Date?
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(String?.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (String?) -> Date?
-          public init(_ body: @escaping (String?) -> Date?) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(_ format: some StructuredQueriesCore.QueryExpression<String?> = String?.none) -> some StructuredQueriesCore.QueryExpression<Date?> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -622,7 +682,7 @@ extension SnapshotTests {
               throw InvalidInvocation()
             }
             return Date?(
-              queryOutput: self.body(format)
+              queryOutput: __macro_local_11currentDatefMu0_(format)
             )
             .queryBinding
           }
@@ -653,20 +713,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_() throws -> Date {
+          currentDate()
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () throws -> Date
-          public init(_ body: @escaping () throws -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -680,7 +746,7 @@ extension SnapshotTests {
           ) throws -> StructuredQueriesCore.QueryBinding {
             do {
               return Date(
-                queryOutput: try self.body()
+                queryOutput: try __macro_local_11currentDatefMu0_()
               )
               .queryBinding
             } catch {
@@ -712,20 +778,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        nonisolated func __macro_local_11currentDatefMu0_() throws -> Date {
+          currentDate()
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () throws(MyError) -> Date
-          public init(_ body: @escaping () throws(MyError) -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -739,7 +811,7 @@ extension SnapshotTests {
           ) throws -> StructuredQueriesCore.QueryBinding {
             do {
               return Date(
-                queryOutput: try self.body()
+                queryOutput: try __macro_local_11currentDatefMu0_()
               )
               .queryBinding
             } catch {
@@ -771,20 +843,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        public nonisolated func __macro_local_11currentDatefMu0_() -> Date {
+          currentDate()
         }
 
         public nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Date
-          public init(_ body: @escaping () -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -797,7 +875,7 @@ extension SnapshotTests {
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
-              queryOutput: self.body()
+              queryOutput: __macro_local_11currentDatefMu0_()
             )
             .queryBinding
           }
@@ -826,20 +904,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        static nonisolated func __macro_local_11currentDatefMu0_() -> Date {
+          currentDate()
         }
 
         nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Date
-          public init(_ body: @escaping () -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -852,7 +936,7 @@ extension SnapshotTests {
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
-              queryOutput: self.body()
+              queryOutput: __macro_local_11currentDatefMu0_()
             )
             .queryBinding
           }
@@ -882,6 +966,172 @@ extension SnapshotTests {
       }
     }
 
+    @Test func asyncFunction() {
+      assertMacro {
+        """
+        @DatabaseFunction
+        func currentTemperature() async -> Double {
+          await weatherService.temperature
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseFunction
+        func currentTemperature() async -> Double {
+                                  ┬────
+                                  ╰─ 🛑 '@DatabaseFunction' functions cannot be asynchronous
+                                     ✏️ Remove 'async'
+          await weatherService.temperature
+        }
+        """
+      } fixes: {
+        """
+        @DatabaseFunction
+        func currentTemperature() -> Double {
+          await weatherService.temperature
+        }
+        """
+      } expansion: {
+        #"""
+        func currentTemperature() -> Double {
+          await weatherService.temperature
+        }
+
+        nonisolated var $currentTemperature: __macro_local_18currentTemperaturefMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(function: currentTemperature)
+          #sourceLocation()
+          #endif
+          return __macro_local_18currentTemperaturefMu_()
+        }
+
+        nonisolated func __macro_local_18currentTemperaturefMu0_() -> Double {
+          currentTemperature()
+        }
+
+        nonisolated struct __macro_local_18currentTemperaturefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
+          public typealias Input = ()
+          public typealias Output = Double
+          public var name: String {
+            "currentTemperature"
+          }
+          public var argumentCount: Int? {
+            0
+          }
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
+          }
+          public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Double> {
+            StructuredQueriesCore.$_isSelecting.withValue(false) {
+              StructuredQueriesCore.SQLQueryExpression(
+                "\(quote: self.name)()"
+              )
+            }
+          }
+          public func invoke(
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            return Double(
+              queryOutput: __macro_local_18currentTemperaturefMu0_()
+            )
+            .queryBinding
+          }
+        }
+        """#
+      }
+    }
+
+    @Test func asyncProperty() {
+      assertMacro {
+        """
+        @DatabaseFunction
+        var currentTemperature: Double {
+          get async {
+            await weatherService.temperature
+          }
+        }
+        """
+      } diagnostics: {
+        """
+        @DatabaseFunction
+        var currentTemperature: Double {
+          get async {
+              ┬────
+              ╰─ 🛑 '@DatabaseFunction' properties cannot be asynchronous
+                 ✏️ Remove 'async'
+            await weatherService.temperature
+          }
+        }
+        """
+      } fixes: {
+        """
+        @DatabaseFunction
+        var currentTemperature: Double {
+          get {
+            await weatherService.temperature
+          }
+        }
+        """
+      } expansion: {
+        #"""
+        var currentTemperature: Double {
+          get {
+            await weatherService.temperature
+          }
+        }
+
+        #if DEBUG
+        func __macro_local_32currentTemperatureIsolationProbefMu_() {
+        }
+        #endif
+
+        nonisolated var $currentTemperature: __macro_local_18currentTemperaturefMu_ {
+          #if DEBUG
+          #sourceLocation(file: "Test.swift", line: 1)
+          #StructuredQueriesIsolationCheck(property: __macro_local_32currentTemperatureIsolationProbefMu_)
+          #sourceLocation()
+          #endif
+          return __macro_local_18currentTemperaturefMu_()
+        }
+
+        nonisolated func __macro_local_18currentTemperaturefMu0_() -> Double {
+          currentTemperature
+        }
+
+        nonisolated struct __macro_local_18currentTemperaturefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
+          public typealias Input = ()
+          public typealias Output = Double
+          public typealias QueryValue = Output
+          public var name: String {
+            "currentTemperature"
+          }
+          public var argumentCount: Int? {
+            0
+          }
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
+          }
+          public func invoke(
+            _ decoder: inout some StructuredQueriesCore.QueryDecoder
+          ) throws -> StructuredQueriesCore.QueryBinding {
+            return Double(
+              queryOutput: __macro_local_18currentTemperaturefMu0_()
+            )
+            .queryBinding
+          }
+          public var queryFragment: StructuredQueriesCore.QueryFragment {
+            "\(quote: self.name)()"
+          }
+        }
+        """#
+      }
+    }
+
     @Test func availability() {
       assertMacro {
         """
@@ -904,20 +1154,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: currentDate)
           #sourceLocation()
           #endif
-          return __macro_local_11currentDatefMu_(currentDate)
+          return __macro_local_11currentDatefMu_()
+        }
+
+        @available(*, unavailable) nonisolated func __macro_local_11currentDatefMu0_() -> Date {
+          currentDate()
         }
 
         @available(*, unavailable) nonisolated struct __macro_local_11currentDatefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Date
-          public let name = "currentDate"
+          public var name: String {
+            "currentDate"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Date
-          public init(_ body: @escaping () -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Date> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -930,7 +1186,7 @@ extension SnapshotTests {
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
-              queryOutput: self.body()
+              queryOutput: __macro_local_11currentDatefMu0_()
             )
             .queryBinding
           }
@@ -959,20 +1215,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: `default`)
           #sourceLocation()
           #endif
-          return __macro_local_7defaultfMu_(`default`)
+          return __macro_local_7defaultfMu_()
+        }
+
+        public nonisolated func __macro_local_7defaultfMu0_() -> Int {
+          `default`()
         }
 
         public nonisolated struct __macro_local_7defaultfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Int
-          public let name = "default"
+          public var name: String {
+            "default"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Int
-          public init(_ body: @escaping () -> Int) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Int> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -985,7 +1247,7 @@ extension SnapshotTests {
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Int(
-              queryOutput: self.body()
+              queryOutput: __macro_local_7defaultfMu0_()
             )
             .queryBinding
           }
@@ -1014,20 +1276,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: void)
           #sourceLocation()
           #endif
-          return __macro_local_4voidfMu_(void)
+          return __macro_local_4voidfMu_()
+        }
+
+        public nonisolated func __macro_local_4voidfMu0_() -> Swift.Void {
+          void()
         }
 
         public nonisolated struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Swift.Void
-          public let name = "void"
+          public var name: String {
+            "void"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Swift.Void
-          public init(_ body: @escaping () -> Swift.Void) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -1039,7 +1307,7 @@ extension SnapshotTests {
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
-            self.body()
+            __macro_local_4voidfMu0_()
             return .null
           }
         }
@@ -1064,20 +1332,26 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: void)
           #sourceLocation()
           #endif
-          return __macro_local_4voidfMu_(void)
+          return __macro_local_4voidfMu_()
+        }
+
+        public nonisolated func __macro_local_4voidfMu0_() throws -> Swift.Void {
+          void()
         }
 
         public nonisolated struct __macro_local_4voidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = ()
           public typealias Output = Swift.Void
-          public let name = "void"
+          public var name: String {
+            "void"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () throws -> Swift.Void
-          public init(_ body: @escaping () throws -> Swift.Void) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -1090,7 +1364,7 @@ extension SnapshotTests {
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             do {
-              try self.body()
+              try __macro_local_4voidfMu0_()
               return .null
             } catch {
               return .invalid(error)
@@ -1127,23 +1401,29 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: min)
           #sourceLocation()
           #endif
-          return __macro_local_3minfMu_(min)
+          return __macro_local_3minfMu_()
+        }
+
+        nonisolated func __macro_local_3minfMu0_(_ arg0: Int, _ arg1: Int) -> Swift.Void {
+          min(arg0, arg1)
         }
 
         nonisolated struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = (Int, Int)
           public typealias Output = Swift.Void
-          public let name = "min"
+          public var name: String {
+            "min"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(Int.self)
             argumentCount += _columnWidth(Int.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (Int, Int) -> Swift.Void
-          public init(_ body: @escaping (Int, Int) -> Swift.Void) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(
             _ x: some StructuredQueriesCore.QueryExpression<Int>,
@@ -1166,7 +1446,7 @@ extension SnapshotTests {
             guard let y else {
               throw InvalidInvocation()
             }
-            self.body(x, y)
+            __macro_local_3minfMu0_(x, y)
             return .null
           }
           private struct InvalidInvocation: Error {
@@ -1199,23 +1479,29 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: min)
           #sourceLocation()
           #endif
-          return __macro_local_3minfMu_(min)
+          return __macro_local_3minfMu_()
+        }
+
+        nonisolated func __macro_local_3minfMu0_(_ arg0: Int, _ arg1: Int) -> Swift.Void {
+          min(x: arg0, y: arg1)
         }
 
         nonisolated struct __macro_local_3minfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = (Int, Int)
           public typealias Output = Swift.Void
-          public let name = "min"
+          public var name: String {
+            "min"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(Int.self)
             argumentCount += _columnWidth(Int.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (Int, Int) -> Swift.Void
-          public init(_ body: @escaping (Int, Int) -> Swift.Void) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(
             x: some StructuredQueriesCore.QueryExpression<Int>,
@@ -1238,7 +1524,7 @@ extension SnapshotTests {
             guard let y else {
               throw InvalidInvocation()
             }
-            self.body(x, y)
+            __macro_local_3minfMu0_(x, y)
             return .null
           }
           private struct InvalidInvocation: Error {
@@ -1268,23 +1554,29 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(function: isValid)
           #sourceLocation()
           #endif
-          return __macro_local_7isValidfMu_(isValid)
+          return __macro_local_7isValidfMu_()
+        }
+
+        nonisolated func __macro_local_7isValidfMu0_(_ arg0: Reminder, _ arg1: Bool) -> Bool {
+          isValid(arg0, arg1)
         }
 
         nonisolated struct __macro_local_7isValidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
           public typealias Input = (Reminder, Bool)
           public typealias Output = Bool
-          public let name = "isValid"
+          public var name: String {
+            "isValid"
+          }
           public var argumentCount: Int? {
             var argumentCount = 0
             argumentCount += _columnWidth(Reminder.self)
             argumentCount += _columnWidth(Bool.self)
             return argumentCount
           }
-          public let isDeterministic = false
-          public let body: (Reminder, Bool) -> Bool
-          public init(_ body: @escaping (Reminder, Bool) -> Bool) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func callAsFunction(_ reminder: some StructuredQueriesCore.QueryExpression<Reminder>, _ override: some StructuredQueriesCore.QueryExpression<Bool> = false) -> some StructuredQueriesCore.QueryExpression<Bool> {
             StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -1305,7 +1597,7 @@ extension SnapshotTests {
               throw InvalidInvocation()
             }
             return Bool(
-              queryOutput: self.body(reminder, override)
+              queryOutput: __macro_local_7isValidfMu0_(reminder, override)
             )
             .queryBinding
           }
@@ -1341,29 +1633,33 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
           #sourceLocation()
           #endif
-          return __macro_local_3nowfMu_ {
-            now
-          }
+          return __macro_local_3nowfMu_()
+        }
+
+        nonisolated func __macro_local_3nowfMu0_() -> Date {
+          now
         }
 
         nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
           public typealias Input = ()
           public typealias Output = Date
           public typealias QueryValue = Output
-          public let name = "now"
+          public var name: String {
+            "now"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Date
-          public init(_ body: @escaping () -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
-              queryOutput: self.body()
+              queryOutput: __macro_local_3nowfMu0_()
             )
             .queryBinding
           }
@@ -1404,29 +1700,33 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
           #sourceLocation()
           #endif
-          return __macro_local_3nowfMu_ {
-            now
-          }
+          return __macro_local_3nowfMu_()
+        }
+
+        nonisolated func __macro_local_3nowfMu0_() -> Date {
+          now
         }
 
         nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
           public typealias Input = ()
           public typealias Output = Date
           public typealias QueryValue = Output
-          public let name = "now"
+          public var name: String {
+            "now"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () -> Date
-          public init(_ body: @escaping () -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
-              queryOutput: self.body()
+              queryOutput: __macro_local_3nowfMu0_()
             )
             .queryBinding
           }
@@ -1467,29 +1767,33 @@ extension SnapshotTests {
           #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
           #sourceLocation()
           #endif
-          return __macro_local_3nowfMu_ {
-            try now
-          }
+          return __macro_local_3nowfMu_()
+        }
+
+        nonisolated func __macro_local_3nowfMu0_() throws -> Date {
+          try now
         }
 
         nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
           public typealias Input = ()
           public typealias Output = Date
           public typealias QueryValue = Output
-          public let name = "now"
+          public var name: String {
+            "now"
+          }
           public var argumentCount: Int? {
             0
           }
-          public let isDeterministic = false
-          public let body: () throws -> Date
-          public init(_ body: @escaping () throws -> Date) {
-            self.body = body
+          public var isDeterministic: Bool {
+            false
+          }
+          public init() {
           }
           public func invoke(
             _ decoder: inout some StructuredQueriesCore.QueryDecoder
           ) throws -> StructuredQueriesCore.QueryBinding {
             return Date(
-              queryOutput: try self.body()
+              queryOutput: try __macro_local_3nowfMu0_()
             )
             .queryBinding
           }
@@ -1530,29 +1834,33 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
             #sourceLocation()
             #endif
-            return __macro_local_3nowfMu_ {
-              now
-            }
+            return __macro_local_3nowfMu_()
+          }
+
+          static nonisolated func __macro_local_3nowfMu0_() -> Date {
+            now
           }
 
           nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
             public typealias Input = ()
             public typealias Output = Date
             public typealias QueryValue = Output
-            public let name = "now"
+            public var name: String {
+              "now"
+            }
             public var argumentCount: Int? {
               0
             }
-            public let isDeterministic = false
-            public let body: () -> Date
-            public init(_ body: @escaping () -> Date) {
-              self.body = body
+            public var isDeterministic: Bool {
+              false
+            }
+            public init() {
             }
             public func invoke(
               _ decoder: inout some StructuredQueriesCore.QueryDecoder
             ) throws -> StructuredQueriesCore.QueryBinding {
               return Date(
-                queryOutput: self.body()
+                queryOutput: __macro_local_3nowfMu0_()
               )
               .queryBinding
             }
@@ -1591,24 +1899,28 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(function: __macro_local_17sumIsolationProbefMu_)
             #sourceLocation()
             #endif
-            return __macro_local_3sumfMu_ {
-              sum($0)
-            }
+            return __macro_local_3sumfMu_()
+          }
+
+          nonisolated func __macro_local_3sumfMu0_(_ arg0: some Sequence<Int>) -> Int {
+            sum(arg0)
           }
 
           nonisolated struct __macro_local_3sumfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = Int
             public typealias Output = Int
-            public let name = "sum"
+            public var name: String {
+              "sum"
+            }
             public var argumentCount: Int? {
               var argumentCount = 0
               argumentCount += _columnWidth(Int.self)
               return argumentCount
             }
-            public let isDeterministic = false
-            public let body: (_ xs: any Sequence<Int>) -> Int
-            public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Int) {
-              self.body = body
+            public var isDeterministic: Bool {
+              false
+            }
+            public init() {
             }
             public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -1627,7 +1939,7 @@ extension SnapshotTests {
               return xs
             }
             public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
-              return Int(queryOutput: self.body(arguments)).queryBinding
+              return Int(queryOutput: __macro_local_3sumfMu0_(arguments)).queryBinding
             }
             private struct InvalidInvocation: Error {
             }
@@ -1661,24 +1973,28 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(function: __macro_local_17sumIsolationProbefMu_)
             #sourceLocation()
             #endif
-            return __macro_local_3sumfMu_ {
-              sum(of: $0)
-            }
+            return __macro_local_3sumfMu_()
+          }
+
+          nonisolated func __macro_local_3sumfMu0_(_ arg0: some Sequence<Int>) -> Int {
+            sum(of: arg0)
           }
 
           nonisolated struct __macro_local_3sumfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = Int
             public typealias Output = Int
-            public let name = "sum"
+            public var name: String {
+              "sum"
+            }
             public var argumentCount: Int? {
               var argumentCount = 0
               argumentCount += _columnWidth(Int.self)
               return argumentCount
             }
-            public let isDeterministic = false
-            public let body: (_ xs: any Sequence<Int>) -> Int
-            public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Int) {
-              self.body = body
+            public var isDeterministic: Bool {
+              false
+            }
+            public init() {
             }
             public func callAsFunction(of xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Int> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -1697,7 +2013,7 @@ extension SnapshotTests {
               return xs
             }
             public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
-              return Int(queryOutput: self.body(arguments)).queryBinding
+              return Int(queryOutput: __macro_local_3sumfMu0_(arguments)).queryBinding
             }
             private struct InvalidInvocation: Error {
             }
@@ -1743,25 +2059,29 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(function: __macro_local_20joinedIsolationProbefMu_)
             #sourceLocation()
             #endif
-            return __macro_local_6joinedfMu_ {
-              joined($0)
-            }
+            return __macro_local_6joinedfMu_()
+          }
+
+          nonisolated func __macro_local_6joinedfMu0_(_ arg0: some Sequence<(String, separator: String)>) -> String? {
+            joined(arg0)
           }
 
           nonisolated struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = (String, separator: String)
             public typealias Output = String?
-            public let name = "joined"
+            public var name: String {
+              "joined"
+            }
             public var argumentCount: Int? {
               var argumentCount = 0
               argumentCount += _columnWidth(String.self)
               argumentCount += _columnWidth(String.self)
               return argumentCount
             }
-            public let isDeterministic = false
-            public let body: (_ arguments: any Sequence<(String, separator: String)>) -> String?
-            public init(_ body: @escaping (_ arguments: any Sequence<(String, separator: String)>) -> String?) {
-              self.body = body
+            public var isDeterministic: Bool {
+              false
+            }
+            public init() {
             }
             public func callAsFunction(_ p0: some StructuredQueriesCore.QueryExpression<String>, separator: some StructuredQueriesCore.QueryExpression<String>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<String?> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -1784,7 +2104,7 @@ extension SnapshotTests {
               return (p0, separator)
             }
             public func invoke(_ arguments: some Sequence<(String, separator: String)>) -> QueryBinding {
-              return String?(queryOutput: self.body(arguments)).queryBinding
+              return String?(queryOutput: __macro_local_6joinedfMu0_(arguments)).queryBinding
             }
             private struct InvalidInvocation: Error {
             }
@@ -1820,24 +2140,28 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(function: __macro_local_20joinedIsolationProbefMu_)
             #sourceLocation()
             #endif
-            return __macro_local_6joinedfMu_ {
-              joined($0)
-            }
+            return __macro_local_6joinedfMu_()
+          }
+
+          nonisolated func __macro_local_6joinedfMu0_(_ arg0: some Sequence<[String]>) -> [String] {
+            joined(arg0)
           }
 
           nonisolated struct __macro_local_6joinedfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = [String].JSONRepresentation
             public typealias Output = [String].JSONRepresentation
-            public let name = "joined"
+            public var name: String {
+              "joined"
+            }
             public var argumentCount: Int? {
               var argumentCount = 0
               argumentCount += _columnWidth([String].JSONRepresentation.self)
               return argumentCount
             }
-            public let isDeterministic = false
-            public let body: (_ arrays: any Sequence<[String]>) -> [String]
-            public init(_ body: @escaping (_ arrays: any Sequence<[String]>) -> [String]) {
-              self.body = body
+            public var isDeterministic: Bool {
+              false
+            }
+            public init() {
             }
             public func callAsFunction(_ arrays: some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<[String].JSONRepresentation> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -1856,7 +2180,7 @@ extension SnapshotTests {
               return arrays
             }
             public func invoke(_ arguments: some Sequence<[String]>) -> QueryBinding {
-              return [String].JSONRepresentation(queryOutput: self.body(arguments)).queryBinding
+              return [String].JSONRepresentation(queryOutput: __macro_local_6joinedfMu0_(arguments)).queryBinding
             }
             private struct InvalidInvocation: Error {
             }
@@ -1894,24 +2218,28 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(function: __macro_local_19printIsolationProbefMu_)
             #sourceLocation()
             #endif
-            return __macro_local_5printfMu_ {
-              print($0)
-            }
+            return __macro_local_5printfMu_()
+          }
+
+          nonisolated func __macro_local_5printfMu0_(_ arg0: some Sequence<Int>) -> Swift.Void {
+            print(arg0)
           }
 
           nonisolated struct __macro_local_5printfMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = Int
             public typealias Output = Swift.Void
-            public let name = "print"
+            public var name: String {
+              "print"
+            }
             public var argumentCount: Int? {
               var argumentCount = 0
               argumentCount += _columnWidth(Int.self)
               return argumentCount
             }
-            public let isDeterministic = false
-            public let body: (_ xs: any Sequence<Int>) -> Swift.Void
-            public init(_ body: @escaping (_ xs: any Sequence<Int>) -> Swift.Void) {
-              self.body = body
+            public var isDeterministic: Bool {
+              false
+            }
+            public init() {
             }
             public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -1930,7 +2258,7 @@ extension SnapshotTests {
               return xs
             }
             public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
-              self.body(arguments)
+              __macro_local_5printfMu0_(arguments)
               return .null
             }
             private struct InvalidInvocation: Error {
@@ -1973,24 +2301,28 @@ extension SnapshotTests {
             #StructuredQueriesIsolationCheck(function: __macro_local_30validatePositiveIsolationProbefMu_)
             #sourceLocation()
             #endif
-            return __macro_local_16validatePositivefMu_ {
-              try validatePositive($0)
-            }
+            return __macro_local_16validatePositivefMu_()
+          }
+
+          nonisolated func __macro_local_16validatePositivefMu0_(_ arg0: some Sequence<Int>) throws -> Swift.Void {
+            validatePositive(arg0)
           }
 
           nonisolated struct __macro_local_16validatePositivefMu_: StructuredQueriesSQLiteCore.AggregateDatabaseFunction {
             public typealias Input = Int
             public typealias Output = Swift.Void
-            public let name = "validatePositive"
+            public var name: String {
+              "validatePositive"
+            }
             public var argumentCount: Int? {
               var argumentCount = 0
               argumentCount += _columnWidth(Int.self)
               return argumentCount
             }
-            public let isDeterministic = false
-            public let body: (_ xs: any Sequence<Int>) throws -> Swift.Void
-            public init(_ body: @escaping (_ xs: any Sequence<Int>) throws -> Swift.Void) {
-              self.body = body
+            public var isDeterministic: Bool {
+              false
+            }
+            public init() {
             }
             public func callAsFunction(_ xs: some StructuredQueriesCore.QueryExpression<Int>, order: (some QueryExpression)? = Bool?.none, filter: (some QueryExpression<Bool>)? = Bool?.none) -> some StructuredQueriesCore.QueryExpression<Swift.Void> {
               StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -2010,7 +2342,7 @@ extension SnapshotTests {
             }
             public func invoke(_ arguments: some Sequence<Int>) -> QueryBinding {
               do {
-                try self.body(arguments)
+                try __macro_local_16validatePositivefMu0_(arguments)
                 return .null
               } catch {
                 return .invalid(error)
@@ -2048,25 +2380,24 @@ extension SnapshotTests {
               #StructuredQueriesIsolationCheck(function: uuid)
               #sourceLocation()
               #endif
-              return __macro_local_4uuidfMu_({ [weak self] in
-                  guard let self else {
-                    throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
-                  }
-                  return self.uuid()
-                })
+              return __macro_local_4uuidfMu_(self)
             }
 
             nonisolated struct __macro_local_4uuidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
               public typealias Input = ()
               public typealias Output = String
-              public let name = "uuid"
+              public var name: String {
+                "uuid"
+              }
               public var argumentCount: Int? {
                 0
               }
-              public let isDeterministic = false
-              public let body: () throws -> String
-              public init(_ body: @escaping () throws -> String) {
-                self.body = body
+              public var isDeterministic: Bool {
+                false
+              }
+              private weak var base: Engine?
+              public init(_ base: Engine) {
+                self.base = base
               }
               public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<String> {
                 StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -2078,14 +2409,19 @@ extension SnapshotTests {
               public func invoke(
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
               ) throws -> StructuredQueriesCore.QueryBinding {
-                do {
-                  return String(
-                    queryOutput: try self.body()
+                guard let base else {
+                  return .invalid(
+                    StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated(
+                      """
+                      Failed to invoke 'uuid'; 'Engine' was deallocated
+                      """
+                    )
                   )
-                  .queryBinding
-                } catch {
-                  return .invalid(error)
                 }
+                return String(
+                  queryOutput: base.uuid()
+                )
+                .queryBinding
               }
             }
           }
@@ -2116,28 +2452,27 @@ extension SnapshotTests {
               #StructuredQueriesIsolationCheck(function: concat)
               #sourceLocation()
               #endif
-              return __macro_local_6concatfMu_({ [weak self] arg0, arg1 in
-                  guard let self else {
-                    throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
-                  }
-                  return self.concat(first: arg0, second: arg1)
-                })
+              return __macro_local_6concatfMu_(self)
             }
 
             nonisolated struct __macro_local_6concatfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
               public typealias Input = (String, String)
               public typealias Output = String
-              public let name = "concat"
+              public var name: String {
+                "concat"
+              }
               public var argumentCount: Int? {
                 var argumentCount = 0
                 argumentCount += _columnWidth(String.self)
                 argumentCount += _columnWidth(String.self)
                 return argumentCount
               }
-              public let isDeterministic = false
-              public let body: (String, String) throws -> String
-              public init(_ body: @escaping (String, String) throws -> String) {
-                self.body = body
+              public var isDeterministic: Bool {
+                false
+              }
+              private weak var base: Engine?
+              public init(_ base: Engine) {
+                self.base = base
               }
               public func callAsFunction(first: some StructuredQueriesCore.QueryExpression<String>, second: some StructuredQueriesCore.QueryExpression<String>) -> some StructuredQueriesCore.QueryExpression<String> {
                 StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -2157,14 +2492,19 @@ extension SnapshotTests {
                 guard let second else {
                   throw InvalidInvocation()
                 }
-                do {
-                  return String(
-                    queryOutput: try self.body(first, second)
+                guard let base else {
+                  return .invalid(
+                    StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated(
+                      """
+                      Failed to invoke 'concat'; 'Engine' was deallocated
+                      """
+                    )
                   )
-                  .queryBinding
-                } catch {
-                  return .invalid(error)
                 }
+                return String(
+                  queryOutput: base.concat(first: first, second: second)
+                )
+                .queryBinding
               }
               private struct InvalidInvocation: Error {
               }
@@ -2197,27 +2537,26 @@ extension SnapshotTests {
               #StructuredQueriesIsolationCheck(function: double)
               #sourceLocation()
               #endif
-              return __macro_local_6doublefMu_({ [weak self] arg0 in
-                  guard let self else {
-                    throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
-                  }
-                  return self.double(arg0)
-                })
+              return __macro_local_6doublefMu_(self)
             }
 
             nonisolated struct __macro_local_6doublefMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
               public typealias Input = Int
               public typealias Output = Int
-              public let name = "double"
+              public var name: String {
+                "double"
+              }
               public var argumentCount: Int? {
                 var argumentCount = 0
                 argumentCount += _columnWidth(Int.self)
                 return argumentCount
               }
-              public let isDeterministic = false
-              public let body: (Int) throws -> Int
-              public init(_ body: @escaping (Int) throws -> Int) {
-                self.body = body
+              public var isDeterministic: Bool {
+                false
+              }
+              private weak var base: Engine?
+              public init(_ base: Engine) {
+                self.base = base
               }
               public func callAsFunction(_ value: some StructuredQueriesCore.QueryExpression<Int>) -> some StructuredQueriesCore.QueryExpression<Int> {
                 StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -2233,14 +2572,19 @@ extension SnapshotTests {
                 guard let value else {
                   throw InvalidInvocation()
                 }
-                do {
-                  return Int(
-                    queryOutput: try self.body(value)
+                guard let base else {
+                  return .invalid(
+                    StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated(
+                      """
+                      Failed to invoke 'double'; 'Engine' was deallocated
+                      """
+                    )
                   )
-                  .queryBinding
-                } catch {
-                  return .invalid(error)
                 }
+                return Int(
+                  queryOutput: base.double(value)
+                )
+                .queryBinding
               }
               private struct InvalidInvocation: Error {
               }
@@ -2273,20 +2617,26 @@ extension SnapshotTests {
               #StructuredQueriesIsolationCheck(function: uuid)
               #sourceLocation()
               #endif
-              return __macro_local_4uuidfMu_(uuid)
+              return __macro_local_4uuidfMu_()
+            }
+
+            static nonisolated func __macro_local_4uuidfMu0_() -> String {
+              uuid()
             }
 
             nonisolated struct __macro_local_4uuidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
               public typealias Input = ()
               public typealias Output = String
-              public let name = "uuid"
+              public var name: String {
+                "uuid"
+              }
               public var argumentCount: Int? {
                 0
               }
-              public let isDeterministic = false
-              public let body: () -> String
-              public init(_ body: @escaping () -> String) {
-                self.body = body
+              public var isDeterministic: Bool {
+                false
+              }
+              public init() {
               }
               public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<String> {
                 StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -2299,7 +2649,7 @@ extension SnapshotTests {
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
               ) throws -> StructuredQueriesCore.QueryBinding {
                 return String(
-                  queryOutput: self.body()
+                  queryOutput: __macro_local_4uuidfMu0_()
                 )
                 .queryBinding
               }
@@ -2332,20 +2682,24 @@ extension SnapshotTests {
               #StructuredQueriesIsolationCheck(function: uuid)
               #sourceLocation()
               #endif
-              return __macro_local_4uuidfMu_(uuid)
+              return __macro_local_4uuidfMu_(self)
             }
 
             nonisolated struct __macro_local_4uuidfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction {
               public typealias Input = ()
               public typealias Output = String
-              public let name = "uuid"
+              public var name: String {
+                "uuid"
+              }
               public var argumentCount: Int? {
                 0
               }
-              public let isDeterministic = false
-              public let body: () -> String
-              public init(_ body: @escaping () -> String) {
-                self.body = body
+              public var isDeterministic: Bool {
+                false
+              }
+              private let base: Helpers
+              public init(_ base: Helpers) {
+                self.base = base
               }
               public func callAsFunction() -> some StructuredQueriesCore.QueryExpression<String> {
                 StructuredQueriesCore.$_isSelecting.withValue(false) {
@@ -2358,7 +2712,7 @@ extension SnapshotTests {
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
               ) throws -> StructuredQueriesCore.QueryBinding {
                 return String(
-                  queryOutput: self.body()
+                  queryOutput: base.uuid()
                 )
                 .queryBinding
               }
@@ -2396,32 +2750,38 @@ extension SnapshotTests {
               #StructuredQueriesIsolationCheck(property: __macro_local_17nowIsolationProbefMu_)
               #sourceLocation()
               #endif
-              return __macro_local_3nowfMu_({ [weak self] in
-                  guard let self else {
-                    throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated()
-                  }
-                  return self.now
-                })
+              return __macro_local_3nowfMu_(self)
             }
 
             nonisolated struct __macro_local_3nowfMu_: StructuredQueriesSQLiteCore.ScalarDatabaseFunction, StructuredQueriesCore.QueryExpression {
               public typealias Input = ()
               public typealias Output = Date
               public typealias QueryValue = Output
-              public let name = "now"
+              public var name: String {
+                "now"
+              }
               public var argumentCount: Int? {
                 0
               }
-              public let isDeterministic = false
-              public let body: () throws -> Date
-              public init(_ body: @escaping () throws -> Date) {
-                self.body = body
+              public var isDeterministic: Bool {
+                false
+              }
+              private weak var base: Engine?
+              public init(_ base: Engine) {
+                self.base = base
               }
               public func invoke(
                 _ decoder: inout some StructuredQueriesCore.QueryDecoder
               ) throws -> StructuredQueriesCore.QueryBinding {
+                guard let base else {
+                  throw StructuredQueriesSQLiteCore._DatabaseFunctionDeallocated(
+                    """
+                    Failed to invoke 'now'; 'Engine' was deallocated
+                    """
+                  )
+                }
                 return Date(
-                  queryOutput: try self.body()
+                  queryOutput: base.now
                 )
                 .queryBinding
               }
