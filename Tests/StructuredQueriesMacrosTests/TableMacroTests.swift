@@ -3217,7 +3217,7 @@ extension SnapshotTests {
           }
         }
 
-        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Post: CasePathable, CasePathIterable {
         }
         """#
       }
@@ -3360,7 +3360,7 @@ extension SnapshotTests {
           }
         }
 
-        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Post: CasePathable, CasePathIterable {
         }
         """#
       }
@@ -3502,7 +3502,7 @@ extension SnapshotTests {
           }
         }
 
-        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Post: CasePathable, CasePathIterable {
         }
         """#
       }
@@ -3671,7 +3671,7 @@ extension SnapshotTests {
           }
         }
 
-        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Post: CasePathable, CasePathIterable {
         }
         """#
       }
@@ -3784,7 +3784,7 @@ extension SnapshotTests {
           }
         }
 
-        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Post: CasePathable, CasePathIterable {
         }
         """#
       }
@@ -3897,7 +3897,7 @@ extension SnapshotTests {
           }
         }
 
-        extension Post: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Post: CasePathable, CasePathIterable {
         }
         """#
       }

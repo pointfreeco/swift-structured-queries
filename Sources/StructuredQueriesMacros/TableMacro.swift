@@ -685,7 +685,9 @@ extension TableMacro: ExtensionMacro {
           of: node,
           attachedTo: declaration,
           providingExtensionsOf: type,
-          conformingTo: protocols,
+          conformingTo: protocols.filter {
+            ["CasePathable", "CasePathIterable"].contains($0.trimmedDescription)
+          },
           in: context
         )
       }
