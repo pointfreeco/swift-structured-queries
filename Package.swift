@@ -190,7 +190,7 @@ let package = Package(
       name: "_StructuredQueriesSQLite",
       dependencies: [
         "StructuredQueriesSQLite",
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "swift-issue-reporting"),
       ]
     ),
   ],
