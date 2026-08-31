@@ -1,4 +1,6 @@
 import MacroTesting
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacroExpansion
 import SnapshotTesting
 import StructuredQueriesMacros
 import StructuredQueriesSQLiteMacros
@@ -9,16 +11,31 @@ import Testing
   .serialized,
   .macros(
     [
-      "_Draft": TableMacro.self,
-      "bind": BindMacro.self,
-      "Column": ColumnMacro.self,
-      "Columns": ColumnsMacro.self,
-      "DatabaseCollation": DatabaseCollationMacro.self,
-      "DatabaseFunction": DatabaseFunctionMacro.self,
-      "Ephemeral": EphemeralMacro.self,
-      "Selection": TableMacro.self,
-      "sql": SQLMacro.self,
-      "Table": TableMacro.self,
+      "_Draft": MacroSpec(
+        type: TableMacro.self,
+        conformances: ["TableDraft", "PartialSelectStatement"]
+      ),
+      "bind": MacroSpec(type: BindMacro.self),
+      "Column": MacroSpec(type: ColumnMacro.self),
+      "Columns": MacroSpec(type: ColumnsMacro.self),
+      "DatabaseCollation": MacroSpec(type: DatabaseCollationMacro.self),
+      "DatabaseFunction": MacroSpec(type: DatabaseFunctionMacro.self),
+      "Ephemeral": MacroSpec(type: EphemeralMacro.self),
+      "Selection": MacroSpec(
+        type: TableMacro.self,
+        conformances: [
+          "_Selection", "Table", "PartialSelectStatement", "PrimaryKeyedTable", "CasePathable",
+          "CasePathIterable",
+        ]
+      ),
+      "sql": MacroSpec(type: SQLMacro.self),
+      "Table": MacroSpec(
+        type: TableMacro.self,
+        conformances: [
+          "Table", "PartialSelectStatement", "PrimaryKeyedTable", "CasePathable",
+          "CasePathIterable",
+        ]
+      ),
     ],
     record: .failed
   )
