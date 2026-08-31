@@ -1,9 +1,9 @@
 import MacroTesting
-import SwiftSyntaxBuilder
-import SwiftSyntaxMacroExpansion
 import SnapshotTesting
 import StructuredQueriesMacros
 import StructuredQueriesSQLiteMacros
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacroExpansion
 import Testing
 
 @MainActor
