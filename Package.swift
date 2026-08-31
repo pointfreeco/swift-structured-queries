@@ -189,7 +189,8 @@ let package = Package(
     .target(
       name: "_StructuredQueriesSQLite",
       dependencies: [
-        "StructuredQueriesSQLite"
+        "StructuredQueriesSQLite",
+        .product(name: "IssueReporting", package: "swift-issue-reporting"),
       ]
     ),
   ],

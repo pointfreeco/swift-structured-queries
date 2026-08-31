@@ -18,6 +18,7 @@ import Testing
       "bind": MacroSpec(type: BindMacro.self),
       "Column": MacroSpec(type: ColumnMacro.self),
       "Columns": MacroSpec(type: ColumnsMacro.self),
+      "DatabaseCollation": MacroSpec(type: DatabaseCollationMacro.self),
       "DatabaseFunction": MacroSpec(type: DatabaseFunctionMacro.self),
       "Ephemeral": MacroSpec(type: EphemeralMacro.self),
       "Selection": MacroSpec(

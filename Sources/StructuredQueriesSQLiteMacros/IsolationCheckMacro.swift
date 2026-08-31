@@ -21,19 +21,23 @@ extension MainActorIsolationCheckMacro: DeclarationMacro {
     in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
     let subject: String
+    let decl: String
     switch node.arguments.first?.label?.text {
     case "collation":
-      subject = "'@DatabaseCollation' function"
+      subject = "'@DatabaseCollation'"
+      decl = "func"
     case "property":
-      subject = "'@DatabaseFunction' property"
+      subject = "'@DatabaseFunction'"
+      decl = "var"
     default:
-      subject = "'@DatabaseFunction' function"
+      subject = "'@DatabaseFunction'"
+      decl = "func"
     }
     context.diagnose(
       Diagnostic(
         node: node,
         message: MacroExpansionErrorMessage(
-          "\(subject) must be 'nonisolated' when default isolation is '@MainActor'"
+          "\(subject) must be 'nonisolated \(decl)' when default isolation is '@MainActor'"
         )
       )
     )

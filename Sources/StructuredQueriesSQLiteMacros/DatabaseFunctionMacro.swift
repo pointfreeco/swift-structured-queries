@@ -926,7 +926,7 @@ extension ExprSyntax {
 }
 
 extension String {
-  fileprivate func trimmingBackticks() -> String {
+  func trimmingBackticks() -> String {
     var result = self[...]
     if result.first == "`" && result.dropFirst().last == "`" {
       result = result.dropFirst().dropLast()
@@ -945,7 +945,7 @@ extension TypeSyntaxProtocol {
 }
 
 extension AttributeListSyntax {
-  fileprivate mutating func remove(_ attributeName: String) {
+  mutating func remove(_ attributeName: String) {
     guard
       let index = firstIndex(where: {
         $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
@@ -967,12 +967,13 @@ extension NamedDeclSyntax where Self: WithGenericParametersSyntax {
 }
 
 extension DeclModifierListSyntax {
-  fileprivate var metadata: (access: TokenSyntax?, static: TokenSyntax?) {
+  var metadata: (access: TokenSyntax?, static: TokenSyntax?) {
     var access: TokenSyntax?
     var `static`: TokenSyntax?
     for modifier in self {
       switch modifier.name.tokenKind {
-      case .keyword(.private), .keyword(.internal), .keyword(.package), .keyword(.public):
+      case .keyword(.private), .keyword(.fileprivate), .keyword(.internal), .keyword(.package),
+        .keyword(.public):
         access = modifier.name
       case .keyword(.static):
         `static` = modifier.name
