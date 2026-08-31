@@ -419,13 +419,3 @@ extension DatabaseCollationMacro {
     }
   }
 }
-
-extension NamedDeclSyntax where Self: WithGenericParametersSyntax {
-  fileprivate var typeDescription: String {
-    var type = name.trimmedDescription
-    if let genericParameterClause {
-      type += "<\(genericParameterClause.parameters.map(\.name.text).joined(separator: ", "))>"
-    }
-    return type
-  }
-}
