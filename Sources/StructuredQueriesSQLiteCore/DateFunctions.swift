@@ -1,7 +1,18 @@
 public import Foundation
 public import StructuredQueriesCore
 
-extension QueryExpression where QueryValue: _SQLiteDateRepresentation {
+public protocol _DateTimeModifiable<QueryValue>: QueryExpression
+where QueryValue: _SQLiteDateRepresentation {}
+
+extension TableColumn: _DateTimeModifiable where Value: _SQLiteDateRepresentation {}
+extension GeneratedColumn: _DateTimeModifiable where Value: _SQLiteDateRepresentation {}
+extension SQLQueryExpression: _DateTimeModifiable where QueryValue: _SQLiteDateRepresentation {}
+extension AggregateFunctionExpression: _DateTimeModifiable
+where QueryValue: _SQLiteDateRepresentation {}
+extension CoalesceFunction: _DateTimeModifiable where QueryValue: _SQLiteDateRepresentation {}
+extension _ModifiedDate: _DateTimeModifiable {}
+
+extension _DateTimeModifiable {
   /// Modifies this date with a given modifier.
   ///
   /// Don't call this method directly. Swift calls it for you when you call the date expression:
@@ -14,10 +25,12 @@ extension QueryExpression where QueryValue: _SQLiteDateRepresentation {
   ///
   /// - Parameter modifier: A modifier to apply.
   /// - Returns: A modified date.
-  public func callAsFunction(_ modifier: DateTimeModifier) -> some QueryExpression<QueryValue> {
+  public func callAsFunction(_ modifier: DateTimeModifier) -> _ModifiedDate<QueryValue> {
     _ModifiedDate(base: timeValueArguments, modifier: modifier)
   }
+}
 
+extension QueryExpression where QueryValue: _SQLiteDateRepresentation {
   /// This date formatted according to a format string.
   ///
   /// ```swift
@@ -62,7 +75,7 @@ extension QueryExpression where QueryValue: _SQLiteDateRepresentation {
   /// The date's day of the year offset (`%j`).
   public var dayOfYear: some QueryExpression<Int> { component("%j") }
 
-  private var timeValueArguments: [QueryFragment] {
+  fileprivate var timeValueArguments: [QueryFragment] {
     (self as? any TimeValue)?.timeValueArguments
       ?? [queryFragment] + QueryValue._timeValueModifiers
   }
