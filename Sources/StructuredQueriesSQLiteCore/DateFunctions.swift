@@ -1,15 +1,6 @@
 public import Foundation
 public import StructuredQueriesCore
 
-/// A date expression that can be called with a ``DateTimeModifier`` to modify it.
-///
-/// Table columns, `#sql` expressions, aggregates, and ``QueryExpression/now`` are all modifiable.
-///
-/// > Note: This is deliberately narrower than `QueryExpression`. `Optional` is a query expression,
-/// > and giving `Optional` a `callAsFunction` trips a Swift 6.3 type-checker assertion
-/// > (`ConstraintSystem::recordAppliedDisjunction`) in any module that also imports CasePaths, on
-/// > ordinary code such as `[x].first { … }`. Optional dates are modified through
-/// > ``QueryExpression/map(_:)`` instead.
 public protocol _DateTimeModifiable<QueryValue>: QueryExpression
 where QueryValue: _SQLiteDateRepresentation {}
 
