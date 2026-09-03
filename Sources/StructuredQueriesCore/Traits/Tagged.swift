@@ -7,6 +7,12 @@
 
   extension Tagged: QueryDecodable where RawValue: QueryDecodable {}
 
+  extension Tagged: QueryEncodable where RawValue: QueryEncodable {
+    public func encode(to encoder: inout some QueryEncoder) throws(QueryEncodingError) {
+      try rawValue.encode(to: &encoder)
+    }
+  }
+
   extension Tagged: QueryExpression where RawValue: QueryExpression {
     public var queryFragment: QueryFragment {
       rawValue.queryFragment

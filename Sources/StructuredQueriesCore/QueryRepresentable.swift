@@ -58,7 +58,7 @@ extension QueryRepresentable {
   }
 }
 
-extension QueryRepresentable where Self: QueryDecodable, Self == QueryOutput {
+extension QueryRepresentable where Self == QueryOutput {
   @inlinable
   @inline(__always)
   public init(queryOutput: QueryOutput) {

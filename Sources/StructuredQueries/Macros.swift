@@ -19,7 +19,8 @@ public import StructuredQueriesCore
     CasePathable,
     CasePathIterable,
     names: named(init(_:)),
-    named(init(decoder:))
+    named(init(decoder:)),
+    named(encode(to:))
   )
   @attached(
     member,
@@ -60,7 +61,8 @@ public import StructuredQueriesCore
     PartialSelectStatement,
     PrimaryKeyedTable,
     names: named(init(_:)),
-    named(init(decoder:))
+    named(init(decoder:)),
+    named(encode(to:))
   )
   @attached(
     member,
@@ -133,7 +135,8 @@ public import StructuredQueriesCore
     CasePathable,
     CasePathIterable,
     names: named(init(_:)),
-    named(init(decoder:))
+    named(init(decoder:)),
+    named(encode(to:))
   )
   @attached(
     member,
@@ -175,7 +178,8 @@ public import StructuredQueriesCore
     PartialSelectStatement,
     PrimaryKeyedTable,
     names: named(init(_:)),
-    named(init(decoder:))
+    named(init(decoder:)),
+    named(encode(to:))
   )
   @attached(
     member,
@@ -327,7 +331,8 @@ public macro _ColumnDefault() =
   conformances: TableDraft,
   PartialSelectStatement,
   names: named(init(_:)),
-  named(init(decoder:))
+  named(init(decoder:)),
+  named(encode(to:))
 )
 public macro _Draft<T>(_ primaryTable: T.Type) =
   #externalMacro(module: "StructuredQueriesMacros", type: "TableMacro")
