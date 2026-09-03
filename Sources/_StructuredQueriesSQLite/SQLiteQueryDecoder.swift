@@ -41,7 +41,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
         )
       )
     default:
-      throw QueryDecodingError.typeMismatch([UInt8].self)
+      throw .typeMismatch([UInt8].self)
     }
   }
 
@@ -53,11 +53,9 @@ struct SQLiteQueryDecoder: QueryDecoder {
   @usableFromInline
   mutating func decode(_ columnType: Date.Type) throws(QueryDecodingError) -> Date? {
     guard let iso8601String = try decode(String.self) else { return nil }
-    do {
-      return try Date(iso8601String: iso8601String)
-    } catch {
-      throw .other(error)
-    }
+    guard let date = try? Date(iso8601String: iso8601String)
+    else { throw .dataCorrupted }
+    return date
   }
 
   @inlinable
@@ -71,7 +69,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
       defer { currentIndex += 1 }
       return sqlite3_column_double(statement, currentIndex)
     default:
-      throw QueryDecodingError.typeMismatch(Double.self)
+      throw .typeMismatch(Double.self)
     }
   }
 
@@ -91,7 +89,7 @@ struct SQLiteQueryDecoder: QueryDecoder {
       defer { currentIndex += 1 }
       return sqlite3_column_int64(statement, currentIndex)
     default:
-      throw QueryDecodingError.typeMismatch(Int64.self)
+      throw .typeMismatch(Int64.self)
     }
   }
 
@@ -106,20 +104,23 @@ struct SQLiteQueryDecoder: QueryDecoder {
       defer { currentIndex += 1 }
       return String(cString: sqlite3_column_text(statement, currentIndex))
     default:
-      throw QueryDecodingError.typeMismatch(String.self)
+      throw .typeMismatch(String.self)
     }
   }
 
   @inlinable
   mutating func decode(_ columnType: UInt64.Type) throws(QueryDecodingError) -> UInt64? {
     guard let n = try decode(Int64.self) else { return nil }
-    guard n >= 0 else { throw .other(UInt64OverflowError(signedInteger: n)) }
+    guard n >= 0 else { throw .dataCorrupted }
     return UInt64(n)
   }
 
   @usableFromInline
   mutating func decode(_ columnType: UUID.Type) throws(QueryDecodingError) -> UUID? {
     guard let uuidString = try decode(String.self) else { return nil }
-    return UUID(uuidString: uuidString)
+    guard let uuid = UUID(uuidString: uuidString) else {
+      throw .typeMismatch(UUID.self)
+    }
+    return uuid
   }
 }

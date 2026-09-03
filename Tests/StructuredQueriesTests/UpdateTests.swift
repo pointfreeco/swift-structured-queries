@@ -442,7 +442,7 @@ extension String {
     init(queryOutput: String) {
       self.queryOutput = queryOutput
     }
-    init(decoder: inout some QueryDecoder) throws {
+    init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
       self.queryOutput = try String(decoder: &decoder)
     }
   }

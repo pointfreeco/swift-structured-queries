@@ -295,7 +295,7 @@ extension TableAlias: QueryBindable where Base: QueryBindable {
 }
 
 extension TableAlias: QueryDecodable where Base: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     try self.init(base: Base(decoder: &decoder))
   }
 }

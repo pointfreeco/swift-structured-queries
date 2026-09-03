@@ -152,7 +152,7 @@ extension SnapshotTests {
       struct Record: Equatable, QueryDecodable, QueryRepresentable {
         var date: Date?
         init(date: Date?) { self.date = date }
-        init(decoder: inout some QueryDecoder) throws {
+        init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
           date = try decoder.decode(Date.ISO8601Representation.self)
         }
       }

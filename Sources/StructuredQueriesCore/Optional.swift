@@ -31,10 +31,10 @@ extension Optional: QueryBindable where Wrapped: QueryBindable {
 
 extension Optional: QueryDecodable where Wrapped: QueryDecodable {
   @inlinable
-  public init(decoder: inout some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     do {
       self = try Wrapped(decoder: &decoder)
-    } catch QueryDecodingError.missingRequiredColumn {
+    } catch .missingRequiredColumn {
       self = nil
     }
   }
