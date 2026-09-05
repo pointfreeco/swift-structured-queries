@@ -119,7 +119,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
   public struct TableColumns: TableDefinition {
     public typealias QueryValue = Optional
 
-    public static var allColumns: [any TableColumnExpression] {
+    public static var allColumns: TableColumnList<any TableColumnExpression> {
       func open<Root, Value>(
         _ column: some TableColumnExpression<Root, Value>
       ) -> any TableColumnExpression {
@@ -143,10 +143,10 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
           default: column.defaultValue
         )
       }
-      return Wrapped.TableColumns.allColumns.map { open($0) }
+      return Wrapped.TableColumns.allColumns.transformingColumns { open($0) }
     }
 
-    public static var writableColumns: [any WritableTableColumnExpression] {
+    public static var writableColumns: TableColumnList<any WritableTableColumnExpression> {
       func open<Root, Value>(
         _ column: some WritableTableColumnExpression<Root, Value>
       ) -> any WritableTableColumnExpression {
@@ -162,7 +162,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
           default: column.defaultValue
         )
       }
-      return Wrapped.TableColumns.writableColumns.map { open($0) }
+      return Wrapped.TableColumns.writableColumns.transformingColumns { open($0) }
     }
 
     public subscript<Member>(

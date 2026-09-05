@@ -124,27 +124,27 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
   public struct TableColumns: Sendable, TableDefinition {
     public typealias QueryValue = TableAlias
 
-    public static var allColumns: [any TableColumnExpression] {
+    public static var allColumns: TableColumnList<any TableColumnExpression> {
       #if compiler(>=6.1)
-        return Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
+        return Base.TableColumns.allColumns.transformingColumns { $0._aliased(Name.self) }
       #else
         func open(_ column: some TableColumnExpression) -> any TableColumnExpression {
           column._aliased(Name.self)
         }
-        return Base.TableColumns.allColumns.map { open($0) }
+        return Base.TableColumns.allColumns.transformingColumns { open($0) }
       #endif
     }
 
-    public static var writableColumns: [any WritableTableColumnExpression] {
+    public static var writableColumns: TableColumnList<any WritableTableColumnExpression> {
       #if compiler(>=6.1)
-        return Base.TableColumns.writableColumns.map { $0._aliased(Name.self) }
+        return Base.TableColumns.writableColumns.transformingColumns { $0._aliased(Name.self) }
       #else
         func open(
           _ column: some WritableTableColumnExpression
         ) -> any WritableTableColumnExpression {
           column._aliased(Name.self)
         }
-        return Base.TableColumns.writableColumns.map { open($0) }
+        return Base.TableColumns.writableColumns.transformingColumns { open($0) }
       #endif
     }
 
