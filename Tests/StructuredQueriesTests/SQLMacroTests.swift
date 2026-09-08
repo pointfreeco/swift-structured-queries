@@ -178,7 +178,7 @@ extension SnapshotTests {
       }
     }
 
-    @Test func `interpolate optional values`() {
+    @Test func interpolateOptionalValues() {
       var optionalValue: Int? = nil
       assertQuery(
         #sql(
