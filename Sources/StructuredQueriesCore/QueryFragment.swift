@@ -353,6 +353,13 @@ extension QueryFragment: ExpressibleByStringInterpolation {
       appendInterpolation(expression.queryFragment)
     }
 
+    public mutating func appendInterpolation(bind expression: (some QueryExpression)?) {
+      appendInterpolation(
+        expression.map(\.queryFragment)
+          ?? QueryFragment(segments: [.binding(.null)])
+      )
+    }
+
     /// Append a query expression to the interpolation.
     ///
     /// - Parameter expression: A query expression.

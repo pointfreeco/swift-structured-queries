@@ -177,6 +177,59 @@ extension SnapshotTests {
         """
       }
     }
+
+    @Test func `interpolate optional values`() {
+      var optionalValue: Int? = nil
+      assertQuery(
+        #sql(
+          """
+          SELECT \(Reminder.title)
+          FROM \(Reminder.self)
+          WHERE \(bind: optionalValue) IS NULL
+          LIMIT 1
+          """,
+          as: String.self
+        )
+      ) {
+        """
+        SELECT "reminders"."title"
+        FROM "reminders"
+        WHERE NULL IS NULL
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ "Groceries" │
+        └─────────────┘
+        """
+      }
+      optionalValue = 42
+      assertQuery(
+        #sql(
+          """
+          SELECT \(Reminder.title)
+          FROM \(Reminder.self)
+          WHERE \(bind: optionalValue) IS NOT NULL
+          LIMIT 1
+          """,
+          as: String.self
+        )
+      ) {
+        """
+        SELECT "reminders"."title"
+        FROM "reminders"
+        WHERE 42 IS NOT NULL
+        LIMIT 1
+        """
+      } results: {
+        """
+        ┌─────────────┐
+        │ "Groceries" │
+        └─────────────┘
+        """
+      }
+    }
   }
 }
 
