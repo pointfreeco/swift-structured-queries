@@ -469,7 +469,7 @@ extension JSONEach: QueryRepresentable {
 }
 
 extension JSONEach: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     self.key = try Key(decoder: &decoder).queryOutput
     self.value = try Value(decoder: &decoder).queryOutput
   }
@@ -556,7 +556,7 @@ extension JSONBEach: QueryRepresentable {
   @available(iOS 27, macOS 27, tvOS 27, watchOS 27, *)
 #endif
 extension JSONBEach: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
     self.key = try Key(decoder: &decoder).queryOutput
     self.value = try Value(decoder: &decoder).queryOutput
   }

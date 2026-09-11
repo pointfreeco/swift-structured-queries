@@ -679,8 +679,11 @@ extension Date.ISO8601Representation: QueryBindable {
   message: "ISO-8601 text is the default representation and is no longer explicitly needed."
 )
 extension Date.ISO8601Representation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
-    try self.init(queryOutput: Date(iso8601String: String(decoder: &decoder)))
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
+    let iso8601String = try String(decoder: &decoder)
+    guard let date = try? Date(iso8601String: iso8601String)
+    else { throw .dataCorrupted }
+    self.init(queryOutput: date)
   }
 }
 
@@ -736,14 +739,11 @@ extension UUID.LowercasedRepresentation: QueryBindable {
   message: "Lowercased text is the default representation and is no longer explicitly needed."
 )
 extension UUID.LowercasedRepresentation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
-    guard let uuid = try UUID(uuidString: String(decoder: &decoder)) else {
-      throw InvalidString()
-    }
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
+    guard let uuid = try UUID(uuidString: String(decoder: &decoder))
+    else { throw .dataCorrupted }
     self.init(queryOutput: uuid)
   }
-
-  private struct InvalidString: Error {}
 }
 
 @available(

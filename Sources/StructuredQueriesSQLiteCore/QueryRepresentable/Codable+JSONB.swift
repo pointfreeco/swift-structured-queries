@@ -82,13 +82,13 @@ extension _CodableJSONBRepresentation: QueryBindable {
   @available(iOS 26, macOS 26, tvOS 26, watchOS 26, *)
 #endif
 extension _CodableJSONBRepresentation: QueryDecodable {
-  public init(decoder: inout some QueryDecoder) throws {
-    self.init(
-      queryOutput: try jsonDecoder.decode(
-        QueryOutput.self,
-        from: Data(String(decoder: &decoder).utf8)
-      )
-    )
+  public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
+    let json = try String(decoder: &decoder)
+    do {
+      self.init(queryOutput: try jsonDecoder.decode(QueryOutput.self, from: Data(json.utf8)))
+    } catch {
+      throw .other(error)
+    }
   }
 }
 
