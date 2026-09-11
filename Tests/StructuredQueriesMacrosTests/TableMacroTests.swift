@@ -82,6 +82,10 @@ extension SnapshotTests {
             }
             self.bar = bar
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
+          }
         }
         """#
       }
@@ -163,6 +167,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
           }
         }
         """#
@@ -283,6 +291,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
           }
         }
         """#
@@ -407,6 +419,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.baz = baz
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.baz, self.baz)
           }
         }
         """#
@@ -571,6 +587,13 @@ extension SnapshotTests {
             self.c2 = c2
             self.c3 = c3
             self.c4 = c4
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.c1, self.c1)
+            try encoder.encode(columns.c2, self.c2)
+            try encoder.encode(columns.c3, self.c3)
+            try encoder.encode(columns.c4, self.c4)
           }
         }
         """#
@@ -1436,6 +1459,10 @@ extension SnapshotTests {
             }
             self.bar = bar
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
+          }
         }
         """#
       }
@@ -1563,6 +1590,10 @@ extension SnapshotTests {
             }
             self.bar = bar
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
+          }
         }
         """#
       }
@@ -1657,6 +1688,10 @@ extension SnapshotTests {
             }
             self.name = name
             self.generated = generated
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.name, self.name)
           }
         }
         """#
@@ -1772,6 +1807,10 @@ extension SnapshotTests {
             self.name = name
             self.generated = generated
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.name, self.name)
+          }
         }
         """#
       }
@@ -1855,6 +1894,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
           }
         }
         """#
@@ -1940,6 +1983,10 @@ extension SnapshotTests {
             }
             self.bar = bar
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
+          }
         }
         """#
       }
@@ -2022,6 +2069,10 @@ extension SnapshotTests {
             }
             self.`bar` = `bar`
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.`bar`, self.`bar`)
+          }
         }
         """#
       }
@@ -2103,6 +2154,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
           }
         }
         """#
@@ -2197,6 +2252,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.bar = bar
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.bar, self.bar)
           }
         }
         """#
@@ -2351,6 +2410,11 @@ extension SnapshotTests {
             self.id = try decoder.decode(Self.columns.id)
             self.referrerID = try decoder.decode(Self.columns.referrerID)
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.referrerID, self.referrerID)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.referrerID = other.referrerID
@@ -2365,6 +2429,11 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.referrerID, self.referrerID)
           }
         }
         """#
@@ -2449,6 +2518,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.name = name
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.name, self.name)
           }
         }
         """#
@@ -2630,6 +2703,11 @@ extension SnapshotTests {
             }
             self.seconds = seconds
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.seconds, self.seconds)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.seconds = other.seconds
@@ -2648,6 +2726,11 @@ extension SnapshotTests {
             }
             self.id = id
             self.seconds = seconds
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.seconds, self.seconds)
           }
         }
         """#
@@ -2828,6 +2911,12 @@ extension SnapshotTests {
             self.color = color
             self.name = name
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.color, self.color)
+            try encoder.encode(columns.name, self.name)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.color = other.color
@@ -2852,6 +2941,12 @@ extension SnapshotTests {
             self.id = id
             self.color = color
             self.name = name
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.color, self.color)
+            try encoder.encode(columns.name, self.name)
           }
         }
         """#
@@ -2976,6 +3071,10 @@ extension SnapshotTests {
           }
           self.name = name
         }
+        public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+          let columns = Self.columns
+          try encoder.encode(columns.name, self.name)
+        }
       }
       """#
     }
@@ -3072,6 +3171,11 @@ extension SnapshotTests {
           }
           self.remindersList = remindersList
           self.remindersCount = remindersCount
+        }
+        public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+          let columns = Self.columns
+          try encoder.encode(columns.remindersList, self.remindersList)
+          try encoder.encode(columns.remindersCount, self.remindersCount)
         }
       }
       """#
@@ -4250,6 +4354,10 @@ extension SnapshotTests {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
           }
@@ -4262,6 +4370,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
           }
         }
         """#
@@ -4376,6 +4488,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
           }
           public nonisolated init(_ other: SourceTable) {
             self.id = other.id
@@ -4573,6 +4689,13 @@ extension SnapshotTests {
             }
             self.title = title
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.title, self.title)
+            try encoder.encode(columns.date, self.date)
+            try encoder.encode(columns.priority, self.priority)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.title = other.title
@@ -4595,6 +4718,13 @@ extension SnapshotTests {
             }
             self.id = id
             self.title = title
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.title, self.title)
+            try encoder.encode(columns.date, self.date)
+            try encoder.encode(columns.priority, self.priority)
           }
         }
         """#
@@ -4731,6 +4861,10 @@ extension SnapshotTests {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
           }
@@ -4743,6 +4877,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
           }
         }
         """#
@@ -4826,6 +4964,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
           }
         }
         """#
@@ -4984,6 +5126,11 @@ extension SnapshotTests {
             }
             self.title = title
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.title, self.title)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.title = other.title
@@ -4998,6 +5145,11 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.title = title
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.title, self.title)
           }
         }
         """#
@@ -5134,6 +5286,10 @@ extension SnapshotTests {
           nonisolated init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws(StructuredQueriesCore.QueryDecodingError) {
             self.id = try decoder.decode(Self.columns.id)
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
           }
@@ -5146,6 +5302,10 @@ extension SnapshotTests {
               throw StructuredQueriesCore.QueryDecodingError.missingRequiredColumn
             }
             self.id = id
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
           }
         }
         """#

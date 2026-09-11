@@ -129,10 +129,12 @@ extension TableMacro: ExtensionMacro {
       : "public "
 
     var initDecoder: DeclSyntax?
+    var encodeFunction: DeclSyntax?
     if declaration.is(StructDeclSyntax.self) {
       var decodings: [String] = []
       var decodingUnwrappings: [String] = []
       var decodingAssignments: [String] = []
+      var encodings: [String] = []
       for member in declaration.memberBlock.members {
         guard
           let property = member.decl.as(VariableDeclSyntax.self),
@@ -371,6 +373,13 @@ extension TableMacro: ExtensionMacro {
           appendColumnProperty(primaryKey: true)
         }
         allColumns.append(identifier)
+        if !isGenerated {
+          encodings.append(
+            """
+            try encoder.encode(columns.\(identifier), self.\(identifier))
+            """
+          )
+        }
         let decodeArgument = "Self.columns.\(identifier)"
         if columnQueryValueType.map(\.isOptionalType) ?? false {
           decodings.append(
@@ -411,6 +420,14 @@ extension TableMacro: ExtensionMacro {
         \(raw: initAccess)\(nonisolated)\
         init(decoder: inout some \(moduleName).QueryDecoder) throws(\(moduleName).QueryDecodingError) {
         \(raw: (decodings + decodingUnwrappings + decodingAssignments).joined(separator: "\n"))
+        }
+        """
+      encodeFunction = """
+
+        public \(nonisolated)func encode(to encoder: inout some \(moduleName).QueryEncoder) \
+        throws(\(moduleName).QueryEncodingError) {
+        let columns = Self.columns
+        \(raw: encodings.joined(separator: "\n"))
         }
         """
     } else if declaration.is(EnumDeclSyntax.self) {
@@ -663,6 +680,9 @@ extension TableMacro: ExtensionMacro {
     var extensionMembers: [DeclSyntax] = []
     if let initDecoder {
       extensionMembers.append(initDecoder)
+    }
+    if let encodeFunction {
+      extensionMembers.append(encodeFunction)
     }
     if let initFromOther {
       extensionMembers.append(initFromOther)

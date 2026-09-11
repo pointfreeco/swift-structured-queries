@@ -171,6 +171,12 @@ extension SnapshotTests {
             self.latitude = try decoder.decode(Self.columns.latitude)
             self.longitude = try decoder.decode(Self.columns.longitude)
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.latitude, self.latitude)
+            try encoder.encode(columns.longitude, self.longitude)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.latitude = other.latitude
@@ -195,6 +201,12 @@ extension SnapshotTests {
             self.id = id
             self.latitude = latitude
             self.longitude = longitude
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.latitude, self.latitude)
+            try encoder.encode(columns.longitude, self.longitude)
           }
         }
         """#
@@ -353,6 +365,11 @@ extension SnapshotTests {
             }
             self.latitude = latitude
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.latitude, self.latitude)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.latitude = other.latitude
@@ -371,6 +388,11 @@ extension SnapshotTests {
             }
             self.id = id
             self.latitude = latitude
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.latitude, self.latitude)
           }
         }
         """#
@@ -525,6 +547,11 @@ extension SnapshotTests {
             self.id = try decoder.decode(Self.columns.id)
             self.startsAt = try decoder.decode(Self.columns.startsAt)
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.startsAt, self.startsAt)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.startsAt = other.startsAt
@@ -543,6 +570,11 @@ extension SnapshotTests {
             }
             self.id = id
             self.startsAt = startsAt
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.startsAt, self.startsAt)
           }
         }
         """#
@@ -697,6 +729,11 @@ extension SnapshotTests {
             self.id = try decoder.decode(Self.columns.id)
             self.coordinate = try decoder.decode(Self.columns.coordinate)
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.coordinate, self.coordinate)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.coordinate = other.coordinate
@@ -715,6 +752,11 @@ extension SnapshotTests {
             }
             self.id = id
             self.coordinate = coordinate
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.coordinate, self.coordinate)
           }
         }
         """#
@@ -873,6 +915,11 @@ extension SnapshotTests {
             }
             self.systemFields = systemFields
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.systemFields, self.systemFields)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.systemFields = other.systemFields
@@ -891,6 +938,11 @@ extension SnapshotTests {
             }
             self.id = id
             self.systemFields = systemFields
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.systemFields, self.systemFields)
           }
         }
         """#
@@ -1113,6 +1165,13 @@ extension SnapshotTests {
             self.b = try decoder.decode(Self.columns.b)
             self.c = try decoder.decode(Self.columns.c)
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.a, self.a)
+            try encoder.encode(columns.b, self.b)
+            try encoder.encode(columns.c, self.c)
+          }
           nonisolated init(_ other: SourceTable) {
             self.id = other.id
             self.a = other.a
@@ -1135,6 +1194,13 @@ extension SnapshotTests {
             }
             self.id = id
             self.c = c
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.id, self.id)
+            try encoder.encode(columns.a, self.a)
+            try encoder.encode(columns.b, self.b)
+            try encoder.encode(columns.c, self.c)
           }
         }
         """#
@@ -1309,6 +1375,12 @@ extension SnapshotTests {
             }
             self.name = name
           }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.latitude, self.latitude)
+            try encoder.encode(columns.longitude, self.longitude)
+            try encoder.encode(columns.name, self.name)
+          }
           nonisolated init(_ other: SourceTable) {
             self.latitude = other.latitude
             self.longitude = other.longitude
@@ -1333,6 +1405,12 @@ extension SnapshotTests {
             self.latitude = latitude
             self.longitude = longitude
             self.name = name
+          }
+          public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+            let columns = Self.columns
+            try encoder.encode(columns.latitude, self.latitude)
+            try encoder.encode(columns.longitude, self.longitude)
+            try encoder.encode(columns.name, self.name)
           }
         }
         """#
@@ -3226,6 +3304,13 @@ extension SnapshotTests {
               self.latitude = latitude
               self.name = name
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.latitude, self.latitude)
+              try encoder.encode(columns.name, self.name)
+              try encoder.encode(columns.note, self.note)
+            }
             nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.latitude = other.latitude
@@ -3252,6 +3337,13 @@ extension SnapshotTests {
               self.id = id
               self.latitude = latitude
               self.name = name
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.latitude, self.latitude)
+              try encoder.encode(columns.name, self.name)
+              try encoder.encode(columns.note, self.note)
             }
           }
           """#
@@ -3428,6 +3520,12 @@ extension SnapshotTests {
               }
               self.quantity = quantity
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.quantity, self.quantity)
+              try encoder.encode(columns.note, self.note)
+            }
             nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.quantity = other.quantity
@@ -3448,6 +3546,12 @@ extension SnapshotTests {
               }
               self.id = id
               self.quantity = quantity
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.quantity, self.quantity)
+              try encoder.encode(columns.note, self.note)
             }
           }
           """#
@@ -3630,6 +3734,12 @@ extension SnapshotTests {
               }
               self.age = age
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.email, self.email)
+              try encoder.encode(columns.age, self.age)
+            }
             nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.email = other.email
@@ -3650,6 +3760,12 @@ extension SnapshotTests {
               }
               self.id = id
               self.age = age
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.email, self.email)
+              try encoder.encode(columns.age, self.age)
             }
           }
           """#
@@ -3816,6 +3932,11 @@ extension SnapshotTests {
               }
               self.name = name
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.name, self.name)
+            }
             nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
@@ -3839,6 +3960,11 @@ extension SnapshotTests {
               self.id = id
               self.name = name
               self.generated = generated
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.name, self.name)
             }
           }
           """#
@@ -3999,6 +4125,11 @@ extension SnapshotTests {
               }
               self.name = name
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.name, self.name)
+            }
             nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
@@ -4017,6 +4148,11 @@ extension SnapshotTests {
               }
               self.id = id
               self.name = name
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.name, self.name)
             }
           }
           """#
@@ -4183,6 +4319,11 @@ extension SnapshotTests {
               }
               self.name = name
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.name, self.name)
+            }
             nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.name = other.name
@@ -4201,6 +4342,11 @@ extension SnapshotTests {
               }
               self.id = id
               self.name = name
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.name, self.name)
             }
           }
           """#
@@ -4381,6 +4527,12 @@ extension SnapshotTests {
               self.reminderTitle = reminderTitle
               self.remindersListTitle = remindersListTitle
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.reminderID, self.reminderID)
+              try encoder.encode(columns.reminderTitle, self.reminderTitle)
+              try encoder.encode(columns.remindersListTitle, self.remindersListTitle)
+            }
             fileprivate nonisolated init(_ other: SourceTable) {
               self.reminderID = other.reminderID
               self.reminderTitle = other.reminderTitle
@@ -4405,6 +4557,12 @@ extension SnapshotTests {
               self.reminderID = reminderID
               self.reminderTitle = reminderTitle
               self.remindersListTitle = remindersListTitle
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.reminderID, self.reminderID)
+              try encoder.encode(columns.reminderTitle, self.reminderTitle)
+              try encoder.encode(columns.remindersListTitle, self.remindersListTitle)
             }
           }
           """#
@@ -4563,6 +4721,11 @@ extension SnapshotTests {
               }
               self.userModificationDate = userModificationDate
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.userModificationDate, self.userModificationDate)
+            }
             fileprivate nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.userModificationDate = other.userModificationDate
@@ -4581,6 +4744,11 @@ extension SnapshotTests {
               }
               self.id = id
               self.userModificationDate = userModificationDate
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.userModificationDate, self.userModificationDate)
             }
           }
           """#
@@ -4738,6 +4906,11 @@ extension SnapshotTests {
               }
               self.timestamps = timestamps
             }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.timestamps, self.timestamps)
+            }
             fileprivate nonisolated init(_ other: SourceTable) {
               self.id = other.id
               self.timestamps = other.timestamps
@@ -4756,6 +4929,11 @@ extension SnapshotTests {
               }
               self.id = id
               self.timestamps = timestamps
+            }
+            public nonisolated func encode(to encoder: inout some StructuredQueriesCore.QueryEncoder) throws(StructuredQueriesCore.QueryEncodingError) {
+              let columns = Self.columns
+              try encoder.encode(columns.id, self.id)
+              try encoder.encode(columns.timestamps, self.timestamps)
             }
           }
           """#

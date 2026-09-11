@@ -878,13 +878,43 @@ public typealias InsertOf<Into: Table> = Insert<Into, ()>
 public enum InsertValuesBuilder<Value> {
   public static func buildExpression(_ expression: [Value]) -> ValuesRows<Value>
   where Value: Table {
-    ValuesRows(rows: _writableRows(expression), elements: [Value.writableValuesElement])
+    var valueFragments: [[QueryFragment]] = []
+    for value in expression {
+      var encoder = QueryFragmentsEncoder()
+      do {
+        try value.encode(to: &encoder)
+        valueFragments.append(encoder.fragments)
+      } catch {
+        valueFragments.append(
+          Array(
+            repeating: "\(QueryBinding.invalid(error))",
+            count: Value.TableColumns.writableColumns.count
+          )
+        )
+      }
+    }
+    return ValuesRows(rows: valueFragments, elements: [Value.writableValuesElement])
   }
 
   @_disfavoredOverload
   public static func buildExpression(_ expression: [Value.Draft]) -> ValuesRows<Value>
   where Value: Table, Value.Draft: TableDraft {
-    ValuesRows(rows: _writableRows(expression), elements: [Value.Draft.writableValuesElement])
+    var valueFragments: [[QueryFragment]] = []
+    for value in expression {
+      var encoder = QueryFragmentsEncoder()
+      do {
+        try value.encode(to: &encoder)
+        valueFragments.append(encoder.fragments)
+      } catch {
+        valueFragments.append(
+          Array(
+            repeating: "\(QueryBinding.invalid(error))",
+            count: Value.Draft.TableColumns.writableColumns.count
+          )
+        )
+      }
+    }
+    return ValuesRows(rows: valueFragments, elements: [Value.Draft.writableValuesElement])
   }
 
   @_disfavoredOverload
@@ -1032,19 +1062,6 @@ public enum InsertValuesBuilder<Value> {
     var rows = accumulated
     rows.append(next)
     return rows
-  }
-}
-
-private func _writableRows<T: Table>(_ values: [T]) -> [[QueryFragment]] {
-  values.map { value in
-    T.TableColumns.writableColumns.map { column in
-      func open<Root, Member>(
-        _ column: some WritableTableColumnExpression<Root, Member>
-      ) -> QueryFragment {
-        Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
-      }
-      return open(column)
-    }
   }
 }
 
