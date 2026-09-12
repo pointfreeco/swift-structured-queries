@@ -5,10 +5,10 @@
 @dynamicMemberLookup
 public protocol TableDefinition<QueryValue>: QueryExpression where QueryValue: Table {
   /// An array of this table's columns.
-  static var allColumns: [any TableColumnExpression] { get }
+  static var allColumns: TableColumnList<any TableColumnExpression> { get }
 
   /// An array of this table's writable (non-generated) columns.
-  static var writableColumns: [any WritableTableColumnExpression] { get }
+  static var writableColumns: TableColumnList<any WritableTableColumnExpression> { get }
 }
 
 extension TableDefinition {
@@ -32,6 +32,6 @@ extension TableDefinition {
   }
 
   public var _allColumns: [any QueryExpression] {
-    Self.allColumns
+    Array(Self.allColumns)
   }
 }
