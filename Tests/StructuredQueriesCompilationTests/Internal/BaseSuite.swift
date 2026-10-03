@@ -5,8 +5,8 @@ import Testing
 @Suite(
   .compilation(
     mode: .main,
-    imports: ["StructuredQueriesSQLite"]
-  ),
-  .snapshots(record: .failed)
+    imports: ["StructuredQueriesSQLite"],
+    record: .failed
+  )
 )
 struct BaseSuite {}
