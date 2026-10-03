@@ -3,11 +3,44 @@ import Testing
 
 extension BaseSuite {
   @Suite struct StructuredQueriesCompilationTests {
-    @Test func `inferred JSON representation`() async {
+    @Test func `RawRepresentable but not QueryBindable`() async {
+      await assertCompilation {
+        """
+        enum Priority: Int { case low, medium, high }
+        @Table struct Reminder {
+          var priority: Priority
+          var priorityWithDefault = Priority.low
+        }
+        """
+      } diagnostics: {
+        """
+        import StructuredQueriesSQLite
+
+        enum Priority: Int { case low, medium, high }
+                                      ˄
+                                      ╰─ error: type 'Priority' does not conform to protocol 'QueryRepresentable'
+        @Table struct Reminder {
+          var priority: Priority
+          ˄
+          ╰─ error: 'Priority' is not representable as a column; conform it to 'QueryBindable' to store it as its raw value (from macro 'StructuredQueries.ColumnCheck')
+          ╰─ note: Apply '@Column(as: Priority.RawRepresentation.self)' to store as its raw value
+          ╰─ note: Apply '@Column(as:)' to specify a representation
+          ╰─ note: Apply '@Ephemeral' to exclude from table
+          var priorityWithDefault = Priority.low
+          ˄
+          ╰─ error: 'Priority.low' is not representable as a column; conform it to 'QueryBindable' to store it as its raw value (from macro 'StructuredQueries.ColumnCheck')
+          ╰─ note: Apply '@Column(as:)' to specify a representation
+          ╰─ note: Apply '@Ephemeral' to exclude from table
+        }
+        """
+      }
+    }
+
+    @Test func `JSON representation`() async {
       await assertCompilation {
         """
         @Table struct Model {
-          var values: [String]
+          var strings: [String]
         }
         """
       } diagnostics: {
@@ -19,7 +52,7 @@ extension BaseSuite {
                              ╰─ error: '_TableColumn' requires the types 'String' and 'UInt8' be equivalent
                              ˄
                              ╰─ error: '_TableColumn' requires the types 'String' and 'UInt8' be equivalent
-          var values: [String]
+          var strings: [String]
           ˄
           ╰─ error: '[String]' is not representable as a column (from macro 'StructuredQueries.ColumnCheck')
           ╰─ note: Apply '@Column(as: [String].JSONRepresentation.self)' to store as JSON
